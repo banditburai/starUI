@@ -1,8 +1,3 @@
-"""
-Label component - Form field labels.
-Based on: https://github.com/shadcn-ui/ui/blob/main/apps/www/registry/new-york/ui/label.tsx
-"""
-
 from starhtml import FT
 from starhtml import Label as HtmlLabel
 
@@ -11,16 +6,10 @@ from .utils import cn
 
 def Label(
     *children,
-    cls: str = "",
     class_name: str = "",
+    cls: str = "",
     **attrs,
 ) -> FT:
-    """
-    Label component - pixel-perfect shadcn/ui copy.
-
-    A semantic label element with proper styling for form fields.
-    Supports disabled states and proper accessibility attributes.
-    """
     return HtmlLabel(
         *children,
         data_slot="label",

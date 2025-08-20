@@ -1,5 +1,3 @@
-"""Alert component - Important messages and notifications."""
-
 from typing import Literal
 
 from starhtml import FT, Div
@@ -11,36 +9,32 @@ AlertVariant = Literal["default", "destructive"]
 
 alert_variants = cva(
     base="relative w-full rounded-lg border px-4 py-3 text-sm grid has-[>iconify-icon]:grid-cols-[calc(var(--spacing)*4)_1fr] grid-cols-[0_1fr] has-[>iconify-icon]:gap-x-3 gap-y-0.5 items-start [&>iconify-icon]:size-4 [&>iconify-icon]:translate-y-0.5 [&>iconify-icon]:text-current",
-    variants={
-        "variant": {
-            "default": "bg-card text-card-foreground",
-            "destructive": "text-destructive bg-card [&>iconify-icon]:text-current *:data-[slot=alert-description]:text-destructive/90",
-        }
+    config={
+        "variants": {
+            "variant": {
+                "default": "bg-card text-card-foreground",
+                "destructive": "text-destructive bg-card [&>iconify-icon]:text-current *:data-[slot=alert-description]:text-destructive/90",
+            }
+        },
+        "defaultVariants": {"variant": "default"},
     },
-    default_variants={"variant": "default"},
 )
 
 
 def Alert(
     *children,
     variant: AlertVariant = "default",
-    cls: str = "",
     class_name: str = "",
+    cls: str = "",
     **attrs,
 ) -> FT:
-    """
-    Alert container - pixel-perfect shadcn/ui copy.
-
-    A callout component that displays important information or messages to users.
-    Can contain icons, titles, and descriptions with proper semantic structure.
-    """
     return Div(
         *children,
         role="alert",
         data_slot="alert",
         cls=cn(
             alert_variants(variant=variant),
-            f"alert-{variant}",  # Add variant class for child styling
+            f"alert-{variant}",
             class_name,
             cls,
         ),
@@ -50,15 +44,10 @@ def Alert(
 
 def AlertTitle(
     *children,
-    cls: str = "",
     class_name: str = "",
+    cls: str = "",
     **attrs,
 ) -> FT:
-    """
-    Alert title - displays the main heading of the alert.
-
-    Positioned in the second column of the grid layout with proper typography.
-    """
     return Div(
         *children,
         data_slot="alert-title",
@@ -73,15 +62,10 @@ def AlertTitle(
 
 def AlertDescription(
     *children,
-    cls: str = "",
     class_name: str = "",
+    cls: str = "",
     **attrs,
 ) -> FT:
-    """
-    Alert description - provides detailed information for the alert.
-
-    Positioned in the second column with muted text styling and proper line height.
-    """
     return Div(
         *children,
         data_slot="alert-description",

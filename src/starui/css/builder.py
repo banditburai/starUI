@@ -33,7 +33,6 @@ class BuildResult:
 
 
 def extract_classes(content: str) -> set[str]:
-    """Extract CSS classes from StarHTML/FastHTML content."""
     classes: set[str] = set()
 
     patterns = [
@@ -51,7 +50,6 @@ def extract_classes(content: str) -> set[str]:
 
 
 class ContentScanner:
-    """Scans project files for Tailwind CSS classes."""
 
     def __init__(self, config: ProjectConfig):
         self.config = config
@@ -79,7 +77,6 @@ class ContentScanner:
 
 
 class CSSBuilder:
-    """CSS build orchestrator."""
 
     def __init__(self, config: ProjectConfig):
         self.config = config
@@ -92,7 +89,6 @@ class CSSBuilder:
         watch: bool = False,
         scan_content: bool = True,
     ) -> BuildResult:
-        """Build CSS with Tailwind."""
         start_time = time.time()
 
         try:
@@ -102,42 +98,52 @@ class CSSBuilder:
             if scan_content:
                 classes_found = len(self.scanner.scan_files())
 
-            with tempfile.TemporaryDirectory() as temp_dir:
-                temp_path = Path(temp_dir)
+            project_input_css = (
+                self.config.project_root / "static" / "css" / "input.css"
+            )
 
-                project_input_css = (
-                    self.config.project_root / "static" / "css" / "input.css"
-                )
-                input_file = temp_path / "input.css"
+            if project_input_css.exists():
+                input_file = project_input_css
+                use_temp = False
+            else:
+                with tempfile.NamedTemporaryFile(
+                    mode="w",
+                    suffix=".css",
+                    dir=self.config.project_root / "static" / "css",
+                    delete=False,
+                ) as temp_file:
+                    temp_file.write(generate_css_input(self.config))
+                    input_file = Path(temp_file.name)
+                    use_temp = True
 
-                if project_input_css.exists():
-                    input_file.write_text(project_input_css.read_text())
-                else:
-                    input_file.write_text(generate_css_input(self.config))
+            self.config.css_output_absolute.parent.mkdir(parents=True, exist_ok=True)
 
-                self.config.css_output_absolute.parent.mkdir(
-                    parents=True, exist_ok=True
-                )
+            cmd = [
+                str(binary_path),
+                "-i",
+                str(input_file),
+                "-o",
+                str(self.config.css_output_absolute),
+            ]
 
-                cmd = [
-                    str(binary_path),
-                    "-i",
-                    str(input_file),
-                    "-o",
-                    str(self.config.css_output_absolute),
-                ]
+            if mode == BuildMode.PRODUCTION:
+                cmd.append("--minify")
+            if watch:
+                cmd.append("--watch")
 
-                if mode == BuildMode.PRODUCTION:
-                    cmd.append("--minify")
-                if watch:
-                    cmd.append("--watch")
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=60,
+                cwd=self.config.project_root,
+            )
 
-                result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+            if use_temp and input_file.exists():
+                input_file.unlink()
 
-                if result.returncode != 0:
-                    raise BuildError(
-                        f"Tailwind failed: {result.stderr or 'Unknown error'}"
-                    )
+            if result.returncode != 0:
+                raise BuildError(f"Tailwind failed: {result.stderr or 'Unknown error'}")
 
             build_time = time.time() - start_time
             css_size = None
@@ -153,4 +159,11 @@ class CSSBuilder:
             )
 
         except Exception as e:
+            if (
+                "use_temp" in locals()
+                and use_temp
+                and "input_file" in locals()
+                and input_file.exists()
+            ):
+                input_file.unlink()
             return BuildResult(success=False, error_message=str(e))
