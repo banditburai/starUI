@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **🚀 Tailwind v4 `@source` Directive Resolution**
+  - Fixed critical issue where `star build` and `star dev` couldn't scan Python CVA component definitions
+  - Resolved subprocess working directory (`cwd`) handling in CSS builder
+  - Fixed `input.css` path resolution to preserve relative `@source` directives
+  - Ensures all component CSS classes are properly generated without manual workarounds
+- **🎨 Button Component Shadcn Parity**
+  - Completely overhauled Button component to match Shadcn UI pixel-perfectly
+  - Fixed icon button sizing, alignment, and visual consistency
+  - Added proper `has-[>svg]` conditional padding for all size variants
+  - Implemented all Shadcn size variants (`default`, `sm`, `lg`, `icon`) with exact styling
+  - Enhanced Iconify icon support with proper CSS targeting (`[&_iconify-icon]`)
+  - Fixed CVA variant/size conflicts and compound variant handling
+
+### Changed
+- **🧪 Improved Test Quality**
+  - Refactored metadata tests to focus on behavior rather than implementation details
+  - Removed brittle string assertions that tested internal documentation
+  - Enhanced test robustness for component metadata extraction
+- **📦 Cleaner Public API**
+  - Removed unused `component_classes` export from main package
+  - Streamlined `__init__.py` imports for better maintainability
+
+### Added
+- **🛠️ Development Infrastructure**
+  - Added comprehensive test sandbox (`test_sandbox/`) with component preview app
+  - Added Pyright configuration (`pyrightconfig.json`) for consistent type checking
+  - Enhanced `.gitignore` with development artifacts (`.sesskey`)
+
 ## [0.1.4] - 2025-08-19
 
 ### Added

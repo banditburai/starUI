@@ -5,7 +5,7 @@ __version__ = "0.1.0"
 from .local import discover_components
 from .registry.components.button import Button
 from .registry.components.theme_toggle import ThemeToggle
-from .registry.components.utils import cn, component_classes, cva
+from .registry.components.utils import cn, cva
 
 _components = discover_components()
 globals().update(_components)
@@ -14,10 +14,9 @@ __all__ = [
     "__version__",
     "cn",
     "cva",
-    "component_classes",
     "Button",
     "ThemeToggle",
-    *list(_components.keys()),  # pyright: ignore[reportUnsupportedDunderAll]
+    *list(_components.keys()),
 ]
 
 
