@@ -46,6 +46,9 @@ class RebuildHandler(FileSystemEventHandler):
 
         if result.success:
             success(f"✓ CSS rebuilt ({result.build_time:.2f}s)")
+            # Force browser reload by touching the output CSS file
+            if result.css_path and result.css_path.exists():
+                result.css_path.touch()
         else:
             error(f"Build failed: {result.error_message}")
 

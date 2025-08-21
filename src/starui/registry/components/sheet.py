@@ -114,7 +114,7 @@ def SheetContent(
         Div(
             ds_show(f"${signal_open}"),
             ds_on_click(f"${signal_open} = false"),
-            cls="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm animate-in fade-in-0",
+            cls="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm animate-in fade-in-0",
             data_sheet_role="overlay",
         )
         if modal
@@ -132,7 +132,7 @@ def SheetContent(
         aria_describedby=f"{content_id}-description",
         tabindex="-1",
         cls=cn(
-            "fixed z-50 bg-background shadow-lg border flex flex-col",
+            "fixed z-[110] bg-background shadow-lg border flex flex-col",
             "transition-all duration-300 ease-in-out",
             "data-[state=open]:animate-in data-[state=closed]:animate-out",
             "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
