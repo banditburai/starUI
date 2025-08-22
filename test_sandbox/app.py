@@ -280,6 +280,64 @@ def index():
                 ),
                 cls="mb-8",
             ),
+            # Dialog example
+            Div(
+                H2("Dialog (Modal)", cls="text-2xl font-semibold mb-4"),
+                Dialog(
+                    trigger=DialogTrigger("Edit Profile", ref_id="edit-profile-dialog"),
+                    content=DialogContent(
+                        DialogHeader(
+                            DialogTitle("Edit Profile"),
+                            DialogDescription(
+                                "Make changes to your profile here. Click save when you're done."
+                            ),
+                        ),
+                        Div(
+                            Div(
+                                Label("Name", for_="dialog-name"),
+                                Input(id="dialog-name", placeholder="Your name", cls="mt-1"),
+                                cls="space-y-2",
+                            ),
+                            Div(
+                                Label("Email", for_="dialog-email"),
+                                Input(id="dialog-email", type="email", placeholder="your@email.com", cls="mt-1"),
+                                cls="space-y-2",
+                            ),
+                            cls="grid gap-4 py-4",
+                        ),
+                        DialogFooter(
+                            DialogClose("Cancel", variant="outline"),
+                            DialogClose("Save changes"),
+                        ),
+                    ),
+                    ref_id="edit-profile-dialog",
+                    size="md",
+                ),
+                cls="mb-8",
+            ),
+            # Dialog with different size and content
+            Div(
+                H2("Alert Dialog", cls="text-2xl font-semibold mb-4"),
+                Dialog(
+                    trigger=DialogTrigger("Delete Account", ref_id="delete-dialog", variant="destructive"),
+                    content=DialogContent(
+                        DialogHeader(
+                            DialogTitle("Are you absolutely sure?"),
+                            DialogDescription(
+                                "This action cannot be undone. This will permanently delete your "
+                                "account and remove your data from our servers."
+                            ),
+                        ),
+                        DialogFooter(
+                            DialogClose("Cancel", variant="outline"),
+                            DialogClose("Yes, delete account", variant="destructive"),
+                        ),
+                    ),
+                    ref_id="delete-dialog",
+                    size="sm",
+                ),
+                cls="mb-8",
+            ),
             # Interactive counter with Datastar
             Div(
                 H2("Interactive Counter (Datastar)", cls="text-2xl font-semibold mb-4"),
