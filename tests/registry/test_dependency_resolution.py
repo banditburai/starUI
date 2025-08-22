@@ -10,22 +10,26 @@ class TestDependencyResolver:
     """Test dependency resolution logic."""
 
     def test_resolve_simple_component(self):
-        """Test resolving component with no dependencies."""
+        """Test resolving component with its dependencies."""
         client = RegistryClient()
         resolver = DependencyResolver(client)
 
         result = resolver.resolve_dependencies("button")
-        assert result == ["button"]
+        assert result == ["utils", "button"]  # button depends on utils
 
     def test_resolve_component_with_dependencies(self):
-        """Test resolving component with dependencies."""
+        """Test resolving component with multiple dependencies."""
         client = RegistryClient()
         resolver = DependencyResolver(client)
 
         result = resolver.resolve_dependencies("theme_toggle")
-        assert result == ["button", "theme_toggle"]
-        assert result[0] == "button"  # Dependency comes first
-        assert result[-1] == "theme_toggle"  # Requested component comes last
+        assert "utils" in result  # transitive dependency
+        assert "button" in result  # direct dependency
+        assert result[-1] == "theme_toggle"  # requested component comes last
+        assert result.index("utils") < result.index("button")  # utils before button
+        assert result.index("button") < result.index(
+            "theme_toggle"
+        )  # button before theme_toggle
 
     def test_nonexistent_component(self):
         """Test error handling for nonexistent components."""
@@ -55,7 +59,8 @@ class TestComponentLoader:
 
         sources = loader.load_component_with_dependencies("theme_toggle")
 
-        assert len(sources) == 2
+        assert len(sources) == 3  # utils, button, theme_toggle
+        assert "utils" in sources
         assert "button" in sources
         assert "theme_toggle" in sources
 
@@ -104,23 +109,21 @@ class TestRegistryClient:
         assert not client.component_exists("nonexistent")
 
     def test_get_component_metadata(self):
-        """Test extracting component metadata."""
-        client = RegistryClient()
+        """Test extracting component metadata using Pydantic models."""
+        from starui.registry.component_metadata import get_component_metadata
 
         # Test component with dependencies
-        meta = client.get_component_metadata("theme_toggle")
-        assert meta["name"] == "theme_toggle"
-        assert meta["dependencies"] == ["button"]
-        assert isinstance(meta["description"], str)
-        assert len(meta["description"]) > 0  # Should have a description
+        meta = get_component_metadata("theme_toggle")
+        assert meta.name == "theme_toggle"
+        assert meta.dependencies == ["utils", "button"]
+        assert isinstance(meta.description, str)
+        assert len(meta.description) > 0  # Should have a description
 
-        # Test component without dependencies
-        meta = client.get_component_metadata("button")
-        assert meta["name"] == "button"
-        assert meta["dependencies"] == []
-        assert isinstance(
-            meta["description"], str
-        )  # Should return empty string if no docstring
+        # Test component with single dependency
+        meta = get_component_metadata("button")
+        assert meta.name == "button"
+        assert meta.dependencies == ["utils"]
+        assert isinstance(meta.description, str)
 
     def test_get_component_source(self):
         """Test getting component source code."""

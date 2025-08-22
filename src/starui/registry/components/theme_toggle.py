@@ -1,8 +1,3 @@
-"""Theme toggle component using Datastar for reactivity.
-
-Dependencies: button
-"""
-
 from starhtml import FT, Div, Icon, Span
 from starhtml.datastar import ds_effect, ds_on_click, ds_on_load, ds_show, ds_signals
 
