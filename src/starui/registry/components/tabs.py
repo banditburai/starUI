@@ -2,7 +2,7 @@ from itertools import count
 from typing import Any, Literal
 
 from starhtml import FT, Div
-from starhtml import Button as BaseButton
+from starhtml import Button as HTMLButton
 from starhtml.datastar import ds_on_click, ds_show, ds_signals
 
 from .utils import cn
@@ -102,7 +102,7 @@ def TabsTrigger(
             ),
         }
 
-        return BaseButton(
+        return HTMLButton(
             *children,
             ds_on_click(f"${signal_value} = '{value}'"),
             disabled=disabled,

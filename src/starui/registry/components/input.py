@@ -1,7 +1,7 @@
 from typing import Literal
 
 from starhtml import FT, Div, Label, P, Span
-from starhtml import Input as BaseInput
+from starhtml import Input as HTMLInput
 
 from .utils import cn
 
@@ -84,7 +84,7 @@ def Input(
         **attrs,
     }
 
-    return BaseInput(*datastar_attrs, **input_attrs)
+    return HTMLInput(*datastar_attrs, **input_attrs)
 
 
 def InputWithLabel(

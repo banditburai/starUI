@@ -1,7 +1,7 @@
 from typing import Any, Literal
 
 from starhtml import FT
-from starhtml import Button as BaseButton
+from starhtml import Button as HTMLButton
 
 from .utils import cn, cva
 
@@ -46,4 +46,4 @@ def Button(
     **attrs: Any,
 ) -> FT:
     classes = cn(button_variants(variant=variant, size=size), class_name, cls)
-    return BaseButton(*children, cls=classes, disabled=disabled, type=type, **attrs)
+    return HTMLButton(*children, cls=classes, disabled=disabled, type=type, **attrs)

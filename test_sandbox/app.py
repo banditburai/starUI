@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # Import starhtml first, then override with our custom components
 from starhtml import *
+
 # Import all registry components at once (this will override starhtml components)
 from registry_loader import *
 
@@ -159,10 +160,14 @@ def index():
                     TabsContent(
                         Div(
                             H3("Preview Content", cls="text-lg font-semibold mb-2"),
-                            P("This is the preview tab content with the default boxed style."),
-                            Button("Action in Preview", variant="secondary", cls="mt-4"),
+                            P(
+                                "This is the preview tab content with the default boxed style."
+                            ),
+                            Button(
+                                "Action in Preview", variant="secondary", cls="mt-4"
+                            ),
                         ),
-                        value="preview"
+                        value="preview",
                     ),
                     TabsContent(
                         Div(
@@ -170,11 +175,11 @@ def index():
                             Pre(
                                 Code(
                                     "# Example code\ndef hello_world():\n    print('Hello, World!')",
-                                    cls="block p-4 bg-muted rounded"
+                                    cls="block p-4 bg-muted rounded",
                                 )
                             ),
                         ),
-                        value="code"
+                        value="code",
                     ),
                     TabsContent(
                         Div(
@@ -183,14 +188,14 @@ def index():
                             Div(
                                 Label("Enable notifications", for_="notifications"),
                                 Input(type="checkbox", id="notifications", cls="ml-2"),
-                                cls="flex items-center gap-2 mt-4"
+                                cls="flex items-center gap-2 mt-4",
                             ),
                         ),
-                        value="settings"
+                        value="settings",
                     ),
                     default_value="preview",
                     variant="default",
-                    cls="mb-8"
+                    cls="mb-8",
                 ),
             ),
             # Tabs example - Plain variant (text style)
@@ -209,11 +214,15 @@ def index():
                             P("Manage your account settings and preferences."),
                             Div(
                                 Label("Username", for_="username"),
-                                Input(id="username", placeholder="Enter username", cls="max-w-sm"),
-                                cls="space-y-2 mt-4"
+                                Input(
+                                    id="username",
+                                    placeholder="Enter username",
+                                    cls="max-w-sm",
+                                ),
+                                cls="space-y-2 mt-4",
                             ),
                         ),
-                        value="account"
+                        value="account",
                     ),
                     TabsContent(
                         Div(
@@ -221,25 +230,25 @@ def index():
                             P("Update your password and security settings."),
                             Button("Change Password", variant="outline", cls="mt-4"),
                         ),
-                        value="password"
+                        value="password",
                     ),
                     TabsContent(
                         Div(
                             H3("Team Members", cls="text-lg font-semibold mb-2"),
                             P("Manage your team and collaborate with others."),
                         ),
-                        value="team"
+                        value="team",
                     ),
                     TabsContent(
                         Div(
                             H3("Billing Information", cls="text-lg font-semibold mb-2"),
                             P("View and manage your subscription and payment methods."),
                         ),
-                        value="billing"
+                        value="billing",
                     ),
                     default_value="account",
                     variant="plain",
-                    cls="mb-8"
+                    cls="mb-8",
                 ),
             ),
             # Sheet example
@@ -295,12 +304,21 @@ def index():
                         Div(
                             Div(
                                 Label("Name", for_="dialog-name"),
-                                Input(id="dialog-name", placeholder="Your name", cls="mt-1"),
+                                Input(
+                                    id="dialog-name",
+                                    placeholder="Your name",
+                                    cls="mt-1",
+                                ),
                                 cls="space-y-2",
                             ),
                             Div(
                                 Label("Email", for_="dialog-email"),
-                                Input(id="dialog-email", type="email", placeholder="your@email.com", cls="mt-1"),
+                                Input(
+                                    id="dialog-email",
+                                    type="email",
+                                    placeholder="your@email.com",
+                                    cls="mt-1",
+                                ),
                                 cls="space-y-2",
                             ),
                             cls="grid gap-4 py-4",
@@ -319,7 +337,9 @@ def index():
             Div(
                 H2("Alert Dialog", cls="text-2xl font-semibold mb-4"),
                 Dialog(
-                    trigger=DialogTrigger("Delete Account", ref_id="delete-dialog", variant="destructive"),
+                    trigger=DialogTrigger(
+                        "Delete Account", ref_id="delete-dialog", variant="destructive"
+                    ),
                     content=DialogContent(
                         DialogHeader(
                             DialogTitle("Are you absolutely sure?"),
@@ -337,6 +357,45 @@ def index():
                     size="sm",
                 ),
                 cls="mb-8",
+            ),
+            # Checkbox examples
+            Div(
+                H2("Checkboxes", cls="text-2xl font-semibold mb-4"),
+                Div(
+                    CheckboxWithLabel(
+                        "Accept terms and conditions", signal="terms", required=True
+                    ),
+                    CheckboxWithLabel(
+                        "Subscribe to newsletter",
+                        signal="newsletter",
+                        helper_text="Get weekly updates about new features",
+                    ),
+                    CheckboxWithLabel(
+                        "Enable notifications", signal="notifications", checked=True
+                    ),
+                    CheckboxWithLabel(
+                        "Disabled option",
+                        disabled=True,
+                        helper_text="This option is currently unavailable",
+                    ),
+                    CheckboxWithLabel(
+                        "Error state example",
+                        signal="error_checkbox",
+                        error_text="This field is required",
+                    ),
+                    # Custom styled checkbox with blue background
+                    Div(
+                        CheckboxWithLabel(
+                            "Custom blue checkbox",
+                            signal="blue_checkbox",
+                            helper_text="With custom blue styling when checked",
+                            checkbox_cls="checked:!bg-blue-600 checked:!border-blue-600 dark:checked:!bg-blue-700 dark:checked:!border-blue-700",
+                            indicator_cls="!text-white",
+                        ),
+                        cls="p-4 border rounded-lg",
+                    ),
+                    cls="space-y-4 mb-8",
+                ),
             ),
             # Interactive counter with Datastar
             Div(
