@@ -1044,6 +1044,143 @@ def index():
                     cls="space-y-4 mb-8",
                 ),
             ),
+            # Separator examples
+            Div(
+                H2("Separators", cls="text-2xl font-semibold mb-4"),
+                Div(
+                    Div(
+                        P("Content above separator", cls="mb-4"),
+                        Separator(),
+                        P("Content below separator", cls="mt-4"),
+                        cls="mb-6",
+                    ),
+                    Div(
+                        H3("Vertical Separators", cls="text-lg font-medium mb-2"),
+                        Div(
+                            Span("Left content"),
+                            Separator(orientation="vertical", cls="mx-4"),
+                            Span("Right content"),
+                            cls="flex items-center h-8",
+                        ),
+                        cls="mb-6",
+                    ),
+                    Div(
+                        H3("Custom Styling", cls="text-lg font-medium mb-2"),
+                        Div(
+                            P("Custom colored separator below:", cls="mb-2"),
+                            Separator(cls="bg-red-500 h-0.5"),
+                            P("Thicker separator with different color:", cls="mt-4 mb-2"),
+                            Separator(cls="bg-blue-500 h-1"),
+                        ),
+                    ),
+                    cls="space-y-4 mb-8",
+                ),
+            ),
+            # Progress examples
+            Div(
+                H2("Progress", cls="text-2xl font-semibold mb-4"),
+                Div(
+                    # Basic examples
+                    Div(
+                        H3("Basic Examples", cls="text-lg font-medium mb-2"),
+                        Div(
+                            P("Default (25%):", cls="mb-2"),
+                            Progress(progress_value=25),
+                            P("Half-way (50%):", cls="mt-4 mb-2"),
+                            Progress(progress_value=50),
+                            P("Complete (100%):", cls="mt-4 mb-2"),
+                            Progress(progress_value=100),
+                        ),
+                        cls="mb-6",
+                    ),
+                    # Reactive progress with signals
+                    Div(
+                        H3("Interactive Progress", cls="text-lg font-medium mb-2"),
+                        Div(
+                            Progress(progress_value=35, signal="demo_progress"),
+                            Div(
+                                Button("Increase", ds_on_click("$demo_progress = Math.min(100, $demo_progress + 10)")),
+                                Button("Decrease", ds_on_click("$demo_progress = Math.max(0, $demo_progress - 10)")),
+                                Button("Reset", ds_on_click("$demo_progress = 0")),
+                                cls="flex gap-2 mt-4",
+                            ),
+                            P(
+                                Span("Current: "),
+                                Span(ds_text("$demo_progress"), cls="font-bold"),
+                                Span("%"),
+                                cls="mt-2 text-sm text-muted-foreground",
+                            ),
+                        ),
+                        cls="mb-6",
+                    ),
+                    # Auto-incrementing progress
+                    Div(
+                        H3("Auto-incrementing Progress", cls="text-lg font-medium mb-2"),
+                        Div(
+                            Progress(progress_value=0, signal="auto_progress"),
+                            Div(
+                                Button(
+                                    "Start", 
+                                    ds_on_click("""
+                                        if (!window.autoProgressInterval) {
+                                            $auto_progress = 0;
+                                            window.autoProgressInterval = setInterval(() => {
+                                                if ($auto_progress < 100) {
+                                                    $auto_progress += 2;
+                                                } else {
+                                                    clearInterval(window.autoProgressInterval);
+                                                    window.autoProgressInterval = null;
+                                                }
+                                            }, 100);
+                                        }
+                                    """),
+                                    variant="default"
+                                ),
+                                Button(
+                                    "Stop", 
+                                    ds_on_click("""
+                                        if (window.autoProgressInterval) {
+                                            clearInterval(window.autoProgressInterval);
+                                            window.autoProgressInterval = null;
+                                        }
+                                    """),
+                                    variant="destructive"
+                                ),
+                                Button(
+                                    "Reset", 
+                                    ds_on_click("""
+                                        if (window.autoProgressInterval) {
+                                            clearInterval(window.autoProgressInterval);
+                                            window.autoProgressInterval = null;
+                                        }
+                                        $auto_progress = 0;
+                                    """),
+                                    variant="secondary"
+                                ),
+                                cls="flex gap-2 mt-4",
+                            ),
+                            P(
+                                Span("Progress: "),
+                                Span(ds_text("$auto_progress"), cls="font-bold"),
+                                Span("%"),
+                                cls="mt-2 text-sm text-muted-foreground",
+                            ),
+                        ),
+                        cls="mb-6",
+                    ),
+                    # Custom styling
+                    Div(
+                        H3("Custom Styling", cls="text-lg font-medium mb-2"),
+                        Div(
+                            P("Large progress bar:", cls="mb-2"),
+                            Progress(progress_value=60, cls="h-4"),
+                            P("Custom color:", cls="mt-4 mb-2"),
+                            Progress(progress_value=80, class_name="bg-green-200", cls="[&>div]:bg-green-500"),
+                        ),
+                    ),
+                    cls="space-y-4 mb-8",
+                ),
+            ),
             # Interactive counter with Datastar
             Div(
                 H2("Interactive Counter (Datastar)", cls="text-2xl font-semibold mb-4"),
