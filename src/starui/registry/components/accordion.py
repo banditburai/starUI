@@ -2,7 +2,7 @@ from typing import Any, Literal
 from uuid import uuid4
 
 from starhtml import FT, Button, Div, Icon
-from starhtml.datastar import ds_on_click, ds_show, ds_signals, value
+from starhtml.datastar import ds_on_click, ds_signals, value
 
 from .utils import cn
 
@@ -31,17 +31,11 @@ def Accordion(
         case ("multiple", val):
             initial_value = value(val)
 
-    processed_children = [
-        child(signal, type, collapsible) if callable(child) else child
-        for child in children
-    ]
-
     return Div(
-        *processed_children,
+        *[child(signal, type, collapsible) if callable(child) else child 
+          for child in children],
         ds_signals(**{signal: initial_value}),
-        data_type=type,
-        data_collapsible=str(collapsible).lower(),
-        cls=cn("w-full", class_name, cls),
+        cls=cn("w-full min-w-0", class_name, cls),
         **attrs,
     )
 
@@ -54,12 +48,9 @@ def AccordionItem(
     **attrs: Any,
 ) -> FT:
     def create_item(signal, type="single", collapsible=False):
-        processed_children = [
-            child(signal, type, collapsible, value) if callable(child) else child
-            for child in children
-        ]
         return Div(
-            *processed_children,
+            *[child(signal, type, collapsible, value) if callable(child) else child
+              for child in children],
             data_value=value,
             cls=cn("border-b", class_name, cls),
             **attrs,
@@ -78,9 +69,7 @@ def AccordionTrigger(
         if not item_value:
             raise ValueError("AccordionTrigger must be used inside AccordionItem")
 
-        is_single = type == "single"
-
-        if is_single:
+        if type == "single":
             click_expr = (
                 f"${signal} = ${signal} === '{item_value}' ? '' : '{item_value}'"
                 if collapsible
@@ -100,19 +89,19 @@ def AccordionTrigger(
                 *children,
                 Icon(
                     "lucide:chevron-down",
-                    cls="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200",
+                    cls="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 ease-out",
                     data_attr_style=f"({is_open_expr}) ? 'transform: rotate(180deg)' : 'transform: rotate(0deg)'",
                 ),
                 ds_on_click(click_expr),
                 type="button",
                 cls=cn(
-                    "flex w-full flex-1 items-center justify-between py-4 text-sm font-medium transition-all hover:underline text-left",
+                    "flex w-full items-center justify-between py-4 text-sm font-medium transition-all hover:underline text-left",
                     class_name,
                     cls,
                 ),
                 **attrs,
             ),
-            cls="flex",
+            cls="flex w-full",
         )
 
     return create_trigger
@@ -136,11 +125,18 @@ def AccordionContent(
 
         return Div(
             Div(
-                *children,
-                cls=cn("pb-4 pt-0", class_name),
+                Div(
+                    *children,
+                    cls=cn("pb-4 pt-0", class_name),
+                ),
+                cls="overflow-hidden min-h-0"
             ),
-            ds_show(show_expr),
-            cls=cn("overflow-hidden text-sm", cls),
+            cls=cn(
+                "text-sm grid transition-[grid-template-rows] duration-200 ease-out",
+                cls
+            ),
+            data_attr_style=f"({show_expr}) ? 'grid-template-rows: 1fr' : 'grid-template-rows: 0fr'",
+            data_state=f"({show_expr}) ? 'open' : 'closed'",
             **attrs,
         )
 
