@@ -80,7 +80,7 @@ def examples():
                     Div(
                         Div(
                             P("Delete Repository", cls="font-medium"),
-                            P("Once deleted, it will be gone forever", cls="text-sm text-muted-foreground"),
+                            P("Once deleted, it will be gone forever", cls="text-sm text-muted-foreground mt-1"),
                             cls="flex-1"
                         ),
                         AlertDialog(
@@ -88,7 +88,8 @@ def examples():
                                 Icon("lucide:trash-2", cls="h-4 w-4 mr-2"),
                                 "Delete",
                                 ref_id="delete_repo",
-                                variant="destructive"
+                                variant="destructive",
+                                size="sm"
                             ),
                             AlertDialogContent(
                                 Icon("lucide:alert-triangle", cls="h-12 w-12 text-destructive mx-auto mb-4"),
@@ -121,7 +122,7 @@ def examples():
                             ),
                             ref_id="delete_repo"
                         ),
-                        cls="flex items-center justify-between p-4 border rounded-lg"
+                        cls="flex items-end justify-between gap-6 p-6 border rounded-lg"
                     ),
                     cls="space-y-3"
                 )
@@ -167,26 +168,32 @@ def examples():
         Card(
             CardContent(
                 Div(
-                    InputWithLabel(
-                        label="Document Title",
-                        value="My Document",
-                        signal="doc_title"
+                    Div(
+                        InputWithLabel(
+                            label="Document Title",
+                            value="My Document",
+                            signal="doc_title"
+                        ),
+                        cls="mb-4"
                     ),
-                    InputWithLabel(
-                        label="Author",
-                        value="John Doe",
-                        signal="doc_author"
+                    Div(
+                        InputWithLabel(
+                            label="Author",
+                            value="John Doe",
+                            signal="doc_author"
+                        ),
+                        cls="mb-4"
                     ),
                     Div(
                         Button(
                             "Cancel",
-                            variant="outline",
-                            ds_on_click="$changes_made = true"
+                            ds_on_click("$changes_made = true"),
+                            variant="outline"
                         ),
                         AlertDialog(
-                            Button(
+                            AlertDialogTrigger(
                                 "Save & Exit",
-                                ds_on_click="$unsaved_dialog.showModal(), $unsaved_dialog_open = true"
+                                ref_id="unsaved_dialog"
                             ),
                             AlertDialogContent(
                                 AlertDialogHeader(
@@ -206,7 +213,7 @@ def examples():
                                         P("Author: ", Span(ds_text("$doc_author"), cls="font-mono"), cls="text-sm"),
                                         cls="space-y-1 p-3 bg-muted rounded-md"
                                     ),
-                                    cls="py-4"
+                                    cls="py-6"
                                 ),
                                 AlertDialogFooter(
                                     AlertDialogAction(
@@ -265,45 +272,78 @@ def examples():
         Card(
             CardHeader(
                 CardTitle("Session Management"),
-                CardDescription("Auto-logout demonstration")
+                CardDescription("Login and auto-logout demonstration")
             ),
             CardContent(
                 Div(
-                    P(
-                        "Session timer: ",
-                        Span(ds_text("$session_time"), cls="font-mono font-bold"),
-                        " seconds",
-                        cls="text-sm"
-                    ),
                     Div(
                         Div(
-                            ds_style(width="`${((30 - $session_time) / 30 * 100)}%`"),
-                            cls="h-2 bg-primary rounded-full transition-all duration-1000"
+                            Button(
+                                "Login",
+                                ds_on_click("$logged_in = true; $session_time = 15; $timer_started = true"),
+                                variant="default",
+                                cls="w-full"
+                            ),
+                            ds_show="!$logged_in"
                         ),
-                        cls="w-full bg-secondary rounded-full h-2 mt-2"
-                    ),
-                    AlertDialog(
                         Div(
-                            ds_effect("""
+                            P(
+                                "Logged in as: user@example.com",
+                                cls="text-sm font-medium mb-2"
+                            ),
+                            P(
+                                "Session expires in: ",
+                                Span(ds_text("$session_time"), cls="font-mono font-bold text-lg"),
+                                " seconds",
+                                cls="text-sm"
+                            ),
+                            Div(
+                                Div(
+                                    ds_style(width="`${((15 - $session_time) / 15 * 100)}%`"),
+                                    cls="h-2 bg-primary rounded-full transition-all duration-1000"
+                                ),
+                                cls="w-full bg-secondary rounded-full h-2 mt-2"
+                            ),
+                            Button(
+                                "Logout",
+                                ds_on_click("$logged_in = false; $timer_started = false; $session_time = 15"),
+                                variant="outline",
+                                size="sm",
+                                cls="mt-4"
+                            ),
+                            ds_show="$logged_in",
+                            cls="space-y-2"
+                        )
+                    ),
+                    Div(
+                        ds_effect("""
+                            if ($timer_started && $logged_in) {
                                 const timer = setInterval(() => {
                                     $session_time--;
-                                    if ($session_time === 10 && !$timeout_dialog_open) {
-                                        $timeout_dialog.showModal();
+                                    if ($session_time === 5 && !$timeout_dialog_open) {
+                                        document.getElementById('timeout_dialog').showModal();
                                         $timeout_dialog_open = true;
                                     }
                                     if ($session_time === 0) {
                                         clearInterval(timer);
                                         if ($timeout_dialog_open) {
-                                            $timeout_dialog.close();
+                                            document.getElementById('timeout_dialog').close();
                                             $timeout_dialog_open = false;
                                         }
                                         alert('Session expired - logged out');
-                                        $session_time = 30;
+                                        $logged_in = false;
+                                        $session_time = 15;
+                                        $timer_started = false;
                                     }
                                 }, 1000);
-                                return () => clearInterval(timer);
-                            """)
-                        ),
+                                return () => {
+                                    clearInterval(timer);
+                                };
+                            }
+                        """)
+                    ),
+                    AlertDialog(
+                        Div(),
                         AlertDialogContent(
                             Icon("lucide:clock", cls="h-12 w-12 text-orange-500 mx-auto mb-4"),
                             AlertDialogHeader(
@@ -319,25 +359,18 @@ def examples():
                                     "Logout",
                                     ref_id="timeout_dialog",
                                     variant="destructive",
-                                    action="$session_time = 0; alert('Logged out')"
+                                    action="$session_time = 0; $logged_in = false; alert('Logged out')"
                                 ),
                                 AlertDialogAction(
                                     "Continue Session",
                                     ref_id="timeout_dialog",
-                                    action="$session_time = 30; alert('Session extended')"
+                                    action="$session_time = 15; $timeout_dialog_open = false; alert('Session extended')"
                                 )
                             )
                         ),
                         ref_id="timeout_dialog"
                     ),
-                    Button(
-                        "Reset Timer",
-                        variant="outline",
-                        size="sm",
-                        ds_on_click="$session_time = 30",
-                        cls="mt-4"
-                    ),
-                    ds_signals(session_time=30, timeout_dialog_open=False)
+                    ds_signals(session_time=15, timeout_dialog_open=False, timer_started=False, logged_in=False)
                 )
             ),
             cls="max-w-md"
@@ -380,10 +413,13 @@ AlertDialog(
             ),
             CardContent(
                 Div(
-                    CheckboxWithLabel(label="file1.txt", signal="file1", checked=True),
-                    CheckboxWithLabel(label="file2.pdf", signal="file2", checked=True),
-                    CheckboxWithLabel(label="file3.jpg", signal="file3"),
-                    CheckboxWithLabel(label="file4.doc", signal="file4", checked=True),
+                    Div(
+                        CheckboxWithLabel(label="file1.txt", signal="file1", checked=True),
+                        CheckboxWithLabel(label="file2.pdf", signal="file2", checked=True),
+                        CheckboxWithLabel(label="file3.jpg", signal="file3"),
+                        CheckboxWithLabel(label="file4.doc", signal="file4", checked=True),
+                        cls="space-y-2"
+                    ),
                     Div(
                         P(
                             Span(ds_text("[$file1, $file2, $file3, $file4].filter(Boolean).length"), cls="font-bold"),
@@ -391,12 +427,12 @@ AlertDialog(
                             cls="text-sm text-muted-foreground"
                         ),
                         AlertDialog(
-                            Button(
+                            AlertDialogTrigger(
                                 Icon("lucide:trash-2", cls="h-4 w-4 mr-2"),
                                 "Delete Selected",
                                 variant="destructive",
-                                ds_disabled="!$file1 && !$file2 && !$file3 && !$file4",
-                                ds_on_click="$batch_dialog.showModal(), $batch_dialog_open = true"
+                                ref_id="batch_dialog",
+                                ds_disabled="!$file1 && !$file2 && !$file3 && !$file4"
                             ),
                             AlertDialogContent(
                                 AlertDialogHeader(
@@ -433,7 +469,7 @@ AlertDialog(
                             ),
                             ref_id="batch_dialog"
                         ),
-                        cls="flex items-center justify-between mt-4"
+                        cls="flex items-center gap-4 mt-4"
                     ),
                     ds_signals(file1=True, file2=True, file3=False, file4=True, batch_dialog_open=False),
                     cls="space-y-2"
@@ -499,16 +535,18 @@ AlertDialog(
                         cls="flex justify-between py-2"
                     ),
                     AlertDialog(
-                        Button(
+                        AlertDialogTrigger(
                             Icon("lucide:credit-card", cls="h-4 w-4 mr-2"),
                             "Complete Purchase",
-                            cls="w-full",
-                            ds_on_click="$payment_dialog.showModal(), $payment_dialog_open = true"
+                            ref_id="payment_dialog",
+                            cls="w-full"
                         ),
                         AlertDialogContent(
-                            Icon("lucide:shield-check", cls="h-12 w-12 text-green-500 mx-auto mb-4"),
                             AlertDialogHeader(
-                                AlertDialogTitle("Confirm Payment"),
+                                AlertDialogTitle(
+                                    Icon("lucide:shield-check", cls="h-5 w-5 text-green-500 inline mr-2"),
+                                    "Confirm Payment"
+                                ),
                                 AlertDialogDescription("Please review and confirm your purchase")
                             ),
                             Div(
