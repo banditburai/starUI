@@ -8,12 +8,12 @@ AlertVariant = Literal["default", "destructive"]
 
 
 alert_variants = cva(
-    base="relative w-full rounded-lg border px-4 py-3 text-sm grid has-[>iconify-icon]:grid-cols-[calc(var(--spacing)*4)_1fr] grid-cols-[0_1fr] has-[>iconify-icon]:gap-x-3 gap-y-0.5 items-start [&>iconify-icon]:size-4 [&>iconify-icon]:translate-y-0.5 [&>iconify-icon]:text-current",
+    base="relative w-full rounded-lg border px-4 py-3 text-sm grid has-[>iconify-icon]:grid-cols-[calc(var(--spacing)*4)_1fr] grid-cols-[0_1fr] has-[>iconify-icon]:gap-x-3 gap-y-0.5 items-start [&>iconify-icon]:size-4 [&>iconify-icon]:translate-y-0.5",
     config={
         "variants": {
             "variant": {
                 "default": "bg-card text-card-foreground",
-                "destructive": "text-destructive bg-card [&>iconify-icon]:text-current *:data-[slot=alert-description]:text-destructive/90",
+                "destructive": "text-destructive bg-card [&>iconify-icon]:text-destructive *:data-[slot=alert-description]:text-destructive/90",
             }
         },
         "defaultVariants": {"variant": "default"},

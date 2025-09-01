@@ -129,7 +129,7 @@ CheckboxWithLabel(
                         cls="w-full bg-secondary rounded-full h-2 mt-2",
                         children=[
                             Div(
-                                ds_style(width="calc([$todo1, $todo2, $todo3, $todo4].filter(Boolean).length * 25%)"),
+                                ds_style(width="`${[$todo1, $todo2, $todo3, $todo4].filter(Boolean).length * 25}%`"),
                                 cls="bg-primary h-2 rounded-full transition-all duration-300"
                             )
                         ]
@@ -158,7 +158,7 @@ CheckboxWithLabel(
         Div(
             P("Completed: ", Span(ds_text("[$todo1, $todo2, $todo3, $todo4].filter(Boolean).length")), " of 4"),
             Div(  # Progress bar
-                Div(ds_style(width="calc([$todo1, $todo2, $todo3, $todo4].filter(Boolean).length * 25%)")),
+                Div(ds_style(width="`${[$todo1, $todo2, $todo3, $todo4].filter(Boolean).length * 25}%`")),
             )
         ),
         ds_signals(todo1=True, todo2=True, todo3=False, todo4=False)

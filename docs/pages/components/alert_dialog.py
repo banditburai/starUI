@@ -277,7 +277,7 @@ def examples():
                     ),
                     Div(
                         Div(
-                            ds_style(width="calc((30 - $session_time) / 30 * 100%)"),
+                            ds_style(width="`${((30 - $session_time) / 30 * 100)}%`"),
                             cls="h-2 bg-primary rounded-full transition-all duration-1000"
                         ),
                         cls="w-full bg-secondary rounded-full h-2 mt-2"

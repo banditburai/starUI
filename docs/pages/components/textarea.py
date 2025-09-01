@@ -114,7 +114,7 @@ TextareaWithLabel(
                 Div(
                     Div(
                         Div(
-                            ds_style(width="min(100%, calc(($bio || '').length / 280 * 100%))"),
+                            ds_style(width="`${Math.min(100, ($bio || '').length / 280 * 100)}%`"),
                             cls="h-1 bg-primary rounded-full transition-all duration-300"
                         ),
                         cls="w-full bg-secondary rounded-full h-1"
@@ -152,7 +152,7 @@ TextareaWithLabel(
         Div(
             // Progress bar
             Div(
-                ds_style(width="min(100%, calc(($bio || '').length / 280 * 100%))"),
+                ds_style(width="`${Math.min(100, ($bio || '').length / 280 * 100)}%`"),
                 cls="h-1 bg-primary rounded-full"
             ),
             // Character count
