@@ -69,6 +69,9 @@ COMPONENT_REGISTRY = {
     ),
     "card": _component("card", "Card container", ["utils"]),
     "checkbox": _component("checkbox", "Checkbox input", ["utils"]),
+    "command": _component(
+        "command", "Command palette interface", ["utils", "dialog", "button"]
+    ),
     "dropdown_menu": _component(
         "dropdown_menu", "Dropdown menu with items", ["utils", "button"], ["position"]
     ),
