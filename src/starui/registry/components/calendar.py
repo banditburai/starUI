@@ -2,8 +2,9 @@ from datetime import datetime, timedelta
 from typing import Any, Literal
 from uuid import uuid4
 
-from starhtml import Div, Icon, Style
-from starhtml.datastar import ds_effect, ds_on_click, ds_signals, ds_text, value
+from starhtml import Div, Icon, Style, Span
+from starhtml import Button as HTMLButton
+from starhtml.datastar import ds_effect, ds_on_click, ds_signals, ds_text, ds_on_toggle, ds_position, ds_ref, value
 
 from .button import Button
 from .utils import cn
@@ -40,41 +41,140 @@ def Calendar(
     )
 
     calendar_data = _generate_calendar_data(current_month, current_year)
-    month_display = _format_month_year(current_month, current_year)
+    
+    # Generate month options
+    months = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ]
+    
+    # Generate year options (current year +/- 10 years)
+    years = list(range(current_year - 10, current_year + 11))
 
     signals = {
         f"{signal}_month": value(current_month),
         f"{signal}_year": value(current_year),
         f"{signal}_selected": value(initial_selected),
         f"{signal}_calendar_data": value(calendar_data),
-        f"{signal}_month_display": value(month_display),
+        f"{signal}_month_open": value(False),
+        f"{signal}_year_open": value(False),
     }
 
     return Div(
         Style(_CALENDAR_STYLES),
         Div(
+            # Previous month button
             Button(
                 Icon("lucide:chevron-left", cls="h-4 w-4"),
                 *([ds_on_click(_nav_handler(signal, False))] if not disabled else []),
                 variant="outline",
                 size="icon",
                 disabled=disabled,
-                cls="h-7 w-7",
+                cls="h-7 w-7 absolute left-0",
             ),
+            # Month and Year selectors in center
             Div(
-                ds_text(f"${signal}_month_display"),
-                ds_effect(_month_display_effect(signal)),
-                cls="text-sm font-medium",
+                # Month dropdown
+                Div(
+                    HTMLButton(
+                        Span(
+                            ds_text(f"'{months[current_month - 1]}'"),
+                            ds_effect(_month_display_update_effect(signal, months)),
+                            cls="pointer-events-none",
+                        ),
+                        Icon("lucide:chevron-down", cls="h-3 w-3 shrink-0 opacity-50 ml-1"),
+                        ds_ref(f"{signal}MonthTrigger"),
+                        id=f"{signal}-month-trigger",
+                        popovertarget=f"{signal}-month-content",
+                        popoveraction="toggle",
+                        type="button",
+                        disabled=disabled,
+                        cls="flex h-7 items-center gap-1 rounded-md px-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground focus:outline-none disabled:opacity-50",
+                    ),
+                    Div(
+                        *[
+                            Div(
+                                month_name,
+                                ds_on_click(_month_select_handler(signal, idx + 1)) if not disabled else None,
+                                cls=cn(
+                                    "px-2 py-1 text-sm rounded cursor-pointer hover:bg-accent hover:text-accent-foreground",
+                                    "data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground",
+                                ),
+                                data_selected=f"${signal}_month === {idx + 1}",
+                            )
+                            for idx, month_name in enumerate(months)
+                        ],
+                        ds_ref(f"{signal}MonthContent"),
+                        ds_position(
+                            anchor=f"{signal}-month-trigger",
+                            placement="bottom",
+                            offset=4,
+                            flip=True,
+                            shift=True,
+                            hide=True,
+                        ),
+                        popover="auto",
+                        id=f"{signal}-month-content",
+                        cls="z-50 max-h-[200px] overflow-y-auto scrollbar-hide rounded-md border bg-popover text-popover-foreground shadow-md outline-none dark:border-input",
+                    ),
+                    cls="relative",
+                ),
+                # Year dropdown
+                Div(
+                    HTMLButton(
+                        Span(
+                            ds_text(f"${signal}_year"),
+                            cls="pointer-events-none",
+                        ),
+                        Icon("lucide:chevron-down", cls="h-3 w-3 shrink-0 opacity-50 ml-1"),
+                        ds_ref(f"{signal}YearTrigger"),
+                        id=f"{signal}-year-trigger",
+                        popovertarget=f"{signal}-year-content",
+                        popoveraction="toggle",
+                        type="button",
+                        disabled=disabled,
+                        cls="flex h-7 items-center gap-1 rounded-md px-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground focus:outline-none disabled:opacity-50",
+                    ),
+                    Div(
+                        *[
+                            Div(
+                                str(year_val),
+                                ds_on_click(_year_select_handler(signal, year_val)) if not disabled else None,
+                                cls=cn(
+                                    "px-2 py-1 text-sm rounded cursor-pointer hover:bg-accent hover:text-accent-foreground",
+                                    "data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground",
+                                ),
+                                data_selected=f"${signal}_year === {year_val}",
+                            )
+                            for year_val in years
+                        ],
+                        ds_ref(f"{signal}YearContent"),
+                        ds_position(
+                            anchor=f"{signal}-year-trigger",
+                            placement="bottom",
+                            offset=4,
+                            flip=True,
+                            shift=True,
+                            hide=True,
+                        ),
+                        popover="auto",
+                        id=f"{signal}-year-content",
+                        cls="z-50 max-h-[200px] overflow-y-auto scrollbar-hide rounded-md border bg-popover text-popover-foreground shadow-md outline-none dark:border-input",
+                    ),
+                    cls="relative",
+                ),
+                cls="flex items-center gap-1",
             ),
+            # Next month button
             Button(
                 Icon("lucide:chevron-right", cls="h-4 w-4"),
                 *([ds_on_click(_nav_handler(signal, True))] if not disabled else []),
                 variant="outline",
                 size="icon",
                 disabled=disabled,
-                cls="h-7 w-7",
+                cls="h-7 w-7 absolute right-0",
             ),
-            cls="flex items-center justify-between mb-4",
+            cls="relative flex items-center justify-center mb-4",
         ),
         Div(
             Div(
@@ -102,8 +202,56 @@ def Calendar(
     )
 
 
-def _month_display_effect(signal: str) -> str:
-    return f"const m=['January','February','March','April','May','June','July','August','September','October','November','December'];${signal}_month_display=m[parseInt(${signal}_month)-1]+' '+${signal}_year"
+def _month_display_update_effect(signal: str, months: list[str]) -> str:
+    """Update the month display when month changes."""
+    months_str = str(months)
+    return f"const m={months_str};const idx=parseInt(${signal}_month)-1;if(idx>=0&&idx<12){{el.textContent=m[idx]}}"
+
+
+def _month_select_handler(signal: str, month: int) -> str:
+    """Handle month selection from dropdown."""
+    return f"""
+        ${signal}_month = {month};
+        const y = parseInt(${signal}_year);
+        const f = new Date(y, {month - 1}, 1);
+        const d = new Date(y, {month}, 0).getDate();
+        const o = f.getDay();
+        const a = [];
+        for(let i = 0; i < 42; i++) {{
+            const n = i - o + 1;
+            const v = i >= o && n <= d;
+            a.push({{
+                day: v ? n.toString() : '',
+                date: v ? `${{y}}-${str(month).zfill(2)}-${{n.toString().padStart(2,'0')}}` : '',
+                empty: !v
+            }});
+        }}
+        ${signal}_calendar_data = a;
+        document.getElementById('{signal}-month-content').hidePopover();
+    """
+
+
+def _year_select_handler(signal: str, year: int) -> str:
+    """Handle year selection from dropdown."""
+    return f"""
+        ${signal}_year = {year};
+        const m = parseInt(${signal}_month);
+        const f = new Date({year}, m - 1, 1);
+        const d = new Date({year}, m, 0).getDate();
+        const o = f.getDay();
+        const a = [];
+        for(let i = 0; i < 42; i++) {{
+            const n = i - o + 1;
+            const v = i >= o && n <= d;
+            a.push({{
+                day: v ? n.toString() : '',
+                date: v ? `{year}-${{m.toString().padStart(2,'0')}}-${{n.toString().padStart(2,'0')}}` : '',
+                empty: !v
+            }});
+        }}
+        ${signal}_calendar_data = a;
+        document.getElementById('{signal}-year-content').hidePopover();
+    """
 
 
 def _nav_handler(signal: str, is_next: bool) -> str:
@@ -141,7 +289,7 @@ def _render_effect(
     if mode == "range":
         range_logic = "if(m==='range'&&s.length===2&&!e){const[a,b]=s;if(c.date===a&&a!==b)l+=' range-start';else if(c.date===b&&a!==b)l+=' range-end';else if(c.date>a&&c.date<b){l+=' range-middle';if(y===0)l+=' range-week-start';if(y===6)l+=' range-week-end'}else if(a===b&&c.date===a)l+=' range-single'}"
 
-    return f"const d=${signal}_calendar_data||[],s=${signal}_selected||{'[]' if mode != 'single' else '""'},b=document.querySelector('[data-calendar-body=\"{signal}\"]'),m='{mode}';if(!b)return;${signal}_selected;let h='';for(let w=0;w<6;w++){{for(let y=0;y<7;y++){{const i=w*7+y,c=d[i]||{{}},e=!c.date,t=c.date==='{today_str}',x={sel_check};let l='cal-cell h-9 w-9 text-center text-sm rounded-md transition-colors flex items-center justify-center';if(!e&&!{str(disabled).lower()})l+=' cursor-pointer';if(e)l+=' empty';if(t)l+=' today';if(!e&&x)l+=' selected';{range_logic}h+=`<div class=\"${{l}}\" data-date=\"${{c.date||''}}\">${{c.day||''}}</div>`}}}}b.innerHTML=h"
+    return f"const d=${signal}_calendar_data||[],s=${signal}_selected||{'[]' if mode != 'single' else '""'},b=document.querySelector('[data-calendar-body=\"{signal}\"]'),m='{mode}';if(!b)return;${signal}_selected;${signal}_month;${signal}_year;let h='';let lastWeekWithDates=5;for(let w=5;w>=0;w--){{let hasDate=false;for(let y=0;y<7;y++){{const i=w*7+y,c=d[i]||{{}};if(c.date){{hasDate=true;break}}}}if(hasDate){{lastWeekWithDates=w;break}}}}for(let w=0;w<=lastWeekWithDates;w++){{for(let y=0;y<7;y++){{const i=w*7+y,c=d[i]||{{}},e=!c.date,t=c.date==='{today_str}',x={sel_check};let l='cal-cell h-9 w-9 text-center text-sm rounded-md transition-colors flex items-center justify-center';if(!e&&!{str(disabled).lower()})l+=' cursor-pointer';if(e)l+=' empty';if(t)l+=' today';if(!e&&x)l+=' selected';{range_logic}h+=`<div class=\"${{l}}\" data-date=\"${{c.date||''}}\">${{c.day||''}}</div>`}}}}b.innerHTML=h"
 
 
 def _format_month_year(month: int, year: int) -> str:
@@ -200,4 +348,7 @@ _CALENDAR_STYLES = """
 [data-theme="dark"] .cal-cell.selected{background-color:hsl(210 40% 98%)!important;color:hsl(222.2 47.4% 11.2%)!important}
 [data-theme="dark"] .cal-cell.range-middle{background-color:hsl(217.2 32.6% 17.5%);color:hsl(210 40% 98%)}
 [data-theme="dark"] .cal-cell.range-middle.selected{background-color:hsl(210 40% 98%);color:hsl(222.2 47.4% 11.2%)}
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide{scrollbar-width:none;-ms-overflow-style:none}
+.scrollbar-hide::-webkit-scrollbar{display:none}
 """

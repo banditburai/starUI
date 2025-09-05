@@ -10,6 +10,10 @@ from src.starui.registry.components.command import (
     Command, CommandDialog, CommandInput, CommandList, CommandEmpty,
     CommandGroup, CommandItem, CommandSeparator, CommandShortcut
 )
+from src.starui.registry.components.date_picker import (
+    DatePicker, DatePickerWithPresets, DateRangePicker,
+    DateTimePicker, DatePickerWithInput
+)
 
 styles = Link(rel="stylesheet", href="/static/css/starui.css", type="text/css")
 
@@ -1814,6 +1818,69 @@ def index():
                         cls="mb-8",
                     ),
                     cls="space-y-4 mb-8",
+                ),
+            ),
+            # Date Picker examples
+            Div(
+                H2("Date Picker", cls="text-2xl font-semibold mb-4"),
+                Div(
+                    # Single date picker
+                    Div(
+                        H3("Single Date", cls="text-lg font-medium mb-2"),
+                        DatePicker(
+                            signal="single_date",
+                            mode="single",
+                            placeholder="Pick a date",
+                        ),
+                        cls="mb-4",
+                    ),
+                    # Date range picker
+                    Div(
+                        H3("Date Range", cls="text-lg font-medium mb-2"),
+                        DateRangePicker(
+                            signal="date_range",
+                            placeholder="Pick a date range",
+                        ),
+                        cls="mb-4",
+                    ),
+                    # Date picker with presets
+                    Div(
+                        H3("With Presets", cls="text-lg font-medium mb-2"),
+                        DatePickerWithPresets(
+                            signal="date_presets",
+                            placeholder="Select a date",
+                        ),
+                        cls="mb-4",
+                    ),
+                    # Multiple date selection
+                    Div(
+                        H3("Multiple Dates", cls="text-lg font-medium mb-2"),
+                        DatePicker(
+                            signal="multiple_dates",
+                            mode="multiple",
+                            placeholder="Select multiple dates",
+                        ),
+                        cls="mb-4",
+                    ),
+                    # Date and time picker
+                    Div(
+                        H3("Date & Time", cls="text-lg font-medium mb-2"),
+                        DateTimePicker(
+                            signal="datetime",
+                            placeholder="Select date and time",
+                        ),
+                        cls="mb-4",
+                    ),
+                    # Date picker with input
+                    Div(
+                        H3("With Input Field", cls="text-lg font-medium mb-2"),
+                        DatePickerWithInput(
+                            signal="date_input",
+                            placeholder="YYYY-MM-DD",
+                        ),
+                        cls="mb-4",
+                    ),
+                    cls="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8",
                 ),
             ),
             # Command examples
