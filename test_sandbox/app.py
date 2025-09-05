@@ -6,6 +6,10 @@ from starhtml.datastar import value
 # Import all registry components at once (this will override starhtml components)
 from registry_loader import *
 from src.starui.registry.components.toast import Toaster, toast, success_toast, error_toast, warning_toast, info_toast
+from src.starui.registry.components.command import (
+    Command, CommandDialog, CommandInput, CommandList, CommandEmpty,
+    CommandGroup, CommandItem, CommandSeparator, CommandShortcut
+)
 
 styles = Link(rel="stylesheet", href="/static/css/starui.css", type="text/css")
 
@@ -1808,6 +1812,294 @@ def index():
                             cls="text-xs [&_th]:h-8 [&_td]:p-1 [&_th]:p-1",
                         ),
                         cls="mb-8",
+                    ),
+                    cls="space-y-4 mb-8",
+                ),
+            ),
+            # Command examples
+            Div(
+                H2("Command", cls="text-2xl font-semibold mb-4"),
+                Div(
+                    # Basic Command palette
+                    Div(
+                        H3("Basic Command Palette", cls="text-lg font-medium mb-2"),
+                        Command(
+                            CommandInput(placeholder="Type a command or search..."),
+                            CommandList(
+                                CommandEmpty("No results found."),
+                                CommandGroup(
+                                    CommandItem(
+                                        Icon("lucide:file"),
+                                        Span("New File", cls="ml-2"),
+                                        value="new-file",
+                                        onclick="console.log('New file')",
+                                        data_index=0,
+                                    ),
+                                    CommandItem(
+                                        Icon("lucide:folder"),
+                                        Span("New Folder", cls="ml-2"),
+                                        value="new-folder",
+                                        onclick="console.log('New folder')",
+                                        data_index=1,
+                                    ),
+                                    CommandItem(
+                                        Icon("lucide:save"),
+                                        Span("Save", cls="ml-2"),
+                                        CommandShortcut("⌘S"),
+                                        value="save",
+                                        onclick="console.log('Save')",
+                                        data_index=2,
+                                    ),
+                                    heading="File",
+                                ),
+                                CommandSeparator(),
+                                CommandGroup(
+                                    CommandItem(
+                                        Icon("lucide:settings"),
+                                        Span("Settings", cls="ml-2"),
+                                        CommandShortcut("⌘,"),
+                                        value="settings",
+                                        onclick="console.log('Settings')",
+                                        data_index=3,
+                                    ),
+                                    CommandItem(
+                                        Icon("lucide:user"),
+                                        Span("Profile", cls="ml-2"),
+                                        value="profile",
+                                        onclick="console.log('Profile')",
+                                        data_index=4,
+                                    ),
+                                    CommandItem(
+                                        Icon("lucide:log-out"),
+                                        Span("Log Out", cls="ml-2"),
+                                        value="logout",
+                                        onclick="console.log('Logout')",
+                                        data_index=5,
+                                    ),
+                                    heading="User",
+                                ),
+                            ),
+                            signal="basic_command",
+                            size="md",
+                            cls="max-w-md",
+                        ),
+                        cls="mb-6",
+                    ),
+                    # Command Dialog
+                    Div(
+                        H3("Command Dialog", cls="text-lg font-medium mb-2"),
+                        CommandDialog(
+                            trigger=Button(
+                                Icon("lucide:terminal"),
+                                Span("Open Command Palette", cls="ml-2"),
+                                variant="outline",
+                            ),
+                            content=[
+                                CommandInput(placeholder="Search commands..."),
+                                CommandList(
+                                    CommandEmpty("No commands found."),
+                                    CommandGroup(
+                                        CommandItem(
+                                            Icon("lucide:copy"),
+                                            Span("Copy", cls="ml-2"),
+                                            CommandShortcut("⌘C"),
+                                            value="copy",
+                                            onclick="console.log('Copy'); document.getElementById('cmd_dialog_dialog').close()",
+                                            data_index=0,
+                                        ),
+                                        CommandItem(
+                                            Icon("lucide:clipboard"),
+                                            Span("Paste", cls="ml-2"),
+                                            CommandShortcut("⌘V"),
+                                            value="paste",
+                                            onclick="console.log('Paste'); document.getElementById('cmd_dialog_dialog').close()",
+                                            data_index=1,
+                                        ),
+                                        CommandItem(
+                                            Icon("lucide:scissors"),
+                                            Span("Cut", cls="ml-2"),
+                                            CommandShortcut("⌘X"),
+                                            value="cut",
+                                            onclick="console.log('Cut'); document.getElementById('cmd_dialog_dialog').close()",
+                                            data_index=2,
+                                        ),
+                                        heading="Edit",
+                                    ),
+                                    CommandSeparator(),
+                                    CommandGroup(
+                                        CommandItem(
+                                            Icon("lucide:layout"),
+                                            Span("Toggle Sidebar", cls="ml-2"),
+                                            CommandShortcut("⌘B"),
+                                            value="toggle-sidebar",
+                                            onclick="console.log('Toggle sidebar'); document.getElementById('cmd_dialog_dialog').close()",
+                                            data_index=3,
+                                        ),
+                                        CommandItem(
+                                            Icon("lucide:moon"),
+                                            Span("Toggle Theme", cls="ml-2"),
+                                            CommandShortcut("⌘T"),
+                                            value="toggle-theme",
+                                            onclick="console.log('Toggle theme'); document.getElementById('cmd_dialog_dialog').close()",
+                                            data_index=4,
+                                        ),
+                                        heading="View",
+                                    ),
+                                    CommandSeparator(),
+                                    CommandGroup(
+                                        CommandItem(
+                                            Icon("lucide:help-circle"),
+                                            Span("Help", cls="ml-2"),
+                                            CommandShortcut("⌘?"),
+                                            value="help",
+                                            onclick="console.log('Help'); document.getElementById('cmd_dialog_dialog').close()",
+                                            data_index=5,
+                                        ),
+                                        CommandItem(
+                                            Icon("lucide:keyboard"),
+                                            Span("Keyboard Shortcuts", cls="ml-2"),
+                                            value="shortcuts",
+                                            onclick="console.log('Shortcuts'); document.getElementById('cmd_dialog_dialog').close()",
+                                            data_index=6,
+                                        ),
+                                        heading="Help",
+                                    ),
+                                ),
+                            ],
+                            signal="cmd_dialog",
+                        ),
+                        cls="mb-6",
+                    ),
+                    # Command with search example
+                    Div(
+                        H3("Searchable Command Palette", cls="text-lg font-medium mb-2"),
+                        Command(
+                            CommandInput(placeholder="Search frameworks..."),
+                            CommandList(
+                                CommandEmpty("No framework found."),
+                                CommandGroup(
+                                    CommandItem(
+                                        "React",
+                                        value="react",
+                                        keywords="javascript frontend",
+                                        onclick="alert('Selected: React')",
+                                        data_index=0,
+                                    ),
+                                    CommandItem(
+                                        "Vue",
+                                        value="vue",
+                                        keywords="javascript frontend",
+                                        onclick="alert('Selected: Vue')",
+                                        data_index=1,
+                                    ),
+                                    CommandItem(
+                                        "Angular",
+                                        value="angular",
+                                        keywords="typescript frontend",
+                                        onclick="alert('Selected: Angular')",
+                                        data_index=2,
+                                    ),
+                                    heading="Frontend",
+                                ),
+                                CommandSeparator(),
+                                CommandGroup(
+                                    CommandItem(
+                                        "Django",
+                                        value="django",
+                                        keywords="python backend",
+                                        onclick="alert('Selected: Django')",
+                                        data_index=3,
+                                    ),
+                                    CommandItem(
+                                        "FastAPI",
+                                        value="fastapi",
+                                        keywords="python backend api",
+                                        onclick="alert('Selected: FastAPI')",
+                                        data_index=4,
+                                    ),
+                                    CommandItem(
+                                        "Express",
+                                        value="express",
+                                        keywords="javascript nodejs backend",
+                                        onclick="alert('Selected: Express')",
+                                        data_index=5,
+                                    ),
+                                    heading="Backend",
+                                ),
+                                CommandSeparator(),
+                                CommandGroup(
+                                    CommandItem(
+                                        "Next.js",
+                                        value="nextjs",
+                                        keywords="react fullstack",
+                                        onclick="alert('Selected: Next.js')",
+                                        data_index=6,
+                                    ),
+                                    CommandItem(
+                                        "Nuxt",
+                                        value="nuxt",
+                                        keywords="vue fullstack",
+                                        onclick="alert('Selected: Nuxt')",
+                                        data_index=7,
+                                    ),
+                                    CommandItem(
+                                        "SvelteKit",
+                                        value="sveltekit",
+                                        keywords="svelte fullstack",
+                                        onclick="alert('Selected: SvelteKit')",
+                                        data_index=8,
+                                    ),
+                                    heading="Full Stack",
+                                ),
+                            ),
+                            signal="framework_command",
+                            size="lg",
+                            cls="max-w-md",
+                        ),
+                        cls="mb-6",
+                    ),
+                    # Command with disabled items
+                    Div(
+                        H3("Command with Disabled Items", cls="text-lg font-medium mb-2"),
+                        Command(
+                            CommandInput(placeholder="Search actions..."),
+                            CommandList(
+                                CommandEmpty("No action found."),
+                                CommandItem(
+                                    Icon("lucide:check"),
+                                    Span("Available Action", cls="ml-2"),
+                                    value="available",
+                                    onclick="alert('Action executed')",
+                                    data_index=0,
+                                ),
+                                CommandItem(
+                                    Icon("lucide:lock"),
+                                    Span("Premium Feature", cls="ml-2"),
+                                    Badge("Pro", variant="secondary", cls="ml-auto"),
+                                    value="premium",
+                                    disabled=True,
+                                    data_index=1,
+                                ),
+                                CommandItem(
+                                    Icon("lucide:shield"),
+                                    Span("Admin Only", cls="ml-2"),
+                                    value="admin",
+                                    disabled=True,
+                                    data_index=2,
+                                ),
+                                CommandItem(
+                                    Icon("lucide:play"),
+                                    Span("Run Task", cls="ml-2"),
+                                    value="run",
+                                    onclick="alert('Task started')",
+                                    data_index=3,
+                                ),
+                            ),
+                            signal="disabled_command",
+                            size="sm",
+                            cls="max-w-md",
+                        ),
+                        cls="mb-6",
                     ),
                     cls="space-y-4 mb-8",
                 ),
