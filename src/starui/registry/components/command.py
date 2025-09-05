@@ -29,7 +29,7 @@ def _get_filter_effect(signal: str) -> str:
 
 
 def _get_search_handler(signal: str) -> str:
-    return f"clearTimeout(window._st_{signal});window._st_{signal}=setTimeout(()=>{{const v=document.querySelectorAll('[data-command-item=\"{signal}\"]:not([style*=\"none\"]):not([data-disabled=\"true\"])');if(v.length>0)${signal}_selected=parseInt(v[0].dataset.index||'0')}},50)"
+    return f'clearTimeout(window._st_{signal});window._st_{signal}=setTimeout(()=>{{const v=document.querySelectorAll(\'[data-command-item="{signal}"]:not([style*="none"]):not([data-disabled="true"])\');if(v.length>0)${signal}_selected=parseInt(v[0].dataset.index||\'0\')}},50)'
 
 
 def _get_nav_handler(signal: str, ref_id: str = None) -> str:
@@ -47,6 +47,7 @@ def _init_command_signals(signal: str) -> dict:
 
 def _process_children(children, signal):
     return [c(signal) if callable(c) else c for c in children]
+
 
 command_variants = cva(
     base="flex w-full flex-col overflow-hidden rounded-lg border border-input bg-popover text-popover-foreground shadow-md",
@@ -110,13 +111,18 @@ def CommandDialog(
         ds_signals(**{**_init_command_signals(signal), signal_open: False}),
         ds_ref(ref_id),
         ds_on_close(reset_signals),
-        ds_on_keydown(f"if(evt.key==='Escape'){{evt.preventDefault();const d=document.getElementById('{ref_id}');if(d){{d.close();d.style.display='none';{reset_signals};setTimeout(()=>{{d.style.display=''}},100)}}}}"),
+        ds_on_keydown(
+            f"if(evt.key==='Escape'){{evt.preventDefault();const d=document.getElementById('{ref_id}');if(d){{d.close();d.style.display='none';{reset_signals};setTimeout(()=>{{d.style.display=''}},100)}}}}"
+        ),
         ds_effect(_get_dialog_open_effect(signal, ref_id)),
     ]
 
     if modal:
         dialog_attrs.append(
-            ds_on("click", f"if(evt.target===evt.currentTarget){{evt.currentTarget.close();{reset_signals}}}")
+            ds_on(
+                "click",
+                f"if(evt.target===evt.currentTarget){{evt.currentTarget.close();{reset_signals}}}",
+            )
         )
 
     command_dialog = HTMLDialog(
@@ -144,7 +150,7 @@ def CommandDialog(
     trigger_elem = Div(
         trigger,
         ds_on_click(f"${ref_id}.{method}();${signal_open}=true"),
-        style="display:contents"
+        style="display:contents",
     )
 
     scroll_lock = Div(
@@ -178,7 +184,11 @@ def CommandInput(
                 **attrs,
             ),
             data_slot="command-input-wrapper",
-            cls=cn("flex h-9 items-center gap-2 border-b border-border px-3", class_name, cls),
+            cls=cn(
+                "flex h-9 items-center gap-2 border-b border-border px-3",
+                class_name,
+                cls,
+            ),
         )
 
     return _
@@ -236,12 +246,18 @@ def CommandGroup(
 ):
     def _(signal):
         return Div(
-            *([Div(
-                heading,
-                data_slot="command-group-heading",
-                cls="text-muted-foreground px-2 py-1.5 text-xs font-medium",
-                aria_hidden="true",
-            )] if heading else []),
+            *(
+                [
+                    Div(
+                        heading,
+                        data_slot="command-group-heading",
+                        cls="text-muted-foreground px-2 py-1.5 text-xs font-medium",
+                        aria_hidden="true",
+                    )
+                ]
+                if heading
+                else []
+            ),
             *_process_children(children, signal),
             role="group",
             data_command_group=signal,
@@ -304,7 +320,9 @@ def CommandItem(
             cls=cn(
                 "relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5",
                 "text-sm outline-none select-none transition-colors",
-                "hover:bg-accent/50 data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground" if not disabled else "",
+                "hover:bg-accent/50 data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground"
+                if not disabled
+                else "",
                 "[&_svg:not([class*='text-'])]:text-muted-foreground",
                 "opacity-50 cursor-not-allowed pointer-events-none" if disabled else "",
                 "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
@@ -326,11 +344,7 @@ def CommandSeparator(class_name: str = "", cls: str = "", **attrs: Any):
     )
 
 
-def CommandDialogWithTrigger(
-    trigger: FT,
-    content: FT | list,
-    **kwargs
-) -> FT:
+def CommandDialogWithTrigger(trigger: FT, content: FT | list, **kwargs) -> FT:
     """Backward compatibility wrapper."""
     if not isinstance(content, list | tuple):
         content = [content]
