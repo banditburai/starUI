@@ -54,6 +54,7 @@ def Calendar(
     signals = {
         f"{signal}_month": value(current_month),
         f"{signal}_year": value(current_year),
+        f"{signal}_month_display": value(months[current_month - 1]),
         f"{signal}_selected": value(initial_selected),
         f"{signal}_calendar_data": value(calendar_data),
         f"{signal}_month_open": value(False),
@@ -78,8 +79,7 @@ def Calendar(
                 Div(
                     HTMLButton(
                         Span(
-                            ds_text(f"'{months[current_month - 1]}'"),
-                            ds_effect(_month_display_update_effect(signal, months)),
+                            ds_text(f"${signal}_month_display"),
                             cls="pointer-events-none",
                         ),
                         Icon("lucide:chevron-down", cls="h-3 w-3 shrink-0 opacity-50 ml-1"),
@@ -202,16 +202,14 @@ def Calendar(
     )
 
 
-def _month_display_update_effect(signal: str, months: list[str]) -> str:
-    """Update the month display when month changes."""
-    months_str = str(months)
-    return f"const m={months_str};const idx=parseInt(${signal}_month)-1;if(idx>=0&&idx<12){{el.textContent=m[idx]}}"
-
 
 def _month_select_handler(signal: str, month: int) -> str:
     """Handle month selection from dropdown."""
+    months = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ]
     return f"""
-        ${signal}_month = {month};
         const y = parseInt(${signal}_year);
         const f = new Date(y, {month - 1}, 1);
         const d = new Date(y, {month}, 0).getDate();
@@ -227,6 +225,8 @@ def _month_select_handler(signal: str, month: int) -> str:
             }});
         }}
         ${signal}_calendar_data = a;
+        ${signal}_month = {month};
+        ${signal}_month_display = "{months[month - 1]}";
         document.getElementById('{signal}-month-content').hidePopover();
     """
 
@@ -234,7 +234,6 @@ def _month_select_handler(signal: str, month: int) -> str:
 def _year_select_handler(signal: str, year: int) -> str:
     """Handle year selection from dropdown."""
     return f"""
-        ${signal}_year = {year};
         const m = parseInt(${signal}_month);
         const f = new Date({year}, m - 1, 1);
         const d = new Date({year}, m, 0).getDate();
@@ -250,13 +249,19 @@ def _year_select_handler(signal: str, year: int) -> str:
             }});
         }}
         ${signal}_calendar_data = a;
+        ${signal}_year = {year};
         document.getElementById('{signal}-year-content').hidePopover();
     """
 
 
 def _nav_handler(signal: str, is_next: bool) -> str:
     op = "+" if is_next else "-"
-    return f"let m=parseInt(${signal}_month){op}1,y=parseInt(${signal}_year);if(m>12){{m=1;y++}}else if(m<1){{m=12;y--}}${signal}_month=m;${signal}_year=y;const f=new Date(y,m-1,1),d=new Date(y,m,0).getDate(),o=f.getDay(),a=[];for(let i=0;i<42;i++){{const n=i-o+1,v=i>=o&&n<=d;a.push({{day:v?n.toString():'',date:v?`${{y}}-${{m.toString().padStart(2,'0')}}-${{n.toString().padStart(2,'0')}}`:'',empty:!v}})}}${signal}_calendar_data=a"
+    months = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ]
+    months_str = str(months)
+    return f"let m=parseInt(${signal}_month){op}1,y=parseInt(${signal}_year);if(m>12){{m=1;y++}}else if(m<1){{m=12;y--}}${signal}_month=m;${signal}_year=y;const months={months_str};${signal}_month_display=months[m-1];const f=new Date(y,m-1,1),d=new Date(y,m,0).getDate(),o=f.getDay(),a=[];for(let i=0;i<42;i++){{const n=i-o+1,v=i>=o&&n<=d;a.push({{day:v?n.toString():'',date:v?`${{y}}-${{m.toString().padStart(2,'0')}}-${{n.toString().padStart(2,'0')}}`:'',empty:!v}})}}${signal}_calendar_data=a"
 
 
 def _select_handler(signal: str, mode: CalendarMode) -> str:
@@ -289,7 +294,7 @@ def _render_effect(
     if mode == "range":
         range_logic = "if(m==='range'&&s.length===2&&!e){const[a,b]=s;if(c.date===a&&a!==b)l+=' range-start';else if(c.date===b&&a!==b)l+=' range-end';else if(c.date>a&&c.date<b){l+=' range-middle';if(y===0)l+=' range-week-start';if(y===6)l+=' range-week-end'}else if(a===b&&c.date===a)l+=' range-single'}"
 
-    return f"const d=${signal}_calendar_data||[],s=${signal}_selected||{'[]' if mode != 'single' else '""'},b=document.querySelector('[data-calendar-body=\"{signal}\"]'),m='{mode}';if(!b)return;${signal}_selected;${signal}_month;${signal}_year;let h='';let lastWeekWithDates=5;for(let w=5;w>=0;w--){{let hasDate=false;for(let y=0;y<7;y++){{const i=w*7+y,c=d[i]||{{}};if(c.date){{hasDate=true;break}}}}if(hasDate){{lastWeekWithDates=w;break}}}}for(let w=0;w<=lastWeekWithDates;w++){{for(let y=0;y<7;y++){{const i=w*7+y,c=d[i]||{{}},e=!c.date,t=c.date==='{today_str}',x={sel_check};let l='cal-cell h-9 w-9 text-center text-sm rounded-md transition-colors flex items-center justify-center';if(!e&&!{str(disabled).lower()})l+=' cursor-pointer';if(e)l+=' empty';if(t)l+=' today';if(!e&&x)l+=' selected';{range_logic}h+=`<div class=\"${{l}}\" data-date=\"${{c.date||''}}\">${{c.day||''}}</div>`}}}}b.innerHTML=h"
+    return f"const d=${signal}_calendar_data||[],s=${signal}_selected||{'[]' if mode != 'single' else '""'},b=document.querySelector('[data-calendar-body=\"{signal}\"]'),m='{mode}';if(!b)return;${signal}_selected;${signal}_month;${signal}_year;${signal}_calendar_data;let h='';let lastWeekWithDates=5;for(let w=5;w>=0;w--){{let hasDate=false;for(let y=0;y<7;y++){{const i=w*7+y,c=d[i]||{{}};if(c.date){{hasDate=true;break}}}}if(hasDate){{lastWeekWithDates=w;break}}}}for(let w=0;w<=lastWeekWithDates;w++){{for(let y=0;y<7;y++){{const i=w*7+y,c=d[i]||{{}},e=!c.date,t=c.date==='{today_str}',x={sel_check};let l='cal-cell h-9 w-9 text-center text-sm rounded-md transition-colors flex items-center justify-center';if(!e&&!{str(disabled).lower()})l+=' cursor-pointer';if(e)l+=' empty';if(t)l+=' today';if(!e&&x)l+=' selected';{range_logic}h+=`<div class=\"${{l}}\" data-date=\"${{c.date||''}}\">${{c.day||''}}</div>`}}}}b.innerHTML=h"
 
 
 def _format_month_year(month: int, year: int) -> str:
