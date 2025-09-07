@@ -64,8 +64,19 @@ COMPONENT_REGISTRY = {
     "alert": _component("alert", "Alert notifications", ["utils"]),
     "badge": _component("badge", "Badge for labels", ["utils"]),
     "breadcrumb": _component("breadcrumb", "Breadcrumb navigation", ["utils"]),
+    "calendar": _component(
+        "calendar", "Date picker with range and multiple selection", ["utils", "button"]
+    ),
+    "date_picker": _component(
+        "date_picker",
+        "Date picker with popover calendar",
+        ["utils", "button", "calendar", "popover"],
+    ),
     "card": _component("card", "Card container", ["utils"]),
     "checkbox": _component("checkbox", "Checkbox input", ["utils"]),
+    "command": _component(
+        "command", "Command palette interface", ["utils", "dialog", "button"]
+    ),
     "dropdown_menu": _component(
         "dropdown_menu", "Dropdown menu with items", ["utils", "button"], ["position"]
     ),
@@ -83,9 +94,13 @@ COMPONENT_REGISTRY = {
     "switch": _component("switch", "Toggle switch", ["utils"]),
     "tabs": _component("tabs", "Tabbed interface", ["utils"]),
     "textarea": _component("textarea", "Multi-line text input", ["utils"]),
+    "toast": _component("toast", "Toast notifications", ["utils", "button"]),
     "toggle": _component("toggle", "Toggle button", ["utils"]),
     "toggle_group": _component(
         "toggle_group", "Toggle button group", ["utils", "toggle"]
+    ),
+    "tooltip": _component(
+        "tooltip", "Hover and focus tooltips", ["utils"], ["position"]
     ),
     "typography": _component(
         "typography",

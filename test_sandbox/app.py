@@ -5,6 +5,15 @@ from starhtml.datastar import value, ds_text
 
 # Import all registry components at once (this will override starhtml components)
 from registry_loader import *
+from src.starui.registry.components.toast import Toaster, toast, success_toast, error_toast, warning_toast, info_toast
+from src.starui.registry.components.command import (
+    Command, CommandDialog, CommandInput, CommandList, CommandEmpty,
+    CommandGroup, CommandItem, CommandSeparator, CommandShortcut
+)
+from src.starui.registry.components.date_picker import (
+    DatePicker, DatePickerWithPresets, DateRangePicker,
+    DateTimePicker, DatePickerWithInput
+)
 
 styles = Link(rel="stylesheet", href="/static/css/starui.css", type="text/css")
 
@@ -23,6 +32,8 @@ app, rt = star_app(
 @rt("/")
 def index():
     return Div(
+        # Initialize toast container first so signals are available
+        Toaster(position="bottom-right"),
         # Theme toggle in top-right corner
         Div(ThemeToggle(), cls="absolute top-4 right-4"),
         # Main content container
@@ -889,6 +900,127 @@ def index():
                     cls="flex flex-wrap gap-4 mb-8",
                 ),
             ),
+            # Tooltip examples
+            Div(
+                H2("Tooltips", cls="text-2xl font-semibold mb-4"),
+                TooltipProvider(
+                    # Better spacing to prevent unwanted flipping
+                    Div(
+                        P("Basic directional tooltips:", cls="text-sm text-muted-foreground mb-4"),
+                        # Top tooltip centered alone
+                        Div(
+                            Tooltip(
+                                TooltipTrigger(
+                                    Button("Top", variant="outline"),
+                                ),
+                                TooltipContent(
+                                    "This tooltip appears on top",
+                                    side="top",
+                                ),
+                            ),
+                            cls="flex justify-center mb-6"
+                        ),
+                        # Left and Right with ample spacing
+                        Div(
+                            Tooltip(
+                                TooltipTrigger(
+                                    Button("Left", variant="outline"),
+                                ),
+                                TooltipContent(
+                                    "This tooltip appears on left",
+                                    side="left",
+                                ),
+                            ),
+                            Div(cls="w-32"),  # Spacer to prevent collision
+                            Tooltip(
+                                TooltipTrigger(
+                                    Button("Right", variant="outline"),
+                                ),
+                                TooltipContent(
+                                    "This tooltip appears on right",
+                                    side="right",
+                                ),
+                            ),
+                            cls="flex justify-center items-center gap-16 mb-6"
+                        ),
+                        # Bottom tooltip centered alone
+                        Div(
+                            Tooltip(
+                                TooltipTrigger(
+                                    Button("Bottom", variant="outline"),
+                                ),
+                                TooltipContent(
+                                    "This tooltip appears on bottom",
+                                    side="bottom",
+                                ),
+                            ),
+                            cls="flex justify-center mb-6"
+                        ),
+                    ),
+                Div(
+                    P("Tooltip alignments:", cls="text-sm text-muted-foreground mb-2"),
+                    Div(
+                        Tooltip(
+                            TooltipTrigger(
+                                Button("Start", variant="secondary", size="sm"),
+                            ),
+                            TooltipContent(
+                                "Aligned to start of trigger",
+                                side="bottom",
+                                align="start",
+                            ),
+                        ),
+                        Tooltip(
+                            TooltipTrigger(
+                                Button("Center", variant="secondary", size="sm"),
+                            ),
+                            TooltipContent(
+                                "Aligned to center of trigger",
+                                side="bottom",
+                                align="center",
+                            ),
+                        ),
+                        Tooltip(
+                            TooltipTrigger(
+                                Button("End", variant="secondary", size="sm"),
+                            ),
+                            TooltipContent(
+                                "Aligned to end of trigger",
+                                side="bottom",
+                                align="end",
+                            ),
+                        ),
+                        cls="flex gap-2 mb-6",
+                    ),
+                ),
+                Div(
+                    P("Custom delay and focus support:", cls="text-sm text-muted-foreground mb-2"),
+                    Div(
+                        Tooltip(
+                            TooltipTrigger(
+                                Button("Fast tooltip", variant="ghost"),
+                                delay_duration=100,
+                            ),
+                            TooltipContent(
+                                "This appears quickly (100ms delay)",
+                                side="top",
+                            ),
+                        ),
+                        Tooltip(
+                            TooltipTrigger(
+                                Input(placeholder="Focus me for tooltip", cls="w-48"),
+                                delay_duration=500,
+                            ),
+                            TooltipContent(
+                                "Tooltips work on focus too!",
+                                side="bottom",
+                            ),
+                        ),
+                        cls="flex gap-4 mb-8",
+                    ),
+                ),
+            ),
+            ),
             # Checkbox examples
             Div(
                 H2("Checkboxes", cls="text-2xl font-semibold mb-4"),
@@ -1709,6 +1841,460 @@ def index():
                             cls="text-xs [&_th]:h-8 [&_td]:p-1 [&_th]:p-1",
                         ),
                         cls="mb-8",
+                    ),
+                    cls="space-y-4 mb-8",
+                ),
+            ),
+            # Date Picker examples
+            Div(
+                H2("Date Picker", cls="text-2xl font-semibold mb-4"),
+                Div(
+                    # Single date picker
+                    Div(
+                        H3("Single Date", cls="text-lg font-medium mb-2"),
+                        DatePicker(
+                            signal="single_date",
+                            mode="single",
+                            placeholder="Pick a date",
+                        ),
+                        cls="mb-4",
+                    ),
+                    # Date range picker
+                    Div(
+                        H3("Date Range", cls="text-lg font-medium mb-2"),
+                        DateRangePicker(
+                            signal="date_range",
+                            placeholder="Pick a date range",
+                        ),
+                        cls="mb-4",
+                    ),
+                    # Date picker with presets
+                    Div(
+                        H3("With Presets", cls="text-lg font-medium mb-2"),
+                        DatePickerWithPresets(
+                            signal="date_presets",
+                            placeholder="Select a date",
+                        ),
+                        cls="mb-4",
+                    ),
+                    # Multiple date selection
+                    Div(
+                        H3("Multiple Dates", cls="text-lg font-medium mb-2"),
+                        DatePicker(
+                            signal="multiple_dates",
+                            mode="multiple",
+                            placeholder="Select multiple dates",
+                        ),
+                        cls="mb-4",
+                    ),
+                    # Date and time picker
+                    Div(
+                        H3("Date & Time", cls="text-lg font-medium mb-2"),
+                        DateTimePicker(
+                            signal="datetime",
+                            placeholder="Select date and time",
+                        ),
+                        cls="mb-4",
+                    ),
+                    # Date picker with input
+                    Div(
+                        H3("With Input Field", cls="text-lg font-medium mb-2"),
+                        DatePickerWithInput(
+                            signal="date_input",
+                            placeholder="YYYY-MM-DD",
+                        ),
+                        cls="mb-4",
+                    ),
+                    cls="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8",
+                ),
+            ),
+            # Command examples
+            Div(
+                H2("Command", cls="text-2xl font-semibold mb-4"),
+                Div(
+                    # Basic Command palette
+                    Div(
+                        H3("Basic Command Palette", cls="text-lg font-medium mb-2"),
+                        Command(
+                            CommandInput(placeholder="Type a command or search..."),
+                            CommandList(
+                                CommandEmpty("No results found."),
+                                CommandGroup(
+                                    CommandItem(
+                                        Icon("lucide:file"),
+                                        Span("New File", cls="ml-2"),
+                                        value="new-file",
+                                        onclick="console.log('New file')",
+                                        data_index=0,
+                                    ),
+                                    CommandItem(
+                                        Icon("lucide:folder"),
+                                        Span("New Folder", cls="ml-2"),
+                                        value="new-folder",
+                                        onclick="console.log('New folder')",
+                                        data_index=1,
+                                    ),
+                                    CommandItem(
+                                        Icon("lucide:save"),
+                                        Span("Save", cls="ml-2"),
+                                        CommandShortcut("⌘S"),
+                                        value="save",
+                                        onclick="console.log('Save')",
+                                        data_index=2,
+                                    ),
+                                    heading="File",
+                                ),
+                                CommandSeparator(),
+                                CommandGroup(
+                                    CommandItem(
+                                        Icon("lucide:settings"),
+                                        Span("Settings", cls="ml-2"),
+                                        CommandShortcut("⌘,"),
+                                        value="settings",
+                                        onclick="console.log('Settings')",
+                                        data_index=3,
+                                    ),
+                                    CommandItem(
+                                        Icon("lucide:user"),
+                                        Span("Profile", cls="ml-2"),
+                                        value="profile",
+                                        onclick="console.log('Profile')",
+                                        data_index=4,
+                                    ),
+                                    CommandItem(
+                                        Icon("lucide:log-out"),
+                                        Span("Log Out", cls="ml-2"),
+                                        value="logout",
+                                        onclick="console.log('Logout')",
+                                        data_index=5,
+                                    ),
+                                    heading="User",
+                                ),
+                            ),
+                            signal="basic_command",
+                            size="md",
+                            cls="max-w-md",
+                        ),
+                        cls="mb-6",
+                    ),
+                    # Command Dialog
+                    Div(
+                        H3("Command Dialog", cls="text-lg font-medium mb-2"),
+                        CommandDialog(
+                            trigger=Button(
+                                Icon("lucide:terminal"),
+                                Span("Open Command Palette", cls="ml-2"),
+                                variant="outline",
+                            ),
+                            content=[
+                                CommandInput(placeholder="Search commands..."),
+                                CommandList(
+                                    CommandEmpty("No commands found."),
+                                    CommandGroup(
+                                        CommandItem(
+                                            Icon("lucide:copy"),
+                                            Span("Copy", cls="ml-2"),
+                                            CommandShortcut("⌘C"),
+                                            value="copy",
+                                            onclick="console.log('Copy'); document.getElementById('cmd_dialog_dialog').close()",
+                                            data_index=0,
+                                        ),
+                                        CommandItem(
+                                            Icon("lucide:clipboard"),
+                                            Span("Paste", cls="ml-2"),
+                                            CommandShortcut("⌘V"),
+                                            value="paste",
+                                            onclick="console.log('Paste'); document.getElementById('cmd_dialog_dialog').close()",
+                                            data_index=1,
+                                        ),
+                                        CommandItem(
+                                            Icon("lucide:scissors"),
+                                            Span("Cut", cls="ml-2"),
+                                            CommandShortcut("⌘X"),
+                                            value="cut",
+                                            onclick="console.log('Cut'); document.getElementById('cmd_dialog_dialog').close()",
+                                            data_index=2,
+                                        ),
+                                        heading="Edit",
+                                    ),
+                                    CommandSeparator(),
+                                    CommandGroup(
+                                        CommandItem(
+                                            Icon("lucide:layout"),
+                                            Span("Toggle Sidebar", cls="ml-2"),
+                                            CommandShortcut("⌘B"),
+                                            value="toggle-sidebar",
+                                            onclick="console.log('Toggle sidebar'); document.getElementById('cmd_dialog_dialog').close()",
+                                            data_index=3,
+                                        ),
+                                        CommandItem(
+                                            Icon("lucide:moon"),
+                                            Span("Toggle Theme", cls="ml-2"),
+                                            CommandShortcut("⌘T"),
+                                            value="toggle-theme",
+                                            onclick="console.log('Toggle theme'); document.getElementById('cmd_dialog_dialog').close()",
+                                            data_index=4,
+                                        ),
+                                        heading="View",
+                                    ),
+                                    CommandSeparator(),
+                                    CommandGroup(
+                                        CommandItem(
+                                            Icon("lucide:help-circle"),
+                                            Span("Help", cls="ml-2"),
+                                            CommandShortcut("⌘?"),
+                                            value="help",
+                                            onclick="console.log('Help'); document.getElementById('cmd_dialog_dialog').close()",
+                                            data_index=5,
+                                        ),
+                                        CommandItem(
+                                            Icon("lucide:keyboard"),
+                                            Span("Keyboard Shortcuts", cls="ml-2"),
+                                            value="shortcuts",
+                                            onclick="console.log('Shortcuts'); document.getElementById('cmd_dialog_dialog').close()",
+                                            data_index=6,
+                                        ),
+                                        heading="Help",
+                                    ),
+                                ),
+                            ],
+                            signal="cmd_dialog",
+                        ),
+                        cls="mb-6",
+                    ),
+                    # Command with search example
+                    Div(
+                        H3("Searchable Command Palette", cls="text-lg font-medium mb-2"),
+                        Command(
+                            CommandInput(placeholder="Search frameworks..."),
+                            CommandList(
+                                CommandEmpty("No framework found."),
+                                CommandGroup(
+                                    CommandItem(
+                                        "React",
+                                        value="react",
+                                        keywords="javascript frontend",
+                                        onclick="alert('Selected: React')",
+                                        data_index=0,
+                                    ),
+                                    CommandItem(
+                                        "Vue",
+                                        value="vue",
+                                        keywords="javascript frontend",
+                                        onclick="alert('Selected: Vue')",
+                                        data_index=1,
+                                    ),
+                                    CommandItem(
+                                        "Angular",
+                                        value="angular",
+                                        keywords="typescript frontend",
+                                        onclick="alert('Selected: Angular')",
+                                        data_index=2,
+                                    ),
+                                    heading="Frontend",
+                                ),
+                                CommandSeparator(),
+                                CommandGroup(
+                                    CommandItem(
+                                        "Django",
+                                        value="django",
+                                        keywords="python backend",
+                                        onclick="alert('Selected: Django')",
+                                        data_index=3,
+                                    ),
+                                    CommandItem(
+                                        "FastAPI",
+                                        value="fastapi",
+                                        keywords="python backend api",
+                                        onclick="alert('Selected: FastAPI')",
+                                        data_index=4,
+                                    ),
+                                    CommandItem(
+                                        "Express",
+                                        value="express",
+                                        keywords="javascript nodejs backend",
+                                        onclick="alert('Selected: Express')",
+                                        data_index=5,
+                                    ),
+                                    heading="Backend",
+                                ),
+                                CommandSeparator(),
+                                CommandGroup(
+                                    CommandItem(
+                                        "Next.js",
+                                        value="nextjs",
+                                        keywords="react fullstack",
+                                        onclick="alert('Selected: Next.js')",
+                                        data_index=6,
+                                    ),
+                                    CommandItem(
+                                        "Nuxt",
+                                        value="nuxt",
+                                        keywords="vue fullstack",
+                                        onclick="alert('Selected: Nuxt')",
+                                        data_index=7,
+                                    ),
+                                    CommandItem(
+                                        "SvelteKit",
+                                        value="sveltekit",
+                                        keywords="svelte fullstack",
+                                        onclick="alert('Selected: SvelteKit')",
+                                        data_index=8,
+                                    ),
+                                    heading="Full Stack",
+                                ),
+                            ),
+                            signal="framework_command",
+                            size="lg",
+                            cls="max-w-md",
+                        ),
+                        cls="mb-6",
+                    ),
+                    # Command with disabled items
+                    Div(
+                        H3("Command with Disabled Items", cls="text-lg font-medium mb-2"),
+                        Command(
+                            CommandInput(placeholder="Search actions..."),
+                            CommandList(
+                                CommandEmpty("No action found."),
+                                CommandItem(
+                                    Icon("lucide:check"),
+                                    Span("Available Action", cls="ml-2"),
+                                    value="available",
+                                    onclick="alert('Action executed')",
+                                    data_index=0,
+                                ),
+                                CommandItem(
+                                    Icon("lucide:lock"),
+                                    Span("Premium Feature", cls="ml-2"),
+                                    Badge("Pro", variant="secondary", cls="ml-auto"),
+                                    value="premium",
+                                    disabled=True,
+                                    data_index=1,
+                                ),
+                                CommandItem(
+                                    Icon("lucide:shield"),
+                                    Span("Admin Only", cls="ml-2"),
+                                    value="admin",
+                                    disabled=True,
+                                    data_index=2,
+                                ),
+                                CommandItem(
+                                    Icon("lucide:play"),
+                                    Span("Run Task", cls="ml-2"),
+                                    value="run",
+                                    onclick="alert('Task started')",
+                                    data_index=3,
+                                ),
+                            ),
+                            signal="disabled_command",
+                            size="sm",
+                            cls="max-w-md",
+                        ),
+                        cls="mb-6",
+                    ),
+                    cls="space-y-4 mb-8",
+                ),
+            ),
+            # Toast examples
+            Div(
+                H2("Toast Notifications", cls="text-2xl font-semibold mb-4"),
+                Div(
+                    # Basic toast triggers
+                    Div(
+                        H3("Basic Toast Types", cls="text-lg font-medium mb-2"),
+                        Div(
+                            Button(
+                                "Default Toast",
+                                ds_on_click(toast('Event has been created', 'Your event is now live')),
+                                variant="outline"
+                            ),
+                            Button(
+                                "Success Toast",
+                                ds_on_click(success_toast('Success!', 'Operation completed successfully')),
+                                variant="outline"
+                            ),
+                            Button(
+                                "Error Toast",
+                                ds_on_click(error_toast('Error!', 'Something went wrong')),
+                                variant="outline"
+                            ),
+                            Button(
+                                "Warning Toast",
+                                ds_on_click(warning_toast('Warning!', 'Please be careful')),
+                                variant="outline"
+                            ),
+                            Button(
+                                "Info Toast",
+                                ds_on_click(info_toast('Info', 'Here is some information')),
+                                variant="outline"
+                            ),
+                            cls="flex flex-wrap gap-2"
+                        ),
+                        cls="mb-6",
+                    ),
+                    # Toast with different durations
+                    Div(
+                        H3("Custom Duration", cls="text-lg font-medium mb-2"),
+                        Div(
+                            Button(
+                                "Quick Toast (1s)",
+                                ds_on_click(toast('Quick!', 'This disappears fast', duration=1000)),
+                                variant="secondary"
+                            ),
+                            Button(
+                                "Long Toast (10s)",
+                                ds_on_click(toast('Long Toast', 'This stays for 10 seconds', duration=10000)),
+                                variant="secondary"
+                            ),
+                            Button(
+                                "Persistent Toast",
+                                ds_on_click(toast('Persistent', 'Click X to dismiss', duration=0)),
+                                variant="secondary"
+                            ),
+                            cls="flex flex-wrap gap-2"
+                        ),
+                        cls="mb-6",
+                    ),
+                    # Multiple toasts
+                    Div(
+                        H3("Multiple Toasts", cls="text-lg font-medium mb-2"),
+                        Div(
+                            Button(
+                                "Spam Toasts",
+                                ds_on_click(f"""
+                                    {info_toast('First toast', 'This is the first one')}
+                                    setTimeout(() => {{ {success_toast('Second toast', 'This is the second one')} }}, 500);
+                                    setTimeout(() => {{ {warning_toast('Third toast', 'This is the third one')} }}, 1000);
+                                """),
+                                variant="destructive"
+                            ),
+                            cls="flex gap-2"
+                        ),
+                        cls="mb-6",
+                    ),
+                    
+                    # Position examples with different toasters
+                    Div(
+                        H3("Different Positions", cls="text-lg font-medium mb-2"),
+                        P("Note: In a real app, you'd have separate toasters for different positions", cls="text-sm text-muted-foreground mb-4"),
+                        Div(
+                            Button(
+                                "Promise Toast",
+                                ds_on_click(f"""
+                                    {toast('Loading...', 'Please wait...')}
+                                    setTimeout(() => {{ {success_toast('Hello John Doe', 'Promise resolved successfully')} }}, 2000);
+                                """),
+                                variant="outline"
+                            ),
+                            Button(
+                                "Rich Colors Demo",
+                                ds_on_click(success_toast('Rich Colors', 'Notice the rich background colors when enabled')),
+                                variant="outline"
+                            ),
+                            cls="flex gap-2"
+                        ),
+                        cls="mb-6",
                     ),
                     cls="space-y-4 mb-8",
                 ),
