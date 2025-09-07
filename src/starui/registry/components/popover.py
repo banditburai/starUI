@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from starhtml import FT, Div
+from starhtml import FT, Div, Style
 from starhtml.datastar import ds_position, ds_ref
 
 from .button import Button
@@ -53,21 +53,25 @@ def PopoverContent(*children, cls="", side="bottom", align="center", **attrs):
             return element
 
         processed_children = [process_element(child) for child in children]
-        
-        # Determine if we should add default width/padding
-        has_width = any(c in cls for c in ["w-auto", "w-fit", "w-full", "w-[", "w-0", "w-1", "w-2", "w-3", "w-4", "w-5", "w-6", "w-7", "w-8", "w-9", "max-w-", "min-w-"])
-        has_padding = any(c in cls for c in ["p-0", "p-1", "p-2", "p-3", "p-4", "p-5", "p-6", "p-7", "p-8", "p-9", "p-[", "px-", "py-", "pt-", "pr-", "pb-", "pl-"])
-        
-        # Build the base classes
-        base_classes = ["z-50", "rounded-md", "border", "bg-popover", "text-popover-foreground", "shadow-md", "outline-none", "dark:border-input"]
-        
-        # Add defaults only if not overridden
-        if not has_width:
-            base_classes.append("w-72")
-        if not has_padding:
-            base_classes.append("p-4")
+
+        has_width = any(w in cls for w in ["w-", "max-w-", "min-w-"])
+        has_padding = any(
+            p in cls for p in ["p-", "px-", "py-", "pt-", "pr-", "pb-", "pl-"]
+        )
 
         return Div(
+            Style(f"""
+                @keyframes popover-show-{signal} {{
+                    from {{ opacity: 0; }}
+                    to {{ opacity: 1; }}
+                }}
+                #{signal}-content {{
+                    opacity: 0;
+                }}
+                #{signal}-content:popover-open {{
+                    animation: popover-show-{signal} 150ms ease-out 75ms forwards;
+                }}
+            """),
             *processed_children,
             ds_ref(f"{signal}Content"),
             ds_position(
@@ -83,7 +87,12 @@ def PopoverContent(*children, cls="", side="bottom", align="center", **attrs):
             role="dialog",
             aria_labelledby=f"{signal}-trigger",
             tabindex="-1",
-            cls=cn(" ".join(base_classes), cls),
+            cls=cn(
+                "z-50 rounded-md border border-input bg-popover text-popover-foreground shadow-md outline-none",
+                "w-72" if not has_width else "",
+                "p-4" if not has_padding else "",
+                cls,
+            ),
             **attrs,
         )
 
