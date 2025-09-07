@@ -2,10 +2,13 @@
 Date Picker component documentation - Calendar date selection with popover.
 """
 
-from datetime import datetime, timedelta
 from starhtml import Div, P, Span
 from starhtml.datastar import ds_signals, ds_text, value
-from starui.registry.components.date_picker import DatePicker, DatePickerWithPresets, DateRangePicker
+from starui.registry.components.date_picker import (
+    DatePicker,
+    DatePickerWithPresets,
+    DateRangePicker,
+)
 from utils import auto_generate_page
 from widgets.component_preview import ComponentPreview
 
@@ -23,10 +26,6 @@ def examples():
     # Date picker with presets
     yield ComponentPreview(
         Div(
-            DatePickerWithPresets(
-                signal="demo_presets",
-                placeholder="Select a date",
-            ),
             Div(
                 P(
                     "Selected: ",
@@ -35,7 +34,11 @@ def examples():
                         cls="font-mono text-xs",
                     ),
                 ),
-                cls="mt-4 text-sm",
+                cls="mb-4 text-sm",
+            ),
+            DatePickerWithPresets(
+                signal="demo_presets",
+                placeholder="Select a date",
             ),
             ds_signals(demo_presets_selected=value("")),
             cls="flex flex-col items-center",
@@ -53,21 +56,23 @@ DatePickerWithPresets(
     # Date range picker
     yield ComponentPreview(
         Div(
-            DateRangePicker(
-                signal="demo_range",
-                placeholder="Select date range",
-            ),
             Div(
                 P(
                     "Range: ",
                     Span(
-                        ds_text("JSON.stringify($demo_range_selected)"),
+                        ds_text(
+                            "!$demo_range_selected || $demo_range_selected === '[]' ? 'None' : $demo_range_selected"
+                        ),
                         cls="font-mono text-xs",
                     ),
                 ),
-                cls="mt-4 text-sm",
+                cls="mb-4 text-sm",
             ),
-            ds_signals(demo_range_selected=value([])),
+            DateRangePicker(
+                signal="demo_range",
+                placeholder="Select date range",
+            ),
+            ds_signals(demo_range_selected=value("[]")),
             cls="flex flex-col items-center",
         ),
         """from starui.registry.components.date_picker import DateRangePicker
@@ -83,23 +88,31 @@ DateRangePicker(
     # Multiple date selection
     yield ComponentPreview(
         Div(
+            Div(
+                P(
+                    "Selected: ",
+                    Span(
+                        ds_text("(JSON.parse($demo_multiple_selected || '[]')).length"),
+                        cls="font-mono",
+                    ),
+                    " dates",
+                ),
+                P(
+                    Span(
+                        ds_text(
+                            "!$demo_multiple_selected || $demo_multiple_selected === '[]' ? '' : $demo_multiple_selected"
+                        ),
+                        cls="text-xs text-muted-foreground font-mono",
+                    ),
+                ),
+                cls="mb-4 text-sm",
+            ),
             DatePicker(
                 signal="demo_multiple",
                 mode="multiple",
                 placeholder="Select dates",
             ),
-            Div(
-                P(
-                    "Selected: ",
-                    Span(
-                        ds_text("($demo_multiple_selected || []).length"),
-                        cls="font-mono",
-                    ),
-                    " dates",
-                ),
-                cls="mt-4 text-sm",
-            ),
-            ds_signals(demo_multiple_selected=value([])),
+            ds_signals(demo_multiple_selected=value("[]")),
             cls="flex flex-col items-center",
         ),
         """from starui.registry.components.date_picker import DatePicker
