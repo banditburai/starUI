@@ -637,7 +637,7 @@ HoverCard(
                                 UIInput(
                                     placeholder="Your name",
                                     cls="text-sm",
-                                    ds_bind="contact_name"
+                                    signal="contact_name"
                                 ),
                                 cls="mb-3"
                             ),
@@ -647,7 +647,7 @@ HoverCard(
                                 UIInput(
                                     type="email",
                                     placeholder="your@email.com",
-                                    ds_bind="contact_email",
+                                    signal="contact_email",
                                     cls="text-sm"
                                 ),
                                 cls="mb-3"
@@ -657,7 +657,7 @@ HoverCard(
                                 Label("Message", cls="text-xs font-medium mb-1 block"),
                                 Input(
                                     placeholder="Your message...",
-                                    ds_bind="contact_message",
+                                    signal="contact_message",
                                     rows="3",
                                     cls="min-h-[60px] resize-none text-sm"
                                 ),
@@ -710,15 +710,15 @@ HoverCard(
                 # Form fields
                 Div(
                     Label("Name", cls="text-xs font-medium mb-1 block"),
-                    UIInput(placeholder="Your name", ds_bind="contact_name")
+                    UIInput(placeholder="Your name", signal="contact_name")
                 ),
                 Div(
                     Label("Email", cls="text-xs font-medium mb-1 block"),
-                    UIInput(type="email", placeholder="your@email.com", ds_bind="contact_email")
+                    UIInput(type="email", placeholder="your@email.com", signal="contact_email")
                 ),
                 Div(
                     Label("Message", cls="text-xs font-medium mb-1 block"),
-                    Input(placeholder="Your message...", rows="3", ds_bind="contact_message")
+                    Input(placeholder="Your message...", rows="3", signal="contact_message")
                 ),
                 # Submit button with validation
                 Button(

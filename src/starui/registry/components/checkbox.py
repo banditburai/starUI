@@ -68,6 +68,7 @@ def Checkbox(
 
 
 def CheckboxWithLabel(
+    *,  # Force keyword-only arguments for consistency and flexibility
     label: str,
     checked: bool | None = None,
     name: str | None = None,

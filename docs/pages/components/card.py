@@ -9,9 +9,13 @@ CATEGORY = "layout"
 ORDER = 10
 STATUS = "stable"
 
-from starhtml import Div, P, H3, H4, Span, Icon, A, Img
+from starhtml import Div, P, H3, H4, Span, Icon, A, Img, if_
+from starhtml.datastar import (
+    ds_on_click, ds_show, ds_text, ds_signals, value, ds_class,
+    ds_bind, ds_disabled, ds_on_mouseenter, ds_on_mouseleave, toggle, ds_on_input, ds_computed, ds_style, if_
+)
 from starui.registry.components.card import (
-    Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter
+    Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, CardAction
 )
 from starui.registry.components.button import Button
 from starui.registry.components.badge import Badge
@@ -26,56 +30,7 @@ def examples():
     # Note: Basic card moved to hero example
     # This will be the first example after the hero
     
-    # Feature cards
-    yield ComponentPreview(
-        Div(
-            Card(
-                CardHeader(
-                    Icon("lucide:rocket", width="24", height="24", cls="text-blue-500 mb-2"),
-                    CardTitle("Fast Performance"),
-                    CardDescription("Lightning-fast rendering with server-side optimization")
-                ),
-                CardContent(
-                    P("Built for speed with minimal JavaScript and efficient server rendering.", cls="text-sm text-muted-foreground")
-                )
-            ),
-            Card(
-                CardHeader(
-                    Icon("lucide:shield-check", width="24", height="24", cls="text-green-500 mb-2"),
-                    CardTitle("Secure by Default"),
-                    CardDescription("Enterprise-grade security built into every component")
-                ),
-                CardContent(
-                    P("CSRF protection, XSS prevention, and secure authentication patterns.", cls="text-sm text-muted-foreground")
-                )
-            ),
-            Card(
-                CardHeader(
-                    Icon("lucide:code", width="24", height="24", cls="text-purple-500 mb-2"),
-                    CardTitle("Developer Friendly"),
-                    CardDescription("Simple Python APIs with full TypeScript support")
-                ),
-                CardContent(
-                    P("Write modern UI entirely in Python with excellent IDE support.", cls="text-sm text-muted-foreground")
-                )
-            ),
-            cls="grid grid-cols-1 md:grid-cols-3 gap-4"
-        ),
-        '''Card(
-    CardHeader(
-        Icon("lucide:rocket", width="24", height="24"),
-        CardTitle("Fast Performance"),
-        CardDescription("Lightning-fast rendering")
-    ),
-    CardContent(
-        P("Built for speed with minimal JavaScript.")
-    )
-)''',
-        title="Feature Cards",
-        description="Cards highlighting key features or benefits"
-    )
-    
-    # User profile cards
+    # Interactive profile cards with follow functionality
     yield ComponentPreview(
         Div(
             Card(
@@ -85,7 +40,12 @@ def examples():
                         Div(
                             CardTitle("John Doe", cls="text-lg"),
                             CardDescription("Product Designer"),
-                            cls="ml-4"
+                            Badge(
+                                "online",
+                                variant="default",
+                                cls="bg-green-100 text-green-800 text-xs"
+                            ),
+                            cls="ml-4 space-y-1"
                         ),
                         cls="flex items-center"
                     )
@@ -94,8 +54,16 @@ def examples():
                     P("Passionate about creating user-centered designs that solve real problems.", cls="text-sm text-muted-foreground")
                 ),
                 CardFooter(
-                    Button("View Profile", variant="outline", size="sm", cls="mr-2"),
-                    Button("Message", size="sm")
+                    Button(
+                        ds_text("$following1 ? 'Following' : 'Follow'"),
+                        variant="outline", size="sm", cls="mr-2",
+                        ds_class={
+                            "bg-green-50 text-green-700 border-green-200": "$following1",
+                            "hover:bg-green-50": "$following1"
+                        },
+                        ds_on_click=toggle("following1")
+                    ),
+                    Button("Message", size="sm", ds_on_click="alert('Message sent to John!')")
                 )
             ),
             Card(
@@ -105,7 +73,12 @@ def examples():
                         Div(
                             CardTitle("Anna Smith", cls="text-lg"),
                             CardDescription("Frontend Developer"),
-                            cls="ml-4"
+                            Badge(
+                                "away",
+                                variant="secondary",
+                                cls="bg-yellow-100 text-yellow-800 text-xs"
+                            ),
+                            cls="ml-4 space-y-1"
                         ),
                         cls="flex items-center"
                     )
@@ -114,10 +87,19 @@ def examples():
                     P("Full-stack developer with expertise in Python and modern web technologies.", cls="text-sm text-muted-foreground")
                 ),
                 CardFooter(
-                    Button("View Profile", variant="outline", size="sm", cls="mr-2"),
-                    Button("Message", size="sm")
+                    Button(
+                        ds_text("$following2 ? 'Following' : 'Follow'"),
+                        variant="outline", size="sm", cls="mr-2",
+                        ds_class={
+                            "bg-green-50 text-green-700 border-green-200": "$following2",
+                            "hover:bg-green-50": "$following2"
+                        },
+                        ds_on_click=toggle("following2")
+                    ),
+                    Button("Message", size="sm", ds_on_click="alert('Message sent to Anna!')")
                 )
             ),
+            ds_signals(following1=False, following2=False),
             cls="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl"
         ),
         '''Card(
@@ -127,6 +109,7 @@ def examples():
             Div(
                 CardTitle("John Doe"),
                 CardDescription("Product Designer"),
+                Badge("online", variant="default"),
                 cls="ml-4"
             ),
             cls="flex items-center"
@@ -136,72 +119,219 @@ def examples():
         P("Passionate about creating user-centered designs.")
     ),
     CardFooter(
-        Button("View Profile", variant="outline"),
-        Button("Message")
+        Button(
+            ds_text("$following ? 'Following' : 'Follow'"),
+            variant="outline",
+            ds_class={"bg-green-50 text-green-700": "$following"},
+            ds_on_click=toggle("following")
+        ),
+        Button("Message", ds_on_click="alert('Message sent!')")
     )
 )''',
-        title="Profile Cards",
-        description="User profile cards with actions"
+        title="Interactive Profile Cards",
+        description="Profile cards with follow/unfollow functionality and status badges"
     )
     
-    # Stats cards
+    # Interactive dashboard stats with period selection
     yield ComponentPreview(
         Div(
-            Card(
-                CardHeader(
-                    CardTitle("Total Revenue"),
-                    CardDescription("Last 30 days")
+            # Dashboard header
+            Div(
+                Div(
+                    Icon("lucide:bar-chart-3", cls="h-5 w-5 text-muted-foreground mr-2"),
+                    H3("Dashboard Overview", cls="text-lg font-semibold"),
+                    cls="flex items-center mb-2"
                 ),
-                CardContent(
-                    Div(
-                        Span("$45,231.89", cls="text-3xl font-bold"),
-                        Span("+20.1% from last month", cls="text-sm text-green-600 mt-2 block")
-                    )
-                )
+                P("Track your key metrics across different time periods", cls="text-sm text-muted-foreground mb-4")
             ),
-            Card(
-                CardHeader(
-                    CardTitle("Active Users"),
-                    CardDescription("Currently online")
+            
+            # Time period selector with toggle group style
+            Div(
+                Div(
+                    Button(
+                        "Today",
+                        ds_on_click("$period = '1d'; $revenue = 3421; $revenue_change = 12.3; $users = 573; $users_change = 5.2; $conversion = 2.8; $conversion_change = 0.2"),
+                        size="sm",
+                        variant="ghost",
+                        ds_class={"bg-muted": "$period === '1d'"},                        
+                    ),
+                    Button(
+                        "Week",
+                        ds_on_click("$period = '7d'; $revenue = 24567; $revenue_change = 18.5; $users = 1847; $users_change = 8.9; $conversion = 3.1; $conversion_change = 0.4"),
+                        size="sm",
+                        variant="ghost",
+                        ds_class={"bg-muted": "$period === '7d'"},                        
+                    ),
+                    Button(
+                        "Month",
+                        ds_on_click("$period = '30d'; $revenue = 98234; $revenue_change = 23.2; $users = 7892; $users_change = 15.7; $conversion = 3.4; $conversion_change = -0.1"),
+                        size="sm",
+                        variant="ghost",
+                        ds_class={"bg-muted": "$period === '30d'"},                        
+                    ),
+                    Button(
+                        "Year",
+                        ds_on_click("$period = '365d'; $revenue = 892451; $revenue_change = 42.8; $users = 45123; $users_change = 31.2; $conversion = 3.9; $conversion_change = 0.8"),
+                        size="sm",
+                        variant="ghost",
+                        ds_class={"bg-muted": "$period === '365d'"},                        
+                    ),                           
+                    cls="inline-flex items-center justify-center rounded-md bg-muted/30 p-1 text-muted-foreground"
                 ),
-                CardContent(
-                    Div(
-                        Span("2,350", cls="text-3xl font-bold"),
-                        Span("+12% from yesterday", cls="text-sm text-green-600 mt-2 block")
-                    )
-                )
+                cls="flex justify-center mb-6"
             ),
-            Card(
-                CardHeader(
-                    CardTitle("Conversion Rate"),
-                    CardDescription("This quarter")
+            
+            # Stats cards that update based on period
+            Div(
+                Card(
+                    CardHeader(
+                        Div(
+                            Icon("lucide:dollar-sign", cls="h-4 w-4 text-muted-foreground"),
+                            cls="mb-2"
+                        ),
+                        CardTitle("Total Revenue", cls="text-sm font-medium"),
+                        CardDescription(ds_text("`${$period === '1d' ? 'Today' : $period === '7d' ? 'Last 7 days' : $period === '30d' ? 'Last 30 days' : 'Last 365 days'}`"))
+                    ),
+                    CardContent(
+                        Div(
+                            Div(
+                                Span(ds_text("`$${$revenue.toLocaleString()}`"), cls="text-2xl font-bold tracking-tight"),
+                                cls="flex items-baseline gap-2"
+                            ),
+                            P(
+                                Span(
+                                    ds_style(color="$revenue_change > 0 ? 'rgb(34, 197, 94)' : ($revenue_change < 0 ? 'rgb(239, 68, 68)' : 'rgb(107, 114, 128)')"),
+                                    ds_text("($revenue_change >= 0 ? '+' : '') + $revenue_change + '%'"),
+                                    cls="font-medium",                                    
+                                ),
+                                Span(" from last period", cls="text-muted-foreground"),
+                                cls="text-sm mt-1"
+                            )
+                        )
+                    )
                 ),
-                CardContent(
-                    Div(
-                        Span("3.2%", cls="text-3xl font-bold"),
-                        Span("-2.4% from last quarter", cls="text-sm text-red-600 mt-2 block")
+                Card(
+                    CardHeader(
+                        Div(
+                            Icon("lucide:users", cls="h-4 w-4 text-muted-foreground"),
+                            cls="mb-2"
+                        ),
+                        CardTitle("Active Users", cls="text-sm font-medium"),
+                        CardDescription(ds_text("`${$period === '1d' ? 'Today' : $period === '7d' ? 'Daily average' : $period === '30d' ? 'Daily average' : 'Monthly average'}`"))
+                    ),
+                    CardContent(
+                        Div(
+                            Div(
+                                Span(ds_text("`${$users.toLocaleString()}`"), cls="text-2xl font-bold tracking-tight"),
+                                cls="flex items-baseline gap-2"
+                            ),
+                            P(
+                                Span(
+                                    ds_style(color="$users_change > 0 ? 'rgb(34, 197, 94)' : ($users_change < 0 ? 'rgb(239, 68, 68)' : 'rgb(107, 114, 128)')"),
+                                    ds_text("($users_change >= 0 ? '+' : '') + $users_change + '%'"),
+                                    cls="font-medium",                                    
+                                ),
+                                Span(" from last period", cls="text-muted-foreground"),
+                                cls="text-sm mt-1"
+                            )
+                        )
                     )
-                )
+                ),
+                Card(
+                    CardHeader(
+                        Div(
+                            Icon("lucide:trending-up", cls="h-4 w-4 text-muted-foreground"),
+                            cls="mb-2"
+                        ),
+                        CardTitle("Conversion Rate", cls="text-sm font-medium"),
+                        CardDescription(ds_text("`${$period === '1d' ? 'Today' : $period === '7d' ? 'This week' : $period === '30d' ? 'This month' : 'This year'}`"))
+                    ),
+                    CardContent(
+                        Div(
+                            Div(
+                                Span(ds_text("`${$conversion}%`"), cls="text-2xl font-bold tracking-tight"),
+                                cls="flex items-baseline gap-2"
+                            ),
+                            P(
+                                Span(
+                                    ds_style(color="$conversion_change > 0 ? 'rgb(34, 197, 94)' : ($conversion_change < 0 ? 'rgb(239, 68, 68)' : 'rgb(107, 114, 128)')"),
+                                    ds_text("($conversion_change >= 0 ? '+' : '') + $conversion_change"),
+                                    cls="font-medium",
+                                    
+                                ),
+                                Span(" percentage points", cls="text-muted-foreground"),
+                                cls="text-sm mt-1"
+                            )
+                        )
+                    )
+                ),
+                cls="grid grid-cols-1 md:grid-cols-3 gap-4"
             ),
-            cls="grid grid-cols-1 md:grid-cols-3 gap-4"
+            
+            # Use snake_case for all signals (consistent across Python/HTML/JS)
+            ds_signals(
+                period=value("1d"),
+                revenue=3421,
+                revenue_change=12.3,
+                users=573,
+                users_change=5.2,
+                conversion=2.8,
+                conversion_change=0.2
+            ),
+            
+            
+            cls="w-full"
         ),
-        '''Card(
-    CardHeader(
-        CardTitle("Total Revenue"),
-        CardDescription("Last 30 days")
+        '''Div(
+    # Period selector buttons
+    Div(
+        Button("Today", variant="ghost",
+               ds_class={"bg-muted": "$period === '1d'"},
+               ds_on_click="$period = '1d'"),
+        Button("Week", variant="ghost",
+               ds_class={"bg-muted": "$period === '7d'"},
+               ds_on_click="$period = '7d'"),
+        Button("Month", variant="ghost",
+               ds_class={"bg-muted": "$period === '30d'"},
+               ds_on_click="$period = '30d'"),
+        cls="inline-flex rounded-md bg-muted/30 p-1"
     ),
-    CardContent(
-        Div(
-            Span("$45,231.89", cls="text-3xl font-bold"),
-            Span("+20.1% from last month", cls="text-sm text-green-600")
+    
+    # Stats cards with dynamic updates
+    Card(
+        CardHeader(
+            CardTitle("Total Revenue"),
+            CardDescription(ds_text("`Last ${$period === '1d' ? 'day' : $period === '7d' ? 'week' : 'month'}`"))
+        ),
+        CardContent(
+            Div(
+                Span(ds_text("'$' + $revenue.toLocaleString()"), cls="text-2xl font-bold"),
+                P(
+                    Span(ds_text("`${$revenueChange >= 0 ? '+' : ''}${$revenueChange}%`"),
+                         ds_class={"text-emerald-600": "$revenueChange > 0", "text-red-600": "$revenueChange < 0"}),
+                    Span(" from last period", cls="text-muted-foreground"),
+                    cls="text-sm mt-1"
+                )
+            )
         )
-    )
+    ),
+    ds_signals(period=value("30d"), revenue=value(98234), revenueChange=value(23.2)),
+    ds_bind("""
+        // Auto-update stats when period changes
+        if ($period === '1d') {
+            $revenue = 3421; $revenueChange = 12.3;
+        } else if ($period === '7d') {
+            $revenue = 24567; $revenueChange = 18.5;
+        } else if ($period === '30d') {
+            $revenue = 98234; $revenueChange = 23.2;
+        }
+    """)
 )''',
-        title="Stats Cards",
-        description="Metric and statistics display cards"
+        title="Interactive Dashboard Stats",
+        description="Dynamic stats cards with period selection and real-time updates"
     )
     
-    # Form card
+    # Interactive form card with validation
     yield ComponentPreview(
         Card(
             CardHeader(
@@ -212,17 +342,32 @@ def examples():
                 Div(
                     Div(
                         Label("Email", for_="email"),
-                        Input(type="email", id="email", placeholder="name@example.com"),
+                        Input(
+                            type="email", 
+                            id="email", 
+                            placeholder="name@example.com",
+                            cls="w-full"
+                        ),
                         cls="space-y-2"
                     ),
                     Div(
                         Label("Password", for_="password"),
-                        Input(type="password", id="password", placeholder="Enter your password"),
+                        Input(
+                            type="password", 
+                            id="password", 
+                            placeholder="Enter your password",
+                            cls="w-full"
+                        ),
                         cls="space-y-2"
                     ),
                     Div(
                         Label("Confirm Password", for_="confirm"),
-                        Input(type="password", id="confirm", placeholder="Confirm your password"),
+                        Input(
+                            type="password", 
+                            id="confirm", 
+                            placeholder="Confirm your password",
+                            cls="w-full"
+                        ),
                         cls="space-y-2"
                     ),
                     cls="space-y-4"
@@ -230,11 +375,30 @@ def examples():
             ),
             CardFooter(
                 Div(
-                    Button("Create Account", cls="w-full mb-2"),
-                    P("Already have an account? ", A("Sign in", href="#", cls="underline"), cls="text-sm text-center text-muted-foreground"),
+                    Button(
+                        "Create Account",
+                        ds_on_click("alert('Create account clicked!')"),
+                        cls="w-full mb-2",
+                        
+                    ),
+                    P(
+                        "Already have an account? ", 
+                        A("Sign in", href="#", cls="underline hover:text-primary"), 
+                        cls="text-sm text-center text-muted-foreground"
+                    ),
                     cls="w-full"
                 )
             ),
+            
+            # Form validation signals
+            ds_signals(
+                email=value(""),
+                password=value(""),
+                confirmPassword=value(""),
+                emailValid=value(False),
+                creating=value(False)
+            ),
+            
             cls="w-full max-w-md"
         ),
         '''Card(
@@ -246,23 +410,219 @@ def examples():
         Div(
             Div(
                 Label("Email", for_="email"),
-                Input(type="email", id="email", placeholder="name@example.com"),
+                Input(
+                    signal="email",
+                    type="email",
+                    placeholder="name@example.com",
+                    ds_class={
+                        "border-red-300": "$email.length > 0 && !$emailValid",
+                        "border-green-300": "$emailValid"
+                    }
+                ),
+                P(
+                    "Please enter a valid email address",
+                    ds_show="$email.length > 0 && !$emailValid",
+                    cls="text-red-500 text-sm mt-1"
+                ),
                 cls="space-y-2"
             ),
             Div(
-                Label("Password", for_="password"),  
-                Input(type="password", id="password"),
-                cls="space-y-2"
+                Label("Password", for_="password"),
+                Input(
+                    signal="password",
+                    type="password",
+                    placeholder="Enter your password",
+                    ds_class={
+                        "border-red-300": "$password.length > 0 && $password.length < 8",
+                        "border-green-300": "$password.length >= 8"
+                    }
+                ),
+                P(
+                    "Password must be at least 8 characters",
+                    ds_show="$password.length > 0 && $password.length < 8",
+                    cls="text-red-500 text-sm mt-1"
+                )
             ),
             cls="space-y-4"
         )
     ),
     CardFooter(
-        Button("Create Account", cls="w-full")
-    )
+        Button(
+            ds_text("$creating ? 'Creating Account...' : 'Create Account'"),
+            ds_disabled("!$emailValid || $password.length < 8 || $creating"),
+            ds_on_click="createAccount()",
+            cls="w-full"
+        )
+    ),
+    ds_signals(email="", password="", emailValid=False, creating=False),
+    ds_bind("$emailValid = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test($email)")
 )''',
-        title="Form Card",
-        description="Cards containing forms and inputs"
+        title="Interactive Form Card",
+        description="Form with real-time validation and dynamic button states"
+    )
+    
+    # Interactive shopping cart card
+    yield ComponentPreview(
+        Card(
+            CardHeader(
+                CardTitle("Shopping Cart"),
+                CardDescription(ds_text("`${$items.length} item${$items.length !== 1 ? 's' : ''} in cart`"))
+            ),
+            CardContent(
+                Div(
+                    # Cart items list (only shows when cart has items)
+                    Div(
+                        # Item 1 - MacBook Pro
+                        Div(
+                            Div(
+                                Div("💻", cls="text-2xl mr-3"),
+                                Div(
+                                    P("MacBook Pro 14\"", cls="font-medium text-sm"),
+                                    P("Space Gray, 16GB RAM", cls="text-xs text-muted-foreground"),
+                                    cls="flex-1"
+                                ),
+                                cls="flex items-start"
+                            ),
+                            Div(
+                                P("$2,399", cls="font-bold text-sm"),
+                                Button(
+                                    ds_on_click("$items = $items.filter(item => item !== 'MacBook Pro 14'); $total = ($items.includes('AirPods Pro (2nd gen)') ? 249 : 0)"),
+                                    Icon("lucide:trash-2", cls="h-3 w-3"),
+                                    variant="ghost", size="sm",                                    
+                                    cls="ml-2 p-1 h-6 w-6"
+                                ),
+                                cls="flex items-center"
+                            ),
+                            ds_show("$items.includes('MacBook Pro 14')"),
+                            cls="flex items-start justify-between py-2 border-b"
+                        ),
+                        # Item 2 - AirPods
+                        Div(
+                            Div(
+                                Div("🎧", cls="text-2xl mr-3"),
+                                Div(
+                                    P("AirPods Pro (2nd gen)", cls="font-medium text-sm"),
+                                    P("with MagSafe Case", cls="text-xs text-muted-foreground"),
+                                    cls="flex-1"
+                                ),
+                                cls="flex items-start"
+                            ),
+                            Div(
+                                P("$249", cls="font-bold text-sm"),
+                                Button(
+                                    ds_on_click("$items = $items.filter(item => item !== 'AirPods Pro (2nd gen)'); $total = ($items.includes('MacBook Pro 14') ? 2399 : 0)"),
+                                    Icon("lucide:trash-2", cls="h-3 w-3"),
+                                    variant="ghost", size="sm",                                    
+                                    cls="ml-2 p-1 h-6 w-6"
+                                ),
+                                cls="flex items-center"
+                            ),
+                            ds_show("$items.includes('AirPods Pro (2nd gen)')"),
+                            cls="flex items-start justify-between py-2"
+                        ),
+                        cls="space-y-1"
+                    ),
+                    
+                    # Empty cart message (only shows when cart is empty)
+                    Div(
+                        Div("🛍️", cls="text-5xl text-center mb-3"),
+                        P("Your cart is empty", cls="text-center text-muted-foreground font-medium"),
+                        P("Add some items to get started", cls="text-center text-sm text-muted-foreground"),
+                        ds_show("$items.length === 0"),
+                        cls="py-8"
+                    ),
+                    
+                    cls="min-h-[120px]"
+                )
+            ),
+            CardFooter(
+                Div(
+                    Div(
+                        Div(
+                            Span("Subtotal: ", cls="text-sm"),
+                            Span(ds_text("`$${$total.toFixed(2)}`"), cls="font-bold"),
+                            cls="flex justify-between w-full mb-2"
+                        ),
+                        Div(
+                            Span("Tax: ", cls="text-sm"),
+                            Span(ds_text("`$${($total * 0.08).toFixed(2)}`"), cls="text-sm"),
+                            cls="flex justify-between w-full mb-2 text-muted-foreground"
+                        ),
+                        Div(
+                            Span("Total: ", cls="font-medium"),
+                            Span(ds_text("`$${($total * 1.08).toFixed(2)}`"), cls="font-bold text-lg"),
+                            cls="flex justify-between w-full border-t pt-2 mt-2"
+                        ),
+                        ds_show("$items.length > 0"),
+                        cls="w-full mb-4"
+                    ),
+                    
+                    Div(
+                        Button(
+                            ds_on_click("$items = ['MacBook Pro 14', 'AirPods Pro (2nd gen)']; $total = 2648"),
+                            "Add Sample Items",
+                            variant="outline", size="sm",                            
+                            cls="w-full mb-2"
+                        ),
+                        ds_show("$items.length === 0")
+                    ),
+                    
+                    Button(
+                        ds_on_click("$checking_out = true; setTimeout(() => { alert('Order placed successfully!'); $items = []; $total = 0; $checking_out = false; }, 2000)"),
+                        ds_text("$checking_out ? 'Processing...' : 'Checkout'"),
+                        ds_disabled="$items.length === 0 || $checking_out",                        
+                        cls="w-full",
+                        ds_class={
+                            "opacity-50 cursor-not-allowed": "$items.length === 0 || $checking_out"
+                        }
+                    ),
+                    
+                    cls="w-full"
+                )
+            ),
+            
+            # Shopping cart state management
+            ds_signals(
+                items=value(["MacBook Pro 14", "AirPods Pro (2nd gen)"]),
+                total=2648.0,
+                checking_out=False
+            ),
+            
+            cls="w-full max-w-md"
+        ),
+        '''Card(
+    CardHeader(
+        CardTitle("Shopping Cart"),
+        CardDescription(ds_text("`${$items.length} item${$items.length !== 1 ? 's' : ''}`"))
+    ),
+    CardContent(
+        Div(
+            # Cart items list
+            Div(
+                Div(
+                    P("MacBook Pro 14\"", cls="font-medium"),
+                    P("$2,399", cls="font-bold"),
+                    Button(Icon("lucide:trash-2"), variant="ghost", size="sm",
+                           ds_on_click="removeItem(0)"),
+                    cls="flex justify-between items-center py-2"
+                ),
+                ds_show("$items.length > 0")
+            ),
+            # Empty state
+            P("Your cart is empty", ds_show("$items.length === 0"), cls="text-center py-8")
+        )
+    ),
+    CardFooter(
+        Div(
+            Span("Total: ", Span(ds_text("`$${$total.toFixed(2)}`"), cls="font-bold")),
+            Button("Checkout", ds_disabled="$items.length === 0", ds_on_click="checkout()"),
+            cls="w-full flex justify-between items-center"
+        )
+    ),
+    ds_signals(items=["MacBook Pro 14"], total=2399.00)
+)''',
+        title="Interactive Shopping Cart",
+        description="Dynamic cart with add/remove items, total calculation, and checkout flow"
     )
     
     # Notification cards
@@ -280,7 +640,8 @@ def examples():
                             ),
                             cls="flex items-start"
                         ),
-                        Button("View Receipt", variant="ghost", size="sm", cls="mt-3"),
+                        Button("View Receipt", variant="ghost", size="sm", cls="mt-3",
+                               ds_on_click="alert('Receipt downloaded!')"),
                         cls="p-4"
                     )
                 )
@@ -297,7 +658,8 @@ def examples():
                             ),
                             cls="flex items-start"
                         ),
-                        Button("Verify Email", size="sm", cls="mt-3"),
+                        Button("Verify Email", size="sm", cls="mt-3",
+                               ds_on_click="alert('Verification email sent!')"),
                         cls="p-4"
                     )
                 )
@@ -314,11 +676,245 @@ def examples():
                 cls="ml-3"
             ),
             cls="flex items-start"
-        )
+        ),
+        Button("View Receipt", variant="ghost", size="sm", 
+               ds_on_click="alert('Receipt downloaded!')")
     )
 )''',
-        title="Notification Cards",
-        description="Alert and notification style cards"
+        title="Interactive Notifications",
+        description="Alert and notification cards with action handlers"
+    )
+    
+    # Product/E-commerce cards with interactive features
+    yield ComponentPreview(
+        Div(
+            Card(
+                CardContent(
+                    Div(
+                        # Product image placeholder
+                        Div(
+                            "📱",
+                            cls="text-6xl flex items-center justify-center h-32 bg-gray-50 rounded-lg mb-4"
+                        ),
+                        
+                        # Product info
+                        Div(
+                            CardTitle("iPhone 15 Pro", cls="text-lg mb-1"),
+                            CardDescription("Natural Titanium, 128GB"),
+                            
+                            # Rating stars
+                            Div(
+                                Span("★★★★★", cls="text-yellow-400 text-sm"),
+                                Span("4.9 (1,234 reviews)", cls="text-sm text-muted-foreground ml-2"),
+                                cls="flex items-center mt-2 mb-3"
+                            ),
+                            
+                            # Price and discount
+                            Div(
+                                Span("$999", cls="text-2xl font-bold text-primary mr-2"),
+                                Span("$1,099", cls="text-sm line-through text-muted-foreground"),
+                                Badge("9% OFF", variant="destructive", cls="ml-2"),
+                                cls="flex items-center mb-4"
+                            ),
+                            
+                            # Color options
+                            Div(
+                                P("Color:", cls="text-sm font-medium mb-2"),
+                                Div(
+                                    Button(
+                                        "", 
+                                        variant="ghost", size="sm",
+                                        cls="w-8 h-8 rounded-full bg-gray-800 border-2 p-0",
+                                        ds_class={"border-primary": "$selectedColor === 'titanium'"},
+                                        ds_on_click="$selectedColor = 'titanium'"
+                                    ),
+                                    Button(
+                                        "", 
+                                        variant="ghost", size="sm",
+                                        cls="w-8 h-8 rounded-full bg-blue-500 border-2 p-0 ml-2",
+                                        ds_class={"border-primary": "$selectedColor === 'blue'"},
+                                        ds_on_click="$selectedColor = 'blue'"
+                                    ),
+                                    Button(
+                                        "", 
+                                        variant="ghost", size="sm",
+                                        cls="w-8 h-8 rounded-full bg-white border-2 p-0 ml-2",
+                                        ds_class={"border-primary": "$selectedColor === 'white'"},
+                                        ds_on_click="$selectedColor = 'white'"
+                                    ),
+                                    cls="flex items-center"
+                                ),
+                                cls="mb-4"
+                            )
+                        ),
+                        
+                        cls="p-0"
+                    )
+                ),
+                CardFooter(
+                    Div(
+                        Button(
+                            Icon("lucide:heart", cls="h-4 w-4 mr-2", 
+                                 ds_class={"fill-current text-red-500": "$favorited"}),
+                            ds_text("$favorited ? 'Favorited' : 'Add to Favorites'"),
+                            variant="outline", size="sm",
+                            ds_on_click=toggle("favorited"),
+                            cls="mr-2"
+                        ),
+                        Button(
+                            Icon("lucide:shopping-cart", cls="h-4 w-4 mr-2"),
+                            ds_text("$addedToCart ? 'Added!' : 'Add to Cart'"),
+                            ds_disabled="$addingToCart",
+                            ds_on_click="$addingToCart = true; setTimeout(() => { $addedToCart = true; $addingToCart = false; setTimeout(() => $addedToCart = false, 2000); }, 800)",
+                            ds_class={
+                                "bg-green-600 hover:bg-green-700": "$addedToCart",
+                                "opacity-50 cursor-not-allowed": "$addingToCart"
+                            },
+                            size="sm"
+                        ),
+                        cls="flex w-full gap-2"
+                    )
+                ),
+                
+                # Product interaction state
+                ds_signals(
+                    selectedColor=value("titanium"),
+                    favorited=False,
+                    addedToCart=False,
+                    addingToCart=False
+                ),
+                
+                cls="w-full max-w-xs hover:shadow-lg transition-shadow duration-200"
+            ),
+            
+            Card(
+                CardContent(
+                    Div(
+                        # Product image placeholder
+                        Div(
+                            "🎧",
+                            cls="text-6xl flex items-center justify-center h-32 bg-gray-50 rounded-lg mb-4"
+                        ),
+                        
+                        # Product info
+                        Div(
+                            CardTitle("AirPods Pro", cls="text-lg mb-1"),
+                            CardDescription("2nd Generation with MagSafe"),
+                            
+                            # Rating stars
+                            Div(
+                                Span("★★★★★", cls="text-yellow-400 text-sm"),
+                                Span("4.8 (892 reviews)", cls="text-sm text-muted-foreground ml-2"),
+                                cls="flex items-center mt-2 mb-3"
+                            ),
+                            
+                            # Price
+                            Div(
+                                Span("$249", cls="text-2xl font-bold text-primary"),
+                                Badge("Best Seller", variant="secondary", cls="ml-2"),
+                                cls="flex items-center mb-4"
+                            ),
+                            
+                            # Quick specs
+                            Div(
+                                P("✓ Active Noise Cancellation", cls="text-sm text-muted-foreground mb-1"),
+                                P("✓ Spatial Audio", cls="text-sm text-muted-foreground mb-1"),
+                                P("✓ 6hr battery + 24hr case", cls="text-sm text-muted-foreground"),
+                                cls="mb-4"
+                            )
+                        ),
+                        
+                        cls="p-0"
+                    )
+                ),
+                CardFooter(
+                    Div(
+                        Button(
+                            Icon("lucide:heart", cls="h-4 w-4 mr-2", 
+                                 ds_class={"fill-current text-red-500": "$favorited2"}),
+                            ds_text("$favorited2 ? 'Favorited' : 'Add to Favorites'"),
+                            variant="outline", size="sm",
+                            ds_on_click=toggle("favorited2"),
+                            cls="mr-2"
+                        ),
+                        Button(
+                            Icon("lucide:shopping-cart", cls="h-4 w-4 mr-2"),
+                            ds_text("$addedToCart2 ? 'Added!' : 'Add to Cart'"),
+                            ds_disabled="$addingToCart2",
+                            ds_on_click="$addingToCart2 = true; setTimeout(() => { $addedToCart2 = true; $addingToCart2 = false; setTimeout(() => $addedToCart2 = false, 2000); }, 800)",
+                            ds_class={
+                                "bg-green-600 hover:bg-green-700": "$addedToCart2",
+                                "opacity-50 cursor-not-allowed": "$addingToCart2"
+                            },
+                            size="sm"
+                        ),
+                        cls="flex w-full gap-2"
+                    )
+                ),
+                
+                # Product interaction state
+                ds_signals(
+                    favorited2=False,
+                    addedToCart2=False,
+                    addingToCart2=False
+                ),
+                
+                cls="w-full max-w-xs hover:shadow-lg transition-shadow duration-200"
+            ),
+            
+            cls="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl"
+        ),
+        '''Card(
+    CardContent(
+        Div(
+            # Product image
+            Div("📱", cls="text-6xl h-32 bg-gray-50 rounded-lg mb-4"),
+            
+            CardTitle("iPhone 15 Pro"),
+            CardDescription("Natural Titanium, 128GB"),
+            
+            # Rating
+            Div(
+                Span("★★★★★", cls="text-yellow-400 text-sm"),
+                Span("4.9 (1,234 reviews)", cls="text-sm text-muted-foreground ml-2")
+            ),
+            
+            # Price
+            Div(
+                Span("$999", cls="text-2xl font-bold text-primary"),
+                Span("$1,099", cls="text-sm line-through text-muted-foreground"),
+                Badge("9% OFF", variant="destructive")
+            ),
+            
+            # Color selection
+            Div(
+                P("Color:", cls="text-sm font-medium"),
+                Div(
+                    Button("", cls="w-8 h-8 rounded-full bg-gray-800 border-2",
+                           ds_class={"border-primary": "$selectedColor === 'titanium'"},
+                           ds_on_click="$selectedColor = 'titanium'"),
+                    # More color options...
+                )
+            )
+        )
+    ),
+    CardFooter(
+        Button(
+            Icon("lucide:heart", ds_class={"fill-current text-red-500": "$favorited"}),
+            ds_text("$favorited ? 'Favorited' : 'Add to Favorites'"),
+            variant="outline",
+            ds_on_click=toggle("favorited")
+        ),
+        Button(
+            Icon("lucide:shopping-cart"),
+            ds_text("$addedToCart ? 'Added!' : 'Add to Cart'"),
+            ds_on_click="addToCart()"
+        )
+    ),
+    ds_signals(selectedColor="titanium", favorited=False, addedToCart=False)
+)''',
+        title="Product Cards",
+        description="E-commerce product cards with color selection, favorites, and cart functionality"
     )
 
 

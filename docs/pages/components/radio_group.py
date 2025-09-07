@@ -11,9 +11,10 @@ ORDER = 30
 STATUS = "stable"
 
 from starhtml import Div, P, Input, Label, Icon, Span, H2, H3, Form, Code
+from starhtml import Input as HTMLInput, Label as HTMLLabel
 from starhtml.datastar import (
     ds_on_click, ds_show, ds_text, ds_signals, value,
-    ds_bind, ds_disabled, ds_on_change, ds_effect, ds_class, toggle
+    ds_bind, ds_disabled, ds_on_change, ds_effect, ds_class, ds_style, ds_attr, if_, toggle
 )
 from starui.registry.components.radio_group import RadioGroup, RadioGroupItem, RadioGroupWithLabel
 from starui.registry.components.button import Button
@@ -26,34 +27,6 @@ from widgets.component_preview import ComponentPreview
 
 def examples():
     """Generate radio group examples using ComponentPreview with tabs."""
-    
-    # Basic usage
-    yield ComponentPreview(
-        Div(
-            RadioGroup(
-                RadioGroupItem(value="option1", label="Option 1"),
-                RadioGroupItem(value="option2", label="Option 2"),
-                RadioGroupItem(value="option3", label="Option 3"),
-                signal="basic_radio",
-                initial_value="option1"
-            ),
-            P(
-                "Selected: ",
-                Code(ds_text("$basic_radio || 'none'"), cls="ml-2"),
-                cls="text-sm text-muted-foreground mt-4"
-            ),
-            cls="space-y-4"
-        ),
-        '''RadioGroup(
-    RadioGroupItem(value="option1", label="Option 1"),
-    RadioGroupItem(value="option2", label="Option 2"),
-    RadioGroupItem(value="option3", label="Option 3"),
-    signal="basic_radio",
-    initial_value="option1"
-)''',
-        title="Basic Radio Group",
-        description="Simple radio button group with selection tracking"
-    )
     
     # Horizontal layout
     yield ComponentPreview(
@@ -72,6 +45,7 @@ def examples():
                 signal="size_radio",
                 helper_text="Choose the appropriate size for your needs"
             ),
+            ds_signals(size_radio=value("md")),
             cls="max-w-lg"
         ),
         '''RadioGroupWithLabel(
@@ -92,7 +66,38 @@ def examples():
         description="Radio buttons arranged horizontally"
     )
     
-    # Subscription tier selector
+    # Use RadioGroupItem with custom card styling
+    def PlanCard(value, name, price, description, features, badge=None):
+        """Create a RadioGroupItem that displays as a card."""
+        # Create rich label content with card styling
+        label_content = Div(
+            Div(
+                Div(
+                    P(name, cls="font-semibold text-base"),
+                    badge and Badge(badge, variant="secondary", cls="ml-2") or None,
+                    cls="flex items-center"
+                ),
+                P(price, cls="text-2xl font-bold mt-1"),
+                P(description, cls="text-sm text-muted-foreground mt-2"),
+                Div(
+                    *[P(f"• {feature}", cls="text-sm") for feature in features],
+                    cls="mt-3 space-y-1"
+                ),
+                cls="flex flex-col"
+            ),
+            # Use ds_attr to properly set data-selected based on signal
+            ds_attr(data_selected=f"$selected_plan === '{value}' ? 'true' : 'false'"),
+            cls="p-4 border-2 rounded-lg h-full min-h-[220px] w-full transition-all hover:bg-gray-50 dark:hover:bg-gray-800 border-gray-200 dark:border-gray-700 data-[selected=true]:border-blue-500 data-[selected=true]:ring-2 data-[selected=true]:ring-blue-500/20 data-[selected=true]:bg-blue-50 dark:data-[selected=true]:bg-blue-950/20",
+        )
+        
+        # Return RadioGroupItem - RadioGroupItem handles the layout when hide_indicators=True
+        return RadioGroupItem(
+            value=value,
+            label=label_content,
+            class_name="w-full",
+        )
+    
+    # Subscription tier selector with card-styled RadioGroupItems
     yield ComponentPreview(
         Card(
             CardHeader(
@@ -100,92 +105,77 @@ def examples():
                 CardDescription("Select the plan that best fits your needs")
             ),
             CardContent(
-                RadioGroup(
-                    Div(
-                        RadioGroupItem(value="free", label=""),
-                        Div(
-                            Div(
-                                P("Free", cls="font-semibold"),
-                                Badge("Most Popular", variant="secondary", cls="ml-2"),
-                                cls="flex items-center"
-                            ),
-                            P("$0/month", cls="text-2xl font-bold mt-1"),
-                            P("Perfect for trying out our service", cls="text-sm text-muted-foreground"),
-                            P("• 10 projects", cls="text-sm mt-2"),
-                            P("• Basic support", cls="text-sm"),
-                            P("• 1GB storage", cls="text-sm"),
-                            cls="flex-1 ml-2"
+                Form(
+                    P("Subscription Plans", cls="text-sm font-medium mb-4"),
+                    RadioGroup(
+                        PlanCard(
+                            "free",
+                            "Free",
+                            "$0/month",
+                            "Perfect for trying out our service",
+                            ["10 projects", "Basic support", "1GB storage"],
+                            badge="Most Popular"
                         ),
-                        cls="flex gap-3 p-4 border rounded-lg",
-                        ds_class={"border-primary bg-accent": "$plan === 'free'"}
-                    ),
-                    Div(
-                        RadioGroupItem(value="pro", label=""),
-                        Div(
-                            P("Professional", cls="font-semibold"),
-                            P("$29/month", cls="text-2xl font-bold mt-1"),
-                            P("For professional developers", cls="text-sm text-muted-foreground"),
-                            P("• Unlimited projects", cls="text-sm mt-2"),
-                            P("• Priority support", cls="text-sm"),
-                            P("• 100GB storage", cls="text-sm"),
-                            P("• Advanced features", cls="text-sm"),
-                            cls="flex-1 ml-2"
+                        PlanCard(
+                            "pro",
+                            "Professional", 
+                            "$29/month",
+                            "For professional developers",
+                            ["Unlimited projects", "Priority support", "100GB storage", "Advanced features"]
                         ),
-                        cls="flex gap-3 p-4 border rounded-lg",
-                        ds_class={"border-primary bg-accent": "$plan === 'pro'"}
-                    ),
-                    Div(
-                        RadioGroupItem(value="enterprise", label=""),
-                        Div(
-                            P("Enterprise", cls="font-semibold"),
-                            P("Custom pricing", cls="text-2xl font-bold mt-1"),
-                            P("For large teams and organizations", cls="text-sm text-muted-foreground"),
-                            P("• Everything in Pro", cls="text-sm mt-2"),
-                            P("• Dedicated support", cls="text-sm"),
-                            P("• Unlimited storage", cls="text-sm"),
-                            P("• Custom integrations", cls="text-sm"),
-                            P("• SLA guarantee", cls="text-sm"),
-                            cls="flex-1 ml-2"
+                        PlanCard(
+                            "enterprise",
+                            "Enterprise",
+                            "Custom pricing",
+                            "For large teams and organizations",
+                            ["Everything in Pro", "Dedicated support", "Unlimited storage", "Custom integrations", "SLA guarantee"]
                         ),
-                        cls="flex gap-3 p-4 border rounded-lg",
-                        ds_class={"border-primary bg-accent": "$plan === 'enterprise'"}
+                        initial_value="free",
+                        signal="selected_plan",
+                        hide_indicators=True,  # Hide radio dots for card-style selection
+                        cls="grid grid-cols-1 gap-3 w-full"  # Use grid for truly consistent width
                     ),
-                    signal="plan",
-                    initial_value="free",
-                    cls="space-y-3"
-                ),
-                Button(
-                    ds_text("$plan === 'enterprise' ? 'Contact Sales' : 'Get Started'"),
-                    cls="w-full mt-6",
-                    ds_on_click="alert(`Selected plan: ${$plan}`)"
-                ),
-                ds_signals(plan=value("free"))
+                    P(
+                        "Selected plan: ",
+                        Code(ds_text("$selected_plan || 'none'"), cls="ml-2"),
+                        cls="text-sm text-muted-foreground mt-4"
+                    ),
+                    Button(
+                        ds_text("$selected_plan === 'enterprise' ? 'Contact Sales' : 'Get Started'"),
+                        ds_on_click("alert(`Selected plan: ${$selected_plan}`)"),
+                        cls="w-full mt-4"
+                    )
+                )
             ),
-            cls="max-w-lg"
+            cls="max-w-2xl"
         ),
-        '''RadioGroup(
-    Div(
-        RadioGroupItem(value="free", label=""),
-        Div(
-            Div(
-                P("Free", cls="font-semibold"),
-                Badge("Most Popular", variant="secondary")
+        '''# Custom PlanCard component that works with RadioGroup
+def PlanCard(value, name, price, description, features, badge=None):
+    def create_plan_card(signal, group_name, default_value=None):
+        radio_id = f"plan_{uuid4()[:8]}"
+        return Div(
+            HTMLInput(
+                type="radio", id=radio_id, name=group_name, value=value,
+                ds_on_change(f"${signal} = '{value}'"), cls="sr-only peer"
             ),
-            P("$0/month", cls="text-2xl font-bold"),
-            P("Perfect for trying out", cls="text-sm text-muted-foreground"),
-            P("• 10 projects"),
-            P("• Basic support"),
-            cls="flex-1 ml-2"
-        ),
-        cls="flex gap-3 p-4 border rounded-lg",
-        ds_class({"border-primary bg-accent": "$plan === 'free'"})
-    ),
-    // More plan options...
-    signal="plan",
-    initial_value="free"
+            HTMLLabel(
+                Div(
+                    # Plan content with peer-checked: styling
+                    cls="p-4 border-2 rounded-lg cursor-pointer transition-all peer-checked:border-primary peer-checked:ring-2 peer-checked:shadow-md"
+                ),
+                for_=radio_id, cls="block w-full cursor-pointer"
+            )
+        )
+    return create_plan_card
+
+# Use with RadioGroup for semantic structure
+RadioGroup(
+    PlanCard("free", "Free", "$0/month", "Perfect for trying out", ["10 projects"]),
+    PlanCard("pro", "Professional", "$29/month", "For developers", ["Unlimited"]),
+    initial_value="free", signal="selected_plan"
 )''',
         title="Subscription Plans",
-        description="Rich radio options with detailed information"
+        description="Rich radio options with proper RadioGroup semantics and CSS peer selectors"
     )
     
     # Payment method selector
@@ -212,39 +202,42 @@ def examples():
                     Div(
                         Div(
                             Icon("lucide:credit-card", cls="h-5 w-5 mr-2"),
-                            P("Secure card payment", cls="text-sm"),
+                            P("Secure payment processing", cls="text-sm"),
                             ds_show("$payment_method === 'card'"),
-                            cls="flex items-center p-3 bg-muted rounded-md"
+                            cls="flex items-center p-3 bg-muted rounded-md w-full"
                         ),
                         Div(
                             Icon("lucide:wallet", cls="h-5 w-5 mr-2"),
-                            P("Pay with PayPal balance", cls="text-sm"),
+                            P("Secure payment processing", cls="text-sm"),
                             ds_show("$payment_method === 'paypal'"),
-                            cls="flex items-center p-3 bg-muted rounded-md"
+                            cls="flex items-center p-3 bg-muted rounded-md w-full"
                         ),
                         Div(
                             Icon("lucide:building-2", cls="h-5 w-5 mr-2"),
-                            P("Direct bank transfer", cls="text-sm"),
+                            P("Secure payment processing", cls="text-sm"),
                             ds_show("$payment_method === 'bank'"),
-                            cls="flex items-center p-3 bg-muted rounded-md"
+                            cls="flex items-center p-3 bg-muted rounded-md w-full"
                         ),
                         Div(
                             Icon("lucide:bitcoin", cls="h-5 w-5 mr-2"),
-                            P("Bitcoin or Ethereum", cls="text-sm"),
+                            P("Secure payment processing", cls="text-sm"),
                             ds_show("$payment_method === 'crypto'"),
-                            cls="flex items-center p-3 bg-muted rounded-md"
+                            cls="flex items-center p-3 bg-muted rounded-md w-full"
                         ),
-                        cls="mt-4"
+                        cls="mt-4 h-16 flex items-center"
                     ),
                     Button(
                         "Continue to Payment",
+                        ds_on_click("event.preventDefault(); alert(`Proceeding with ${$payment_method}`)"),
                         type="submit",
-                        cls="w-full mt-4",
-                        ds_on_click="event.preventDefault(); alert(`Proceeding with ${$payment_method}`)"
+                        cls="w-full mt-4",                        
+                    ),
+                    ds_signals(
+                        payment_method=value("card")
                     )
                 )
             ),
-            cls="max-w-md"
+            cls="max-w-lg"
         ),
         '''RadioGroupWithLabel(
     label="Select payment method",
@@ -262,93 +255,170 @@ def examples():
 Div(
     Icon("lucide:credit-card"),
     P("Secure card payment"),
-    ds_show("$payment_method === 'card'"
+    ds_show="$payment_method === 'card'"
 )''',
         title="Payment Method",
         description="Payment selection with contextual information"
     )
     
-    # Survey/Quiz question
+    # Interactive 3-question survey
     yield ComponentPreview(
         Card(
             CardHeader(
-                CardTitle("Question 1 of 3"),
+                CardTitle(
+                    ds_text("'Question ' + ($step + 1) + ' of 3'")
+                ),
                 CardDescription("Web Development Survey")
             ),
             CardContent(
-                Div(
-                    RadioGroupWithLabel(
-                        label="What is your primary programming language?",
-                        options=[
-                            {"value": "javascript", "label": "JavaScript/TypeScript"},
-                            {"value": "python", "label": "Python"},
-                            {"value": "java", "label": "Java"},
-                            {"value": "csharp", "label": "C#"},
-                            {"value": "go", "label": "Go"},
-                            {"value": "rust", "label": "Rust"},
-                            {"value": "other", "label": "Other"}
-                        ],
-                        signal="survey_q1",
-                        required=True,
-                        error_text=(ds_show("$survey_submitted && !$survey_q1") and "Please select an answer" or None)
+                # Progress bar at the top
+                    Div(
+                        P(
+                            ds_text("`Question ${$step + 1} of 3`"),
+                            cls="text-xs text-muted-foreground mb-2"
+                        ),
+                        Div(
+                            Div(
+                                ds_style(width="`${([$survey_q1, $survey_q2, $survey_q3].filter(q => q !== '').length / 3) * 100}%`"),
+                                cls="h-2 bg-primary rounded-full transition-all duration-300"
+                            ),
+                            cls="w-full bg-secondary rounded-full h-2 mb-6"
+                        ),
+                        cls="mb-4"
                     ),
+                    
+                    
+                    # Question 1 - Programming Language
+                    Div(
+                        RadioGroupWithLabel(
+                            label="What is your primary programming language?",
+                            options=[
+                                {"value": "javascript", "label": "JavaScript/TypeScript"},
+                                {"value": "python", "label": "Python"},
+                                {"value": "java", "label": "Java"},
+                                {"value": "csharp", "label": "C#"},
+                                {"value": "go", "label": "Go"},
+                                {"value": "rust", "label": "Rust"},
+                                {"value": "other", "label": "Other"}
+                            ],
+                            signal="survey_q1",
+                            required=True
+                        ),
+                        ds_show("$step === 0")
+                    ),
+                    
+                    # Question 2 - Experience Level
+                    Div(
+                        RadioGroupWithLabel(
+                            label="How many years of development experience do you have?",
+                            options=[
+                                {"value": "0-1", "label": "Less than 1 year"},
+                                {"value": "1-3", "label": "1-3 years"},
+                                {"value": "3-5", "label": "3-5 years"},
+                                {"value": "5-10", "label": "5-10 years"},
+                                {"value": "10+", "label": "More than 10 years"}
+                            ],
+                            signal="survey_q2",
+                            required=True
+                        ),
+                        ds_show("$step === 1")
+                    ),
+                    
+                    # Question 3 - Preferred Framework
+                    Div(
+                        RadioGroupWithLabel(
+                            label="Which frontend framework do you prefer?",
+                            options=[
+                                {"value": "react", "label": "React"},
+                                {"value": "vue", "label": "Vue.js"},
+                                {"value": "angular", "label": "Angular"},
+                                {"value": "svelte", "label": "Svelte"},
+                                {"value": "datastar", "label": "Datastar"},
+                                {"value": "vanilla", "label": "Vanilla JS"},
+                                {"value": "none", "label": "I'm a backend developer"}
+                            ],
+                            signal="survey_q3",
+                            required=True
+                        ),
+                        ds_show("$step === 2")
+                    ),
+                    
+                    # Validation message - only show if submitted and no answer
+                    P(
+                        "Please select an answer to continue",
+                        ds_show("$survey_error_visible"),
+                        cls="text-sm text-destructive mt-2",                        
+                    ),
+                    
+                    # Navigation buttons
                     Div(
                         Button(
+                            ds_disabled("$step === 0"),
+                            ds_on_click("if ($step > 0) { $step = $step - 1 }"),
                             "Previous",
                             variant="outline",
-                            disabled=True,
-                            cls="mr-2"
+                            disabled=True,  # Will be overridden by ds_disabled                            
                         ),
                         Button(
                             "Next",
-                            ds_on_click="""
-                                $survey_submitted = true;
-                                if ($survey_q1) {
-                                    alert('Moving to question 2');
-                                    $survey_submitted = false;
-                                }
-                            """
+                            ds_text("$step === 2 ? 'Complete' : 'Next'"),
+                            ds_on_click("if ($step < 2) { $step = $step + 1 } else { alert('Survey Complete!') }")
                         ),
                         cls="flex justify-between mt-6"
                     ),
-                    Div(
-                        Div(
-                            cls="w-1/3 h-2 bg-primary rounded-full"
-                        ),
-                        cls="w-full bg-secondary rounded-full h-2 mt-4"
-                    ),
-                    ds_signals(survey_q1=value(""), survey_submitted=False)
+                
+                ds_signals(
+                    step=0,
+                    survey_q1=value(""),
+                    survey_q2=value(""),
+                    survey_q3=value("")
                 )
             ),
-            cls="max-w-md"
+            cls="max-w-lg"
         ),
         '''Card(
     CardHeader(
-        CardTitle("Question 1 of 3"),
+        CardTitle(ds_text("'Question ' + ($step + 1) + ' of 3'")),
         CardDescription("Web Development Survey")
     ),
     CardContent(
-        RadioGroupWithLabel(
-            label="What is your primary programming language?",
-            options=[
-                {"value": "javascript", "label": "JavaScript/TypeScript"},
-                {"value": "python", "label": "Python"},
-                // ... more options
-            ],
-            signal="survey_q1",
-            required=True,
-            error_text=ds_show("$submitted && !$survey_q1") and "Required" or None
-        ),
+        # Progress bar at top
         Div(
-            Button("Previous", disabled=True),
-            Button("Next", ds_on_click="validateAndNext()")
+            P(ds_text("`Step ${$step + 1} of 3`"), cls="text-xs text-muted-foreground mb-2"),
+            Div(
+                Div(
+                    ds_style(width="`${([$survey_q1, $survey_q2, $survey_q3].filter(q => q !== '').length / 3) * 100}%`"),
+                    cls="h-2 bg-primary rounded-full transition-all duration-300"
+                ),
+                cls="w-full bg-secondary rounded-full h-2 mb-6"
+            )
         ),
-        // Progress bar
-        Div(cls="w-1/3 h-2 bg-primary rounded-full")
+        
+        # Questions with conditional display
+        Div(
+            ds_show("$step === 0"),
+            RadioGroupWithLabel(
+                label="What is your primary programming language?",
+                options=[
+                    {"value": "javascript", "label": "JavaScript/TypeScript"},
+                    {"value": "python", "label": "Python"}
+                ],
+                signal="survey_q1"
+            )
+        ),
+        
+        # Navigation buttons  
+        Div(
+            Button("Previous", variant="outline", ds_disabled("$step === 0")),
+            Button(ds_text("$step === 2 ? 'Complete Survey' : 'Next'")),
+            cls="flex justify-between mt-6"
+        ),
+        
+        ds_signals(step=0, survey_q1=value(""), survey_q2=value(""), survey_q3=value(""))
     )
 )''',
-        title="Survey Question",
-        description="Multi-step form with validation"
+        title="Interactive Survey",
+        description="Multi-step survey with progress tracking and validation"
     )
     
     # Settings panel
@@ -400,10 +470,15 @@ Div(
                         "Apply Settings",
                         cls="w-full mt-6",
                         ds_on_click="alert(`Settings applied:\\nTheme: ${$theme_setting}\\nFont: ${$font_setting}\\nLanguage: ${$language_setting}`)"
+                    ),
+                    ds_signals(
+                        theme_setting=value("system"),
+                        font_setting=value("medium"),
+                        language_setting=value("en")
                     )
                 )
             ),
-            cls="max-w-md"
+            cls="max-w-lg"
         ),
         '''Card(
     CardContent(
@@ -428,7 +503,7 @@ Div(
             value="medium",
             signal="font_setting"
         ),
-        Button("Apply Settings", ds_on_click="applySettings()")
+        Button("Apply Settings", ds_on_click("applySettings()"))
     )
 )''',
         title="Settings Panel",

@@ -115,7 +115,7 @@ Button(Icon("lucide:loader-2", cls="mr-2 h-4 w-4 animate-spin"), "Please wait", 
             Div(
                 Label("Name:", cls="block text-sm font-medium mb-1"),
                 Input(
-                    ds_bind("name"),
+                    signal="name",
                     type="text",
                     placeholder="Enter your name",                
                     cls="w-full px-3 py-2 border rounded-md"
@@ -135,7 +135,7 @@ Button(Icon("lucide:loader-2", cls="mr-2 h-4 w-4 animate-spin"), "Please wait", 
     Div(
         Label("Name:", cls="block text-sm font-medium mb-1"),
         Input(
-            ds_bind("name"),
+            signal="name",
             type="text",
             placeholder="Enter your name",                
             cls="w-full px-3 py-2 border rounded-md"

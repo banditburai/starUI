@@ -120,20 +120,16 @@ Popover(
     # Profile card popover
     yield ComponentPreview(
         Div(
-            P("Hover or click on the avatar to see profile details:", cls="text-sm text-muted-foreground mb-4"),
+            P("Click on the avatar to see profile details:", cls="text-sm text-muted-foreground mb-4"),
             Popover(
                 PopoverTrigger(
-                    Div(
-                        Avatar(
-                            Img(src="https://github.com/shadcn.png", alt="@shadcn"),
-                            size="sm",
-                            cls="mr-2"
-                        ),
-                        Span("@shadcn", cls="text-sm font-medium"),
-                        cls="flex items-center hover:bg-muted/50 p-2 rounded-md transition-colors"
+                    Avatar(
+                        Img(src="https://github.com/shadcn.png", alt="@shadcn"),
+                        size="sm",
+                        cls="mr-2"
                     ),
-                    variant="ghost",
-                    cls="h-auto p-0"
+                    Span("@shadcn", cls="text-sm font-medium"),
+                    cls="flex items-center hover:bg-muted/50 px-3 py-2 rounded-lg transition-colors cursor-pointer"
                 ),
                 PopoverContent(
                     Div(
@@ -252,10 +248,10 @@ Popover(
                             value="30",
                             signal="meeting_duration"
                         ),
-                        InputWithLabel(
+                        DatePickerWithLabel(
                             label="Date & Time",
-                            type="datetime-local",
                             signal="meeting_datetime",
+                            placeholder="Select date and time",
                             required=True
                         ),
                         TextareaWithLabel(
@@ -320,10 +316,10 @@ Popover(
                 options=[("15", "15 minutes"), ("30", "30 minutes"), ("60", "1 hour")],
                 signal="meeting_duration"
             ),
-            InputWithLabel(
-                label="Date & Time",
-                type="datetime-local",
+            DatePickerWithLabel(
+                label="Date & Time", 
                 signal="meeting_datetime",
+                placeholder="Select date and time",
                 required=True
             ),
             TextareaWithLabel(
@@ -358,7 +354,7 @@ Popover(
                 PopoverTrigger(
                     Div(
                         Div(
-                            ds_style({"backgroundColor": "$selected_color"}),
+                            ds_style(background_color="$selected_color"),
                             cls="w-6 h-6 rounded border border-border mr-2"
                         ),
                         Span(ds_text("$selected_color || '#3b82f6'"), cls="text-sm font-mono"),
@@ -396,7 +392,7 @@ Popover(
                             Input(
                                 type="color",
                                 cls="w-full h-10 rounded border cursor-pointer",
-                                ds_bind="custom_color",
+                                signal="custom_color",
                                 ds_on_change="$selected_color = $custom_color"
                             )
                         ),
@@ -413,10 +409,10 @@ Popover(
                 P("Preview:", cls="text-sm font-medium mb-2"),
                 Div(
                     P("This text uses your selected color", 
-                      ds_style({"color": "$selected_color"}),
+                      ds_style(color="$selected_color"),
                       cls="font-medium"),
                     Div(
-                        ds_style({"backgroundColor": "$selected_color"}),
+                        ds_style(background_color="$selected_color"),
                         cls="w-full h-16 rounded border mt-2"
                     )
                 ),
@@ -428,7 +424,7 @@ Popover(
     PopoverTrigger(
         Div(
             Div(
-                ds_style({"backgroundColor": "$selected_color"}),
+                ds_style(background_color="$selected_color"),
                 cls="w-6 h-6 rounded border mr-2"
             ),
             Span(ds_text("$selected_color"), cls="text-sm font-mono"),
@@ -453,7 +449,7 @@ Popover(
                 Label("Custom Color:"),
                 Input(
                     type="color",
-                    ds_bind="custom_color",
+                    signal="custom_color",
                     ds_on_change="$selected_color = $custom_color"
                 )
             ),
@@ -493,6 +489,7 @@ Popover(
                                 cls="flex items-center flex-1"
                             ),
                             SelectWithLabel(
+                                label="Theme",
                                 options=[
                                     ("light", "Light"),
                                     ("dark", "Dark"),
@@ -603,6 +600,7 @@ Popover(
                     cls="flex items-center flex-1"
                 ),
                 SelectWithLabel(
+                    label="Theme",
                     options=[("light", "Light"), ("dark", "Dark"), ("system", "System")],
                     signal="theme_setting"
                 ),

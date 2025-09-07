@@ -462,47 +462,53 @@ def examples():
                             )
                         ),
                         AccordionContent(
-                            Accordion(
-                                AccordionItem(
-                                    AccordionTrigger(
-                                        Div(
-                                            Icon("lucide:folder", cls="h-4 w-4 mr-2 text-blue-500"),
-                                            Span("components/"),
-                                            Badge("8", variant="outline", cls="ml-auto mr-2"),
-                                            cls="flex items-center w-full"
-                                        )
+                            Div(
+                                # Visual hierarchy with border and indentation
+                                Div(
+                                    Accordion(
+                                        AccordionItem(
+                                            AccordionTrigger(
+                                                Div(
+                                                    Icon("lucide:folder", cls="h-4 w-4 mr-2 text-blue-500"),
+                                                    Span("components/"),
+                                                    Badge("8", variant="outline", cls="ml-auto mr-2"),
+                                                    cls="flex items-center w-full"
+                                                )
+                                            ),
+                                            AccordionContent(
+                                                Div(
+                                                    Div(Icon("lucide:file", cls="h-4 w-4 mr-2"), "Button.tsx", cls="flex items-center py-1 pl-8"),
+                                                    Div(Icon("lucide:file", cls="h-4 w-4 mr-2"), "Card.tsx", cls="flex items-center py-1 pl-8"),
+                                                    Div(Icon("lucide:file", cls="h-4 w-4 mr-2"), "Dialog.tsx", cls="flex items-center py-1 pl-8"),
+                                                    Div(Icon("lucide:file", cls="h-4 w-4 mr-2"), "Input.tsx", cls="flex items-center py-1 pl-8"),
+                                                    cls="text-sm text-muted-foreground"
+                                                )
+                                            ),
+                                            value="components"
+                                        ),
+                                        AccordionItem(
+                                            AccordionTrigger(
+                                                Div(
+                                                    Icon("lucide:folder", cls="h-4 w-4 mr-2 text-blue-500"),
+                                                    Span("utils/"),
+                                                    Badge("4", variant="outline", cls="ml-auto mr-2"),
+                                                    cls="flex items-center w-full"
+                                                )
+                                            ),
+                                            AccordionContent(
+                                                Div(
+                                                    Div(Icon("lucide:file", cls="h-4 w-4 mr-2"), "cn.ts", cls="flex items-center py-1 pl-8"),
+                                                    Div(Icon("lucide:file", cls="h-4 w-4 mr-2"), "helpers.ts", cls="flex items-center py-1 pl-8"),
+                                                    cls="text-sm text-muted-foreground"
+                                                )
+                                            ),
+                                            value="utils"
+                                        ),
+                                        type="multiple",
+                                        signal="src_accordion"
                                     ),
-                                    AccordionContent(
-                                        Div(
-                                            Div(Icon("lucide:file", cls="h-4 w-4 mr-2"), "Button.tsx", cls="flex items-center py-1 pl-4"),
-                                            Div(Icon("lucide:file", cls="h-4 w-4 mr-2"), "Card.tsx", cls="flex items-center py-1 pl-4"),
-                                            Div(Icon("lucide:file", cls="h-4 w-4 mr-2"), "Dialog.tsx", cls="flex items-center py-1 pl-4"),
-                                            Div(Icon("lucide:file", cls="h-4 w-4 mr-2"), "Input.tsx", cls="flex items-center py-1 pl-4"),
-                                            cls="text-sm text-muted-foreground"
-                                        )
-                                    ),
-                                    value="components"
-                                ),
-                                AccordionItem(
-                                    AccordionTrigger(
-                                        Div(
-                                            Icon("lucide:folder", cls="h-4 w-4 mr-2 text-blue-500"),
-                                            Span("utils/"),
-                                            Badge("4", variant="outline", cls="ml-auto mr-2"),
-                                            cls="flex items-center w-full"
-                                        )
-                                    ),
-                                    AccordionContent(
-                                        Div(
-                                            Div(Icon("lucide:file", cls="h-4 w-4 mr-2"), "cn.ts", cls="flex items-center py-1 pl-4"),
-                                            Div(Icon("lucide:file", cls="h-4 w-4 mr-2"), "helpers.ts", cls="flex items-center py-1 pl-4"),
-                                            cls="text-sm text-muted-foreground"
-                                        )
-                                    ),
-                                    value="utils"
-                                ),
-                                type="multiple",
-                                signal="src_accordion"
+                                    cls="ml-2 pl-3 border-l-2 border-muted"
+                                )
                             )
                         ),
                         value="src"

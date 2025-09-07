@@ -14,12 +14,14 @@ def Separator(
 ) -> FT:
     combined_classes = (cls + " " + class_name).split()
 
-    has_custom_size = any(c.startswith(("h-", "w-")) for c in combined_classes)
-    default_size = (
-        ("h-px w-full" if orientation == "horizontal" else "w-px h-full")
-        if not has_custom_size
-        else ""
-    )
+    if orientation == "horizontal":
+        has_custom_height = any(c.startswith("h-") for c in combined_classes)
+        has_custom_width = any(c.startswith("w-") for c in combined_classes)
+        default_size = f"{'h-px' if not has_custom_height else ''} {'w-full' if not has_custom_width else ''}".strip()
+    else:  # vertical
+        has_custom_height = any(c.startswith("h-") for c in combined_classes)
+        has_custom_width = any(c.startswith("w-") for c in combined_classes)
+        default_size = f"{'w-px' if not has_custom_width else ''} {'h-full' if not has_custom_height else ''}".strip()
 
     has_custom_bg = any(c.startswith("bg-") for c in combined_classes)
     default_bg = "bg-border" if not has_custom_bg else ""

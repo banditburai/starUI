@@ -27,7 +27,7 @@ def examples():
             # User profile card
             Div(
                 Div(
-                    Div("Profile", cls="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-semibold"),
+                    Div(cls="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full"),
                     Div(
                         H4("John Doe", cls="font-medium"),
                         P("Software Engineer", cls="text-sm text-muted-foreground"),
@@ -70,31 +70,32 @@ Div(
         description="Use horizontal separators to divide sections within cards or panels"
     )
     
-    # Menu and navigation
+    # Content sections with clear divisions
     yield ComponentPreview(
         Div(
-            # Sidebar menu
+            # Article or content layout
             Div(
-                H3("Navigation", cls="text-sm font-semibold mb-3"),
+                # Main content section
                 Div(
-                    P("Dashboard", cls="p-2 hover:bg-muted rounded cursor-pointer text-sm"),
-                    P("Analytics", cls="p-2 hover:bg-muted rounded cursor-pointer text-sm"),
-                    P("Reports", cls="p-2 hover:bg-muted rounded cursor-pointer text-sm"),
+                    H3("Getting Started", cls="text-lg font-semibold mb-2"),
+                    P("Learn the basics of using our platform with this comprehensive guide.", 
+                      cls="text-sm text-muted-foreground mb-4"),
                 ),
-                Separator(cls="my-4"),
-                H3("Settings", cls="text-sm font-semibold mb-3"),
+                Separator(cls="my-6"),
+                # Features section
                 Div(
-                    P("Profile", cls="p-2 hover:bg-muted rounded cursor-pointer text-sm"),
-                    P("Preferences", cls="p-2 hover:bg-muted rounded cursor-pointer text-sm"),
-                    P("Security", cls="p-2 hover:bg-muted rounded cursor-pointer text-sm"),
+                    H3("Key Features", cls="text-lg font-semibold mb-2"),
+                    P("Discover the powerful features that make our platform unique.", 
+                      cls="text-sm text-muted-foreground mb-4"),
                 ),
-                Separator(cls="my-4"),
-                H3("Support", cls="text-sm font-semibold mb-3"),
+                Separator(cls="my-6"),
+                # Resources section
                 Div(
-                    P("Help Center", cls="p-2 hover:bg-muted rounded cursor-pointer text-sm"),
-                    P("Contact", cls="p-2 hover:bg-muted rounded cursor-pointer text-sm"),
+                    H3("Additional Resources", cls="text-lg font-semibold mb-2"),
+                    P("Find helpful documentation, tutorials, and community support.", 
+                      cls="text-sm text-muted-foreground"),
                 ),
-                cls="w-48 p-4 border rounded-lg"
+                cls="max-w-2xl p-6 border rounded-lg"
             ),
             cls=""
         ),
@@ -102,22 +103,27 @@ Div(
 from starhtml import Div, H3, P
 
 Div(
-    H3("Navigation", cls="text-sm font-semibold mb-3"),
-    Div("Dashboard", "Analytics", "Reports"),
-    
-    Separator(cls="my-4"),
-    
-    H3("Settings", cls="text-sm font-semibold mb-3"), 
-    Div("Profile", "Preferences", "Security"),
-    
-    Separator(cls="my-4"),
-    
-    H3("Support", cls="text-sm font-semibold mb-3"),
-    Div("Help Center", "Contact"),
-    cls="w-48 p-4 border rounded-lg"
+    # Content section 1
+    Div(
+        H3("Getting Started"),
+        P("Introduction content...")
+    ),
+    Separator(cls="my-6"),
+    # Content section 2
+    Div(
+        H3("Key Features"), 
+        P("Features content...")
+    ),
+    Separator(cls="my-6"),
+    # Content section 3
+    Div(
+        H3("Additional Resources"),
+        P("Resources content...")
+    ),
+    cls="max-w-2xl p-6 border rounded-lg"
 )''',
-        title="Menu Section Dividers",
-        description="Organize navigation menus with clear section separators"
+        title="Content Section Dividers",
+        description="Organize content areas with clear visual separation"
     )
     
     # Vertical separators in toolbars
@@ -318,13 +324,13 @@ Div(
                 Separator(cls="mb-6"),
                 
                 Div(
-                    P("Published on March 15, 2024", cls="text-xs text-muted-foreground"),
-                    Separator(orientation="vertical", cls="mx-2 h-3"),
-                    P("Updated March 20, 2024", cls="text-xs text-muted-foreground"),
-                    cls="flex items-center text-center"
+                    Span("Published on March 15, 2024", cls="text-xs text-muted-foreground"),
+                    Separator(orientation="vertical", cls="mx-3 h-6"),
+                    Span("Updated March 20, 2024", cls="text-xs text-muted-foreground"),
+                    cls="flex items-center mt-auto"
                 ),
                 
-                cls="max-w-2xl p-6 border rounded-lg"
+                cls="max-w-2xl p-6 border rounded-lg flex flex-col min-h-[300px]"
             ),
             cls=""
         ),
@@ -370,10 +376,10 @@ Article(
     
     # Footer with inline separators
     Div(
-        P("Published on March 15, 2024"),
-        Separator(orientation="vertical", cls="mx-2 h-3"),
-        P("Updated March 20, 2024"),
-        cls="flex items-center"
+        Span("Published on March 15, 2024"),
+        Separator(orientation="vertical", cls="mx-3 h-6"),
+        Span("Updated March 20, 2024"),
+        cls="flex items-center mt-auto"
     )
 )''',
         title="Article Layout",

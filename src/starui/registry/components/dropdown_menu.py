@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from starhtml import FT, Div, Hr, Icon, Span
 from starhtml import Button as HTMLButton
-from starhtml.datastar import ds_on_click, ds_position, ds_ref, ds_show
+from starhtml.datastar import ds_on_click, ds_position, ds_ref, ds_show, ds_effect
 
 from .button import Button
 from .utils import cn
@@ -85,13 +85,21 @@ def DropdownMenuContent(
                 shift=True,
                 hide=True,
             ),
+            ds_effect(f"""
+                const trigger = document.getElementById('{signal}-trigger');
+                const content = document.getElementById('{signal}-content');
+                if (trigger && content) {{
+                    const triggerWidth = trigger.offsetWidth;
+                    content.style.minWidth = triggerWidth + 'px';
+                }}
+            """),
             popover="auto",
             id=f"{signal}-content",
             role="menu",
             aria_labelledby=f"{signal}-trigger",
             tabindex="-1",
             cls=cn(
-                "z-50 min-w-[8rem] overflow-hidden rounded-md border border-input",
+                "z-50 overflow-hidden rounded-md border border-input",
                 "bg-popover text-popover-foreground shadow-lg p-1",
                 class_name,
                 cls,
@@ -297,12 +305,20 @@ def DropdownMenuGroup(
     class_name: str = "",
     **attrs: Any,
 ) -> FT:
-    return Div(
-        *children,
-        role="group",
-        cls=cn(class_name, cls),
-        **attrs,
-    )
+    def create(signal):
+        processed_children = [
+            child(signal) if callable(child) else child 
+            for child in children
+        ]
+        
+        return Div(
+            *processed_children,
+            role="group",
+            cls=cn(class_name, cls),
+            **attrs,
+        )
+    
+    return create
 
 
 def DropdownMenuSub(

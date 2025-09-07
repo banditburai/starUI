@@ -12,8 +12,8 @@ STATUS = "stable"
 
 from starhtml import Div, P, H3, H4, Pre, Code, Button as HTMLButton, Span, Icon
 from starhtml.datastar import ds_signals, ds_on_click, ds_text, ds_show, value, ds_bind
-from starui.registry.components.code_block import CodeBlock, InlineCode
 from starui.registry.components.button import Button
+from starui.registry.components.code_block import CodeBlock, InlineCode
 from starui.registry.components.badge import Badge
 from starui.registry.components.separator import Separator
 from widgets.component_preview import ComponentPreview
@@ -58,164 +58,40 @@ print(f"Fibonacci numbers up to 100: {numbers}")\'\'\'', language="python")''',
         description="Beautiful syntax highlighting for Python code with proper indentation and colors"
     )
     
-    # Multiple language support
-    yield ComponentPreview(
-        Div(
-            # JavaScript
-            Div(
-                Div(
-                    Badge("JavaScript", variant="outline"),
-                    cls="mb-3"
-                ),
-                CodeBlock('''// Modern JavaScript with async/await
-async function fetchUserData(userId) {
-    try {
-        const response = await fetch(`/api/users/${userId}`);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const userData = await response.json();
-        return userData;
-    } catch (error) {
-        console.error('Failed to fetch user data:', error);
-        return null;
-    }
-}
-
-// Usage with destructuring
-const { name, email, avatar } = await fetchUserData(123) || {};''', language="javascript"),
-                cls="mb-6"
-            ),
-            
-            # CSS
-            Div(
-                Div(
-                    Badge("CSS", variant="outline"),
-                    cls="mb-3"
-                ),
-                CodeBlock('''/* Modern CSS with custom properties */
-:root {
-    --primary-color: #3b82f6;
-    --secondary-color: #64748b;
-    --border-radius: 0.5rem;
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-}
-
-.button {
-    background: var(--primary-color);
-    color: white;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow-lg);
-    transition: all 0.2s ease-in-out;
-}
-
-.button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-}''', language="css"),
-                cls="mb-6"
-            ),
-            
-            # HTML
-            Div(
-                Div(
-                    Badge("HTML", variant="outline"),
-                    cls="mb-3"
-                ),
-                CodeBlock('''<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modern Web Page</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <header class="header">
-        <nav class="navigation">
-            <a href="#home" class="nav-link">Home</a>
-            <a href="#about" class="nav-link">About</a>
-            <a href="#contact" class="nav-link">Contact</a>
-        </nav>
-    </header>
-    
-    <main class="main-content">
-        <section class="hero">
-            <h1>Welcome to Our Site</h1>
-            <p>Beautiful, modern web experiences.</p>
-        </section>
-    </main>
-</body>
-</html>''', language="html"),
-                cls=""
-            ),
-            
-            cls="max-w-3xl space-y-6"
-        ),
-        '''from starui.registry.components.code_block import CodeBlock
-
-# JavaScript
-CodeBlock(\'\'\'async function fetchUserData(userId) {
-    const response = await fetch(`/api/users/${userId}`);
-    return response.json();
-}\'\'\'', language="javascript")
-
-# CSS  
-CodeBlock(\'\'\'/* Custom properties */
-:root {
-    --primary-color: #3b82f6;
-}
-
-.button {
-    background: var(--primary-color);
-}\'\'\', language="css")
-
-# HTML
-CodeBlock(\'\'\'<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>Page Title</title>
-</head>
-<body>
-    <h1>Hello World</h1>
-</body>
-</html>\'\'\', language="html")''',
-        title="Multiple Languages",
-        description="Syntax highlighting support for various programming languages"
-    )
-    
     # Code block with copy functionality (manual implementation)
     yield ComponentPreview(
         Div(
             P("Interactive Code Block", cls="font-medium mb-3"),
             
-            # Code block with copy button
+            # Code block with copy button - using relative positioning
             Div(
-                # Header with copy button
+                # Header that overlaps the CodeBlock
                 Div(
                     Span("example.py", cls="text-sm font-mono text-muted-foreground"),
-                    Button(
-                        Icon("lucide:copy", cls="w-4 h-4 mr-2"),
-                        "Copy",
-                        ds_on_click("navigator.clipboard.writeText($code_content); $copied = true; setTimeout(() => $copied = false, 2000)"),
-                        variant="ghost",
-                        size="sm",
-                        cls="ml-auto"
+                    Div(
+                        Button(
+                            Icon("lucide:copy", cls="w-4 h-4"),
+                            ds_on_click("navigator.clipboard.writeText($code_content); $copied = true; setTimeout(() => $copied = false, 2000)"),
+                            ds_show("!$copied"),
+                            variant="ghost",
+                            size="sm"
+                        ),
+                        Button(
+                            Icon("lucide:check", cls="w-4 h-4"),
+                            ds_show("$copied"),
+                            variant="ghost", 
+                            size="sm",
+                            cls="text-green-600"
+                        ),
+                        cls="flex"
                     ),
-                    Button(
-                        Icon("lucide:check", cls="w-4 h-4 mr-2"),
-                        "Copied!",
-                        ds_show("$copied"),
-                        variant="ghost", 
-                        size="sm",
-                        cls="ml-auto text-green-600"
-                    ),
-                    cls="flex items-center justify-between px-4 py-2 bg-muted border-b"
+                    cls="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4 py-3 bg-muted/95 backdrop-blur-sm border-b border-border rounded-t-lg"
                 ),
                 
-                # Code content
-                Div(
-                    CodeBlock('''import asyncio
+                # Code content with blank lines to account for header overlay
+                CodeBlock('''
+
+import asyncio
 from datetime import datetime
 
 async def process_data(data):
@@ -248,8 +124,6 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())''', language="python"),
-                    cls="overflow-x-auto"
-                ),
                 
                 ds_signals(
                     code_content=value('''import asyncio
@@ -287,44 +161,45 @@ if __name__ == "__main__":
     asyncio.run(main())'''),
                     copied=False
                 ),
-                cls="border rounded-lg overflow-hidden"
+                cls="relative rounded-lg overflow-hidden"
             ),
             
             cls="max-w-3xl"
         ),
-        '''from starui.registry.components.code_block import CodeBlock
-from starui.registry.components.button import Button
-from starhtml import Div, Span, Icon
+        '''from starhtml import Div, Span, Icon
 from starhtml.datastar import ds_on_click, ds_show, ds_signals, value
+from starui.registry.components.code_block import CodeBlock
+from starui.registry.components.button import Button
 
 # Code block with copy functionality
 Div(
     # Header
     Div(
         Span("example.py", cls="text-sm font-mono text-muted-foreground"),
-        Button(
-            Icon("lucide:copy", cls="w-4 h-4 mr-2"),
-            "Copy",
-            ds_on_click("navigator.clipboard.writeText($code_content); $copied = true; setTimeout(() => $copied = false, 2000)"),
-            variant="ghost",
-            size="sm"
+        Div(
+            Button(
+                Icon("lucide:copy", cls="w-4 h-4"),
+                ds_on_click("navigator.clipboard.writeText($code_content); $copied = true; setTimeout(() => $copied = false, 2000)"),
+                ds_show("!$copied"),
+                variant="ghost",
+                size="sm"
+            ),
+            Button(
+                Icon("lucide:check", cls="w-4 h-4"),
+                ds_show("$copied"),
+                variant="ghost",
+                size="sm",
+                cls="text-green-600"
+            ),
+            cls="flex"
         ),
-        Button(
-            Icon("lucide:check", cls="w-4 h-4 mr-2"),
-            "Copied!",
-            ds_show("$copied"),
-            variant="ghost",
-            size="sm",
-            cls="text-green-600"
-        ),
-        cls="flex items-center justify-between px-4 py-2 bg-muted border-b"
+        cls="flex items-center justify-between px-4 py-2 bg-muted rounded-t-lg"
     ),
     
     # Code content
-    CodeBlock(code_content, language="python"),
+    CodeBlock(code_content, language="python", cls="rounded-t-none"),
     
-    ds_signals(code_content=value("..."), copied=False),
-    cls="border rounded-lg overflow-hidden"
+    ds_signals(code_content=value("..."), copied=False)
 )''',
         title="Interactive Copy Feature",
         description="Add copy functionality to code blocks with visual feedback"
@@ -333,56 +208,59 @@ Div(
     # Inline code usage
     yield ComponentPreview(
         Div(
-            P([
+            P(
                 "Use the ",
                 InlineCode("useState"),
                 " hook to manage component state in React. You can import it like this: ",
                 InlineCode("import { useState } from 'react'"),
                 ". Then call it in your component: ",
                 InlineCode("const [count, setCount] = useState(0)"),
-                " to create a state variable."
-            ], cls="text-sm leading-relaxed mb-4"),
+                " to create a state variable.",
+                cls="text-sm leading-7 mb-4"
+            ),
             
-            P([
+            P(
                 "For styling, you can use CSS classes like ",
                 InlineCode("bg-blue-500"),
                 " for background color, ",
                 InlineCode("text-white"),
                 " for text color, and ",
                 InlineCode("p-4"),
-                " for padding."
-            ], cls="text-sm leading-relaxed mb-4"),
+                " for padding.",
+                cls="text-sm leading-7 mb-4"
+            ),
             
-            P([
+            P(
                 "Configuration files often use formats like ",
                 InlineCode("config.json"),
                 " or ",
                 InlineCode("settings.yaml"),
                 ". Environment variables are accessed via ",
                 InlineCode("process.env.NODE_ENV"),
-                " in Node.js."
-            ], cls="text-sm leading-relaxed"),
+                " in Node.js.",
+                cls="text-sm leading-7"
+            ),
             
-            cls="max-w-2xl p-4 border rounded-lg"
+            cls="prose prose-sm max-w-2xl p-6 border rounded-lg"
         ),
         '''from starui.registry.components.code_block import InlineCode
 from starhtml import P
 
-P([
+P(
     "Use the ",
     InlineCode("useState"),
     " hook to manage component state in React. Import it like: ",
     InlineCode("import { useState } from 'react'"),
     "."
-])
+)
 
-P([
+P(
     "For styling, use CSS classes like ",
     InlineCode("bg-blue-500"),
     " for background and ",
     InlineCode("text-white"),
     " for text color."
-])''',
+)''',
         title="Inline Code Snippets",
         description="Highlight code snippets within paragraphs and documentation"
     )
@@ -395,33 +273,81 @@ P([
                 H3("Installation", cls="text-lg font-semibold mb-3"),
                 P("Install StarUI using your preferred package manager:", cls="text-sm text-muted-foreground mb-3"),
                 
-                # npm
+                # npm with proper CodeBlock
                 Div(
+                    P("npm", cls="text-xs text-muted-foreground mb-1"),
                     Div(
-                        Badge("npm", variant="secondary"),
-                        cls="mb-2"
+                        CodeBlock("npm install starui", language="bash", cls="text-sm py-3"),
+                        Button(
+                            Icon("lucide:copy", cls="w-4 h-4"),
+                            ds_on_click("navigator.clipboard.writeText('npm install starui'); $npm_copied = true; setTimeout(() => $npm_copied = false, 2000)"),
+                            ds_show("!$npm_copied"),
+                            variant="ghost",
+                            size="icon",
+                            cls="absolute top-1/2 right-2 -translate-y-1/2 h-8 w-8"
+                        ),
+                        Button(
+                            Icon("lucide:check", cls="w-4 h-4"),
+                            ds_show("$npm_copied"),
+                            variant="ghost",
+                            size="icon",
+                            cls="absolute top-1/2 right-2 -translate-y-1/2 h-8 w-8 text-green-600"
+                        ),
+                        ds_signals(npm_copied=False),
+                        cls="relative"
                     ),
-                    CodeBlock("npm install starui", language="bash"),
                     cls="mb-4"
                 ),
                 
-                # pnpm
+                # pnpm with proper CodeBlock
                 Div(
+                    P("pnpm", cls="text-xs text-muted-foreground mb-1"),
                     Div(
-                        Badge("pnpm", variant="secondary"),
-                        cls="mb-2"
+                        CodeBlock("pnpm add starui", language="bash", cls="text-sm py-3"),
+                        Button(
+                            Icon("lucide:copy", cls="w-4 h-4"),
+                            ds_on_click("navigator.clipboard.writeText('pnpm add starui'); $pnpm_copied = true; setTimeout(() => $pnpm_copied = false, 2000)"),
+                            ds_show("!$pnpm_copied"),
+                            variant="ghost",
+                            size="icon",
+                            cls="absolute top-1/2 right-2 -translate-y-1/2 h-8 w-8"
+                        ),
+                        Button(
+                            Icon("lucide:check", cls="w-4 h-4"),
+                            ds_show("$pnpm_copied"),
+                            variant="ghost",
+                            size="icon",
+                            cls="absolute top-1/2 right-2 -translate-y-1/2 h-8 w-8 text-green-600"
+                        ),
+                        ds_signals(pnpm_copied=False),
+                        cls="relative"
                     ),
-                    CodeBlock("pnpm add starui", language="bash"),
                     cls="mb-4"
                 ),
                 
-                # yarn
+                # yarn with proper CodeBlock
                 Div(
+                    P("yarn", cls="text-xs text-muted-foreground mb-1"),
                     Div(
-                        Badge("yarn", variant="secondary"),
-                        cls="mb-2"
+                        CodeBlock("yarn add starui", language="bash", cls="text-sm py-3"),
+                        Button(
+                            Icon("lucide:copy", cls="w-4 h-4"),
+                            ds_on_click("navigator.clipboard.writeText('yarn add starui'); $yarn_copied = true; setTimeout(() => $yarn_copied = false, 2000)"),
+                            ds_show("!$yarn_copied"),
+                            variant="ghost",
+                            size="icon",
+                            cls="absolute top-1/2 right-2 -translate-y-1/2 h-8 w-8"
+                        ),
+                        Button(
+                            Icon("lucide:check", cls="w-4 h-4"),
+                            ds_show("$yarn_copied"),
+                            variant="ghost",
+                            size="icon",
+                            cls="absolute top-1/2 right-2 -translate-y-1/2 h-8 w-8 text-green-600"
+                        ),
+                        ds_signals(yarn_copied=False),
+                        cls="relative"
                     ),
-                    CodeBlock("yarn add starui", language="bash"),
                     cls="mb-6"
                 ),
                 
@@ -435,9 +361,8 @@ P([
                 H3("Quick Start", cls="text-lg font-semibold mb-3"),
                 P("Import and use components in your project:", cls="text-sm text-muted-foreground mb-3"),
                 
-                CodeBlock('''from starui.registry.components.button import Button
-from starui.registry.components.card import Card, CardHeader, CardTitle, CardContent
-from starhtml import Div, H1, P
+                CodeBlock('''from starhtml import Div, H1, P
+from starui import Button, Card, CardHeader, CardTitle, CardContent
 
 def my_app():
     return Div(
@@ -460,19 +385,29 @@ def my_app():
         ),
         '''from starui.registry.components.code_block import CodeBlock
 from starui.registry.components.badge import Badge
-from starhtml import H3, P, Div
+from starhtml import H3, P, Div, Span
+from starui.registry.components.button import Button
 
 # Documentation with multiple code blocks
 H3("Installation")
 P("Install using your preferred package manager:")
 
-# npm
-Badge("npm", variant="secondary")
-CodeBlock("npm install starui", language="bash")
+# Inline command with copy button
+Div(
+    Span("npm install starui", cls="font-mono text-sm"),
+    Button(
+        Icon("lucide:copy", cls="w-4 h-4"),
+        ds_on_click("navigator.clipboard.writeText('npm install starui')"),
+        variant="ghost",
+        size="sm"
+    ),
+    cls="flex items-center justify-between px-3 py-2 bg-muted rounded-md"
+)
 
 # Usage example
 H3("Quick Start")
-CodeBlock(\'\'\'from starui.registry.components.button import Button
+CodeBlock(\'\'\'from starhtml import Div, H1, P
+from starui.registry.components.button import Button
 
 def my_app():
     return Button("Click me!")\'\'\'', language="python")''',
@@ -480,113 +415,14 @@ def my_app():
         description="Structure documentation with code blocks for installation and usage examples"
     )
     
-    # Code comparison
-    yield ComponentPreview(
-        Div(
-            H4("Before vs After", cls="text-lg font-semibold mb-6 text-center"),
-            
-            Div(
-                # Before
-                Div(
-                    Div(
-                        Badge("Before", variant="destructive"),
-                        cls="mb-3"
-                    ),
-                    CodeBlock('''# Old way - verbose and repetitive
-def create_user_card(name, email, avatar):
-    html = f"""
-    <div class="user-card">
-        <div class="user-avatar">
-            <img src="{avatar}" alt="{name}">
-        </div>
-        <div class="user-info">
-            <h3 class="user-name">{name}</h3>
-            <p class="user-email">{email}</p>
-        </div>
-        <div class="user-actions">
-            <button class="btn btn-primary">View Profile</button>
-            <button class="btn btn-secondary">Send Message</button>
-        </div>
-    </div>
-    """
-    return html''', language="python"),
-                    cls="flex-1"
-                ),
-                
-                # After  
-                Div(
-                    Div(
-                        Badge("After", variant="default", cls="bg-green-600 text-white"),
-                        cls="mb-3"
-                    ),
-                    CodeBlock('''# New way - clean and component-based
-from starui.registry.components import Card, CardContent, Avatar, Button
-from starhtml import Div, H3, P
-
-def create_user_card(name, email, avatar):
-    return Card(
-        CardContent(
-            Div(
-                Avatar(src=avatar, alt=name),
-                Div(
-                    H3(name, cls="font-semibold"),
-                    P(email, cls="text-muted-foreground"),
-                    cls="ml-4"
-                ),
-                cls="flex items-center mb-4"
-            ),
-            Div(
-                Button("View Profile", variant="primary", cls="mr-2"),
-                Button("Send Message", variant="outline"),
-                cls="flex gap-2"
-            )
-        )
-    )''', language="python"),
-                    cls="flex-1"
-                ),
-                
-                cls="grid grid-cols-1 lg:grid-cols-2 gap-6"
-            ),
-            
-            cls="max-w-6xl"
-        ),
-        '''from starui.registry.components.code_block import CodeBlock
-from starui.registry.components.badge import Badge
-
-# Before/After comparison
-Div(
-    # Before
-    Div(
-        Badge("Before", variant="destructive"),
-        CodeBlock(\'\'\'# Old verbose approach
-def old_way():
-    return f"""<div>{content}</div>\"\"\"\'\'\', language="python")
-    ),
-    
-    # After
-    Div(
-        Badge("After", variant="default", cls="bg-green-600 text-white"),
-        CodeBlock(\'\'\'# Clean component approach
-from starui import Component
-
-def new_way():
-    return Component(content)\'\'\', language="python")
-    ),
-    
-    cls="grid grid-cols-1 lg:grid-cols-2 gap-6"
-)''',
-        title="Code Comparison",
-        description="Show before/after code examples with clear visual distinction"
-    )
-    
     # Terminal/command output
     yield ComponentPreview(
         Div(
             P("Terminal Output", cls="font-medium mb-3"),
             
-            # Terminal-style code block
+            # Terminal-style code block with overlay header
             Div(
-                # Terminal header
+                # Terminal header overlay
                 Div(
                     Div(
                         Div(cls="w-3 h-3 rounded-full bg-red-500"),
@@ -595,11 +431,13 @@ def new_way():
                         cls="flex gap-2"
                     ),
                     Span("Terminal", cls="text-sm text-muted-foreground"),
-                    cls="flex items-center justify-between px-4 py-2 bg-gray-800 border-b border-gray-700"
+                    cls="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4 py-3 bg-gray-800 border-b border-gray-700 rounded-t-lg"
                 ),
                 
-                # Terminal content
-                CodeBlock('''$ star create my-project
+                # Terminal content with blank lines for header space
+                CodeBlock('''
+
+$ star create my-project
 Creating new StarUI project...
 ✓ Project directory created
 ✓ Dependencies installed  
@@ -624,10 +462,10 @@ Run 'star dev' to see your changes.''',
                          language="bash",
                          cls="bg-gray-900 text-green-400 font-mono"),
                 
-                cls="border rounded-lg overflow-hidden bg-gray-900"
+                cls="relative rounded-lg overflow-hidden"
             ),
             
-            cls="max-w-2xl"
+            cls="w-full max-w-4xl"
         ),
         '''from starui.registry.components.code_block import CodeBlock
 from starhtml import Div, Span
@@ -643,7 +481,7 @@ Div(
             cls="flex gap-2"
         ),
         Span("Terminal"),
-        cls="flex items-center justify-between px-4 py-2 bg-gray-800"
+        cls="flex items-center justify-between px-4 py-2 bg-gray-800 rounded-t-lg"
     ),
     
     # Terminal content
@@ -654,9 +492,9 @@ Creating new StarUI project...
 
 Success! Your project is ready.\'\'\', 
               language="bash",
-              cls="bg-gray-900 text-green-400 font-mono"),
+              cls="bg-gray-900 text-green-400 font-mono rounded-t-none"),
     
-    cls="border rounded-lg overflow-hidden bg-gray-900"
+    cls="bg-gray-900"
 )''',
         title="Terminal Output",
         description="Style code blocks to look like terminal output with custom colors"
@@ -672,8 +510,8 @@ def create_code_block_docs():
         Div(
             # Main code block
             Div(
-                CodeBlock('''from starui.registry.components.button import Button
-from starhtml import Div, H1, P
+                CodeBlock('''from starhtml import Div, H1, P
+from starui import Button
 
 def welcome_component():
     """A simple welcome component with a button."""
@@ -687,13 +525,14 @@ def welcome_component():
             ),
             
             # Inline code example
-            P([
+            P(
                 "Import the component with ",
-                InlineCode("from starui import CodeBlock"),
-                " and use it to display syntax-highlighted code blocks."
-            ], cls="text-sm text-muted-foreground text-center"),
+                InlineCode("from starui import Button"),
+                " and use it to display syntax-highlighted code blocks.",
+                cls="text-sm text-muted-foreground max-w-2xl"
+            ),
             
-            cls="max-w-2xl mx-auto"
+            cls="max-w-2xl"
         ),
         '''from starui.registry.components.code_block import CodeBlock, InlineCode
 
@@ -704,13 +543,13 @@ CodeBlock(\'\'\'def hello_world():
 hello_world()\'\'\'', language="python")
 
 # Inline code within text
-P([
+P(
     "Use ",
     InlineCode("CodeBlock"),
     " for multi-line code and ",
     InlineCode("InlineCode"),
     " for inline snippets."
-])''',
+)''',
         copy_button=True
     )
     
@@ -780,5 +619,5 @@ P([
         cli_command="star add code-block",
         api_reference=api_reference,
         hero_example=hero_example,
-        component_slug="code-block"
+        component_slug="code_block"
     )

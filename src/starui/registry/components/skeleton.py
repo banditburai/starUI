@@ -13,7 +13,9 @@ def Skeleton(
         *children,
         data_slot="skeleton",
         cls=cn(
-            "animate-pulse rounded-md bg-muted",
+            "animate-pulse bg-muted",
+            {"rounded-md": not any(c.startswith("rounded") 
+                                   for c in f"{class_name} {cls}".split())},
             class_name,
             cls,
         ),

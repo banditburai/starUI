@@ -12,6 +12,7 @@ from .utils import cn
 
 
 def Switch(
+    *children,
     checked: bool | None = None,
     signal: str = "",
     disabled: bool = False,
@@ -20,11 +21,13 @@ def Switch(
     cls: str = "",
     **attrs: Any,
 ) -> FT:
+    
     signal = signal or f"switch_{str(uuid4())[:8]}"
     switch_id = attrs.pop("id", f"switch_{str(uuid4())[:8]}")
 
     return Div(
         HTMLButton(
+            *children,  # Pass children to HTMLButton for DatastarAttr processing
             HTMLSpan(
                 ds_class(
                     **{
@@ -66,6 +69,7 @@ def Switch(
 
 
 def SwitchWithLabel(
+    *,  # Force keyword-only arguments for consistency and flexibility
     label: str,
     checked: bool | None = None,
     signal: str = "",

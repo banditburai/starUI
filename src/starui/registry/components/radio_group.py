@@ -20,6 +20,7 @@ def RadioGroup(
     signal: str = "",
     disabled: bool = False,
     required: bool = False,
+    hide_indicators: bool = False,
     class_name: str = "",
     cls: str = "",
     **attrs: Any,
@@ -28,14 +29,14 @@ def RadioGroup(
     group_name = f"radio_group_{signal}"
 
     processed_children = [
-        child(signal, group_name, initial_value) if callable(child) else child
+        child(signal, group_name, initial_value, hide_indicators) if callable(child) else child
         for child in children
     ]
 
     return Div(
         *processed_children,
         ds_signals({signal: value(initial_value or "")}),
-        cls=cn("grid gap-2", class_name, cls),
+        cls=cn(class_name, cls) or "grid gap-2",
         data_slot="radio-group",
         data_radio_signal=signal,
         data_radio_name=group_name,
@@ -54,7 +55,7 @@ def RadioGroupItem(
     indicator_cls: str = "",
     **attrs: Any,
 ) -> FT:
-    def create_item(signal, group_name, default_value=None):
+    def create_item(signal, group_name, default_value=None, hide_indicators=False):
         radio_id = f"radio_{str(uuid4())[:8]}"
         filtered_attrs = {k: v for k, v in attrs.items() if k != "name"}
 
@@ -70,6 +71,16 @@ def RadioGroupItem(
             **filtered_attrs,
         )
 
+        # Apply sr-only to hide the visual radio if hide_indicators is True
+        visual_radio_cls = cn(
+            "relative aspect-square size-4 shrink-0 rounded-full border transition-all",
+            "border-input bg-background dark:bg-input/30",
+            "peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
+            "sr-only" if hide_indicators else None,
+            class_name,
+            cls,
+        )
+        
         visual_radio = Div(
             Div(
                 Div(cls="size-2 rounded-full bg-primary"),
@@ -79,37 +90,39 @@ def RadioGroupItem(
                 ),
                 cls=cn(
                     "absolute inset-0 flex items-center justify-center",
-                    indicator_cls,
+                    "sr-only" if hide_indicators else indicator_cls,
                 ),
                 data_slot="radio-indicator",
             ),
-            cls=cn(
-                "relative aspect-square size-4 shrink-0 rounded-full border transition-all",
-                "border-input bg-background dark:bg-input/30",
-                "peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
-                class_name,
-                cls,
-            ),
+            cls=visual_radio_cls,
             data_slot="radio-visual",
         )
 
         if not label:
             return Div(
                 radio_input,
-                visual_radio,
+                visual_radio if not hide_indicators else None,
                 cls="relative inline-flex items-center",
                 data_slot="radio-container",
             )
 
+        # When hiding indicators, use block layout for full width cards
+        label_cls = "flex items-center gap-2 cursor-pointer"
+        span_cls = "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+        
+        if hide_indicators:
+            label_cls = "block w-full cursor-pointer"
+            span_cls = "block w-full"
+        
         return HTMLLabel(
             radio_input,
-            visual_radio,
+            visual_radio if not hide_indicators else None,
             HTMLSpan(
                 label,
-                cls="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
+                cls=span_cls,
             ),
             for_=radio_id,
-            cls="flex items-center gap-2 cursor-pointer",
+            cls=label_cls,
             data_slot="radio-container",
         )
 
@@ -117,6 +130,7 @@ def RadioGroupItem(
 
 
 def RadioGroupWithLabel(
+    *,  # Force keyword-only arguments for consistency and flexibility
     label: str,
     options: list[dict[str, Any]],
     value: str | None = None,
@@ -126,6 +140,7 @@ def RadioGroupWithLabel(
     error_text: str | None = None,
     disabled: bool = False,
     required: bool = False,
+    hide_indicators: bool = False,
     orientation: str = "vertical",
     class_name: str = "",
     cls: str = "",
@@ -159,11 +174,12 @@ def RadioGroupWithLabel(
                 )
                 for option in options
             ],
-            value=value,
+            initial_value=value,
             signal=signal,
             name=name,
             disabled=disabled,
             required=required,
+            hide_indicators=hide_indicators,
             cls=radio_group_classes,
             id=group_id,
             aria_invalid="true" if error_text else None,

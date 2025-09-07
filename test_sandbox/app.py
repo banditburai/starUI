@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # Import starhtml first, then override with our custom components
 from starhtml import *
-from starhtml.datastar import value
+from starhtml.datastar import value, ds_text
 
 # Import all registry components at once (this will override starhtml components)
 from registry_loader import *
@@ -62,19 +62,19 @@ def index():
                     Div(
                         Label("Text Input", for_="text-input"),
                         Input(
-                            ds_bind("name"),
                             id="text-input",
                             placeholder="Enter text...",
+                            signal="name",
                         ),
                         cls="space-y-2",
                     ),
                     Div(
                         Label("Email Input", for_="email-input"),
                         Input(
-                            ds_bind("email"),
                             id="email-input",
                             type="email",
                             placeholder="email@example.com",
+                            signal="email",
                         ),
                         cls="space-y-2",
                     ),
@@ -615,6 +615,31 @@ def index():
                         cls="p-4 border rounded-lg",
                     ),
                     cls="space-y-4 mb-8",
+                ),
+                # Reactive textarea test
+                Div(
+                    H3("Reactive Textarea Test", cls="text-lg font-semibold mb-4"),
+                    Div(
+                        Textarea(
+                            placeholder="Type here to test reactive binding...",
+                            signal="reactiveTest",
+                            rows=3,
+                            cls="mb-4"
+                        ),
+                        Div(
+                            P("Live Preview:", cls="font-medium mb-2"),
+                            P(ds_text("$reactiveTest || '(nothing typed yet)'"), cls="p-3 border rounded bg-gray-50 dark:bg-gray-900 min-h-[3rem]"),
+                            cls="mb-3"
+                        ),
+                        P(
+                            "Characters: ",
+                            ds_text("$reactiveTest.length || 0"),
+                            cls="text-sm text-muted-foreground"
+                        ),
+                        ds_signals(reactiveTest=value("")),
+                        cls="p-4 border rounded-lg bg-background"
+                    ),
+                    cls="mb-8"
                 ),
             ),
             # Select examples
@@ -1697,7 +1722,9 @@ def index():
                     Div(
                         Label("Name", for_="name"),
                         Input(
-                            ds_bind("name"), id="name", placeholder="Enter your name"
+                            id="name", 
+                            placeholder="Enter your name",
+                            signal="name"
                         ),
                         Span(
                             "Name is required",
@@ -1709,10 +1736,10 @@ def index():
                     Div(
                         Label("Email", for_="email"),
                         Input(
-                            ds_bind("email"),
                             id="email",
                             type="email",
                             placeholder="email@example.com",
+                            signal="email"
                         ),
                         Span(
                             "Invalid email",

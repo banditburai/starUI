@@ -10,6 +10,7 @@ ORDER = 10
 STATUS = "stable"
 
 from starhtml import Div, P, Label, Span, Icon
+from starhtml.datastar import ds_signals, ds_show, value
 from starui.registry.components.input import Input
 from starui.registry.components.button import Button
 from starui.registry.components.label import Label as UILabel
@@ -47,6 +48,83 @@ Input(type="password", placeholder="Enter your password")
 Input(type="tel", placeholder="+1 (555) 123-4567")''',
         title="Input Types",
         description="Different input types for various data"
+    )
+    
+    # Reactive Input with validation
+    yield ComponentPreview(
+        Div(
+            Div(
+                UILabel(
+                    "Username", 
+                    Span(" *", cls="text-destructive"),
+                    for_="username-reactive"
+                ),
+                Input(
+                    id="username-reactive",
+                    placeholder="Enter username",
+                    signal="username",
+                    validation="/^[a-zA-Z0-9_]{3,}$/.test($signal)"
+                ),
+                Div(
+                    P(
+                        ds_show("!$usernameValid && $username.length > 0"),
+                        "Username must be at least 3 characters, letters/numbers/underscores only",
+                        cls="text-xs text-destructive"
+                    ),
+                    P(
+                        ds_show("$usernameValid && $username.length > 0"),
+                        "✓ Username is available",
+                        cls="text-xs text-green-600"
+                    ),
+                    cls="mt-1 h-4"
+                ),
+                cls="space-y-2"
+            ),
+            Div(
+                UILabel("Email", for_="email-reactive"),
+                Input(
+                    type="email",
+                    id="email-reactive", 
+                    placeholder="you@example.com",
+                    signal="userEmail",
+                    validation="/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test($signal)"
+                ),
+                Div(
+                    P(
+                        ds_show("!$userEmailValid && $userEmail.length > 0"),
+                        "Please enter a valid email address",
+                        cls="text-xs text-destructive"
+                    ),
+                    P(
+                        ds_show("$userEmailValid && $userEmail.length > 0"),
+                        "✓ Valid email format",
+                        cls="text-xs text-green-600"
+                    ),
+                    cls="mt-1 h-4"
+                ),
+                cls="space-y-2"
+            ),
+            ds_signals(username=value(""), usernameValid=False, userEmail=value(""), userEmailValid=False),
+            cls="grid gap-4 max-w-md"
+        ),
+        '''Input(
+    placeholder="Enter username",
+    signal="username", 
+    validation="/^[a-zA-Z0-9_]{3,}$/.test($signal)"
+)
+
+Input(
+    type="email",
+    placeholder="you@example.com", 
+    signal="userEmail",
+    validation="/^[^\\\\s@]+@[^\\\\s@]+\\\\.[^\\\\s@]+$/.test($signal)"
+)
+
+P("Username must be at least 3 characters...", 
+  ds_show="!$usernameValid && $username.length > 0",
+  cls="text-xs text-destructive")''',
+        title="Reactive Input with Validation",
+        description="Real-time input validation using signals"
     )
     
     # Input with button
@@ -301,6 +379,24 @@ Input(type="password", placeholder="Enter your password")'''
                     "type": "str | None",
                     "default": "None",
                     "description": "Placeholder text when input is empty"
+                },
+                {
+                    "name": "value",
+                    "type": "str | None",
+                    "default": "None",
+                    "description": "Initial value (for non-reactive inputs)"
+                },
+                {
+                    "name": "signal",
+                    "type": "str | None",
+                    "default": "None",
+                    "description": "Signal name for reactive binding (enables reactivity)"
+                },
+                {
+                    "name": "validation",
+                    "type": "str | None",
+                    "default": "None",
+                    "description": "JavaScript validation expression (e.g., '/^[a-zA-Z0-9-]+$/.test($signal)')"
                 },
                 {
                     "name": "disabled",

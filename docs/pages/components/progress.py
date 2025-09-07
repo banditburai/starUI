@@ -27,17 +27,66 @@ from widgets.component_preview import ComponentPreview
 def examples():
     """Generate progress examples using ComponentPreview with tabs."""
     
-    # Basic progress
+    # Interactive progress control
     yield ComponentPreview(
-        Div(
-            Progress(progress_value=33),
-            P("33% Complete", cls="text-sm text-muted-foreground mt-2 text-center"),
-            cls="w-full max-w-md mx-auto"
+        Card(
+            CardHeader(
+                CardTitle("Volume Control"),
+                CardDescription("Adjust system volume")
+            ),
+            CardContent(
+                Div(
+                    Div(
+                        Icon("lucide:volume-2", cls="h-5 w-5 text-muted-foreground mr-3"),
+                        Progress(signal="volume", cls="flex-1 h-2"),
+                        Span(ds_text("$volume + '%'"), cls="text-sm font-mono ml-3 w-10 text-right"),
+                        cls="flex items-center"
+                    ),
+                    Div(
+                        Button(
+                            Icon("lucide:minus", cls="h-4 w-4"),
+                            ds_on_click("$volume = Math.max(0, $volume - 10)"),
+                            variant="outline",
+                            size="sm"
+                        ),
+                        Button(
+                            "Mute",
+                            ds_on_click("$volume = 0"),
+                            variant="outline",
+                            size="sm"
+                        ),
+                        Button(
+                            Icon("lucide:plus", cls="h-4 w-4"),
+                            ds_on_click("$volume = Math.min(100, $volume + 10)"),
+                            variant="outline",
+                            size="sm"
+                        ),
+                        cls="flex gap-2 mt-4"
+                    ),
+                    ds_signals(volume=50)
+                )
+            ),
+            cls="w-full max-w-xl"
         ),
-        '''Progress(progress_value=33)
-P("33% Complete")''',
-        title="Basic Progress",
-        description="Simple progress bar with percentage"
+        '''Card(
+    CardContent(
+        Div(
+            Icon("lucide:volume-2"),
+            Progress(signal="volume", cls="flex-1 h-2"),
+            Span(ds_text("$volume + '%'")),
+            cls="flex items-center gap-3"
+        ),
+        Div(
+            Button(Icon("lucide:minus"), ds_on_click("$volume = Math.max(0, $volume - 10)")),
+            Button("Mute", ds_on_click("$volume = 0")),
+            Button(Icon("lucide:plus"), ds_on_click("$volume = Math.min(100, $volume + 10)")),
+            cls="flex gap-2 mt-4"
+        ),
+        ds_signals(volume=50)
+    )
+)''',
+        title="Interactive Controls",
+        description="Progress bar with interactive controls for adjusting values"
     )
     
     # File upload progress
@@ -49,58 +98,62 @@ P("33% Complete")''',
             ),
             CardContent(
                 Div(
+                    # File 1 - Complete
                     Div(
                         Div(
-                            Icon("lucide:file-text", cls="h-4 w-4 mr-2"),
-                            P("document.pdf", cls="font-medium"),
-                            P("2.4 MB", cls="text-sm text-muted-foreground ml-auto"),
-                            cls="flex items-center"
+                            Icon("lucide:file-text", cls="h-4 w-4 text-muted-foreground"),
+                            P("document.pdf", cls="font-medium flex-1 ml-3"),
+                            P("2.4 MB", cls="text-sm text-muted-foreground"),
+                            cls="flex items-center mb-2"
                         ),
                         Progress(progress_value=100, signal="file1"),
-                        P(
-                            Icon("lucide:check-circle", cls="h-4 w-4 mr-1 text-green-500 inline"),
-                            "Complete",
-                            cls="text-sm text-green-500"
+                        Div(
+                            Icon("lucide:check-circle", cls="h-4 w-4 text-green-500"),
+                            P("Complete", cls="text-sm text-green-500"),
+                            cls="flex items-center gap-1 mt-1"
                         ),
-                        cls="space-y-2"
+                        cls="pb-3"
                     ),
-                    Separator(),
+                    Separator(cls="my-3"),
+                    # File 2 - In Progress
                     Div(
                         Div(
-                            Icon("lucide:image", cls="h-4 w-4 mr-2"),
-                            P("photo.jpg", cls="font-medium"),
-                            P("1.8 MB", cls="text-sm text-muted-foreground ml-auto"),
-                            cls="flex items-center"
+                            Icon("lucide:image", cls="h-4 w-4 text-muted-foreground"),
+                            P("photo.jpg", cls="font-medium flex-1 ml-3"),
+                            P("1.8 MB", cls="text-sm text-muted-foreground"),
+                            cls="flex items-center mb-2"
                         ),
                         Progress(progress_value=65, signal="file2"),
                         P(
                             Span(ds_text("$file2"), cls="font-mono"),
                             "% • 1.2 MB of 1.8 MB",
-                            cls="text-sm text-muted-foreground"
+                            cls="text-sm text-muted-foreground mt-1"
                         ),
-                        cls="space-y-2"
+                        cls="pb-3"
                     ),
-                    Separator(),
+                    Separator(cls="my-3"),
+                    # File 3 - In Progress
                     Div(
                         Div(
-                            Icon("lucide:video", cls="h-4 w-4 mr-2"),
-                            P("video.mp4", cls="font-medium"),
-                            P("45.2 MB", cls="text-sm text-muted-foreground ml-auto"),
-                            cls="flex items-center"
+                            Icon("lucide:video", cls="h-4 w-4 text-muted-foreground"),
+                            P("video.mp4", cls="font-medium flex-1 ml-3"),
+                            P("45.2 MB", cls="text-sm text-muted-foreground"),
+                            cls="flex items-center mb-2"
                         ),
                         Progress(progress_value=28, signal="file3"),
                         P(
                             Span(ds_text("$file3"), cls="font-mono"),
                             "% • 12.6 MB of 45.2 MB • ",
                             Span("~2 min remaining", cls="text-blue-500"),
-                            cls="text-sm text-muted-foreground"
+                            cls="text-sm text-muted-foreground mt-1"
                         ),
-                        cls="space-y-2"
+                        cls="pb-3"
                     ),
+                    # Total Progress
                     Div(
-                        P("Total: 49.4 MB", cls="text-sm text-muted-foreground"),
+                        P("Total: 49.4 MB", cls="text-sm font-medium mb-2"),
                         Progress(progress_value=54, signal="total", cls="h-3"),
-                        cls="space-y-2 pt-2"
+                        cls="pt-3 border-t"
                     ),
                     ds_signals(file1=100, file2=65, file3=28, total=54)
                 )
@@ -160,13 +213,7 @@ P("33% Complete")''',
                     ),
                     Button(
                         "Simulate Loading",
-                        ds_on_click="""
-                            $loading_step = 1; $loading_progress = 20;
-                            setTimeout(() => { $loading_step = 2; $loading_progress = 40; }, 1000);
-                            setTimeout(() => { $loading_step = 3; $loading_progress = 60; }, 2000);
-                            setTimeout(() => { $loading_step = 4; $loading_progress = 80; }, 3000);
-                            setTimeout(() => { $loading_step = 5; $loading_progress = 100; }, 4000);
-                        """,
+                        ds_on_click("$loading_step = 1; $loading_progress = 20; setTimeout(() => { $loading_step = 2; $loading_progress = 40; setTimeout(() => { $loading_step = 3; $loading_progress = 60; setTimeout(() => { $loading_step = 4; $loading_progress = 80; setTimeout(() => { $loading_step = 5; $loading_progress = 100; }, 1000); }, 1000); }, 1000); }, 1000);"),
                         variant="outline",
                         size="sm",
                         cls="mt-4"
@@ -174,7 +221,7 @@ P("33% Complete")''',
                     ds_signals(loading_step=1, loading_progress=20)
                 )
             ),
-            cls="max-w-md"
+            cls="w-full max-w-xl"
         ),
         '''// Animated multi-step progress
 Progress(signal="loading_progress")
@@ -188,80 +235,84 @@ Button("Start", ds_on_click="""
         description="Multi-step loading with animated progress"
     )
     
-    # Skills progress bars
+    # Battery status indicator
     yield ComponentPreview(
         Card(
             CardHeader(
-                CardTitle("Skills Assessment"),
-                CardDescription("Technical proficiency levels")
+                CardTitle("Device Status"),
+                CardDescription("System resource monitoring")
             ),
             CardContent(
                 Div(
+                    # Battery
                     Div(
                         Div(
-                            P("JavaScript", cls="font-medium"),
-                            Badge("Expert", variant="default", cls="ml-auto"),
-                            cls="flex items-center justify-between mb-2"
+                            Icon("lucide:battery-charging", cls="h-5 w-5 text-green-500 mr-3"),
+                            P("Battery", cls="font-medium"),
+                            Span("87%", cls="text-sm font-mono ml-auto"),
+                            cls="flex items-center"
                         ),
-                        Progress(progress_value=90, cls="h-2"),
+                        Progress(progress_value=87, cls="h-2"),
+                        P("Charging • 23 min to full", cls="text-xs text-muted-foreground mt-1"),
                         cls="space-y-2"
                     ),
+                    Separator(cls="my-3"),
+                    # CPU
                     Div(
                         Div(
-                            P("Python", cls="font-medium"),
-                            Badge("Advanced", variant="secondary", cls="ml-auto"),
-                            cls="flex items-center justify-between mb-2"
+                            Icon("lucide:cpu", cls="h-5 w-5 text-blue-500 mr-3"),
+                            P("CPU Usage", cls="font-medium"),
+                            Span("42%", cls="text-sm font-mono ml-auto"),
+                            cls="flex items-center"
                         ),
-                        Progress(progress_value=75, cls="h-2"),
+                        Progress(progress_value=42, cls="h-2"),
                         cls="space-y-2"
                     ),
+                    # Memory
                     Div(
                         Div(
-                            P("React", cls="font-medium"),
-                            Badge("Advanced", variant="secondary", cls="ml-auto"),
-                            cls="flex items-center justify-between mb-2"
+                            Icon("lucide:hard-drive", cls="h-5 w-5 text-purple-500 mr-3"),
+                            P("Memory", cls="font-medium"),
+                            Span("6.8/16 GB", cls="text-sm font-mono ml-auto"),
+                            cls="flex items-center"
                         ),
-                        Progress(progress_value=80, cls="h-2"),
+                        Progress(progress_value=42.5, cls="h-2"),
                         cls="space-y-2"
                     ),
+                    # Temperature
                     Div(
                         Div(
-                            P("Docker", cls="font-medium"),
-                            Badge("Intermediate", variant="outline", cls="ml-auto"),
-                            cls="flex items-center justify-between mb-2"
+                            Icon("lucide:thermometer", cls="h-5 w-5 text-orange-500 mr-3"),
+                            P("Temperature", cls="font-medium"),
+                            Span("65°C", cls="text-sm font-mono ml-auto"),
+                            cls="flex items-center"
                         ),
-                        Progress(progress_value=60, cls="h-2"),
+                        Progress(progress_value=65, cls="h-2"),
+                        P("Normal operating range", cls="text-xs text-muted-foreground mt-1"),
                         cls="space-y-2"
                     ),
-                    Div(
-                        Div(
-                            P("Machine Learning", cls="font-medium"),
-                            Badge("Learning", variant="outline", cls="ml-auto"),
-                            cls="flex items-center justify-between mb-2"
-                        ),
-                        Progress(progress_value=35, cls="h-2"),
-                        cls="space-y-2"
-                    ),
-                    cls="space-y-4"
+                    cls="space-y-3"
                 )
             ),
-            cls="max-w-md"
+            cls="w-full max-w-2xl"
         ),
         '''Card(
     CardContent(
         Div(
-            Div(P("JavaScript"), Badge("Expert")),
-            Progress(progress_value=90)
+            Icon("lucide:battery-charging"), P("Battery"), Span("87%"),
+            Progress(progress_value=87, cls="h-2"),
+            P("Charging • 23 min to full")
         ),
+        Separator(),
         Div(
-            Div(P("Python"), Badge("Advanced")),
-            Progress(progress_value=75)
+            Icon("lucide:cpu"), P("CPU Usage"), Span("42%"),
+            Progress(progress_value=42, cls="h-2")
         ),
-        // More skills...
+        // More system stats...
     )
 )''',
-        title="Skills Assessment",
-        description="Multiple progress bars showing proficiency levels"
+        title="System Monitoring",
+        description="Real-time system resource monitoring with progress indicators"
     )
     
     # Download progress with speed
@@ -273,76 +324,71 @@ Button("Start", ds_on_click="""
             ),
             CardContent(
                 Div(
+                    # Download 1
                     Div(
                         Div(
-                            Icon("lucide:download", cls="h-5 w-5 mr-2 text-blue-500"),
+                            Icon("lucide:download", cls="h-5 w-5 text-blue-500"),
                             Div(
                                 P("StarUI-v2.0.zip", cls="font-medium"),
-                                P("125 MB", cls="text-sm text-muted-foreground"),
-                                cls="flex-1"
+                                P("125 MB", cls="text-xs text-muted-foreground"),
+                                cls="flex-1 ml-3"
                             ),
                             Button(
                                 Icon("lucide:pause", cls="h-4 w-4"),
                                 variant="ghost",
                                 size="sm"
                             ),
-                            cls="flex items-center"
+                            cls="flex items-center mb-2"
                         ),
                         Progress(progress_value=42, signal="download1", cls="h-3"),
                         Div(
-                            P(
-                                Span(ds_text("$download1"), cls="font-mono"),
-                                "% • 52.5 MB of 125 MB",
-                                cls="text-sm"
+                            Div(
+                                Span(ds_text("$download1"), cls="font-semibold"),
+                                "%",
+                                cls="flex items-center gap-1"
                             ),
-                            P(
-                                Icon("lucide:arrow-down", cls="h-3 w-3 inline"),
-                                " 2.4 MB/s • ~30s remaining",
-                                cls="text-sm text-muted-foreground"
-                            ),
-                            cls="flex justify-between"
+                            P("~30s remaining", cls="text-sm text-muted-foreground"),
+                            cls="flex justify-between items-center mt-2"
                         ),
-                        cls="space-y-2 p-3 border rounded-md"
+                        cls="p-4 border rounded-lg"
                     ),
+                    # Download 2
                     Div(
                         Div(
-                            Icon("lucide:download", cls="h-5 w-5 mr-2 text-blue-500"),
+                            Icon("lucide:download", cls="h-5 w-5 text-blue-500"),
                             Div(
                                 P("node_modules.tar.gz", cls="font-medium"),
-                                P("892 MB", cls="text-sm text-muted-foreground"),
-                                cls="flex-1"
+                                P("892 MB", cls="text-xs text-muted-foreground"),
+                                cls="flex-1 ml-3"
                             ),
                             Button(
                                 Icon("lucide:x", cls="h-4 w-4"),
                                 variant="ghost",
                                 size="sm"
                             ),
-                            cls="flex items-center"
+                            cls="flex items-center mb-2"
                         ),
                         Progress(progress_value=78, signal="download2", cls="h-3"),
                         Div(
-                            P(
-                                Span(ds_text("$download2"), cls="font-mono"),
-                                "% • 696 MB of 892 MB",
-                                cls="text-sm"
+                            Div(
+                                Span(ds_text("$download2"), cls="font-semibold"),
+                                "%",
+                                cls="flex items-center gap-1"
                             ),
-                            P(
-                                Icon("lucide:arrow-down", cls="h-3 w-3 inline"),
-                                " 5.1 MB/s • ~38s remaining",
-                                cls="text-sm text-muted-foreground"
-                            ),
-                            cls="flex justify-between"
+                            P("~38s remaining", cls="text-sm text-muted-foreground"),
+                            cls="flex justify-between items-center mt-2"
                         ),
-                        cls="space-y-2 p-3 border rounded-md"
+                        cls="p-4 border rounded-lg"
                     ),
                     Div(
                         P("Queue: 2 files waiting", cls="text-sm text-muted-foreground"),
                         cls="mt-3"
                     ),
-                    ds_signals(download1=42, download2=78)
+                    ds_signals(download1=42, download2=78),
+                    cls="space-y-3"
                 )
             ),
-            cls="max-w-lg"
+            cls="max-w-2xl"
         ),
         '''Card(
     CardContent(
@@ -369,9 +415,18 @@ Button("Start", ds_on_click="""
             CardContent(
                 Div(
                     Div(
-                        P("Total Usage", cls="text-sm text-muted-foreground"),
+                        Div(
+                            Icon("lucide:cloud", cls="h-5 w-5 text-blue-500 mr-3"),
+                            P("Total Usage", cls="text-sm text-muted-foreground"),
+                            cls="flex items-center mb-2"
+                        ),
                         P("68.4 GB of 100 GB", cls="font-semibold text-lg"),
                         Progress(progress_value=68.4, cls="h-4"),
+                        P(
+                            Badge("31.6 GB", variant="outline"),
+                            " available",
+                            cls="text-sm mt-2"
+                        ),
                         cls="space-y-2"
                     ),
                     Separator(cls="my-4"),
@@ -436,7 +491,7 @@ Button("Start", ds_on_click="""
                     cls="space-y-3"
                 )
             ),
-            cls="max-w-md"
+            cls="w-full max-w-2xl"
         ),
         '''Card(
     CardContent(
@@ -480,7 +535,7 @@ Button("Start", ds_on_click="""
                     Separator(cls="my-4"),
                     Div(
                         Div(
-                            Icon("lucide:check-circle", cls="h-4 w-4 text-green-500"),
+                            Icon("lucide:check-circle", cls="h-4 w-4 text-green-500 mr-3"),
                             P("HTML & CSS", cls="text-sm font-medium"),
                             Badge("Complete", variant="secondary", cls="ml-auto"),
                             cls="flex items-center"
@@ -490,7 +545,7 @@ Button("Start", ds_on_click="""
                     ),
                     Div(
                         Div(
-                            Icon("lucide:check-circle", cls="h-4 w-4 text-green-500"),
+                            Icon("lucide:check-circle", cls="h-4 w-4 text-green-500 mr-3"),
                             P("JavaScript", cls="text-sm font-medium"),
                             Badge("Complete", variant="secondary", cls="ml-auto"),
                             cls="flex items-center"
@@ -500,7 +555,7 @@ Button("Start", ds_on_click="""
                     ),
                     Div(
                         Div(
-                            Icon("lucide:loader-2", cls="h-4 w-4 text-blue-500 animate-spin"),
+                            Icon("lucide:loader-2", cls="h-4 w-4 text-blue-500 animate-spin mr-3"),
                             P("React", cls="text-sm font-medium"),
                             P("3 of 8", cls="text-xs text-muted-foreground ml-auto"),
                             cls="flex items-center"
@@ -510,7 +565,7 @@ Button("Start", ds_on_click="""
                     ),
                     Div(
                         Div(
-                            Icon("lucide:lock", cls="h-4 w-4 text-muted-foreground"),
+                            Icon("lucide:lock", cls="h-4 w-4 text-muted-foreground mr-3"),
                             P("Node.js", cls="text-sm font-medium text-muted-foreground"),
                             Badge("Locked", variant="outline", cls="ml-auto"),
                             cls="flex items-center"
@@ -525,7 +580,7 @@ Button("Start", ds_on_click="""
                     cls="space-y-3"
                 )
             ),
-            cls="max-w-md"
+            cls="w-full max-w-2xl"
         ),
         '''Card(
     CardContent(

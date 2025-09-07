@@ -10,7 +10,7 @@ ORDER = 25
 STATUS = "stable"
 
 from starhtml import Div, P, H3, H4, Span
-from starhtml.datastar import ds_signals, ds_show, ds_on_click, value
+from starhtml.datastar import ds_signals, ds_show, ds_on_click, ds_text, value
 from starui.registry.components.skeleton import Skeleton
 from starui.registry.components.button import Button
 from starui.registry.components.card import Card, CardContent, CardHeader, CardTitle
@@ -21,7 +21,7 @@ from widgets.component_preview import ComponentPreview
 def examples():
     """Generate skeleton examples using ComponentPreview with tabs."""
     
-    # Basic skeleton shapes
+    # Basic skeleton shapes with proper circles
     yield ComponentPreview(
         Div(
             Div(
@@ -32,36 +32,56 @@ def examples():
                 cls="mb-6"
             ),
             Div(
-                H4("Various Shapes", cls="mb-3 text-sm font-medium"),
+                H4("Shapes", cls="mb-3 text-sm font-medium"),
                 Div(
-                    Skeleton(cls="h-12 w-12 rounded-full"),
+                    # Perfect circles - Skeleton component now handles rounded-full properly
+                    Skeleton(cls="h-8 w-8 rounded-full mr-4"),
+                    Skeleton(cls="h-10 w-10 rounded-full mr-4"),  
+                    Skeleton(cls="h-12 w-12 rounded-full mr-4"),
+                    Skeleton(cls="h-16 w-16 rounded-full mr-4"),
+                    # Rectangle with default rounded-md
+                    Skeleton(cls="h-10 w-24"),
+                    cls="flex items-center"
+                ),
+                cls="mb-4"
+            ),
+            Div(
+                H4("User Profile", cls="mb-3 text-sm font-medium"),
+                Div(
+                    Skeleton(cls="h-14 w-14 rounded-full"),
                     Div(
                         Skeleton(cls="h-4 w-32 mb-2"),
                         Skeleton(cls="h-3 w-24"),
                         cls="ml-4"
                     ),
-                    cls="flex items-center space-x-4"
+                    cls="flex items-center"
                 )
             ),
             cls="space-y-6"
         ),
-        '''# Text line skeletons
+        '''# Text lines
 Skeleton(cls="h-4 w-3/4")
 Skeleton(cls="h-4 w-full") 
 Skeleton(cls="h-4 w-5/6")
 
-# Avatar and content skeleton
+# Perfect circles - Skeleton detects rounded-full and skips default rounded-md
+Skeleton(cls="h-8 w-8 rounded-full")
+Skeleton(cls="h-10 w-10 rounded-full")  
+Skeleton(cls="h-12 w-12 rounded-full")
+Skeleton(cls="h-16 w-16 rounded-full")
+
+# User profile with circular avatar
 Div(
-    Skeleton(cls="h-12 w-12 rounded-full"),
+    Skeleton(cls="h-14 w-14 rounded-full"),
     Div(
         Skeleton(cls="h-4 w-32"),
         Skeleton(cls="h-3 w-24"),
         cls="ml-4"
     ),
-    cls="flex items-center space-x-4"
+    cls="flex items-center"
 )''',
         title="Basic Shapes",
-        description="Common skeleton patterns for text, avatars, and content"
+        description="Text lines, perfect circles, and common patterns"
     )
     
     # Card skeleton layout
@@ -109,258 +129,137 @@ Div(
         description="Skeleton for a typical user card with avatar, content, and action"
     )
     
-    # Table skeleton
+    # Data table skeleton
     yield ComponentPreview(
         Div(
+            # Table header
             Div(
-                Skeleton(cls="h-6 w-32 mb-4"),
-                cls="mb-4"
+                Div(
+                    Skeleton(cls="h-4 w-16"),  # Name
+                    Skeleton(cls="h-4 w-20"),  # Email
+                    Skeleton(cls="h-4 w-12"),  # Role
+                    Skeleton(cls="h-4 w-14"),  # Status
+                    cls="grid grid-cols-4 gap-4 py-3 px-4 border-b"
+                ),
+                cls="bg-muted/50"
             ),
+            # Table rows
             Div(
                 *[
                     Div(
-                        Skeleton(cls="h-10 w-20"),
-                        Skeleton(cls="h-10 w-32"),
-                        Skeleton(cls="h-10 w-24"),
-                        Skeleton(cls="h-10 w-16"),
-                        cls="grid grid-cols-4 gap-4 mb-2"
+                        Div(
+                            Skeleton(cls="h-8 w-8 rounded-full"),  # Avatar
+                            Skeleton(cls="h-4 w-24 ml-2"),         # Name
+                            cls="flex items-center"
+                        ),
+                        Skeleton(cls="h-4 w-32"),                  # Email
+                        Skeleton(cls="h-5 w-16 rounded-full"),     # Role badge
+                        Skeleton(cls="h-6 w-6 rounded-full"),      # Status dot
+                        cls="grid grid-cols-4 gap-4 py-4 px-4 border-b border-border/50"
                     )
-                    for _ in range(5)
+                    for _ in range(4)
                 ],
-                cls="space-y-2"
             ),
-            cls="w-full max-w-2xl"
+            cls="w-full max-w-3xl border rounded-lg overflow-hidden"
         ),
-        '''# Table header
-Skeleton(cls="h-6 w-32 mb-4")
-
-# Table rows
+        '''# Table with header and data rows
 Div(
-    *[
+    # Header
+    Div(
         Div(
-            Skeleton(cls="h-10 w-20"),
-            Skeleton(cls="h-10 w-32"),
-            Skeleton(cls="h-10 w-24"),
-            Skeleton(cls="h-10 w-16"),
-            cls="grid grid-cols-4 gap-4"
-        )
-        for _ in range(5)
-    ],
-    cls="space-y-2"
+            Skeleton(cls="h-4 w-16"),  # Column headers
+            Skeleton(cls="h-4 w-20"),
+            Skeleton(cls="h-4 w-12"), 
+            Skeleton(cls="h-4 w-14"),
+            cls="grid grid-cols-4 gap-4 py-3 px-4"
+        ),
+        cls="bg-muted/50 border-b"
+    ),
+    # Data rows
+    Div(
+        *[
+            Div(
+                Div(
+                    Skeleton(cls="h-8 w-8 rounded-full"),
+                    Skeleton(cls="h-4 w-24"),
+                    cls="flex items-center gap-2"
+                ),
+                Skeleton(cls="h-4 w-32"),
+                Skeleton(cls="h-5 w-16 rounded-full"),
+                Skeleton(cls="h-6 w-6 rounded-full"),
+                cls="grid grid-cols-4 gap-4 py-4 px-4 border-b"
+            )
+            for _ in range(4)
+        ]
+    ),
+    cls="border rounded-lg overflow-hidden"
 )''',
-        title="Table Layout",
-        description="Skeleton pattern for loading data tables"
+        title="Data Table",
+        description="Skeleton for user data table with avatars and status indicators"
     )
     
-    # Interactive loading demo
+    # Interactive loading demo - exact copy from test sandbox
     yield ComponentPreview(
         Div(
-            Button(
-                "Load Content",
-                ds_on_click="$loading = true; setTimeout(() => $loading = false, 3000)"
-            ),
+            H4("Loading State Toggle", cls="text-lg font-medium mb-2"),
             Div(
-                # Loading state
-                Div(
-                    Card(
-                        CardHeader(
-                            Skeleton(cls="h-6 w-48 mb-2"),
-                            Skeleton(cls="h-4 w-32")
-                        ),
-                        CardContent(
-                            Skeleton(cls="h-4 w-full mb-3"),
-                            Skeleton(cls="h-4 w-5/6 mb-3"),
-                            Skeleton(cls="h-4 w-4/5 mb-4"),
-                            Div(
-                                Skeleton(cls="h-8 w-20 mr-2"),
-                                Skeleton(cls="h-8 w-16"),
-                                cls="flex"
-                            )
-                        )
-                    ),
-                    ds_show("$loading"),
-                    cls="w-80"
+                Button(
+                    ds_text("$loading ? 'Stop Loading' : 'Start Loading'"),
+                    ds_on_click("$loading = !$loading"),
+                    variant="outline",
+                    cls="mb-4",
                 ),
-                # Loaded state
                 Div(
-                    Card(
-                        CardHeader(
-                            CardTitle("Article Published Successfully"),
-                            P("Your article is now live and visible to readers.", cls="text-sm text-muted-foreground")
-                        ),
-                        CardContent(
-                            P("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.", cls="mb-4"),
-                            Div(
-                                Button("View Article", variant="default", cls="mr-2"),
-                                Button("Share", variant="outline"),
-                                cls="flex"
-                            )
-                        )
+                    Skeleton(cls="h-6 w-40 mb-2"),  # "Content Loaded!" title width
+                    Skeleton(cls="h-4 w-80 mb-4"),  # Paragraph text width  
+                    Skeleton(cls="h-20 w-full rounded-lg"),  # Content box with rounded corners
+                    ds_show("$loading"),
+                ),
+                Div(
+                    H4("Content Loaded!", cls="text-lg font-semibold mb-2"),
+                    P("This content appears when loading is complete.", cls="mb-4"),
+                    Div(
+                        "This is the actual content that would load.",
+                        cls="p-4 bg-muted rounded-lg",
                     ),
                     ds_show("!$loading"),
-                    cls="w-80"
-                )
+                ),
+                ds_signals(loading=True),
+                cls="p-4 border rounded-lg",
             ),
-            ds_signals(loading=False),
-            cls="space-y-4"
+            cls="mb-6",
         ),
         '''Button(
-    "Load Content",
-    ds_on_click="$loading = true; setTimeout(() => $loading = false, 3000)"
+    ds_text("$loading ? 'Stop Loading' : 'Start Loading'"),
+    ds_on_click="$loading = !$loading",
+    variant="outline"
 )
 
-# Loading state with skeletons
+# Loading skeletons that match actual content
 Div(
-    Card(
-        CardHeader(
-            Skeleton(cls="h-6 w-48"),
-            Skeleton(cls="h-4 w-32")
-        ),
-        CardContent(
-            Skeleton(cls="h-4 w-full"),
-            Skeleton(cls="h-4 w-5/6"),
-            Skeleton(cls="h-4 w-4/5"),
-            Div(
-                Skeleton(cls="h-8 w-20"),
-                Skeleton(cls="h-8 w-16"),
-                cls="flex gap-2"
-            )
-        )
-    ),
+    Skeleton(cls="h-6 w-40"),    # Title width
+    Skeleton(cls="h-4 w-80"),    # Paragraph width
+    Skeleton(cls="h-20 w-full rounded-lg"),  # Content box
     ds_show("$loading")
 )
 
-# Actual content when loaded
+# Loaded content
 Div(
-    Card(
-        CardHeader(
-            CardTitle("Article Published Successfully"),
-            P("Your article is now live...", cls="text-sm text-muted-foreground")
-        ),
-        CardContent(
-            P("Lorem ipsum dolor sit amet..."),
-            Div(
-                Button("View Article"),
-                Button("Share", variant="outline"),
-                cls="flex gap-2"
-            )
-        )
+    H4("Content Loaded!"),
+    P("This content appears when loading is complete."),
+    Div(
+        "This is the actual content that would load.",
+        cls="p-4 bg-muted rounded-lg"
     ),
     ds_show("!$loading")
-)''',
+)
+
+ds_signals(loading=True)''',
         title="Loading States",
         description="Interactive demo showing skeleton to content transition"
     )
     
-    # List skeleton with varying sizes
-    yield ComponentPreview(
-        Div(
-            H4("Contact List", cls="mb-4"),
-            Div(
-                *[
-                    Div(
-                        Skeleton(cls="h-10 w-10 rounded-full"),
-                        Div(
-                            Skeleton(cls=f"h-4 w-{width} mb-1"),
-                            Skeleton(cls=f"h-3 w-{sub_width}"),
-                            cls="flex-1 ml-3"
-                        ),
-                        Skeleton(cls="h-6 w-6 rounded"),
-                        cls="flex items-center space-x-3 p-3"
-                    )
-                    for width, sub_width in [("32", "20"), ("28", "24"), ("36", "16"), ("24", "28")]
-                ],
-                cls="space-y-1 border rounded-lg"
-            ),
-            cls="w-full max-w-sm"
-        ),
-        '''Div(
-    H4("Contact List"),
-    Div(
-        *[
-            Div(
-                Skeleton(cls="h-10 w-10 rounded-full"),
-                Div(
-                    Skeleton(cls="h-4 w-32"),
-                    Skeleton(cls="h-3 w-20"),
-                    cls="flex-1 ml-3"
-                ),
-                Skeleton(cls="h-6 w-6 rounded"),
-                cls="flex items-center space-x-3 p-3"
-            )
-            for _ in range(4)
-        ],
-        cls="space-y-1 border rounded-lg"
-    )
-)''',
-        title="List Items",
-        description="Skeleton pattern for contact or user lists with varying content lengths"
-    )
-    
-    # Dashboard skeleton layout
-    yield ComponentPreview(
-        Div(
-            Div(
-                Skeleton(cls="h-8 w-48 mb-6"),
-                cls="mb-6"
-            ),
-            Div(
-                *[
-                    Card(
-                        CardContent(
-                            Skeleton(cls="h-4 w-24 mb-2"),
-                            Skeleton(cls="h-8 w-16 mb-3"),
-                            Skeleton(cls="h-3 w-20"),
-                            cls="p-6"
-                        )
-                    )
-                    for _ in range(4)
-                ],
-                cls="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"
-            ),
-            Card(
-                CardHeader(
-                    Skeleton(cls="h-6 w-40 mb-2"),
-                    Skeleton(cls="h-4 w-64")
-                ),
-                CardContent(
-                    Skeleton(cls="h-48 w-full rounded")
-                )
-            ),
-            cls="w-full max-w-4xl"
-        ),
-        '''# Dashboard title
-Skeleton(cls="h-8 w-48")
 
-# Stats cards
-Div(
-    *[
-        Card(
-            CardContent(
-                Skeleton(cls="h-4 w-24"),  # Label
-                Skeleton(cls="h-8 w-16"),  # Value
-                Skeleton(cls="h-3 w-20"), # Subtitle
-                cls="p-6"
-            )
-        )
-        for _ in range(4)
-    ],
-    cls="grid grid-cols-4 gap-4"
-)
-
-# Main chart area
-Card(
-    CardHeader(
-        Skeleton(cls="h-6 w-40"),
-        Skeleton(cls="h-4 w-64")
-    ),
-    CardContent(
-        Skeleton(cls="h-48 w-full rounded")
-    )
-)''',
-        title="Dashboard Layout",
-        description="Complete dashboard skeleton with stats cards and chart area"
-    )
 
 
 def create_skeleton_docs():

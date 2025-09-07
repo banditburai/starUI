@@ -10,10 +10,11 @@ CATEGORY = "form"
 ORDER = 25
 STATUS = "stable"
 
-from starhtml import Div, P, Input, Label, Icon, Span, H2, H3, Form, Code, Button as HTMLButton
+from starhtml import Div, P, Input, Label, Icon, Span, H2, H3, Form, Code, Button as HTMLButton, Script
 from starhtml.datastar import (
     ds_on_click, ds_show, ds_text, ds_signals, value,
-    ds_bind, ds_disabled, ds_on_input, ds_effect, ds_class, toggle, ds_style
+    ds_bind, ds_disabled, ds_on_input, ds_effect, ds_class, toggle, ds_style,
+    ds_on_mouseenter, ds_on_mouseleave
 )
 from starui.registry.components.textarea import Textarea, TextareaWithLabel
 from starui.registry.components.button import Button
@@ -41,7 +42,7 @@ def examples():
                 disabled=True,
                 cls="mt-4"
             ),
-            cls="space-y-4 max-w-md mx-auto"
+            cls="space-y-4 w-full max-w-3xl mx-auto"
         ),
         '''Textarea(placeholder="Type your message here...")
 Textarea(
@@ -53,46 +54,133 @@ Textarea(placeholder="Disabled textarea", disabled=True)''',
         description="Simple textarea with different states"
     )
     
-    # Size variations
+    # Contextual usage examples
     yield ComponentPreview(
         Div(
-            TextareaWithLabel(
-                label="Compact (2 rows)",
-                placeholder="Brief input...",
-                rows=2,
-                signal="compact"
+            Card(
+                CardHeader(
+                    CardTitle("Quick Note"),
+                    CardDescription("Brief message or reminder")
+                ),
+                CardContent(
+                    TextareaWithLabel(
+                        label="Note",
+                        placeholder="Jot down your thoughts...",
+                        rows=2,
+                        signal="quick_note",
+                        helper_text="Perfect for short messages"
+                    ),
+                    Button(
+                        Icon("lucide:save", cls="h-4 w-4 mr-2"),
+                        "Save Note",
+                        ds_on_click("alert('Note saved!')"),
+                        size="sm",
+                        ds_disabled="($quick_note || '').trim().length === 0",                        
+                        cls="mt-3"
+                    ),
+                    ds_signals(quick_note=value(""))
+                ),
+                cls="w-full"
             ),
-            TextareaWithLabel(
-                label="Standard (4 rows)",
-                placeholder="Regular input...",
-                rows=4,
-                signal="standard"
+            Card(
+                CardHeader(
+                    CardTitle("Article Summary"),
+                    CardDescription("Summarize the key points")
+                ),
+                CardContent(
+                    TextareaWithLabel(
+                        label="Summary",
+                        placeholder="Write a concise summary of the main ideas...",
+                        rows=4,
+                        signal="article_summary",
+                        helper_text="Aim for 2-3 sentences"
+                    ),
+                    Div(
+                        Badge(
+                            ds_text("($article_summary || '').split(' ').length + ' words'"),
+                            variant="secondary"
+                        ),
+                        ds_show="($article_summary || '').trim().length > 0",
+                        cls="mt-2"
+                    ),
+                    ds_signals(article_summary=value(""))
+                ),
+                cls="w-full"
             ),
-            TextareaWithLabel(
-                label="Extended (8 rows)",
-                placeholder="Detailed input...",
-                rows=8,
-                signal="extended"
+            Card(
+                CardHeader(
+                    CardTitle("Essay Draft"),
+                    CardDescription("Long-form writing space")
+                ),
+                CardContent(
+                    TextareaWithLabel(
+                        label="Content",
+                        placeholder="Begin writing your essay or long-form content here...",
+                        rows=8,
+                        signal="essay_draft",
+                        helper_text="Take your time to develop your ideas"
+                    ),
+                    Div(
+                        P(
+                            "Words: ",
+                            Span(
+                                ds_text("($essay_draft || '').trim() ? ($essay_draft || '').trim().split(/\\s+/).length : 0"),
+                                cls="font-medium"
+                            ),
+                            " | Characters: ",
+                            Span(
+                                ds_text("($essay_draft || '').length"),
+                                cls="font-medium"
+                            ),
+                            cls="text-sm text-muted-foreground"
+                        ),
+                        ds_show="($essay_draft || '').trim().length > 0",
+                        cls="mt-2"
+                    ),
+                    ds_signals(essay_draft=value(""))
+                ),
+                cls="w-full"
             ),
-            cls="space-y-4 max-w-md mx-auto"
+            cls="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-6xl mx-auto"
         ),
-        '''TextareaWithLabel(
-    label="Compact (2 rows)",
-    placeholder="Brief input...",
-    rows=2
+        '''// Different textarea sizes for different contexts
+Card(
+    CardContent(
+        TextareaWithLabel(
+            label="Quick Note",
+            placeholder="Jot down your thoughts...",
+            rows=2,
+            signal="quick_note"
+        ),
+        Button("Save Note", size="sm")
+    )
 )
-TextareaWithLabel(
-    label="Standard (4 rows)",
-    placeholder="Regular input...",
-    rows=4
+
+Card(
+    CardContent(
+        TextareaWithLabel(
+            label="Article Summary",
+            placeholder="Write a concise summary...",
+            rows=4,
+            signal="summary"
+        ),
+        Badge(ds_text("$summary.split(' ').length + ' words'"))
+    )
 )
-TextareaWithLabel(
-    label="Extended (8 rows)",
-    placeholder="Detailed input...",
-    rows=8
+
+Card(
+    CardContent(
+        TextareaWithLabel(
+            label="Essay Draft",
+            placeholder="Begin writing...",
+            rows=8,
+            signal="essay"
+        ),
+        P("Words: ", Span(ds_text("wordCount")))
+    )
 )''',
-        title="Size Variations",
-        description="Different row heights for various use cases"
+        title="Contextual Usage",
+        description="Textarea sizes matched to specific use cases"
     )
     
     # Character counter
@@ -134,12 +222,12 @@ TextareaWithLabel(
                 Button(
                     "Save Bio",
                     ds_disabled("($bio || '').length === 0"),
-                    ds_on_click="alert('Bio saved!')",
+                    ds_on_click("alert('Bio saved!')"),
                     cls="w-full mt-4"
                 ),
                 ds_signals(bio=value(""))
             ),
-            cls="max-w-md"
+            cls="w-full max-w-3xl"
         ),
         '''Card(
     CardContent(
@@ -173,101 +261,287 @@ TextareaWithLabel(
         description="Track character count with visual feedback"
     )
     
-    # Comment box with formatting hints
+    # Comment box with live markdown preview
     yield ComponentPreview(
-        Card(
-            CardHeader(
-                CardTitle("Add Comment"),
-                CardDescription("Share your thoughts with the community")
-            ),
+        Div(
+            Card(
+                CardHeader(
+                    CardTitle("Comment Box with Live Preview"),
+                    CardDescription("Rich text editor with real-time preview")
+                ),
             CardContent(
+                # Markdown renderer and formatting functions
+                Script(r"""
+                    window.renderMarkdown = function(text) {
+                        if (!text) return '';
+                        let html = text
+                            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')  // Bold
+                            .replace(/\*(.+?)\*/g, '<em>$1</em>')  // Italic
+                            .replace(/`([^`]+)`/g, '<code class="bg-gray-100 dark:bg-gray-800 px-1 rounded">$1</code>')  // Inline code
+                            .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-primary underline">$1</a>')  // Links
+                            .replace(/^> (.*$)/gim, '<blockquote class="border-l-4 border-gray-300 pl-4 italic">$1</blockquote>')  // Quotes
+                            .replace(/^- (.*$)/gim, '<li>$1</li>')  // Lists
+                            .replace(/\n/g, '<br>');  // Line breaks
+                        // Wrap list items
+                        return html.replace(/(<li>.*<\/li>(<br>)?)+/g, m => '<ul class="list-disc pl-5">' + m.replace(/<br>/g, '') + '</ul>');
+                    };
+                    
+                    window.applyFormatting = function(prefix, suffix, defaultText, cursorPos) {
+                        const textarea = document.querySelector('[data-bind="comment_text"]');
+                        if (!textarea) return;
+                        
+                        const start = textarea.selectionStart;
+                        const end = textarea.selectionEnd;
+                        const selectedText = textarea.value.substring(start, end);
+                        const replacement = selectedText ? 
+                            prefix + selectedText + suffix : 
+                            prefix + defaultText + suffix;
+                        const newValue = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
+                        
+                        // Update the textarea value directly
+                        textarea.value = newValue;
+                        
+                        // Trigger input event for Datastar binding and preview update
+                        const updateEvent = new Event('input', { bubbles: true });
+                        textarea.dispatchEvent(updateEvent);
+                        
+                        setTimeout(() => {
+                            textarea.focus();
+                            if (cursorPos === 'link') {
+                                const linkStart = start + replacement.indexOf('](') + 2;
+                                const linkEnd = start + replacement.lastIndexOf(')');
+                                textarea.setSelectionRange(linkStart, linkEnd);
+                            } else {
+                                const newPos = start + replacement.length;
+                                textarea.setSelectionRange(newPos, newPos);
+                            }
+                        }, 10);
+                    };
+                    
+                    window.applyListFormatting = function(linePrefix, defaultText) {
+                        const textarea = document.querySelector('[data-bind="comment_text"]');
+                        if (!textarea) return;
+                        
+                        const start = textarea.selectionStart;
+                        const end = textarea.selectionEnd;
+                        const selectedText = textarea.value.substring(start, end);
+                        const lines = selectedText ? selectedText.split('\\n') : [defaultText || ''];
+                        const replacement = lines.map(line => linePrefix + line).join('\\n');
+                        const newValue = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
+                        
+                        // Update the textarea value directly
+                        textarea.value = newValue;
+                        
+                        // Trigger input event for Datastar binding and preview update
+                        const updateEvent = new Event('input', { bubbles: true });
+                        textarea.dispatchEvent(updateEvent);
+                        
+                        setTimeout(() => {
+                            textarea.focus();
+                            const newPos = start + replacement.length;
+                            textarea.setSelectionRange(newPos, newPos);
+                        }, 10);
+                    };
+                    
+                    // Set up reactive markdown rendering after DOM loads
+                    document.addEventListener('DOMContentLoaded', () => {
+                        const updatePreview = () => {
+                            const preview = document.getElementById('preview-area');
+                            const textarea = document.querySelector('[data-bind="comment_text"]');
+                            if (preview && textarea) {
+                                const rendered = window.renderMarkdown(textarea.value);
+                                preview.innerHTML = rendered || '<span class="text-muted-foreground">Start typing to see a preview...</span>';
+                            }
+                        };
+                        
+                        // Listen for changes
+                        const textarea = document.querySelector('[data-bind="comment_text"]');
+                        if (textarea) {
+                            textarea.addEventListener('input', updatePreview);
+                            // Initial render
+                            setTimeout(updatePreview, 100);
+                        }
+                    });
+                """),
                 Form(
-                    TextareaWithLabel(
-                        label="Your Comment",
-                        placeholder="What are your thoughts?",
-                        rows=4,
-                        signal="comment",
-                        helper_text="Markdown formatting is supported"
-                    ),
+                    # Stacked layout
                     Div(
-                        HTMLButton(
-                            Icon("lucide:bold", cls="h-4 w-4"),
-                            type="button",
-                            ds_on_click="$comment = $comment + '**bold**'",
-                            cls="p-1.5 rounded hover:bg-accent"
+                        # Editor section
+                        Div(
+                            # Formatting toolbar
+                            Div(
+                                Div(
+                                    HTMLButton(
+                                        Icon("lucide:bold", cls="h-4 w-4"),
+                                        ds_on_click("applyFormatting('**', '**', 'bold text')"),
+                                        type="button",
+                                        title="Bold (Ctrl+B)",
+                                        cls="p-2 rounded-md hover:bg-accent transition-colors border"
+                                    ),
+                                    HTMLButton(
+                                        Icon("lucide:italic", cls="h-4 w-4"),
+                                        ds_on_click("applyFormatting('*', '*', 'italic text')"),
+                                        type="button",
+                                        title="Italic (Ctrl+I)",
+                                        cls="p-2 rounded-md hover:bg-accent transition-colors border"
+                                    ),
+                                    HTMLButton(
+                                        Icon("lucide:link", cls="h-4 w-4"),
+                                        ds_on_click("applyFormatting('[', '](https://example.com)', 'link text', 'link')"),
+                                        type="button",
+                                        title="Insert Link",
+                                        cls="p-2 rounded-md hover:bg-accent transition-colors border"
+                                    ),
+                                    HTMLButton(
+                                        Icon("lucide:code", cls="h-4 w-4"),
+                                        ds_on_click("applyFormatting('`', '`', 'code')"),
+                                        type="button",
+                                        title="Inline Code",
+                                        cls="p-2 rounded-md hover:bg-accent transition-colors border"
+                                    ),
+                                    HTMLButton(
+                                        Icon("lucide:list", cls="h-4 w-4"),
+                                        ds_on_click("applyListFormatting('- ')"),
+                                        type="button",
+                                        title="Bullet List",
+                                        cls="p-2 rounded-md hover:bg-accent transition-colors border"
+                                    ),
+                                    HTMLButton(
+                                        Icon("lucide:quote", cls="h-4 w-4"),
+                                        ds_on_click("applyListFormatting('> ', 'Quote text')"),
+                                        type="button",
+                                        title="Quote",
+                                        cls="p-2 rounded-md hover:bg-accent transition-colors border"
+                                    ),
+                                    cls="flex gap-1"
+                                ),
+                                P(
+                                    ds_class(**{
+                                        "text-muted-foreground": "($comment_text || '').length < 500",
+                                        "text-orange-500": "($comment_text || '').length >= 500 && ($comment_text || '').length < 1000",
+                                        "text-destructive": "($comment_text || '').length >= 1000"
+                                    }),
+                                    ds_text="($comment_text || '').length + ' characters'",                                    
+                                    cls="text-xs font-mono"
+                                ),
+                                cls="flex items-center justify-between p-3 border rounded-t-md bg-muted/30 border-b-0"
+                            ),
+                            
+                            # Textarea with custom style override
+                            Textarea(
+                                placeholder="What are your thoughts? Supports **bold**, *italic*, `code`, [links](url), lists, and > quotes",
+                                rows=6,
+                                signal="comment_text",
+                                style="outline: none !important; box-shadow: none !important; border: none !important;",
+                                cls="rounded-t-none border-t-0 min-h-[150px] resize-none focus:outline-none focus:ring-0 focus:border-input focus-visible:outline-none focus-visible:ring-0 focus-visible:border-input !border-none"
+                            ),
+                            cls="flex-1"
                         ),
-                        HTMLButton(
-                            Icon("lucide:italic", cls="h-4 w-4"),
-                            type="button",
-                            ds_on_click="$comment = $comment + '*italic*'",
-                            cls="p-1.5 rounded hover:bg-accent"
+                        
+                        # Live preview section 
+                        Div(
+                            Div(
+                                P("Live Preview", cls="text-sm font-semibold mb-2"),
+                                Div(
+                                    Div(
+                                        # Preview area - will be populated by JavaScript
+                                        "Start typing to see a preview...",
+                                        cls="whitespace-pre-wrap leading-relaxed prose-content",
+                                        id="preview-area"
+                                    ),
+                                    cls="min-h-[150px] p-4 border rounded-md bg-background/50 prose prose-sm max-w-none overflow-auto"
+                                )
+                            ),
+                            cls="w-full"
                         ),
-                        HTMLButton(
-                            Icon("lucide:link", cls="h-4 w-4"),
-                            type="button",
-                            ds_on_click="$comment = $comment + '[link](url)'",
-                            cls="p-1.5 rounded hover:bg-accent"
-                        ),
-                        HTMLButton(
-                            Icon("lucide:code", cls="h-4 w-4"),
-                            type="button",
-                            ds_on_click="$comment = $comment + '`code`'",
-                            cls="p-1.5 rounded hover:bg-accent"
-                        ),
-                        HTMLButton(
-                            Icon("lucide:list", cls="h-4 w-4"),
-                            type="button",
-                            ds_on_click="$comment = $comment + '\\n- Item'",
-                            cls="p-1.5 rounded hover:bg-accent"
-                        ),
-                        cls="flex gap-1 p-1 border rounded-md"
+                        cls="flex flex-col gap-4"
                     ),
+                    
+                    # Action buttons
                     Div(
                         Button(
+                            Icon("lucide:x", cls="h-4 w-4 mr-2"),
                             "Cancel",
+                            ds_on_click="$comment_text = ''",
                             variant="outline",
                             type="button",
-                            ds_on_click="$comment = ''"
+                            ds_disabled="($comment_text || '').trim().length === 0"
                         ),
                         Button(
+                            Icon("lucide:send", cls="h-4 w-4 mr-2"),
                             "Post Comment",
                             type="submit",
-                            ds_disabled="($comment || '').trim().length === 0",
-                            ds_on_click="event.preventDefault(); alert('Comment posted!')"
+                            ds_disabled="($comment_text || '').trim().length === 0",
+                            ds_on_click="""
+                                event.preventDefault(); 
+                                if (($comment_text || '').trim().length > 0) {
+                                    alert('Comment posted successfully!');
+                                    $comment_text = '';
+                                }
+                            """
                         ),
-                        cls="flex gap-2 justify-end mt-4"
+                        cls="flex gap-3 justify-end mt-6"
                     ),
-                    ds_signals(comment=value(""))
+                    ds_signals(comment_text=value(""))
                 )
             ),
-            cls="max-w-lg"
+            cls="w-full max-w-6xl"
         ),
+        cls="w-full"
+    ),
         '''Card(
     CardContent(
         Form(
-            TextareaWithLabel(
-                label="Your Comment",
-                placeholder="What are your thoughts?",
-                signal="comment",
-                helper_text="Markdown formatting is supported"
+            // Stacked layout with editor and live preview
+            Div(
+                // Editor section with formatting toolbar
+                Div(
+                    // Formatting toolbar
+                    Div(
+                        Button(Icon("lucide:bold"), title="Bold", 
+                            ds_on_click="applyFormatting('**', '**', 'bold text')"),
+                        Button(Icon("lucide:italic"), title="Italic",
+                            ds_on_click="applyFormatting('*', '*', 'italic text')"),
+                        Button(Icon("lucide:link"), title="Link",
+                            ds_on_click="applyFormatting('[', '](https://example.com)', 'link text', 'link')"),
+                        Button(Icon("lucide:code"), title="Code",
+                            ds_on_click="applyFormatting('`', '`', 'code')"),
+                        P(ds_text="($comment_text || '').length + ' characters'", cls="text-xs"),
+                        cls="toolbar-layout"
+                    ),
+                    Textarea(
+                        placeholder="What are your thoughts? Supports markdown...",
+                        signal="comment_text",
+                        rows=6,
+                        cls="rounded-t-none"
+                    ),
+                    cls="flex-1"
+                ),
+                
+                // Live preview section  
+                Div(
+                    P("Live Preview", cls="text-sm font-semibold"),
+                    Div(
+                        P(ds_text="$comment_text || 'Start typing to see a preview...'"),
+                        cls="preview-area"
+                    ),
+                    cls="w-full"
+                ),
+                cls="flex flex-col gap-4"
             ),
-            Div(  // Formatting toolbar
-                Button(Icon("lucide:bold"), ds_on_click="$comment += '**bold**'"),
-                Button(Icon("lucide:italic"), ds_on_click="$comment += '*italic*'"),
-                Button(Icon("lucide:link"), ds_on_click="$comment += '[link](url)'"),
-                Button(Icon("lucide:code"), ds_on_click="$comment += '`code`'"),
-                cls="flex gap-1"
+            
+            // Actions
+            Div(
+                Button("Cancel", variant="outline", ds_on_click="$comment_text = ''"),
+                Button("Post Comment", ds_disabled="!($comment_text || '').trim()"),
+                cls="flex gap-3 justify-end"
             ),
-            Button(
-                "Post Comment",
-                ds_disabled="($comment || '').trim().length === 0"
-            ),
-            ds_signals(comment=value(""))
+            ds_signals(comment_text=value(""))
         )
     )
 )''',
-        title="Comment Box",
-        description="Rich text comment with formatting toolbar"
+        title="Comment Box with Live Preview", 
+        description="Rich text editor with real-time preview and formatting toolbar"
     )
     
     # Auto-expanding textarea
@@ -295,7 +569,7 @@ TextareaWithLabel(
                 ),
                 ds_signals(auto_expand=value(""))
             ),
-            cls="max-w-md"
+            cls="w-full max-w-3xl"
         ),
         '''TextareaWithLabel(
     label="Message",
@@ -308,11 +582,11 @@ TextareaWithLabel(
         description="Textarea that grows with content"
     )
     
-    # Feedback form with validation
+    # Enhanced feedback form with advanced validation
     yield ComponentPreview(
         Card(
             CardHeader(
-                CardTitle("Feedback Form"),
+                CardTitle("Customer Feedback"),
                 CardDescription("Help us improve our service")
             ),
             CardContent(
@@ -323,47 +597,136 @@ TextareaWithLabel(
                         required=True,
                         rows=4,
                         signal="feedback",
-                        error_text=ds_show("$feedback_submitted && ($feedback || '').length < 10") and "Feedback must be at least 10 characters" or None,
-                        helper_text="Minimum 10 characters required"
+                        error_text=None,
+                        helper_text="Share your honest thoughts (10-1000 characters)"
                     ),
-                    TextareaWithLabel(
-                        label="Suggestions for improvement",
-                        placeholder="Any ideas to make things better? (optional)",
-                        rows=3,
-                        signal="suggestions"
+                    # Validation messages
+                    Div(
+                        P(
+                            "Feedback is required",
+                            cls="text-sm text-destructive"
+                        ),
+                        ds_show("$feedback_submitted && ($feedback || '').trim().length === 0")
                     ),
                     Div(
-                        Badge(
-                            "Draft",
-                            variant="secondary",
-                            ds_show="($feedback || '').length > 0 && ($feedback || '').length < 10"
+                        P(
+                            "Please provide at least 10 characters",
+                            cls="text-sm text-destructive"
                         ),
-                        Badge(
-                            "Ready to submit",
-                            variant="default",
-                            ds_show="($feedback || '').length >= 10"
-                        ),
-                        cls="flex gap-2 mb-4"
+                        ds_show("$feedback_submitted && ($feedback || '').trim().length > 0 && ($feedback || '').length < 10")
                     ),
-                    Button(
-                        "Submit Feedback",
-                        type="submit",
-                        ds_on_click="""
-                            event.preventDefault();
-                            $feedback_submitted = true;
-                            if (($feedback || '').length >= 10) {
-                                alert('Thank you for your feedback!');
+                    Div(
+                        P(
+                            "Feedback cannot exceed 1000 characters",
+                            cls="text-sm text-destructive"
+                        ),
+                        ds_show("($feedback || '').length > 1000")
+                    ),
+                    Div(
+                        P(
+                            "Rate your experience",
+                            cls="text-sm font-medium mb-3"
+                        ),
+                        Div(
+                            *[
+                                HTMLButton(
+                                    "★",
+                                    ds_class(**{
+                                        "text-yellow-500": f"($feedback_rating && $feedback_rating >= {i+1}) || ($hover_rating && $hover_rating >= {i+1})",
+                                        "text-gray-300": f"(!$feedback_rating || $feedback_rating < {i+1}) && (!$hover_rating || $hover_rating < {i+1})"
+                                    }),
+                                    ds_on_click(f"$feedback_rating = $feedback_rating === {i+1} ? null : {i+1}"),
+                                    ds_on_mouseenter(f"$hover_rating = {i+1}"),
+                                    ds_on_mouseleave("$hover_rating = null"),
+                                    type="button",
+                                    cls="text-3xl transition-colors"
+                                )
+                                for i in range(5)
+                            ],
+                            cls="flex gap-1 mb-2"
+                        ),
+                        P(
+                            "Rating: ",
+                            Span(
+                                ds_text("$feedback_rating || 'Not selected'"),
+                                cls="font-medium"
+                            ),
+                            cls="text-sm text-muted-foreground"
+                        ),
+                        cls="border rounded-lg p-4 bg-muted/30 my-6"
+                    ),
+                    TextareaWithLabel(
+                        label="Additional suggestions",
+                        placeholder="Any specific improvements you'd like to see? (optional)",
+                        rows=3,
+                        signal="suggestions",
+                        helper_text="This helps us prioritize improvements"
+                    ),
+                    Div(
+                        # Status indicators
+                        Badge(
+                            Icon("lucide:clock", cls="h-3 w-3 mr-1"),                            
+                            "Draft",
+                            ds_show("($feedback || '').trim().length > 0 && ($feedback || '').length < 10"),
+                            variant="secondary",                            
+                        ),
+                        Badge(
+                            Icon("lucide:check-circle", cls="h-3 w-3 mr-1"),
+                            "Ready to submit",
+                            ds_show("($feedback || '').length >= 10 && ($feedback || '').length <= 1000 && !$feedback_rating"),
+                            variant="default",                            
+                        ),
+                        Badge(
+                            Icon("lucide:star", cls="h-3 w-3 mr-1"),
+                            "Complete",
+                            ds_show("($feedback || '').length >= 10 && $feedback_rating"),
+                            variant="default",                            
+                        ),
+                        cls="flex flex-wrap gap-2 mb-4"
+                    ),
+                    Div(
+                        Button(
+                            "Clear Form",
+                            variant="outline",
+                            type="button",
+                            ds_on_click="""
                                 $feedback = '';
                                 $suggestions = '';
+                                $feedback_rating = null;
+                                $hover_rating = null;
                                 $feedback_submitted = false;
-                            }
-                        """,
-                        cls="w-full"
+                            """,
+                            ds_disabled="($feedback || '').length === 0 && ($suggestions || '').length === 0 && !$feedback_rating"
+                        ),
+                        Button(
+                            Icon("lucide:send", cls="h-4 w-4 mr-2"),
+                            "Submit Feedback",
+                            type="submit",
+                            ds_disabled="($feedback || '').length < 10 || !$feedback_rating || ($feedback || '').length > 1000",
+                            ds_on_click="""
+                                event.preventDefault();
+                                $feedback_submitted = true;
+                                if (($feedback || '').length >= 10 && $feedback_rating && ($feedback || '').length <= 1000) {
+                                    alert(`Thank you for your ${$feedback_rating}-star feedback!`);
+                                    $feedback = '';
+                                    $suggestions = '';
+                                    $feedback_rating = null;
+                                    $feedback_submitted = false;
+                                }
+                            """
+                        ),
+                        cls="flex gap-2 justify-end"
                     ),
-                    ds_signals(feedback=value(""), suggestions=value(""), feedback_submitted=False)
+                    ds_signals(
+                        feedback=value(""), 
+                        suggestions=value(""), 
+                        feedback_rating=value(None),
+                        hover_rating=value(None),
+                        feedback_submitted=False
+                    )
                 )
             ),
-            cls="max-w-md"
+            cls="w-full max-w-3xl"
         ),
         '''Card(
     CardContent(
@@ -433,18 +796,23 @@ TextareaWithLabel(
                             cls="text-xs text-muted-foreground"
                         ),
                         Button(
-                            Icon("lucide:copy", cls="h-4 w-4 mr-2"),
-                            "Copy",
+                            Span(Icon("lucide:check", cls="h-4 w-4 mr-2"), ds_show("$code_copied")),
+                            Span(Icon("lucide:copy", cls="h-4 w-4 mr-2"), ds_show("!$code_copied")),
+                            Span("Copied!", ds_show("$code_copied")),
+                            Span("Copy", ds_show("!$code_copied")),
+                            ds_on_click("@clipboard($code_editor || '', 'code_copied', 2000)"),
                             size="sm",
-                            variant="outline",
-                            ds_on_click="navigator.clipboard.writeText($code_editor); alert('Copied!')"
+                            variant="outline",                            
                         ),
                         cls="flex items-center justify-between mt-2"
                     ),
-                    ds_signals(code_editor=value("def hello_world():\n    print('Hello, World!')\n    return True"))
+                    ds_signals(
+                        code_editor=value("def hello_world():\n    print('Hello, World!')\n    return True"),
+                        code_copied=False
+                    )
                 )
             ),
-            cls="max-w-lg"
+            cls="w-full max-w-3xl"
         ),
         '''Textarea(
     placeholder="# Enter your code here...",
@@ -460,6 +828,210 @@ Div(
 )''',
         title="Code Editor",
         description="Code input with monospace font and utilities"
+    )
+    
+    # Email template composer
+    yield ComponentPreview(
+        Card(
+            CardHeader(
+                CardTitle("Email Template Composer"),
+                CardDescription("Create professional email templates with variables")
+            ),
+            CardContent(
+                Form(
+                    Div(
+                        TextareaWithLabel(
+                            label="Subject Line",
+                            placeholder="Welcome to {{company_name}}, {{first_name}}!",
+                            rows=1,
+                            signal="email_subject",
+                            helper_text="Use {{variable}} syntax for dynamic content"
+                        ),
+                        cls="mb-4"
+                    ),
+                    TextareaWithLabel(
+                        label="Email Body",
+                        placeholder="Hi {{first_name}},\n\nWelcome to {{company_name}}! We're excited to have you on board.\n\nBest regards,\n{{sender_name}}",
+                        rows=8,
+                        signal="email_body",
+                        helper_text="Available variables: {{first_name}}, {{last_name}}, {{company_name}}, {{sender_name}}"
+                    ),
+                    
+                    # Variable insertion toolbar with script for cursor position
+                    Script(r"""
+                        // Track last focused textarea
+                        let lastFocusedTextarea = null;
+                        
+                        // Set up focus tracking after DOM loads
+                        document.addEventListener('DOMContentLoaded', () => {
+                            const bodyTextarea = document.querySelector('[data-bind="email_body"]');
+                            const subjectTextarea = document.querySelector('[data-bind="email_subject"]');
+                            
+                            if (bodyTextarea) {
+                                bodyTextarea.addEventListener('focus', () => {
+                                    lastFocusedTextarea = bodyTextarea;
+                                });
+                            }
+                            
+                            if (subjectTextarea) {
+                                subjectTextarea.addEventListener('focus', () => {
+                                    lastFocusedTextarea = subjectTextarea;
+                                });
+                            }
+                            
+                            // Default to body textarea
+                            lastFocusedTextarea = bodyTextarea;
+                        });
+                        
+                        window.insertVariable = function(varName) {
+                            // Use the last focused textarea, or fall back to body
+                            const bodyTextarea = document.querySelector('[data-bind="email_body"]');
+                            let targetTextarea = lastFocusedTextarea || bodyTextarea;
+                            
+                            if (!targetTextarea) return;
+                            
+                            const start = targetTextarea.selectionStart;
+                            const end = targetTextarea.selectionEnd;
+                            const text = targetTextarea.value;
+                            const variable = '{{' + varName + '}}';
+                            
+                            // Insert at cursor position
+                            const newValue = text.substring(0, start) + variable + text.substring(end);
+                            targetTextarea.value = newValue;
+                            
+                            // No need to manually update signal - the input event will handle it
+                            
+                            // Trigger input event for reactivity
+                            targetTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+                            
+                            // Set cursor after inserted variable
+                            setTimeout(() => {
+                                targetTextarea.focus();
+                                const newPos = start + variable.length;
+                                targetTextarea.setSelectionRange(newPos, newPos);
+                            }, 10);
+                        };
+                    """),
+                    Div(
+                        P("Quick Variables:", cls="text-sm font-medium mb-2"),
+                        Div(
+                            HTMLButton(
+                                "{{first_name}}",
+                                ds_on_click("insertVariable('first_name')"),
+                                type="button",
+                                cls="px-2 py-1 text-xs bg-muted hover:bg-accent rounded border"
+                            ),
+                            HTMLButton(
+                                "{{last_name}}",
+                                ds_on_click("insertVariable('last_name')"),
+                                type="button",
+                                cls="px-2 py-1 text-xs bg-muted hover:bg-accent rounded border"
+                            ),
+                            HTMLButton(
+                                "{{company_name}}",
+                                ds_on_click("insertVariable('company_name')"),
+                                type="button",
+                                cls="px-2 py-1 text-xs bg-muted hover:bg-accent rounded border"
+                            ),
+                            HTMLButton(
+                                "{{sender_name}}",
+                                ds_on_click("insertVariable('sender_name')"),
+                                type="button",
+                                cls="px-2 py-1 text-xs bg-muted hover:bg-accent rounded border"
+                            ),
+                            cls="flex flex-wrap gap-2"
+                        ),
+                        cls="p-3 border rounded-md bg-muted/30 mb-4"
+                    ),
+                    
+                    # Preview section
+                    Div(
+                        P("Preview", cls="text-sm font-medium mb-2"),
+                        Div(
+                            Div(
+                                P("Subject:", cls="text-xs text-muted-foreground"),
+                                P(
+                                    ds_text("($email_subject || 'No subject').replace(/{{([^}]+)}}/g, function(m,p1){return '[' + p1 + ']'})"),
+                                    cls="font-medium text-sm mb-2"
+                                ),
+                                Separator(cls="my-2"),
+                                P(
+                                    ds_text("($email_body || 'No content').replace(/{{([^}]+)}}/g, function(m,p1){return '[' + p1 + ']'})"),
+                                    cls="text-sm whitespace-pre-wrap"
+                                )
+                            ),
+                            cls="p-3 bg-background border rounded-md min-h-[120px]"
+                        ),
+                        P("Variables will be replaced with actual values when sent", cls="text-xs text-muted-foreground mt-1"),
+                        ds_show="($email_subject || '').length > 0 || ($email_body || '').length > 0",
+                        cls="mb-4"
+                    ),
+                    
+                    # Actions
+                    Div(
+                        Button(
+                            Icon("lucide:eye", cls="h-4 w-4 mr-2"),
+                            "Test Send",
+                            ds_on_click("alert('Test email sent to your address!')"),
+                            variant="outline",
+                            type="button",
+                            ds_disabled="($email_subject || '').length === 0 || ($email_body || '').length === 0",                            
+                        ),
+                        Button(
+                            Icon("lucide:save", cls="h-4 w-4 mr-2"),
+                            "Save Template",
+                            type="submit",
+                            ds_disabled="($email_subject || '').length === 0 || ($email_body || '').length === 0",
+                            ds_on_click="""
+                                event.preventDefault();
+                                if (($email_subject || '').length > 0 && ($email_body || '').length > 0) {
+                                    alert('Template saved successfully!');
+                                }
+                            """
+                        ),
+                        cls="flex gap-2 justify-end"
+                    ),
+                    
+                    ds_signals(
+                        email_subject=value("Welcome to {{company_name}}, {{first_name}}!"),
+                        email_body=value("Hi {{first_name}},\n\nWelcome to {{company_name}}! We're excited to have you on board.\n\nBest regards,\n{{sender_name}}")
+                    )
+                )
+            ),
+            cls="max-w-3xl"
+        ),
+        '''Card(
+    CardContent(
+        Form(
+            TextareaWithLabel(
+                label="Subject Line",
+                placeholder="Welcome to {{company_name}}, {{first_name}}!",
+                signal="email_subject"
+            ),
+            TextareaWithLabel(
+                label="Email Body",
+                placeholder="Template with {{variables}}...",
+                rows=8,
+                signal="email_body"
+            ),
+            // Variable insertion buttons
+            Div(
+                Button("{{first_name}}", ds_on_click="insertVariable('first_name')"),
+                Button("{{company_name}}", ds_on_click="insertVariable('company_name')"),
+                cls="flex gap-2"
+            ),
+            // Preview with variable substitution
+            Div(
+                P(ds_text("$email_subject.replace(/{{([^}]+)}}/g, '[Sample $1]')")),
+                P(ds_text("$email_body.replace(/{{([^}]+)}}/g, '[Sample $1]')")),
+                cls="preview-area"
+            ),
+            Button("Save Template", ds_disabled="!$email_subject || !$email_body")
+        )
+    )
+)''',
+        title="Email Template Composer",
+        description="Professional template system with variable substitution"
     )
 
 
@@ -586,7 +1158,7 @@ def create_textarea_docs():
                 signal="hero_textarea",
                 helper_text="Provide as much detail as needed"
             ),
-            cls="max-w-md mx-auto"
+            cls="w-full max-w-4xl mx-auto"
         ),
         '''TextareaWithLabel(
     label="Description",

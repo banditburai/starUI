@@ -11,7 +11,7 @@ ORDER = 40
 STATUS = "stable"
 
 from starhtml import Div, P, H3, H4, Span, Icon, Label, Input
-from starhtml.datastar import ds_signals, ds_on_click, ds_text, ds_show, value, ds_bind
+from starhtml.datastar import ds_signals, ds_on_click, ds_text, ds_show, value, ds_bind, ds_class
 from starui.registry.components.toggle_group import ToggleGroup, SingleToggleGroup, MultipleToggleGroup
 from starui.registry.components.button import Button
 from starui.registry.components.separator import Separator
@@ -291,9 +291,19 @@ SingleToggleGroup(
             
             # Preview area
             Div(
-                P("Sample Text", 
-                  ds_text=f"$alignment_value === 'left' ? 'text-left' : $alignment_value === 'center' ? 'text-center' : $alignment_value === 'right' ? 'text-right' : $alignment_value === 'justify' ? 'text-justify' : 'text-left'",
-                  cls="p-4 bg-muted rounded transition-all"),
+                P(
+                    "The quick brown fox jumps over the lazy dog. This sample text demonstrates the selected text alignment and decoration options.",
+                    ds_class(**{
+                        "text-left": "$alignment_value === 'left' || !$alignment_value",
+                        "text-center": "$alignment_value === 'center'",
+                        "text-right": "$alignment_value === 'right'",
+                        "text-justify": "$alignment_value === 'justify'",
+                        "font-bold": "$decoration_value && $decoration_value.includes('bold')",
+                        "italic": "$decoration_value && $decoration_value.includes('italic')",
+                        "underline": "$decoration_value && $decoration_value.includes('underline')"
+                    }),
+                    cls="p-4 bg-muted rounded transition-all"
+                ),
                 cls="mt-6"
             ),
             

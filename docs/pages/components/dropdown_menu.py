@@ -58,7 +58,7 @@ def examples():
                 )
             )
         ),
-            cls="w-full max-w-xl"
+            cls="flex items-center justify-center min-h-[200px]"
         ),
         '''DropdownMenu(
     DropdownMenuTrigger(
@@ -98,44 +98,56 @@ def examples():
     signal_id = uuid4().hex[:8]
     yield ComponentPreview(
         Div(
-            DropdownMenu(
-                DropdownMenuTrigger(
-                    Icon("lucide:eye", cls="mr-2 h-4 w-4"),
-                    "View Options"
+            Div(
+                Div(
+                    Span("Grid: ", cls="text-muted-foreground"),
+                    Span(ds_text("$show_grid ? 'On' : 'Off'"), cls="font-medium"),
+                    Span(" • ", cls="text-muted-foreground mx-1"),
+                    Span("Rulers: ", cls="text-muted-foreground"),
+                    Span(ds_text("$show_rulers ? 'On' : 'Off'"), cls="font-medium"),
+                    Span(" • ", cls="text-muted-foreground mx-1"),
+                    Span("Guides: ", cls="text-muted-foreground"),
+                    Span(ds_text("$show_guides ? 'On' : 'Off'"), cls="font-medium"),
+                    Span(" • ", cls="text-muted-foreground mx-1"),
+                    Span("Auto-save: ", cls="text-muted-foreground"),
+                    Span(ds_text("$auto_save ? 'On' : 'Off'"), cls="font-medium"),
+                    cls="flex items-center flex-wrap gap-1"
                 ),
-                DropdownMenuContent(
-                    DropdownMenuLabel("Display Settings"),
-                    DropdownMenuSeparator(),
-                    DropdownMenuCheckboxItem(
-                        "Show Grid",
-                        checked_signal="showGrid"
-                    ),
-                    DropdownMenuCheckboxItem(
-                        "Show Rulers",
-                        checked_signal="showRulers"
-                    ),
-                    DropdownMenuCheckboxItem(
-                        "Show Guides",
-                        checked_signal="showGuides"
-                    ),
-                    DropdownMenuSeparator(),
-                    DropdownMenuCheckboxItem(
-                        "Auto-save",
-                        checked_signal="autoSave"
-                    )
-                ),
-                signal=f"view_menu_{signal_id}"
+                cls="p-3 bg-muted/50 rounded-lg border border-border text-sm mb-4"
             ),
             Div(
-                P("Current settings:", cls="font-medium mb-2"),
-                P("Grid: ", Span(ds_text("$showGrid ? 'On' : 'Off'"), cls="font-mono")),
-                P("Rulers: ", Span(ds_text("$showRulers ? 'On' : 'Off'"), cls="font-mono")),
-                P("Guides: ", Span(ds_text("$showGuides ? 'On' : 'Off'"), cls="font-mono")),
-                P("Auto-save: ", Span(ds_text("$autoSave ? 'On' : 'Off'"), cls="font-mono")),
-                cls="mt-4 p-3 bg-muted rounded text-sm"
+                DropdownMenu(
+                    DropdownMenuTrigger(
+                        Icon("lucide:eye", cls="mr-2 h-4 w-4"),
+                        "View Options"
+                    ),
+                    DropdownMenuContent(
+                        DropdownMenuLabel("Display Settings"),
+                        DropdownMenuSeparator(),
+                        DropdownMenuCheckboxItem(
+                            "Show Grid",
+                            checked_signal="showGrid"
+                        ),
+                        DropdownMenuCheckboxItem(
+                            "Show Rulers",
+                            checked_signal="showRulers"
+                        ),
+                        DropdownMenuCheckboxItem(
+                            "Show Guides",
+                            checked_signal="showGuides"
+                        ),
+                        DropdownMenuSeparator(),
+                        DropdownMenuCheckboxItem(
+                            "Auto-save",
+                            checked_signal="autoSave"
+                        )
+                    ),
+                    signal=f"view_menu_{signal_id}"
+                ),
+                cls="flex justify-center"
             ),
-            ds_signals(showGrid=True, showRulers=False, showGuides=True, autoSave=True),
-            cls="w-full max-w-xl space-y-4"
+            ds_signals(show_grid=True, show_rulers=False, show_guides=True, auto_save=True),
+            cls="flex flex-col min-h-[200px] justify-center"
         ),
         '''DropdownMenu(
     DropdownMenuTrigger(
@@ -160,44 +172,52 @@ def examples():
     signal_id2 = uuid4().hex[:8]
     yield ComponentPreview(
         Div(
-            DropdownMenu(
-                DropdownMenuTrigger(
-                    Icon("lucide:palette", cls="mr-2 h-4 w-4"),
-                    "Theme"
+            Div(
+                Div(
+                    Icon("lucide:palette", cls="h-4 w-4 text-muted-foreground"),
+                    Span("Current theme: ", cls="text-muted-foreground ml-2"),
+                    Strong(ds_text("$theme"), cls="capitalize ml-1"),
+                    cls="flex items-center"
                 ),
-                DropdownMenuContent(
-                    DropdownMenuLabel("Appearance"),
-                    DropdownMenuSeparator(),
-                    DropdownMenuRadioGroup(
-                        DropdownMenuRadioItem(
-                            Icon("lucide:sun", cls="mr-2 h-4 w-4"),
-                            "Light",
-                            value="light",
-                            value_signal="theme"
-                        ),
-                        DropdownMenuRadioItem(
-                            Icon("lucide:moon", cls="mr-2 h-4 w-4"),
-                            "Dark", 
-                            value="dark",
-                            value_signal="theme"
-                        ),
-                        DropdownMenuRadioItem(
-                            Icon("lucide:laptop", cls="mr-2 h-4 w-4"),
-                            "System",
-                            value="system", 
-                            value_signal="theme"
-                        ),
-                        value_signal="theme"
-                    )
-                ),
-                signal=f"theme_menu_{signal_id2}"
+                cls="p-3 bg-muted/50 rounded-lg border border-border text-sm mb-4"
             ),
             Div(
-                P("Selected theme: ", Strong(ds_text("$theme"), cls="capitalize")),
-                cls="mt-4 p-3 bg-muted rounded text-sm"
+                DropdownMenu(
+                    DropdownMenuTrigger(
+                        Icon("lucide:palette", cls="mr-2 h-4 w-4"),
+                        "Theme"
+                    ),
+                    DropdownMenuContent(
+                        DropdownMenuLabel("Appearance"),
+                        DropdownMenuSeparator(),
+                        DropdownMenuRadioGroup(
+                            DropdownMenuRadioItem(
+                                Icon("lucide:sun", cls="mr-2 h-4 w-4"),
+                                "Light",
+                                value="light",
+                                value_signal="theme"
+                            ),
+                            DropdownMenuRadioItem(
+                                Icon("lucide:moon", cls="mr-2 h-4 w-4"),
+                                "Dark", 
+                                value="dark",
+                                value_signal="theme"
+                            ),
+                            DropdownMenuRadioItem(
+                                Icon("lucide:laptop", cls="mr-2 h-4 w-4"),
+                                "System",
+                                value="system", 
+                                value_signal="theme"
+                            ),
+                            value_signal="theme"
+                        )
+                    ),
+                    signal=f"theme_menu_{signal_id2}"
+                ),
+                cls="flex justify-center"
             ),
             ds_signals(theme=value("system")),
-            cls="w-full max-w-xl space-y-4"
+            cls="flex flex-col min-h-[200px] justify-center"
         ),
         '''DropdownMenu(
     DropdownMenuTrigger(
@@ -247,20 +267,20 @@ def examples():
                 DropdownMenuGroup(
                     DropdownMenuItem(
                         Icon("lucide:copy", cls="mr-2 h-4 w-4"),
-                        "Copy",
-                        DropdownMenuShortcut("⌘C"),
+                        Span("Copy", cls="flex-1"),
+                        Span("⌘C", cls="ml-auto text-xs tracking-widest text-muted-foreground"),
                         onclick="alert('Copy action')"
                     ),
                     DropdownMenuItem(
                         Icon("lucide:scissors", cls="mr-2 h-4 w-4"),
-                        "Cut",
-                        DropdownMenuShortcut("⌘X"),
+                        Span("Cut", cls="flex-1"),
+                        Span("⌘X", cls="ml-auto text-xs tracking-widest text-muted-foreground"),
                         onclick="alert('Cut action')"
                     ),
                     DropdownMenuItem(
                         Icon("lucide:clipboard", cls="mr-2 h-4 w-4"),
-                        "Paste", 
-                        DropdownMenuShortcut("⌘V"),
+                        Span("Paste", cls="flex-1"),
+                        Span("⌘V", cls="ml-auto text-xs tracking-widest text-muted-foreground"),
                         onclick="alert('Paste action')"
                     )
                 ),
@@ -268,29 +288,29 @@ def examples():
                 DropdownMenuGroup(
                     DropdownMenuItem(
                         Icon("lucide:search", cls="mr-2 h-4 w-4"),
-                        "Find",
-                        DropdownMenuShortcut("⌘F"),
+                        Span("Find", cls="flex-1"),
+                        Span("⌘F", cls="ml-auto text-xs tracking-widest text-muted-foreground"),
                         onclick="alert('Find action')"
                     ),
                     DropdownMenuItem(
                         Icon("lucide:repeat", cls="mr-2 h-4 w-4"),
-                        "Replace",
-                        DropdownMenuShortcut("⌘H"),
+                        Span("Replace", cls="flex-1"),
+                        Span("⌘H", cls="ml-auto text-xs tracking-widest text-muted-foreground"),
                         onclick="alert('Replace action')"
                     )
                 ),
                 DropdownMenuSeparator(),
                 DropdownMenuItem(
                     Icon("lucide:trash", cls="mr-2 h-4 w-4"),
-                    "Delete",
-                    DropdownMenuShortcut("⌘⌫"),
+                    Span("Delete", cls="flex-1"),
+                    Span("⌘⌫", cls="ml-auto text-xs tracking-widest text-muted-foreground"),
                     variant="destructive",
                     onclick="alert('Delete action')"
                 ),
                 align="end"
             )
         ),
-            cls="w-full max-w-xl"
+            cls="flex items-center justify-center min-h-[200px]"
         ),
         '''DropdownMenu(
     DropdownMenuTrigger(
@@ -302,20 +322,20 @@ def examples():
         DropdownMenuGroup(
             DropdownMenuItem(
                 Icon("lucide:copy", cls="mr-2 h-4 w-4"),
-                "Copy",
-                DropdownMenuShortcut("⌘C"),
+                Span("Copy", cls="flex-1"),
+                Span("⌘C", cls="ml-auto text-xs tracking-widest text-muted-foreground"),
                 onclick="alert('Copy action')"
             ),
             DropdownMenuItem(
                 Icon("lucide:scissors", cls="mr-2 h-4 w-4"), 
-                "Cut",
-                DropdownMenuShortcut("⌘X"),
+                Span("Cut", cls="flex-1"),
+                Span("⌘X", cls="ml-auto text-xs tracking-widest text-muted-foreground"),
                 onclick="alert('Cut action')"
             ),
             DropdownMenuItem(
                 Icon("lucide:clipboard", cls="mr-2 h-4 w-4"),
-                "Paste",
-                DropdownMenuShortcut("⌘V"),
+                Span("Paste", cls="flex-1"),
+                Span("⌘V", cls="ml-auto text-xs tracking-widest text-muted-foreground"),
                 onclick="alert('Paste action')"
             )
         ),
@@ -323,27 +343,26 @@ def examples():
         DropdownMenuGroup(
             DropdownMenuItem(
                 Icon("lucide:search", cls="mr-2 h-4 w-4"),
-                "Find", 
-                DropdownMenuShortcut("⌘F"),
+                Span("Find", cls="flex-1"),
+                Span("⌘F", cls="ml-auto text-xs tracking-widest text-muted-foreground"),
                 onclick="alert('Find action')"
             ),
             DropdownMenuItem(
                 Icon("lucide:repeat", cls="mr-2 h-4 w-4"),
-                "Replace",
-                DropdownMenuShortcut("⌘H"), 
+                Span("Replace", cls="flex-1"),
+                Span("⌘H", cls="ml-auto text-xs tracking-widest text-muted-foreground"), 
                 onclick="alert('Replace action')"
             )
         ),
         DropdownMenuSeparator(),
         DropdownMenuItem(
             Icon("lucide:trash", cls="mr-2 h-4 w-4"),
-            "Delete",
-            DropdownMenuShortcut("⌘⌫"),
+            Span("Delete", cls="flex-1"),
+            Span("⌘⌫", cls="ml-auto text-xs tracking-widest text-muted-foreground"),
             variant="destructive",
             onclick="alert('Delete action')"
         ),
-        align="end"
-    )
+        align="end"    )
 )''',
         title="Context Menu",
         description="Rich menu with keyboard shortcuts and grouped actions"
@@ -400,7 +419,7 @@ def examples():
                 align="end"
             )
         ),
-            cls="w-full max-w-xl"
+            cls="flex items-center justify-center min-h-[200px]"
         ),
         '''DropdownMenu(
     DropdownMenuTrigger(
@@ -458,51 +477,59 @@ def examples():
     signal_id3 = uuid4().hex[:8]
     yield ComponentPreview(
         Div(
-            DropdownMenu(
-                DropdownMenuTrigger(
-                    "Create New",
-                    Icon("lucide:chevron-down", cls="ml-2 h-4 w-4")
+            Div(
+                Div(
+                    Icon("lucide:plus-circle", cls="h-4 w-4 text-muted-foreground"),
+                    Span("Action: ", cls="text-muted-foreground ml-2 mr-1"),
+                    Span(ds_text("$created || 'No action taken yet'"), cls="font-medium italic"),
+                    cls="flex items-center"
                 ),
-                DropdownMenuContent(
-                    DropdownMenuGroup(
-                        DropdownMenuItem(
-                            Icon("lucide:file-text", cls="mr-2 h-4 w-4"),
-                            "Document",
-                            onclick=f"$created = 'Document created'"
+                cls="p-3 bg-muted/50 rounded-lg border border-border text-sm mb-4"
+            ),
+            Div(
+                DropdownMenu(
+                    DropdownMenuTrigger(
+                        "Create New",
+                        Icon("lucide:chevron-down", cls="ml-2 h-4 w-4")
+                    ),
+                    DropdownMenuContent(
+                        DropdownMenuGroup(
+                            DropdownMenuItem(
+                                Icon("lucide:file-text", cls="mr-2 h-4 w-4"),
+                                "Document",
+                                onclick=f"$created = 'Document created'"
+                            ),
+                            DropdownMenuItem(
+                                Icon("lucide:table", cls="mr-2 h-4 w-4"),
+                                "Spreadsheet",
+                                onclick=f"$created = 'Spreadsheet created'"
+                            ),
+                            DropdownMenuItem(
+                                Icon("lucide:presentation", cls="mr-2 h-4 w-4"),
+                                "Presentation",
+                                onclick=f"$created = 'Presentation created'"
+                            )
                         ),
-                        DropdownMenuItem(
-                            Icon("lucide:table", cls="mr-2 h-4 w-4"),
-                            "Spreadsheet",
-                            onclick=f"$created = 'Spreadsheet created'"
-                        ),
-                        DropdownMenuItem(
-                            Icon("lucide:presentation", cls="mr-2 h-4 w-4"),
-                            "Presentation",
-                            onclick=f"$created = 'Presentation created'"
+                        DropdownMenuSeparator(),
+                        DropdownMenuGroup(
+                            DropdownMenuItem(
+                                Icon("lucide:folder-plus", cls="mr-2 h-4 w-4"),
+                                "New Folder",
+                                onclick=f"$created = 'Folder created'"
+                            ),
+                            DropdownMenuItem(
+                                Icon("lucide:upload", cls="mr-2 h-4 w-4"),
+                                "Upload File",
+                                onclick=f"$created = 'File uploaded'"
+                            )
                         )
                     ),
-                    DropdownMenuSeparator(),
-                    DropdownMenuGroup(
-                        DropdownMenuItem(
-                            Icon("lucide:folder-plus", cls="mr-2 h-4 w-4"),
-                            "New Folder",
-                            onclick=f"$created = 'Folder created'"
-                        ),
-                        DropdownMenuItem(
-                            Icon("lucide:upload", cls="mr-2 h-4 w-4"),
-                            "Upload File",
-                            onclick=f"$created = 'File uploaded'"
-                        )
-                    )
+                    signal=f"create_menu_{signal_id3}"
                 ),
-                signal=f"create_menu_{signal_id3}"
-            ),
-            P(
-                ds_text("$created || 'No action taken yet'"),
-                cls="mt-4 text-sm text-muted-foreground italic"
+                cls="flex justify-center"
             ),
             ds_signals(created=value("")),
-            cls="w-full max-w-xl space-y-4"
+            cls="flex flex-col min-h-[200px] justify-center"
         ),
         '''DropdownMenu(
     DropdownMenuTrigger(
@@ -550,7 +577,26 @@ def examples():
     signal_id4 = uuid4().hex[:8]
     yield ComponentPreview(
         Div(
-            H4("Data Table Actions", cls="mb-4"),
+            Div(
+                Div(
+                    Span("Sort: ", cls="text-muted-foreground"),
+                    Span(ds_text("$sort_by"), cls="font-medium capitalize"),
+                    Span(" (", cls="text-muted-foreground"),
+                    Span(ds_text('$ascending ? "Ascending" : "Descending"'), cls="font-medium"),
+                    Span(")", cls="text-muted-foreground"),
+                    Span(" • ", cls="text-muted-foreground mx-1"),
+                    Span("View: ", cls="text-muted-foreground"),
+                    Span(ds_text("$view_mode"), cls="font-medium capitalize"),
+                    Span(" • ", cls="text-muted-foreground mx-1"),
+                    Span("Hidden: ", cls="text-muted-foreground"),
+                    Span(ds_text('$show_hidden ? "On" : "Off"'), cls="font-medium"),
+                    Span(" • ", cls="text-muted-foreground mx-1"),
+                    Span("Extensions: ", cls="text-muted-foreground"),
+                    Span(ds_text('$show_extensions ? "On" : "Off"'), cls="font-medium"),
+                    cls="flex items-center flex-wrap gap-1"
+                ),
+                cls="p-3 bg-muted/50 rounded-lg border border-border text-sm mb-4"
+            ),
             Div(
                 DropdownMenu(
                     DropdownMenuTrigger(
@@ -623,16 +669,10 @@ def examples():
                     ),
                     signal=f"view_menu_{signal_id4}"
                 ),
-                cls="flex items-center"
+                cls="flex items-center justify-center"
             ),
-            Div(
-                P(Strong("Sort:"), f" {ds_text('$sortBy')} ({ds_text('$ascending ? \"Ascending\" : \"Descending\"')})", cls="text-sm"),
-                P(Strong("View:"), f" {ds_text('$viewMode')} mode", cls="text-sm"),
-                P(Strong("Options:"), f" Hidden files: {ds_text('$showHidden ? \"On\" : \"Off\"')}, Extensions: {ds_text('$showExtensions ? \"On\" : \"Off\"')}", cls="text-sm"),
-                cls="mt-4 p-3 bg-muted rounded space-y-1"
-            ),
-            ds_signals(sortBy=value("name"), ascending=True, viewMode=value("list"), showHidden=False, showExtensions=True),
-            cls="w-full max-w-2xl space-y-4"
+            ds_signals(sort_by=value("name"), ascending=True, view_mode=value("list"), show_hidden=False, show_extensions=True),
+            cls="flex flex-col min-h-[200px] justify-center"
         ),
         '''# Multiple coordinated dropdown menus
 DropdownMenu(

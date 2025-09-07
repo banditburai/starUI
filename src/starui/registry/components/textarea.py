@@ -79,12 +79,30 @@ def Textarea(
     }
 
     if signal:
-        datastar_attrs = (*datastar_attrs, ds_bind(signal))
+        # Add reactive binding (following the input component pattern)
+        bind_attrs = ds_bind(signal)
+        textarea_attrs.update(bind_attrs.attrs)
+        # NOTE: Don't add bind_attrs to datastar_attrs - it's already in textarea_attrs!
 
-    return HTMLTextarea(*datastar_attrs, **textarea_attrs)
+    # For HTML textarea, the initial value should be passed as children content
+    initial_content = value if value and not signal else None
+    
+    # Create the base textarea
+    if initial_content:
+        base_textarea = HTMLTextarea(initial_content, *datastar_attrs, **textarea_attrs)
+    else:
+        base_textarea = HTMLTextarea(*datastar_attrs, **textarea_attrs)
+    
+    # CRITICAL FIX: Remove auto-generated name attribute for reactive textareas
+    # StarHTML automatically sets name=id, which conflicts with ds_bind
+    if signal and 'name' in base_textarea.attrs and base_textarea.attrs.get('name') == base_textarea.attrs.get('id'):
+        base_textarea.attrs = {k: v for k, v in base_textarea.attrs.items() if k != 'name'}
+    
+    return base_textarea
 
 
 def TextareaWithLabel(
+    *,  # Force keyword-only arguments for consistency and flexibility
     label: str,
     placeholder: str | None = None,
     value: str | None = None,

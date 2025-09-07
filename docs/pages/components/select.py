@@ -30,53 +30,6 @@ from widgets.component_preview import ComponentPreview
 def examples():
     """Generate select examples using ComponentPreview with tabs."""
     
-    # Basic usage
-    yield ComponentPreview(
-        Div(
-            Select(
-                SelectTrigger(
-                    SelectValue(placeholder="Select a fruit", signal="fruit"),
-                    signal="fruit",
-                    width="w-[200px]"
-                ),
-                SelectContent(
-                    SelectItem("apple", "Apple", signal="fruit"),
-                    SelectItem("banana", "Banana", signal="fruit"),
-                    SelectItem("orange", "Orange", signal="fruit"),
-                    SelectItem("grape", "Grape", signal="fruit"),
-                    SelectItem("strawberry", "Strawberry", signal="fruit"),
-                    signal="fruit"
-                ),
-                signal="fruit"
-            ),
-            P(
-                "Selected: ",
-                Code(ds_text("$fruit_value || 'none'"), cls="ml-2"),
-                ds_show("$fruit_value"),
-                cls="text-sm text-muted-foreground mt-4"
-            ),
-            cls="flex flex-col items-center"
-        ),
-        '''Select(
-    SelectTrigger(
-        SelectValue(placeholder="Select a fruit", signal="fruit"),
-        signal="fruit",
-        width="w-[200px]"
-    ),
-    SelectContent(
-        SelectItem("apple", "Apple", signal="fruit"),
-        SelectItem("banana", "Banana", signal="fruit"),
-        SelectItem("orange", "Orange", signal="fruit"),
-        SelectItem("grape", "Grape", signal="fruit"),
-        SelectItem("strawberry", "Strawberry", signal="fruit"),
-        signal="fruit"
-    ),
-    signal="fruit"
-)''',
-        title="Basic Select",
-        description="Simple dropdown with options"
-    )
-    
     # Grouped options
     yield ComponentPreview(
         Select(
@@ -263,31 +216,45 @@ SelectWithLabel(
                         Icon("lucide:search", cls="h-4 w-4 mr-2"),
                         "Apply Filters",
                         cls="w-full mt-4",
-                        ds_on_click="alert(`Searching: Category=${$category_filter_value}, Price=${$price_filter_label}, Sort=${$sort_filter_label}`)"
+                        ds_on_click="alert(`Searching: Category=${$category_filter_value || 'All Categories'}, Price=${$price_filter_label || 'All Prices'}, Sort=${$sort_filter_label || 'Relevance'}`)"
                     ),
                     Div(
-                        Badge(
-                            ds_text("$category_filter_value"),
-                            ds_show("$category_filter_value !== 'All Categories'"),
-                            variant="secondary"
+                        Div(
+                            Badge(
+                                ds_text("$category_filter_value"),
+                                variant="secondary"
+                            ),
+                            ds_show("$category_filter_value !== 'All Categories'")
                         ),
-                        Badge(
-                            ds_text("$price_filter_label"),
-                            ds_show("$price_filter_value !== 'all'"),
-                            variant="secondary"
+                        Div(
+                            Badge(
+                                ds_text("$price_filter_label || 'All Prices'"),
+                                variant="secondary"
+                            ),
+                            ds_show("$price_filter_value !== 'all'")
                         ),
-                        Badge(
-                            ds_text("'Sort: ' + $sort_filter_label"),
-                            ds_show("$sort_filter_value !== 'relevance'"),
-                            variant="secondary"
+                        Div(
+                            Badge(
+                                ds_text("'Sort: ' + ($sort_filter_label || 'Relevance')"),
+                                variant="secondary"
+                            ),
+                            ds_show("$sort_filter_value !== 'relevance'")
                         ),
-                        cls="flex gap-2 mt-4 flex-wrap",
+                        cls="flex flex-col gap-1 mt-4",
                         ds_show="$category_filter_value !== 'All Categories' || $price_filter_value !== 'all' || $sort_filter_value !== 'relevance'"
+                    ),
+                    # Initialize signals with proper labels
+                    ds_signals(
+                        price_filter_value=value("all"),
+                        price_filter_label=value("All Prices"),
+                        sort_filter_value=value("relevance"),
+                        sort_filter_label=value("Relevance"),
+                        category_filter_value=value("All Categories")
                     ),
                     cls="space-y-3"
                 )
             ),
-            cls="max-w-md"
+            cls="w-full max-w-md"
         ),
         '''Card(
     CardContent(
@@ -333,68 +300,104 @@ SelectWithLabel(
             ),
             CardContent(
                 Form(
-                    SelectWithLabel(
-                        label="Country",
-                        options=[
-                            "United States",
-                            "Canada",
-                            "Mexico"
-                        ],
-                        placeholder="Select country first",
-                        signal="location_country",
-                        select_cls="w-full"
-                    ),
-                    SelectWithLabel(
-                        label="State/Province",
-                        options=[],
-                        placeholder="Select a country first",
-                        signal="location_state",
-                        select_cls="w-full",
-                        disabled=True
-                    ),
-                    SelectWithLabel(
-                        label="City",
-                        options=[],
-                        placeholder="Select a state first",
-                        signal="location_city",
-                        select_cls="w-full",
-                        disabled=True
+                    Div(
+                        Label("Country", cls="text-sm font-medium"),
+                        Select(
+                            SelectTrigger(
+                                SelectValue(placeholder="Select country", signal="location_country"),
+                                signal="location_country",
+                                cls="w-full"
+                            ),
+                            SelectContent(
+                                SelectItem("us", "United States", signal="location_country"),
+                                SelectItem("ca", "Canada", signal="location_country"),
+                                SelectItem("mx", "Mexico", signal="location_country"),
+                                signal="location_country"
+                            ),
+                            signal="location_country"
+                        ),
+                        cls="space-y-2"
                     ),
                     Div(
-                        P(
-                            Icon("lucide:map-pin", cls="h-4 w-4 inline mr-1"),
-                            "Location: ",
-                            Span(
-                                ds_text("[$location_city_label, $location_state_label, $location_country_value].filter(Boolean).join(', ') || 'Not selected'"),
-                                cls="font-medium"
+                        Label("State/Province", cls="text-sm font-medium"),
+                        Select(
+                            SelectTrigger(
+                                SelectValue(
+                                    placeholder="Select state",
+                                    signal="location_state"
+                                ),
+                                ds_disabled("!$location_country_value"),
+                                signal="location_state",                                
+                                cls="w-full",
+                                
                             ),
-                            cls="text-sm"
+                            SelectContent(
+                                # US States
+                                Div(
+                                    SelectItem("ca", "California", signal="location_state"),
+                                    SelectItem("tx", "Texas", signal="location_state"),
+                                    SelectItem("ny", "New York", signal="location_state"),
+                                    SelectItem("fl", "Florida", signal="location_state"),
+                                    ds_show("$location_country_value === 'us'")
+                                ),
+                                # Canadian Provinces
+                                Div(
+                                    SelectItem("on", "Ontario", signal="location_state"),
+                                    SelectItem("qc", "Quebec", signal="location_state"),
+                                    SelectItem("bc", "British Columbia", signal="location_state"),
+                                    SelectItem("ab", "Alberta", signal="location_state"),
+                                    ds_show("$location_country_value === 'ca'")
+                                ),
+                                # Mexican States
+                                Div(
+                                    SelectItem("mx_city", "Mexico City", signal="location_state"),
+                                    SelectItem("jal", "Jalisco", signal="location_state"),
+                                    SelectItem("nl", "Nuevo León", signal="location_state"),
+                                    SelectItem("ver", "Veracruz", signal="location_state"),
+                                    ds_show("$location_country_value === 'mx'")
+                                ),
+                                signal="location_state"
+                            ),
+                            signal="location_state"
                         ),
-                        cls="mt-4 p-3 bg-muted rounded-md"
+                        cls="space-y-2"
+                    ),
+                    Div(
+                        Div(
+                            Icon("lucide:map-pin", cls="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0"),
+                            Div(
+                                P("Location", cls="text-xs text-muted-foreground mb-0.5"),
+                                P(
+                                    ds_text("($location_state_label && $location_country_label ? $location_state_label + ', ' + $location_country_label : $location_country_label) || 'Not selected'"),
+                                    cls="text-sm font-medium"
+                                ),
+                                cls="flex-1"
+                            ),
+                            cls="flex gap-2 items-start"
+                        ),
+                        cls="mt-4 p-3 bg-muted/50 rounded-md border"
+                    ),
+                    ds_signals(
+                        location_country_value=value(""),
+                        location_country_label=value(""),
+                        location_state_value=value(""),
+                        location_state_label=value("")
                     ),
                     ds_effect("""
-                        // Enable state select when country is selected
-                        const stateSelect = document.querySelector('[data-bind*="location_state"]');
-                        const citySelect = document.querySelector('[data-bind*="location_city"]');
-                        
-                        if ($location_country_value) {
-                            // In real app, fetch states based on country
-                            if (stateSelect) {
-                                stateSelect.closest('button').disabled = false;
-                            }
-                        }
-                        
-                        if ($location_state_value) {
-                            // In real app, fetch cities based on state
-                            if (citySelect) {
-                                citySelect.closest('button').disabled = false;
-                            }
+                        // Reset state when country changes or is cleared
+                        if (!$location_country_value || 
+                            ($location_country_value && $location_state_value && 
+                             (($location_country_value === 'us' && !['ca', 'tx', 'ny', 'fl'].includes($location_state_value)) ||
+                              ($location_country_value === 'ca' && !['on', 'qc', 'bc', 'ab'].includes($location_state_value)) ||
+                              ($location_country_value === 'mx' && !['mx_city', 'jal', 'nl', 'ver'].includes($location_state_value))))) {
+                            $location_state_value = '';
+                            $location_state_label = '';
                         }
                     """),
                     cls="space-y-4"
                 )
             ),
-            cls="max-w-md"
+            cls="w-full max-w-md"
         ),
         '''// Dependent selects that update based on parent selection
 Form(
@@ -448,7 +451,7 @@ Form(
                             SelectTrigger(
                                 SelectValue(placeholder="Select role", signal="user1_role"),
                                 signal="user1_role",
-                                width="w-[140px]"
+                                width="w-[160px]"
                             ),
                             SelectContent(
                                 SelectItem("viewer", "Viewer", signal="user1_role"),
@@ -460,7 +463,7 @@ Form(
                             initial_value="editor",
                             signal="user1_role"
                         ),
-                        cls="flex items-center justify-between p-3 border rounded-md"
+                        cls="flex items-center justify-between gap-6 p-4 border rounded-lg hover:bg-muted/50 transition-colors"
                     ),
                     Div(
                         Div(
@@ -472,7 +475,7 @@ Form(
                             SelectTrigger(
                                 SelectValue(placeholder="Select role", signal="user2_role"),
                                 signal="user2_role",
-                                width="w-[140px]"
+                                width="w-[160px]"
                             ),
                             SelectContent(
                                 SelectItem("viewer", "Viewer", signal="user2_role"),
@@ -484,7 +487,7 @@ Form(
                             initial_value="viewer",
                             signal="user2_role"
                         ),
-                        cls="flex items-center justify-between p-3 border rounded-md"
+                        cls="flex items-center justify-between gap-6 p-4 border rounded-lg hover:bg-muted/50 transition-colors"
                     ),
                     Div(
                         Div(
@@ -496,7 +499,7 @@ Form(
                             SelectTrigger(
                                 SelectValue(placeholder="Select role", signal="user3_role"),
                                 signal="user3_role",
-                                width="w-[140px]"
+                                width="w-[160px]"
                             ),
                             SelectContent(
                                 SelectItem("viewer", "Viewer", signal="user3_role"),
@@ -508,7 +511,7 @@ Form(
                             initial_value="admin",
                             signal="user3_role"
                         ),
-                        cls="flex items-center justify-between p-3 border rounded-md"
+                        cls="flex items-center justify-between gap-6 p-4 border rounded-lg hover:bg-muted/50 transition-colors"
                     ),
                     Button(
                         "Save Changes",
@@ -518,7 +521,7 @@ Form(
                     cls="space-y-2"
                 )
             ),
-            cls="max-w-lg"
+            cls="max-w-2xl"
         ),
         '''// User role management with multiple selects
 Div(
@@ -714,58 +717,134 @@ def create_select_docs():
         ]
     }
     
-    # Hero example
+    # Hero example - Interactive preferences panel
     hero_example = ComponentPreview(
-        Div(
-            Select(
-                SelectTrigger(
-                    SelectValue(placeholder="Select framework", signal="framework"),
-                    signal="framework",
-                    width="w-[200px]"
-                ),
-                SelectContent(
-                    SelectGroup(
-                        SelectLabel("Frontend"),
-                        SelectItem("react", "React", signal="framework"),
-                        SelectItem("vue", "Vue", signal="framework"),
-                        SelectItem("angular", "Angular", signal="framework"),
-                        SelectItem("svelte", "Svelte", signal="framework")
-                    ),
-                    SelectGroup(
-                        SelectLabel("Backend"),
-                        SelectItem("django", "Django", signal="framework"),
-                        SelectItem("fastapi", "FastAPI", signal="framework"),
-                        SelectItem("flask", "Flask", signal="framework"),
-                        SelectItem("rails", "Ruby on Rails", signal="framework")
-                    ),
-                    signal="framework"
-                ),
-                initial_value="react",
-                signal="framework"
+        Card(
+            CardHeader(
+                CardTitle("Quick Settings"),
+                CardDescription("Configure your preferences")
             ),
-            cls="flex justify-center"
+            CardContent(
+                Div(
+                    Div(
+                        SelectWithLabel(
+                            label="Theme",
+                            options=[
+                                ("light", "Light"),
+                                ("dark", "Dark"),
+                                ("auto", "System")
+                            ],
+                            value="auto",
+                            signal="theme",
+                            select_cls="w-full"
+                        ),
+                        SelectWithLabel(
+                            label="Language",
+                            options=[
+                                ("en", "English"),
+                                ("es", "Español"),
+                                ("fr", "Français"),
+                                ("de", "Deutsch"),
+                                ("zh", "中文"),
+                                ("ja", "日本語")
+                            ],
+                            value="en",
+                            signal="language",
+                            select_cls="w-full"
+                        ),
+                        SelectWithLabel(
+                            label="Timezone",
+                            options=[
+                                {"group": "Americas", "items": [
+                                    ("est", "Eastern Time"),
+                                    ("cst", "Central Time"),
+                                    ("pst", "Pacific Time")
+                                ]},
+                                {"group": "Europe", "items": [
+                                    ("gmt", "GMT"),
+                                    ("cet", "Central European")
+                                ]}
+                            ],
+                            value="pst",
+                            signal="timezone_hero",
+                            select_cls="w-full"
+                        ),
+                        cls="grid grid-cols-1 md:grid-cols-3 gap-4"
+                    ),
+                    Div(
+                        P(
+                            "Your settings: ",
+                            cls="text-sm text-muted-foreground mb-2"
+                        ),
+                        Div(
+                            Badge(
+                                Icon("lucide:palette", cls="h-3 w-3 mr-1"),
+                                ds_text("$theme_label || 'System'"),
+                                variant="outline"
+                            ),
+                            Badge(
+                                Icon("lucide:globe", cls="h-3 w-3 mr-1"),
+                                ds_text("$language_label || 'English'"),
+                                variant="outline"
+                            ),
+                            Badge(
+                                Icon("lucide:clock", cls="h-3 w-3 mr-1"),
+                                ds_text("$timezone_hero_label || 'Pacific Time'"),
+                                variant="outline"
+                            ),
+                            cls="flex flex-wrap gap-2"
+                        ),
+                        cls="mt-6 pt-6 border-t"
+                    ),
+                    ds_signals(
+                        theme_value=value("auto"),
+                        theme_label=value("System"),
+                        language_value=value("en"),
+                        language_label=value("English"),
+                        timezone_hero_value=value("pst"),
+                        timezone_hero_label=value("Pacific Time")
+                    )
+                )
+            ),
+            cls="w-full max-w-2xl mx-auto"
         ),
-        '''Select(
-    SelectTrigger(
-        SelectValue(placeholder="Select framework", signal="framework"),
-        signal="framework"
+        '''Card(
+    CardHeader(
+        CardTitle("Quick Settings"),
+        CardDescription("Configure your preferences")
     ),
-    SelectContent(
-        SelectGroup(
-            SelectLabel("Frontend"),
-            SelectItem("react", "React", signal="framework"),
-            SelectItem("vue", "Vue", signal="framework"),
-            // ... more items
+    CardContent(
+        Div(
+            SelectWithLabel(
+                label="Theme",
+                options=[("light", "Light"), ("dark", "Dark"), ("auto", "System")],
+                value="auto",
+                signal="theme"
+            ),
+            SelectWithLabel(
+                label="Language",
+                options=[("en", "English"), ("es", "Español"), ("fr", "Français")],
+                value="en",
+                signal="language"
+            ),
+            SelectWithLabel(
+                label="Timezone",
+                options=[
+                    {"group": "Americas", "items": [("est", "Eastern"), ("pst", "Pacific")]},
+                    {"group": "Europe", "items": [("gmt", "GMT"), ("cet", "Central")]}
+                ],
+                value="pst",
+                signal="timezone"
+            ),
+            cls="grid grid-cols-1 md:grid-cols-3 gap-4"
         ),
-        SelectGroup(
-            SelectLabel("Backend"),
-            SelectItem("django", "Django", signal="framework"),
-            // ... more items
-        ),
-        signal="framework"
-    ),
-    initial_value="react",
-    signal="framework"
+        Div(
+            Badge(Icon("lucide:palette"), ds_text("$theme_label")),
+            Badge(Icon("lucide:globe"), ds_text("$language_label")),
+            Badge(Icon("lucide:clock"), ds_text("$timezone_label")),
+            cls="flex gap-2 mt-4"
+        )
+    )
 )''',
         copy_button=True
     )

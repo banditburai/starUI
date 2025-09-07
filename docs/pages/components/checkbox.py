@@ -26,62 +26,190 @@ from widgets.component_preview import ComponentPreview
 def examples():
     """Generate checkbox examples using ComponentPreview with tabs."""
     
-    # Basic usage
+    # Terms and conditions example
     yield ComponentPreview(
-        Div(
-            Checkbox(),
-            Checkbox(checked=True, cls="ml-4"),
-            Checkbox(disabled=True, cls="ml-4"),
-            Checkbox(checked=True, disabled=True, cls="ml-4"),
-            cls="flex items-center gap-4"
+        Card(
+            CardHeader(
+                CardTitle("Complete Registration"),
+                CardDescription("Please review and accept our terms")
+            ),
+            CardContent(
+                Form(
+                    Div(
+                        CheckboxWithLabel(
+                            label="I accept the Terms of Service",
+                            helper_text="You must accept to continue",
+                            signal="terms_accepted",
+                            required=True
+                        ),
+                        CheckboxWithLabel(
+                            label="I accept the Privacy Policy",
+                            helper_text="Learn how we protect your data",
+                            signal="privacy_accepted",
+                            required=True
+                        ),
+                        CheckboxWithLabel(
+                            label="Send me product updates and offers",
+                            helper_text="You can unsubscribe at any time",
+                            signal="marketing_emails"
+                        ),
+                        cls="space-y-3"
+                    ),
+                    Button(
+                        "Create Account",
+                        type="submit",
+                        cls="w-full mt-4",
+                        ds_disabled="!$terms_accepted || !$privacy_accepted",
+                        ds_on_click="event.preventDefault(); alert('Account created!')"
+                    ),
+                    ds_signals(terms_accepted=False, privacy_accepted=False, marketing_emails=True)
+                )
+            ),
+            cls="max-w-md"
         ),
-        '''Checkbox()
-Checkbox(checked=True)
-Checkbox(disabled=True)
-Checkbox(checked=True, disabled=True)''',
-        title="Basic Checkboxes",
-        description="Default, checked, and disabled states"
+        '''Card(
+    CardContent(
+        Form(
+            Div(
+                CheckboxWithLabel(
+                    label="I accept the Terms of Service",
+                    helper_text="You must accept to continue",
+                    signal="terms_accepted",
+                    required=True
+                ),
+                CheckboxWithLabel(
+                    label="I accept the Privacy Policy",
+                    helper_text="Learn how we protect your data",
+                    signal="privacy_accepted",
+                    required=True
+                ),
+                CheckboxWithLabel(
+                    label="Send me product updates and offers",
+                    helper_text="You can unsubscribe at any time",
+                    signal="marketing_emails"
+                ),
+                cls="space-y-3"
+            ),
+            Button(
+                "Create Account",
+                ds_disabled="!$terms_accepted || !$privacy_accepted"
+            ),
+            ds_signals(terms_accepted=False, privacy_accepted=False, marketing_emails=True)
+        )
+    )
+)''',
+        title="Terms & Conditions",
+        description="Registration form with required checkboxes"
     )
     
-    # With labels and helper text
+    # Feature permissions
     yield ComponentPreview(
-        Div(
-            CheckboxWithLabel(
-                label="Accept terms and conditions",
-                signal="terms"
+        Card(
+            CardHeader(
+                CardTitle("App Permissions"),
+                CardDescription("Control what this app can access")
             ),
-            CheckboxWithLabel(
-                label="Subscribe to newsletter",
-                helper_text="Get weekly updates about new features",
-                checked=True,
-                signal="newsletter"
+            CardContent(
+                Div(
+                    Div(
+                        H3("Essential", cls="text-sm font-semibold mb-2 text-muted-foreground"),
+                        CheckboxWithLabel(
+                            label="Storage",
+                            helper_text="Save files and preferences",
+                            signal="storage",
+                            checked=True,
+                            disabled=True
+                        ),
+                        CheckboxWithLabel(
+                            label="Network",
+                            helper_text="Connect to the internet",
+                            signal="network",
+                            checked=True,
+                            disabled=True
+                        ),
+                        cls="space-y-2 mb-4"
+                    ),
+                    Div(
+                        H3("Optional", cls="text-sm font-semibold mb-2 text-muted-foreground"),
+                        CheckboxWithLabel(
+                            label="Camera",
+                            helper_text="Take photos and videos",
+                            signal="camera"
+                        ),
+                        CheckboxWithLabel(
+                            label="Location",
+                            helper_text="Access your location for maps",
+                            signal="location",
+                            checked=True
+                        ),
+                        CheckboxWithLabel(
+                            label="Contacts",
+                            helper_text="Find friends using this app",
+                            signal="contacts"
+                        ),
+                        CheckboxWithLabel(
+                            label="Notifications",
+                            helper_text="Show alerts and reminders",
+                            signal="notify",
+                            checked=True
+                        ),
+                        cls="space-y-2"
+                    ),
+                    Div(
+                        Badge(
+                            ds_text("[$camera && 'Camera', $location && 'Location', $contacts && 'Contacts', $notify && 'Notifications'].filter(Boolean).length + ' optional permissions'"),
+                            variant="secondary"
+                        ),
+                        cls="mt-4 flex justify-center"
+                    ),
+                    ds_signals(storage=True, network=True, camera=False, location=True, contacts=False, notify=True)
+                )
             ),
-            CheckboxWithLabel(
-                label="Required field",
-                required=True,
-                helper_text="This field must be checked to continue",
-                signal="required_field"
-            ),
-            cls="space-y-4"
+            cls="max-w-md"
         ),
-        '''CheckboxWithLabel(
-    label="Accept terms and conditions",
-    signal="terms"
-)
-CheckboxWithLabel(
-    label="Subscribe to newsletter",
-    helper_text="Get weekly updates about new features",
-    checked=True,
-    signal="newsletter"
-)
-CheckboxWithLabel(
-    label="Required field",
-    required=True,
-    helper_text="This field must be checked to continue",
-    signal="required_field"
+        '''Card(
+    CardHeader(
+        CardTitle("App Permissions"),
+        CardDescription("Control what this app can access")
+    ),
+    CardContent(
+        Div(
+            Div(
+                H3("Essential", cls="text-sm font-semibold"),
+                CheckboxWithLabel(
+                    label="Storage",
+                    helper_text="Save files and preferences",
+                    checked=True,
+                    disabled=True
+                ),
+                CheckboxWithLabel(
+                    label="Network",
+                    helper_text="Connect to the internet",
+                    checked=True,
+                    disabled=True
+                )
+            ),
+            Div(
+                H3("Optional", cls="text-sm font-semibold"),
+                CheckboxWithLabel(
+                    label="Camera",
+                    helper_text="Take photos and videos",
+                    signal="camera"
+                ),
+                CheckboxWithLabel(
+                    label="Location",
+                    helper_text="Access your location for maps",
+                    signal="location",
+                    checked=True
+                ),
+                # ... more permissions
+            ),
+            ds_signals(camera=False, location=True, contacts=False, notify=True)
+        )
+    )
 )''',
-        title="Checkbox with Labels",
-        description="Labels, helper text, and required indicators"
+        title="Feature Permissions",
+        description="Grouped checkboxes with disabled states"
     )
     
     # Todo list example
@@ -186,53 +314,78 @@ CheckboxWithLabel(
                         cls="border-b pb-2 mb-3"
                     ),
                     Div(
-                        CheckboxWithLabel(
-                            label="invoice-2024-001.pdf",
-                            signal="file1",
-                            helper_text="2.4 MB"
+                        Div(
+                            CheckboxWithLabel(
+                                label="invoice-2024-001.pdf",
+                                signal="file1",
+                                helper_text="2.4 MB"
+                            ),
+                            ds_show("$file1_exists")
                         ),
-                        CheckboxWithLabel(
-                            label="report-q3.xlsx",
-                            signal="file2",
-                            helper_text="1.8 MB"
+                        Div(
+                            CheckboxWithLabel(
+                                label="report-q3.xlsx",
+                                signal="file2",
+                                helper_text="1.8 MB"
+                            ),
+                            ds_show("$file2_exists")
                         ),
-                        CheckboxWithLabel(
-                            label="presentation.pptx",
-                            signal="file3",
-                            helper_text="5.2 MB"
+                        Div(
+                            CheckboxWithLabel(
+                                label="presentation.pptx",
+                                signal="file3",
+                                helper_text="5.2 MB"
+                            ),
+                            ds_show("$file3_exists")
                         ),
-                        CheckboxWithLabel(
-                            label="contracts.zip",
-                            signal="file4",
-                            helper_text="12.1 MB"
+                        Div(
+                            CheckboxWithLabel(
+                                label="contracts.zip",
+                                signal="file4",
+                                helper_text="12.1 MB"
+                            ),
+                            ds_show("$file4_exists")
                         ),
                         cls="space-y-2 pl-6"
                     ),
                     Div(
                         Button(
                             Icon("lucide:trash-2", cls="h-4 w-4 mr-2"),
-                            "Delete Selected",
+                            Span(ds_text("`Delete ${[$file1, $file2, $file3, $file4].filter(Boolean).length} Selected`")),
+                            ds_on_click("""
+                                if ($file1) $file1_exists = false;
+                                if ($file2) $file2_exists = false;
+                                if ($file3) $file3_exists = false;
+                                if ($file4) $file4_exists = false;
+                                $file1 = false;
+                                $file2 = false;
+                                $file3 = false;
+                                $file4 = false;
+                                $selectAll = false;
+                            """),
                             variant="destructive",
                             size="sm",
-                            ds_disabled="!$file1 && !$file2 && !$file3 && !$file4",
-                            ds_on_click="alert(`Deleting ${[$file1 && 'invoice-2024-001.pdf', $file2 && 'report-q3.xlsx', $file3 && 'presentation.pptx', $file4 && 'contracts.zip'].filter(Boolean).length} files`)"
+                            ds_disabled="!$file1 && !$file2 && !$file3 && !$file4",                            
                         ),
-                        P(
-                            ds_text("[$file1, $file2, $file3, $file4].filter(Boolean).length"),
-                            " items selected",
-                            cls="text-sm text-muted-foreground ml-auto",
-                            ds_show="[$file1, $file2, $file3, $file4].some(Boolean)"
-                        ),
-                        cls="flex items-center justify-between mt-4 pt-4 border-t"
+                        cls="flex items-center justify-start mt-4 pt-4 border-t"
                     ),
-                    ds_signals(selectAll=False, file1=False, file2=False, file3=False, file4=False),
+                    P(
+                        "All files deleted!",
+                        ds_show("!$file1_exists && !$file2_exists && !$file3_exists && !$file4_exists"),
+                        cls="text-sm text-center text-muted-foreground mt-4",                        
+                    ),
+                    ds_signals(
+                        selectAll=False, 
+                        file1=False, file2=False, file3=False, file4=False,
+                        file1_exists=True, file2_exists=True, file3_exists=True, file4_exists=True
+                    ),
                     ds_effect("$selectAll = $file1 && $file2 && $file3 && $file4 && ($file1 || $file2 || $file3 || $file4)"),
                     ds_on_change("""
                         if (event.target.matches('[data-bind="selectAll"]')) {
-                            $file1 = $selectAll;
-                            $file2 = $selectAll;
-                            $file3 = $selectAll;
-                            $file4 = $selectAll;
+                            if ($file1_exists) $file1 = $selectAll;
+                            if ($file2_exists) $file2 = $selectAll;
+                            if ($file3_exists) $file3 = $selectAll;
+                            if ($file4_exists) $file4 = $selectAll;
                         }
                     """)
                 )
@@ -244,18 +397,26 @@ CheckboxWithLabel(
         Div(
             CheckboxWithLabel(label="Select All", signal="selectAll"),
             Div(
-                CheckboxWithLabel(label="file1.pdf", signal="file1"),
-                CheckboxWithLabel(label="file2.xlsx", signal="file2"),
-                # ... more files
+                Div(CheckboxWithLabel(label="invoice.pdf", signal="file1"), ds_show("$file1_exists")),
+                Div(CheckboxWithLabel(label="report.xlsx", signal="file2"), ds_show("$file2_exists")),
+                # ... more files with ds_show
             ),
             Button(
-                "Delete Selected",
+                Span(ds_text("`Delete ${count} Selected`")),
                 ds_disabled("!$file1 && !$file2 && !$file3 && !$file4"),
-                ds_on_click("deleteSelected()")
+                ds_on_click("""
+                    if ($file1) $file1_exists = false;
+                    if ($file2) $file2_exists = false;
+                    // Remove selected files and uncheck
+                """)
             ),
-            ds_signals(selectAll=False, file1=False, file2=False, file3=False, file4=False),
-            ds_effect("$selectAll = $file1 && $file2 && $file3 && $file4"),
-            ds_on_change("if (event.target.matches('[data-bind=\\"selectAll\\"]')) { /* sync all */ }")
+            P(ds_text("`${count} item${count !== 1 ? 's' : ''} selected`")),
+            ds_signals(
+                selectAll=False, file1=False, file2=False,
+                file1_exists=True, file2_exists=True
+            ),
+            ds_effect("$selectAll = $file1 && $file2 && ($file1 || $file2)"),
+            ds_on_change("if (event.target.matches('[data-bind=\\"selectAll\\"]')) { /* sync */ }")
         )
     )
 )''',
@@ -386,13 +547,17 @@ CheckboxWithLabel(
                             helper_text="Critical alerts sent to your phone",
                             signal="sms_notif"
                         ),
+                        cls="space-y-4"
+                    ),
+                    Div(
+                        H3("Optional", cls="text-sm font-semibold mb-3"),
                         CheckboxWithLabel(
                             label="Marketing Communications",
                             helper_text="Product updates and special offers",
                             signal="marketing",
                             checkbox_cls=ds_class(**{"border-blue-500": "$marketing"})
                         ),
-                        cls="space-y-4"
+                        cls="mt-6 pt-6 border-t"
                     ),
                     Div(
                         P(
@@ -411,12 +576,23 @@ CheckboxWithLabel(
                         cls="w-full mt-4"
                     ),
                     Div(
-                        Badge(
-                            ds_text("'Active: ' + [$email_notif && 'Email', $push_notif && 'Push', $sms_notif && 'SMS'].filter(Boolean).join(', ')"),
-                            variant="secondary",
-                            ds_show="$email_notif || $push_notif || $sms_notif"
+                        Div(
+                            Badge(
+                                ds_text("'Active: ' + [$email_notif && 'Email', $push_notif && 'Push', $sms_notif && 'SMS'].filter(Boolean).join(', ')"),
+                                ds_show("$email_notif || $push_notif || $sms_notif"),
+                                variant="secondary",                            
+                            ),
+                            cls="flex justify-center"
                         ),
-                        cls="mt-4 text-center"
+                        Div(
+                            Badge(
+                                "Marketing enabled",
+                                ds_show("$marketing"),
+                                variant="outline"
+                            ),
+                            cls="flex justify-center mt-2"
+                        ),
+                        cls="mt-4"
                     ),
                     ds_signals(email_notif=True, push_notif=False, sms_notif=False, marketing=False)
                 )
@@ -541,29 +717,90 @@ def create_checkbox_docs():
         ]
     }
     
-    # Hero example
+    # Hero example - Interactive settings panel
     hero_example = ComponentPreview(
-        Div(
-            Div(
-                Checkbox(cls="mr-4"),
-                CheckboxWithLabel(label="I agree to the terms", signal="terms_hero", cls="mr-4"),
-                CheckboxWithLabel(
-                    label="Subscribe to updates",
-                    helper_text="Get notified about new features",
-                    checked=True,
-                    signal="updates_hero"
-                ),
-                cls="flex flex-col sm:flex-row gap-4 items-start sm:items-center"
+        Card(
+            CardHeader(
+                CardTitle("Quick Setup"),
+                CardDescription("Configure your preferences in seconds")
             ),
-            cls="flex justify-center"
+            CardContent(
+                Div(
+                    CheckboxWithLabel(
+                        label="Enable dark mode",
+                        helper_text="Reduce eye strain in low-light conditions",
+                        signal="dark_mode",
+                        checked=True
+                    ),
+                    CheckboxWithLabel(
+                        label="Show notifications",
+                        helper_text="Stay updated with real-time alerts",
+                        signal="notifications"
+                    ),
+                    CheckboxWithLabel(
+                        label="Auto-save drafts",
+                        helper_text="Never lose your work",
+                        signal="auto_save",
+                        checked=True
+                    ),
+                    Div(
+                        P(
+                            "Your preferences: ",
+                            cls="text-sm text-muted-foreground mb-1"
+                        ),
+                        P(
+                            Span(
+                                ds_text("[$dark_mode && 'Dark Mode', $notifications && 'Notifications', $auto_save && 'Auto-save'].filter(Boolean).join(', ') || 'None selected'"),
+                                cls="font-medium text-sm break-words"
+                            ),
+                            cls="min-h-[1.25rem]"
+                        ),
+                        cls="mt-4 pt-4 border-t"
+                    ),
+                    ds_signals(dark_mode=True, notifications=False, auto_save=True),
+                    cls="space-y-3"
+                )
+            ),
+            cls="max-w-md mx-auto"
         ),
-        '''Checkbox()
-CheckboxWithLabel(label="I agree to the terms", signal="terms")
-CheckboxWithLabel(
-    label="Subscribe to updates",
-    helper_text="Get notified about new features", 
-    checked=True,
-    signal="updates"
+        '''Card(
+    CardHeader(
+        CardTitle("Quick Setup"),
+        CardDescription("Configure your preferences in seconds")
+    ),
+    CardContent(
+        Div(
+            CheckboxWithLabel(
+                label="Enable dark mode",
+                helper_text="Reduce eye strain in low-light conditions",
+                signal="dark_mode",
+                checked=True
+            ),
+            CheckboxWithLabel(
+                label="Show notifications",
+                helper_text="Stay updated with real-time alerts",
+                signal="notifications"
+            ),
+            CheckboxWithLabel(
+                label="Auto-save drafts",
+                helper_text="Never lose your work",
+                signal="auto_save",
+                checked=True
+            ),
+            Div(
+                P("Your preferences: ", cls="text-sm text-muted-foreground mb-1"),
+                P(
+                    Span(
+                        ds_text("[$dark_mode && 'Dark Mode', $notifications && 'Notifications', $auto_save && 'Auto-save'].filter(Boolean).join(', ') || 'None selected'"),
+                        cls="font-medium text-sm break-words"
+                    ),
+                    cls="min-h-[1.25rem]"
+                ),
+                cls="mt-4 pt-4 border-t"
+            ),
+            ds_signals(dark_mode=True, notifications=False, auto_save=True)
+        )
+    )
 )''',
         copy_button=True
     )

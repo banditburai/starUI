@@ -23,6 +23,7 @@ from .utils import cn
 def Select(
     *children,
     initial_value: str | None = None,
+    initial_label: str | None = None,
     signal: str | None = None,
     cls: str = "",
     **attrs: Any,
@@ -33,11 +34,11 @@ def Select(
         ds_signals(
             {
                 f"{signal}_value": value(initial_value or ""),
-                f"{signal}_label": value(""),
+                f"{signal}_label": value(initial_label or ""),
                 f"{signal}_open": False,
             }
         ),
-        cls=cn("relative inline-block", cls),
+        cls=cn("relative", cls),
         **attrs,
     )
 
@@ -45,12 +46,19 @@ def Select(
 def SelectTrigger(
     *children,
     signal: str | None = None,
-    width: str = "w-[180px]",
+    width: str | None = None,
     cls: str = "",
     **attrs: Any,
 ) -> FT:
     signal = signal or "select"
     trigger_id = attrs.pop("id", f"{signal}-trigger")
+    
+    # Default width if not specified in either width param or cls
+    default_width = "w-[180px]"
+    # Check if cls contains width classes
+    has_width_in_cls = any(c.startswith(('w-', 'min-w-', 'max-w-')) for c in cls.split())
+    # Use explicit width param, or width in cls, or default
+    final_width = width if width else ('' if has_width_in_cls else default_width)
 
     return HTMLButton(
         *children,
@@ -65,10 +73,10 @@ def SelectTrigger(
         data_placeholder=f"!${signal}_label",
         id=trigger_id,
         cls=cn(
-            width,
+            final_width,
             "flex h-9 items-center justify-between gap-2 rounded-md border border-input",
-            "bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs",
-            "transition-[color,box-shadow] outline-none",
+            "bg-transparent px-3 py-2 text-sm shadow-xs",
+            "transition-[color,box-shadow] outline-none truncate",
             "dark:bg-input/30 dark:hover:bg-input/50",
             "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
             "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40",
@@ -91,7 +99,7 @@ def SelectValue(
     return Span(
         ds_text(f"${signal}_label || '{placeholder}'"),
         ds_class(text_muted_foreground=f"!${signal}_label"),
-        cls=cn("pointer-events-none", cls),
+        cls=cn("pointer-events-none truncate flex-1 text-left", cls),
         **attrs,
     )
 
@@ -147,6 +155,10 @@ def SelectItem(
 ) -> FT:
     label = label or value
     signal = signal or "select"
+    
+    # Use Unicode escape sequence for dollar sign to avoid Datastar parsing issues
+    # Replace $ with \u0024 and escape single quotes
+    js_safe_label = label.replace("$", "\\u0024").replace("'", "\\'")
 
     return Div(
         Span(label),
@@ -160,7 +172,7 @@ def SelectItem(
             if disabled
             else [
                 ds_on_click(
-                    f"${signal}_value='{value}';${signal}_label='{label}';document.getElementById('{signal}-content').hidePopover()"
+                    f"${signal}_value='{value}';${signal}_label='{js_safe_label}';document.getElementById('{signal}-content').hidePopover()"
                 )
             ]
         ),
@@ -205,6 +217,7 @@ def SelectLabel(
 
 
 def SelectWithLabel(
+    *attrs: Any,  # Accept positional args (ds_* attributes, etc.)
     label: str,
     options: list[str | tuple[str, str] | dict],
     value: str | None = None,
@@ -218,7 +231,7 @@ def SelectWithLabel(
     label_cls: str = "",
     select_cls: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     # Generate signal if not provided
     if not signal:
@@ -226,6 +239,27 @@ def SelectWithLabel(
 
     # Use the signal-based ID that SelectTrigger expects
     select_id = f"{signal}-trigger"
+    
+    # Find the initial label for the given value
+    initial_label = ""
+    if value:
+        for opt in options:
+            if isinstance(opt, str) and opt == value:
+                initial_label = opt
+                break
+            elif isinstance(opt, tuple) and len(opt) == 2 and opt[0] == value:
+                initial_label = opt[1]
+                break
+            elif isinstance(opt, dict) and "items" in opt:
+                for item in opt["items"]:
+                    if isinstance(item, str) and item == value:
+                        initial_label = item
+                        break
+                    elif isinstance(item, tuple) and len(item) == 2 and item[0] == value:
+                        initial_label = item[1]
+                        break
+    
+    # Keep initial_label as-is since it goes into value() wrapper, not JavaScript
 
     def build_options(opts):
         items = []
@@ -267,8 +301,11 @@ def SelectWithLabel(
             ),
             SelectContent(*build_options(options), signal=signal),
             initial_value=value,
+            initial_label=initial_label,
             signal=signal,
-            **attrs,
+            cls="w-full",  # Ensure Select container takes full width of parent
+            *attrs,  # Pass through positional attrs
+            **kwargs,  # Pass through keyword attrs
         ),
         error_text and HTMLP(error_text, cls="text-sm text-destructive mt-1.5"),
         helper_text

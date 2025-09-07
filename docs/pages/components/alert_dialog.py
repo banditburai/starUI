@@ -92,9 +92,11 @@ def examples():
                                 size="sm"
                             ),
                             AlertDialogContent(
-                                Icon("lucide:alert-triangle", cls="h-12 w-12 text-destructive mx-auto mb-4"),
                                 AlertDialogHeader(
-                                    AlertDialogTitle("Delete Repository"),
+                                    AlertDialogTitle(
+                                        Icon("lucide:alert-triangle", width="24", height="24", cls="mr-2 text-destructive"),
+                                        "Delete Repository"
+                                    ),
                                     AlertDialogDescription(
                                         "This action cannot be undone. This will permanently delete the repository and all of its contents."
                                     )
@@ -166,13 +168,17 @@ def examples():
     # Unsaved changes warning
     yield ComponentPreview(
         Card(
+            CardHeader(
+                CardTitle("Document Editor"),
+                CardDescription("Edit your document details")
+            ),
             CardContent(
                 Div(
                     Div(
-                        InputWithLabel(
+                        InputWithLabel(   
                             label="Document Title",
                             value="My Document",
-                            signal="doc_title"
+                            signal="doc_title"                                                                              
                         ),
                         cls="mb-4"
                     ),
@@ -180,11 +186,14 @@ def examples():
                         InputWithLabel(
                             label="Author",
                             value="John Doe",
-                            signal="doc_author"
+                            signal="doc_author"                                                                              
                         ),
                         cls="mb-4"
                     ),
                     Div(
+                        Div(
+                            P("Make changes to the document fields above and try to save.", cls="text-sm text-muted-foreground italic mb-2")
+                        ),
                         Button(
                             "Cancel",
                             ds_on_click("$changes_made = true"),
@@ -269,74 +278,101 @@ def examples():
     
     # Session timeout warning
     yield ComponentPreview(
-        Card(
-            CardHeader(
+        Div(
+            Card(
+                CardHeader(
                 CardTitle("Session Management"),
                 CardDescription("Login and auto-logout demonstration")
             ),
             CardContent(
                 Div(
+                    ds_signals(session_time=15, timeout_dialog_open=False, timer_started=False, logged_in=False),
                     Div(
-                        Div(
-                            Button(
-                                "Login",
-                                ds_on_click("$logged_in = true; $session_time = 15; $timer_started = true"),
-                                variant="default",
-                                cls="w-full"
-                            ),
-                            ds_show="!$logged_in"
+                        Button(
+                            "Login",
+                            ds_on_click("console.log('Login button clicked!', {before: $logged_in}); $logged_in = true; $session_time = 15; $timer_started = true; console.log('After click:', {logged_in: $logged_in, timer: $timer_started})"),
+                            variant="default"
+                        ),
+                        ds_show("!$logged_in")
+                    ),
+                    Div(
+                        P(
+                            "Logged in as: user@example.com",
+                            cls="text-sm font-medium mb-2"
+                        ),
+                        P(
+                            "Session expires in: ",
+                            Span(ds_text("$session_time"), cls="font-mono font-bold text-lg"),
+                            " seconds",
+                            cls="text-sm"
                         ),
                         Div(
-                            P(
-                                "Logged in as: user@example.com",
-                                cls="text-sm font-medium mb-2"
-                            ),
-                            P(
-                                "Session expires in: ",
-                                Span(ds_text("$session_time"), cls="font-mono font-bold text-lg"),
-                                " seconds",
-                                cls="text-sm"
-                            ),
                             Div(
-                                Div(
-                                    ds_style(width="`${((15 - $session_time) / 15 * 100)}%`"),
-                                    cls="h-2 bg-primary rounded-full transition-all duration-1000"
-                                ),
-                                cls="w-full bg-secondary rounded-full h-2 mt-2"
+                                ds_style(width="`${Math.max(0, ($session_time / 15 * 100))}%`"),
+                                cls="h-2 bg-orange-500 rounded-full transition-all duration-1000"
                             ),
-                            Button(
-                                "Logout",
-                                ds_on_click("$logged_in = false; $timer_started = false; $session_time = 15"),
-                                variant="outline",
-                                size="sm",
-                                cls="mt-4"
-                            ),
-                            ds_show="$logged_in",
-                            cls="space-y-2"
-                        )
+                            cls="w-full bg-secondary rounded-full h-2 mt-2"
+                        ),
+                        Button(
+                            "Logout",
+                            ds_on_click("console.log('Logout clicked'); $logged_in = false; $timer_started = false; $session_time = 15"),
+                            variant="outline",
+                            size="sm",
+                            cls="mt-4"
+                        ),
+                        ds_show("$logged_in"),
+                        cls="space-y-2"
                     ),
                     Div(
                         ds_effect("""
                             if ($timer_started && $logged_in) {
+                                console.log('Starting session timer...');
                                 const timer = setInterval(() => {
-                                    $session_time--;
-                                    if ($session_time === 5 && !$timeout_dialog_open) {
-                                        document.getElementById('timeout_dialog').showModal();
-                                        $timeout_dialog_open = true;
-                                    }
-                                    if ($session_time === 0) {
+                                    if (!$logged_in || !$timer_started) {
+                                        console.log('Timer stopped - user logged out');
                                         clearInterval(timer);
-                                        if ($timeout_dialog_open) {
-                                            document.getElementById('timeout_dialog').close();
-                                            $timeout_dialog_open = false;
+                                        return;
+                                    }
+                                    
+                                    if ($session_time > 0) {
+                                        $session_time = $session_time - 1;
+                                        console.log('Session time:', $session_time);
+                                        
+                                        // Show dialog at 5 seconds
+                                        if ($session_time === 5 && !$timeout_dialog_open) {
+                                            console.log('Showing timeout warning dialog');
+                                            setTimeout(() => {
+                                                const dialog = document.getElementById('timeout_dialog');
+                                                if (dialog) {
+                                                    dialog.showModal();
+                                                    $timeout_dialog_open = true;
+                                                } else {
+                                                    console.error('Could not find timeout dialog with id timeout_dialog');
+                                                }
+                                            }, 0);
                                         }
-                                        alert('Session expired - logged out');
-                                        $logged_in = false;
-                                        $session_time = 15;
-                                        $timer_started = false;
+                                        
+                                        // Auto logout at 0 seconds
+                                        if ($session_time === 0) {
+                                            console.log('Session expired - logging out');
+                                            clearInterval(timer);
+                                            if ($timeout_dialog_open) {
+                                                const dialog = document.getElementById('timeout_dialog');
+                                                if (dialog) {
+                                                    dialog.close();
+                                                }
+                                                $timeout_dialog_open = false;
+                                            }
+                                            $logged_in = false;
+                                            $session_time = 15;
+                                            $timer_started = false;
+                                        }
                                     }
                                 }, 1000);
+                                
+                                // Cleanup function
                                 return () => {
+                                    console.log('Cleaning up session timer');
                                     clearInterval(timer);
                                 };
                             }
@@ -356,25 +392,26 @@ def examples():
                             ),
                             AlertDialogFooter(
                                 AlertDialogAction(
-                                    "Logout",
+                                    "Logout Now",
                                     ref_id="timeout_dialog",
                                     variant="destructive",
-                                    action="$session_time = 0; $logged_in = false; alert('Logged out')"
+                                    action="$logged_in = false; $timer_started = false; $session_time = 15; $timeout_dialog_open = false"
                                 ),
                                 AlertDialogAction(
                                     "Continue Session",
                                     ref_id="timeout_dialog",
-                                    action="$session_time = 15; $timeout_dialog_open = false; alert('Session extended')"
+                                    action="$session_time = 15; $timeout_dialog_open = false"
                                 )
                             )
                         ),
                         ref_id="timeout_dialog"
-                    ),
-                    ds_signals(session_time=15, timeout_dialog_open=False, timer_started=False, logged_in=False)
+                    )
                 )
             ),
-            cls="max-w-md"
+            cls="w-full max-w-lg"
         ),
+        cls="w-full max-w-2xl"
+    ),
         '''// Auto-show alert when session is about to expire
 AlertDialog(
     Div(ds_effect("""
@@ -449,10 +486,10 @@ AlertDialog(
                                 Div(
                                     P("The following items will be deleted:", cls="text-sm font-medium mb-2"),
                                     Ul(
-                                        Li("file1.txt", ds_show="$file1", cls="text-sm text-muted-foreground"),
-                                        Li("file2.pdf", ds_show="$file2", cls="text-sm text-muted-foreground"),
-                                        Li("file3.jpg", ds_show="$file3", cls="text-sm text-muted-foreground"),
-                                        Li("file4.doc", ds_show="$file4", cls="text-sm text-muted-foreground"),
+                                        Li("file1.txt", ds_show("$file1"), cls="text-sm text-muted-foreground"),
+                                        Li("file2.pdf", ds_show("$file2"), cls="text-sm text-muted-foreground"),
+                                        Li("file3.jpg", ds_show("$file3"), cls="text-sm text-muted-foreground"),
+                                        Li("file4.doc", ds_show("$file4"), cls="text-sm text-muted-foreground"),
                                         cls="list-disc list-inside space-y-1"
                                     ),
                                     cls="py-4"
@@ -544,7 +581,7 @@ AlertDialog(
                         AlertDialogContent(
                             AlertDialogHeader(
                                 AlertDialogTitle(
-                                    Icon("lucide:shield-check", cls="h-5 w-5 text-green-500 inline mr-2"),
+                                    Icon("lucide:shield-check", width="24", height="24", cls="mr-2 text-green-500"),
                                     "Confirm Payment"
                                 ),
                                 AlertDialogDescription("Please review and confirm your purchase")

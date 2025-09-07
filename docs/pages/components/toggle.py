@@ -10,16 +10,17 @@ CATEGORY = "ui"
 ORDER = 80
 STATUS = "stable"
 
-from starhtml import Div, P, Icon, Span, H3, Code
+from starhtml import Div, P, Icon, Span, H3, Code, Audio
 from starhtml.datastar import (
     ds_on_click, ds_show, ds_text, ds_signals, value,
-    ds_bind, ds_disabled, ds_on_change, ds_effect, ds_class
+    ds_bind, ds_disabled, ds_on_change, ds_effect, ds_class, ds_ref, ds_style
 )
 from starui.registry.components.toggle import Toggle
 from starui.registry.components.button import Button
 from starui.registry.components.badge import Badge
 from starui.registry.components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
 from starui.registry.components.separator import Separator
+from starui.registry.components.progress import Progress
 from utils import auto_generate_page
 from widgets.component_preview import ComponentPreview
 
@@ -51,116 +52,6 @@ def examples():
         description="Simple toggle button with icon"
     )
     
-    # Text formatting toolbar
-    yield ComponentPreview(
-        Card(
-            CardHeader(
-                CardTitle("Text Editor"),
-                CardDescription("Format your text")
-            ),
-            CardContent(
-                Div(
-                    Div(
-                        Toggle(
-                            Icon("lucide:bold", cls="h-4 w-4"),
-                            variant="outline",
-                            size="sm",
-                            signal="format_bold",
-                            aria_label="Bold"
-                        ),
-                        Toggle(
-                            Icon("lucide:italic", cls="h-4 w-4"),
-                            variant="outline",
-                            size="sm",
-                            signal="format_italic",
-                            aria_label="Italic"
-                        ),
-                        Toggle(
-                            Icon("lucide:underline", cls="h-4 w-4"),
-                            variant="outline",
-                            size="sm",
-                            signal="format_underline",
-                            aria_label="Underline"
-                        ),
-                        Separator(orientation="vertical", cls="h-6"),
-                        Toggle(
-                            Icon("lucide:align-left", cls="h-4 w-4"),
-                            variant="outline",
-                            size="sm",
-                            signal="align_left",
-                            pressed=True,
-                            aria_label="Align left"
-                        ),
-                        Toggle(
-                            Icon("lucide:align-center", cls="h-4 w-4"),
-                            variant="outline",
-                            size="sm",
-                            signal="align_center",
-                            aria_label="Align center"
-                        ),
-                        Toggle(
-                            Icon("lucide:align-right", cls="h-4 w-4"),
-                            variant="outline",
-                            size="sm",
-                            signal="align_right",
-                            aria_label="Align right"
-                        ),
-                        cls="flex items-center gap-1"
-                    ),
-                    Div(
-                        P(
-                            "Sample text",
-                            ds_class(**{
-                                "font-bold": "$format_bold",
-                                "italic": "$format_italic",
-                                "underline": "$format_underline",
-                                "text-left": "$align_left",
-                                "text-center": "$align_center",
-                                "text-right": "$align_right"
-                            }),
-                            cls="p-4 border rounded-md min-h-[60px]"
-                        ),
-                        cls="mt-4"
-                    ),
-                    ds_effect("""
-                        // Ensure only one alignment is active
-                        if ($align_left && ($align_center || $align_right)) {
-                            $align_center = false;
-                            $align_right = false;
-                        } else if ($align_center && ($align_left || $align_right)) {
-                            $align_left = false;
-                            $align_right = false;
-                        } else if ($align_right && ($align_left || $align_center)) {
-                            $align_left = false;
-                            $align_center = false;
-                        }
-                    """)
-                )
-            ),
-            cls="max-w-md"
-        ),
-        '''// Text formatting toolbar
-Div(
-    Toggle(Icon("lucide:bold"), variant="outline", signal="format_bold"),
-    Toggle(Icon("lucide:italic"), variant="outline", signal="format_italic"),
-    Toggle(Icon("lucide:underline"), variant="outline", signal="format_underline"),
-    Separator(orientation="vertical"),
-    Toggle(Icon("lucide:align-left"), variant="outline", signal="align_left"),
-    // ... more alignment options
-    cls="flex items-center gap-1"
-)
-P(
-    "Sample text",
-    ds_class({
-        "font-bold": "$format_bold",
-        "italic": "$format_italic",
-        "underline": "$format_underline"
-    })
-)''',
-        title="Text Formatting",
-        description="Rich text editor formatting toolbar"
-    )
-    
     # Feature toggles
     yield ComponentPreview(
         Card(
@@ -172,7 +63,7 @@ P(
                 Div(
                     Div(
                         Toggle(
-                            Icon("lucide:flask", cls="h-4 w-4 mr-2"),
+                            Icon("lucide:flask-conical", cls="h-4 w-4 mr-2", ds_class=ds_class(**{"text-orange-500": "$experimental"})),
                             Span("Experimental Mode"),
                             variant="outline",
                             signal="experimental"
@@ -182,7 +73,7 @@ P(
                     ),
                     Div(
                         Toggle(
-                            Icon("lucide:bug", cls="h-4 w-4 mr-2"),
+                            Icon("lucide:bug", cls="h-4 w-4 mr-2", ds_class=ds_class(**{"text-red-500": "$debug"})),
                             Span("Debug Mode"),
                             variant="outline",
                             signal="debug"
@@ -192,7 +83,7 @@ P(
                     ),
                     Div(
                         Toggle(
-                            Icon("lucide:zap", cls="h-4 w-4 mr-2"),
+                            Icon("lucide:zap", cls="h-4 w-4 mr-2", ds_class=ds_class(**{"text-yellow-500": "$performance"})),
                             Span("Performance Mode"),
                             variant="outline",
                             signal="performance",
@@ -206,7 +97,7 @@ P(
                         Badge(
                             ds_text("[$experimental && 'Experimental', $debug && 'Debug', $performance && 'Performance'].filter(Boolean).join(' • ') || 'Standard Mode'"),
                             variant="secondary",
-                            cls="w-full justify-center"
+                            cls="w-full justify-center min-w-[200px]"
                         ),
                         cls="text-center"
                     ),
@@ -214,7 +105,7 @@ P(
                     cls="space-y-3"
                 )
             ),
-            cls="max-w-md"
+            cls="w-80"
         ),
         '''Card(
     CardContent(
@@ -332,7 +223,7 @@ Toggle(Icon("lucide:heart"), "Like", variant="outline", size="lg")''',
                         ),
                         Toggle(
                             Icon("lucide:message-circle", cls="h-4 w-4 mr-1"),
-                            Span("8", cls="text-sm"),
+                            Span(ds_text("$comment ? '9' : '8'"), cls="text-sm"),
                             variant="outline",
                             signal="comment",
                             aria_label="Comment"
@@ -354,17 +245,17 @@ Toggle(Icon("lucide:heart"), "Like", variant="outline", size="lg")''',
                     Div(
                         P(
                             ds_show("$liked"),
-                            Icon("lucide:heart", cls="h-3 w-3 inline mr-1 text-red-500"),
+                            Icon("lucide:heart", cls="h-4 w-4 mr-2 text-red-500"),
                             "You liked this",
-                            cls="text-xs text-muted-foreground"
+                            cls="text-xs text-muted-foreground flex items-center"
                         ),
                         P(
                             ds_show("$saved"),
-                            Icon("lucide:bookmark", cls="h-3 w-3 inline mr-1"),
+                            Icon("lucide:bookmark", cls="h-4 w-4 mr-2"),
                             "Saved to collection",
-                            cls="text-xs text-muted-foreground"
+                            cls="text-xs text-muted-foreground flex items-center"
                         ),
-                        cls="mt-2 space-y-1"
+                        cls="mt-2 space-y-1 min-h-[32px]"
                     ),
                     ds_signals(liked=False, comment=False, saved=False, share=False)
                 )
@@ -395,7 +286,7 @@ Card(
         description="Like, comment, save, and share toggles"
     )
     
-    # Music player controls
+    # Music player controls with HTML5 Audio
     yield ComponentPreview(
         Card(
             CardHeader(
@@ -404,39 +295,85 @@ Card(
             ),
             CardContent(
                 Div(
-                    Div(
-                        Div(cls="h-2 bg-secondary rounded-full"),
-                        Div(cls="h-2 bg-primary rounded-full w-1/3"),
-                        cls="relative"
+                    # Realistic timer system for demo purposes
+                    ds_effect("""
+                        // Clean up any existing timer
+                        if (window.musicTimer) {
+                            clearInterval(window.musicTimer);
+                            window.musicTimer = null;
+                        }
+                        
+                        // Start timer when playing
+                        if ($playing && $current_time < $total_time) {
+                            window.musicTimer = setInterval(() => {
+                                if (!$playing) {
+                                    clearInterval(window.musicTimer);
+                                    return;
+                                }
+                                
+                                if ($current_time < $total_time) {
+                                    $current_time = $current_time + 1;
+                                    $song_progress = Math.round(($current_time / $total_time) * 100);
+                                } else {
+                                    // Song completed
+                                    clearInterval(window.musicTimer);
+                                    if ($repeat) {
+                                        $current_time = 0;  // Reset to beginning
+                                        $song_progress = 0;
+                                    } else {
+                                        $playing = false;
+                                    }
+                                }
+                            }, 1000);
+                        }
+                    """),
+                    
+                    # Progress bar
+                    Progress(
+                        signal="song_progress", 
+                        cls="h-2"
                     ),
-                    P("1:23 / 4:56", cls="text-xs text-muted-foreground mt-2 text-center"),
+                    
+                    # Time display
+                    P(
+                        ds_text("Math.floor($current_time / 60) + ':' + String($current_time % 60).padStart(2, '0') + ' / ' + Math.floor($total_time / 60) + ':' + String($total_time % 60).padStart(2, '0')"), 
+                        cls="text-xs text-muted-foreground mt-2 text-center"
+                    ),
+                    
+                    # Control buttons
                     Div(
                         Toggle(
                             Icon("lucide:shuffle", cls="h-4 w-4"),
+                            variant="outline",
                             size="sm",
                             signal="shuffle",
                             aria_label="Shuffle"
                         ),
-                        Toggle(
+                        Button(
                             Icon("lucide:skip-back", cls="h-4 w-4"),
+                            ds_on_click("$current_time = 0; $song_progress = 0; $playing = false"),
+                            variant="outline",
                             size="sm",
-                            signal="prev",
-                            aria_label="Previous"
+                            aria_label="Previous Song"
                         ),
                         Toggle(
-                            Icon("lucide:play", cls="h-5 w-5"),
+                            Span(Icon("lucide:play", cls="h-5 w-5"), ds_show("!$playing")),
+                            Span(Icon("lucide:pause", cls="h-5 w-5"), ds_show("$playing")),
+                            variant="outline",
                             signal="playing",
-                            pressed=True,
+                            pressed=True,  # Start playing
                             aria_label="Play/Pause"
                         ),
-                        Toggle(
+                        Button(
                             Icon("lucide:skip-forward", cls="h-4 w-4"),
+                            ds_on_click("$current_time = 0; $song_progress = 0; $playing = false"),
+                            variant="outline",
                             size="sm",
-                            signal="next",
-                            aria_label="Next"
+                            aria_label="Next Song"
                         ),
                         Toggle(
                             Icon("lucide:repeat", cls="h-4 w-4"),
+                            variant="outline",
                             size="sm",
                             signal="repeat",
                             pressed=True,
@@ -444,6 +381,8 @@ Card(
                         ),
                         cls="flex items-center justify-center gap-2 mt-4"
                     ),
+                    
+                    # Status badges
                     Div(
                         Badge(
                             ds_text("$shuffle ? 'Shuffle ON' : 'Shuffle OFF'"),
@@ -457,28 +396,69 @@ Card(
                         ),
                         cls="flex justify-center gap-2 mt-3"
                     ),
-                    ds_signals(shuffle=False, prev=False, playing=True, next=False, repeat=True)
+                    
+                    # Audio control effect - handles play/pause based on $playing state
+                    Div(
+                        ds_effect("""
+                            const audio = $audioPlayer;
+                            if (!audio) return;
+                            
+                            if ($playing && audio.paused) {
+                                console.log('Playing audio...');
+                                audio.play().catch(e => {
+                                    console.warn('Audio play failed:', e);
+                                    $playing = false;
+                                });
+                            } else if (!$playing && !audio.paused) {
+                                console.log('Pausing audio...');
+                                audio.pause();
+                            }
+                        """)
+                    ),
+                    
+                    
+                    ds_signals(
+                        shuffle=False, 
+                        playing=True,   # Start playing for demo
+                        repeat=True,
+                        current_time=83,   # Start at 1:23 (83 seconds)
+                        total_time=296,    # 4:56 total (296 seconds)
+                        song_progress=28  # 83/296 = ~28%
+                    )
                 )
             ),
             cls="max-w-sm"
         ),
-        '''// Music player controls
+        '''// Simulated Music Player with Toggle Controls
 Card(
     CardContent(
-        // Progress bar
+        // Progress bar synced with timer
+        Progress(signal="song_progress", cls="h-2"),
+        
+        // Time display
+        P(ds_text("Math.floor($current_time / 60) + ':' + String($current_time % 60).padStart(2, '0') + ' / 4:56'")),
+        ),
+        
+        // Control buttons
         Div(
             Toggle(Icon("lucide:shuffle"), size="sm", signal="shuffle"),
-            Toggle(Icon("lucide:skip-back"), size="sm"),
-            Toggle(Icon("lucide:play"), signal="playing", pressed=True),
-            Toggle(Icon("lucide:skip-forward"), size="sm"),
+            Button(Icon("lucide:skip-back"), ds_on_click="audio.currentTime = 0"),
+            Toggle(
+                Span(Icon("lucide:play"), ds_show="!$playing"),
+                Span(Icon("lucide:pause"), ds_show="$playing"),
+                signal="playing"
+            ),
+            Button(Icon("lucide:skip-forward"), ds_on_click="audio.currentTime += 10"),
             Toggle(Icon("lucide:repeat"), size="sm", signal="repeat"),
             cls="flex items-center justify-center gap-2"
         ),
-        Badge(ds_text("$shuffle ? 'Shuffle ON' : 'OFF'"))
+        
+        // Audio control effect
+        Div(ds_effect="// Play/pause audio based on $playing state")
     )
 )''',
-        title="Music Player",
-        description="Media player control toggles"
+        title="Music Player Simulation",
+        description="Simulated music player with realistic timer and toggle controls"
     )
     
     # Disabled states

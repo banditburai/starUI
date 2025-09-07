@@ -102,7 +102,7 @@ def examples():
                 TableHeader(
                     TableRow(
                         TableHead(
-                            Checkbox(checked_signal="selectAll", cls="mr-2"),
+                            Checkbox(signal="selectAll", cls="mr-2"),
                             cls="w-12"
                         ),
                         TableHead("Task"),
@@ -113,7 +113,8 @@ def examples():
                 ),
                 TableBody(
                     TableRow(
-                        TableCell(Checkbox(checked_signal="task1")),
+                        ds_show("$task1Visible"),
+                        TableCell(Checkbox(signal="task1")),
                         TableCell("Fix login bug"),
                         TableCell(Badge("High", variant="destructive")),
                         TableCell("2024-01-15"),
@@ -125,11 +126,11 @@ def examples():
                                 onclick="alert('Edit task')"
                             ),
                             cls="text-right"
-                        ),
-                        selected=True
+                        )
                     ),
                     TableRow(
-                        TableCell(Checkbox(checked_signal="task2")),
+                        ds_show("$task2Visible"),
+                        TableCell(Checkbox(signal="task2")),
                         TableCell("Update documentation"),
                         TableCell(Badge("Medium", variant="secondary")),
                         TableCell("2024-01-20"),
@@ -144,7 +145,8 @@ def examples():
                         )
                     ),
                     TableRow(
-                        TableCell(Checkbox(checked_signal="task3")),
+                        ds_show("$task3Visible"),
+                        TableCell(Checkbox(signal="task3")),
                         TableCell("Code review"),
                         TableCell(Badge("Low", variant="outline")),
                         TableCell("2024-01-25"),
@@ -165,23 +167,29 @@ def examples():
                   Span(
                       ds_text("($task1 ? 1 : 0) + ($task2 ? 1 : 0) + ($task3 ? 1 : 0)"),
                       cls="font-bold"
-                  )
+                  ),
+                  " of ",
+                  Span(
+                      ds_text("($task1Visible ? 1 : 0) + ($task2Visible ? 1 : 0) + ($task3Visible ? 1 : 0)"),
+                      cls="font-bold"
+                  ),
+                  " remaining"
                 ),
                 Button(
                     "Complete Selected",
-                    ds_on_click("alert('Complete ' + (($task1 ? 1 : 0) + ($task2 ? 1 : 0) + ($task3 ? 1 : 0)) + ' tasks')"),
+                    ds_on_click("let count = ($task1 ? 1 : 0) + ($task2 ? 1 : 0) + ($task3 ? 1 : 0); if(count > 0) { alert('Completing ' + count + ' task' + (count !== 1 ? 's' : '')); if($task1) { $task1Visible = false; $task1 = false; } if($task2) { $task2Visible = false; $task2 = false; } if($task3) { $task3Visible = false; $task3 = false; } } else { alert('No tasks selected'); }"),
                     size="sm",
                     cls="mt-2"
                 ),
                 cls="mt-4 p-3 bg-muted rounded text-sm"
             ),
-            ds_signals(selectAll=False, task1=True, task2=False, task3=False),
+            ds_signals(selectAll=False, task1=False, task2=False, task3=False, task1Visible=True, task2Visible=True, task3Visible=True),
             cls="space-y-4"
         ),
         '''Table(
     TableHeader(
         TableRow(
-            TableHead(Checkbox(checked_signal="selectAll")),
+            TableHead(Checkbox(signal="selectAll")),
             TableHead("Task"),
             TableHead("Priority"),
             TableHead("Due Date"),
@@ -190,7 +198,7 @@ def examples():
     ),
     TableBody(
         TableRow(
-            TableCell(Checkbox(checked_signal="task1")),
+            TableCell(Checkbox(signal="task1")),
             TableCell("Fix login bug"),
             TableCell(Badge("High", variant="destructive")),
             TableCell("2024-01-15"),
@@ -289,145 +297,6 @@ def examples():
         title="Financial Data",
         description="Table with footer totals and formatted currency values"
     )
-    
-    # Sortable product table
-    signal_id2 = uuid4().hex[:8]
-    yield ComponentPreview(
-        Div(
-            Div(
-                Input(
-                    ds_bind("search"),
-                    type="text",
-                    placeholder="Search products...",
-                    cls="w-full px-3 py-2 border rounded-md mb-4"
-                ),
-                P("Search: ", Span(ds_text("$search"), cls="font-mono"), cls="text-sm text-muted-foreground mb-4")
-            ),
-            Table(
-                TableHeader(
-                    TableRow(
-                        TableHead(
-                            Button(
-                                "Product Name",
-                                Icon("lucide:chevron-up" if True else "lucide:chevron-down", cls="ml-1 h-3 w-3"),
-                                variant="ghost",
-                                size="sm",
-                                ds_on_click="$sortBy = 'name'; $sortDesc = !$sortDesc",
-                                cls="p-0 font-medium hover:bg-transparent"
-                            )
-                        ),
-                        TableHead("Category"),
-                        TableHead(
-                            Button(
-                                "Price",
-                                Icon("lucide:chevron-up", cls="ml-1 h-3 w-3"),
-                                variant="ghost", 
-                                size="sm",
-                                ds_on_click="$sortBy = 'price'; $sortDesc = !$sortDesc",
-                                cls="p-0 font-medium hover:bg-transparent"
-                            ),
-                            cls="text-right"
-                        ),
-                        TableHead("Stock", cls="text-right")
-                    )
-                ),
-                TableBody(
-                    TableRow(
-                        TableCell("Wireless Headphones"),
-                        TableCell(Badge("Electronics")),
-                        TableCell("$199.99", cls="text-right font-medium"),
-                        TableCell(
-                            Span("42", cls="text-green-600 font-medium"),
-                            cls="text-right"
-                        )
-                    ),
-                    TableRow(
-                        TableCell("Coffee Mug"),
-                        TableCell(Badge("Kitchen", variant="secondary")),
-                        TableCell("$12.99", cls="text-right font-medium"),
-                        TableCell(
-                            Span("156", cls="text-green-600 font-medium"),
-                            cls="text-right"
-                        )
-                    ),
-                    TableRow(
-                        TableCell("Desk Lamp"),
-                        TableCell(Badge("Furniture", variant="outline")),
-                        TableCell("$89.99", cls="text-right font-medium"),
-                        TableCell(
-                            Span("3", cls="text-red-600 font-medium"),
-                            cls="text-right"
-                        )
-                    ),
-                    TableRow(
-                        TableCell("Notebook Set"),
-                        TableCell(Badge("Office", variant="secondary")),
-                        TableCell("$24.99", cls="text-right font-medium"),
-                        TableCell(
-                            Span("89", cls="text-green-600 font-medium"),
-                            cls="text-right"
-                        )
-                    )
-                ),
-                TableCaption("Product inventory as of January 2024")
-            ),
-            Div(
-                P("Sorting by: ", Strong(ds_text("$sortBy")), 
-                  " (", ds_text("$sortDesc ? 'Descending' : 'Ascending'"), ")",
-                  cls="text-sm text-muted-foreground"
-                ),
-                cls="mt-4"
-            ),
-            ds_signals(search=value(""), sortBy=value("name"), sortDesc=False),
-            cls="space-y-4"
-        ),
-        '''# Searchable and sortable table
-Input(
-    ds_bind("search"),
-    type="text",
-    placeholder="Search products...",
-    cls="w-full px-3 py-2 border rounded-md"
-)
-
-Table(
-    TableHeader(
-        TableRow(
-            TableHead(
-                Button(
-                    "Product Name",
-                    Icon("lucide:chevron-up", cls="ml-1 h-3 w-3"),
-                    variant="ghost",
-                    ds_on_click("$sortBy = 'name'; $sortDesc = !$sortDesc")
-                )
-            ),
-            TableHead("Category"),
-            TableHead(
-                Button(
-                    "Price",
-                    Icon("lucide:chevron-up", cls="ml-1 h-3 w-3"),
-                    variant="ghost",
-                    ds_on_click="$sortBy = 'price'; $sortDesc = !$sortDesc"
-                ),
-                cls="text-right"
-            ),
-            TableHead("Stock", cls="text-right")
-        )
-    ),
-    TableBody(
-        TableRow(
-            TableCell("Wireless Headphones"),
-            TableCell(Badge("Electronics")),
-            TableCell("$199.99", cls="text-right font-medium"),
-            TableCell(Span("42", cls="text-green-600"), cls="text-right")
-        ),
-        # ... more rows
-    ),
-    TableCaption("Product inventory as of January 2024")
-)''',
-        title="Sortable Product Table",
-        description="Interactive table with search, sortable columns, and status indicators"
-    )
-    
     # File browser table
     signal_id3 = uuid4().hex[:8]
     yield ComponentPreview(
@@ -436,7 +305,7 @@ Table(
                 TableHeader(
                     TableRow(
                         TableHead(
-                            Checkbox(checked_signal="selectAll"),
+                            Checkbox(signal="selectAll"),
                             cls="w-12"
                         ),
                         TableHead("Name"),
@@ -447,7 +316,8 @@ Table(
                 ),
                 TableBody(
                     TableRow(
-                        TableCell(Checkbox(checked_signal="file1")),
+                        ds_show("$file1Visible"),
+                        TableCell(Checkbox(signal="file1")),
                         TableCell(
                             Div(
                                 Icon("lucide:folder", cls="mr-2 h-4 w-4 text-blue-500"),
@@ -468,7 +338,8 @@ Table(
                         )
                     ),
                     TableRow(
-                        TableCell(Checkbox(checked_signal="file2")),
+                        ds_show("$file2Visible"),
+                        TableCell(Checkbox(signal="file2")),
                         TableCell(
                             Div(
                                 Icon("lucide:file-text", cls="mr-2 h-4 w-4 text-gray-500"),
@@ -489,7 +360,8 @@ Table(
                         )
                     ),
                     TableRow(
-                        TableCell(Checkbox(checked_signal="file3")),
+                        ds_show("$file3Visible"),
+                        TableCell(Checkbox(signal="file3")),
                         TableCell(
                             Div(
                                 Icon("lucide:image", cls="mr-2 h-4 w-4 text-green-500"),
@@ -512,29 +384,35 @@ Table(
                 )
             ),
             Div(
-                P("Selected files: ",
+                P("Selected: ",
                   Span(
                       ds_text("($file1 ? 1 : 0) + ($file2 ? 1 : 0) + ($file3 ? 1 : 0)"),
                       cls="font-bold"
                   ),
+                  " of ",
+                  Span(
+                      ds_text("($file1Visible ? 1 : 0) + ($file2Visible ? 1 : 0) + ($file3Visible ? 1 : 0)"),
+                      cls="font-bold"
+                  ),
+                  " files",
                   cls="text-sm"
                 ),
                 Button(
                     "Delete Selected",
+                    ds_on_click("let count = ($file1 ? 1 : 0) + ($file2 ? 1 : 0) + ($file3 ? 1 : 0); if(count > 0) { alert('Deleting ' + count + ' selected file' + (count > 1 ? 's' : '')); if($file1) { $file1Visible = false; $file1 = false; } if($file2) { $file2Visible = false; $file2 = false; } if($file3) { $file3Visible = false; $file3 = false; } } else { alert('No files selected'); }"),
                     variant="destructive",
-                    size="sm",
-                    ds_on_click="alert('Delete selected files')",
+                    size="sm",                    
                     cls="mt-2"
                 ),
                 cls="mt-4 p-3 bg-muted rounded"
             ),
-            ds_signals(selectAll=False, file1=False, file2=True, file3=False),
+            ds_signals(selectAll=False, file1=False, file2=False, file3=False, file1Visible=True, file2Visible=True, file3Visible=True),
             cls="space-y-4"
         ),
         '''Table(
     TableHeader(
         TableRow(
-            TableHead(Checkbox(checked_signal="selectAll")),
+            TableHead(Checkbox(signal="selectAll")),
             TableHead("Name"),
             TableHead("Modified"),
             TableHead("Size", cls="text-right"),
@@ -543,7 +421,7 @@ Table(
     ),
     TableBody(
         TableRow(
-            TableCell(Checkbox(checked_signal="file1")),
+            TableCell(Checkbox(signal="file1")),
             TableCell(
                 Div(
                     Icon("lucide:folder", cls="mr-2 h-4 w-4 text-blue-500"),
