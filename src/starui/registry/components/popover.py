@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from starhtml import FT, Div
+from starhtml import FT, Div, Style
 from starhtml.datastar import ds_position, ds_ref
 
 from .button import Button
@@ -54,7 +54,24 @@ def PopoverContent(*children, cls="", side="bottom", align="center", **attrs):
 
         processed_children = [process_element(child) for child in children]
 
+        has_width = any(w in cls for w in ["w-", "max-w-", "min-w-"])
+        has_padding = any(
+            p in cls for p in ["p-", "px-", "py-", "pt-", "pr-", "pb-", "pl-"]
+        )
+
         return Div(
+            Style(f"""
+                @keyframes popover-show-{signal} {{
+                    from {{ opacity: 0; }}
+                    to {{ opacity: 1; }}
+                }}
+                #{signal}-content {{
+                    opacity: 0;
+                }}
+                #{signal}-content:popover-open {{
+                    animation: popover-show-{signal} 150ms ease-out 75ms forwards;
+                }}
+            """),
             *processed_children,
             ds_ref(f"{signal}Content"),
             ds_position(
@@ -71,7 +88,9 @@ def PopoverContent(*children, cls="", side="bottom", align="center", **attrs):
             aria_labelledby=f"{signal}-trigger",
             tabindex="-1",
             cls=cn(
-                "z-50 w-72 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none dark:border-input",
+                "z-50 rounded-md border border-input bg-popover text-popover-foreground shadow-md outline-none",
+                "w-72" if not has_width else "",
+                "p-4" if not has_padding else "",
                 cls,
             ),
             **attrs,

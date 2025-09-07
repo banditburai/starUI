@@ -67,6 +67,11 @@ COMPONENT_REGISTRY = {
     "calendar": _component(
         "calendar", "Date picker with range and multiple selection", ["utils", "button"]
     ),
+    "date_picker": _component(
+        "date_picker",
+        "Date picker with popover calendar",
+        ["utils", "button", "calendar", "popover"],
+    ),
     "card": _component("card", "Card container", ["utils"]),
     "checkbox": _component("checkbox", "Checkbox input", ["utils"]),
     "command": _component(
