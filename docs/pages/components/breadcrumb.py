@@ -164,6 +164,250 @@ def examples():
         description="Full breadcrumb trail with multiple levels"
     )
     
+    # Breadcrumb with icons
+    yield ComponentPreview(
+        Breadcrumb(
+            BreadcrumbList(
+                BreadcrumbItem(
+                    BreadcrumbLink(
+                        Icon("lucide:home", width="16", height="16", cls="mr-1 inline-block align-text-bottom"),
+                        "Home",
+                        href="/"
+                    )
+                ),
+                BreadcrumbSeparator(),
+                BreadcrumbItem(
+                    BreadcrumbLink(
+                        Icon("lucide:folder", width="16", height="16", cls="mr-1 inline-block align-text-bottom"),
+                        "Documents",
+                        href="/documents"
+                    )
+                ),
+                BreadcrumbSeparator(),
+                BreadcrumbItem(
+                    BreadcrumbLink(
+                        Icon("lucide:folder", width="16", height="16", cls="mr-1 inline-block align-text-bottom"),
+                        "Projects",
+                        href="/documents/projects"
+                    )
+                ),
+                BreadcrumbSeparator(),
+                BreadcrumbItem(
+                    BreadcrumbPage(
+                        Icon("lucide:file-text", width="16", height="16", cls="mr-1 inline-block align-text-bottom"),
+                        "README.md"
+                    )
+                )
+            )
+        ),
+        '''Breadcrumb(
+    BreadcrumbList(
+        BreadcrumbItem(
+            BreadcrumbLink(
+                Icon("lucide:home", width="16", height="16", cls="mr-1 inline-block align-text-bottom"),
+                "Home",
+                href="/"
+            )
+        ),
+        BreadcrumbSeparator(),
+        BreadcrumbItem(
+            BreadcrumbLink(
+                Icon("lucide:folder", width="16", height="16", cls="mr-1 inline-block align-text-bottom"),
+                "Documents",
+                href="/documents"
+            )
+        ),
+        BreadcrumbSeparator(),
+        BreadcrumbItem(
+            BreadcrumbLink(
+                Icon("lucide:folder", width="16", height="16", cls="mr-1 inline-block align-text-bottom"),
+                "Projects",
+                href="/documents/projects"
+            )
+        ),
+        BreadcrumbSeparator(),
+        BreadcrumbItem(
+            BreadcrumbPage(
+                Icon("lucide:file-text", width="16", height="16", cls="mr-1 inline-block align-text-bottom"),
+                "README.md"
+            )
+        )
+    )
+)''',
+        title="With Icons",
+        description="Breadcrumb items with icons for better visual context"
+    )
+    
+    # E-commerce product breadcrumb
+    yield ComponentPreview(
+        Breadcrumb(
+            BreadcrumbList(
+                BreadcrumbItem(
+                    BreadcrumbLink("Shop", href="/shop")
+                ),
+                BreadcrumbSeparator(
+                    Icon("lucide:chevron-right", width="16", height="16")
+                ),
+                BreadcrumbItem(
+                    BreadcrumbLink("Electronics", href="/shop/electronics")
+                ),
+                BreadcrumbSeparator(
+                    Icon("lucide:chevron-right", width="16", height="16")
+                ),
+                BreadcrumbItem(
+                    BreadcrumbLink("Smartphones", href="/shop/electronics/smartphones")
+                ),
+                BreadcrumbSeparator(
+                    Icon("lucide:chevron-right", width="16", height="16")
+                ),
+                BreadcrumbItem(
+                    BreadcrumbLink("Apple", href="/shop/electronics/smartphones/apple")
+                ),
+                BreadcrumbSeparator(
+                    Icon("lucide:chevron-right", width="16", height="16")
+                ),
+                BreadcrumbItem(
+                    BreadcrumbPage("iPhone 15 Pro")
+                )
+            )
+        ),
+        '''Breadcrumb(
+    BreadcrumbList(
+        BreadcrumbItem(
+            BreadcrumbLink("Shop", href="/shop")
+        ),
+        BreadcrumbSeparator(
+            Icon("lucide:chevron-right", width="16", height="16")
+        ),
+        BreadcrumbItem(
+            BreadcrumbLink("Electronics", href="/shop/electronics")
+        ),
+        BreadcrumbSeparator(
+            Icon("lucide:chevron-right", width="16", height="16")
+        ),
+        BreadcrumbItem(
+            BreadcrumbLink("Smartphones", href="/shop/electronics/smartphones")
+        ),
+        BreadcrumbSeparator(
+            Icon("lucide:chevron-right", width="16", height="16")
+        ),
+        BreadcrumbItem(
+            BreadcrumbLink("Apple", href="/shop/electronics/smartphones/apple")
+        ),
+        BreadcrumbSeparator(
+            Icon("lucide:chevron-right", width="16", height="16")
+        ),
+        BreadcrumbItem(
+            BreadcrumbPage("iPhone 15 Pro")
+        )
+    )
+)''',
+        title="E-commerce Product Path",
+        description="Product category hierarchy with chevron separators"
+    )
+    
+    # Different separator styles
+    yield ComponentPreview(
+        Div(
+            # Dot separator
+            Breadcrumb(
+                BreadcrumbList(
+                    BreadcrumbItem(
+                        BreadcrumbLink("Blog", href="/blog")
+                    ),
+                    BreadcrumbSeparator(
+                        Span("•", cls="px-2 text-muted-foreground")
+                    ),
+                    BreadcrumbItem(
+                        BreadcrumbLink("Technology", href="/blog/tech")
+                    ),
+                    BreadcrumbSeparator(
+                        Span("•", cls="px-2 text-muted-foreground")
+                    ),
+                    BreadcrumbItem(
+                        BreadcrumbPage("AI Trends 2024")
+                    )
+                ),
+                cls="mb-4"
+            ),
+            # Arrow separator
+            Breadcrumb(
+                BreadcrumbList(
+                    BreadcrumbItem(
+                        BreadcrumbLink("Settings", href="/settings")
+                    ),
+                    BreadcrumbSeparator(
+                        Span("→", cls="px-2 text-muted-foreground")
+                    ),
+                    BreadcrumbItem(
+                        BreadcrumbLink("Security", href="/settings/security")
+                    ),
+                    BreadcrumbSeparator(
+                        Span("→", cls="px-2 text-muted-foreground")
+                    ),
+                    BreadcrumbItem(
+                        BreadcrumbPage("Two-Factor Auth")
+                    )
+                ),
+                cls="mb-4"
+            ),
+            # Pipe separator
+            Breadcrumb(
+                BreadcrumbList(
+                    BreadcrumbItem(
+                        BreadcrumbLink("Docs", href="/docs")
+                    ),
+                    BreadcrumbSeparator(
+                        Span("|", cls="px-2 text-muted-foreground")
+                    ),
+                    BreadcrumbItem(
+                        BreadcrumbLink("API", href="/docs/api")
+                    ),
+                    BreadcrumbSeparator(
+                        Span("|", cls="px-2 text-muted-foreground")
+                    ),
+                    BreadcrumbItem(
+                        BreadcrumbPage("Authentication")
+                    )
+                )
+            )
+        ),
+        '''# Dot separator
+Breadcrumb(
+    BreadcrumbList(
+        BreadcrumbItem(BreadcrumbLink("Blog", href="/blog")),
+        BreadcrumbSeparator(Span("•", cls="px-2 text-muted-foreground")),
+        BreadcrumbItem(BreadcrumbLink("Technology", href="/blog/tech")),
+        BreadcrumbSeparator(Span("•", cls="px-2 text-muted-foreground")),
+        BreadcrumbItem(BreadcrumbPage("AI Trends 2024"))
+    )
+)
+
+# Arrow separator
+Breadcrumb(
+    BreadcrumbList(
+        BreadcrumbItem(BreadcrumbLink("Settings", href="/settings")),
+        BreadcrumbSeparator(Span("→", cls="px-2 text-muted-foreground")),
+        BreadcrumbItem(BreadcrumbLink("Security", href="/settings/security")),
+        BreadcrumbSeparator(Span("→", cls="px-2 text-muted-foreground")),
+        BreadcrumbItem(BreadcrumbPage("Two-Factor Auth"))
+    )
+)
+
+# Pipe separator
+Breadcrumb(
+    BreadcrumbList(
+        BreadcrumbItem(BreadcrumbLink("Docs", href="/docs")),
+        BreadcrumbSeparator(Span("|", cls="px-2 text-muted-foreground")),
+        BreadcrumbItem(BreadcrumbLink("API", href="/docs/api")),
+        BreadcrumbSeparator(Span("|", cls="px-2 text-muted-foreground")),
+        BreadcrumbItem(BreadcrumbPage("Authentication"))
+    )
+)''',
+        title="Separator Styles",
+        description="Different separator styles: dots, arrows, and pipes"
+    )
+    
     # Responsive breadcrumb
     yield ComponentPreview(
         Breadcrumb(

@@ -13,7 +13,7 @@ STATUS = "stable"
 from starhtml import Div, P, Input, Label, Icon, Span, H2, H3, Form, Code, Ul, Li, A, Img, Strong, Hr
 from starhtml.datastar import (
     ds_on_click, ds_show, ds_text, ds_signals, value,
-    ds_bind, ds_disabled, ds_on_change, ds_effect, ds_class, ds_style, toggle
+    ds_bind, ds_disabled, ds_on_change, ds_on_input, ds_effect, ds_class, ds_style, toggle
 )
 from starui.registry.components.popover import (
     Popover, PopoverTrigger, PopoverContent, PopoverClose
@@ -26,6 +26,8 @@ from starui.registry.components.badge import Badge
 from starui.registry.components.separator import Separator
 from starui.registry.components.select import SelectWithLabel
 from starui.registry.components.avatar import Avatar
+from starui.registry.components.date_picker import DatePicker, DateTimePicker
+from starui.registry.components.toggle_group import ToggleGroup
 from utils import auto_generate_page
 from widgets.component_preview import ComponentPreview
 
@@ -120,16 +122,16 @@ Popover(
     # Profile card popover
     yield ComponentPreview(
         Div(
-            P("Click on the avatar to see profile details:", cls="text-sm text-muted-foreground mb-4"),
+            P("Click the profile button to see details:", cls="text-sm text-muted-foreground mb-4"),
             Popover(
                 PopoverTrigger(
                     Avatar(
                         Img(src="https://github.com/shadcn.png", alt="@shadcn"),
-                        size="sm",
-                        cls="mr-2"
+                        size="sm"
                     ),
-                    Span("@shadcn", cls="text-sm font-medium"),
-                    cls="flex items-center hover:bg-muted/50 px-3 py-2 rounded-lg transition-colors cursor-pointer"
+                    Span("@shadcn", cls="text-sm font-medium ml-2"),
+                    variant="ghost",
+                    cls="h-auto px-2 py-1.5"
                 ),
                 PopoverContent(
                     Div(
@@ -176,19 +178,17 @@ Popover(
                             cls="flex gap-2"
                         )
                     ),
-                    cls="w-80"
+                    cls="w-96"
                 )
             ),
             cls="flex flex-col items-center"
         ),
         '''Popover(
     PopoverTrigger(
-        Div(
-            Avatar(Img(src="https://github.com/shadcn.png", alt="@shadcn"), size="sm"),
-            Span("@shadcn", cls="text-sm font-medium"),
-            cls="flex items-center hover:bg-muted/50 p-2 rounded-md transition-colors"
-        ),
-        variant="ghost"
+        Avatar(Img(src="https://github.com/shadcn.png", alt="@shadcn"), size="sm"),
+        Span("@shadcn", cls="text-sm font-medium ml-2"),
+        variant="ghost",
+        cls="h-auto px-2 py-1.5"
     ),
     PopoverContent(
         Div(
@@ -248,11 +248,10 @@ Popover(
                             value="30",
                             signal="meeting_duration"
                         ),
-                        DatePickerWithLabel(
-                            label="Date & Time",
+                        Label("Date & Time", cls="text-sm font-medium mb-1 block"),
+                        DateTimePicker(
                             signal="meeting_datetime",
                             placeholder="Select date and time",
-                            required=True
                         ),
                         TextareaWithLabel(
                             label="Notes (Optional)",
@@ -264,23 +263,23 @@ Popover(
                         Div(
                             Button(
                                 "Cancel",
+                                ds_on_click("$meeting_title = ''; $meeting_notes = ''"),
                                 type="button",
                                 variant="outline",
-                                size="sm",
-                                ds_on_click="$meeting_title = ''; $meeting_notes = ''"
+                                size="sm"
                             ),
                             Button(
                                 "Schedule",
-                                type="button",
-                                size="sm",
-                                ds_disabled="!$meeting_title || !$meeting_datetime",
-                                ds_on_click="""
+                                ds_disabled("!$meeting_title || !$meeting_datetime"),
+                                ds_on_click("""
                                     if ($meeting_title && $meeting_datetime) {
                                         alert(`Meeting "${$meeting_title}" scheduled for ${new Date($meeting_datetime).toLocaleString()}`);
                                         $meeting_title = '';
                                         $meeting_notes = '';
                                     }
-                                """
+                                """),
+                                type="button",
+                                size="sm"
                             ),
                             cls="flex justify-end gap-2 pt-4"
                         ),
@@ -316,11 +315,10 @@ Popover(
                 options=[("15", "15 minutes"), ("30", "30 minutes"), ("60", "1 hour")],
                 signal="meeting_duration"
             ),
-            DatePickerWithLabel(
-                label="Date & Time", 
+            Label("Date & Time", cls="text-sm font-medium mb-1 block"),
+            DateTimePicker(
                 signal="meeting_datetime",
                 placeholder="Select date and time",
-                required=True
             ),
             TextareaWithLabel(
                 label="Notes (Optional)",
@@ -330,10 +328,10 @@ Popover(
             Div(
                 Button("Cancel", variant="outline", size="sm"),
                 Button(
-                    "Schedule", 
-                    size="sm",
-                    ds_disabled="!$meeting_title || !$meeting_datetime",
-                    ds_on_click="scheduleMeeting()"
+                    "Schedule",
+                    ds_disabled("!$meeting_title || !$meeting_datetime"),
+                    ds_on_click("scheduleMeeting()"),
+                    size="sm"
                 ),
                 cls="flex justify-end gap-2 pt-4"
             ),
@@ -371,8 +369,8 @@ Popover(
                         Div(
                             *[
                                 Button(
+                                    ds_on_click(f"$selected_color = '{color}'"),
                                     style=f"background-color: {color}; width: 32px; height: 32px; border-radius: 6px;",
-                                    ds_on_click=f"$selected_color = '{color}'",
                                     variant="ghost",
                                     cls="p-0 hover:scale-110 transition-transform"
                                 )
@@ -389,11 +387,11 @@ Popover(
                         # Custom color input
                         Div(
                             Label("Custom Color:", cls="text-xs font-medium mb-2 block"),
-                            Input(
+                            UIInput(
+                                ds_on_input("$selected_color = evt.target.value"),
                                 type="color",
                                 cls="w-full h-10 rounded border cursor-pointer",
-                                signal="custom_color",
-                                ds_on_change="$selected_color = $custom_color"
+                                signal="custom_color"
                             )
                         ),
                         ds_signals(
@@ -440,7 +438,7 @@ Popover(
             Div(
                 *[Button(
                     style=f"background-color: {color}; width: 32px; height: 32px;",
-                    ds_on_click=f"$selected_color = '{color}'"
+                    ds_on_click(f"$selected_color = '{color}'")
                 ) for color in ["#ef4444", "#f97316", "#f59e0b", "#eab308", ...]],
                 cls="grid grid-cols-4 gap-2 mb-4"
             ),
@@ -448,9 +446,9 @@ Popover(
             Div(
                 Label("Custom Color:"),
                 Input(
+                    ds_on_input("$selected_color = evt.target.value"),
                     type="color",
-                    signal="custom_color",
-                    ds_on_change="$selected_color = $custom_color"
+                    signal="custom_color"
                 )
             ),
             ds_signals(selected_color="#3b82f6", custom_color="#3b82f6")
@@ -465,116 +463,87 @@ Popover(
     # Settings panel popover
     yield ComponentPreview(
         Div(
-            Popover(
-                PopoverTrigger(
-                    Icon("lucide:settings", cls="h-4 w-4"),
-                    variant="ghost",
-                    size="icon"
+            # Mock app header to provide context
+            Div(
+                Div(
+                    H3("My Application", cls="font-semibold text-lg"),
+                    P("Dashboard", cls="text-sm text-muted-foreground"),
+                    cls="flex-1"
                 ),
-                PopoverContent(
-                    Div(
-                        Div(
-                            Icon("lucide:settings", cls="h-4 w-4 mr-2"),
-                            H3("Quick Settings", cls="font-semibold text-sm"),
-                            cls="flex items-center mb-4"
-                        ),
-                        # Theme toggle
-                        Div(
-                            Div(
-                                Icon("lucide:palette", cls="h-4 w-4 mr-3"),
-                                Div(
-                                    P("Theme", cls="text-sm font-medium"),
-                                    P("Choose your preferred theme", cls="text-xs text-muted-foreground")
-                                ),
-                                cls="flex items-center flex-1"
-                            ),
-                            SelectWithLabel(
-                                label="Theme",
-                                options=[
-                                    ("light", "Light"),
-                                    ("dark", "Dark"),
-                                    ("system", "System")
-                                ],
-                                value="system",
-                                signal="theme_setting",
-                                show_label=False
-                            ),
-                            cls="flex items-center justify-between py-2"
-                        ),
-                        Hr(cls="my-3"),
-                        # Notifications
-                        Div(
-                            Div(
-                                Icon("lucide:bell", cls="h-4 w-4 mr-3"),
-                                Div(
-                                    P("Notifications", cls="text-sm font-medium"),
-                                    P("Enable push notifications", cls="text-xs text-muted-foreground")
-                                ),
-                                cls="flex items-center flex-1"
-                            ),
-                            Button(
-                                ds_text("$notifications_enabled ? 'On' : 'Off'"),
-                                size="sm",
-                                variant="secondary",
-                                ds_on_click=toggle("notifications_enabled"),
-                                ds_class={"bg-green-100 text-green-800 hover:bg-green-200": "$notifications_enabled",
-                                         "bg-gray-100 text-gray-800 hover:bg-gray-200": "!$notifications_enabled"}
-                            ),
-                            cls="flex items-center justify-between py-2"
-                        ),
-                        Hr(cls="my-3"),
-                        # Auto-save
-                        Div(
-                            Div(
-                                Icon("lucide:save", cls="h-4 w-4 mr-3"),
-                                Div(
-                                    P("Auto-save", cls="text-sm font-medium"),
-                                    P("Save changes automatically", cls="text-xs text-muted-foreground")
-                                ),
-                                cls="flex items-center flex-1"
-                            ),
-                            Button(
-                                ds_text("$autosave_enabled ? 'On' : 'Off'"),
-                                size="sm",
-                                variant="secondary",
-                                ds_on_click=toggle("autosave_enabled"),
-                                ds_class={"bg-green-100 text-green-800 hover:bg-green-200": "$autosave_enabled",
-                                         "bg-gray-100 text-gray-800 hover:bg-gray-200": "!$autosave_enabled"}
-                            ),
-                            cls="flex items-center justify-between py-2"
-                        ),
-                        Hr(cls="my-3"),
-                        # Actions
-                        Div(
-                            Button(
-                                Icon("lucide:external-link", cls="h-3 w-3 mr-2"),
-                                "More Settings",
-                                variant="ghost",
-                                size="sm",
-                                cls="w-full justify-start text-xs"
-                            ),
-                            Button(
-                                Icon("lucide:log-out", cls="h-3 w-3 mr-2"),
-                                "Sign Out",
-                                variant="ghost",
-                                size="sm",
-                                cls="w-full justify-start text-xs text-destructive hover:text-destructive"
-                            ),
-                            cls="space-y-1"
-                        ),
-                        ds_signals(
-                            theme_setting=value("system"),
-                            notifications_enabled=True,
-                            autosave_enabled=True
-                        )
+                Popover(
+                    PopoverTrigger(
+                        Icon("lucide:settings", cls="h-4 w-4"),
+                        variant="ghost",
+                        size="sm"
                     ),
-                    cls="w-72",
-                    side="bottom",
-                    align="end"
-                )
+                    PopoverContent(
+                        Div(
+                            # Header
+                            H3("Settings", cls="font-semibold text-base mb-4"),
+                            # Appearance
+                            Div(
+                                P("APPEARANCE", cls="text-xs font-medium text-muted-foreground mb-3"),
+                                Label("Theme", cls="text-sm font-medium mb-2 block"),
+                                ToggleGroup(
+                                    ("light", Div(Icon("lucide:sun", cls="h-4 w-4 mr-2"), "Light", cls="flex items-center")),
+                                    ("dark", Div(Icon("lucide:moon", cls="h-4 w-4 mr-2"), "Dark", cls="flex items-center")),
+                                    ("system", Div(Icon("lucide:laptop", cls="h-4 w-4 mr-2"), "System", cls="flex items-center")),
+                                    type="single",
+                                    signal="theme_setting",
+                                    variant="outline",
+                                    cls="grid grid-cols-3 w-full"
+                                )
+                            ),
+                            Separator(cls="my-4"),
+                            # Preferences
+                            Div(
+                                P("PREFERENCES", cls="text-xs font-medium text-muted-foreground mb-3"),
+                                # Notifications
+                                Div(
+                                    Label("Notifications", cls="text-sm font-medium"),
+                                    Button(
+                                        ds_text("$notifications_enabled ? 'On' : 'Off'"),
+                                        ds_on_click(toggle("notifications_enabled")),
+                                        size="sm",
+                                        variant="outline"
+                                    ),
+                                    cls="flex items-center justify-between mb-3"
+                                ),
+                                # Auto-save
+                                Div(
+                                    Label("Auto-save", cls="text-sm font-medium"),
+                                    Button(
+                                        ds_text("$autosave_enabled ? 'On' : 'Off'"),
+                                        ds_on_click(toggle("autosave_enabled")),
+                                        size="sm",
+                                        variant="outline"
+                                    ),
+                                    cls="flex items-center justify-between"
+                                )
+                            ),
+                            Separator(cls="my-4"),
+                            # Footer
+                            Button(
+                                "Manage Account",
+                                variant="outline",
+                                size="sm",
+                                cls="w-full"
+                            ),
+                            ds_signals(
+                                theme_setting=value("system"),
+                                theme_setting_value=value("system"),
+                                notifications_enabled=value(True),
+                                autosave_enabled=value(True)
+                            )
+                        ),
+                        cls="w-96",
+                        side="bottom",
+                        align="end"
+                    )
+                ),
+                cls="flex items-center justify-between p-4 border rounded-lg bg-card"
             ),
-            P("Click the settings icon to open the quick settings panel", 
-              cls="text-sm text-muted-foreground mt-4 text-center")
+            cls="w-full max-w-md mx-auto"
         ),
         '''Popover(
     PopoverTrigger(
@@ -621,8 +590,8 @@ Popover(
         align="end"
     )
 )''',
-        title="Settings Panel Popover",
-        description="Comprehensive settings panel with toggles, dropdowns, and actions"
+        title="Settings Panel",  
+        description="Clean settings panel with theme selector and preference toggles"
     )
     
     # Help tooltip popover
@@ -666,10 +635,11 @@ Popover(
                         ),
                         cls="text-sm font-medium flex items-center"
                     ),
-                    Input(
+                    UIInput(
                         type="password",
                         placeholder="sk-1234567890abcdef",
-                        cls="w-full mt-1"
+                        cls="w-full mt-1",
+                        signal="api_key"
                     ),
                     cls="mb-4"
                 ),
@@ -710,14 +680,19 @@ Popover(
                         ),
                         cls="text-sm font-medium flex items-center"
                     ),
-                    Input(
+                    UIInput(
                         type="url",
                         placeholder="https://api.example.com/webhook",
-                        cls="w-full mt-1"
+                        cls="w-full mt-1",
+                        signal="webhook_url"
                     )
                 )
             ),
-            cls="max-w-md"
+            ds_signals(
+                api_key=value(""),
+                webhook_url=value("")
+            ),
+            cls="max-w-lg w-full"
         ),
         '''# Form fields with help popovers
 Div(

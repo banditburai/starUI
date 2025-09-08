@@ -14,6 +14,7 @@ from starhtml.datastar import (
     ds_on_keydown,
     ds_on_mouseenter,
     ds_ref,
+    ds_show,
     ds_signals,
     value,
 )
@@ -284,6 +285,7 @@ def CommandItem(
     onclick: str | None = None,
     disabled: bool = False,
     keywords: str | None = None,
+    show: str | None = None,
     class_name: str = "",
     cls: str = "",
     **attrs: Any,
@@ -303,10 +305,16 @@ def CommandItem(
                 click_handler = f"{onclick};const d=document.querySelector('dialog[data-command-root=\"{signal}\"]');if(d){{d.close();d.style.display='none';${signal}_dialog_open=false;${signal}_search='';${signal}_selected=0;document.body.style.overflow='';setTimeout(()=>{{d.style.display=''}},100)}}"
                 event_attrs.append(ds_on_click(click_handler))
             event_attrs.append(ds_on_mouseenter(f"${signal}_selected={index}"))
+        
+        # Add ds_show if show condition is provided
+        show_attrs = []
+        if show:
+            show_attrs.append(ds_show(show))
 
         return Div(
             *children,
             *event_attrs,
+            *show_attrs,
             ds_attr(data_selected=f"${signal}_selected==={index}?'true':'false'"),
             role="option",
             aria_selected=f"${{{signal}_selected}} === {index}",

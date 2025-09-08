@@ -87,6 +87,7 @@ def HoverCardContent(
             flip=True,
             shift=True,
             hide=True,
+            strategy="fixed",
         ),
         ds_on_mouseenter(
             f"clearTimeout(window.hoverTimer_{signal}); ${signal}_open = true;"
@@ -104,6 +105,7 @@ def HoverCardContent(
         cls=cn(
             "fixed z-50 w-72 max-w-[90vw] pointer-events-auto",
             "rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none dark:border-input",
+            "overflow-hidden",
             cls,
         ),
         **attrs,

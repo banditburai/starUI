@@ -47,7 +47,7 @@ def AccordionItem(
     cls: str = "",
     **attrs: Any,
 ) -> FT:
-    def create_item(signal, type="single", collapsible=False):
+    def _(signal, type="single", collapsible=False):
         return Div(
             *[child(signal, type, collapsible, value) if callable(child) else child
               for child in children],
@@ -56,7 +56,7 @@ def AccordionItem(
             **attrs,
         )
 
-    return create_item
+    return _
 
 
 def AccordionTrigger(
@@ -65,7 +65,7 @@ def AccordionTrigger(
     cls: str = "",
     **attrs: Any,
 ) -> FT:
-    def create_trigger(signal, type="single", collapsible=False, item_value=None):
+    def _(signal, type="single", collapsible=False, item_value=None):
         if not item_value:
             raise ValueError("AccordionTrigger must be used inside AccordionItem")
 
@@ -104,7 +104,7 @@ def AccordionTrigger(
             cls="flex w-full",
         )
 
-    return create_trigger
+    return _
 
 
 def AccordionContent(
@@ -113,7 +113,7 @@ def AccordionContent(
     cls: str = "",
     **attrs: Any,
 ) -> FT:
-    def create_content(signal, type="single", collapsible=False, item_value=None):
+    def _(signal, type="single", collapsible=False, item_value=None):
         if not item_value:
             raise ValueError("AccordionContent must be used inside AccordionItem")
 
@@ -140,4 +140,4 @@ def AccordionContent(
             **attrs,
         )
 
-    return create_content
+    return _

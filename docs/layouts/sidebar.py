@@ -1,5 +1,6 @@
 from typing import Any
 from starhtml import *
+from starhtml.datastar import ds_class
 
 
 def DocsSidebar(
@@ -42,23 +43,37 @@ def _sidebar_section(section: dict[str, Any]) -> FT:
         ) if section.get("title") else "",
         Div(
             *[_sidebar_item(item) for item in section.get("items", [])],
-            cls="grid grid-flow-row auto-rows-max text-sm mb-6 space-y-1"
+            cls="flex flex-col items-start text-sm mb-6 space-y-1"
         )
     )
 
 
 def _sidebar_item(item: dict[str, Any]) -> FT:
-    is_active = item.get("active", False)
     is_disabled = item.get("disabled", False)
+    href = item.get("href", "#")
     
     if is_disabled:
         return Span(
             item.get("label", ""),
-            cls="flex w-full items-center rounded-md p-2 text-sm text-muted-foreground cursor-not-allowed opacity-60"
+            cls="inline-flex items-center rounded-md px-2 py-1.5 text-sm text-muted-foreground cursor-not-allowed opacity-60"
         )
+    
+    # Base classes - removed w-full so highlight only covers text
+    base_classes = "inline-flex items-center rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    
+    # These classes need to be in the code for Tailwind to include them
+    # bg-accent text-accent-foreground font-medium text-muted-foreground
     
     return A(
         item.get("label", ""),
-        href=item.get("href", "#"),
-        cls=f"flex w-full items-center rounded-md p-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring {'bg-accent text-accent-foreground font-medium' if is_active else 'text-muted-foreground'}"
+        href=href,
+        cls=f"{base_classes} text-muted-foreground",
+        **ds_class(
+            # Remove default text color when active
+            text_muted_foreground=f"!(location.pathname === '{href}')",
+            # Add active styles
+            bg_accent=f"location.pathname === '{href}'",
+            text_accent_foreground=f"location.pathname === '{href}'", 
+            font_medium=f"location.pathname === '{href}'"
+        )
     )

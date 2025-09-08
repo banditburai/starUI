@@ -849,15 +849,16 @@ def discover_components():
         except Exception as e:
             print(f"Failed to load component {component_file.stem}: {e}")
 
-    categories = {}
+    # Create single alphabetical components list for sidebar (like ShadCN)
+    all_components = []
     for name, component in registry.components.items():
-        category = component.get("category", "ui")
-        if category not in categories:
-            categories[category] = []
-        categories[category].append({
+        all_components.append({
             "href": f"/components/{name}",
             "label": component["title"],
         })
+    
+    # Sort all components alphabetically by title
+    all_components.sort(key=lambda x: x["label"])
 
     DOCS_SIDEBAR_SECTIONS = [
         {
@@ -866,14 +867,12 @@ def discover_components():
                 {"href": "/docs", "label": "Introduction"},
                 {"href": "/installation", "label": "Installation"},
             ]
+        },
+        {
+            "title": "Components",
+            "items": all_components
         }
     ]
-    
-    for cat, items in categories.items():
-        DOCS_SIDEBAR_SECTIONS.append({
-            "title": f"UI Components" if cat == "ui" else cat.title(),
-            "items": sorted(items, key=lambda x: x["label"])
-        })
 
 
 discover_components()

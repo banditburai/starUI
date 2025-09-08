@@ -39,7 +39,7 @@ def examples():
                 ),
                 cls="mt-4 text-sm",
             ),
-            ds_signals(demo_range_selected=value(["2025-09-15", "2025-09-25"])),
+            ds_signals(demo_range_selected=value('["2025-09-15", "2025-09-25"]')),
             cls="flex flex-col items-center",
         ),
         """from starui.registry.components.calendar import Calendar
@@ -69,7 +69,7 @@ Calendar(
                 P(
                     "Selected: ",
                     Span(
-                        ds_text("($demo_multiple_selected || []).length"),
+                        ds_text("(JSON.parse($demo_multiple_selected || '[]')).length"),
                         cls="font-mono",
                     ),
                     " dates",
@@ -77,7 +77,7 @@ Calendar(
                 cls="mt-4 text-sm",
             ),
             ds_signals(
-                demo_multiple_selected=value(["2025-09-10", "2025-09-15", "2025-09-20"])
+                demo_multiple_selected=value('["2025-09-10", "2025-09-15", "2025-09-20"]')
             ),
             cls="flex flex-col items-center",
         ),
@@ -133,7 +133,12 @@ def create_calendar_docs():
                     ),
                     cls="flex flex-col items-center",
                 ),
-                cls="grid grid-cols-1 md:grid-cols-3 gap-8",
+                cls="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl mx-auto",
+            ),
+            ds_signals(
+                hero_single_selected=value(""),
+                hero_range_selected=value('["2025-09-10", "2025-09-20"]'),
+                hero_multiple_selected=value('["2025-09-05", "2025-09-15", "2025-09-25"]')
             ),
             cls="w-full",
         ),

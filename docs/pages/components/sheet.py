@@ -24,9 +24,10 @@ from starui.registry.components.textarea import TextareaWithLabel
 from starui.registry.components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
 from starui.registry.components.badge import Badge
 from starui.registry.components.separator import Separator
-from starui.registry.components.select import SelectWithLabel
+from starui.registry.components.select import SelectWithLabel, Select, SelectTrigger, SelectValue, SelectContent, SelectItem
 from starui.registry.components.checkbox import CheckboxWithLabel
 from starui.registry.components.avatar import Avatar
+from starui.registry.components.switch import Switch
 from utils import auto_generate_page
 from widgets.component_preview import ComponentPreview
 
@@ -48,8 +49,9 @@ def examples():
                     SheetTitle("Navigation", signal="nav_sheet"),
                     SheetDescription("Browse through the app sections", signal="nav_sheet")
                 ),
+                # Main content with flex column that fills remaining height
                 Div(
-                    # Main navigation links
+                    # Navigation items
                     Div(
                         Icon("lucide:home", cls="h-4 w-4 mr-3"),
                         Span("Home"),
@@ -83,29 +85,28 @@ def examples():
                         Span("Help & Support"),
                         cls="flex items-center py-3 px-4 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
                     ),
-                    cls="space-y-1 px-6"
+                    cls="space-y-1 px-6 flex-1 overflow-hidden"
                 ),
+                # Profile section fixed at bottom
                 SheetFooter(
                     Div(
+                        Avatar(
+                            Img(src="https://github.com/shadcn.png", alt="User"),
+                            size="sm",
+                            cls="mr-3"
+                        ),
                         Div(
-                            Avatar(
-                                Img(src="https://github.com/shadcn.png", alt="User"),
-                                size="sm",
-                                cls="mr-3"
-                            ),
-                            Div(
-                                P("John Doe", cls="text-sm font-medium"),
-                                P("john@example.com", cls="text-xs text-muted-foreground"),
-                            ),
-                            cls="flex items-center"
+                            P("John Doe", cls="text-sm font-medium"),
+                            P("john@example.com", cls="text-xs text-muted-foreground"),
+                            cls="flex-1"
                         ),
                         Button(
                             Icon("lucide:log-out", cls="h-4 w-4"),
                             variant="ghost",
-                            size="sm",
-                            cls="mt-4 w-full justify-start"
+                            size="icon",
+                            cls="ml-2"
                         ),
-                        cls="w-full"
+                        cls="flex items-center w-full"
                     )
                 ),
                 signal="nav_sheet",
@@ -161,14 +162,17 @@ def examples():
         Sheet(
             SheetTrigger(
                 Icon("lucide:shopping-cart", cls="h-4 w-4 mr-2"),
-                "Cart (3)",
+                Span("Cart (", ds_text("($qty_headphones + $qty_shoes)"), ")"),
                 signal="cart_sheet",
                 variant="outline"
             ),
             SheetContent(
                 SheetHeader(
                     SheetTitle("Shopping Cart", signal="cart_sheet"),
-                    SheetDescription("3 items in your cart", signal="cart_sheet")
+                    SheetDescription(
+                        Span(ds_text("($qty_headphones + $qty_shoes) + ' items in your cart'")),
+                        signal="cart_sheet"
+                    )
                 ),
                 Div(
                     # Cart items
@@ -184,9 +188,21 @@ def examples():
                             Div(
                                 Span("$99.99", cls="text-sm font-bold"),
                                 Div(
-                                    Button("-", size="sm", variant="outline", cls="h-6 w-6 p-0"),
-                                    Span("1", cls="mx-2 text-sm"),
-                                    Button("+", size="sm", variant="outline", cls="h-6 w-6 p-0"),
+                                    Button(
+                                        "-",
+                                        ds_on_click("$qty_headphones = Math.max(0, $qty_headphones - 1)"),
+                                        size="sm", 
+                                        variant="outline", 
+                                        cls="h-6 w-6 p-0"
+                                    ),
+                                    Span(ds_text("$qty_headphones"), cls="mx-2 text-sm"),
+                                    Button(
+                                        "+",
+                                        ds_on_click("$qty_headphones = $qty_headphones + 1"),
+                                        size="sm", 
+                                        variant="outline", 
+                                        cls="h-6 w-6 p-0"
+                                    ),
                                     cls="flex items-center ml-auto"
                                 ),
                                 cls="flex items-center justify-between mt-2"
@@ -207,9 +223,21 @@ def examples():
                             Div(
                                 Span("$129.99", cls="text-sm font-bold"),
                                 Div(
-                                    Button("-", size="sm", variant="outline", cls="h-6 w-6 p-0"),
-                                    Span("2", cls="mx-2 text-sm"),
-                                    Button("+", size="sm", variant="outline", cls="h-6 w-6 p-0"),
+                                    Button(
+                                        "-",
+                                        ds_on_click("$qty_shoes = Math.max(0, $qty_shoes - 1)"),
+                                        size="sm", 
+                                        variant="outline", 
+                                        cls="h-6 w-6 p-0"
+                                    ),
+                                    Span(ds_text("$qty_shoes"), cls="mx-2 text-sm"),
+                                    Button(
+                                        "+",
+                                        ds_on_click("$qty_shoes = $qty_shoes + 1"),
+                                        size="sm", 
+                                        variant="outline", 
+                                        cls="h-6 w-6 p-0"
+                                    ),
                                     cls="flex items-center ml-auto"
                                 ),
                                 cls="flex items-center justify-between mt-2"
@@ -218,12 +246,16 @@ def examples():
                         ),
                         cls="flex items-start p-4 border-b"
                     ),
-                    # Subtotal
+                    # Subtotal calculations
                     Div(
                         Div(
                             Div(
                                 Span("Subtotal", cls="text-sm"),
-                                Span("$359.97", cls="text-sm font-bold"),
+                                Span(
+                                    "$",
+                                    ds_text("(($qty_headphones * 99.99 + $qty_shoes * 129.99).toFixed(2))"),
+                                    cls="text-sm font-bold"
+                                ),
                                 cls="flex justify-between"
                             ),
                             Div(
@@ -232,20 +264,29 @@ def examples():
                                 cls="flex justify-between"
                             ),
                             Div(
-                                Span("Tax", cls="text-sm"),
-                                Span("$29.60", cls="text-sm"),
+                                Span("Tax (8%)", cls="text-sm"),
+                                Span(
+                                    "$",
+                                    ds_text("((($qty_headphones * 99.99 + $qty_shoes * 129.99) * 0.08).toFixed(2))"),
+                                    cls="text-sm"
+                                ),
                                 cls="flex justify-between"
                             ),
                             Hr(cls="my-3"),
                             Div(
                                 Span("Total", cls="text-base font-bold"),
-                                Span("$399.56", cls="text-base font-bold"),
+                                Span(
+                                    "$",
+                                    ds_text("(($qty_headphones * 99.99 + $qty_shoes * 129.99) * 1.08 + 9.99).toFixed(2)"),
+                                    cls="text-base font-bold"
+                                ),
                                 cls="flex justify-between"
                             ),
                             cls="space-y-2"
                         ),
                         cls="p-4"
                     ),
+                    ds_signals(qty_headphones=value(1), qty_shoes=value(2)),
                     cls="flex-1 overflow-y-auto"
                 ),
                 SheetFooter(
@@ -332,23 +373,24 @@ def examples():
                     SheetDescription("Refine your search results", signal="filter_sheet")
                 ),
                 Div(
-                    # Price range
+                    # Price range - stacked vertically
                     Div(
                         H3("Price Range", cls="text-sm font-semibold mb-3"),
                         Div(
                             InputWithLabel(
                                 label="Min Price",
                                 type="number",
-                                placeholder="0",
-                                signal="min_price"
+                                placeholder="$0",
+                                signal="min_price",
+                                cls="mb-3"
                             ),
                             InputWithLabel(
                                 label="Max Price",
                                 type="number",
-                                placeholder="1000",
+                                placeholder="$1000",
                                 signal="max_price"
                             ),
-                            cls="grid grid-cols-2 gap-3"
+                            cls="space-y-2"
                         ),
                         cls="mb-6"
                     ),
@@ -397,22 +439,30 @@ def examples():
                         ),
                         cls="mb-6"
                     ),
-                    # Rating
+                    # Rating - interactive stars
                     Div(
                         H3("Minimum Rating", cls="text-sm font-semibold mb-3"),
                         Div(
-                            *[
-                                Button(
-                                    *["★" if i < rating else "☆" for i in range(5)],
-                                    f" & up",
-                                    variant="ghost",
-                                    size="sm",
-                                    cls="justify-start",
-                                    ds_on_click=f"$min_rating = {rating}"
-                                )
-                                for rating in [4, 3, 2, 1]
-                            ],
-                            cls="space-y-1"
+                            Div(
+                                *[
+                                    Span(
+                                        "★",
+                                        ds_on_click(f"$min_rating = {i+1}"),
+                                        ds_class(
+                                            text_yellow_500=f"$min_rating >= {i+1}",
+                                            text_gray_300=f"$min_rating < {i+1}"
+                                        ),
+                                        cls="text-xl cursor-pointer transition-colors hover:text-yellow-400"
+                                    )
+                                    for i in range(5)
+                                ],
+                                cls="flex gap-1"
+                            ),
+                            Span(
+                                ds_text("$min_rating > 0 ? $min_rating + '+ stars' : 'Any rating'"),
+                                cls="text-sm text-muted-foreground mt-2"
+                            ),
+                            cls="space-y-2"
                         ),
                         cls="mb-6"
                     ),
@@ -454,7 +504,7 @@ def examples():
                 ),
                 signal="filter_sheet",
                 side="left",
-                size="md"
+                size="sm"
             ),
             signal="filter_sheet"
         ),
@@ -494,6 +544,7 @@ def examples():
             Div(
                 H3("Brand", cls="text-sm font-semibold mb-3"),
                 SelectWithLabel(
+                    label="Brand",
                     options=[("", "Any"), ("apple", "Apple"), ("samsung", "Samsung")],
                     signal="selected_brand"
                 )
@@ -532,118 +583,119 @@ def examples():
                 Div(
                     # Account section
                     Div(
-                        H3("Account", cls="text-sm font-semibold mb-4"),
+                        H3("Account", cls="text-sm font-semibold mb-3"),
                         Div(
                             Avatar(
                                 Img(src="https://github.com/shadcn.png", alt="Profile"),
-                                size="lg",
-                                cls="mr-4"
+                                size="md",
+                                cls="mr-3"
                             ),
                             Div(
                                 H4("John Doe", cls="font-medium"),
                                 P("john.doe@example.com", cls="text-sm text-muted-foreground"),
-                                Button("Edit Profile", size="sm", variant="outline", cls="mt-2")
+                                cls="flex-1"
                             ),
-                            cls="flex items-start"
+                            cls="flex items-center mb-3"
                         ),
-                        cls="mb-8"
+                        Button("Edit Profile", size="sm", variant="outline", cls="w-full"),
+                        cls="pb-4 mb-4 border-b"
                     ),
                     # Preferences
                     Div(
-                        H3("Preferences", cls="text-sm font-semibold mb-4"),
+                        H3("Preferences", cls="text-sm font-semibold mb-3"),
+                        # Theme
                         Div(
-                            # Theme
                             Div(
+                                Icon("lucide:palette", cls="h-4 w-4 text-muted-foreground"),
                                 Div(
-                                    Icon("lucide:palette", cls="h-4 w-4 mr-3"),
-                                    Div(
-                                        P("Theme", cls="text-sm font-medium"),
-                                        P("Choose your interface theme", cls="text-xs text-muted-foreground")
-                                    ),
-                                    cls="flex items-center flex-1"
+                                    P("Theme", cls="text-sm font-medium"),
+                                    P("Choose your interface theme", cls="text-xs text-muted-foreground"),
+                                    cls="ml-3"
                                 ),
-                                SelectWithLabel(
-                                    options=[
-                                        ("light", "Light"),
-                                        ("dark", "Dark"),
-                                        ("system", "System")
-                                    ],
-                                    value="system",
+                                cls="flex items-start mb-2"
+                            ),
+                            Select(
+                                SelectTrigger(
+                                    SelectValue(signal="theme_pref"),
                                     signal="theme_pref",
-                                    show_label=False
+                                    cls="w-full"
                                 ),
-                                cls="flex items-center justify-between py-3"
+                                SelectContent(
+                                    SelectItem("light", "Light", signal="theme_pref"),
+                                    SelectItem("dark", "Dark", signal="theme_pref"),
+                                    SelectItem("system", "System", signal="theme_pref"),
+                                    signal="theme_pref"
+                                ),
+                                initial_value="system",
+                                initial_label="System",
+                                signal="theme_pref"
                             ),
-                            # Language
-                            Div(
-                                Div(
-                                    Icon("lucide:globe", cls="h-4 w-4 mr-3"),
-                                    Div(
-                                        P("Language", cls="text-sm font-medium"),
-                                        P("Select your preferred language", cls="text-xs text-muted-foreground")
-                                    ),
-                                    cls="flex items-center flex-1"
-                                ),
-                                SelectWithLabel(
-                                    options=[
-                                        ("en", "English"),
-                                        ("es", "Spanish"),
-                                        ("fr", "French"),
-                                        ("de", "German")
-                                    ],
-                                    value="en",
-                                    signal="language_pref",
-                                    show_label=False
-                                ),
-                                cls="flex items-center justify-between py-3"
-                            ),
-                            cls="space-y-1"
+                            cls="mb-4"
                         ),
-                        cls="mb-8"
+                        # Language
+                        Div(
+                            Div(
+                                Icon("lucide:globe", cls="h-4 w-4 text-muted-foreground"),
+                                Div(
+                                    P("Language", cls="text-sm font-medium"),
+                                    P("Select your preferred language", cls="text-xs text-muted-foreground"),
+                                    cls="ml-3"
+                                ),
+                                cls="flex items-start mb-2"
+                            ),
+                            Select(
+                                SelectTrigger(
+                                    SelectValue(signal="language_pref"),
+                                    signal="language_pref",
+                                    cls="w-full"
+                                ),
+                                SelectContent(
+                                    SelectItem("en", "English", signal="language_pref"),
+                                    SelectItem("es", "Spanish", signal="language_pref"),
+                                    SelectItem("fr", "French", signal="language_pref"),
+                                    SelectItem("de", "German", signal="language_pref"),
+                                    signal="language_pref"
+                                ),
+                                initial_value="en",
+                                initial_label="English",
+                                signal="language_pref"
+                            ),
+                            cls="mb-4"
+                        ),
+                        cls="pb-4 mb-4 border-b"
                     ),
                     # Notifications
                     Div(
-                        H3("Notifications", cls="text-sm font-semibold mb-4"),
+                        H3("Notifications", cls="text-sm font-semibold mb-3"),
+                        # Push notifications
                         Div(
+                            Icon("lucide:bell", cls="h-4 w-4 text-muted-foreground mt-0.5"),
                             Div(
-                                Div(
-                                    Icon("lucide:bell", cls="h-4 w-4 mr-3"),
-                                    Div(
-                                        P("Push Notifications", cls="text-sm font-medium"),
-                                        P("Receive notifications for important updates", cls="text-xs text-muted-foreground")
-                                    ),
-                                    cls="flex items-center flex-1"
-                                ),
-                                Button(
-                                    ds_text("$push_notifications ? 'On' : 'Off'"),
-                                    size="sm",
-                                    variant="secondary",
-                                    ds_on_click=toggle("push_notifications"),
-                                    ds_class={"bg-green-100 text-green-800 hover:bg-green-200": "$push_notifications",
-                                             "bg-gray-100 text-gray-800 hover:bg-gray-200": "!$push_notifications"}
-                                ),
-                                cls="flex items-center justify-between py-3"
+                                P("Push Notifications", cls="text-sm font-medium"),
+                                P("Receive notifications for important updates", cls="text-xs text-muted-foreground"),
+                                cls="ml-3 flex-1"
                             ),
+                            Switch(
+                                signal="push_notifications",
+                                checked=True,
+                                cls="ml-auto"
+                            ),
+                            cls="flex items-start mb-4"
+                        ),
+                        # Email notifications
+                        Div(
+                            Icon("lucide:mail", cls="h-4 w-4 text-muted-foreground mt-0.5"),
                             Div(
-                                Div(
-                                    Icon("lucide:mail", cls="h-4 w-4 mr-3"),
-                                    Div(
-                                        P("Email Notifications", cls="text-sm font-medium"),
-                                        P("Get email updates for your account", cls="text-xs text-muted-foreground")
-                                    ),
-                                    cls="flex items-center flex-1"
-                                ),
-                                Button(
-                                    ds_text("$email_notifications ? 'On' : 'Off'"),
-                                    size="sm",
-                                    variant="secondary",
-                                    ds_on_click=toggle("email_notifications"),
-                                    ds_class={"bg-green-100 text-green-800 hover:bg-green-200": "$email_notifications",
-                                             "bg-gray-100 text-gray-800 hover:bg-gray-200": "!$email_notifications"}
-                                ),
-                                cls="flex items-center justify-between py-3"
+                                P("Email Notifications", cls="text-sm font-medium"),
+                                P("Get email updates for your account", cls="text-xs text-muted-foreground"),
+                                cls="ml-3 flex-1"
                             ),
-                            cls="space-y-1"
+                            Switch(
+                                signal="email_notifications",
+                                checked=True,
+                                cls="ml-auto"
+                            ),
+                            cls="flex items-start"
                         )
                     ),
                     ds_signals(
@@ -672,7 +724,7 @@ def examples():
                 ),
                 signal="settings_sheet",
                 side="right",
-                size="lg"
+                size="md"
             ),
             signal="settings_sheet"
         ),
@@ -709,6 +761,7 @@ def examples():
                     Icon("lucide:palette"),
                     Div("Theme", "Choose your interface theme"),
                     SelectWithLabel(
+                        label="Theme",
                         options=[("light", "Light"), ("dark", "Dark"), ("system", "System")],
                         signal="theme_pref"
                     ),
@@ -751,13 +804,43 @@ def examples():
             SheetTrigger(
                 Icon("lucide:bell", cls="h-4 w-4 mr-2"),
                 "Notifications",
-                Badge("3", variant="destructive", cls="ml-2 text-xs"),
+                Badge(
+                    ds_text("""
+                        let count = 0;
+                        if ($notif_1) count++;
+                        if ($notif_2) count++;
+                        if ($notif_3) count++;
+                        if ($notif_4) count++;
+                        count
+                    """),
+                    ds_show("$notif_1 || $notif_2 || $notif_3 || $notif_4"),
+                    variant="destructive",
+                    cls="ml-2 text-xs"
+                ),
                 signal="notifications_sheet",
                 variant="outline"
             ),
             SheetContent(
                 SheetHeader(
-                    SheetTitle("Recent Notifications", signal="notifications_sheet"),
+                    SheetTitle(
+                        "Recent Notifications",
+                        Badge(
+                            ds_text("""
+                                let count = 0;
+                                if ($notif_1) count++;
+                                if ($notif_2) count++;
+                                if ($notif_3) count++;
+                                if ($notif_4) count++;
+                                count > 0 ? count : ''
+                            """),
+                            ds_show("""
+                                $notif_1 || $notif_2 || $notif_3 || $notif_4
+                            """),
+                            variant="destructive",
+                            cls="ml-2 text-xs"
+                        ),
+                        signal="notifications_sheet"
+                    ),
                     SheetDescription("Stay up to date with your latest activity", signal="notifications_sheet")
                 ),
                 Div(
@@ -770,7 +853,14 @@ def examples():
                             P("2 minutes ago", cls="text-xs text-muted-foreground"),
                             cls="flex-1"
                         ),
-                        Button("×", variant="ghost", size="sm", cls="h-6 w-6 p-0 text-muted-foreground"),
+                        Button(
+                            Icon("lucide:x", cls="h-4 w-4"),
+                            ds_on_click("$notif_1 = false"),
+                            variant="ghost",
+                            size="sm",
+                            cls="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-muted"
+                        ),
+                        ds_show("$notif_1"),
                         cls="flex items-start p-4 border-b hover:bg-muted/30 transition-colors"
                     ),
                     Div(
@@ -781,7 +871,14 @@ def examples():
                             P("1 hour ago", cls="text-xs text-muted-foreground"),
                             cls="flex-1"
                         ),
-                        Button("×", variant="ghost", size="sm", cls="h-6 w-6 p-0 text-muted-foreground"),
+                        Button(
+                            Icon("lucide:x", cls="h-4 w-4"),
+                            ds_on_click("$notif_2 = false"),
+                            variant="ghost",
+                            size="sm",
+                            cls="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-muted"
+                        ),
+                        ds_show("$notif_2"),
                         cls="flex items-start p-4 border-b hover:bg-muted/30 transition-colors"
                     ),
                     Div(
@@ -792,7 +889,14 @@ def examples():
                             P("3 hours ago", cls="text-xs text-muted-foreground"),
                             cls="flex-1"
                         ),
-                        Button("×", variant="ghost", size="sm", cls="h-6 w-6 p-0 text-muted-foreground"),
+                        Button(
+                            Icon("lucide:x", cls="h-4 w-4"),
+                            ds_on_click("$notif_3 = false"),
+                            variant="ghost",
+                            size="sm",
+                            cls="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-muted"
+                        ),
+                        ds_show("$notif_3"),
                         cls="flex items-start p-4 border-b hover:bg-muted/30 transition-colors"
                     ),
                     Div(
@@ -803,15 +907,46 @@ def examples():
                             P("5 hours ago", cls="text-xs text-muted-foreground"),
                             cls="flex-1"
                         ),
-                        Button("×", variant="ghost", size="sm", cls="h-6 w-6 p-0 text-muted-foreground"),
+                        Button(
+                            Icon("lucide:x", cls="h-4 w-4"),
+                            ds_on_click("$notif_4 = false"),
+                            variant="ghost",
+                            size="sm",
+                            cls="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-muted"
+                        ),
+                        ds_show("$notif_4"),
                         cls="flex items-start p-4 border-b hover:bg-muted/30 transition-colors"
                     ),
-                    cls="flex-1 overflow-y-auto"
+                    # Empty state
+                    Div(
+                        Icon("lucide:inbox", cls="h-12 w-12 text-muted-foreground mb-2"),
+                        P("No notifications", cls="text-sm text-muted-foreground"),
+                        ds_show("!($notif_1 || $notif_2 || $notif_3 || $notif_4)"),
+                        cls="flex flex-col items-center justify-center py-12"
+                    ),
+                    ds_signals(
+                        notif_1=True,
+                        notif_2=True,
+                        notif_3=True,
+                        notif_4=True
+                    ),
+                    cls="flex-1 overflow-y-auto min-h-[200px]"
                 ),
                 SheetFooter(
                     Div(
-                        Button("Mark All Read", variant="outline", size="sm", cls="flex-1 mr-2"),
-                        Button("View All", size="sm", cls="flex-1"),
+                        Button(
+                            "Mark All Read",
+                            ds_on_click("$notif_1 = false; $notif_2 = false; $notif_3 = false; $notif_4 = false"),
+                            variant="outline",
+                            size="sm",
+                            cls="flex-1 mr-2"
+                        ),
+                        Button(
+                            "View All",
+                            ds_on_click("alert('Navigate to full notifications page')"),
+                            size="sm",
+                            cls="flex-1"
+                        ),
                         cls="flex gap-2 w-full"
                     )
                 ),

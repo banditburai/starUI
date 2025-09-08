@@ -5,7 +5,7 @@ Clean, minimal, and easy to extend.
 
 # Component metadata for auto-discovery
 TITLE = "Hover Card"
-DESCRIPTION = "For sighted users to preview content available behind a link or element on hover."
+DESCRIPTION = "For sighted users to preview content available behind a link or element on hover. Unlike popovers, hover cards are triggered by mouse hover and are ideal for supplemental information."
 CATEGORY = "overlay"
 ORDER = 120
 STATUS = "stable"
@@ -20,6 +20,7 @@ from starui.registry.components.hover_card import (
 )
 from starui.registry.components.button import Button
 from starui.registry.components.input import Input as UIInput, InputWithLabel
+from starui.registry.components.textarea import TextareaWithLabel
 from starui.registry.components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
 from starui.registry.components.badge import Badge
 from starui.registry.components.separator import Separator
@@ -34,25 +35,51 @@ def examples():
     # Basic hover card
     yield ComponentPreview(
         Div(
-            P("Hover over the ", Span("@username", cls="font-medium"), " link below:", cls="text-sm text-muted-foreground mb-4"),
+            P("Hover over the link below to see a preview:", cls="text-sm text-muted-foreground mb-6"),
             HoverCard(
                 HoverCardTrigger(
-                    A("@nextjs", href="#", cls="text-blue-600 hover:underline font-medium"),
+                    Div(
+                        Icon("lucide:external-link", cls="h-4 w-4 mr-2 text-blue-500"),
+                        Span("StarUI Documentation", cls="text-blue-600 hover:underline font-medium"),
+                        cls="inline-flex items-center cursor-pointer"
+                    ),
                     signal="basic_hover"
                 ),
                 HoverCardContent(
                     Div(
+                        # Header with icon
                         Div(
-                            H4("Next.js", cls="text-sm font-semibold mb-1"),
-                            P("The React Framework for the Web", cls="text-sm text-muted-foreground mb-3"),
-                            cls="space-y-1"
+                            Icon("lucide:star", width="24", height="24", cls="mr-2 text-blue-600 text-xl"),
+                            Div(
+                                H4("StarUI Component Library", cls="font-semibold text-sm"),
+                                P("Modern, accessible React components", cls="text-xs text-muted-foreground"),
+                                cls="space-y-0.5"
+                            ),
+                            cls="flex items-center mb-3"
                         ),
+                        # Description
+                        P("Build beautiful interfaces with our comprehensive collection of customizable UI components.", 
+                          cls="text-sm text-muted-foreground mb-3"),
+                        # Quick stats
                         Div(
-                            Icon("lucide:calendar", cls="mr-2 h-4 w-4 opacity-70"),
-                            Span("Joined December 2021", cls="text-xs text-muted-foreground"),
-                            cls="flex items-center"
+                            Div(
+                                Div("50+", cls="font-semibold text-sm"),
+                                Div("Components", cls="text-xs text-muted-foreground"),
+                                cls="text-center space-y-1"
+                            ),
+                            Div(
+                                Div("TypeScript", cls="font-semibold text-sm"),
+                                Div("Support", cls="text-xs text-muted-foreground"),
+                                cls="text-center space-y-1"
+                            ),
+                            Div(
+                                Div("Dark", cls="font-semibold text-sm"),
+                                Div("Mode", cls="text-xs text-muted-foreground"),
+                                cls="text-center space-y-1"
+                            ),
+                            cls="flex justify-between py-3 px-3 bg-muted/30 rounded-md"
                         ),
-                        cls="space-y-3"
+                        cls="space-y-2"
                     ),
                     signal="basic_hover"
                 ),
@@ -62,19 +89,45 @@ def examples():
         ),
         '''HoverCard(
     HoverCardTrigger(
-        A("@nextjs", href="#", cls="text-blue-600 hover:underline font-medium"),
+        Div(
+            Icon("lucide:external-link", cls="h-4 w-4 mr-2 text-blue-500"),
+            Span("StarUI Documentation", cls="text-blue-600 hover:underline font-medium"),
+            cls="inline-flex items-center cursor-pointer"
+        ),
         signal="basic_hover"
     ),
     HoverCardContent(
         Div(
+            # Header with icon
             Div(
-                H4("Next.js", cls="text-sm font-semibold mb-1"),
-                P("The React Framework for the Web", cls="text-sm text-muted-foreground mb-3")
+                Icon("lucide:star", width="24", height="24", cls="mr-2 text-blue-600 text-xl"),
+                Div(
+                    H4("StarUI Component Library", cls="font-semibold text-sm"),
+                    P("Modern, accessible React components", cls="text-xs text-muted-foreground")
+                ),
+                cls="flex items-center mb-3"
             ),
+            # Description  
+            P("Build beautiful interfaces with our comprehensive collection of customizable UI components.", 
+              cls="text-sm text-muted-foreground mb-3"),
+            # Quick stats with better spacing
             Div(
-                Icon("lucide:calendar", cls="mr-2 h-4 w-4 opacity-70"),
-                Span("Joined December 2021", cls="text-xs text-muted-foreground"),
-                cls="flex items-center"
+                Div(
+                    Div("50+", cls="font-semibold text-sm"),
+                    Div("Components", cls="text-xs text-muted-foreground"),
+                    cls="text-center space-y-1"
+                ),
+                Div(
+                    Div("TypeScript", cls="font-semibold text-sm"),
+                    Div("Support", cls="text-xs text-muted-foreground"),
+                    cls="text-center space-y-1"
+                ),
+                Div(
+                    Div("Dark", cls="font-semibold text-sm"),
+                    Div("Mode", cls="text-xs text-muted-foreground"),
+                    cls="text-center space-y-1"
+                ),
+                cls="flex justify-between py-3 px-3 bg-muted/30 rounded-md"
             )
         ),
         signal="basic_hover"
@@ -88,20 +141,21 @@ def examples():
     # User profile hover card
     yield ComponentPreview(
         Div(
-            P("Hover over the user avatar to see their profile:", cls="text-sm text-muted-foreground mb-4"),
-            HoverCard(
-                HoverCardTrigger(
-                    Div(
-                        Avatar(
-                            Img(src="https://github.com/shadcn.png", alt="@shadcn"),
-                            size="sm",
-                            cls="mr-3"
+            P("Hover over the user avatar to see their profile:", cls="text-sm text-muted-foreground mb-4 text-center"),
+            Div(
+                HoverCard(
+                    HoverCardTrigger(
+                        Div(
+                            Avatar(
+                                Img(src="https://github.com/shadcn.png", alt="@shadcn"),
+                                size="sm",
+                                cls="mr-3"
+                            ),
+                            Span("@shadcn", cls="text-sm font-medium"),
+                            cls="flex items-center cursor-pointer hover:bg-muted/50 p-2 rounded-md transition-colors"
                         ),
-                        Span("@shadcn", cls="text-sm font-medium"),
-                        cls="flex items-center cursor-pointer hover:bg-muted/50 p-2 rounded-md transition-colors"
+                        signal="profile_hover"
                     ),
-                    signal="profile_hover"
-                ),
                 HoverCardContent(
                     Div(
                         # Header with avatar and basic info
@@ -154,7 +208,8 @@ def examples():
                 ),
                 signal="profile_hover"
             ),
-            cls="flex justify-center"
+                cls="flex justify-center"
+            )
         ),
         '''HoverCard(
     HoverCardTrigger(
@@ -203,46 +258,43 @@ def examples():
             P("Hover over the repository link:", cls="text-sm text-muted-foreground mb-4"),
             HoverCard(
                 HoverCardTrigger(
-                    A("starui/components", href="#", cls="text-blue-600 hover:underline font-mono text-sm"),
+                    Div(
+                        Icon("lucide:star", width="16", height="16", cls="mr-2 text-blue-500"),
+                        A("starui/components", href="#", cls="text-blue-600 hover:underline font-medium"),
+                        cls="inline-flex items-center cursor-pointer"
+                    ),
                     signal="repo_hover"
                 ),
                 HoverCardContent(
                     Div(
-                        # Repo header with icon
+                        # Repo header
                         Div(
-                            Icon("lucide:github", cls="h-6 w-6 mr-3"),
-                            Div(
-                                H4("starui/components", cls="text-sm font-semibold"),
-                                P("Beautifully designed components for StarHTML applications.", cls="text-sm text-muted-foreground"),
-                                cls="space-y-1"
-                            ),
-                            cls="flex items-start mb-4"
+                            Icon("lucide:repo", width="16", height="16", cls="mr-2 text-muted-foreground"),
+                            H4("starui/components", cls="text-sm font-semibold text-blue-600"),
+                            Badge("Public", variant="secondary", cls="ml-auto text-xs"),
+                            cls="flex items-center mb-3"
                         ),
-                        # Repository stats
+                        # Description
+                        P("Beautifully designed components that make building interfaces with StarHTML a breeze.", 
+                          cls="text-sm text-muted-foreground mb-3"),
+                        # Repository stats - GitHub style with better indent
                         Div(
                             Div(
-                                Icon("lucide:star", cls="mr-1 h-3 w-3 text-yellow-500"),
-                                Span("2.1k", cls="text-xs font-medium"),
-                                cls="flex items-center"
+                                Icon("lucide:star", width="14", height="14", cls="mr-1 text-yellow-500"),
+                                Span("2.1k", cls="text-sm font-medium mr-4"),
+                                Icon("lucide:git-fork", width="14", height="14", cls="mr-1 text-muted-foreground"),
+                                Span("184", cls="text-sm text-muted-foreground"),
+                                cls="flex items-center mb-2"
                             ),
                             Div(
-                                Icon("lucide:git-fork", cls="mr-1 h-3 w-3 text-muted-foreground"),
-                                Span("184", cls="text-xs text-muted-foreground"),
-                                cls="flex items-center"
-                            ),
-                            Div(
-                                Icon("lucide:circle", cls="mr-1 h-3 w-3 text-blue-500 fill-current"),
-                                Span("Python", cls="text-xs text-muted-foreground"),
-                                cls="flex items-center"
-                            ),
-                            Div(
-                                Icon("lucide:calendar", cls="mr-1 h-3 w-3 text-muted-foreground"),
+                                Div(cls="w-3 h-3 bg-blue-500 rounded-full mr-1"),
+                                Span("Python", cls="text-xs text-muted-foreground mr-3"),
                                 Span("Updated 2 days ago", cls="text-xs text-muted-foreground"),
                                 cls="flex items-center"
                             ),
-                            cls="grid grid-cols-2 gap-3"
+                            cls="space-y-1 pl-6"
                         ),
-                        cls="space-y-2"
+                        cls="space-y-1"
                     ),
                     signal="repo_hover",
                     side="top"
@@ -253,28 +305,41 @@ def examples():
         ),
         '''HoverCard(
     HoverCardTrigger(
-        A("starui/components", href="#", cls="text-blue-600 hover:underline font-mono"),
+        Div(
+            Icon("lucide:star", width="16", height="16", cls="mr-2 text-blue-500"),
+            A("starui/components", href="#", cls="text-blue-600 hover:underline font-medium"),
+            cls="inline-flex items-center cursor-pointer"
+        ),
         signal="repo_hover"
     ),
     HoverCardContent(
         Div(
-            # Repository header
+            # Repository header with icon and badge
             Div(
-                Icon("lucide:github", cls="h-6 w-6 mr-3"),
-                Div(
-                    H4("starui/components", cls="text-sm font-semibold"),
-                    P("Beautifully designed components for StarHTML applications.", 
-                      cls="text-sm text-muted-foreground")
-                ),
-                cls="flex items-start mb-4"
+                Icon("lucide:repo", width="16", height="16", cls="mr-2 text-muted-foreground"),
+                H4("starui/components", cls="text-sm font-semibold text-blue-600"),
+                Badge("Public", variant="secondary", cls="ml-auto text-xs"),
+                cls="flex items-center mb-3"
             ),
-            # Repository stats
+            # Description
+            P("Beautifully designed components that make building interfaces with StarHTML a breeze.", 
+              cls="text-sm text-muted-foreground mb-3"),
+            # GitHub-style stats
             Div(
-                Div(Icon("lucide:star"), Span("2.1k"), cls="flex items-center"),
-                Div(Icon("lucide:git-fork"), Span("184"), cls="flex items-center"),
-                Div(Icon("lucide:circle"), Span("Python"), cls="flex items-center"),
-                Div(Icon("lucide:calendar"), Span("Updated 2 days ago"), cls="flex items-center"),
-                cls="grid grid-cols-2 gap-3"
+                Div(
+                    Icon("lucide:star", width="14", height="14", cls="mr-1 text-yellow-500"),
+                    Span("2.1k", cls="text-sm font-medium mr-4"),
+                    Icon("lucide:git-fork", width="14", height="14", cls="mr-1 text-muted-foreground"),
+                    Span("184", cls="text-sm text-muted-foreground"),
+                    cls="flex items-center mb-2"
+                ),
+                Div(
+                    Div(cls="w-3 h-3 bg-blue-500 rounded-full mr-1"),  # Language dot
+                    Span("Python", cls="text-xs text-muted-foreground mr-3"),
+                    Span("Updated 2 days ago", cls="text-xs text-muted-foreground"),
+                    cls="flex items-center"
+                ),
+                cls="space-y-1 pl-6"  # Add indent to stats section
             )
         ),
         signal="repo_hover",
@@ -308,20 +373,17 @@ def examples():
                             P("Titanium. So strong. So light. So Pro.", cls="text-sm text-muted-foreground mb-3"),
                             cls="text-center"
                         ),
-                        # Product details
+                        # Pricing and rating
                         Div(
                             Div(
-                                Div(
-                                    Span("Starting at", cls="text-xs text-muted-foreground"),
-                                    Span("$999", cls="text-lg font-bold"),
-                                    cls="text-center"
-                                ),
-                                Div(
-                                    Span("⭐ 4.8", cls="text-xs font-medium"),
-                                    Span("(2.1k reviews)", cls="text-xs text-muted-foreground ml-1"),
-                                    cls="text-center"
-                                ),
-                                cls="space-y-1"
+                                Span("Starting at", cls="text-xs text-muted-foreground block mb-1"),
+                                Span("$999", cls="text-xl font-bold text-foreground"),
+                                cls="text-center mb-3"
+                            ),
+                            Div(
+                                Span("⭐ 4.8", cls="text-sm font-medium mr-2"),
+                                Span("(2.1k reviews)", cls="text-xs text-muted-foreground"),
+                                cls="flex items-center justify-center"
                             ),
                             cls="mb-4"
                         ),
@@ -363,13 +425,17 @@ def examples():
                 H4("iPhone 15 Pro", cls="font-semibold text-lg"),
                 P("Titanium. So strong. So light. So Pro.", cls="text-sm text-muted-foreground")
             ),
-            # Price and rating
+            # Pricing and rating  
             Div(
-                Span("Starting at", cls="text-xs text-muted-foreground"),
-                Span("$999", cls="text-lg font-bold"),
                 Div(
-                    Span("⭐ 4.8", cls="text-xs font-medium"),
-                    Span("(2.1k reviews)", cls="text-xs text-muted-foreground")
+                    Span("Starting at", cls="text-xs text-muted-foreground block mb-1"),
+                    Span("$999", cls="text-xl font-bold text-foreground"),
+                    cls="text-center mb-3"
+                ),
+                Div(
+                    Span("⭐ 4.8", cls="text-sm font-medium mr-2"),
+                    Span("(2.1k reviews)", cls="text-xs text-muted-foreground"),
+                    cls="flex items-center justify-center"
                 )
             ),
             # Features
@@ -516,45 +582,40 @@ HoverCard(
                           Div(
                               # Header with icon and title
                               Div(
-                                  Icon("lucide:book-open", cls="h-5 w-5 mr-3 text-blue-600"),
+                                  Icon("lucide:book-open", width="20", height="20", cls="mr-3 text-blue-600"),
                                   Div(
-                                      H4("StarHTML Framework", cls="font-semibold text-sm"),
+                                      H4("StarHTML Framework", cls="font-semibold text-sm mb-1"),
                                       P("Modern Python web framework", cls="text-xs text-muted-foreground"),
-                                      cls="space-y-1"
                                   ),
-                                  cls="flex items-start mb-3"
+                                  cls="flex items-start mb-4"
                               ),
                               # Description
-                              P("StarHTML is a Python framework for building modern web applications with server-side rendering and reactive components.", 
-                                cls="text-sm text-muted-foreground mb-3"),
-                              # Features
+                              P("A Python framework for building modern web applications with server-side rendering and reactive components.", 
+                                cls="text-sm text-muted-foreground mb-4"),
+                              # Features - simplified
                               Div(
-                                  H4("Key Features:", cls="text-xs font-semibold mb-2"),
-                                  Ul(
-                                      Li("Server-side rendering", cls="text-xs"),
-                                      Li("Reactive components", cls="text-xs"),
-                                      Li("Modern Python syntax", cls="text-xs"),
-                                      Li("TypeScript-like development", cls="text-xs"),
-                                      cls="list-disc list-inside space-y-1 text-muted-foreground mb-3"
-                                  )
+                                  H4("Key Features", cls="text-sm font-semibold mb-2"),
+                                  Div(
+                                      Div("• Server-side rendering", cls="text-sm text-muted-foreground mb-1"),
+                                      Div("• Reactive components", cls="text-sm text-muted-foreground mb-1"),
+                                      Div("• Modern Python syntax", cls="text-sm text-muted-foreground mb-1"),
+                                      Div("• TypeScript-like development", cls="text-sm text-muted-foreground"),
+                                  ),
+                                  cls="mb-4"
                               ),
                               # Action links
                               Div(
                                   A(
-                                      Icon("lucide:external-link", cls="h-3 w-3 mr-2"),
-                                      "View Documentation",
+                                      "View Documentation →",
                                       href="#",
-                                      cls="text-xs text-blue-600 hover:text-blue-800 flex items-center mr-4"
+                                      cls="text-sm text-blue-600 hover:text-blue-800 block mb-2"
                                   ),
                                   A(
-                                      Icon("lucide:github", cls="h-3 w-3 mr-2"),
-                                      "GitHub",
+                                      "View on GitHub →",
                                       href="#",
-                                      cls="text-xs text-blue-600 hover:text-blue-800 flex items-center"
+                                      cls="text-sm text-blue-600 hover:text-blue-800 block"
                                   ),
-                                  cls="flex items-center"
                               ),
-                              cls="space-y-2"
                           ),
                           signal="docs_hover",
                           side="top",
@@ -562,8 +623,7 @@ HoverCard(
                       ),
                       signal="docs_hover"
                   ),
-                  " and its component system.", cls="text-sm"),
-                cls="text-center"
+                  " and its component system.", cls="text-sm")
             )
         ),
         '''P("Learn more about ", 
@@ -576,31 +636,31 @@ HoverCard(
           Div(
               # Header with icon and title
               Div(
-                  Icon("lucide:book-open", cls="h-5 w-5 mr-3 text-blue-600"),
+                  Icon("lucide:book-open", width="20", height="20", cls="mr-3 text-blue-600"),
                   Div(
-                      H4("StarHTML Framework", cls="font-semibold text-sm"),
+                      H4("StarHTML Framework", cls="font-semibold text-sm mb-1"),
                       P("Modern Python web framework", cls="text-xs text-muted-foreground")
                   ),
-                  cls="flex items-start mb-3"
+                  cls="flex items-start mb-4"
               ),
-              # Rich description
-              P("StarHTML is a Python framework for building modern web applications...", 
-                cls="text-sm text-muted-foreground mb-3"),
-              # Feature list
+              # Description
+              P("A Python framework for building modern web applications with server-side rendering and reactive components.", 
+                cls="text-sm text-muted-foreground mb-4"),
+              # Features - simplified and left-aligned
               Div(
-                  H4("Key Features:", cls="text-xs font-semibold mb-2"),
-                  Ul(
-                      Li("Server-side rendering"),
-                      Li("Reactive components"),
-                      Li("Modern Python syntax"),
-                      cls="list-disc list-inside space-y-1 text-muted-foreground"
-                  )
+                  H4("Key Features", cls="text-sm font-semibold mb-2"),
+                  Div(
+                      Div("• Server-side rendering", cls="text-sm text-muted-foreground mb-1"),
+                      Div("• Reactive components", cls="text-sm text-muted-foreground mb-1"),
+                      Div("• Modern Python syntax", cls="text-sm text-muted-foreground mb-1"),
+                      Div("• TypeScript-like development", cls="text-sm text-muted-foreground")
+                  ),
+                  cls="mb-4"
               ),
-              # External links
+              # Action links - stacked vertically
               Div(
-                  A("View Documentation", href="#", cls="text-xs text-blue-600"),
-                  A("GitHub", href="#", cls="text-xs text-blue-600"),
-                  cls="flex items-center gap-4"
+                  A("View Documentation →", href="#", cls="text-sm text-blue-600 hover:text-blue-800 block mb-2"),
+                  A("View on GitHub →", href="#", cls="text-sm text-blue-600 hover:text-blue-800 block")
               )
           ),
           signal="docs_hover",
@@ -617,8 +677,9 @@ HoverCard(
     # Interactive hover card with form
     yield ComponentPreview(
         Div(
-            P("Hover over the contact button to see an interactive form:", cls="text-sm text-muted-foreground mb-4"),
-            HoverCard(
+            P("Hover over the contact button to see an interactive form:", cls="text-sm text-muted-foreground mb-4 text-center"),
+            Div(
+                HoverCard(
                 HoverCardTrigger(
                     Div(
                         Icon("lucide:mail", cls="h-4 w-4 mr-2"),
@@ -653,15 +714,13 @@ HoverCard(
                                 cls="mb-3"
                             ),
                             # Message textarea
-                            Div(
-                                Label("Message", cls="text-xs font-medium mb-1 block"),
-                                Input(
-                                    placeholder="Your message...",
-                                    signal="contact_message",
-                                    rows="3",
-                                    cls="min-h-[60px] resize-none text-sm"
-                                ),
-                                cls="mb-4"
+                            TextareaWithLabel(
+                                label="Message",
+                                placeholder="Your message...",
+                                signal="contact_message",
+                                rows=3,
+                                cls="text-sm resize-none",
+                                class_name="mb-4"
                             ),
                             # Submit button
                             Button(
@@ -692,7 +751,8 @@ HoverCard(
                 ),
                 signal="contact_hover"
             ),
-            cls="flex justify-center"
+                cls="flex justify-center"
+            )
         ),
         '''HoverCard(
     HoverCardTrigger(
@@ -716,9 +776,12 @@ HoverCard(
                     Label("Email", cls="text-xs font-medium mb-1 block"),
                     UIInput(type="email", placeholder="your@email.com", signal="contact_email")
                 ),
-                Div(
-                    Label("Message", cls="text-xs font-medium mb-1 block"),
-                    Input(placeholder="Your message...", rows="3", signal="contact_message")
+                TextareaWithLabel(
+                    label="Message",
+                    placeholder="Your message...",
+                    signal="contact_message",
+                    rows=3,
+                    cls="text-sm resize-none"
                 ),
                 # Submit button with validation
                 Button(
@@ -855,8 +918,9 @@ def create_hover_card_docs():
                         P("Beautiful, accessible components built with StarHTML. Perfect for displaying rich content on hover without disrupting the user experience.", 
                           cls="text-sm text-muted-foreground mb-4"),
                         Div(
-                            Button("Explore Components", size="sm", cls="mr-2"),
-                            Button("Documentation", size="sm", variant="outline")
+                            Button("Explore Components", size="sm", cls="w-full"),
+                            Button("Documentation", size="sm", variant="outline", cls="w-full"),
+                            cls="space-y-2"
                         )
                     ),
                     signal="hero_hover"
@@ -876,8 +940,9 @@ def create_hover_card_docs():
             P("Beautiful, accessible components built with StarHTML...", 
               cls="text-sm text-muted-foreground mb-4"),
             Div(
-                Button("Explore Components", size="sm"),
-                Button("Documentation", size="sm", variant="outline")
+                Button("Explore Components", size="sm", cls="w-full"),
+                Button("Documentation", size="sm", variant="outline", cls="w-full"),
+                cls="space-y-2"
             )
         ),
         signal="hero_hover"

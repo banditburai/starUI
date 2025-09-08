@@ -5,6 +5,7 @@ from starhtml.datastar import ds_on_click, ds_signals, ds_text, ds_show
 from layouts.footer import DocsFooter
 from layouts.header import DocsHeader
 from layouts.sidebar import DocsSidebar, MobileSidebar
+from layouts.navigation import TopNavigation, BottomNavigation
 from starui.registry.components.breadcrumb import (
     Breadcrumb,
     BreadcrumbItem,
@@ -91,14 +92,18 @@ def _copy_page_button(component_name: str | None = None) -> FT:
 
 
 def _page_header_section(layout: LayoutConfig) -> FT:
-    """Create the page header section with title, description, and copy button."""
+    """Create the page header section with title, description, and copy/navigation buttons."""
     if not layout.title:
         return None
     
     return Div(
         Div(
             H1(layout.title, cls="scroll-m-20 text-4xl font-semibold tracking-tight"),
-            _copy_page_button(layout.component_name) if layout.show_copy else None,
+            Div(
+                _copy_page_button(layout.component_name) if layout.show_copy else None,
+                TopNavigation(layout.component_name) if layout.component_name else None,
+                cls="flex items-center gap-3"
+            ),
             cls="flex items-center justify-between"
         ),
         P(layout.description, cls="text-muted-foreground mt-2") if layout.description else None,
@@ -115,7 +120,7 @@ def _main_content_area(content: tuple, layout: LayoutConfig) -> FT:
             *content,
             cls=f"max-w-full overflow-x-hidden {layout.content_class}"
         ),
-        _page_nav(layout.prev_page, layout.next_page) if (layout.prev_page or layout.next_page) else None,
+        BottomNavigation(layout.component_name) if layout.component_name else None,
         cls=f"w-full max-w-full mx-auto px-8 sm:px-12 md:px-16 lg:px-20 xl:px-24 py-6 lg:py-8 {layout.container_class}"
     )
 
@@ -228,17 +233,3 @@ def _breadcrumb(items: list[dict[str, Any]]) -> FT:
     )
 
 
-def _page_nav(prev_page: dict[str, str] | None, next_page: dict[str, str] | None) -> FT:
-    return Div(
-        A(
-            "← " + prev_page["label"],
-            href=prev_page["href"],
-            cls="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground"
-        ) if prev_page else Span(),
-        A(
-            next_page["label"] + " →",
-            href=next_page["href"],
-            cls="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground"
-        ) if next_page else Span(),
-        cls="flex items-center justify-between mt-12 pt-6 border-t"
-    )

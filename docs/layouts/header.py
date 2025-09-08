@@ -72,7 +72,7 @@ def _github_dropdown(github_stars: str) -> FT:
             side="bottom",
             align="end",
             cls="p-2",
-            style="width: 180px"
+            style="width: 180px;"
         ),
         cls="relative"
     )
@@ -128,5 +128,6 @@ def DocsHeader(config: "HeaderConfig", show_mobile_menu_button: bool = False, **
             cls="flex h-14 w-full items-center justify-between px-4 sm:px-6 md:px-8 lg:px-6 max-w-full mx-auto",
         ),
         cls="sticky top-0 z-50 w-full border-b border-border bg-background",
+        style="will-change: transform; transform: translateZ(0); backface-visibility: hidden;",
         **attrs
     )

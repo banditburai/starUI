@@ -160,7 +160,7 @@ def create_date_picker_docs():
                     ),
                     cls="flex flex-col items-center",
                 ),
-                cls="grid grid-cols-1 md:grid-cols-3 gap-8",
+                cls="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl mx-auto",
             ),
             cls="w-full",
         ),

@@ -29,6 +29,7 @@ InputType = Literal[
 
 
 def Input(
+    *args,
     type: InputType = "text",
     placeholder: str | None = None,
     value: str | None = None,
@@ -149,8 +150,8 @@ def Input(
     clean_attrs = {k: v for k, v in attrs.items() if k not in ['signal', 'validation']}
     input_attrs.update(clean_attrs)
 
-    # Create the base input
-    base_input = HTMLInput(**input_attrs)
+    # Create the base input with positional args first
+    base_input = HTMLInput(*args, **input_attrs)
     
     # CRITICAL FIX: Remove auto-generated name attribute for reactive inputs
     # StarHTML automatically sets name=id, which conflicts with ds_bind

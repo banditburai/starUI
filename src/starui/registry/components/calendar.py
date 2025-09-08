@@ -262,7 +262,7 @@ def _select_handler(
         select_logic = f"const i=s.indexOf(d);${signal}_selected=JSON.stringify(i>=0?s.filter((_,x)=>x!==i):[...s,d])"
     else:
         base += f"let s;try{{s=JSON.parse(${signal}_selected||'[]')}}catch{{s=[]}};"
-        select_logic = f"if(s.length===0||s.length===2){{${signal}_selected=JSON.stringify([d])}}else{{${signal}_selected=JSON.stringify([s[0],d].sort())}}"
+        select_logic = f"if(s.length===0){{${signal}_selected=JSON.stringify([d])}}else if(s.length===1){{if(s[0]===d){{${signal}_selected=JSON.stringify([])}}else{{${signal}_selected=JSON.stringify([s[0],d].sort())}}}}else{{${signal}_selected=JSON.stringify([d])}}"
 
     if on_select:
         if mode == "single":

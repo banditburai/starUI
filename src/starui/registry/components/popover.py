@@ -81,6 +81,7 @@ def PopoverContent(*children, cls="", side="bottom", align="center", **attrs):
                 flip=True,
                 shift=True,
                 hide=True,
+                strategy="fixed",
             ),
             popover="auto",
             id=f"{signal}-content",

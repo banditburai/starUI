@@ -34,7 +34,6 @@ def Alert(
         data_slot="alert",
         cls=cn(
             alert_variants(variant=variant),
-            f"alert-{variant}",
             class_name,
             cls,
         ),
