@@ -7,7 +7,7 @@ from starhtml.datastar import ds_signals, ds_on_click, ds_show, ds_class, ds_bin
 from starui.registry.components.command import (
     Command, CommandInput, CommandList, CommandEmpty,
     CommandGroup, CommandItem, CommandSeparator, CommandShortcut,
-    CommandDialog, CommandDialogWithTrigger
+    CommandDialog
 )
 from starui.registry.components.button import Button
 from starui.registry.components.badge import Badge
@@ -36,7 +36,7 @@ def examples():
     ]
     
     # Generate CommandItems for each status group (including dynamic slots)
-    def generate_task_items(tasks_list, status_filter, signal="task_cmd"):
+    def generate_task_items(tasks_list, status_filter):
         items = []
         
         # Create all possible task IDs (existing + dynamic slots)
@@ -72,8 +72,7 @@ def examples():
                                   cls="ml-auto"),
                             value=f"{task_id}_pending",
                             onclick=f"${task_id}_status = 'progress'",
-                            show=show_condition,
-                            signal=signal
+                            show=show_condition
                         )
                     )
                 else:  # Dynamic task
@@ -104,8 +103,7 @@ def examples():
                             ),
                             value=f"{task_id}_pending",
                             onclick=f"${task_id}_status = 'progress'",
-                            show=show_condition,
-                            signal=signal
+                            show=show_condition
                         )
                     )
                     
@@ -124,8 +122,7 @@ def examples():
                             Badge(badge_text, variant=badge_variant, cls="ml-auto"),
                             value=f"{task_id}_progress",
                             onclick=f"${task_id}_status = 'completed'",
-                            show=show_condition,
-                            signal=signal
+                            show=show_condition
                         )
                     )
                 else:  # Dynamic task
@@ -157,7 +154,6 @@ def examples():
                             value=f"{task_id}_progress",
                             onclick=f"${task_id}_status = 'completed'",
                             show=f"${task_id}_visible && ${task_id}_status === 'progress'",
-                            signal=signal
                         )
                     )
                     
@@ -172,8 +168,7 @@ def examples():
                             Badge("Done", variant="outline", cls="ml-auto opacity-60"),
                             value=f"{task_id}_completed",
                             onclick=f"${task_id}_visible = false",
-                            show=show_condition,
-                            signal=signal
+                            show=show_condition
                         )
                     )
                 else:  # Dynamic task
@@ -185,7 +180,6 @@ def examples():
                             value=f"{task_id}_completed",
                             onclick=f"${task_id}_visible = false",
                             show=f"${task_id}_visible && ${task_id}_status === 'completed'",
-                            signal=signal
                         )
                     )
         
@@ -203,8 +197,7 @@ def examples():
                 Span(empty_messages[status_filter], cls="text-muted-foreground italic"),
                 value=f"empty_{status_filter}",
                 disabled=True,
-                show=empty_show,
-                signal=signal
+                show=empty_show
             )
         )
         
@@ -230,7 +223,7 @@ def examples():
     task_signals["task_cmd_next_id"] = value(len(tasks) + 1)
     
     # Custom CommandInput for task addition
-    def TaskCommandInput(placeholder: str = "Add a new task...", **attrs):
+    def TaskCommandInput(placeholder: str = "Add a new task...", **kwargs):
         def _(signal):
             return Div(
                 Icon("lucide:plus", cls="size-4 shrink-0 opacity-50"),
@@ -288,7 +281,7 @@ def examples():
                     autocorrect="off",
                     spellcheck="false",
                     type="text",
-                    **attrs
+                    **kwargs
                 ),
                 data_slot="command-input-wrapper",
                 cls="flex h-9 items-center gap-2 border-b border-border px-3"
@@ -299,28 +292,23 @@ def examples():
         Div(
             Command(
                 TaskCommandInput(
-                    placeholder="Add a new task (use ! for urgent)...",
-                    signal="tasks"
+                    placeholder="Add a new task (use ! for urgent)..."
                 ),
                 CommandList(
-                    CommandEmpty("No tasks yet. Add your first task above!", signal="task_cmd"),
+                    CommandEmpty("No tasks yet. Add your first task above!"),
                     CommandGroup(
                         "Pending Tasks",
-                        *generate_task_items(tasks, "pending", "task_cmd"),
-                        signal="task_cmd"
+                        *generate_task_items(tasks, "pending")
                     ),
                     CommandGroup(
                         "In Progress",
-                        *generate_task_items(tasks, "progress", "task_cmd"),
-                        signal="task_cmd"
+                        *generate_task_items(tasks, "progress")
                     ),
                     CommandSeparator(),
                     CommandGroup(
                         "Completed",
-                        *generate_task_items(tasks, "completed", "task_cmd"),
-                        signal="task_cmd"
+                        *generate_task_items(tasks, "completed")
                     ),
-                    signal="task_cmd",
                     cls="max-h-none overflow-visible"
                 ),
                 signal="tasks",
@@ -329,7 +317,7 @@ def examples():
             ds_signals(**task_signals)
         ),
         """# Custom CommandInput for task addition
-def TaskCommandInput(placeholder="Add a new task...", **attrs):
+def TaskCommandInput(placeholder="Add a new task...", **kwargs):
     def _(signal):
         return Div(
             Icon("lucide:plus", cls="size-4 shrink-0 opacity-50"),
@@ -337,7 +325,7 @@ def TaskCommandInput(placeholder="Add a new task...", **attrs):
                 ds_bind("task_cmd_new"),
                 ds_on_keydown("...task addition logic..."),
                 placeholder=placeholder,
-                **attrs
+                **kwargs
             ),
             cls="flex h-9 items-center gap-2 border-b border-border px-3"
         )
@@ -346,7 +334,7 @@ def TaskCommandInput(placeholder="Add a new task...", **attrs):
 Command(
     TaskCommandInput(placeholder="Add a new task (use ! for urgent)..."),
     CommandList(
-        CommandEmpty("No tasks found.", signal="task_cmd"),
+        CommandEmpty("No tasks found."),
         CommandGroup(
             "Active Tasks",
             CommandItem(
@@ -354,10 +342,8 @@ Command(
                 "Review pull requests",
                 Badge("In Progress", variant="default", cls="ml-auto"),
                 value="task1",
-                onclick="alert('Task marked as complete')",
-                signal="task_cmd"
-            ),
-            signal="task_cmd"
+                onclick="alert('Task marked as complete')"
+            )
         ),
         CommandGroup(
             "Completed",
@@ -366,12 +352,9 @@ Command(
                 Span("Deploy to production", cls="line-through opacity-60"),
                 Badge("Done", variant="outline", cls="ml-auto"),
                 value="task4",
-                disabled=True,
-                signal="task_cmd"
-            ),
-            signal="task_cmd"
-        ),
-        signal="task_cmd"
+                disabled=True
+            )
+        )
     ),
     signal="task_cmd"
 )""",
@@ -391,9 +374,9 @@ Command(
                     cls="w-64 justify-start text-sm text-muted-foreground"
                 ),
                 [
-                    CommandInput(placeholder="Type a command or search...", signal="action_cmd"),
+                    CommandInput(placeholder="Type a command or search..."),
                     CommandList(
-                        CommandEmpty("No commands found.", signal="action_cmd"),
+                        CommandEmpty("No commands found."),
                         CommandGroup(
                             "Navigation",
                             CommandItem(
@@ -401,25 +384,21 @@ Command(
                                 "Go to Home",
                                 value="home",
                                 onclick="window.location.href='/'",
-                                signal="action_cmd"
-                            ),
+                                ),
                             CommandItem(
                                 Icon("lucide:book-open", cls="mr-2 h-4 w-4"),
                                 "Documentation",
                                 Icon("lucide:external-link", cls="ml-auto h-3 w-3 opacity-50"),
                                 value="docs",
                                 onclick="window.open('https://docs.example.com', '_blank')",
-                                signal="action_cmd"
-                            ),
+                                ),
                             CommandItem(
                                 Icon("lucide:github", cls="mr-2 h-4 w-4"),
                                 "GitHub Repository",
                                 Icon("lucide:external-link", cls="ml-auto h-3 w-3 opacity-50"),
                                 value="github",
                                 onclick="window.open('https://github.com', '_blank')",
-                                signal="action_cmd"
-                            ),
-                            signal="action_cmd"
+                                ),
                         ),
                         CommandSeparator(),
                         CommandGroup(
@@ -430,25 +409,21 @@ Command(
                                 CommandShortcut("⌘C"),
                                 value="copy-email",
                                 onclick="navigator.clipboard.writeText('user@example.com').then(() => alert('Email copied!'))",
-                                signal="action_cmd"
-                            ),
+                                ),
                             CommandItem(
                                 Icon("lucide:link", cls="mr-2 h-4 w-4"),
                                 "Copy Share Link",
                                 CommandShortcut("⌘L"),
                                 value="copy-link",
                                 onclick="navigator.clipboard.writeText(window.location.href).then(() => alert('Link copied!'))",
-                                signal="action_cmd"
-                            ),
+                                ),
                             CommandItem(
                                 Icon("lucide:download", cls="mr-2 h-4 w-4"),
                                 "Export Data",
                                 Badge("CSV", variant="secondary", cls="ml-auto"),
                                 value="export",
                                 onclick="alert('Exporting data as CSV...')",
-                                signal="action_cmd"
-                            ),
-                            signal="action_cmd"
+                                ),
                         ),
                         CommandSeparator(),
                         CommandGroup(
@@ -459,16 +434,13 @@ Command(
                                 CommandShortcut("⌘D"),
                                 value="dark-mode",
                                 onclick="document.documentElement.classList.toggle('dark')",
-                                signal="action_cmd"
-                            ),
+                                ),
                             CommandItem(
                                 Icon("lucide:log-out", cls="mr-2 h-4 w-4 text-red-500"),
                                 Span("Sign Out", cls="text-red-500"),
                                 value="signout",
                                 onclick="if(confirm('Sign out?')) window.location.href='/logout'",
-                                signal="action_cmd"
-                            ),
-                            signal="action_cmd"
+                                ),
                         ),
                         signal="action_cmd",
                         cls="max-h-none overflow-visible"
@@ -486,9 +458,9 @@ Command(
         variant="outline"
     ),
     [
-        CommandInput(placeholder="Type a command...", signal="cmd"),
+        CommandInput(placeholder="Type a command..."),
         CommandList(
-            CommandEmpty("No commands found.", signal="cmd"),
+            CommandEmpty("No commands found."),
             CommandGroup(
                 "Navigation",
                 CommandItem(
@@ -496,9 +468,7 @@ Command(
                     "Go to Home",
                     value="home",
                     onclick="window.location.href='/'",
-                    signal="cmd"
                 ),
-                signal="cmd"
             ),
             CommandGroup(
                 "Utilities",
@@ -508,11 +478,8 @@ Command(
                     CommandShortcut("⌘C"),
                     value="copy-email",
                     onclick="navigator.clipboard.writeText('user@example.com')",
-                    signal="cmd"
                 ),
-                signal="cmd"
             ),
-            signal="cmd"
         )
     ],
     signal="cmd"
@@ -534,7 +501,6 @@ Command(
                             CommandShortcut("⌘E"),
                             value="edit",
                             onclick="alert('Edit mode activated')",
-                            signal="context_cmd"
                         ),
                         CommandItem(
                             Icon("lucide:copy", cls="mr-2 h-4 w-4"),
@@ -542,16 +508,13 @@ Command(
                             CommandShortcut("⌘D"),
                             value="duplicate",
                             onclick="alert('Item duplicated')",
-                            signal="context_cmd"
                         ),
                         CommandItem(
                             Icon("lucide:archive", cls="mr-2 h-4 w-4"),
                             "Archive",
                             value="archive",
                             onclick="alert('Item archived')",
-                            signal="context_cmd"
                         ),
-                        signal="context_cmd"
                     ),
                     CommandSeparator(),
                     CommandGroup(
@@ -561,14 +524,12 @@ Command(
                             "Copy Link",
                             value="copy-link",
                             onclick="navigator.clipboard.writeText('https://example.com/item/123')",
-                            signal="context_cmd"
                         ),
                         CommandItem(
                             Icon("lucide:mail", cls="mr-2 h-4 w-4"),
                             "Email",
                             value="email",
                             onclick="window.location.href='mailto:?subject=Check this out'",
-                            signal="context_cmd"
                         ),
                         CommandItem(
                             Icon("lucide:message-circle", cls="mr-2 h-4 w-4"),
@@ -576,9 +537,7 @@ Command(
                             Icon("lucide:external-link", cls="ml-auto h-3 w-3 opacity-50"),
                             value="slack",
                             onclick="alert('Opening Slack...')",
-                            signal="context_cmd"
                         ),
-                        signal="context_cmd"
                     ),
                     CommandSeparator(),
                     CommandItem(
@@ -587,9 +546,7 @@ Command(
                         CommandShortcut("Del"),
                         value="delete",
                         onclick="if(confirm('Delete this item?')) alert('Item deleted')",
-                        signal="context_cmd"
                     ),
-                    signal="context_cmd"
                 ),
                 signal="context_cmd",
                 size="sm"
@@ -606,16 +563,13 @@ Command(
                 CommandShortcut("⌘E"),
                 value="edit",
                 onclick="alert('Edit mode')",
-                signal="context_cmd"
-            ),
+                ),
             CommandItem(
                 Icon("lucide:copy", cls="mr-2 h-4 w-4"),
                 "Duplicate",
                 value="duplicate",
                 onclick="alert('Duplicated')",
-                signal="context_cmd"
-            ),
-            signal="context_cmd"
+                ),
         ),
         CommandSeparator(),
         CommandItem(
@@ -623,9 +577,7 @@ Command(
             Span("Delete", cls="text-red-500"),
             value="delete",
             onclick="if(confirm('Delete?')) alert('Deleted')",
-            signal="context_cmd"
         ),
-        signal="context_cmd"
     ),
     signal="context_cmd",
     size="sm"
@@ -644,10 +596,9 @@ def create_command_docs():
             Command(
                 CommandInput(
                     placeholder="Type a command or search...",
-                    signal="hero_cmd"
                 ),
                 CommandList(
-                    CommandEmpty("No results found.", signal="hero_cmd"),
+                    CommandEmpty("No results found."),
                     CommandGroup(
                         "Suggestions",
                         CommandItem(
@@ -656,7 +607,6 @@ def create_command_docs():
                             CommandShortcut("⌘L"),
                             value="launch",
                             onclick="alert('Launching...')",
-                            signal="hero_cmd"
                         ),
                         CommandItem(
                             Icon("lucide:search", cls="mr-2 h-4 w-4"),
@@ -664,7 +614,6 @@ def create_command_docs():
                             CommandShortcut("⌘K"),
                             value="search",
                             onclick="alert('Opening search...')",
-                            signal="hero_cmd"
                         ),
                         CommandItem(
                             Icon("lucide:terminal", cls="mr-2 h-4 w-4"),
@@ -672,9 +621,7 @@ def create_command_docs():
                             CommandShortcut("⌘T"),
                             value="terminal",
                             onclick="alert('Opening terminal...')",
-                            signal="hero_cmd"
                         ),
-                        signal="hero_cmd"
                     ),
                     CommandSeparator(),
                     CommandGroup(
@@ -685,18 +632,14 @@ def create_command_docs():
                             Badge("Active", variant="default", cls="ml-auto"),
                             value="project-alpha",
                             onclick="alert('Opening Project Alpha')",
-                            signal="hero_cmd"
                         ),
                         CommandItem(
                             Icon("lucide:file", cls="mr-2 h-4 w-4"),
                             "Project Beta",
                             value="project-beta",
                             onclick="alert('Opening Project Beta')",
-                            signal="hero_cmd"
                         ),
-                        signal="hero_cmd"
                     ),
-                    signal="hero_cmd"
                 ),
                 signal="hero_cmd",
                 size="md"
@@ -706,28 +649,24 @@ def create_command_docs():
         """from starui.registry.components.command import *
 
 Command(
-    CommandInput(placeholder="Type a command or search...", signal="cmd"),
+    CommandInput(placeholder="Type a command or search..."),
     CommandList(
-        CommandEmpty("No results found.", signal="cmd"),
+        CommandEmpty("No results found."),
         CommandGroup(
             "Suggestions",
             CommandItem(
                 Icon("lucide:rocket", cls="mr-2 h-4 w-4"),
                 "Launch",
                 CommandShortcut("⌘L"),
-                signal="cmd",
                 value="launch"
             ),
             CommandItem(
                 Icon("lucide:search", cls="mr-2 h-4 w-4"),
                 "Search",
                 CommandShortcut("⌘K"),
-                signal="cmd",
                 value="search"
             ),
-            signal="cmd"
         ),
-        signal="cmd"
     ),
     signal="cmd"
 )""",
@@ -779,10 +718,6 @@ Command(
                 {
                     "name": "CommandDialog",
                     "description": "Command palette in a modal dialog"
-                },
-                {
-                    "name": "CommandDialogWithTrigger",
-                    "description": "Command dialog with built-in trigger button"
                 }
             ],
             "props": [

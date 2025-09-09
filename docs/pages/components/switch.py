@@ -13,7 +13,7 @@ STATUS = "stable"
 from starhtml import Div, P, Input, Label, Icon, Span, H2, H3, Form, Code
 from starhtml.datastar import (
     ds_on_click, ds_show, ds_text, ds_signals, value,
-    ds_bind, ds_disabled, ds_on_change, ds_effect, ds_class, toggle
+    ds_bind, ds_disabled, ds_on_change, ds_effect, ds_class
 )
 from starui.registry.components.switch import Switch, SwitchWithLabel
 from starui.registry.components.button import Button

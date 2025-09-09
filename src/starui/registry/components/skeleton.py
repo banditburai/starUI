@@ -7,7 +7,7 @@ def Skeleton(
     *children,
     class_name: str = "",
     cls: str = "",
-    **attrs,
+    **kwargs,
 ) -> FT:
     return Div(
         *children,
@@ -19,5 +19,5 @@ def Skeleton(
             class_name,
             cls,
         ),
-        **attrs,
+        **kwargs,
     )

@@ -1,39 +1,39 @@
 from uuid import uuid4
 
-from starhtml import FT, Div, Style
+from starhtml import FT, Div
 from starhtml.datastar import ds_position, ds_ref
 
 from .button import Button
 from .utils import cn
 
 
-def Popover(*children, cls="relative inline-block", **attrs):
+def Popover(*children, cls="relative inline-block", **kwargs):
     signal = f"popover_{uuid4().hex[:8]}"
     return Div(
         *[child(signal) if callable(child) else child for child in children],
         cls=cls,
-        **attrs,
+        **kwargs,
     )
 
 
-def PopoverTrigger(*children, variant="default", cls="", **attrs):
-    def create(signal):
+def PopoverTrigger(*children, variant="default", cls="", **kwargs):
+    def _(signal):
         return Button(
             *children,
-            ds_ref(f"{signal}Trigger"),
+            ds_ref(f"{signal}_trigger"),
             variant=variant,
-            popovertarget=f"{signal}-content",
+            popovertarget=f"{signal}_content",
             popoveraction="toggle",
-            id=f"{signal}-trigger",
+            id=f"{signal}_trigger",
             cls=cls,
-            **attrs,
+            **kwargs,
         )
 
-    return create
+    return _
 
 
-def PopoverContent(*children, cls="", side="bottom", align="center", **attrs):
-    def create_content(signal):
+def PopoverContent(*children, cls="", side="bottom", align="center", **kwargs):
+    def _(signal):
         placement = f"{side}-{align}" if align != "center" else side
 
         def process_element(element):
@@ -60,33 +60,20 @@ def PopoverContent(*children, cls="", side="bottom", align="center", **attrs):
         )
 
         return Div(
-            Style(f"""
-                @keyframes popover-show-{signal} {{
-                    from {{ opacity: 0; }}
-                    to {{ opacity: 1; }}
-                }}
-                #{signal}-content {{
-                    opacity: 0;
-                }}
-                #{signal}-content:popover-open {{
-                    animation: popover-show-{signal} 150ms ease-out 75ms forwards;
-                }}
-            """),
             *processed_children,
-            ds_ref(f"{signal}Content"),
+            ds_ref(f"{signal}_content"),
             ds_position(
-                anchor=f"{signal}-trigger",
+                anchor=f"{signal}_trigger",
                 placement=placement,
                 offset=8,
                 flip=True,
                 shift=True,
                 hide=True,
-                strategy="fixed",
             ),
             popover="auto",
-            id=f"{signal}-content",
+            id=f"{signal}_content",
             role="dialog",
-            aria_labelledby=f"{signal}-trigger",
+            aria_labelledby=f"{signal}_trigger",
             tabindex="-1",
             cls=cn(
                 "z-50 rounded-md border border-input bg-popover text-popover-foreground shadow-md outline-none",
@@ -94,24 +81,24 @@ def PopoverContent(*children, cls="", side="bottom", align="center", **attrs):
                 "p-4" if not has_padding else "",
                 cls,
             ),
-            **attrs,
+            **kwargs,
         )
 
-    return create_content
+    return _
 
 
-def PopoverClose(*children, cls="", variant="ghost", size="sm", **attrs):
-    def close_button(signal):
+def PopoverClose(*children, cls="", variant="ghost", size="sm", **kwargs):
+    def _(signal):
         return Button(
             *children,
-            popovertarget=f"{signal}-content",
+            popovertarget=f"{signal}_content",
             popoveraction="hide",
             variant=variant,
             size=size,
             cls=cn("absolute right-2 top-2", cls),
             aria_label="Close popover",
-            **attrs,
+            **kwargs,
         )
 
-    close_button._is_popover_close = True
-    return close_button
+    _._is_popover_close = True
+    return _

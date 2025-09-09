@@ -10,7 +10,7 @@ ORDER = 25
 STATUS = "stable"
 
 from starhtml import Div, P, H3, H4, Span
-from starhtml.datastar import ds_signals, ds_show, ds_on_click, ds_text, value
+from starhtml.datastar import ds_signals, ds_show, ds_on_click, ds_text, value, toggle_signal
 from starui.registry.components.skeleton import Skeleton
 from starui.registry.components.button import Button
 from starui.registry.components.card import Card, CardContent, CardHeader, CardTitle
@@ -205,7 +205,7 @@ Div(
             Div(
                 Button(
                     ds_text("$loading ? 'Stop Loading' : 'Start Loading'"),
-                    ds_on_click("$loading = !$loading"),
+                    ds_on_click(toggle_signal("loading")),
                     variant="outline",
                     cls="mb-4",
                 ),
@@ -231,7 +231,7 @@ Div(
         ),
         '''Button(
     ds_text("$loading ? 'Stop Loading' : 'Start Loading'"),
-    ds_on_click="$loading = !$loading",
+    ds_on_click(toggle_signal("loading")),
     variant="outline"
 )
 

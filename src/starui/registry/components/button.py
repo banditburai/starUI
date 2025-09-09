@@ -43,7 +43,7 @@ def Button(
     disabled: bool = False,
     type: Literal["button", "submit", "reset"] = "button",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     classes = cn(button_variants(variant=variant, size=size), class_name, cls)
-    return HTMLButton(*children, cls=classes, disabled=disabled, type=type, **attrs)
+    return HTMLButton(*children, cls=classes, disabled=disabled, type=type, **kwargs)

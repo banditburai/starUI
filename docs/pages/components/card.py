@@ -12,7 +12,7 @@ STATUS = "stable"
 from starhtml import Div, P, H3, H4, Span, Icon, A, Img, if_
 from starhtml.datastar import (
     ds_on_click, ds_show, ds_text, ds_signals, value, ds_class,
-    ds_bind, ds_disabled, ds_on_mouseenter, ds_on_mouseleave, toggle, ds_on_input, ds_computed, ds_style, if_
+    ds_bind, ds_disabled, ds_on_mouseenter, ds_on_mouseleave, toggle_signal, ds_on_input, ds_computed, ds_style, if_
 )
 from starui.registry.components.card import (
     Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, CardAction
@@ -56,12 +56,12 @@ def examples():
                 CardFooter(
                     Button(
                         ds_text("$following1 ? 'Following' : 'Follow'"),
+                        ds_on_click(toggle_signal("following1")),
                         variant="outline", size="sm", cls="mr-2",
                         ds_class={
                             "bg-green-50 text-green-700 border-green-200": "$following1",
                             "hover:bg-green-50": "$following1"
-                        },
-                        ds_on_click=toggle("following1")
+                        },                        
                     ),
                     Button("Message", size="sm", ds_on_click="alert('Message sent to John!')")
                 )
@@ -89,12 +89,12 @@ def examples():
                 CardFooter(
                     Button(
                         ds_text("$following2 ? 'Following' : 'Follow'"),
+                        ds_on_click(toggle_signal("following2")),
                         variant="outline", size="sm", cls="mr-2",
                         ds_class={
                             "bg-green-50 text-green-700 border-green-200": "$following2",
                             "hover:bg-green-50": "$following2"
-                        },
-                        ds_on_click=toggle("following2")
+                        },                        
                     ),
                     Button("Message", size="sm", ds_on_click="alert('Message sent to Anna!')")
                 )
@@ -123,7 +123,7 @@ def examples():
             ds_text("$following ? 'Following' : 'Follow'"),
             variant="outline",
             ds_class={"bg-green-50 text-green-700": "$following"},
-            ds_on_click=toggle("following")
+            ds_on_click=toggle_signal("following")
         ),
         Button("Message", ds_on_click="alert('Message sent!')")
     )
@@ -186,7 +186,7 @@ def examples():
                 Card(
                     CardHeader(
                         Div(
-                            Icon("lucide:dollar-sign", cls="h-4 w-4 text-muted-foreground"),
+                            Icon("lucide:dollar-sign", width="24", height="24", cls="text-green-600"),
                             cls="mb-2"
                         ),
                         CardTitle("Total Revenue", cls="text-sm font-medium"),
@@ -213,7 +213,7 @@ def examples():
                 Card(
                     CardHeader(
                         Div(
-                            Icon("lucide:users", cls="h-4 w-4 text-muted-foreground"),
+                            Icon("lucide:users", width="24", height="24", cls="text-blue-600"),
                             cls="mb-2"
                         ),
                         CardTitle("Active Users", cls="text-sm font-medium"),
@@ -240,7 +240,7 @@ def examples():
                 Card(
                     CardHeader(
                         Div(
-                            Icon("lucide:trending-up", cls="h-4 w-4 text-muted-foreground"),
+                            Icon("lucide:trending-up", width="24", height="24", cls="text-purple-600"),
                             cls="mb-2"
                         ),
                         CardTitle("Conversion Rate", cls="text-sm font-medium"),
@@ -758,7 +758,7 @@ def examples():
                                  ds_class={"fill-current text-red-500": "$favorited"}),
                             ds_text("$favorited ? 'Favorited' : 'Add to Favorites'"),
                             variant="outline", size="sm",
-                            ds_on_click=toggle("favorited"),
+                            ds_on_click=toggle_signal("favorited"),
                             cls="mr-2"
                         ),
                         Button(
@@ -834,7 +834,7 @@ def examples():
                                  ds_class={"fill-current text-red-500": "$favorited2"}),
                             ds_text("$favorited2 ? 'Favorited' : 'Add to Favorites'"),
                             variant="outline", size="sm",
-                            ds_on_click=toggle("favorited2"),
+                            ds_on_click=toggle_signal("favorited2"),
                             cls="mr-2"
                         ),
                         Button(
@@ -903,7 +903,7 @@ def examples():
             Icon("lucide:heart", ds_class={"fill-current text-red-500": "$favorited"}),
             ds_text("$favorited ? 'Favorited' : 'Add to Favorites'"),
             variant="outline",
-            ds_on_click=toggle("favorited")
+            ds_on_click=toggle_signal("favorited")
         ),
         Button(
             Icon("lucide:shopping-cart"),

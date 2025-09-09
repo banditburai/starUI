@@ -1,5 +1,5 @@
 from starhtml import Div, FT, Icon, Span
-from starhtml.datastar import ds_on_click, ds_text, ds_signals, ds_show, ds_class, if_, toggle
+from starhtml.datastar import ds_on_click, ds_text, ds_signals, ds_show, ds_class, if_, toggle_signal, toggle_class
 from starui.registry.components.button import Button
 from starui.registry.components.utils import cn
 from starui.registry.components.code_block import CodeBlock as BaseCodeBlock
@@ -29,16 +29,16 @@ def CodeBlock(
                 _chevron_button(collapsed_signal) if collapsible else Div(cls="w-6"),
                 Span(language, cls="text-xs font-medium text-muted-foreground"),
                 _copy_button(code_id, code) if show_copy else Div(cls="w-8"),
-                collapsible and ds_on_click(toggle(collapsed_signal)),
+                collapsible and ds_on_click(toggle_signal(collapsed_signal)),
                 cls=header_cls
             ),
             Div(
-                BaseCodeBlock(code, language, cls="font-mono text-sm !border-0 !border-none"),
-                ds_class(**{
-                    "max-h-0": f"${collapsed_signal}",
-                    "overflow-hidden": f"${collapsed_signal}",
-                    "max-h-[2000px]": f"!${collapsed_signal}"
-                }),
+                BaseCodeBlock(code, language, cls="font-mono text-sm !border-0 !border-none overflow-x-auto", style="scrollbar-width: thin; scrollbar-color: transparent transparent;"),
+                toggle_class(
+                    f"${collapsed_signal}",
+                    "max-h-0 overflow-hidden",
+                    "max-h-[2000px]"
+                ),
                 cls="transition-all duration-300 ease-in-out"
             ),
             ds_signals({
@@ -57,13 +57,14 @@ def _chevron_button(collapsed_signal: str) -> FT:
     return Div(
         Span(
             Icon("lucide:chevron-up", cls="h-4 w-4"),
-            ds_class(**{
-                "rotate-180": f"${collapsed_signal}",
-                "rotate-0": f"!${collapsed_signal}"
-            }),
+            toggle_class(
+                f"${collapsed_signal}",
+                "rotate-180",
+                "rotate-0"
+            ),
             cls="inline-block transition-transform duration-300"
         ),
-        ds_on_click(f"evt.stopPropagation(); {toggle(collapsed_signal)}"),
+        ds_on_click(f"evt.stopPropagation(); {toggle_signal(collapsed_signal)}"),
         role="button",
         tabindex="0",
         aria_label="Toggle code block",

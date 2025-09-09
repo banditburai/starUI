@@ -6,14 +6,6 @@ from layouts.footer import DocsFooter
 from layouts.header import DocsHeader
 from layouts.sidebar import DocsSidebar, MobileSidebar
 from layouts.navigation import TopNavigation, BottomNavigation
-from starui.registry.components.breadcrumb import (
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbPage,
-    BreadcrumbSeparator,
-)
 from starui.registry.components.button import Button
 from starui.registry.components.sheet import Sheet, SheetContent, SheetClose
 
@@ -22,7 +14,6 @@ from starui.registry.components.sheet import Sheet, SheetContent, SheetClose
 class LayoutConfig:
     title: str = ""
     description: str = ""
-    breadcrumb_items: list[dict[str, Any]] | None = None
     prev_page: dict[str, str] | None = None
     next_page: dict[str, str] | None = None
     show_copy: bool = True
@@ -66,12 +57,11 @@ class SidebarConfig:
 
 
 def _copy_page_button(component_name: str | None = None) -> FT:
-    """Create the copy page button with clipboard functionality for markdown content."""
-    # If we have a component name, fetch markdown from API; otherwise copy URL
-    if component_name:
-        copy_action = f"fetch('/api/markdown/{component_name}').then(r => r.json()).then(data => @clipboard(data.markdown, 'page_copied', 2000)).catch(() => @clipboard(window.location.href, 'page_copied', 2000))"
-    else:
-        copy_action = "@clipboard(window.location.href, 'page_copied', 2000)"
+    copy_action = (
+        f"fetch('/api/markdown/{component_name}').then(r => r.json()).then(data => @clipboard(data.markdown, 'page_copied', 2000)).catch(() => @clipboard(window.location.href, 'page_copied', 2000))"
+        if component_name
+        else "@clipboard(window.location.href, 'page_copied', 2000)"
+    )
     
     return Button(
         Span(
@@ -92,7 +82,6 @@ def _copy_page_button(component_name: str | None = None) -> FT:
 
 
 def _page_header_section(layout: LayoutConfig) -> FT:
-    """Create the page header section with title, description, and copy/navigation buttons."""
     if not layout.title:
         return None
     
@@ -112,9 +101,7 @@ def _page_header_section(layout: LayoutConfig) -> FT:
 
 
 def _main_content_area(content: tuple, layout: LayoutConfig) -> FT:
-    """Create the main content area with breadcrumbs, header, content, and navigation."""
     return Div(
-        _breadcrumb(layout.breadcrumb_items) if layout.breadcrumb_items else None,
         _page_header_section(layout),
         Div(
             *content,
@@ -126,7 +113,6 @@ def _main_content_area(content: tuple, layout: LayoutConfig) -> FT:
 
 
 def _mobile_sheet_section(sidebar: SidebarConfig) -> FT:
-    """Create the mobile menu sheet for sidebar navigation."""
     return Sheet(
         SheetContent(
             MobileSidebar(sections=sidebar.sections),
@@ -138,6 +124,7 @@ def _mobile_sheet_section(sidebar: SidebarConfig) -> FT:
         ),
         signal="mobile_menu",
         modal=True,
+        default_open=False,
     )
 
 
@@ -147,7 +134,6 @@ def _layout_with_sidebar(
     layout: LayoutConfig,
     **attrs
 ) -> FT:
-    """Create layout wrapper with mobile sidebar sheet."""
     return Div(
         main_content,
         _mobile_sheet_section(sidebar),
@@ -165,7 +151,6 @@ def _main_layout_structure(
     show_sidebar: bool,
     **attrs
 ) -> FT:
-    """Create the main layout structure with header, content, and footer."""
     return Div(
         DocsHeader(header, show_mobile_menu_button=show_sidebar),
         Div(
@@ -196,7 +181,6 @@ def DocsLayout(
     sidebar: SidebarConfig | None = None,
     **attrs,
 ) -> FT:
-    """Create a documentation layout with optional sidebar, header, and footer."""
     layout = layout or LayoutConfig()
     header = header or HeaderConfig()
     footer = footer or FooterConfig()
@@ -208,28 +192,8 @@ def DocsLayout(
         content, layout, header, footer, sidebar, show_sidebar, **attrs
     )
 
-    if show_sidebar:
-        return _layout_with_sidebar(main_content, sidebar, layout, **attrs)
-    else:
-        return main_content
+    return _layout_with_sidebar(main_content, sidebar, layout, **attrs) if show_sidebar else main_content
 
 
-def _breadcrumb(items: list[dict[str, Any]]) -> FT:
-    breadcrumb_items = []
-    for i, item in enumerate(items):
-        breadcrumb_items.append(
-            BreadcrumbItem(
-                BreadcrumbLink(item["label"], href=item.get("href", "#"))
-                if not item.get("active")
-                else BreadcrumbPage(item["label"])
-            )
-        )
-        if i < len(items) - 1:
-            breadcrumb_items.append(BreadcrumbSeparator())
-    
-    return Breadcrumb(
-        BreadcrumbList(*breadcrumb_items),
-        cls="mb-4"
-    )
 
 

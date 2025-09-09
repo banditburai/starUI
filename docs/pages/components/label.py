@@ -10,7 +10,7 @@ ORDER = 30
 STATUS = "stable"
 
 from starhtml import Div, P, Span, Icon, Button
-from starhtml.datastar import ds_signals, ds_on_input, ds_on_click, ds_show, ds_class, value, toggle, ds_text
+from starhtml.datastar import ds_signals, ds_on_input, ds_on_click, ds_show, ds_class, value, toggle_signal, ds_text
 from starui.registry.components.label import Label
 from starui.registry.components.input import Input
 from starui.registry.components.checkbox import Checkbox, CheckboxWithLabel
@@ -36,17 +36,17 @@ def examples():
                 Input(
                     id="project-name-val", 
                     placeholder="awesome-project",
-                    signal="projectName",
+                    signal="project_name",
                     validation="/^[a-zA-Z0-9-]+$/.test($signal)"
                 ),
                 Div(
                     P(
-                        ds_show("!$projectNameValid && $projectName.length > 0"),
+                        ds_show("!$project_name_valid && $project_name.length > 0"),
                         "Project names can only contain letters, numbers, and hyphens",
                         cls="text-xs text-destructive"
                     ),
                     P(
-                        ds_show("$projectNameValid && $projectName.length > 0"),
+                        ds_show("$project_name_valid && $project_name.length > 0"),
                         "✓ Valid project name",
                         cls="text-xs text-green-600"
                     ),
@@ -56,8 +56,8 @@ def examples():
             ),
             # Initialize signals
             ds_signals(
-                projectName=value("my-project"), 
-                projectNameValid=True
+                project_name=value("my-project"), 
+                project_name_valid=True
             ),
             cls="w-full max-w-md"
         ),
@@ -69,24 +69,24 @@ def examples():
 Input(
     id="project-name", 
     placeholder="awesome-project",
-    signal="projectName",
+    signal="project_name",
     validation="/^[a-zA-Z0-9-]+$/.test($signal)"
 )
 
 # Validation messages
 P(
-    ds_show("!$projectNameValid && $projectName.length > 0"),
+    ds_show("!$project_name_valid && $project_name.length > 0"),
     "Project names can only contain letters, numbers, and hyphens", 
     cls="text-xs text-destructive"
 )
 P(
-    ds_show("$projectNameValid && $projectName.length > 0"),
+    ds_show("$project_name_valid && $project_name.length > 0"),
     "✓ Valid project name", 
     cls="text-xs text-green-600"
 )
 
 # Initialize signals
-ds_signals(projectName=value("my-project"), projectNameValid=True)''',
+ds_signals(project_name=value("my-project"), project_name_valid=True)''',
         title="Interactive Validation",
         description="Labels with real-time validation feedback"
     )
@@ -115,7 +115,7 @@ ds_signals(projectName=value("my-project"), projectNameValid=True)''',
                     Button(
                         Span(Icon("lucide:eye-off", cls="h-3 w-3"), ds_show("!$showSecret")),
                         Span(Icon("lucide:eye", cls="h-3 w-3"), ds_show("$showSecret")),
-                        ds_on_click("$showSecret = !$showSecret; document.getElementById('api-secret-ctx').type = $showSecret ? 'text' : 'password'"),
+                        ds_on_click(f"{toggle_signal('showSecret')}; document.getElementById('api-secret-ctx').type = $showSecret ? 'text' : 'password'"),
                         variant="ghost",
                         size="sm",
                         cls="ml-auto p-0 h-auto text-muted-foreground hover:text-foreground"
@@ -139,13 +139,13 @@ ds_signals(projectName=value("my-project"), projectNameValid=True)''',
     "API Secret Key",
     Button(
         Icon("lucide:eye-off", cls="h-3 w-3"),
-        ds_on_click="$showSecret = !$showSecret",
+        ds_on_click(toggle_signal("showSecret")),
         ds_show("!$showSecret"),
         cls="ml-auto p-0 h-auto bg-transparent border-0"
     ),
     Button(
         Icon("lucide:eye", cls="h-3 w-3"), 
-        ds_on_click="$showSecret = !$showSecret",
+        ds_on_click(toggle_signal("showSecret")),
         ds_show("$showSecret"),
         cls="ml-auto p-0 h-auto bg-transparent border-0"
     ),
@@ -234,9 +234,9 @@ Label(
             Div(
                 Label("Notification Preferences", cls="text-base font-semibold mb-3 block"),
                 Div(
-                    CheckboxWithLabel("Email notifications", name="notify-email"),
-                    CheckboxWithLabel("SMS notifications", name="notify-sms"),
-                    CheckboxWithLabel("Push notifications", name="notify-push"),
+                    CheckboxWithLabel(label="Email notifications", name="notify-email"),
+                    CheckboxWithLabel(label="SMS notifications", name="notify-sms"),
+                    CheckboxWithLabel(label="Push notifications", name="notify-push"),
                     cls="space-y-3"
                 ),
                 cls="p-4 border rounded-lg"
@@ -252,9 +252,9 @@ RadioGroup(
 )
 
 Label("Notification Preferences", cls="text-base font-semibold mb-3 block")
-CheckboxWithLabel("Email notifications", name="notify-email")
-CheckboxWithLabel("SMS notifications", name="notify-sms")
-CheckboxWithLabel("Push notifications", name="notify-push")''',
+CheckboxWithLabel(label="Email notifications", name="notify-email")
+CheckboxWithLabel(label="SMS notifications", name="notify-sms")
+CheckboxWithLabel(label="Push notifications", name="notify-push")''',
         title="Radio & Checkbox Groups",
         description="Labels for grouped form controls"
     )

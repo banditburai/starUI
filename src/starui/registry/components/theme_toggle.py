@@ -1,18 +1,18 @@
 from starhtml import FT, Div, Icon
 from starhtml import Span as HTMLSpan
-from starhtml.datastar import ds_effect, ds_on_click, ds_on_load, ds_show, ds_signals
+from starhtml.datastar import ds_effect, ds_on_click, ds_on_load, ds_show, ds_signals, toggle_signal
 
 from .button import Button
 
 
-def ThemeToggle(alt_theme="dark", default_theme="light", **attrs) -> FT:
+def ThemeToggle(alt_theme="dark", default_theme="light", **kwargs) -> FT:
     """Reactive theme toggle supporting arbitrary theme names."""
 
     return Div(
         Button(
             HTMLSpan(Icon("ph:moon-bold", width="20", height="20"), ds_show("!$isAlt")),
             HTMLSpan(Icon("ph:sun-bold", width="20", height="20"), ds_show("$isAlt")),
-            ds_on_click("$isAlt = !$isAlt"),
+            ds_on_click(toggle_signal("isAlt")),
             variant="ghost",
             aria_label="Toggle theme",
             cls="h-9 px-4 py-2 flex-shrink-0",
@@ -28,5 +28,5 @@ def ThemeToggle(alt_theme="dark", default_theme="light", **attrs) -> FT:
             document.documentElement.setAttribute('data-theme', theme);
             localStorage.setItem('theme', theme);
         """),
-        **attrs,
+        **kwargs,
     )

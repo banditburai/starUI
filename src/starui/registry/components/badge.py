@@ -31,20 +31,31 @@ def Badge(
     clickable: bool = False,
     class_name: str = "",
     cls: str = "",
-    **attrs,
+    **kwargs,
 ) -> FT:
-    classes = cn(badge_variants(variant=variant), class_name, cls)
-
+    base_classes = badge_variants(variant=variant)
+    
     if href:
-        return A(*children, href=href, cls=classes, data_slot="badge", **attrs)
+        return A(
+            *children, 
+            href=href, 
+            cls=cn(base_classes, class_name, cls), 
+            data_slot="badge", 
+            **kwargs
+        )
 
     if clickable:
         return HTMLButton(
             *children,
-            cls=cn(classes, "cursor-pointer"),
+            cls=cn(base_classes, "cursor-pointer", class_name, cls),
             data_slot="badge",
             type="button",
-            **attrs,
+            **kwargs,
         )
 
-    return Span(*children, cls=classes, data_slot="badge", **attrs)
+    return Span(
+        *children, 
+        cls=cn(base_classes, class_name, cls), 
+        data_slot="badge", 
+        **kwargs
+    )

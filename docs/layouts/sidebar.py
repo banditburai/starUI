@@ -1,6 +1,6 @@
 from typing import Any
 from starhtml import *
-from starhtml.datastar import ds_class
+from starhtml.datastar import ds_class, toggle_class
 
 
 def DocsSidebar(
@@ -58,22 +58,14 @@ def _sidebar_item(item: dict[str, Any]) -> FT:
             cls="inline-flex items-center rounded-md px-2 py-1.5 text-sm text-muted-foreground cursor-not-allowed opacity-60"
         )
     
-    # Base classes - removed w-full so highlight only covers text
     base_classes = "inline-flex items-center rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-    
-    # These classes need to be in the code for Tailwind to include them
-    # bg-accent text-accent-foreground font-medium text-muted-foreground
-    
+
     return A(
         item.get("label", ""),
         href=href,
         cls=f"{base_classes} text-muted-foreground",
-        **ds_class(
-            # Remove default text color when active
-            text_muted_foreground=f"!(location.pathname === '{href}')",
-            # Add active styles
-            bg_accent=f"location.pathname === '{href}'",
-            text_accent_foreground=f"location.pathname === '{href}'", 
-            font_medium=f"location.pathname === '{href}'"
+        **toggle_class(
+            f"location.pathname",
+            **{f"'{href}'": "bg-accent text-accent-foreground font-medium", "_": "text-muted-foreground"}
         )
     )

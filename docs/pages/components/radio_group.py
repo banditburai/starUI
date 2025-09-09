@@ -14,7 +14,7 @@ from starhtml import Div, P, Input, Label, Icon, Span, H2, H3, Form, Code
 from starhtml import Input as HTMLInput, Label as HTMLLabel
 from starhtml.datastar import (
     ds_on_click, ds_show, ds_text, ds_signals, value,
-    ds_bind, ds_disabled, ds_on_change, ds_effect, ds_class, ds_style, ds_attr, if_, toggle
+    ds_bind, ds_disabled, ds_on_change, ds_effect, ds_class, ds_style, ds_attr, if_
 )
 from starui.registry.components.radio_group import RadioGroup, RadioGroupItem, RadioGroupWithLabel
 from starui.registry.components.button import Button

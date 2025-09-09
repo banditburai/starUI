@@ -6,7 +6,7 @@ from starhtml import Button as HTMLButton
 from starhtml import Label as HTMLLabel
 from starhtml import P as HTMLP
 from starhtml import Span as HTMLSpan
-from starhtml.datastar import ds_class, ds_on_click, ds_signals
+from starhtml.datastar import ds_class, ds_on_click, ds_signals, t, toggle_signal, toggle_class
 
 from .utils import cn
 
@@ -14,44 +14,39 @@ from .utils import cn
 def Switch(
     *children,
     checked: bool | None = None,
-    signal: str = "",
+    signal: str | None = None,
     disabled: bool = False,
     required: bool = False,
     class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
-    
     signal = signal or f"switch_{str(uuid4())[:8]}"
-    switch_id = attrs.pop("id", f"switch_{str(uuid4())[:8]}")
+    switch_id = kwargs.pop("id", f"switch_{str(uuid4())[:8]}")
 
     return Div(
         HTMLButton(
-            *children,  # Pass children to HTMLButton for DatastarAttr processing
+            *children,
             HTMLSpan(
-                ds_class(
-                    **{
-                        "translate-x-3.5": f"${signal}",
-                        "translate-x-0": f"!${signal}",
-                        "dark:bg-primary-foreground": f"${signal}",
-                        "dark:bg-white": f"!${signal}",
-                    }
+                toggle_class(
+                    f"${signal}",
+                    "translate-x-3.5 dark:bg-primary-foreground",
+                    "translate-x-0 dark:bg-white"
                 ),
                 cls="pointer-events-none block size-4 rounded-full bg-white ring-0 transition-transform",
                 data_slot="switch-thumb",
             ),
-            ds_on_click(f"${signal} = !${signal}"),
-            ds_class(
-                **{
-                    "bg-primary": f"${signal}",
-                    "bg-input": f"!${signal}",
-                }
+            ds_on_click(toggle_signal(signal)),
+            toggle_class(
+                f"${signal}",
+                "bg-primary",
+                "bg-input"
             ),
             type="button",
             role="switch",
             id=switch_id,
             disabled=disabled,
-            aria_checked=f"${{{signal}}}",
+            aria_checked=t("{signal}"),
             aria_required="true" if required else None,
             data_slot="switch",
             cls=cn(
@@ -62,17 +57,17 @@ def Switch(
                 class_name,
                 cls,
             ),
-            **attrs,
+            **kwargs,
         ),
         ds_signals(**{signal: checked or False}),
     )
 
 
 def SwitchWithLabel(
-    *,  # Force keyword-only arguments for consistency and flexibility
+    *attrs: Any,
     label: str,
     checked: bool | None = None,
-    signal: str = "",
+    signal: str | None = None,
     helper_text: str | None = None,
     error_text: str | None = None,
     disabled: bool = False,
@@ -81,7 +76,7 @@ def SwitchWithLabel(
     cls: str = "",
     label_cls: str = "",
     switch_cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     signal = signal or f"switch_{str(uuid4())[:8]}"
     switch_id = f"switch_{str(uuid4())[:8]}"
@@ -90,13 +85,11 @@ def SwitchWithLabel(
         Div(
             HTMLLabel(
                 label,
-                required and HTMLSpan(" *", cls="text-destructive") or None,
+                HTMLSpan(" *", cls="text-destructive") if required else None,
                 for_=switch_id,
                 cls=cn(
                     "text-sm font-medium",
-                    "cursor-pointer"
-                    if not disabled
-                    else "cursor-not-allowed opacity-50",
+                    "cursor-pointer" if not disabled else "cursor-not-allowed opacity-50",
                     label_cls,
                 ),
             ),
@@ -111,11 +104,9 @@ def SwitchWithLabel(
             ),
             cls="flex items-center gap-3",
         ),
-        error_text and HTMLP(error_text, cls="text-sm text-destructive mt-1.5") or None,
-        helper_text
-        and not error_text
-        and HTMLP(helper_text, cls="text-sm text-muted-foreground mt-1.5")
-        or None,
+        HTMLP(error_text, cls="text-sm text-destructive mt-1.5") if error_text else None,
+        HTMLP(helper_text, cls="text-sm text-muted-foreground mt-1.5") if helper_text and not error_text else None,
         cls=cn("space-y-1.5", class_name, cls),
-        **attrs,
+        *attrs,
+        **kwargs,
     )

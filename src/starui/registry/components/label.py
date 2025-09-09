@@ -8,7 +8,7 @@ def Label(
     *children,
     class_name: str = "",
     cls: str = "",
-    **attrs,
+    **kwargs,
 ) -> FT:
     return HtmlLabel(
         *children,
@@ -20,5 +20,5 @@ def Label(
             class_name,
             cls,
         ),
-        **attrs,
+        **kwargs,
     )

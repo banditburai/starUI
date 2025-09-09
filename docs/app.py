@@ -88,7 +88,7 @@ def home():
                         "Zero Runtime Overhead",
                         "Components render complete HTML on the server. No bundle sizes, no waterfall loading, perfect SEO, and instant time-to-interactive."
                     ),
-                    cls="grid md:grid-cols-2 lg:grid-cols-4 gap-6",
+                    cls="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6",
                 ),
                 cls="py-16",
             ),
@@ -143,7 +143,7 @@ def _professional_feature_card(title: str, description: str, icon: str) -> FT:
             ),
             H3(title, cls="text-xl font-semibold mb-4"),
             P(description, cls="text-muted-foreground leading-relaxed"),
-            cls="p-6"
+            cls="p-4 sm:p-6"
         ),
         cls="border rounded-xl bg-gradient-to-br from-background to-muted/20 hover:shadow-lg hover:border-primary/30 transition-all duration-300 h-full"
     )
@@ -158,11 +158,11 @@ def _workflow_card(title: str, description: str, code: str, caption: str) -> FT:
             H3(title, cls="text-lg font-semibold mb-3"),
             P(description, cls="text-sm text-muted-foreground mb-4"),
             Div(
-                CodeBlock(code, language="python", cls="text-sm border rounded-md [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-muted-foreground/30 [&::-webkit-scrollbar-corner]:bg-transparent"),
+                CodeBlock(code, language="python", cls="text-sm border rounded-md overflow-x-auto", style="scrollbar-width: thin; scrollbar-color: transparent transparent;"),
                 P(caption, cls="text-xs text-muted-foreground mt-2"),
                 cls="mb-0"
             ),
-            cls="p-6"
+            cls="p-4 sm:p-6"
         ),
         cls="border rounded-lg bg-gradient-to-br from-background to-muted/10 hover:shadow-md transition-all duration-200 h-full"
     )
@@ -184,11 +184,11 @@ def _feature_highlight_card(title: str, description: str, code: str, code_captio
                 cls="mb-6"
             ),
             Div(
-                CodeBlock(code, language="python", cls="text-sm border rounded-md [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-muted-foreground/30 [&::-webkit-scrollbar-corner]:bg-transparent"),
+                CodeBlock(code, language="python", cls="text-sm border rounded-md overflow-x-auto", style="scrollbar-width: thin; scrollbar-color: transparent transparent;"),
                 P(code_caption, cls="text-xs text-muted-foreground mt-3"),
                 cls="space-y-2"
             ),
-            cls="p-6"
+            cls="p-4 sm:p-6"
         ),
         cls="border rounded-xl bg-gradient-to-br from-background to-muted/20 hover:shadow-lg hover:border-primary/30 transition-all duration-300 h-full"
     )
@@ -203,7 +203,7 @@ def _workflow_highlight_card(title: str, description: str, code: str, code_capti
             H3(title, cls="text-lg font-semibold mb-3"),
             P(description, cls="text-sm text-muted-foreground mb-4 leading-relaxed"),
             Div(
-                CodeBlock(code, language="python", cls="text-sm border rounded-md [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-muted-foreground/30 [&::-webkit-scrollbar-corner]:bg-transparent"),
+                CodeBlock(code, language="python", cls="text-sm border rounded-md overflow-x-auto", style="scrollbar-width: thin; scrollbar-color: transparent transparent;"),
                 P(code_caption, cls="text-xs text-muted-foreground mt-2"),
                 cls="space-y-2"
             ),
@@ -264,7 +264,7 @@ def docs_index():
                         "Reactive patterns with server-side state",
                         "lucide:zap"
                     ),
-                    cls="grid lg:grid-cols-2 gap-8 mb-16"
+                    cls="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 mb-16"
                 ),
             ),
             
@@ -290,7 +290,7 @@ def docs_index():
                         "star add button input card tabs\n\n# Components ready to import\nfrom starui import Button, Input, Card, Tabs",
                         "CLI handles dependency management"
                     ),
-                    cls="grid lg:grid-cols-3 gap-6 mb-16"
+                    cls="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-16"
                 ),
             ),
             
@@ -302,7 +302,7 @@ def docs_index():
                         _performance_metric("Zero", "Runtime JavaScript", "Components work without any client-side JavaScript"),
                         _performance_metric("Instant", "Server Rendering", "No hydration delays or layout shifts"),
                         _performance_metric("100%", "SEO Friendly", "Fully rendered HTML for search engines"),
-                        cls="grid grid-cols-3 gap-6 mb-8"
+                        cls="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8"
                     ),
                     Div(
                         H3("Enterprise Standards", cls="text-xl font-semibold mb-4"),
@@ -514,7 +514,7 @@ def installation():
         signal = f"copied_{code_id}"
         
         return Div(
-            SimpleCodeBlock(code, language=language),
+            SimpleCodeBlock(code, language=language, cls="overflow-x-auto", style="scrollbar-width: thin; scrollbar-color: transparent transparent;"),
             Button(
                 Span(Icon("lucide:check", cls="h-3 w-3"), ds_show(f"${signal}")),
                 Span(Icon("lucide:copy", cls="h-3 w-3"), ds_show(f"!${signal}")),
@@ -573,11 +573,11 @@ Button("View Components", variant="outline")''',
                                 H3("Install the StarUI CLI", cls="text-xl font-semibold mb-2"),
                                 P("Install StarUI globally using pip to access the CLI commands.", cls="text-muted-foreground mb-4"),
                                 CodeBlockWithCopy("pip install starui", "bash"),
-                                cls="flex-1"
+                                cls="flex-1 min-w-0 overflow-hidden"
                             ),
-                            cls="flex gap-6 items-start"
+                            cls="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start"
                         ),
-                        cls="p-6 border rounded-lg bg-gradient-to-br from-background to-muted/20"
+                        cls="p-4 sm:p-6 border rounded-lg bg-gradient-to-br from-background to-muted/20 overflow-hidden"
                     ),
                     cls="mb-8"
                 ),
@@ -613,11 +613,11 @@ Button("View Components", variant="outline")''',
                                     ),
                                     cls="space-y-3 mt-4 bg-muted/30 rounded-md p-4"
                                 ),
-                                cls="flex-1"
+                                cls="flex-1 min-w-0 overflow-hidden"
                             ),
-                            cls="flex gap-6 items-start"
+                            cls="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start"
                         ),
-                        cls="p-6 border rounded-lg bg-gradient-to-br from-background to-muted/20"
+                        cls="p-4 sm:p-6 border rounded-lg bg-gradient-to-br from-background to-muted/20 overflow-hidden"
                     ),
                     cls="mb-8"
                 ),
@@ -644,11 +644,11 @@ star add button input card tabs
 star list''',
                                     "bash"
                                 ),
-                                cls="flex-1"
+                                cls="flex-1 min-w-0 overflow-hidden"
                             ),
-                            cls="flex gap-6 items-start"
+                            cls="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start"
                         ),
-                        cls="p-6 border rounded-lg bg-gradient-to-br from-background to-muted/20"
+                        cls="p-4 sm:p-6 border rounded-lg bg-gradient-to-br from-background to-muted/20 overflow-hidden"
                     ),
                     cls="mb-12"
                 ),
@@ -675,57 +675,6 @@ Div(
 )''',
                     title="Basic Component Usage",
                     description="Import and use components directly in your StarHTML templates"
-                ),
-                
-                # Framework Integration
-                ComponentPreview(
-                    Div(
-                        Div(
-                            P("FastAPI Integration", cls="font-semibold mb-2"),
-                            Div(
-                                Pre(
-                                    Code('''@app.get("/")
-def home():
-    return Div(
-        Button("Hello FastAPI!"),
-        cls="p-4"
-    )'''),
-                                    cls="text-xs bg-muted/50 rounded p-3 text-left overflow-auto"
-                                ),
-                            ),
-                            cls="mb-4"
-                        ),
-                        Div(
-                            P("Django Views", cls="font-semibold mb-2"),
-                            Pre(
-                                Code('''def view(request):
-    return render(request, Div(
-        Button("Hello Django!"),
-        cls="p-4"
-                    ))'''),
-                                cls="text-xs bg-muted/50 rounded p-3 text-left overflow-auto"
-                            ),
-                        ),
-                        cls="space-y-4 text-sm"
-                    ),
-                    '''# Works with any Python web framework
-from starui import Button
-
-# FastAPI
-@app.get("/")
-def home():
-    return Button("Hello FastAPI!")
-
-# Django  
-def view(request):
-    return render(request, Button("Hello Django!"))
-
-# Flask
-@app.route("/")
-def home():
-    return Button("Hello Flask!")''',
-                    title="Framework Integration",
-                    description="StarUI works seamlessly with FastAPI, Django, Flask, and any Python web framework"
                 ),
                 
                 # Interactive Features
@@ -777,7 +726,7 @@ Div(
                         "https://github.com/banditburai/starui",
                         "Visit GitHub"
                     ),
-                    cls="grid md:grid-cols-3 gap-6"
+                    cls="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6"
                 ),
             ),
         ),

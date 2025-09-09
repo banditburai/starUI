@@ -13,7 +13,7 @@ STATUS = "stable"
 from starhtml import Div, P, Input, Label, Icon, Span, H2, H3, Form, Code, Ul, Li, A, Img, Strong, Hr
 from starhtml.datastar import (
     ds_on_click, ds_show, ds_text, ds_signals, value,
-    ds_bind, ds_disabled, ds_on_change, ds_on_input, ds_effect, ds_class, ds_style, toggle
+    ds_bind, ds_disabled, ds_on_change, ds_effect, ds_class, ds_style, ds_on_input
 )
 from starui.registry.components.popover import (
     Popover, PopoverTrigger, PopoverContent, PopoverClose
@@ -26,7 +26,8 @@ from starui.registry.components.badge import Badge
 from starui.registry.components.separator import Separator
 from starui.registry.components.select import SelectWithLabel
 from starui.registry.components.avatar import Avatar
-from starui.registry.components.date_picker import DatePicker, DateTimePicker
+from starui.registry.components.switch import Switch
+from starui.registry.components.date_picker import DateTimePicker
 from starui.registry.components.toggle_group import ToggleGroup
 from utils import auto_generate_page
 from widgets.component_preview import ComponentPreview
@@ -122,16 +123,17 @@ Popover(
     # Profile card popover
     yield ComponentPreview(
         Div(
-            P("Click the profile button to see details:", cls="text-sm text-muted-foreground mb-4"),
+            P("Click on the avatar to see profile details:", cls="text-sm text-muted-foreground mb-4"),
             Popover(
                 PopoverTrigger(
                     Avatar(
                         Img(src="https://github.com/shadcn.png", alt="@shadcn"),
-                        size="sm"
+                        size="sm",
+                        cls="mr-2"
                     ),
-                    Span("@shadcn", cls="text-sm font-medium ml-2"),
+                    Span("@shadcn", cls="text-sm font-medium"),
                     variant="ghost",
-                    cls="h-auto px-2 py-1.5"
+                    cls="flex items-center h-auto p-0 hover:bg-transparent"
                 ),
                 PopoverContent(
                     Div(
@@ -178,17 +180,19 @@ Popover(
                             cls="flex gap-2"
                         )
                     ),
-                    cls="w-96"
+                    cls="w-80"
                 )
             ),
             cls="flex flex-col items-center"
         ),
         '''Popover(
     PopoverTrigger(
-        Avatar(Img(src="https://github.com/shadcn.png", alt="@shadcn"), size="sm"),
-        Span("@shadcn", cls="text-sm font-medium ml-2"),
-        variant="ghost",
-        cls="h-auto px-2 py-1.5"
+        Div(
+            Avatar(Img(src="https://github.com/shadcn.png", alt="@shadcn"), size="sm"),
+            Span("@shadcn", cls="text-sm font-medium"),
+            cls="flex items-center hover:bg-muted/50 p-2 rounded-md transition-colors"
+        ),
+        variant="ghost"
     ),
     PopoverContent(
         Div(
@@ -251,7 +255,7 @@ Popover(
                         Label("Date & Time", cls="text-sm font-medium mb-1 block"),
                         DateTimePicker(
                             signal="meeting_datetime",
-                            placeholder="Select date and time",
+                            placeholder="Select date and time"
                         ),
                         TextareaWithLabel(
                             label="Notes (Optional)",
@@ -263,23 +267,23 @@ Popover(
                         Div(
                             Button(
                                 "Cancel",
-                                ds_on_click("$meeting_title = ''; $meeting_notes = ''"),
                                 type="button",
                                 variant="outline",
-                                size="sm"
+                                size="sm",
+                                ds_on_click="$meeting_title = ''; $meeting_notes = ''"
                             ),
                             Button(
                                 "Schedule",
-                                ds_disabled("!$meeting_title || !$meeting_datetime"),
-                                ds_on_click("""
+                                type="button",
+                                size="sm",
+                                ds_disabled="!$meeting_title || !$meeting_datetime",
+                                ds_on_click="""
                                     if ($meeting_title && $meeting_datetime) {
                                         alert(`Meeting "${$meeting_title}" scheduled for ${new Date($meeting_datetime).toLocaleString()}`);
                                         $meeting_title = '';
                                         $meeting_notes = '';
                                     }
-                                """),
-                                type="button",
-                                size="sm"
+                                """
                             ),
                             cls="flex justify-end gap-2 pt-4"
                         ),
@@ -318,7 +322,7 @@ Popover(
             Label("Date & Time", cls="text-sm font-medium mb-1 block"),
             DateTimePicker(
                 signal="meeting_datetime",
-                placeholder="Select date and time",
+                placeholder="Select date and time"
             ),
             TextareaWithLabel(
                 label="Notes (Optional)",
@@ -328,10 +332,10 @@ Popover(
             Div(
                 Button("Cancel", variant="outline", size="sm"),
                 Button(
-                    "Schedule",
-                    ds_disabled("!$meeting_title || !$meeting_datetime"),
-                    ds_on_click("scheduleMeeting()"),
-                    size="sm"
+                    "Schedule", 
+                    size="sm",
+                    ds_disabled="!$meeting_title || !$meeting_datetime",
+                    ds_on_click="scheduleMeeting()"
                 ),
                 cls="flex justify-end gap-2 pt-4"
             ),
@@ -375,10 +379,8 @@ Popover(
                                     cls="p-0 hover:scale-110 transition-transform"
                                 )
                                 for color in [
-                                    "#ef4444", "#f97316", "#f59e0b", "#eab308",
-                                    "#84cc16", "#22c55e", "#10b981", "#06b6d4",
-                                    "#3b82f6", "#6366f1", "#8b5cf6", "#a855f7",
-                                    "#d946ef", "#ec4899", "#f43f5e", "#64748b"
+                                    "#0d2b45", "#203c56", "#544e68", "#8d697a",
+                                    "#d08159", "#ffaa5e", "#ffd4a3", "#ffecd6"
                                 ]
                             ],
                             cls="grid grid-cols-4 gap-2 mb-4"
@@ -387,16 +389,14 @@ Popover(
                         # Custom color input
                         Div(
                             Label("Custom Color:", cls="text-xs font-medium mb-2 block"),
-                            UIInput(
-                                ds_on_input("$selected_color = evt.target.value"),
+                            Input(
+                                ds_on_input("$custom_color = event.target.value; $selected_color = event.target.value"),
                                 type="color",
                                 cls="w-full h-10 rounded border cursor-pointer",
-                                signal="custom_color"
-                            )
-                        ),
-                        ds_signals(
-                            selected_color=value("#3b82f6"),
-                            custom_color=value("#3b82f6")
+                                value="#3b82f6",                                
+                            ),
+                            # Sync custom color picker to show selected color when preset is clicked
+                            ds_effect("if ($selected_color !== $custom_color) { $custom_color = $selected_color }")
                         )
                     ),
                     cls="w-64"
@@ -415,6 +415,11 @@ Popover(
                     )
                 ),
                 cls="mt-6 p-4 border rounded-lg"
+            ),
+            # Initialize signals outside popover
+            ds_signals(
+                selected_color=value("#3b82f6"),
+                custom_color=value("#3b82f6")
             ),
             cls="max-w-sm"
         ),
@@ -438,20 +443,21 @@ Popover(
             Div(
                 *[Button(
                     style=f"background-color: {color}; width: 32px; height: 32px;",
-                    ds_on_click(f"$selected_color = '{color}'")
-                ) for color in ["#ef4444", "#f97316", "#f59e0b", "#eab308", ...]],
+                    ds_on_click=f"$selected_color = '{color}'"
+                ) for color in ["#0d2b45", "#203c56", "#544e68", "#8d697a", "#d08159", "#ffaa5e", "#ffd4a3", "#ffecd6"]],
                 cls="grid grid-cols-4 gap-2 mb-4"
             ),
             # Custom color input
             Div(
                 Label("Custom Color:"),
                 Input(
-                    ds_on_input("$selected_color = evt.target.value"),
                     type="color",
-                    signal="custom_color"
-                )
+                    value="#3b82f6",
+                    ds_on_input("$custom_color = event.target.value; $selected_color = event.target.value")
+                ),
+                ds_effect("if ($selected_color !== $custom_color) { $custom_color = $selected_color }")
             ),
-            ds_signals(selected_color="#3b82f6", custom_color="#3b82f6")
+            ds_signals(selected_color=value("#3b82f6"), custom_color=value("#3b82f6"))
         ),
         cls="w-64"
     )
@@ -463,134 +469,145 @@ Popover(
     # Settings panel popover
     yield ComponentPreview(
         Div(
-            # Mock app header to provide context
+            # Mock dashboard header
             Div(
+                # Mock app name and nav
                 Div(
-                    H3("My Application", cls="font-semibold text-lg"),
-                    P("Dashboard", cls="text-sm text-muted-foreground"),
-                    cls="flex-1"
-                ),
-                Popover(
-                    PopoverTrigger(
-                        Icon("lucide:settings", cls="h-4 w-4"),
-                        variant="ghost",
-                        size="sm"
-                    ),
-                    PopoverContent(
-                        Div(
-                            # Header
-                            H3("Settings", cls="font-semibold text-base mb-4"),
-                            # Appearance
-                            Div(
-                                P("APPEARANCE", cls="text-xs font-medium text-muted-foreground mb-3"),
-                                Label("Theme", cls="text-sm font-medium mb-2 block"),
-                                ToggleGroup(
-                                    ("light", Div(Icon("lucide:sun", cls="h-4 w-4 mr-2"), "Light", cls="flex items-center")),
-                                    ("dark", Div(Icon("lucide:moon", cls="h-4 w-4 mr-2"), "Dark", cls="flex items-center")),
-                                    ("system", Div(Icon("lucide:laptop", cls="h-4 w-4 mr-2"), "System", cls="flex items-center")),
-                                    type="single",
-                                    signal="theme_setting",
-                                    variant="outline",
-                                    cls="grid grid-cols-3 w-full"
-                                )
-                            ),
-                            Separator(cls="my-4"),
-                            # Preferences
-                            Div(
-                                P("PREFERENCES", cls="text-xs font-medium text-muted-foreground mb-3"),
-                                # Notifications
-                                Div(
-                                    Label("Notifications", cls="text-sm font-medium"),
-                                    Button(
-                                        ds_text("$notifications_enabled ? 'On' : 'Off'"),
-                                        ds_on_click(toggle("notifications_enabled")),
-                                        size="sm",
-                                        variant="outline"
-                                    ),
-                                    cls="flex items-center justify-between mb-3"
-                                ),
-                                # Auto-save
-                                Div(
-                                    Label("Auto-save", cls="text-sm font-medium"),
-                                    Button(
-                                        ds_text("$autosave_enabled ? 'On' : 'Off'"),
-                                        ds_on_click(toggle("autosave_enabled")),
-                                        size="sm",
-                                        variant="outline"
-                                    ),
-                                    cls="flex items-center justify-between"
-                                )
-                            ),
-                            Separator(cls="my-4"),
-                            # Footer
-                            Button(
-                                "Manage Account",
-                                variant="outline",
-                                size="sm",
-                                cls="w-full"
-                            ),
-                            ds_signals(
-                                theme_setting=value("system"),
-                                theme_setting_value=value("system"),
-                                notifications_enabled=value(True),
-                                autosave_enabled=value(True)
-                            )
-                        ),
-                        cls="w-96",
-                        side="bottom",
-                        align="end"
-                    )
-                ),
-                cls="flex items-center justify-between p-4 border rounded-lg bg-card"
-            ),
-            cls="w-full max-w-md mx-auto"
-        ),
-        '''Popover(
-    PopoverTrigger(
-        Icon("lucide:settings"),
-        variant="ghost",
-        size="icon"
-    ),
-    PopoverContent(
-        Div(
-            Div(
-                Icon("lucide:settings"),
-                H3("Quick Settings", cls="font-semibold text-sm"),
-                cls="flex items-center mb-4"
-            ),
-            # Theme setting
-            Div(
-                Div(
-                    Icon("lucide:palette"),
+                    Span("Dashboard", cls="text-lg font-semibold"),
                     Div(
-                        P("Theme", cls="text-sm font-medium"),
-                        P("Choose your preferred theme", cls="text-xs text-muted-foreground")
+                        Span("Projects", cls="text-sm text-muted-foreground"),
+                        Span("Team", cls="text-sm text-muted-foreground"),
+                        Span("Analytics", cls="text-sm text-muted-foreground"),
+                        cls="flex gap-6"
                     ),
-                    cls="flex items-center flex-1"
+                    cls="flex items-center gap-8"
                 ),
-                SelectWithLabel(
-                    label="Theme",
-                    options=[("light", "Light"), ("dark", "Dark"), ("system", "System")],
-                    signal="theme_setting"
+                # Settings icon in top right
+                Popover(
+                        PopoverTrigger(
+                            Icon("lucide:settings", cls="h-4 w-4"),
+                            variant="ghost",
+                            size="icon"
+                        ),
+                        PopoverContent(
+                            Div(
+                                # Header
+                                Div(
+                                    Icon("lucide:settings", cls="h-4 w-4 mr-2"),
+                                    H3("Settings", cls="font-semibold text-base"),
+                                    cls="flex items-center mb-4"
+                                ),
+                                # Theme section
+                                Div(
+                                    P("APPEARANCE", cls="text-xs font-medium text-muted-foreground mb-3"),
+                                    Div(
+                                        Label("Theme", cls="text-sm font-medium mb-2 block"),
+                                        ToggleGroup(
+                                            ("light", Div(Icon("lucide:sun", cls="h-4 w-4"), Span("Light", cls="ml-2 text-sm"), cls="flex items-center")),
+                                            ("dark", Div(Icon("lucide:moon", cls="h-4 w-4"), Span("Dark", cls="ml-2 text-sm"), cls="flex items-center")),
+                                            ("system", Div(Icon("lucide:laptop", cls="h-4 w-4"), Span("System", cls="ml-2 text-sm"), cls="flex items-center")),
+                                            signal="theme_setting",
+                                            variant="outline",
+                                            cls="grid grid-cols-3 w-full"
+                                        ),
+                                        ds_effect("$theme_setting_value = 'system'")
+                                    )
+                                ),
+                                Separator(cls="my-4"),
+                                # Preferences
+                                Div(
+                                    P("PREFERENCES", cls="text-xs font-medium text-muted-foreground mb-3"),
+                                    # Notifications
+                                    Div(
+                                        Label("Notifications", cls="text-sm font-medium"),
+                                        Switch(signal="notifications_enabled", checked=True),
+                                        cls="flex items-center justify-between mb-3"
+                                    ),
+                                    # Auto-save
+                                    Div(
+                                        Label("Auto-save", cls="text-sm font-medium"),
+                                        Switch(signal="autosave_enabled", checked=True),
+                                        cls="flex items-center justify-between"
+                                    )
+                                ),
+                                Separator(cls="my-4"),
+                                # Footer
+                                Button(
+                                    "Manage Account",
+                                    variant="outline",
+                                    size="sm",
+                                    cls="w-full"
+                                )
+                            ),
+                            cls="w-96",
+                            side="bottom",
+                            align="end"
+                        )
+                    ),
+                    cls="flex items-center justify-between p-4 border rounded-lg bg-card"
                 ),
-                cls="flex items-center justify-between py-2"
+                cls="w-full max-w-md mx-auto"
             ),
-            # Toggle settings
-            Div(/* notification toggle */),
-            Div(/* auto-save toggle */),
-            # Action buttons
-            Div(
-                Button("More Settings", variant="ghost"),
-                Button("Sign Out", variant="ghost", cls="text-destructive")
-            ),
-            ds_signals(theme_setting="system", notifications_enabled=True)
+        '''Div(
+    # Dashboard header
+    Div(
+        # Navigation
+        Div(
+            Span("Dashboard", cls="text-lg font-semibold"),
+            Div("Projects", "Team", "Analytics", cls="flex gap-6"),
+            cls="flex items-center gap-8"
         ),
-        cls="w-72",
-        side="bottom",
-        align="end"
-    )
+        # Settings popover
+        Popover(
+            PopoverTrigger(
+                Icon("lucide:settings"),
+                variant="ghost",
+                size="icon"
+            ),
+            PopoverContent(
+                Div(
+                    # Header
+                    Div(
+                        Icon("lucide:settings"),
+                        H3("Settings", cls="font-semibold text-base"),
+                        cls="flex items-center mb-4"
+                    ),
+                    # Theme section
+                    Div(
+                        P("APPEARANCE", cls="text-xs font-medium text-muted-foreground mb-3"),
+                        ToggleGroup(
+                            ("light", Icon("lucide:sun")),
+                            ("dark", Icon("lucide:moon")),
+                            ("system", Icon("lucide:laptop")),
+                            signal="theme_setting",
+                            cls="grid grid-cols-3 w-full"
+                        )
+                    ),
+                    # Preferences
+                    Div(
+                        P("PREFERENCES", cls="text-xs font-medium text-muted-foreground mb-3"),
+                        Div(
+                            Label("Notifications"),
+                            Switch(signal="notifications_enabled"),
+                            cls="flex items-center justify-between"
+                        ),
+                        Div(
+                            Label("Auto-save"),
+                            Switch(signal="autosave_enabled"),
+                            cls="flex items-center justify-between"
+                        )
+                    ),
+                    Button("Manage Account", variant="outline", size="sm", cls="w-full")
+                ),
+                cls="w-96", side="bottom", align="end"
+            )
+        ),
+        cls="flex items-center justify-between p-4 border rounded-lg bg-card"
+    ),
+    ds_signals(theme_setting_value=value("system")),
+    cls="w-full max-w-md mx-auto"
 )''',
-        title="Settings Panel",  
+        title="Settings Panel",
         description="Clean settings panel with theme selector and preference toggles"
     )
     
@@ -635,11 +652,10 @@ Popover(
                         ),
                         cls="text-sm font-medium flex items-center"
                     ),
-                    UIInput(
+                    Input(
                         type="password",
                         placeholder="sk-1234567890abcdef",
-                        cls="w-full mt-1",
-                        signal="api_key"
+                        cls="w-full mt-1"
                     ),
                     cls="mb-4"
                 ),
@@ -680,19 +696,14 @@ Popover(
                         ),
                         cls="text-sm font-medium flex items-center"
                     ),
-                    UIInput(
+                    Input(
                         type="url",
                         placeholder="https://api.example.com/webhook",
-                        cls="w-full mt-1",
-                        signal="webhook_url"
+                        cls="w-full mt-1"
                     )
                 )
             ),
-            ds_signals(
-                api_key=value(""),
-                webhook_url=value("")
-            ),
-            cls="max-w-lg w-full"
+            cls="max-w-md"
         ),
         '''# Form fields with help popovers
 Div(

@@ -14,11 +14,9 @@ def _get_ordered_components() -> list[Tuple[str, str]]:
 
 
 def _slug_to_registry_key(component_slug: str) -> Optional[str]:
-    registry = get_registry()
-    
+    registry = get_registry()    
     if component_slug in registry.components:
-        return component_slug
-    
+        return component_slug    
     if (underscore_key := component_slug.replace("-", "_")) in registry.components:
         return underscore_key
     
@@ -27,15 +25,12 @@ def _slug_to_registry_key(component_slug: str) -> Optional[str]:
 
 def get_component_navigation(current_component: str) -> Tuple[Optional[Tuple[str, str]], Optional[Tuple[str, str]]]:
     if not (current_key := _slug_to_registry_key(current_component)):
-        return None, None
-    
-    components = _get_ordered_components()
-    
+        return None, None    
+    components = _get_ordered_components()    
     try:
         current_index = [key for key, _ in components].index(current_key)
     except ValueError:
-        return None, None
-    
+        return None, None    
     prev_comp = components[current_index - 1] if current_index > 0 else None
     next_comp = components[current_index + 1] if current_index < len(components) - 1 else None
     

@@ -12,7 +12,7 @@ STATUS = "stable"
 from starhtml import Div, P, H3, H4, Span, Icon, A, Img, Form, Label, Hr, Ul, Li, Strong
 from starhtml.datastar import (
     ds_on_click, ds_show, ds_text, ds_signals, value,
-    ds_bind, ds_disabled, ds_on_change, ds_effect, ds_class, toggle
+    ds_bind, ds_disabled, ds_on_change, ds_effect, ds_class, toggle_signal
 )
 from starui.registry.components.sheet import (
     Sheet, SheetTrigger, SheetContent, SheetClose, 
@@ -776,7 +776,7 @@ def examples():
                     Div("Push Notifications", "Receive important updates"),
                     Button(
                         ds_text("$push_notifications ? 'On' : 'Off'"),
-                        ds_on_click=toggle("push_notifications")
+                        ds_on_click(toggle_signal("push_notifications"))
                     ),
                     cls="flex items-center justify-between py-3"
                 )

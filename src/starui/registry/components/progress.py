@@ -15,7 +15,7 @@ def Progress(
     signal: str = "",
     class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     signal = signal or f"progress_{str(uuid4())[:8]}"
 
@@ -50,5 +50,5 @@ def Progress(
             class_name,
             cls,
         ),
-        **attrs,
+        **kwargs,
     )

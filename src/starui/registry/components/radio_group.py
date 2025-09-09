@@ -7,7 +7,7 @@ from starhtml import Input as HTMLInput
 from starhtml import Label as HTMLLabel
 from starhtml import P as HTMLP
 from starhtml import Span as HTMLSpan
-from starhtml.datastar import ds_class, ds_on_change, ds_signals, value
+from starhtml.datastar import ds_class, ds_on_change, ds_signals, value, toggle_class
 
 from .utils import cn
 
@@ -23,7 +23,7 @@ def RadioGroup(
     hide_indicators: bool = False,
     class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     signal = signal or f"radio_{next(_radio_group_ids)}"
     group_name = f"radio_group_{signal}"
@@ -42,7 +42,7 @@ def RadioGroup(
         data_radio_name=group_name,
         role="radiogroup",
         aria_required="true" if required else None,
-        **attrs,
+        **kwargs,
     )
 
 
@@ -53,11 +53,11 @@ def RadioGroupItem(
     class_name: str = "",
     cls: str = "",
     indicator_cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     def create_item(signal, group_name, default_value=None, hide_indicators=False):
         radio_id = f"radio_{str(uuid4())[:8]}"
-        filtered_attrs = {k: v for k, v in attrs.items() if k != "name"}
+        filtered_kwargs = {k: v for k, v in kwargs.items() if k != "name"}
 
         radio_input = HTMLInput(
             ds_on_change(f"${signal} = '{value}'"),
@@ -68,7 +68,7 @@ def RadioGroupItem(
             disabled=disabled,
             data_slot="radio-input",
             cls="sr-only peer",
-            **filtered_attrs,
+            **filtered_kwargs,
         )
 
         # Apply sr-only to hide the visual radio if hide_indicators is True
@@ -84,9 +84,9 @@ def RadioGroupItem(
         visual_radio = Div(
             Div(
                 Div(cls="size-2 rounded-full bg-primary"),
-                ds_class(
-                    opacity_100=f"${signal} === '{value}'",
-                    opacity_0=f"${signal} !== '{value}'",
+                toggle_class(
+                    f"${signal}",
+                    **{value: "opacity-100", "_": "opacity-0"}
                 ),
                 cls=cn(
                     "absolute inset-0 flex items-center justify-center",
@@ -144,7 +144,7 @@ def RadioGroupWithLabel(
     orientation: str = "vertical",
     class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     base_id = str(uuid4())[:8]
     signal = signal or f"radio_{base_id}"
@@ -190,5 +190,5 @@ def RadioGroupWithLabel(
         and HTMLP(helper_text, cls="text-sm text-muted-foreground mt-1.5")
         or None,
         cls=cn("space-y-1.5", class_name, cls),
-        **attrs,
+        **kwargs,
     )

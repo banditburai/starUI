@@ -10,7 +10,7 @@ def Separator(
     decorative: bool = True,
     class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     combined_classes = (cls + " " + class_name).split()
 
@@ -38,5 +38,5 @@ def Separator(
             class_name,
             cls,
         ),
-        **attrs,
+        **kwargs,
     )

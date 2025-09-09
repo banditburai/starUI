@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from starhtml import FT, Div
 from starhtml import Button as HTMLButton
-from starhtml.datastar import ds_on_click, ds_signals
+from starhtml.datastar import ds_on_click, ds_signals, toggle_signal
 
 from .utils import cn, cva
 
@@ -43,15 +43,15 @@ def Toggle(
     aria_label: str | None = None,
     class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     signal = signal or f"toggle_{str(uuid4())[:8]}"
-    toggle_id = attrs.pop("id", f"toggle_{str(uuid4())[:8]}")
+    toggle_id = kwargs.pop("id", f"toggle_{str(uuid4())[:8]}")
 
     return Div(
         HTMLButton(
             *children,
-            ds_on_click(f"${signal} = !${signal}") if not disabled else None,
+            ds_on_click(toggle_signal(signal)) if not disabled else None,
             type="button",
             id=toggle_id,
             disabled=disabled,
@@ -65,7 +65,7 @@ def Toggle(
                 class_name,
                 cls,
             ),
-            **attrs,
+            **kwargs,
         ),
         ds_signals(**{signal: pressed}),
     )

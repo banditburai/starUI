@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # Import starhtml first, then override with our custom components
 from starhtml import *
-from starhtml.datastar import value, ds_text
+from starhtml.datastar import value, ds_text, toggle_signal
 
 # Import all registry components at once (this will override starhtml components)
 from registry_loader import *
@@ -300,6 +300,7 @@ def index():
                     side="right",
                     size="md",
                     modal=True,
+                    default_open=False,
                 ),
                 cls="mb-8",
             ),
@@ -801,9 +802,9 @@ def index():
                         DropdownMenuContent(
                             DropdownMenuLabel("Appearance"),
                             DropdownMenuSeparator(),
-                            DropdownMenuCheckboxItem("Status Bar", checked_signal="statusBar"),
-                            DropdownMenuCheckboxItem("Activity Bar", checked_signal="activityBar", disabled=True),
-                            DropdownMenuCheckboxItem("Panel", checked_signal="panel"),
+                            DropdownMenuCheckboxItem("Status Bar", signal="statusBar"),
+                            DropdownMenuCheckboxItem("Activity Bar", signal="activityBar", disabled=True),
+                            DropdownMenuCheckboxItem("Panel", signal="panel"),
                         ),
                         signal="checkbox_dropdown",
                     ),
@@ -814,10 +815,10 @@ def index():
                             DropdownMenuLabel("Position"),
                             DropdownMenuSeparator(),
                             DropdownMenuRadioGroup(
-                                DropdownMenuRadioItem("Top", value="top", value_signal="position"),
-                                DropdownMenuRadioItem("Bottom", value="bottom", value_signal="position"),
-                                DropdownMenuRadioItem("Right", value="right", value_signal="position"),
-                                value_signal="position",
+                                DropdownMenuRadioItem("Top", value="top", signal="position"),
+                                DropdownMenuRadioItem("Bottom", value="bottom", signal="position"),
+                                DropdownMenuRadioItem("Right", value="right", signal="position"),
+                                signal="position",
                             ),
                         ),
                         signal="radio_dropdown",
@@ -1551,7 +1552,7 @@ def index():
                         Div(
                             Button(
                                 ds_text("$loading ? 'Stop Loading' : 'Start Loading'"),
-                                ds_on_click("$loading = !$loading"),
+                                ds_on_click(toggle_signal("loading")),
                                 variant="outline",
                                 cls="mb-4",
                             ),

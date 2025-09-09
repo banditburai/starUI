@@ -18,13 +18,13 @@ from starhtml.datastar import (
 from .utils import cn
 
 
-def Tooltip(*children, cls: str = "relative inline-block", **attrs: Any) -> FT:
+def Tooltip(*children, cls: str = "relative inline-block", **kwargs: Any) -> FT:
     tooltip_id = f"tooltip_{uuid4().hex[:8]}"
     return Div(
         *[child(tooltip_id) if callable(child) else child for child in children],
         ds_signals({f"{tooltip_id}_open": False}),
         cls=cls,
-        **attrs,
+        **kwargs,
     )
 
 
@@ -34,7 +34,7 @@ def TooltipTrigger(
     hide_delay: int = 0,
     class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> Callable[[str], FT]:
     def _(tooltip_id: str) -> FT:
         return Div(
@@ -62,7 +62,7 @@ def TooltipTrigger(
             aria_describedby=f"{tooltip_id}-content",
             aria_expanded=f"${tooltip_id}_open",
             cls=cn("inline-block outline-none", class_name, cls),
-            **attrs,
+            **kwargs,
         )
 
     return _
@@ -76,7 +76,7 @@ def TooltipContent(
     allow_flip: bool = True,
     class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> Callable[[str], FT]:
     def _(tooltip_id: str) -> FT:
         placement = f"{side}-{align}" if align != "center" else side
@@ -115,11 +115,11 @@ def TooltipContent(
                 class_name,
                 cls,
             ),
-            **attrs,
+            **kwargs,
         )
 
     return _
 
 
-def TooltipProvider(*children, **attrs: Any) -> FT:
-    return Div(*children, **attrs)
+def TooltipProvider(*children, **kwargs: Any) -> FT:
+    return Div(*children, **kwargs)

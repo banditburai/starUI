@@ -7,13 +7,16 @@ from starhtml import Label as HTMLLabel
 from starhtml import P as HTMLP
 from starhtml.datastar import (
     ds_class,
-    ds_on_click,
-    ds_on_toggle,
+    ds_computed,
+    ds_on_click,    
     ds_position,
     ds_ref,
     ds_show,
     ds_signals,
+    ds_style,
     ds_text,
+    t,
+    toggle_class,
     value,
 )
 
@@ -26,7 +29,7 @@ def Select(
     initial_label: str | None = None,
     signal: str | None = None,
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     signal = signal or f"select_{uuid4().hex[:8]}"
     return Div(
@@ -39,31 +42,23 @@ def Select(
             }
         ),
         cls=cn("relative", cls),
-        **attrs,
+        **kwargs,
     )
 
 
 def SelectTrigger(
     *children,
     signal: str | None = None,
-    width: str | None = None,
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     signal = signal or "select"
-    trigger_id = attrs.pop("id", f"{signal}-trigger")
-    
-    # Default width if not specified in either width param or cls
-    default_width = "w-[180px]"
-    # Check if cls contains width classes
-    has_width_in_cls = any(c.startswith(('w-', 'min-w-', 'max-w-')) for c in cls.split())
-    # Use explicit width param, or width in cls, or default
-    final_width = width if width else ('' if has_width_in_cls else default_width)
+    trigger_id = kwargs.pop("id", f"{signal}-trigger")
 
     return HTMLButton(
         *children,
         Icon("lucide:chevron-down", cls="size-4 shrink-0 opacity-50"),
-        ds_ref(f"{signal}Trigger"),
+        ds_ref(f"{signal}_trigger"),
         popovertarget=f"{signal}-content",
         popoveraction="toggle",
         type="button",
@@ -73,8 +68,7 @@ def SelectTrigger(
         data_placeholder=f"!${signal}_label",
         id=trigger_id,
         cls=cn(
-            final_width,
-            "flex h-9 items-center justify-between gap-2 rounded-md border border-input",
+            "w-[180px] flex h-9 items-center justify-between gap-2 rounded-md border border-input",
             "bg-transparent px-3 py-2 text-sm shadow-xs",
             "transition-[color,box-shadow] outline-none truncate",
             "dark:bg-input/30 dark:hover:bg-input/50",
@@ -85,7 +79,7 @@ def SelectTrigger(
             "data-[placeholder]:text-muted-foreground",
             cls,
         ),
-        **attrs,
+        **kwargs,
     )
 
 
@@ -93,14 +87,14 @@ def SelectValue(
     placeholder: str = "Select an option",
     signal: str | None = None,
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     signal = signal or "select"
     return Span(
         ds_text(f"${signal}_label || '{placeholder}'"),
-        ds_class(text_muted_foreground=f"!${signal}_label"),
+        toggle_class(f"${signal}_label", "", "text-muted-foreground"),
         cls=cn("pointer-events-none truncate flex-1 text-left", cls),
-        **attrs,
+        **kwargs,
     )
 
 
@@ -108,21 +102,15 @@ def SelectContent(
     *children,
     signal: str | None = None,
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     signal = signal or "select"
 
     return Div(
         Div(*children, cls="p-1 max-h-[300px] overflow-auto"),
-        ds_ref(f"{signal}Content"),
-        ds_on_toggle(f"""
-            if (event.newState === 'open') {{
-                const trigger = document.getElementById('{signal}-trigger');
-                if (trigger) {{
-                    el.style.minWidth = trigger.offsetWidth + 'px';
-                }}
-            }}
-        """),
+        ds_ref(f"{signal}_content"),
+        ds_computed(f"{signal}_content_min_width", f"${signal}_trigger ? ${signal}_trigger.offsetWidth + 'px' : 'auto'"),
+        ds_style(min_width=f"${signal}_content_min_width"),
         ds_position(
             anchor=f"{signal}-trigger",
             placement="bottom",
@@ -130,7 +118,6 @@ def SelectContent(
             flip=True,
             shift=True,
             hide=True,
-            auto_size=True,
         ),
         popover="auto",
         id=f"{signal}-content",
@@ -138,10 +125,10 @@ def SelectContent(
         aria_labelledby=f"{signal}-trigger",
         tabindex="-1",
         cls=cn(
-            "z-50 overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md dark:border-input",
+            "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md dark:border-input",
             cls,
         ),
-        **attrs,
+        **kwargs,
     )
 
 
@@ -151,13 +138,10 @@ def SelectItem(
     signal: str | None = None,
     disabled: bool = False,
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     label = label or value
     signal = signal or "select"
-    
-    # Use Unicode escape sequence for dollar sign to avoid Datastar parsing issues
-    # Replace $ with \u0024 and escape single quotes
     js_safe_label = label.replace("$", "\\u0024").replace("'", "\\'")
 
     return Div(
@@ -167,15 +151,9 @@ def SelectItem(
             ds_show(f"${signal}_value === '{value}'"),
             cls="absolute right-2 flex h-3.5 w-3.5 items-center justify-center",
         ),
-        *(
-            ()
-            if disabled
-            else [
-                ds_on_click(
-                    f"${signal}_value='{value}';${signal}_label='{js_safe_label}';document.getElementById('{signal}-content').hidePopover()"
-                )
-            ]
-        ),
+        ds_on_click(
+            f"${signal}_value='{value}';${signal}_label='{js_safe_label}';${signal}_content.hidePopover()"
+        ) if not disabled else None,
         role="option",
         data_value=value,
         data_selected=f"${signal}_value === '{value}'",
@@ -186,7 +164,7 @@ def SelectItem(
             "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
             cls,
         ),
-        **attrs,
+        **kwargs,
     )
 
 
@@ -194,30 +172,78 @@ def SelectGroup(
     *children,
     label: str | None = None,
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     return Div(
-        SelectLabel(label) if label else "",
+        SelectLabel(label) if label else None,
         *children,
         cls=cls,
-        **attrs,
+        **kwargs,
     )
 
 
 def SelectLabel(
-    text: str,
+    *children,
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     return Div(
-        text,
+        *children,
         cls=cn("text-muted-foreground px-2 py-1.5 text-xs", cls),
-        **attrs,
+        **kwargs,
     )
 
 
+def _get_value_label(item: str | tuple) -> tuple[str, str]:
+    """Extract value and label from an option item."""
+    match item:
+        case str():
+            return item, item
+        case (value, label):
+            return value, label
+        case _:
+            return "", ""
+
+
+def _find_initial_label(options: list, value: str | None) -> str:
+    """Find the display label for a given value in options."""
+    if not value:
+        return ""
+    
+    for opt in options:
+        match opt:
+            case str() if opt == value:
+                return opt
+            case (opt_value, label) if opt_value == value:
+                return label
+            case {"items": items}:
+                for item in items:
+                    item_value, item_label = _get_value_label(item)
+                    if item_value == value:
+                        return item_label
+    return ""
+
+
+def _build_select_items(options: list, signal: str) -> list:
+    """Convert options list into SelectItem components."""
+    items = []
+    for opt in options:
+        match opt:
+            case str():
+                items.append(SelectItem(value=opt, label=opt, signal=signal))
+            case (value, label):
+                items.append(SelectItem(value=value, label=label, signal=signal))
+            case {"group": group_label, "items": group_items}:
+                items.append(SelectGroup(
+                    *[SelectItem(*_get_value_label(item), signal=signal) 
+                      for item in group_items],
+                    label=group_label
+                ))
+    return items
+
+
 def SelectWithLabel(
-    *attrs: Any,  # Accept positional args (ds_* attributes, etc.)
+    *attrs: Any,
     label: str,
     options: list[str | tuple[str, str] | dict],
     value: str | None = None,
@@ -233,55 +259,9 @@ def SelectWithLabel(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    # Generate signal if not provided
-    if not signal:
-        signal = f"select_{uuid4().hex[:8]}"
-
-    # Use the signal-based ID that SelectTrigger expects
+    signal = signal or f"select_{uuid4().hex[:8]}"
     select_id = f"{signal}-trigger"
-    
-    # Find the initial label for the given value
-    initial_label = ""
-    if value:
-        for opt in options:
-            if isinstance(opt, str) and opt == value:
-                initial_label = opt
-                break
-            elif isinstance(opt, tuple) and len(opt) == 2 and opt[0] == value:
-                initial_label = opt[1]
-                break
-            elif isinstance(opt, dict) and "items" in opt:
-                for item in opt["items"]:
-                    if isinstance(item, str) and item == value:
-                        initial_label = item
-                        break
-                    elif isinstance(item, tuple) and len(item) == 2 and item[0] == value:
-                        initial_label = item[1]
-                        break
-    
-    # Keep initial_label as-is since it goes into value() wrapper, not JavaScript
-
-    def build_options(opts):
-        items = []
-        for opt in opts:
-            if isinstance(opt, str):
-                items.append(SelectItem(value=opt, label=opt, signal=signal))
-            elif isinstance(opt, tuple) and len(opt) == 2:
-                items.append(SelectItem(value=opt[0], label=opt[1], signal=signal))
-            elif isinstance(opt, dict):
-                if "group" in opt and "items" in opt:
-                    group_items = []
-                    for item in opt["items"]:
-                        if isinstance(item, str):
-                            group_items.append(
-                                SelectItem(value=item, label=item, signal=signal)
-                            )
-                        elif isinstance(item, tuple) and len(item) == 2:
-                            group_items.append(
-                                SelectItem(value=item[0], label=item[1], signal=signal)
-                            )
-                    items.append(SelectGroup(*group_items, label=opt["group"]))
-        return items
+    initial_label = _find_initial_label(options, value)
 
     return Div(
         HTMLLabel(
@@ -297,19 +277,16 @@ def SelectWithLabel(
                 cls=select_cls,
                 disabled=disabled,
                 aria_invalid="true" if error_text else None,
-                # Don't override the ID - SelectTrigger will set it correctly
             ),
-            SelectContent(*build_options(options), signal=signal),
+            SelectContent(*_build_select_items(options, signal), signal=signal),
             initial_value=value,
             initial_label=initial_label,
             signal=signal,
-            cls="w-full",  # Ensure Select container takes full width of parent
-            *attrs,  # Pass through positional attrs
-            **kwargs,  # Pass through keyword attrs
+            cls="w-full",
+            *attrs,
+            **kwargs,
         ),
         error_text and HTMLP(error_text, cls="text-sm text-destructive mt-1.5"),
-        helper_text
-        and not error_text
-        and HTMLP(helper_text, cls="text-sm text-muted-foreground mt-1.5"),
+        helper_text and not error_text and HTMLP(helper_text, cls="text-sm text-muted-foreground mt-1.5"),
         cls=cn("space-y-1.5", cls),
     )

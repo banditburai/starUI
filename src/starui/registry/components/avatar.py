@@ -11,9 +11,8 @@ def Avatar(
     *children: Any,
     class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
-    """Avatar container component."""
     return Div(
         *children,
         data_slot="avatar",
@@ -22,7 +21,7 @@ def Avatar(
             class_name,
             cls,
         ),
-        **attrs,
+        **kwargs,
     )
 
 
@@ -32,16 +31,15 @@ def AvatarImage(
     loading: str = "lazy",
     class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
-    """Avatar image component."""
     return Img(
         src=src,
         alt=alt,
         loading=loading,
         data_slot="avatar-image",
         cls=cn("aspect-square size-full object-cover", class_name, cls),
-        **attrs,
+        **kwargs,
     )
 
 
@@ -49,10 +47,9 @@ def AvatarFallback(
     *children: Any,
     class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
-    """Avatar fallback component."""
-    has_bg = any("bg-" in str(c) for c in [class_name, cls])
+    has_bg = "bg-" in f"{class_name} {cls}"
 
     return Div(
         *children,
@@ -63,7 +60,7 @@ def AvatarFallback(
             class_name,
             cls,
         ),
-        **attrs,
+        **kwargs,
     )
 
 
@@ -71,16 +68,16 @@ def AvatarWithFallback(
     src: str | None = None,
     alt: str = "",
     fallback: str = "?",
+    loading: str = "lazy",
     class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
-    """Avatar with automatic fallback on image load error."""
     if not src:
         return Avatar(
             AvatarFallback(fallback),
             cls=cn(class_name, cls),
-            **attrs,
+            **kwargs,
         )
 
     signal = f"avatar_{str(uuid4())[:8]}_error"
@@ -92,7 +89,7 @@ def AvatarWithFallback(
             ds_on("error", f"${signal} = true"),
             src=src,
             alt=alt,
-            loading="lazy",
+            loading=loading,
             cls="aspect-square size-full object-cover",
             data_slot="avatar-image",
         ),
@@ -103,5 +100,5 @@ def AvatarWithFallback(
             data_slot="avatar-fallback",
         ),
         cls=cn(class_name, cls),
-        **attrs,
+        **kwargs,
     )

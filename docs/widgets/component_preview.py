@@ -74,7 +74,8 @@ def ComponentPreview(
                         BaseCodeBlock(
                             code_content,
                             language="python",
-                            cls="max-h-[650px] overflow-auto"
+                            cls="max-h-[650px] overflow-auto",
+                            style="scrollbar-width: thin; scrollbar-color: transparent transparent;"
                         ),
                         _copy_button(preview_id) if copy_button else None,
                         cls="relative group overflow-x-auto"

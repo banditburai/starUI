@@ -78,91 +78,91 @@ prose_variants = cva(
 )
 
 
-def Display(*children, class_name="", cls="", **attrs) -> FT:
+def Display(*children, class_name="", cls="", **kwargs) -> FT:
     return HTMLH1(
         *children,
         cls=cn("text-6xl font-extrabold leading-none mb-8 first:mt-0", class_name, cls),
-        **attrs,
+        **kwargs,
     )
 
 
-def H1(*children, class_name="", cls="", **attrs) -> FT:
+def H1(*children, class_name="", cls="", **kwargs) -> FT:
     return HTMLH1(
-        *children, cls=cn(heading_variants(level="h1"), class_name, cls), **attrs
+        *children, cls=cn(heading_variants(level="h1"), class_name, cls), **kwargs
     )
 
 
-def H2(*children, section=False, class_name="", cls="", **attrs) -> FT:
+def H2(*children, section=False, class_name="", cls="", **kwargs) -> FT:
     return HTMLH2(
         *children,
         cls=cn(
             heading_variants(level="h2", section=str(section).lower()), class_name, cls
         ),
-        **attrs,
+        **kwargs,
     )
 
 
-def H3(*children, class_name="", cls="", **attrs) -> FT:
+def H3(*children, class_name="", cls="", **kwargs) -> FT:
     return HTMLH3(
-        *children, cls=cn(heading_variants(level="h3"), class_name, cls), **attrs
+        *children, cls=cn(heading_variants(level="h3"), class_name, cls), **kwargs
     )
 
 
-def H4(*children, class_name="", cls="", **attrs) -> FT:
+def H4(*children, class_name="", cls="", **kwargs) -> FT:
     return HTMLH4(
-        *children, cls=cn(heading_variants(level="h4"), class_name, cls), **attrs
+        *children, cls=cn(heading_variants(level="h4"), class_name, cls), **kwargs
     )
 
 
-def H5(*children, class_name="", cls="", **attrs) -> FT:
+def H5(*children, class_name="", cls="", **kwargs) -> FT:
     return HTMLH5(
-        *children, cls=cn(heading_variants(level="h5"), class_name, cls), **attrs
+        *children, cls=cn(heading_variants(level="h5"), class_name, cls), **kwargs
     )
 
 
-def H6(*children, class_name="", cls="", **attrs) -> FT:
+def H6(*children, class_name="", cls="", **kwargs) -> FT:
     return HTMLH6(
-        *children, cls=cn(heading_variants(level="h6"), class_name, cls), **attrs
+        *children, cls=cn(heading_variants(level="h6"), class_name, cls), **kwargs
     )
 
 
-def P(*children, class_name="", cls="", **attrs) -> FT:
+def P(*children, class_name="", cls="", **kwargs) -> FT:
     return HTMLP(
-        *children, cls=cn(text_variants(variant="body"), class_name, cls), **attrs
+        *children, cls=cn(text_variants(variant="body"), class_name, cls), **kwargs
     )
 
 
-def Lead(*children, class_name="", cls="", **attrs) -> FT:
+def Lead(*children, class_name="", cls="", **kwargs) -> FT:
     return HTMLP(
-        *children, cls=cn(text_variants(variant="lead"), class_name, cls), **attrs
+        *children, cls=cn(text_variants(variant="lead"), class_name, cls), **kwargs
     )
 
 
-def Large(*children, class_name="", cls="", **attrs) -> FT:
+def Large(*children, class_name="", cls="", **kwargs) -> FT:
     return Div(
-        *children, cls=cn(text_variants(variant="large"), class_name, cls), **attrs
+        *children, cls=cn(text_variants(variant="large"), class_name, cls), **kwargs
     )
 
 
-def Small(*children, class_name="", cls="", **attrs) -> FT:
-    return Div(*children, cls=cn("text-sm font-medium", class_name, cls), **attrs)
+def Small(*children, class_name="", cls="", **kwargs) -> FT:
+    return Div(*children, cls=cn("text-sm font-medium", class_name, cls), **kwargs)
 
 
-def Muted(*children, class_name="", cls="", **attrs) -> FT:
+def Muted(*children, class_name="", cls="", **kwargs) -> FT:
     return HTMLP(
-        *children, cls=cn(text_variants(variant="muted"), class_name, cls), **attrs
+        *children, cls=cn(text_variants(variant="muted"), class_name, cls), **kwargs
     )
 
 
-def Subtitle(*children, class_name="", cls="", **attrs) -> FT:
+def Subtitle(*children, class_name="", cls="", **kwargs) -> FT:
     return HTMLP(
         *children,
         cls=cn("text-lg leading-relaxed text-muted-foreground mb-6", class_name, cls),
-        **attrs,
+        **kwargs,
     )
 
 
-def Caption(*children, class_name="", cls="", **attrs) -> FT:
+def Caption(*children, class_name="", cls="", **kwargs) -> FT:
     return Div(
         *children,
         cls=cn(
@@ -170,17 +170,17 @@ def Caption(*children, class_name="", cls="", **attrs) -> FT:
             class_name,
             cls,
         ),
-        **attrs,
+        **kwargs,
     )
 
 
-def Text(*children, variant="body", class_name="", cls="", **attrs) -> FT:
+def Text(*children, variant="body", class_name="", cls="", **kwargs) -> FT:
     return HTMLP(
-        *children, cls=cn(text_variants(variant=variant), class_name, cls), **attrs
+        *children, cls=cn(text_variants(variant=variant), class_name, cls), **kwargs
     )
 
 
-def InlineCode(*children, class_name="", cls="", **attrs) -> FT:
+def InlineCode(*children, class_name="", cls="", **kwargs) -> FT:
     return HTMLCode(
         *children,
         cls=cn(
@@ -188,28 +188,28 @@ def InlineCode(*children, class_name="", cls="", **attrs) -> FT:
             class_name,
             cls,
         ),
-        **attrs,
+        **kwargs,
     )
 
 
-def Blockquote(*children, class_name="", cls="", **attrs) -> FT:
+def Blockquote(*children, class_name="", cls="", **kwargs) -> FT:
     return HTMLBlockquote(
-        *children, cls=cn("mt-6 border-l-2 pl-6 italic", class_name, cls), **attrs
+        *children, cls=cn("mt-6 border-l-2 pl-6 italic", class_name, cls), **kwargs
     )
 
 
-def List(*children, ordered=False, class_name="", cls="", **attrs) -> FT:
+def List(*children, ordered=False, class_name="", cls="", **kwargs) -> FT:
     classes = cn(
         "my-6 ml-6", "list-decimal" if ordered else "list-disc", class_name, cls
     )
-    return (Ol if ordered else Ul)(*children, cls=classes, **attrs)
+    return (Ol if ordered else Ul)(*children, cls=classes, **kwargs)
 
 
-def Prose(*children, size: ProseSize = "base", class_name="", cls="", **attrs) -> FT:
-    return Div(*children, cls=cn(prose_variants(size=size), class_name, cls), **attrs)
+def Prose(*children, size: ProseSize = "base", class_name="", cls="", **kwargs) -> FT:
+    return Div(*children, cls=cn(prose_variants(size=size), class_name, cls), **kwargs)
 
 
-def Kbd(*children, class_name="", cls="", **attrs) -> FT:
+def Kbd(*children, class_name="", cls="", **kwargs) -> FT:
     return HTMLKbd(
         *children,
         cls=cn(
@@ -217,39 +217,39 @@ def Kbd(*children, class_name="", cls="", **attrs) -> FT:
             class_name,
             cls,
         ),
-        **attrs,
+        **kwargs,
     )
 
 
-def Mark(*children, class_name="", cls="", **attrs) -> FT:
+def Mark(*children, class_name="", cls="", **kwargs) -> FT:
     return HTMLMark(
         *children,
         cls=cn(
             "bg-yellow-200 dark:bg-yellow-800/30 px-1 py-0.5 rounded", class_name, cls
         ),
-        **attrs,
+        **kwargs,
     )
 
 
-def Strong(*children, class_name="", cls="", **attrs) -> FT:
-    return HTMLStrong(*children, cls=cn("font-semibold", class_name, cls), **attrs)
+def Strong(*children, class_name="", cls="", **kwargs) -> FT:
+    return HTMLStrong(*children, cls=cn("font-semibold", class_name, cls), **kwargs)
 
 
-def Em(*children, class_name="", cls="", **attrs) -> FT:
-    return HTMLEm(*children, cls=cn("italic", class_name, cls), **attrs)
+def Em(*children, class_name="", cls="", **kwargs) -> FT:
+    return HTMLEm(*children, cls=cn("italic", class_name, cls), **kwargs)
 
 
-def Hr(class_name="", cls="", **attrs) -> FT:
-    return HTMLHr(cls=cn("my-8 border-0 h-px bg-border", class_name, cls), **attrs)
+def Hr(class_name="", cls="", **kwargs) -> FT:
+    return HTMLHr(cls=cn("my-8 border-0 h-px bg-border", class_name, cls), **kwargs)
 
 
-def Figure(*children, class_name="", cls="", **attrs) -> FT:
-    return HTMLFigure(*children, cls=cn("my-8 space-y-3", class_name, cls), **attrs)
+def Figure(*children, class_name="", cls="", **kwargs) -> FT:
+    return HTMLFigure(*children, cls=cn("my-8 space-y-3", class_name, cls), **kwargs)
 
 
-def Figcaption(*children, class_name="", cls="", **attrs) -> FT:
+def Figcaption(*children, class_name="", cls="", **kwargs) -> FT:
     return HTMLFigcaption(
         *children,
         cls=cn("text-sm text-muted-foreground text-center italic", class_name, cls),
-        **attrs,
+        **kwargs,
     )

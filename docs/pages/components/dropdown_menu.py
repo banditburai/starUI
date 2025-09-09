@@ -31,7 +31,8 @@ def examples():
             DropdownMenu(
             DropdownMenuTrigger(
                 Icon("lucide:settings", cls="mr-2 h-4 w-4"),
-                "Settings"
+                "Settings",
+                cls="w-32"
             ),
             DropdownMenuContent(
                 DropdownMenuItem(
@@ -95,7 +96,7 @@ def examples():
     )
     
     # Menu with checkboxes for preferences
-    signal_id = uuid4().hex[:8]
+    checkbox_signal_id = uuid4().hex[:8]
     yield ComponentPreview(
         Div(
             Div(
@@ -126,23 +127,23 @@ def examples():
                         DropdownMenuSeparator(),
                         DropdownMenuCheckboxItem(
                             "Show Grid",
-                            checked_signal="showGrid"
+                            signal="show_grid"
                         ),
                         DropdownMenuCheckboxItem(
                             "Show Rulers",
-                            checked_signal="showRulers"
+                            signal="show_rulers"
                         ),
                         DropdownMenuCheckboxItem(
                             "Show Guides",
-                            checked_signal="showGuides"
+                            signal="show_guides"
                         ),
                         DropdownMenuSeparator(),
                         DropdownMenuCheckboxItem(
                             "Auto-save",
-                            checked_signal="autoSave"
+                            signal="auto_save"
                         )
                     ),
-                    signal=f"view_menu_{signal_id}"
+                    signal=f"view_menu_{checkbox_signal_id}"
                 ),
                 cls="flex justify-center"
             ),
@@ -157,11 +158,11 @@ def examples():
     DropdownMenuContent(
         DropdownMenuLabel("Display Settings"),
         DropdownMenuSeparator(),
-        DropdownMenuCheckboxItem("Show Grid", checked_signal="showGrid"),
-        DropdownMenuCheckboxItem("Show Rulers", checked_signal="showRulers"),
-        DropdownMenuCheckboxItem("Show Guides", checked_signal="showGuides"),
+        DropdownMenuCheckboxItem("Show Grid", signal="show_grid"),
+        DropdownMenuCheckboxItem("Show Rulers", signal="show_rulers"),
+        DropdownMenuCheckboxItem("Show Guides", signal="show_guides"),
         DropdownMenuSeparator(),
-        DropdownMenuCheckboxItem("Auto-save", checked_signal="autoSave")
+        DropdownMenuCheckboxItem("Auto-save", signal="auto_save")
     )
 )''',
         title="Checkbox Menu",
@@ -185,7 +186,8 @@ def examples():
                 DropdownMenu(
                     DropdownMenuTrigger(
                         Icon("lucide:palette", cls="mr-2 h-4 w-4"),
-                        "Theme"
+                        "Theme",
+                        cls="w-32"
                     ),
                     DropdownMenuContent(
                         DropdownMenuLabel("Appearance"),
@@ -195,21 +197,21 @@ def examples():
                                 Icon("lucide:sun", cls="mr-2 h-4 w-4"),
                                 "Light",
                                 value="light",
-                                value_signal="theme"
+                                signal="theme"
                             ),
                             DropdownMenuRadioItem(
                                 Icon("lucide:moon", cls="mr-2 h-4 w-4"),
                                 "Dark", 
                                 value="dark",
-                                value_signal="theme"
+                                signal="theme"
                             ),
                             DropdownMenuRadioItem(
                                 Icon("lucide:laptop", cls="mr-2 h-4 w-4"),
                                 "System",
                                 value="system", 
-                                value_signal="theme"
+                                signal="theme"
                             ),
-                            value_signal="theme"
+                            signal="theme"
                         )
                     ),
                     signal=f"theme_menu_{signal_id2}"
@@ -232,21 +234,21 @@ def examples():
                 Icon("lucide:sun", cls="mr-2 h-4 w-4"),
                 "Light",
                 value="light",
-                value_signal="theme"
+                signal="theme"
             ),
             DropdownMenuRadioItem(
                 Icon("lucide:moon", cls="mr-2 h-4 w-4"),
                 "Dark",
                 value="dark", 
-                value_signal="theme"
+                signal="theme"
             ),
             DropdownMenuRadioItem(
                 Icon("lucide:laptop", cls="mr-2 h-4 w-4"),
                 "System",
                 value="system",
-                value_signal="theme"
+                signal="theme"
             ),
-            value_signal="theme"
+            signal="theme"
         )
     )
 )''',
@@ -490,7 +492,8 @@ def examples():
                 DropdownMenu(
                     DropdownMenuTrigger(
                         "Create New",
-                        Icon("lucide:chevron-down", cls="ml-2 h-4 w-4")
+                        Icon("lucide:chevron-down", cls="ml-2 h-4 w-4"),
+                        cls="w-36"
                     ),
                     DropdownMenuContent(
                         DropdownMenuGroup(
@@ -602,37 +605,39 @@ def examples():
                     DropdownMenuTrigger(
                         "Sort By",
                         Icon("lucide:chevron-down", cls="ml-2 h-4 w-4"),
-                        variant="outline"
+                        variant="outline",
+                        cls="w-32"
                     ),
                     DropdownMenuContent(
                         DropdownMenuRadioGroup(
                             DropdownMenuRadioItem(
                                 "Name",
                                 value="name",
-                                value_signal="sortBy"
+                                signal="sort_by"
                             ),
                             DropdownMenuRadioItem(
                                 "Date Created",
                                 value="date",
-                                value_signal="sortBy"
+                                signal="sort_by"
                             ),
                             DropdownMenuRadioItem(
                                 "Size",
                                 value="size",
-                                value_signal="sortBy"
+                                signal="sort_by"
                             ),
                             DropdownMenuRadioItem(
                                 "Type",
                                 value="type",
-                                value_signal="sortBy"
+                                signal="sort_by"
                             ),
-                            value_signal="sortBy"
+                            signal="sort_by"
                         ),
                         DropdownMenuSeparator(),
                         DropdownMenuCheckboxItem(
                             "Ascending",
-                            checked_signal="ascending"
-                        )
+                            signal="ascending"
+                        ),
+                        align="end"
                     ),
                     signal=f"sort_menu_{signal_id4}"
                 ),
@@ -641,31 +646,32 @@ def examples():
                         "View",
                         Icon("lucide:chevron-down", cls="ml-2 h-4 w-4"),
                         variant="outline",
-                        cls="ml-2"
+                        cls="ml-2 w-28"
                     ),
                     DropdownMenuContent(
                         DropdownMenuCheckboxItem(
                             "Show Hidden Files",
-                            checked_signal="showHidden"
+                            signal="show_hidden"
                         ),
                         DropdownMenuCheckboxItem(
                             "Show File Extensions",
-                            checked_signal="showExtensions"
+                            signal="show_extensions"
                         ),
                         DropdownMenuSeparator(),
                         DropdownMenuRadioGroup(
                             DropdownMenuRadioItem(
                                 "Grid View",
                                 value="grid",
-                                value_signal="viewMode"
+                                signal="view_mode"
                             ),
                             DropdownMenuRadioItem(
                                 "List View", 
                                 value="list",
-                                value_signal="viewMode"
+                                signal="view_mode"
                             ),
-                            value_signal="viewMode"
-                        )
+                            signal="view_mode"
+                        ),
+                        align="start"
                     ),
                     signal=f"view_menu_{signal_id4}"
                 ),
@@ -679,27 +685,27 @@ DropdownMenu(
     DropdownMenuTrigger("Sort By", variant="outline"),
     DropdownMenuContent(
         DropdownMenuRadioGroup(
-            DropdownMenuRadioItem("Name", value="name", value_signal="sortBy"),
-            DropdownMenuRadioItem("Date Created", value="date", value_signal="sortBy"),
-            DropdownMenuRadioItem("Size", value="size", value_signal="sortBy"),
-            DropdownMenuRadioItem("Type", value="type", value_signal="sortBy"),
-            value_signal="sortBy"
+            DropdownMenuRadioItem("Name", value="name", signal="sort_by"),
+            DropdownMenuRadioItem("Date Created", value="date", signal="sort_by"),
+            DropdownMenuRadioItem("Size", value="size", signal="sort_by"),
+            DropdownMenuRadioItem("Type", value="type", signal="sort_by"),
+            signal="sort_by"
         ),
         DropdownMenuSeparator(),
-        DropdownMenuCheckboxItem("Ascending", checked_signal="ascending")
+        DropdownMenuCheckboxItem("Ascending", signal="ascending")
     )
 )
 
 DropdownMenu(
     DropdownMenuTrigger("View", variant="outline"),
     DropdownMenuContent(
-        DropdownMenuCheckboxItem("Show Hidden Files", checked_signal="showHidden"),
-        DropdownMenuCheckboxItem("Show File Extensions", checked_signal="showExtensions"),
+        DropdownMenuCheckboxItem("Show Hidden Files", signal="show_hidden"),
+        DropdownMenuCheckboxItem("Show File Extensions", signal="show_extensions"),
         DropdownMenuSeparator(),
         DropdownMenuRadioGroup(
-            DropdownMenuRadioItem("Grid View", value="grid", value_signal="viewMode"),
-            DropdownMenuRadioItem("List View", value="list", value_signal="viewMode"),
-            value_signal="viewMode"
+            DropdownMenuRadioItem("Grid View", value="grid", signal="view_mode"),
+            DropdownMenuRadioItem("List View", value="list", signal="view_mode"),
+            signal="view_mode"
         )
     )
 )''',
@@ -716,6 +722,7 @@ def create_dropdown_menu_docs():
         "components": [
             {
                 "name": "DropdownMenu",
+                "description": "Container component for dropdown menus",
                 "props": [
                     {
                         "name": "signal",
@@ -733,6 +740,7 @@ def create_dropdown_menu_docs():
             },
             {
                 "name": "DropdownMenuTrigger",
+                "description": "Button that opens the dropdown menu",
                 "props": [
                     {
                         "name": "variant",
@@ -756,6 +764,7 @@ def create_dropdown_menu_docs():
             },
             {
                 "name": "DropdownMenuContent",
+                "description": "Container for dropdown menu items",
                 "props": [
                     {
                         "name": "side",
@@ -779,6 +788,7 @@ def create_dropdown_menu_docs():
             },
             {
                 "name": "DropdownMenuItem",
+                "description": "Clickable menu option",
                 "props": [
                     {
                         "name": "onclick",
@@ -805,11 +815,99 @@ def create_dropdown_menu_docs():
                         "description": "Whether item is disabled"
                     }
                 ]
+            },
+            {
+                "name": "DropdownMenuCheckboxItem",
+                "description": "Menu item with toggleable checkbox",
+                "props": [
+                    {
+                        "name": "signal",
+                        "type": "str",
+                        "required": True,
+                        "description": "Signal name for checkbox state"
+                    },
+                    {
+                        "name": "inset",
+                        "type": "bool",
+                        "default": "False",
+                        "description": "Add left padding for alignment"
+                    },
+                    {
+                        "name": "disabled",
+                        "type": "bool",
+                        "default": "False",
+                        "description": "Whether item is disabled"
+                    }
+                ]
+            },
+            {
+                "name": "DropdownMenuRadioGroup",
+                "description": "Container for radio menu items",
+                "props": [
+                    {
+                        "name": "signal",
+                        "type": "str",
+                        "required": True,
+                        "description": "Signal name for selected value"
+                    }
+                ]
+            },
+            {
+                "name": "DropdownMenuRadioItem",
+                "description": "Menu item for single selection",
+                "props": [
+                    {
+                        "name": "value",
+                        "type": "str",
+                        "required": True,
+                        "description": "Value when this item is selected"
+                    },
+                    {
+                        "name": "signal",
+                        "type": "str",
+                        "required": True,
+                        "description": "Signal name for selected value"
+                    },
+                    {
+                        "name": "disabled",
+                        "type": "bool",
+                        "default": "False",
+                        "description": "Whether item is disabled"
+                    }
+                ]
+            },
+            {
+                "name": "DropdownMenuSeparator",
+                "description": "Visual separator between menu items",
+                "props": []
+            },
+            {
+                "name": "DropdownMenuLabel",
+                "description": "Non-interactive label for menu sections",
+                "props": [
+                    {
+                        "name": "inset",
+                        "type": "bool",
+                        "default": "False",
+                        "description": "Add left padding for alignment"
+                    }
+                ]
+            },
+            {
+                "name": "DropdownMenuGroup",
+                "description": "Groups related menu items together",
+                "props": []
+            },
+            {
+                "name": "DropdownMenuShortcut",
+                "description": "Displays keyboard shortcut text",
+                "props": []
             }
         ]
     }
     
     # Hero example
+    hero_signal_id = uuid4().hex[:8]
     hero_example = ComponentPreview(
         Div(
             DropdownMenu(
@@ -832,7 +930,8 @@ def create_dropdown_menu_docs():
                         "Delete",
                         variant="destructive"
                     )
-                )
+                ),
+                signal=f"hero_menu_{hero_signal_id}"
             ),
             cls="w-full max-w-xl flex justify-center"
         ),

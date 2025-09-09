@@ -28,17 +28,17 @@ def examples():
         Div(
             Div(
                 UILabel("Email", for_="email"),
-                Input(type="email", id="email", placeholder="you@example.com"),
+                Input(type="email", id="email", placeholder="you@example.com", cls="w-80"),
                 cls="space-y-2"
             ),
             Div(
                 UILabel("Password", for_="password"),
-                Input(type="password", id="password", placeholder="Enter your password"),
+                Input(type="password", id="password", placeholder="Enter your password", cls="w-80"),
                 cls="space-y-2"
             ),
             Div(
                 UILabel("Phone Number", for_="phone"),
-                Input(type="tel", id="phone", placeholder="+1 (555) 123-4567"),
+                Input(type="tel", id="phone", placeholder="+1 (555) 123-4567", cls="w-80"),
                 cls="space-y-2"
             ),
             cls="grid gap-4 max-w-md"
@@ -63,20 +63,21 @@ Input(type="tel", placeholder="+1 (555) 123-4567")''',
                     id="username-reactive",
                     placeholder="Enter username",
                     signal="username",
-                    validation="/^[a-zA-Z0-9_]{3,}$/.test($signal)"
+                    validation="/^[a-zA-Z0-9_]{3,}$/.test($signal)",
+                    cls="w-80"
                 ),
                 Div(
                     P(
-                        ds_show("!$usernameValid && $username.length > 0"),
+                        ds_show("!$username_valid && $username.length > 0"),
                         "Username must be at least 3 characters, letters/numbers/underscores only",
-                        cls="text-xs text-destructive"
+                        cls="text-xs text-destructive break-words"
                     ),
                     P(
-                        ds_show("$usernameValid && $username.length > 0"),
+                        ds_show("$username_valid && $username.length > 0"),
                         "✓ Username is available",
                         cls="text-xs text-green-600"
                     ),
-                    cls="mt-1 h-4"
+                    cls="mt-1 min-h-[1rem] w-80"
                 ),
                 cls="space-y-2"
             ),
@@ -86,25 +87,26 @@ Input(type="tel", placeholder="+1 (555) 123-4567")''',
                     type="email",
                     id="email-reactive", 
                     placeholder="you@example.com",
-                    signal="userEmail",
-                    validation="/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test($signal)"
+                    signal="user_email",
+                    validation="/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test($signal)",
+                    cls="w-80"
                 ),
                 Div(
                     P(
-                        ds_show("!$userEmailValid && $userEmail.length > 0"),
+                        ds_show("!$user_email_valid && $user_email.length > 0"),
                         "Please enter a valid email address",
-                        cls="text-xs text-destructive"
+                        cls="text-xs text-destructive break-words"
                     ),
                     P(
-                        ds_show("$userEmailValid && $userEmail.length > 0"),
+                        ds_show("$user_email_valid && $user_email.length > 0"),
                         "✓ Valid email format",
                         cls="text-xs text-green-600"
                     ),
-                    cls="mt-1 h-4"
+                    cls="mt-1 min-h-[1rem] w-80"
                 ),
                 cls="space-y-2"
             ),
-            ds_signals(username=value(""), usernameValid=False, userEmail=value(""), userEmailValid=False),
+            ds_signals(username=value(""), username_valid=False, user_email=value(""), user_email_valid=False),
             cls="grid gap-4 max-w-md"
         ),
         '''Input(
@@ -116,12 +118,12 @@ Input(type="tel", placeholder="+1 (555) 123-4567")''',
 Input(
     type="email",
     placeholder="you@example.com", 
-    signal="userEmail",
+    signal="user_email",
     validation="/^[^\\\\s@]+@[^\\\\s@]+\\\\.[^\\\\s@]+$/.test($signal)"
 )
 
 P("Username must be at least 3 characters...", 
-  ds_show="!$usernameValid && $username.length > 0",
+  ds_show="!$username_valid && $username.length > 0",
   cls="text-xs text-destructive")''',
         title="Reactive Input with Validation",
         description="Real-time input validation using signals"
@@ -133,18 +135,18 @@ P("Username must be at least 3 characters...",
             Div(
                 UILabel("Subscribe to Newsletter", for_="newsletter"),
                 Div(
-                    Input(type="email", id="newsletter", placeholder="Enter your email", cls="flex-1"),
+                    Input(type="email", id="newsletter", placeholder="Enter your email", cls="w-80"),
                     Button("Subscribe"),
-                    cls="flex gap-2"
+                    cls="flex gap-2 items-center"
                 ),
                 cls="space-y-2"
             ),
             Div(
                 UILabel("Search", for_="search"),
                 Div(
-                    Input(type="search", id="search", placeholder="Search products...", cls="flex-1"),
+                    Input(type="search", id="search", placeholder="Search products...", cls="w-80"),
                     Button("Search", variant="outline"),
-                    cls="flex gap-2"
+                    cls="flex gap-2 items-center"
                 ),
                 cls="space-y-2"
             ),
@@ -172,7 +174,7 @@ Div(
                 UILabel("Quantity", for_="quantity"),
                 Div(
                     Icon("lucide:hash", width="16", height="16", cls="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"),
-                    Input(type="number", id="quantity", placeholder="Enter quantity", min=1, max=99, step=1, cls="pl-10"),
+                    Input(type="number", id="quantity", placeholder="Enter quantity", min=1, max=99, step=1, cls="pl-10 w-80"),
                     cls="relative"
                 ),
                 cls="space-y-2"
@@ -181,7 +183,7 @@ Div(
                 UILabel("Date of Birth", for_="dob"),
                 Div(
                     Icon("lucide:calendar", width="16", height="16", cls="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"),
-                    Input(type="text", id="dob", placeholder="MM/DD/YYYY", cls="pl-10"),
+                    Input(type="text", id="dob", placeholder="MM/DD/YYYY", cls="pl-10 w-80"),
                     cls="relative"
                 ),
                 cls="space-y-2"
@@ -190,7 +192,7 @@ Div(
                 UILabel("Appointment Time", for_="time"),
                 Div(
                     Icon("lucide:clock", width="16", height="16", cls="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"),
-                    Input(type="text", id="time", placeholder="HH:MM", cls="pl-10"),
+                    Input(type="text", id="time", placeholder="HH:MM", cls="pl-10 w-80"),
                     cls="relative"
                 ),
                 cls="space-y-2"
@@ -199,7 +201,7 @@ Div(
                 UILabel("Website", for_="website"),
                 Div(
                     Icon("lucide:globe", width="16", height="16", cls="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"),
-                    Input(type="url", id="website", placeholder="https://example.com", cls="pl-10"),
+                    Input(type="url", id="website", placeholder="https://example.com", cls="pl-10 w-80"),
                     cls="relative"
                 ),
                 cls="space-y-2"
@@ -239,12 +241,12 @@ Div(
         Div(
             Div(
                 UILabel("Disabled Input", for_="disabled", cls="opacity-50"),
-                Input(id="disabled", placeholder="This field is disabled", disabled=True),
+                Input(id="disabled", placeholder="This field is disabled", disabled=True, cls="w-80"),
                 cls="space-y-2"
             ),
             Div(
                 UILabel("Read-only Input", for_="readonly"),
-                Input(id="readonly", value="This value cannot be changed", readonly=True),
+                Input(id="readonly", value="This value cannot be changed", readonly=True, cls="w-80"),
                 cls="space-y-2"
             ),
             Div(
@@ -253,7 +255,7 @@ Div(
                     Span(" *", cls="text-destructive"),
                     for_="required"
                 ),
-                Input(id="required", placeholder="This field is required", required=True),
+                Input(id="required", placeholder="This field is required", required=True, cls="w-80"),
                 P("This field is required", cls="text-xs text-muted-foreground"),
                 cls="space-y-2"
             ),
@@ -271,13 +273,13 @@ Input(placeholder="This field is required", required=True)''',
         Div(
             Div(
                 UILabel("Profile Picture", for_="avatar"),
-                Input(type="file", id="avatar", accept="image/*"),
+                Input(type="file", id="avatar", accept="image/*", cls="w-80"),
                 P("PNG, JPG up to 2MB", cls="text-xs text-muted-foreground"),
                 cls="space-y-2"
             ),
             Div(
                 UILabel("Document Upload", for_="docs"),
-                Input(type="file", id="docs", accept=".pdf,.doc,.docx", multiple=True),
+                Input(type="file", id="docs", accept=".pdf,.doc,.docx", multiple=True, cls="w-80"),
                 P("PDF, DOC, DOCX files", cls="text-xs text-muted-foreground"),
                 cls="space-y-2"
             ),
@@ -294,22 +296,22 @@ Input(type="file", accept=".pdf,.doc,.docx", multiple=True)''',
         Div(
             Div(
                 UILabel("First Name", for_="first"),
-                Input(id="first", placeholder="John"),
+                Input(id="first", placeholder="John", cls="w-80"),
                 cls="space-y-2"
             ),
             Div(
                 UILabel("Last Name", for_="last"),
-                Input(id="last", placeholder="Doe"),
+                Input(id="last", placeholder="Doe", cls="w-80"),
                 cls="space-y-2"
             ),
             Div(
                 UILabel("Email Address", for_="email-form"),
-                Input(type="email", id="email-form", placeholder="john.doe@example.com"),
+                Input(type="email", id="email-form", placeholder="john.doe@example.com", cls="w-80"),
                 cls="space-y-2"
             ),
             Div(
                 UILabel("Message", for_="message"),
-                Input(id="message", placeholder="Tell us about your project..."),
+                Input(id="message", placeholder="Tell us about your project...", cls="w-80"),
                 cls="space-y-2"
             ),
             Div(
@@ -349,9 +351,9 @@ def create_input_docs():
     # Hero example - basic input showcase
     hero_example = ComponentPreview(
         Div(
-            Input(placeholder="Enter text...", cls="mb-3"),
-            Input(type="email", placeholder="you@example.com", cls="mb-3"),
-            Input(type="password", placeholder="Enter your password"),
+            Input(placeholder="Enter text...", cls="mb-3 w-80"),
+            Input(type="email", placeholder="you@example.com", cls="mb-3 w-80"),
+            Input(type="password", placeholder="Enter your password", cls="w-80"),
             cls="grid gap-3 max-w-sm"
         ),
         '''Input(placeholder="Enter text...")

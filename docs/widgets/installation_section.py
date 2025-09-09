@@ -23,7 +23,7 @@ def _manual_installation_section(manual_files: list[dict[str, str]]) -> FT:
         *[
             Div(
                 P(file["path"], cls="text-sm font-mono text-muted-foreground mb-2"),
-                CodeBlock(file["content"], language=file.get("language", "python")),
+                CodeBlock(file["content"], language=file.get("language", "python"), cls="overflow-x-auto", style="scrollbar-width: thin; scrollbar-color: transparent transparent;"),
                 cls="mb-4"
             )
             for file in manual_files
@@ -37,7 +37,7 @@ def _dependencies_section(dependencies: list[str]) -> FT:
     return Div(
         H3("Dependencies", cls="text-lg font-semibold mt-6"),
         P("This component requires the following dependencies:", cls="text-sm text-muted-foreground mb-3"),
-        CodeBlock("\n".join(dependencies), language="bash"),
+        CodeBlock("\n".join(dependencies), language="bash", cls="overflow-x-auto", style="scrollbar-width: thin; scrollbar-color: transparent transparent;"),
         cls="space-y-3"
     )
 

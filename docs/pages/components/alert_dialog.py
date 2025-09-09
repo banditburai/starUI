@@ -118,7 +118,7 @@ def examples():
                                         "Delete Repository",
                                         ref_id="delete_repo",
                                         variant="destructive",
-                                        action="alert('Repository deleted!')"
+                                        action="console.log('Repository deleted')"
                                     )
                                 )
                             ),
@@ -229,13 +229,13 @@ def examples():
                                         "Discard Changes",
                                         ref_id="unsaved_dialog",
                                         variant="destructive",
-                                        action="$doc_title=''; $doc_author=''; alert('Changes discarded')"
+                                        action="$doc_title=''; $doc_author=''; console.log('Changes discarded')"
                                     ),
                                     AlertDialogCancel("Keep Editing", ref_id="unsaved_dialog"),
                                     AlertDialogAction(
                                         "Save & Exit",
                                         ref_id="unsaved_dialog",
-                                        action="alert('Document saved!')"
+                                        action="console.log('Document saved')"
                                     )
                                 )
                             ),
@@ -451,10 +451,22 @@ AlertDialog(
             CardContent(
                 Div(
                     Div(
-                        CheckboxWithLabel(label="file1.txt", signal="file1", checked=True),
-                        CheckboxWithLabel(label="file2.pdf", signal="file2", checked=True),
-                        CheckboxWithLabel(label="file3.jpg", signal="file3"),
-                        CheckboxWithLabel(label="file4.doc", signal="file4", checked=True),
+                        Div(
+                            CheckboxWithLabel(label="file1.txt", signal="file1", checked=True),
+                            ds_show("$file1_exists")
+                        ),
+                        Div(
+                            CheckboxWithLabel(label="file2.pdf", signal="file2", checked=True),
+                            ds_show("$file2_exists")
+                        ),
+                        Div(
+                            CheckboxWithLabel(label="file3.jpg", signal="file3"),
+                            ds_show("$file3_exists")
+                        ),
+                        Div(
+                            CheckboxWithLabel(label="file4.doc", signal="file4", checked=True),
+                            ds_show("$file4_exists")
+                        ),
                         cls="space-y-2"
                     ),
                     Div(
@@ -500,7 +512,7 @@ AlertDialog(
                                         ds_text("'Delete ' + [$file1, $file2, $file3, $file4].filter(Boolean).length + ' Items'"),
                                         ref_id="batch_dialog",
                                         variant="destructive",
-                                        action="alert('Items deleted'); $file1=false; $file2=false; $file3=false; $file4=false"
+                                        action="console.log('Action executing', $batch_dialog); if($file1) $file1_exists=false; if($file2) $file2_exists=false; if($file3) $file3_exists=false; if($file4) $file4_exists=false"
                                     )
                                 )
                             ),
@@ -508,7 +520,7 @@ AlertDialog(
                         ),
                         cls="flex items-center gap-4 mt-4"
                     ),
-                    ds_signals(file1=True, file2=True, file3=False, file4=True, batch_dialog_open=False),
+                    ds_signals(file1=True, file2=True, file3=False, file4=True, file1_exists=True, file2_exists=True, file3_exists=True, file4_exists=True, batch_dialog_open=False),
                     cls="space-y-2"
                 )
             ),
@@ -608,7 +620,7 @@ AlertDialog(
                                 AlertDialogAction(
                                     "Confirm Payment",
                                     ref_id="payment_dialog",
-                                    action="alert('Payment successful! Order #12345')"
+                                    action="console.log('Payment successful! Order #12345')"
                                 )
                             )
                         ),
@@ -761,7 +773,7 @@ def create_alert_dialog_docs():
                         "Delete",
                         ref_id="hero_alert",
                         variant="destructive",
-                        action="alert('Item deleted!')"
+                        action="console.log('Item deleted')"
                     )
                 )
             ),

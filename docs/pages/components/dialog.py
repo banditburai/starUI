@@ -13,7 +13,7 @@ STATUS = "stable"
 from starhtml import Div, P, Input, Label, Icon, Span, H2, H3, Form, Code, Ul, Li, Style
 from starhtml.datastar import (
     ds_on_click, ds_show, ds_text, ds_signals, value,
-    ds_bind, ds_disabled, ds_on_change, ds_effect, ds_class, ds_style, toggle
+    ds_bind, ds_disabled, ds_on_change, ds_effect, ds_class, ds_style
 )
 from starui.registry.components.dialog import (
     Dialog, DialogTrigger, DialogContent, DialogHeader, DialogFooter,
@@ -114,7 +114,7 @@ def examples():
                         ref_id="confirm_dialog",
                         variant="destructive",
                         value="delete",
-                        ds_on_click=ds_on_click("alert('Account deleted!')")
+                        onclick="alert('Account deleted!')"
                     )
                 )
             ),
@@ -277,8 +277,7 @@ def examples():
                             Icon("lucide:send", cls="h-4 w-4 mr-2"),
                             "Send Invitation",
                             ds_disabled("!$member_name || !$member_email"),
-                            type="submit",                            
-                            ds_on_click=ds_on_click("""
+                            ds_on_click("""
                                 event.preventDefault();
                                 if ($member_name && $member_email) {
                                     const roleLabel = $member_role === 'viewer' ? 'Viewer' : 
@@ -293,6 +292,7 @@ def examples():
                                     $send_welcome = true;
                                 }
                             """),
+                            type="submit",
                             cls="bg-primary hover:bg-primary/90"
                         )
                     ),
@@ -379,10 +379,11 @@ def examples():
                 ),
                 DialogFooter(
                     DialogClose("Decline", ref_id="scroll_dialog", variant="outline"),
-                    Button(
+                    DialogClose(
                         "Accept",
                         ds_disabled("!$terms_accepted"),
-                        ds_on_click=ds_on_click("$terms_accepted && ($scroll_dialog.close(), alert('Terms accepted!'))")
+                        ref_id="scroll_dialog",
+                        onclick="alert('Terms accepted!')"
                     )
                 ),
                 ds_signals(terms_accepted=False)
@@ -1251,7 +1252,11 @@ def create_dialog_docs():
                 ),
                 DialogFooter(
                     DialogClose("Cancel", ref_id="hero_dialog", variant="outline"),
-                    DialogClose("Save Changes", ref_id="hero_dialog", ds_on_click=ds_on_click("alert('Profile saved!')"))
+                    DialogClose(
+                        "Save Changes", 
+                        ref_id="hero_dialog",
+                        onclick="alert('Profile saved!')"
+                    )
                 )
             ),
             ref_id="hero_dialog"

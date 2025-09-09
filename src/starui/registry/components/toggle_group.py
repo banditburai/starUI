@@ -22,7 +22,7 @@ def ToggleGroup(
     disabled: bool = False,
     class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     signal = signal or f"toggle_group_{str(uuid4())[:8]}"
     value_signal = f"{signal}_value"
@@ -64,7 +64,7 @@ def ToggleGroup(
             class_name,
             cls,
         ),
-        **attrs,
+        **kwargs,
     )
 
 
@@ -79,11 +79,11 @@ def ToggleGroupItem(
     aria_label: str | None = None,
     class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     value_signal = f"{group_signal}_value"
-    item_id = attrs.pop("id", f"toggle_item_{str(uuid4())[:8]}")
-    aria_label = aria_label or attrs.pop("aria_label", None)
+    item_id = kwargs.pop("id", f"toggle_item_{str(uuid4())[:8]}")
+    aria_label = aria_label or kwargs.pop("aria_label", None)
 
     if type == "single":
         is_selected = f"${value_signal} === '{value}'"
@@ -124,7 +124,7 @@ def ToggleGroupItem(
             class_name,
             cls,
         ),
-        **attrs,
+        **kwargs,
     )
 
 
@@ -136,7 +136,7 @@ def SingleToggleGroup(
     disabled: bool = False,
     class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     return ToggleGroup(
         *children,
@@ -147,7 +147,7 @@ def SingleToggleGroup(
         disabled=disabled,
         class_name=class_name,
         cls=cls,
-        **attrs,
+        **kwargs,
     )
 
 
@@ -159,7 +159,7 @@ def MultipleToggleGroup(
     disabled: bool = False,
     class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     return ToggleGroup(
         *children,
@@ -170,5 +170,5 @@ def MultipleToggleGroup(
         disabled=disabled,
         class_name=class_name,
         cls=cls,
-        **attrs,
+        **kwargs,
     )

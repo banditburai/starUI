@@ -13,7 +13,7 @@ STATUS = "stable"
 from starhtml import Div, P, Input, Label, Icon, Span, H2, H3, Form, Code
 from starhtml.datastar import (
     ds_on_click, ds_show, ds_text, ds_signals, value,
-    ds_bind, ds_disabled, ds_on_change, ds_effect, ds_class, toggle
+    ds_bind, ds_disabled, ds_on_change, ds_effect, ds_class
 )
 from starui.registry.components.select import (
     Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
@@ -36,7 +36,7 @@ def examples():
             SelectTrigger(
                 SelectValue(placeholder="Select a timezone", signal="timezone"),
                 signal="timezone",
-                width="w-[240px]"
+                cls="w-[240px]"
             ),
             SelectContent(
                 SelectGroup(
@@ -451,7 +451,7 @@ Form(
                             SelectTrigger(
                                 SelectValue(placeholder="Select role", signal="user1_role"),
                                 signal="user1_role",
-                                width="w-[160px]"
+                                cls="w-[160px]"
                             ),
                             SelectContent(
                                 SelectItem("viewer", "Viewer", signal="user1_role"),
@@ -461,9 +461,10 @@ Form(
                                 signal="user1_role"
                             ),
                             initial_value="editor",
+                            initial_label="Editor",
                             signal="user1_role"
                         ),
-                        cls="flex items-center justify-between gap-6 p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                        cls="flex items-center justify-between gap-6 px-4 py-3 first:pt-4 last:pb-4"
                     ),
                     Div(
                         Div(
@@ -475,7 +476,7 @@ Form(
                             SelectTrigger(
                                 SelectValue(placeholder="Select role", signal="user2_role"),
                                 signal="user2_role",
-                                width="w-[160px]"
+                                cls="w-[160px]"
                             ),
                             SelectContent(
                                 SelectItem("viewer", "Viewer", signal="user2_role"),
@@ -485,9 +486,10 @@ Form(
                                 signal="user2_role"
                             ),
                             initial_value="viewer",
+                            initial_label="Viewer",
                             signal="user2_role"
                         ),
-                        cls="flex items-center justify-between gap-6 p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                        cls="flex items-center justify-between gap-6 px-4 py-3 first:pt-4 last:pb-4"
                     ),
                     Div(
                         Div(
@@ -499,7 +501,7 @@ Form(
                             SelectTrigger(
                                 SelectValue(placeholder="Select role", signal="user3_role"),
                                 signal="user3_role",
-                                width="w-[160px]"
+                                cls="w-[160px]"
                             ),
                             SelectContent(
                                 SelectItem("viewer", "Viewer", signal="user3_role"),
@@ -509,16 +511,17 @@ Form(
                                 signal="user3_role"
                             ),
                             initial_value="admin",
+                            initial_label="Admin",
                             signal="user3_role"
                         ),
-                        cls="flex items-center justify-between gap-6 p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                        cls="flex items-center justify-between gap-6 px-4 py-3 first:pt-4 last:pb-4"
                     ),
-                    Button(
-                        "Save Changes",
-                        cls="w-full mt-4",
-                        ds_on_click="alert(`Roles updated:\\nJohn: ${$user1_role_label}\\nJane: ${$user2_role_label}\\nBob: ${$user3_role_label}`)"
-                    ),
-                    cls="space-y-2"
+                    cls="divide-y border rounded-lg"
+                ),
+                Button(
+                    "Save Changes",
+                    cls="w-full mt-4",
+                    ds_on_click="alert(`Roles updated:\\nJohn: ${$user1_role_label}\\nJane: ${$user2_role_label}\\nBob: ${$user3_role_label}`)"
                 )
             ),
             cls="max-w-2xl"

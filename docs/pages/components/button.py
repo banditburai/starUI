@@ -13,7 +13,7 @@ STATUS = "stable"
 from starhtml import Div, P, Input, Label, Icon, Span, H2, H3
 from starhtml.datastar import (
     ds_on_click, ds_show, ds_text, ds_signals, value,
-    ds_bind, ds_disabled, ds_on_mouseenter, ds_on_mouseleave, ds_style, toggle
+    ds_bind, ds_disabled, ds_on_mouseenter, ds_on_mouseleave, ds_style, toggle_signal
 )
 from starui.registry.components.button import Button
 from utils import auto_generate_page
@@ -74,7 +74,7 @@ Button(Icon("lucide:loader-2", cls="mr-2 h-4 w-4 animate-spin"), "Please wait", 
         Div(
             Button(
                 ds_text("$expanded ? 'Hide Details' : 'Show Details'"),
-                ds_on_click(toggle("expanded")),
+                ds_on_click(toggle_signal("expanded")),
                 variant="outline"
             ),
             Div(
@@ -92,7 +92,7 @@ Button(Icon("lucide:loader-2", cls="mr-2 h-4 w-4 animate-spin"), "Please wait", 
         '''Div(
     Button(
         ds_text("$expanded ? 'Hide Details' : 'Show Details'"),
-        ds_on_click(toggle("expanded")),
+        ds_on_click(toggle_signal("expanded")),
         variant="outline"
     ),
     Div(

@@ -38,7 +38,8 @@ def examples():
 # Usage example
 numbers = fibonacci(100)
 print(f"Fibonacci numbers up to 100: {numbers}")''', language="python"),
-            cls="max-w-2xl"
+            cls="w-full overflow-x-auto",
+            style="scrollbar-width: thin; scrollbar-color: transparent transparent;"
         ),
         '''from starui.registry.components.code_block import CodeBlock
 
@@ -164,7 +165,8 @@ if __name__ == "__main__":
                 cls="relative rounded-lg overflow-hidden"
             ),
             
-            cls="max-w-3xl"
+            cls="w-full overflow-x-auto",
+            style="scrollbar-width: thin; scrollbar-color: transparent transparent;"
         ),
         '''from starhtml import Div, Span, Icon
 from starhtml.datastar import ds_on_click, ds_show, ds_signals, value
@@ -241,7 +243,8 @@ Div(
                 cls="text-sm leading-7"
             ),
             
-            cls="prose prose-sm max-w-2xl p-6 border rounded-lg"
+            cls="prose prose-sm w-full max-w-none px-3 sm:px-4 py-4 sm:py-6 border rounded-lg overflow-x-auto",
+            style="scrollbar-width: thin; scrollbar-color: transparent transparent;"
         ),
         '''from starui.registry.components.code_block import InlineCode
 from starhtml import P
@@ -381,7 +384,8 @@ def my_app():
                 cls=""
             ),
             
-            cls="max-w-3xl p-6 border rounded-lg"
+            cls="w-full px-3 sm:px-4 py-4 sm:py-6 border rounded-lg overflow-x-auto",
+            style="scrollbar-width: thin; scrollbar-color: transparent transparent;"
         ),
         '''from starui.registry.components.code_block import CodeBlock
 from starui.registry.components.badge import Badge
@@ -465,7 +469,8 @@ Run 'star dev' to see your changes.''',
                 cls="relative rounded-lg overflow-hidden"
             ),
             
-            cls="w-full max-w-4xl"
+            cls="w-full overflow-x-auto",
+            style="scrollbar-width: thin; scrollbar-color: transparent transparent;"
         ),
         '''from starui.registry.components.code_block import CodeBlock
 from starhtml import Div, Span
@@ -532,7 +537,8 @@ def welcome_component():
                 cls="text-sm text-muted-foreground max-w-2xl"
             ),
             
-            cls="max-w-2xl"
+            cls="w-full overflow-x-auto",
+            style="scrollbar-width: thin; scrollbar-color: transparent transparent;"
         ),
         '''from starui.registry.components.code_block import CodeBlock, InlineCode
 

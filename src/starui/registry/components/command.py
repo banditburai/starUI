@@ -17,6 +17,7 @@ from starhtml.datastar import (
     ds_show,
     ds_signals,
     value,
+    t,
 )
 
 from .utils import cn, cva
@@ -71,7 +72,7 @@ def Command(
     size: CommandSize = "md",
     class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     signal = signal or f"command_{uuid4().hex[:8]}"
 
@@ -86,7 +87,7 @@ def Command(
         data_slot="command",
         tabindex="-1",
         cls=cn(command_variants(size=size), class_name, cls),
-        **attrs,
+        **kwargs,
     )
 
 
@@ -97,7 +98,7 @@ def CommandDialog(
     modal: bool = True,
     class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     signal = signal or f"command_{uuid4().hex[:8]}"
     ref_id = f"{signal}_dialog"
@@ -144,7 +145,7 @@ def CommandDialog(
             class_name,
             cls,
         ),
-        **attrs,
+        **kwargs,
     )
 
     method = "showModal" if modal else "show"
@@ -166,7 +167,7 @@ def CommandInput(
     placeholder: str = "Type a command or search...",
     class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ):
     def _(signal):
         return Div(
@@ -182,7 +183,7 @@ def CommandInput(
                 autocorrect="off",
                 spellcheck="false",
                 type="text",
-                **attrs,
+                **kwargs,
             ),
             data_slot="command-input-wrapper",
             cls=cn(
@@ -199,7 +200,7 @@ def CommandList(
     *children,
     class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ):
     def _(signal):
         return Div(
@@ -213,7 +214,7 @@ def CommandList(
                 class_name,
                 cls,
             ),
-            **attrs,
+            **kwargs,
         )
 
     return _
@@ -223,7 +224,7 @@ def CommandEmpty(
     *children,
     class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ):
     def _(signal):
         return Div(
@@ -232,7 +233,7 @@ def CommandEmpty(
             data_slot="command-empty",
             style="display: none;",
             cls=cn("py-6 text-center text-sm", class_name, cls),
-            **attrs,
+            **kwargs,
         )
 
     return _
@@ -243,21 +244,17 @@ def CommandGroup(
     heading: str | None = None,
     class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ):
     def _(signal):
         return Div(
             *(
-                [
-                    Div(
-                        heading,
-                        data_slot="command-group-heading",
-                        cls="text-muted-foreground px-2 py-1.5 text-xs font-medium",
-                        aria_hidden="true",
-                    )
-                ]
-                if heading
-                else []
+                [Div(
+                    heading,
+                    data_slot="command-group-heading",
+                    cls="text-muted-foreground px-2 py-1.5 text-xs font-medium",
+                    aria_hidden="true",
+                )] if heading else []
             ),
             *_process_children(children, signal),
             role="group",
@@ -265,15 +262,11 @@ def CommandGroup(
             data_slot="command-group",
             cls=cn(
                 "overflow-hidden p-1 text-foreground",
-                "[&_[data-slot='command-group-heading']]:text-muted-foreground",
-                "[&_[data-slot='command-group-heading']]:px-2",
-                "[&_[data-slot='command-group-heading']]:py-1.5",
-                "[&_[data-slot='command-group-heading']]:text-xs",
-                "[&_[data-slot='command-group-heading']]:font-medium",
+                "[&_[data-slot='command-group-heading']]:text-muted-foreground [&_[data-slot='command-group-heading']]:px-2 [&_[data-slot='command-group-heading']]:py-1.5 [&_[data-slot='command-group-heading']]:text-xs [&_[data-slot='command-group-heading']]:font-medium",
                 class_name,
                 cls,
             ),
-            **attrs,
+            **kwargs,
         )
 
     return _
@@ -288,10 +281,10 @@ def CommandItem(
     show: str | None = None,
     class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ):
     def _(signal):
-        index = attrs.pop("index", attrs.pop("data_index", None))
+        index = kwargs.pop("index", kwargs.pop("data_index", None))
 
         if index is None:
             global _command_item_counters
@@ -306,10 +299,7 @@ def CommandItem(
                 event_attrs.append(ds_on_click(click_handler))
             event_attrs.append(ds_on_mouseenter(f"${signal}_selected={index}"))
         
-        # Add ds_show if show condition is provided
-        show_attrs = []
-        if show:
-            show_attrs.append(ds_show(show))
+        show_attrs = [ds_show(show)] if show else []
 
         return Div(
             *children,
@@ -317,7 +307,7 @@ def CommandItem(
             *show_attrs,
             ds_attr(data_selected=f"${signal}_selected==={index}?'true':'false'"),
             role="option",
-            aria_selected=f"${{{signal}_selected}} === {index}",
+            aria_selected=t("{signal}_selected === {index}"),
             aria_disabled="true" if disabled else "false",
             data_command_item=signal,
             data_slot="command-item",
@@ -326,44 +316,32 @@ def CommandItem(
             data_disabled="true" if disabled else "false",
             data_index=str(index),
             cls=cn(
-                "relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5",
-                "text-sm outline-none select-none transition-colors",
-                "hover:bg-accent/50 data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground"
-                if not disabled
-                else "",
-                "[&_svg:not([class*='text-'])]:text-muted-foreground",
-                "opacity-50 cursor-not-allowed pointer-events-none" if disabled else "",
-                "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+                "relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none select-none transition-colors",
+                "[&_svg:not([class*='text-'])]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+                "hover:bg-accent/50 data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground" if not disabled else "opacity-50 cursor-not-allowed pointer-events-none",
                 class_name,
                 cls,
             ),
-            **attrs,
+            **kwargs,
         )
 
     return _
 
 
-def CommandSeparator(class_name: str = "", cls: str = "", **attrs: Any):
+def CommandSeparator(class_name: str = "", cls: str = "", **kwargs: Any):
     return lambda signal: Div(
         role="separator",
         data_slot="command-separator",
         cls=cn("-mx-1 h-px bg-border", class_name, cls),
-        **attrs,
+        **kwargs,
     )
-
-
-def CommandDialogWithTrigger(trigger: FT, content: FT | list, **kwargs) -> FT:
-    """Backward compatibility wrapper."""
-    if not isinstance(content, list | tuple):
-        content = [content]
-    return CommandDialog(*content, trigger=trigger, **kwargs)
 
 
 def CommandShortcut(
     *children,
     class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     return Span(
         *children,
@@ -373,5 +351,5 @@ def CommandShortcut(
             class_name,
             cls,
         ),
-        **attrs,
+        **kwargs,
     )

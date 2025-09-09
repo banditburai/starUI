@@ -8,17 +8,17 @@ from starhtml import Span as HTMLSpan
 from .utils import cn
 
 
-def Breadcrumb(*children, class_name: str = "", cls: str = "", **attrs) -> FT:
+def Breadcrumb(*children, class_name: str = "", cls: str = "", **kwargs) -> FT:
     return HTMLNav(
         *children,
         aria_label="breadcrumb",
         data_slot="breadcrumb",
-        cls=cn("", class_name, cls),
-        **attrs,
+        cls=cn(class_name, cls),
+        **kwargs,
     )
 
 
-def BreadcrumbList(*children, class_name: str = "", cls: str = "", **attrs) -> FT:
+def BreadcrumbList(*children, class_name: str = "", cls: str = "", **kwargs) -> FT:
     return HTMLOl(
         *children,
         data_slot="breadcrumb-list",
@@ -27,32 +27,32 @@ def BreadcrumbList(*children, class_name: str = "", cls: str = "", **attrs) -> F
             class_name,
             cls,
         ),
-        **attrs,
+        **kwargs,
     )
 
 
-def BreadcrumbItem(*children, class_name: str = "", cls: str = "", **attrs) -> FT:
+def BreadcrumbItem(*children, class_name: str = "", cls: str = "", **kwargs) -> FT:
     return HTMLLi(
         *children,
         data_slot="breadcrumb-item",
         cls=cn("inline-flex items-center gap-1.5", class_name, cls),
-        **attrs,
+        **kwargs,
     )
 
 
 def BreadcrumbLink(
-    *children, href: str = "#", class_name: str = "", cls: str = "", **attrs
+    *children, href: str = "#", class_name: str = "", cls: str = "", **kwargs
 ) -> FT:
     return HTMLA(
         *children,
         href=href,
         data_slot="breadcrumb-link",
         cls=cn("hover:text-foreground transition-colors", class_name, cls),
-        **attrs,
+        **kwargs,
     )
 
 
-def BreadcrumbPage(*children, class_name: str = "", cls: str = "", **attrs) -> FT:
+def BreadcrumbPage(*children, class_name: str = "", cls: str = "", **kwargs) -> FT:
     return HTMLSpan(
         *children,
         role="link",
@@ -60,24 +60,22 @@ def BreadcrumbPage(*children, class_name: str = "", cls: str = "", **attrs) -> F
         aria_current="page",
         data_slot="breadcrumb-page",
         cls=cn("text-foreground font-normal", class_name, cls),
-        **attrs,
+        **kwargs,
     )
 
 
-def BreadcrumbSeparator(*children, class_name: str = "", cls: str = "", **attrs) -> FT:
-    separator_content = children if children else (Icon("lucide:chevron-right"),)
-
+def BreadcrumbSeparator(*children, class_name: str = "", cls: str = "", **kwargs) -> FT:
     return HTMLLi(
-        *separator_content,
+        *(children or (Icon("lucide:chevron-right"),)),
         role="presentation",
         aria_hidden="true",
         data_slot="breadcrumb-separator",
         cls=cn("[&>svg]:size-3.5", class_name, cls),
-        **attrs,
+        **kwargs,
     )
 
 
-def BreadcrumbEllipsis(class_name: str = "", cls: str = "", **attrs) -> FT:
+def BreadcrumbEllipsis(class_name: str = "", cls: str = "", **kwargs) -> FT:
     return HTMLSpan(
         Icon("lucide:more-horizontal", cls="size-4"),
         HTMLSpan("More", cls="sr-only"),
@@ -85,5 +83,5 @@ def BreadcrumbEllipsis(class_name: str = "", cls: str = "", **attrs) -> FT:
         aria_hidden="true",
         data_slot="breadcrumb-ellipsis",
         cls=cn("flex size-9 items-center justify-center", class_name, cls),
-        **attrs,
+        **kwargs,
     )

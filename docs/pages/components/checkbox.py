@@ -13,12 +13,13 @@ STATUS = "stable"
 from starhtml import Div, P, Input, Label, Icon, Span, H2, H3, Button as HTMLButton, Form
 from starhtml.datastar import (
     ds_on_click, ds_show, ds_text, ds_signals, value,
-    ds_bind, ds_disabled, ds_on_change, ds_effect, ds_class, toggle, ds_style
+    ds_bind, ds_disabled, ds_on_change, ds_effect, ds_class, ds_style, ds_computed, toggle_class
 )
 from starui.registry.components.checkbox import Checkbox, CheckboxWithLabel
 from starui.registry.components.button import Button
 from starui.registry.components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
 from starui.registry.components.badge import Badge
+from starui.registry.components.progress import Progress
 from utils import auto_generate_page
 from widgets.component_preview import ComponentPreview
 
@@ -224,22 +225,22 @@ def examples():
                     CheckboxWithLabel(
                         label="Write documentation",
                         signal="todo1",
-                        label_cls=ds_class(**{"line-through text-muted-foreground": "$todo1"})
+                        label_cls=toggle_class("$todo1", "line-through text-muted-foreground", "")
                     ),
                     CheckboxWithLabel(
                         label="Review pull requests",
                         signal="todo2",
-                        label_cls=ds_class(**{"line-through text-muted-foreground": "$todo2"})
+                        label_cls=toggle_class("$todo2", "line-through text-muted-foreground", "")
                     ),
                     CheckboxWithLabel(
                         label="Update dependencies",
                         signal="todo3",
-                        label_cls=ds_class(**{"line-through text-muted-foreground": "$todo3"})
+                        label_cls=toggle_class("$todo3", "line-through text-muted-foreground", "")
                     ),
                     CheckboxWithLabel(
                         label="Deploy to production",
                         signal="todo4",
-                        label_cls=ds_class(**{"line-through text-muted-foreground": "$todo4"})
+                        label_cls=toggle_class("$todo4", "line-through text-muted-foreground", "")
                     ),
                     cls="space-y-3"
                 ),
@@ -253,18 +254,19 @@ def examples():
                         " of 4",
                         cls="text-sm text-muted-foreground"
                     ),
-                    Div(
-                        cls="w-full bg-secondary rounded-full h-2 mt-2",
-                        children=[
-                            Div(
-                                ds_style(width="`${[$todo1, $todo2, $todo3, $todo4].filter(Boolean).length * 25}%`"),
-                                cls="bg-primary h-2 rounded-full transition-all duration-300"
-                            )
-                        ]
+                    Progress(
+                        signal="todo_progress",
+                        cls="w-full h-2 mt-2"
                     ),
                     cls="mt-4"
                 ),
-                ds_signals(todo1=True, todo2=True, todo3=False, todo4=False)
+                ds_signals(
+                    todo1=True, 
+                    todo2=True, 
+                    todo3=False, 
+                    todo4=False
+                ),
+                ds_computed("todo_progress", "([$todo1, $todo2, $todo3, $todo4].filter(Boolean).length / 4) * 100")
             ),
             cls="max-w-md"
         ),
@@ -285,11 +287,12 @@ def examples():
         ),
         Div(
             P("Completed: ", Span(ds_text("[$todo1, $todo2, $todo3, $todo4].filter(Boolean).length")), " of 4"),
-            Div(  # Progress bar
-                Div(ds_style(width="`${[$todo1, $todo2, $todo3, $todo4].filter(Boolean).length * 25}%`")),
-            )
+            Progress(signal="todo_progress", cls="w-full h-2")
         ),
-        ds_signals(todo1=True, todo2=True, todo3=False, todo4=False)
+        ds_signals(
+            todo1=True, todo2=True, todo3=False, todo4=False
+        ),
+        ds_computed("todo_progress", "([$todo1, $todo2, $todo3, $todo4].filter(Boolean).length / 4) * 100")
     )
 )''',
         title="Interactive Todo List",
@@ -561,12 +564,12 @@ def examples():
                     ),
                     Div(
                         P(
-                            Icon("lucide:alert-circle", cls="h-4 w-4 inline mr-1"),
+                            Icon("lucide:alert-circle", cls="h-4 w-4 mr-1 flex-shrink-0"),
                             "At least one notification method must be enabled",
                             ds_show("!$email_notif && !$push_notif && !$sms_notif"),
-                            cls="text-sm text-destructive"
+                            cls="text-sm text-destructive flex items-start"
                         ),
-                        cls="mt-4"
+                        cls="mt-4 min-h-[1.5rem] w-full max-w-full overflow-hidden"
                     ),
                     Button(
                         "Save Settings",
@@ -597,7 +600,7 @@ def examples():
                     ds_signals(email_notif=True, push_notif=False, sms_notif=False, marketing=False)
                 )
             ),
-            cls="max-w-md"
+            cls="w-80"
         ),
         '''Card(
     CardContent(

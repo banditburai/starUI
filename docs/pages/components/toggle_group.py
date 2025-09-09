@@ -11,7 +11,7 @@ ORDER = 40
 STATUS = "stable"
 
 from starhtml import Div, P, H3, H4, Span, Icon, Label, Input
-from starhtml.datastar import ds_signals, ds_on_click, ds_text, ds_show, value, ds_bind, ds_class
+from starhtml.datastar import ds_signals, ds_on_click, ds_text, ds_show, value, ds_bind, ds_class, toggle_signal
 from starui.registry.components.toggle_group import ToggleGroup, SingleToggleGroup, MultipleToggleGroup
 from starui.registry.components.button import Button
 from starui.registry.components.separator import Separator
@@ -500,7 +500,7 @@ P("Frequency: ", ds_text("$frequency_value"))''',
                         signal="status_partial"
                     ),
                     Button("Disable", 
-                           ds_on_click("$disabled_partial = !$disabled_partial"),
+                           ds_on_click(toggle_signal("disabled_partial")),
                            variant="outline",
                            size="sm",
                            cls="ml-4"),
@@ -537,7 +537,7 @@ Div(
         ("away", "Away"),
         signal="status"
     ),
-    Button("Toggle Disabled", ds_on_click("$disabled = !$disabled")),
+    Button("Toggle Disabled", ds_on_click(toggle_signal("disabled"))),
     ds_signals(disabled=False)
 )
 

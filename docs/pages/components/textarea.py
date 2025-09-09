@@ -13,7 +13,7 @@ STATUS = "stable"
 from starhtml import Div, P, Input, Label, Icon, Span, H2, H3, Form, Code, Button as HTMLButton, Script
 from starhtml.datastar import (
     ds_on_click, ds_show, ds_text, ds_signals, value,
-    ds_bind, ds_disabled, ds_on_input, ds_effect, ds_class, toggle, ds_style,
+    ds_bind, ds_disabled, ds_on_input, ds_effect, ds_class, ds_style,
     ds_on_mouseenter, ds_on_mouseleave
 )
 from starui.registry.components.textarea import Textarea, TextareaWithLabel

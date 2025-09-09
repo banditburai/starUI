@@ -63,3 +63,5 @@ def cva(base: str = "", config: dict[str, Any] | None = None) -> Callable[..., s
         return cn(*classes)
 
     return variant_function
+
+

@@ -6,7 +6,7 @@ from starhtml import Input as HTMLInput
 from starhtml import Label as HTMLLabel
 from starhtml import P as HTMLP
 from starhtml import Span as HTMLSpan
-from starhtml.datastar import ds_bind, ds_class, ds_signals
+from starhtml.datastar import ds_bind, ds_class, ds_signals, toggle_class
 
 from .utils import cn
 
@@ -21,7 +21,7 @@ def Checkbox(
     class_name: str = "",
     cls: str = "",
     indicator_cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     signal = signal or f"checkbox_{str(uuid4())[:8]}"
 
@@ -46,29 +46,24 @@ def Checkbox(
                 class_name,
                 cls,
             ),
-            **attrs,
+            **kwargs,
         ),
         HTMLSpan(
             Icon("lucide:check"),
-            ds_class(
-                **{
-                    "opacity-100": f"${signal}",
-                    "opacity-0": f"!${signal}",
-                }
-            ),
+            toggle_class(f"${signal}", "opacity-100", "opacity-0"),
             data_slot="checkbox-indicator",
             cls=cn(
                 "absolute inset-0 flex items-center justify-center text-background text-sm transition-opacity pointer-events-none",
                 indicator_cls,
             ),
         ),
-        ds_signals(**{signal: checked or False}),
+        ds_signals(**{signal: checked or False}, ifmissing="true"),
         cls="relative inline-block",
     )
 
 
 def CheckboxWithLabel(
-    *,  # Force keyword-only arguments for consistency and flexibility
+    *attrs: Any,
     label: str,
     checked: bool | None = None,
     name: str | None = None,
@@ -83,7 +78,7 @@ def CheckboxWithLabel(
     label_cls: str = "",
     checkbox_cls: str = "",
     indicator_cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     checkbox_id = f"checkbox_{str(uuid4())[:8]}"
 
@@ -104,7 +99,7 @@ def CheckboxWithLabel(
             Div(
                 HTMLLabel(
                     label,
-                    required and HTMLSpan(" *", cls="text-destructive") or None,
+                    HTMLSpan(" *", cls="text-destructive") if required else None,
                     for_=checkbox_id,
                     cls=cn(
                         "flex items-center gap-2 text-sm leading-none font-medium select-none",
@@ -115,20 +110,19 @@ def CheckboxWithLabel(
                     ),
                     data_slot="label",
                 ),
-                helper_text
-                and HTMLP(
+                HTMLP(
                     helper_text,
                     cls=cn(
                         "text-muted-foreground text-sm",
                         "opacity-50" if disabled else "",
                     ),
-                )
-                or None,
+                ) if helper_text else None,
                 cls="grid gap-1.5" if helper_text else None,
             ),
             cls="flex items-start gap-3",
         ),
-        error_text and HTMLP(error_text, cls="text-sm text-destructive mt-1.5") or None,
+        HTMLP(error_text, cls="text-sm text-destructive mt-1.5") if error_text else None,
         cls=cn(class_name, cls),
-        **attrs,
+        *attrs,
+        **kwargs,
     )

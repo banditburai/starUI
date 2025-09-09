@@ -13,7 +13,7 @@ ResizeType = Literal["none", "both", "horizontal", "vertical"]
 
 
 def Textarea(
-    *datastar_attrs,
+    *attrs,
     placeholder: str | None = None,
     value: str | None = None,
     signal: str | None = None,
@@ -30,7 +30,7 @@ def Textarea(
     resize: ResizeType | None = None,
     class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     resize_classes = {
         "none": "resize-none",
@@ -75,23 +75,23 @@ def Textarea(
             }.items()
             if v is not None and v is not False
         },
-        **attrs,
+        **kwargs,
     }
 
     if signal:
         # Add reactive binding (following the input component pattern)
         bind_attrs = ds_bind(signal)
         textarea_attrs.update(bind_attrs.attrs)
-        # NOTE: Don't add bind_attrs to datastar_attrs - it's already in textarea_attrs!
+        # NOTE: Don't add bind_attrs to attrs - it's already in textarea_attrs!
 
     # For HTML textarea, the initial value should be passed as children content
     initial_content = value if value and not signal else None
     
     # Create the base textarea
     if initial_content:
-        base_textarea = HTMLTextarea(initial_content, *datastar_attrs, **textarea_attrs)
+        base_textarea = HTMLTextarea(initial_content, *attrs, **textarea_attrs)
     else:
-        base_textarea = HTMLTextarea(*datastar_attrs, **textarea_attrs)
+        base_textarea = HTMLTextarea(*attrs, **textarea_attrs)
     
     # CRITICAL FIX: Remove auto-generated name attribute for reactive textareas
     # StarHTML automatically sets name=id, which conflicts with ds_bind
@@ -118,7 +118,7 @@ def TextareaWithLabel(
     label_cls: str = "",
     textarea_cls: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     if not id:
         import uuid
@@ -146,7 +146,7 @@ def TextareaWithLabel(
             required=required,
             rows=rows,
             cls=textarea_cls,
-            **attrs,
+            **kwargs,
         ),
         error_text and HTMLP(error_text, cls="text-sm text-destructive mt-1.5"),
         helper_text

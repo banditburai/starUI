@@ -17,7 +17,7 @@ def AlertDialog(
     ref_id: str,
     class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     signal_name = f"{ref_id}_open"
 
@@ -31,13 +31,10 @@ def AlertDialog(
         content,
         ds_ref(ref_id),
         ds_on_close(f"${signal_name} = false"),
-        ds_on_click(f"""
-            evt.target === evt.currentTarget &&
-            (${ref_id}.close(), ${signal_name} = false)
-        """),
+        ds_on_click(f"evt.target === evt.currentTarget && (${ref_id}.close(), ${signal_name} = false)"),
         id=ref_id,
         cls=classes,
-        **attrs,
+        **kwargs,
     )
 
     scroll_lock = Div(
@@ -52,20 +49,20 @@ def AlertDialog(
 def AlertDialogTrigger(
     *children: Any,
     ref_id: str,
-    variant: str = "default",
+    variant: AlertDialogVariant = "default",
     class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     from .button import Button
 
     return Button(
         *children,
-        ds_on_click(f"${ref_id}.showModal(), ${ref_id}_open = true"),
+        ds_on_click(f"${ref_id}.showModal(); ${ref_id}_open = true"),
         aria_haspopup="dialog",
         variant=variant,
         cls=cn(class_name, cls),
-        **attrs,
+        **kwargs,
     )
 
 
@@ -73,12 +70,12 @@ def AlertDialogContent(
     *children: Any,
     class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     return Div(
         *children,
         cls=cn("relative p-6", class_name, cls),
-        **attrs,
+        **kwargs,
     )
 
 
@@ -86,12 +83,12 @@ def AlertDialogHeader(
     *children: Any,
     class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     return Div(
         *children,
         cls=cn("flex flex-col gap-2 text-center sm:text-left", class_name, cls),
-        **attrs,
+        **kwargs,
     )
 
 
@@ -99,7 +96,7 @@ def AlertDialogFooter(
     *children: Any,
     class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     return Div(
         *children,
@@ -108,7 +105,7 @@ def AlertDialogFooter(
             class_name,
             cls,
         ),
-        **attrs,
+        **kwargs,
     )
 
 
@@ -116,12 +113,12 @@ def AlertDialogTitle(
     *children: Any,
     class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     return HTMLH2(
         *children,
         cls=cn("text-lg leading-none font-semibold text-foreground", class_name, cls),
-        **attrs,
+        **kwargs,
     )
 
 
@@ -129,12 +126,12 @@ def AlertDialogDescription(
     *children: Any,
     class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     return HTMLP(
         *children,
         cls=cn("text-muted-foreground text-sm", class_name, cls),
-        **attrs,
+        **kwargs,
     )
 
 
@@ -145,20 +142,20 @@ def AlertDialogAction(
     variant: AlertDialogVariant = "default",
     class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     from .button import Button
 
-    close_expr = f"${ref_id}_open = false, ${ref_id}.close()"
+    close_expr = f"${ref_id}_open = false; ${ref_id}.close()"
     if action:
-        close_expr = f"{action}, {close_expr}"
+        close_expr = f"{action}; {close_expr}"
 
     return Button(
         *children,
         ds_on_click(close_expr),
         variant="destructive" if variant == "destructive" else "default",
         cls=cn(class_name, cls),
-        **attrs,
+        **kwargs,
     )
 
 
@@ -167,14 +164,14 @@ def AlertDialogCancel(
     ref_id: str,
     class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     from .button import Button
 
     return Button(
         *children,
-        ds_on_click(f"${ref_id}_open = false, ${ref_id}.close()"),
+        ds_on_click(f"${ref_id}_open = false; ${ref_id}.close()"),
         variant="outline",
         cls=cn(class_name, cls),
-        **attrs,
+        **kwargs,
     )

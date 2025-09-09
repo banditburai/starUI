@@ -17,9 +17,9 @@ def Tabs(
     default_id: str,
     variant: TabsVariant = "default",
     cls: str = "",
-    **attrs,
+    **kwargs,
 ) -> FT:
-    signal = attrs.pop("signal", None)
+    signal = kwargs.pop("signal", None)
     if not signal:
         signal = f"tabs_{next(_tab_ids)}"
     processed_children = [
@@ -31,11 +31,11 @@ def Tabs(
         ds_signals({signal: value(default_id)}),
         data_slot="tabs",
         cls=cn("w-full", cls),
-        **attrs,
+        **kwargs,
     )
 
 
-def TabsList(*children, class_name: str = "", cls: str = "", **attrs) -> FT:
+def TabsList(*children, class_name: str = "", cls: str = "", **kwargs) -> FT:
     def create_list(signal, default_id=None, variant="default"):
         processed_children = [
             child(signal, default_id, variant) if callable(child) else child
@@ -52,7 +52,7 @@ def TabsList(*children, class_name: str = "", cls: str = "", **attrs) -> FT:
             data_slot="tabs-list",
             cls=cn(base_classes, class_name, cls),
             role="tablist",
-            **attrs,
+            **kwargs,
         )
 
     return create_list
@@ -64,7 +64,7 @@ def TabsTrigger(
     disabled: bool = False,
     class_name: str = "",
     cls: str = "",
-    **attrs,
+    **kwargs,
 ) -> FT:
     def create_trigger(signal, default_id=None, variant="default"):
         is_active = default_id == id
@@ -101,14 +101,14 @@ def TabsTrigger(
             **{
                 "data-attr-data-state": f"${signal} === '{id}' ? 'active' : 'inactive'",
                 "data-attr-aria-selected": f"${signal} === '{id}'",
-                **attrs,
+                **kwargs,
             },
         )
 
     return create_trigger
 
 
-def TabsContent(*children, id: str, class_name: str = "", cls: str = "", **attrs) -> FT:
+def TabsContent(*children, id: str, class_name: str = "", cls: str = "", **kwargs) -> FT:
     def create_content(signal, default_id=None, variant="default"):
         return Div(
             *children,
@@ -120,7 +120,7 @@ def TabsContent(*children, id: str, class_name: str = "", cls: str = "", **attrs
             tabindex="0",
             cls=cn("mt-2 outline-none overflow-x-auto", class_name, cls),
             style=None if default_id == id else "display: none",
-            **attrs,
+            **kwargs,
         )
 
     return create_content

@@ -2,7 +2,7 @@ from typing import Literal
 
 from starhtml import FT, Div, P, Span
 from starhtml import H2 as HTMLH2
-from starhtml.datastar import ds_effect, ds_on_click, ds_on_keydown, ds_show, ds_signals
+from starhtml.datastar import ds_effect, ds_on_click, ds_on_keydown, ds_show, ds_signals, t
 
 from .utils import cn
 
@@ -17,7 +17,7 @@ def Sheet(
     default_open: bool = False,
     class_name: str = "",
     cls: str = "",
-    **attrs,
+    **kwargs,
 ) -> FT:
     signal_open = f"{signal}_open"
 
@@ -35,9 +35,9 @@ def Sheet(
         else None,
         scroll_lock,
         data_sheet_root=signal,
-        data_state=f"${{{signal_open}}} ? 'open' : 'closed'",
+        data_state=t("{signal_open} ? 'open' : 'closed'"),
         cls=cn("relative", class_name, cls),
-        **attrs,
+        **kwargs,
     )
 
 
@@ -47,7 +47,7 @@ def SheetTrigger(
     variant: str = "outline",
     class_name: str = "",
     cls: str = "",
-    **attrs,
+    **kwargs,
 ) -> FT:
     from .button import Button
 
@@ -58,13 +58,13 @@ def SheetTrigger(
         *children,
         ds_on_click(f"${signal_open} = true"),
         id=f"{signal}-trigger",
-        aria_expanded=f"${{{signal_open}}}",
+        aria_expanded=t("{signal_open}"),
         aria_haspopup="dialog",
         aria_controls=content_id,
         data_sheet_role="trigger",
         variant=variant,
         cls=cn(class_name, cls),
-        **attrs,
+        **kwargs,
     )
 
 
@@ -77,7 +77,7 @@ def SheetContent(
     show_close: bool = True,
     class_name: str = "",
     cls: str = "",
-    **attrs,
+    **kwargs,
 ) -> FT:
     signal_open = f"{signal}_open"
     content_id = f"{signal}-content"
@@ -122,8 +122,10 @@ def SheetContent(
         Div(
             ds_show(f"${signal_open}"),
             ds_on_click(f"${signal_open} = false"),
+            data_state=t("{signal_open} ? 'open' : 'closed'"),
             cls="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm animate-in fade-in-0",
             data_sheet_role="overlay",
+            style="display: none;",  # Initial state to prevent flash
         )
         if modal
         else None
@@ -138,7 +140,7 @@ def SheetContent(
         aria_modal="true" if modal else None,
         aria_labelledby=f"{content_id}-title",
         aria_describedby=f"{content_id}-description",
-        data_state=f"${{{signal_open}}} ? 'open' : 'closed'",
+        data_state=t("{signal_open} ? 'open' : 'closed'"),
         data_sheet_role="content",
         cls=cn(
             "fixed z-[110] bg-background shadow-lg border flex flex-col",
@@ -151,7 +153,8 @@ def SheetContent(
             class_name,
             cls,
         ),
-        **attrs,
+        style="display: none;",  # Initial state to prevent flash
+        **kwargs,
     )
 
     return Div(overlay, content_panel, data_sheet_role="content-wrapper")
@@ -164,7 +167,7 @@ def SheetClose(
     size: str = "sm",
     class_name: str = "",
     cls: str = "",
-    **attrs,
+    **kwargs,
 ) -> FT:
     from .button import Button
 
@@ -177,20 +180,20 @@ def SheetClose(
         variant=variant,
         size=size,
         cls=cn(class_name, cls),
-        **attrs,
+        **kwargs,
     )
 
 
-def SheetHeader(*children, class_name: str = "", cls: str = "", **attrs) -> FT:
+def SheetHeader(*children, class_name: str = "", cls: str = "", **kwargs) -> FT:
     return Div(
         *children,
         data_sheet_role="header",
         cls=cn("flex flex-col space-y-1.5 p-6", class_name, cls),
-        **attrs,
+        **kwargs,
     )
 
 
-def SheetFooter(*children, class_name: str = "", cls: str = "", **attrs) -> FT:
+def SheetFooter(*children, class_name: str = "", cls: str = "", **kwargs) -> FT:
     return Div(
         *children,
         data_sheet_role="footer",
@@ -199,12 +202,12 @@ def SheetFooter(*children, class_name: str = "", cls: str = "", **attrs) -> FT:
             class_name,
             cls,
         ),
-        **attrs,
+        **kwargs,
     )
 
 
 def SheetTitle(
-    *children, signal: str, class_name: str = "", cls: str = "", **attrs
+    *children, signal: str, class_name: str = "", cls: str = "", **kwargs
 ) -> FT:
     content_id = f"{signal}-content"
 
@@ -213,12 +216,12 @@ def SheetTitle(
         id=f"{content_id}-title",
         data_sheet_role="title",
         cls=cn("text-lg font-semibold text-foreground", class_name, cls),
-        **attrs,
+        **kwargs,
     )
 
 
 def SheetDescription(
-    *children, signal: str, class_name: str = "", cls: str = "", **attrs
+    *children, signal: str, class_name: str = "", cls: str = "", **kwargs
 ) -> FT:
     content_id = f"{signal}-content"
 
@@ -227,5 +230,5 @@ def SheetDescription(
         id=f"{content_id}-description",
         data_sheet_role="description",
         cls=cn("text-sm text-muted-foreground", class_name, cls),
-        **attrs,
+        **kwargs,
     )

@@ -26,7 +26,7 @@ def Alert(
     variant: AlertVariant = "default",
     class_name: str = "",
     cls: str = "",
-    **attrs,
+    **kwargs,
 ) -> FT:
     return Div(
         *children,
@@ -37,7 +37,7 @@ def Alert(
             class_name,
             cls,
         ),
-        **attrs,
+        **kwargs,
     )
 
 
@@ -45,7 +45,7 @@ def AlertTitle(
     *children,
     class_name: str = "",
     cls: str = "",
-    **attrs,
+    **kwargs,
 ) -> FT:
     return Div(
         *children,
@@ -55,7 +55,7 @@ def AlertTitle(
             class_name,
             cls,
         ),
-        **attrs,
+        **kwargs,
     )
 
 
@@ -63,7 +63,7 @@ def AlertDescription(
     *children,
     class_name: str = "",
     cls: str = "",
-    **attrs,
+    **kwargs,
 ) -> FT:
     return Div(
         *children,
@@ -73,5 +73,5 @@ def AlertDescription(
             class_name,
             cls,
         ),
-        **attrs,
+        **kwargs,
     )

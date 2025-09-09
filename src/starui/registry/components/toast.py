@@ -55,7 +55,7 @@ def Toaster(
     signal: str = "toasts",
     max_visible: int = 3,
     class_name: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     return Div(
         ds_signals(
@@ -71,7 +71,7 @@ def Toaster(
                 position_map.get(position, "bottom-right"),
                 class_name,
             ),
-            **attrs,
+            **kwargs,
         ),
     )
 
@@ -133,6 +133,7 @@ def _toast_element(signal: str, index: int, variant: str) -> FT:
         ),
         ds_show(show_condition),
         cls=toast_variants(variant=variant),
+        style="display: none;",  # Initial state to prevent flash
         role="status",
         aria_live="polite",
         aria_atomic="true",

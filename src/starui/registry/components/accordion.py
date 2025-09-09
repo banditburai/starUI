@@ -17,7 +17,7 @@ def Accordion(
     signal: str = "",
     class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     signal = signal or f"accordion_{uuid4().hex[:8]}"
 
@@ -36,7 +36,7 @@ def Accordion(
           for child in children],
         ds_signals(**{signal: initial_value}),
         cls=cn("w-full min-w-0", class_name, cls),
-        **attrs,
+        **kwargs,
     )
 
 
@@ -45,7 +45,7 @@ def AccordionItem(
     value: str,
     class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     def _(signal, type="single", collapsible=False):
         return Div(
@@ -53,7 +53,7 @@ def AccordionItem(
               for child in children],
             data_value=value,
             cls=cn("border-b", class_name, cls),
-            **attrs,
+            **kwargs,
         )
 
     return _
@@ -63,7 +63,7 @@ def AccordionTrigger(
     *children: Any,
     class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     def _(signal, type="single", collapsible=False, item_value=None):
         if not item_value:
@@ -99,7 +99,7 @@ def AccordionTrigger(
                     class_name,
                     cls,
                 ),
-                **attrs,
+                **kwargs,
             ),
             cls="flex w-full",
         )
@@ -111,7 +111,7 @@ def AccordionContent(
     *children: Any,
     class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
     def _(signal, type="single", collapsible=False, item_value=None):
         if not item_value:
@@ -137,7 +137,7 @@ def AccordionContent(
             ),
             data_attr_style=f"({show_expr}) ? 'grid-template-rows: 1fr' : 'grid-template-rows: 0fr'",
             data_state=f"({show_expr}) ? 'open' : 'closed'",
-            **attrs,
+            **kwargs,
         )
 
     return _

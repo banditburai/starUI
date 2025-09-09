@@ -11,20 +11,20 @@ STATUS = "stable"
 
 from starhtml import Div, H3, Icon, P, Span, FT
 from starhtml import Span as HTMLSpan
-from starhtml.datastar import ds_show, ds_on_click, ds_on_load, ds_signals, ds_effect, toggle
+from starhtml.datastar import ds_show, ds_on_click, ds_on_load, ds_signals, ds_effect, toggle_signal
 from starui.registry.components.theme_toggle import ThemeToggle
 from starui.registry.components.button import Button
 from widgets.component_preview import ComponentPreview
 
 
-def IsolatedThemeToggle(alt_theme="dark", default_theme="light", **attrs) -> FT:
+def IsolatedThemeToggle(alt_theme="dark", default_theme="light", **kwargs) -> FT:
     """Theme toggle that only affects its iframe container, not the parent document."""
 
     return Div(
         Button(
             HTMLSpan(Icon("ph:moon-bold", width="20", height="20"), ds_show("!$isAlt")),
             HTMLSpan(Icon("ph:sun-bold", width="20", height="20"), ds_show("$isAlt")),
-            ds_on_click("$isAlt = !$isAlt"),
+            ds_on_click(toggle_signal("isAlt")),
             variant="ghost",
             aria_label="Toggle theme",
             cls="h-9 px-4 py-2 flex-shrink-0",
@@ -53,7 +53,7 @@ def IsolatedThemeToggle(alt_theme="dark", default_theme="light", **attrs) -> FT:
             const iframeKey = 'iframe-theme-' + window.location.pathname.split('/').pop();
             localStorage.setItem(iframeKey, theme);
         """),
-        **attrs,
+        **kwargs,
     )
 
 
@@ -115,7 +115,7 @@ ThemeToggle(cls="scale-125")   # Large''',
                         Button(
                             Span(Icon("lucide:sun-medium", width="20", height="20"), ds_show("!$isDark1")),
                             Span(Icon("lucide:moon-star", width="20", height="20"), ds_show("$isDark1")),
-                            ds_on_click("$isDark1 = !$isDark1"),
+                            ds_on_click(toggle_signal("isDark1")),
                             variant="ghost",
                             aria_label="Toggle theme",
                             cls="h-9 px-4 py-2"
@@ -135,7 +135,7 @@ ThemeToggle(cls="scale-125")   # Large''',
                         Button(
                             Span("Light", ds_show("!$isDark2")),
                             Span("Dark", ds_show("$isDark2")),
-                            ds_on_click("$isDark2 = !$isDark2"),
+                            ds_on_click(toggle_signal("isDark2")),
                             variant="outline",
                             size="sm",
                             aria_label="Toggle theme",
@@ -162,7 +162,7 @@ ThemeToggle()
 Button(
     Span(Icon("lucide:sun-medium"), ds_show("!$isDark")),
     Span(Icon("lucide:moon-star"), ds_show("$isDark")),
-    ds_on_click("$isDark = !$isDark"),
+    ds_on_click(toggle_signal("isDark")),
     variant="ghost"
 )
 
@@ -170,7 +170,7 @@ Button(
 Button(
     Span("Light", ds_show("!$isDark")),
     Span("Dark", ds_show("$isDark")),
-    ds_on_click("$isDark = !$isDark"),
+    ds_on_click(toggle_signal("isDark")),
     variant="outline",
     size="sm"
 )''',
