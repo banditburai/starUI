@@ -1,6 +1,6 @@
 from collections.abc import Callable
 from typing import Any
-
+from starhtml import Div
 
 def cn(*classes: Any) -> str:
     result_classes: list[str] = []
@@ -70,9 +70,7 @@ def inject_signal_recursively(element, signal, *args):
     match element:
         case _ if callable(element) and not hasattr(element, 'children'):
             return element(signal, *args)
-        case _ if hasattr(element, 'children') and element.children:
-            from starhtml import Div
-            
+        case _ if hasattr(element, 'children') and element.children:                        
             children = [
                 child(signal, *args) if callable(child) else child 
                 for child in element.children

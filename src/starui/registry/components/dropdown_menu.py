@@ -37,27 +37,24 @@ def DropdownMenuTrigger(
 ):
     def _trigger(signal):
         trigger_id = f"{signal}-trigger"
+        popover_attrs = {
+            "popovertarget": f"{signal}-content",
+            "popoveraction": "toggle",
+            "id": trigger_id,
+        }
         
-        if as_child and children:
-            child = children[0]
-            if hasattr(child, "attrs"):
-                child.attrs.update({                 
-                    "popovertarget": f"{signal}-content",
-                    "popoveraction": "toggle",
-                    "id": trigger_id,
-                })
-            return child
+        if as_child and children and hasattr(children[0], "attrs"):
+            children[0].attrs.update(popover_attrs)
+            return children[0]
         
         return Button(
             *children,
             ds_ref(f"{signal}_trigger"),
             variant=variant,
             size=size,
-            popovertarget=f"{signal}-content",
-            popoveraction="toggle",
-            id=trigger_id,
             type="button",
             cls=cn(class_name, cls),
+            **popover_attrs,
             **kwargs,
         )
     
@@ -74,15 +71,13 @@ def DropdownMenuContent(
     **kwargs: Any,
 ):
     def _content(signal):
-        placement = f"{side}-{align}" if align != "center" else side
-        
         return Div(
             *[child(signal) if callable(child) else child for child in children],
             ds_ref(f"{signal}_content"),                        
             ds_style(min_width=f"${signal}_trigger ? ${signal}_trigger.offsetWidth + 'px' : '8rem'"),
             ds_position(
                 anchor=f"{signal}-trigger",
-                placement=placement,
+                placement=f"{side}-{align}" if align != "center" else side,
                 offset=side_offset,
                 flip=True,
                 shift=True,
@@ -120,8 +115,8 @@ def DropdownMenuItem(
             "default": "hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
             "destructive": "text-destructive hover:bg-destructive/10 hover:text-destructive focus:bg-destructive/10 focus:text-destructive",
         }
-        close_popover = f"${signal}_content.hidePopover()"
-        click_handler = f"{onclick}; {close_popover}" if onclick else close_popover
+        
+        click_handler = f"{onclick}; ${signal}_content.hidePopover()" if onclick else f"${signal}_content.hidePopover()"
         
         return HTMLButton(
             *children,
@@ -129,7 +124,7 @@ def DropdownMenuItem(
             cls=cn(
                 "relative flex w-full cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5",
                 "text-sm outline-none transition-colors",
-                variant_classes.get(variant, variant_classes["default"]),
+                variant_classes[variant],
                 "pl-8" if inset else "",
                 "pointer-events-none opacity-50" if disabled else "",
                 "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg]:size-4",
@@ -156,11 +151,6 @@ def DropdownMenuCheckboxItem(
     **kwargs: Any,
 ):
     def _checkbox_item(dropdown_signal):
-        toggle_handler = (
-            f"{toggle_signal(signal)}; "
-            f"${dropdown_signal}_content.hidePopover()"
-        ) if not disabled else None
-        
         return HTMLButton(
             Span(
                 Icon("lucide:check"),
@@ -168,7 +158,7 @@ def DropdownMenuCheckboxItem(
                 cls="absolute left-2 flex size-3.5 items-center justify-center",
             ),
             *children,
-            ds_on_click(toggle_handler) if toggle_handler else None,
+            ds_on_click(f"{toggle_signal(signal)}; ${dropdown_signal}_content.hidePopover()") if not disabled else None,
             cls=cn(
                 "relative flex w-full cursor-default select-none items-center gap-2 rounded-sm",
                 "py-1.5 pr-2 pl-8 text-sm outline-none transition-colors",
@@ -215,11 +205,6 @@ def DropdownMenuRadioItem(
     **kwargs: Any,
 ):
     def _radio_item(dropdown_signal):
-        select_handler = (
-            f"${signal} = '{value}'; "
-            f"${dropdown_signal}_content.hidePopover()"
-        ) if not disabled else None
-        
         return HTMLButton(
             Span(
                 Icon("lucide:circle", cls="size-2 fill-current"),
@@ -227,7 +212,7 @@ def DropdownMenuRadioItem(
                 cls="absolute left-2 flex size-3.5 items-center justify-center",
             ),
             *children,
-            ds_on_click(select_handler) if select_handler else None,
+            ds_on_click(f"${signal} = '{value}'; ${dropdown_signal}_content.hidePopover()") if not disabled else None,
             cls=cn(
                 "relative flex w-full cursor-default select-none items-center gap-2 rounded-sm",
                 "py-1.5 pr-2 pl-8 text-sm outline-none transition-colors",
