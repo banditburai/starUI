@@ -23,7 +23,7 @@ from starui.registry.components.badge import Badge
 from starui.registry.components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
 from starui.registry.components.input import InputWithLabel
 from starui.registry.components.checkbox import CheckboxWithLabel
-from utils import auto_generate_page
+from utils import auto_generate_page, with_code
 from widgets.component_preview import ComponentPreview
 
 
@@ -31,8 +31,9 @@ def examples():
     """Generate accordion examples using ComponentPreview with tabs."""
     
     # Basic accordion
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def basic_accordion_example():
+        return Div(
             Accordion(
                 AccordionItem(
                     AccordionTrigger("Is it accessible?"),
@@ -61,33 +62,19 @@ def examples():
                 signal="basic_accordion"
             ),
             cls="w-full max-w-2xl"
-        ),
-        '''Accordion(
-    AccordionItem(
-        AccordionTrigger("Is it accessible?"),
-        AccordionContent(
-            P("Yes. It adheres to the WAI-ARIA design pattern...")
-        ),
-        value="item-1"
-    ),
-    AccordionItem(
-        AccordionTrigger("Is it styled?"),
-        AccordionContent(
-            P("Yes. It comes with default styles...")
-        ),
-        value="item-2"
-    ),
-    type="single",
-    collapsible=True,
-    default_value="item-1"
-)''',
+        )
+    
+    yield ComponentPreview(
+        basic_accordion_example(),
+        basic_accordion_example.code,
         title="Basic Accordion",
         description="Single selection accordion with collapsible behavior"
     )
     
     # FAQ section
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def faq_accordion_example():
+        return Card(
             CardHeader(
                 CardTitle("Frequently Asked Questions"),
                 CardDescription("Find answers to common questions about our service")
@@ -177,37 +164,19 @@ def examples():
                 )
             ),
             cls="max-w-2xl"
-        ),
-        '''Card(
-    CardHeader(
-        CardTitle("Frequently Asked Questions"),
-        CardDescription("Find answers to common questions")
-    ),
-    CardContent(
-        Accordion(
-            AccordionItem(
-                AccordionTrigger(
-                    Div(Icon("lucide:credit-card"), "What payment methods?")
-                ),
-                AccordionContent(
-                    P("We accept all major credit cards..."),
-                    Ul(Li("Visa, Mastercard"), Li("PayPal"))
-                ),
-                value="payment"
-            ),
-            // More FAQ items...
-            type="single",
-            collapsible=True
         )
-    )
-)''',
+    
+    yield ComponentPreview(
+        faq_accordion_example(),
+        faq_accordion_example.code,
         title="FAQ Section",
         description="Frequently asked questions with icons and rich content"
     )
     
     # Multiple selection accordion
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def multiple_selection_accordion_example():
+        return Card(
             CardHeader(
                 CardTitle("API Documentation"),
                 CardDescription("Explore available endpoints and methods")
@@ -258,32 +227,19 @@ def examples():
                 )
             ),
             cls="max-w-2xl"
-        ),
-        '''Accordion(
-    AccordionItem(
-        AccordionTrigger("Authentication"),
-        AccordionContent(
-            Code("POST /api/auth/login"),
-            P("Authenticate and receive JWT token"),
-            Ul(/* parameters */)
-        ),
-        value="auth"
-    ),
-    AccordionItem(
-        AccordionTrigger("Users"),
-        AccordionContent(/* endpoints */),
-        value="users"
-    ),
-    type="multiple",  // Allow multiple sections open
-    default_value=["auth", "users"]  // Start with these open
-)''',
+        )
+    
+    yield ComponentPreview(
+        multiple_selection_accordion_example(),
+        multiple_selection_accordion_example.code,
         title="Multiple Selection",
         description="API documentation with multiple sections open simultaneously"
     )
     
     # Settings accordion with forms
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def settings_accordion_example():
+        return Card(
             CardHeader(
                 CardTitle("Account Settings"),
                 CardDescription("Manage your account preferences")
@@ -413,39 +369,19 @@ def examples():
                 )
             ),
             cls="max-w-2xl"
-        ),
-        '''Accordion(
-    AccordionItem(
-        AccordionTrigger(
-            Div(Badge("3 fields"), "Personal Information")
-        ),
-        AccordionContent(
-            InputWithLabel(label="Full Name", signal="user_name"),
-            InputWithLabel(label="Email", signal="user_email"),
-            Button("Save Changes")
-        ),
-        value="personal"
-    ),
-    AccordionItem(
-        AccordionTrigger("Password & Security"),
-        AccordionContent(/* security form */),
-        value="security"
-    ),
-    AccordionItem(
-        AccordionTrigger("Notifications"),
-        AccordionContent(/* notification settings */),
-        value="notifications"
-    ),
-    type="single",
-    collapsible=True
-)''',
+        )
+    
+    yield ComponentPreview(
+        settings_accordion_example(),
+        settings_accordion_example.code,
         title="Settings Panel",
         description="Account settings organized in collapsible sections with forms"
     )
     
     # File explorer accordion
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def file_explorer_accordion_example():
+        return Card(
             CardHeader(
                 CardTitle("Project Structure"),
                 CardDescription("Browse project files and folders")
@@ -555,34 +491,19 @@ def examples():
                 )
             ),
             cls="max-w-xl"
-        ),
-        '''// Nested accordions for file explorer
-Accordion(
-    AccordionItem(
-        AccordionTrigger(
-            Div(Icon("lucide:folder"), "src/", Badge("12 files"))
-        ),
-        AccordionContent(
-            Accordion(  // Nested accordion
-                AccordionItem(
-                    AccordionTrigger("components/"),
-                    AccordionContent(/* file list */),
-                    value="components"
-                ),
-                type="multiple"
-            )
-        ),
-        value="src"
-    ),
-    type="multiple"
-)''',
+        )
+    
+    yield ComponentPreview(
+        file_explorer_accordion_example(),
+        file_explorer_accordion_example.code,
         title="File Explorer",
         description="Nested accordions for file tree navigation"
     )
     
     # Course curriculum accordion
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def course_curriculum_accordion_example():
+        return Card(
             CardHeader(
                 CardTitle("Course Curriculum"),
                 CardDescription("Web Development Bootcamp")
@@ -698,29 +619,11 @@ Accordion(
                 )
             ),
             cls="max-w-3xl"
-        ),
-        '''Accordion(
-    AccordionItem(
-        AccordionTrigger(
-            Div(
-                Badge("5 lessons"),
-                Strong("Module 1: HTML & CSS"),
-                Badge("2.5 hours")
-            )
-        ),
-        AccordionContent(
-            Ul(
-                Li(Icon("lucide:play-circle"), "Introduction", "15:30"),
-                Li(Icon("lucide:file-text"), "Exercise", Badge("Exercise")),
-                Li(Icon("lucide:check-circle"), "Quiz", Badge("Completed"))
-            )
-        ),
-        value="module1"
-    ),
-    // More modules...
-    type="single",
-    default_value="module1"
-)''',
+        )
+    
+    yield ComponentPreview(
+        course_curriculum_accordion_example(),
+        course_curriculum_accordion_example.code,
         title="Course Curriculum",
         description="Educational content with progress tracking and lesson details"
     )
@@ -788,8 +691,9 @@ def create_accordion_docs():
     }
     
     # Hero example
-    hero_example = ComponentPreview(
-        Div(
+    @with_code
+    def hero_accordion_example():
+        return Div(
             Accordion(
                 AccordionItem(
                     AccordionTrigger("What is StarUI?"),
@@ -820,26 +724,11 @@ def create_accordion_docs():
                 default_value="item-1"
             ),
             cls="w-full max-w-2xl"
-        ),
-        '''Accordion(
-    AccordionItem(
-        AccordionTrigger("What is StarUI?"),
-        AccordionContent(
-            P("StarUI is a modern component library...")
-        ),
-        value="item-1"
-    ),
-    AccordionItem(
-        AccordionTrigger("How do I get started?"),
-        AccordionContent(
-            P("Install StarUI using the CLI...")
-        ),
-        value="item-2"
-    ),
-    type="single",
-    collapsible=True,
-    default_value="item-1"
-)''',
+        )
+    
+    hero_example = ComponentPreview(
+        hero_accordion_example(),
+        hero_accordion_example.code,
         copy_button=True
     )
     
