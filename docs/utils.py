@@ -1,8 +1,19 @@
-from typing import Any
+"""Documentation utilities for StarUI components."""
+
+import inspect
+import re
+from functools import wraps
+from textwrap import dedent
+from typing import Any, Callable
+
 from starhtml import *
 from widgets.installation_section import InstallationSection
 from widgets.code_block import CodeBlock
 
+
+# ============================================================================
+# MAIN API
+# ============================================================================
 
 def auto_generate_page(
     component_name: str,
@@ -21,24 +32,19 @@ def auto_generate_page(
     **layout_attrs
 ) -> FT:
     """Auto-generate a component documentation page."""
-    
     from layouts.base import DocsLayout, LayoutConfig, SidebarConfig
     from app import DOCS_SIDEBAR_SECTIONS
     
+    sections = [
+        hero_example,
+        _installation(cli_command, manual_files, dependencies),
+        _examples(examples),
+        _usage(usage_code, usage_description),
+        _api_reference(api_reference)
+    ]
+    
     return DocsLayout(
-        Div(
-            hero_example if hero_example else "",
-            InstallationSection(
-                cli_command=cli_command,
-                manual_files=manual_files,
-                dependencies=dependencies,
-                cls="my-8"
-            ) if (cli_command or manual_files or dependencies) else "",
-            _examples_section(examples) if examples else "",
-            _usage_section(usage_code, usage_description) if usage_code else "",
-            _api_section(api_reference) if api_reference else "",
-            # Removed space-y-12 to allow custom spacing
-        ),
+        Div(*filter(None, sections)),
         layout=LayoutConfig(
             title=component_name,
             description=description,
@@ -49,8 +55,36 @@ def auto_generate_page(
     )
 
 
-def _usage_section(code: str, description: str | None = None) -> FT:
-    """Create usage section."""
+# ============================================================================
+# SECTIONS
+# ============================================================================
+
+def _installation(cli_command, manual_files, dependencies):
+    """Installation section."""
+    if not any([cli_command, manual_files, dependencies]):
+        return None
+    return InstallationSection(
+        cli_command=cli_command,
+        manual_files=manual_files,
+        dependencies=dependencies,
+        cls="my-8"
+    )
+
+
+def _examples(examples: list[Any]) -> FT | None:
+    """Examples section."""
+    if not examples:
+        return None
+    return Div(
+        H2("Examples", cls="text-2xl font-bold tracking-tight mb-6 mt-12"),
+        Div(*examples)
+    )
+
+
+def _usage(code: str | None, description: str | None = None) -> FT | None:
+    """Usage section."""
+    if not code:
+        return None
     return Div(
         H2("Usage", cls="text-2xl font-bold tracking-tight mb-4 mt-12"),
         P(description, cls="text-muted-foreground mb-4") if description else "",
@@ -59,142 +93,100 @@ def _usage_section(code: str, description: str | None = None) -> FT:
     )
 
 
-def _examples_section(examples: list[Any]) -> FT:
-    """Create examples section."""
-    return Div(
-        H2("Examples", cls="text-2xl font-bold tracking-tight mb-6 mt-12"),
-        Div(
-            *examples,
-            # Removed space-y-2 to allow custom spacing on examples
-        )
-    )
-
-
-def _api_section(api_reference: dict[str, Any]) -> FT:
-    """Create API reference section."""
-    props = api_reference.get("props", [])
-    # Support both "api" and "components" for backwards compatibility
-    api_items = api_reference.get("api", api_reference.get("components", []))
+def _api_reference(api_ref: dict[str, Any] | None) -> FT | None:
+    """API reference section with tables."""
+    if not api_ref:
+        return None
     
-    # Only show API Reference section if there's actual content
-    if not props and not api_items:
-        return ""
+    props = api_ref.get("props", [])
+    items = api_ref.get("api", api_ref.get("components", []))
     
-    content_sections = []
+    if not (props or items):
+        return None
     
-    # Props table if props exist
-    if props:
-        content_sections.append(
-            Div(
-                H3("Props", cls="text-lg font-semibold mb-4"),
-                Div(
-                    Table(
-                        Thead(
-                            Tr(
-                                Th("Prop", cls="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"),
-                                Th("Type", cls="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"),
-                                Th("Default", cls="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"),
-                                Th("Description", cls="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"),
-                                cls="bg-muted/50"
-                            )
-                        ),
-                        Tbody(
-                            *[
-                                Tr(
-                                    Td(Code(prop["name"], cls="text-sm font-mono font-medium"), cls="px-6 py-4 whitespace-nowrap"),
-                                    Td(Code(prop["type"], cls="text-xs font-mono text-muted-foreground"), cls="px-6 py-4 text-sm"),
-                                    Td(Code(prop.get("default", "-"), cls="text-xs font-mono text-muted-foreground"), cls="px-6 py-4 whitespace-nowrap"),
-                                    Td(prop.get("description", ""), cls="px-6 py-4 text-sm text-muted-foreground"),
-                                    cls="border-t border-border"
-                                )
-                                for prop in props
-                            ],
-                            cls="divide-y divide-border"
-                        ),
-                        cls="w-full"
-                    ),
-                    cls="overflow-hidden rounded-lg border border-border"
-                ),
-                cls="overflow-x-auto"
-            )
-        )
-    
-    # API items table if they exist (for composite components)
-    if api_items:
-        # Determine if these items have a "type" field (like props) or just name/description
-        has_type = any("type" in item for item in api_items)
-        
-        if has_type:
-            # Display like props table but without "Default" column
-            content_sections.append(
-                Div(
-                    Div(
-                        Table(
-                            Thead(
-                                Tr(
-                                    Th("Name", cls="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"),
-                                    Th("Type", cls="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"),
-                                    Th("Description", cls="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"),
-                                    cls="bg-muted/50"
-                                )
-                            ),
-                            Tbody(
-                                *[
-                                    Tr(
-                                        Td(Code(item["name"], cls="text-sm font-mono font-medium"), cls="px-6 py-4 whitespace-nowrap"),
-                                        Td(Code(item.get("type", ""), cls="text-xs font-mono text-muted-foreground"), cls="px-6 py-4 text-sm"),
-                                        Td(item.get("description", ""), cls="px-6 py-4 text-sm text-muted-foreground"),
-                                        cls="border-t border-border"
-                                    )
-                                    for item in api_items
-                                ],
-                                cls="divide-y divide-border"
-                            ),
-                            cls="w-full"
-                        ),
-                        cls="overflow-hidden rounded-lg border border-border"
-                    ),
-                    cls="overflow-x-auto"
-                )
-            )
-        else:
-            # Simple name/description table for sub-components
-            content_sections.append(
-                Div(
-                    Div(
-                        Table(
-                            Thead(
-                                Tr(
-                                    Th("Component", cls="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"),
-                                    Th("Description", cls="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"),
-                                    cls="bg-muted/50"
-                                )
-                            ),
-                            Tbody(
-                                *[
-                                    Tr(
-                                        Td(Code(item["name"], cls="text-sm font-mono font-medium"), cls="px-6 py-4 whitespace-nowrap"),
-                                        Td(item.get("description", ""), cls="px-6 py-4 text-sm text-muted-foreground"),
-                                        cls="border-t border-border"
-                                    )
-                                    for item in api_items
-                                ],
-                                cls="divide-y divide-border"
-                            ),
-                            cls="w-full"
-                        ),
-                        cls="overflow-hidden rounded-lg border border-border"
-                    ),
-                    cls="overflow-x-auto"
-                )
-            )
+    tables = filter(None, [
+        _props_table(props),
+        _api_items_table(items)
+    ])
     
     return Div(
         H2("API Reference", cls="text-2xl font-bold tracking-tight mb-6 mt-12"),
-        *content_sections,
+        *tables,
         cls="space-y-6"
     )
 
+
+# ============================================================================
+# TABLES
+# ============================================================================
+
+def _props_table(props: list[dict]) -> FT | None:
+    """Props table."""
+    if not props:
+        return None
+    
+    return Div(
+        H3("Props", cls="text-lg font-semibold mb-4"),
+        _table(
+            ["Prop", "Type", "Default", "Description"],
+            [[
+                Code(p["name"], cls="text-sm font-mono font-medium"),
+                Code(p["type"], cls="text-xs font-mono text-muted-foreground"),
+                Code(p.get("default", "-"), cls="text-xs font-mono text-muted-foreground"),
+                p.get("description", "")
+            ] for p in props]
+        ),
+        cls="overflow-x-auto"
+    )
+
+
+def _api_items_table(items: list[dict]) -> FT | None:
+    """API items/components table."""
+    if not items:
+        return None
+    
+    has_type = any("type" in item for item in items)
+    headers = ["Name", "Type", "Description"] if has_type else ["Component", "Description"]
+    
+    rows = [[
+        Code(item["name"], cls="text-sm font-mono font-medium"),
+        Code(item.get("type", ""), cls="text-xs font-mono text-muted-foreground") if has_type else None,
+        item.get("description", "")
+    ] for item in items]
+    
+    # Filter out None values for tables without type column
+    rows = [[cell for cell in row if cell is not None] for row in rows]
+    
+    return _table(headers, rows)
+
+
+def _table(headers: list[str], rows: list[list]) -> FT:
+    """Create a styled table."""
+    header_cls = "px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"
+    cell_cls = "px-6 py-4"
+    
+    return Div(
+        Table(
+            Thead(
+                Tr(*[Th(h, cls=header_cls) for h in headers], cls="bg-muted/50")
+            ),
+            Tbody(
+                *[Tr(
+                    *[Td(cell, cls=f"{cell_cls} {getattr(cell, 'attrs', {}).get('cls', '')}") 
+                      for cell in row],
+                    cls="border-t border-border"
+                ) for row in rows],
+                cls="divide-y divide-border"
+            ),
+            cls="w-full"
+        ),
+        cls="overflow-hidden rounded-lg border border-border"
+    )
+
+
+# ============================================================================
+# MARKDOWN
+# ============================================================================
 
 def generate_component_markdown(
     component_name: str,
@@ -205,88 +197,107 @@ def generate_component_markdown(
     api_reference: dict[str, Any] | None = None,
     hero_example_code: str | None = None,
 ) -> str:
-    """Generate markdown content for a component documentation page."""
+    """Generate markdown documentation."""
+    sections = filter(None, [
+        f"# {component_name}\n\n{description}",
+        f"## Preview\n\n```python\n{hero_example_code}\n```" if hero_example_code else None,
+        f"## Installation\n\n```bash\n{cli_command}\n```" if cli_command else None,
+        _markdown_examples(examples_data),
+        f"## Usage\n\n```python\n{usage_code}\n```" if usage_code else None,
+        _markdown_props(api_reference)
+    ])
     
-    lines = []
+    return "\n\n".join(sections)
+
+
+def _markdown_examples(examples: list[dict[str, str]] | None) -> str | None:
+    """Format examples for markdown."""
+    if not examples:
+        return None
     
-    # Header
-    lines.append(f"# {component_name}")
-    lines.append("")
-    lines.append(description)
-    lines.append("")
+    parts = ["## Examples"]
+    for ex in examples:
+        if title := ex.get("title"):
+            parts.append(f"### {title}")
+        if desc := ex.get("description"):
+            parts.append(desc)
+        if code := ex.get("code"):
+            parts.append(f"```python\n{code}\n```")
     
-    # Hero Example
-    if hero_example_code:
-        lines.append("## Preview")
-        lines.append("")
-        lines.append("```python")
-        lines.append(hero_example_code)
-        lines.append("```")
-        lines.append("")
+    return "\n\n".join(parts)
+
+
+def _markdown_props(api_ref: dict[str, Any] | None) -> str | None:
+    """Format props table for markdown."""
+    if not api_ref or "props" not in api_ref:
+        return None
     
-    # Installation
-    if cli_command:
-        lines.append("## Installation")
-        lines.append("")
-        lines.append("### CLI")
-        lines.append("")
-        lines.append("Install the component using the StarUI CLI:")
-        lines.append("")
-        lines.append(f"```bash")
-        lines.append(cli_command)
-        lines.append("```")
-        lines.append("")
+    lines = [
+        "## API Reference",
+        "",
+        "| Prop | Type | Default | Description |",
+        "|------|------|---------|-------------|"
+    ]
     
-    # Examples
-    if examples_data:
-        lines.append("## Examples")
-        lines.append("")
-        
-        for example in examples_data:
-            title = example.get("title")
-            description = example.get("description")
-            code = example.get("code", "")
-            
-            if title:
-                lines.append(f"### {title}")
-                lines.append("")
-            
-            if description:
-                lines.append(description)
-                lines.append("")
-            
-            lines.append("```python")
-            lines.append(code)
-            lines.append("```")
-            lines.append("")
-    
-    # Usage
-    if usage_code:
-        lines.append("## Usage")
-        lines.append("")
-        lines.append("```python")
-        lines.append(usage_code)
-        lines.append("```")
-        lines.append("")
-    
-    # API Reference
-    if api_reference and "props" in api_reference:
-        lines.append("## API Reference")
-        lines.append("")
-        lines.append("### Props")
-        lines.append("")
-        
-        # Create markdown table
-        lines.append("| Prop | Type | Default | Description |")
-        lines.append("|------|------|---------|-------------|")
-        
-        for prop in api_reference["props"]:
-            name = prop.get("name", "")
-            type_str = prop.get("type", "")
-            default = prop.get("default", "")
-            desc = prop.get("description", "")
-            lines.append(f"| `{name}` | `{type_str}` | `{default}` | {desc} |")
-        
-        lines.append("")
+    for p in api_ref["props"]:
+        lines.append(
+            f"| `{p.get('name', '')}` | "
+            f"`{p.get('type', '')}` | "
+            f"`{p.get('default', '')}` | "
+            f"{p.get('description', '')} |"
+        )
     
     return "\n".join(lines)
+
+
+# ============================================================================
+# CODE EXTRACTION
+# ============================================================================
+
+def extract_code(func: Callable) -> str:
+    """Extract and normalize code from function's return statement."""
+    try:
+        source = dedent(inspect.getsource(func))
+        match = re.search(r'return\s+(.*?)(?=\n(?:def |class |@|$))', source, re.DOTALL)
+        
+        if not match:
+            return "# Could not extract return statement"
+        
+        code = match.group(1).strip()
+        lines = code.split('\n')
+        
+        if not lines:
+            return code
+        
+        # Keep first line as-is, normalize indentation for rest
+        result = [lines[0]]
+        
+        if len(lines) > 1:
+            # Calculate indent adjustment needed
+            actual_indent = len(lines[1]) - len(lines[1].lstrip())
+            expected_indent = 4  # Standard Python indent
+            adjustment = actual_indent - expected_indent
+            
+            # Apply adjustment to remaining lines
+            for line in lines[1:]:
+                if line.strip():
+                    current_indent = len(line) - len(line.lstrip())
+                    new_indent = max(0, current_indent - adjustment)
+                    result.append(' ' * new_indent + line.lstrip())
+                else:
+                    result.append('')
+        
+        return '\n'.join(line.rstrip() for line in result)
+        
+    except Exception as e:
+        return f"# Error: {e}"
+
+
+def with_code(func: Callable) -> Callable:
+    """Add .code attribute with extracted source to a function."""
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+    
+    wrapper.code = extract_code(func)
+    return wrapper

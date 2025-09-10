@@ -6,7 +6,7 @@ from starhtml import Button as HTMLButton
 from starhtml import Label as HTMLLabel
 from starhtml import P as HTMLP
 from starhtml import Span as HTMLSpan
-from starhtml.datastar import ds_class, ds_on_click, ds_signals, t, toggle_signal, toggle_class
+from starhtml.datastar import ds_on_click, ds_signals, toggle_signal, toggle_class, t
 
 from .utils import cn
 
@@ -21,6 +21,7 @@ def Switch(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
+    
     signal = signal or f"switch_{str(uuid4())[:8]}"
     switch_id = kwargs.pop("id", f"switch_{str(uuid4())[:8]}")
 
@@ -29,34 +30,34 @@ def Switch(
             *children,
             HTMLSpan(
                 toggle_class(
-                    f"${signal}",
+                    signal,
                     "translate-x-3.5 dark:bg-primary-foreground",
-                    "translate-x-0 dark:bg-white"
+                    "translate-x-0 dark:bg-white",
+                    base="pointer-events-none block size-4 rounded-full bg-white ring-0 transition-transform"
                 ),
-                cls="pointer-events-none block size-4 rounded-full bg-white ring-0 transition-transform",
                 data_slot="switch-thumb",
             ),
             ds_on_click(toggle_signal(signal)),
             toggle_class(
-                f"${signal}",
+                signal,
                 "bg-primary",
-                "bg-input"
+                "bg-input",
+                base=cn(
+                    "peer inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-full",
+                    "border border-transparent shadow-xs transition-all outline-none",
+                    "focus-visible:ring-[3px] focus-visible:border-ring focus-visible:ring-ring/50",
+                    "disabled:cursor-not-allowed disabled:opacity-50",
+                    class_name,
+                    cls,
+                )
             ),
             type="button",
             role="switch",
             id=switch_id,
             disabled=disabled,
-            aria_checked=t("{signal}"),
+            aria_checked=t(signal),
             aria_required="true" if required else None,
             data_slot="switch",
-            cls=cn(
-                "peer inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-full",
-                "border border-transparent shadow-xs transition-all outline-none",
-                "focus-visible:ring-[3px] focus-visible:border-ring focus-visible:ring-ring/50",
-                "disabled:cursor-not-allowed disabled:opacity-50",
-                class_name,
-                cls,
-            ),
             **kwargs,
         ),
         ds_signals(**{signal: checked or False}),
@@ -85,11 +86,13 @@ def SwitchWithLabel(
         Div(
             HTMLLabel(
                 label,
-                HTMLSpan(" *", cls="text-destructive") if required else None,
+                required and HTMLSpan(" *", cls="text-destructive") or None,
                 for_=switch_id,
                 cls=cn(
                     "text-sm font-medium",
-                    "cursor-pointer" if not disabled else "cursor-not-allowed opacity-50",
+                    "cursor-pointer"
+                    if not disabled
+                    else "cursor-not-allowed opacity-50",
                     label_cls,
                 ),
             ),
@@ -104,8 +107,11 @@ def SwitchWithLabel(
             ),
             cls="flex items-center gap-3",
         ),
-        HTMLP(error_text, cls="text-sm text-destructive mt-1.5") if error_text else None,
-        HTMLP(helper_text, cls="text-sm text-muted-foreground mt-1.5") if helper_text and not error_text else None,
+        error_text and HTMLP(error_text, cls="text-sm text-destructive mt-1.5") or None,
+        helper_text
+        and not error_text
+        and HTMLP(helper_text, cls="text-sm text-muted-foreground mt-1.5")
+        or None,
         cls=cn("space-y-1.5", class_name, cls),
         *attrs,
         **kwargs,

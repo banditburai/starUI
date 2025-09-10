@@ -1,7 +1,7 @@
 from typing import Any
 from dataclasses import dataclass, field
 from starhtml import *
-from starhtml.datastar import ds_on_click, ds_signals, ds_text, ds_show
+from starhtml.datastar import ds_on_click, ds_signals, ds_text, ds_show, ds_effect, value
 from layouts.footer import DocsFooter
 from layouts.header import DocsHeader
 from layouts.sidebar import DocsSidebar, MobileSidebar
@@ -135,6 +135,9 @@ def _layout_with_sidebar(
     **attrs
 ) -> FT:
     return Div(
+        # Initialize sidebar_active signal once at the root level
+        ds_signals(sidebar_active=value("")),
+        ds_effect("$sidebar_active = location.pathname;"),
         main_content,
         _mobile_sheet_section(sidebar),
         cls=f"flex min-h-screen flex-col {layout.class_name}",

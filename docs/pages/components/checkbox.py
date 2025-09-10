@@ -225,22 +225,30 @@ def examples():
                     CheckboxWithLabel(
                         label="Write documentation",
                         signal="todo1",
-                        label_cls=toggle_class("$todo1", "line-through text-muted-foreground", "")
+                        slot_attrs={
+                            "label": toggle_class("todo1", "line-through text-muted-foreground", "")
+                        }
                     ),
                     CheckboxWithLabel(
                         label="Review pull requests",
                         signal="todo2",
-                        label_cls=toggle_class("$todo2", "line-through text-muted-foreground", "")
+                        slot_attrs={
+                            "label": toggle_class("todo2", "line-through text-muted-foreground", "")
+                        }
                     ),
                     CheckboxWithLabel(
                         label="Update dependencies",
                         signal="todo3",
-                        label_cls=toggle_class("$todo3", "line-through text-muted-foreground", "")
+                        slot_attrs={
+                            "label": toggle_class("todo3", "line-through text-muted-foreground", "")
+                        }
                     ),
                     CheckboxWithLabel(
                         label="Deploy to production",
                         signal="todo4",
-                        label_cls=toggle_class("$todo4", "line-through text-muted-foreground", "")
+                        slot_attrs={
+                            "label": toggle_class("todo4", "line-through text-muted-foreground", "")
+                        }
                     ),
                     cls="space-y-3"
                 ),

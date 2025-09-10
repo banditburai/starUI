@@ -17,10 +17,10 @@ def DropdownMenu(
 ) -> FT:
     signal = signal or f"dropdown_{uuid4().hex[:8]}"
     return Div(
-        *[child(signal) if callable(child) else child for child in children],
         ds_signals({
             f"{signal}_open": False,
         }),
+        *[child(signal) if callable(child) else child for child in children],
         cls=cn("relative inline-block", cls),
         **kwargs,
     )
@@ -30,7 +30,7 @@ def DropdownMenuTrigger(
     *children,
     variant: Literal["default", "destructive", "outline", "secondary", "ghost", "link"] = "outline",
     size: Literal["default", "sm", "lg", "icon"] = "default",
-    as_child: bool = False,
+    as_child: bool = False,    
     cls: str = "",
     class_name: str = "",
     **kwargs: Any,
@@ -41,7 +41,7 @@ def DropdownMenuTrigger(
         if as_child and children:
             child = children[0]
             if hasattr(child, "attrs"):
-                child.attrs.update({
+                child.attrs.update({                 
                     "popovertarget": f"{signal}-content",
                     "popoveraction": "toggle",
                     "id": trigger_id,
@@ -68,7 +68,7 @@ def DropdownMenuContent(
     *children,
     side: Literal["top", "right", "bottom", "left"] = "bottom",
     align: Literal["start", "center", "end"] = "start",
-    side_offset: int = 4,
+    side_offset: int = 4,    
     cls: str = "",
     class_name: str = "",
     **kwargs: Any,
@@ -78,9 +78,8 @@ def DropdownMenuContent(
         
         return Div(
             *[child(signal) if callable(child) else child for child in children],
-            ds_ref(f"{signal}_content"),            
-            ds_computed(f"{signal}_content_min_width", f"${signal}_trigger ? ${signal}_trigger.offsetWidth + 'px' : 'auto'"),
-            ds_style(min_width=f"${signal}_content_min_width"),
+            ds_ref(f"{signal}_content"),                        
+            ds_style(min_width=f"${signal}_trigger ? ${signal}_trigger.offsetWidth + 'px' : '8rem'"),
             ds_position(
                 anchor=f"{signal}-trigger",
                 placement=placement,
@@ -111,7 +110,7 @@ def DropdownMenuItem(
     onclick: str | None = None,
     variant: Literal["default", "destructive"] = "default",
     inset: bool = False,
-    disabled: bool = False,
+    disabled: bool = False,    
     cls: str = "",
     class_name: str = "",
     **kwargs: Any,
@@ -316,7 +315,8 @@ def DropdownMenuSub(
 ):
     signal = signal or f"dropdown_sub_{uuid4().hex[:8]}"
     return Div(
-        *children,
+        ds_signals({f"{signal}_open": False }),
+        *[child(signal) if callable(child) else child for child in children],
         cls=cn("relative", class_name, cls),
         **kwargs,
     )
@@ -324,53 +324,57 @@ def DropdownMenuSub(
 
 def DropdownMenuSubTrigger(
     *children,
-    signal: str,
     inset: bool = False,
     cls: str = "",
     class_name: str = "",
     **kwargs: Any,
 ):
-    return HTMLButton(
-        *children,
-        Icon("lucide:chevron-right", cls="ml-auto size-4"),
-        ds_on_click(toggle_signal(f"{signal}_open")),
-        cls=cn(
-            "flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5",
-            "text-sm outline-none transition-colors",
-            "hover:bg-accent hover:text-accent-foreground",
-            "focus:bg-accent focus:text-accent-foreground",
-            "data-[state=open]:bg-accent data-[state=open]:text-accent-foreground",
-            "pl-8" if inset else "",
-            class_name,
-            cls,
-        ),
-        data_state=t("{signal}_open ? 'open' : 'closed'"),
-        type="button",
-        role="menuitem",
-        aria_haspopup="menu",
-        aria_expanded=t("{signal}_open ? 'true' : 'false'"),
-        **kwargs,
-    )
+    def _sub_trigger(signal):
+        return HTMLButton(
+            *children,
+            Icon("lucide:chevron-right", cls="ml-auto size-4"),
+            ds_on_click(toggle_signal(f"{signal}_open")),
+            cls=cn(
+                "flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5",
+                "text-sm outline-none transition-colors",
+                "hover:bg-accent hover:text-accent-foreground",
+                "focus:bg-accent focus:text-accent-foreground",
+                "data-[state=open]:bg-accent data-[state=open]:text-accent-foreground",
+                "pl-8" if inset else "",
+                class_name,
+                cls,
+            ),
+            data_state=t("{signal}_open ? 'open' : 'closed'"),
+            type="button",
+            role="menuitem",
+            aria_haspopup="menu",
+            aria_expanded=t("{signal}_open ? 'true' : 'false'"),
+            **kwargs,
+        )
+    
+    return _sub_trigger
 
 
 def DropdownMenuSubContent(
     *children,
-    signal: str,
     cls: str = "",
     class_name: str = "",
     **kwargs: Any,
 ):
-    return Div(
-        *children,
-        ds_show(f"${signal}_open"),
-        cls=cn(
-            "absolute left-full top-0 ml-1 z-50",
-            "min-w-[8rem] overflow-hidden rounded-md border border-input",
-            "bg-popover text-popover-foreground shadow-lg",
-            "p-1",
-            class_name,
-            cls,
-        ),
-        role="menu",
-        **kwargs,
-    )
+    def _sub_content(signal):
+        return Div(
+            *[child(signal) if callable(child) else child for child in children],
+            ds_show(f"${signal}_open"),
+            cls=cn(
+                "absolute left-full top-0 ml-1 z-50",
+                "min-w-[8rem] overflow-hidden rounded-md border border-input",
+                "bg-popover text-popover-foreground shadow-lg",
+                "p-1",
+                class_name,
+                cls,
+            ),
+            role="menu",
+            **kwargs,
+        )
+    
+    return _sub_content

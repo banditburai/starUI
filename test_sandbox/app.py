@@ -15,6 +15,11 @@ from src.starui.registry.components.date_picker import (
     DateTimePicker, DatePickerWithInput
 )
 
+# Import our CSS debugging tools
+from css_debug_agent import CSSDebugAgent
+from css_cascade_analyzer import CSSCascadeAnalyzer
+from width_conflict_detector import WidthConflictDetector
+
 styles = Link(rel="stylesheet", href="/static/css/starui.css", type="text/css")
 
 app, rt = star_app(
@@ -2353,6 +2358,230 @@ def index():
             cls="container mx-auto p-8",
         ),
         cls="min-h-screen relative",
+    )
+
+
+@rt("/dropdown-width-debug")
+def dropdown_width_debug():
+    """Debug dropdown width matching issues."""
+    return Div(
+        # Theme toggle in top-right corner
+        Div(ThemeToggle(), cls="absolute top-4 right-4"),
+        # Main content
+        Div(
+            H1("Dropdown Width Matching Debug", cls="text-3xl font-bold mb-8"),
+            
+            Div(
+                H2("WORKING: Select Component", cls="text-xl font-semibold mb-4 text-green-600"),
+                Select(
+                    SelectTrigger(
+                        SelectValue(placeholder="Choose option")
+                    ),
+                    SelectContent(
+                        SelectItem("Option 1", "opt1"),
+                        SelectItem("Option 2", "opt2"),
+                        SelectItem("Option 3", "opt3")
+                    )
+                ),
+                cls="mb-8"
+            ),
+            
+            Div(
+                H2("FAILING: Hero Dropdown (Open Menu)", cls="text-xl font-semibold mb-4 text-red-600"),
+                DropdownMenu(
+                    DropdownMenuTrigger(
+                        "Open Menu",
+                        Icon("lucide:chevron-down", cls="ml-2 h-4 w-4")
+                    ),
+                    DropdownMenuContent(
+                        DropdownMenuItem(
+                            Icon("lucide:plus", cls="mr-2 h-4 w-4"),
+                            "New File"
+                        ),
+                        DropdownMenuItem(
+                            Icon("lucide:download", cls="mr-2 h-4 w-4"),
+                            "Download"
+                        ),
+                        DropdownMenuSeparator(),
+                        DropdownMenuItem(
+                            Icon("lucide:trash", cls="mr-2 h-4 w-4"),
+                            "Delete",
+                            variant="destructive"
+                        )
+                    )
+                ),
+                cls="mb-8"
+            ),
+            
+            Div(
+                H2("FAILING: Checkbox Dropdown (View Options)", cls="text-xl font-semibold mb-4 text-red-600"),
+                DropdownMenu(
+                    DropdownMenuTrigger(
+                        Icon("lucide:eye", cls="mr-2 h-4 w-4"),
+                        "View Options"
+                    ),
+                    DropdownMenuContent(
+                        DropdownMenuLabel("Display Settings"),
+                        DropdownMenuSeparator(),
+                        DropdownMenuCheckboxItem(
+                            "Show Grid",
+                            signal="show_grid"
+                        ),
+                        DropdownMenuCheckboxItem(
+                            "Show Rulers", 
+                            signal="show_rulers"
+                        ),
+                        DropdownMenuCheckboxItem(
+                            "Show Guides",
+                            signal="show_guides"
+                        )
+                    )
+                ),
+                cls="mb-8"
+            ),
+            
+            Div(
+                H2("WORKING: Simple Dropdown (Settings)", cls="text-xl font-semibold mb-4 text-green-600"),
+                DropdownMenu(
+                    DropdownMenuTrigger("Settings"),
+                    DropdownMenuContent(
+                        DropdownMenuItem("Profile"),
+                        DropdownMenuItem("Billing"),
+                        DropdownMenuItem("Settings"),
+                        DropdownMenuItem("Log out")
+                    )
+                ),
+                cls="mb-8"
+            ),
+            
+            # CSS Debug Tools Section
+            Div(
+                H1("🔧 CSS Debug Tools", cls="text-3xl font-bold mb-6 text-blue-600"),
+                P(
+                    "Advanced CSS debugging tools for analyzing dropdown width conflicts. "
+                    "These tools help identify why some dropdowns are narrower than their triggers "
+                    "despite having reactive min-width properties.",
+                    cls="text-gray-600 mb-8 text-lg"
+                ),
+                
+                # CSS Debug Agent
+                Div(
+                    CSSDebugAgent(),
+                    cls="mb-8"
+                ),
+                
+                # CSS Cascade Analyzer
+                Div(
+                    CSSCascadeAnalyzer(),
+                    cls="mb-8"
+                ),
+                
+                # Width Conflict Detector
+                Div(
+                    WidthConflictDetector(),
+                    cls="mb-8"
+                ),
+                
+                cls="container mx-auto p-8 max-w-7xl"
+            ),
+            
+            cls="container mx-auto p-8 max-w-2xl"
+        ),
+        ds_signals(show_grid=True, show_rulers=False, show_guides=True),
+        Script("""
+            // Debug dropdown width calculations
+            setTimeout(() => {
+                console.log('=== DROPDOWN WIDTH DEBUG V2 ===');
+                
+                // Find all triggers and their associated dropdowns
+                document.querySelectorAll('button[id*="-trigger"]').forEach((trigger, i) => {
+                    const triggerWidth = trigger.offsetWidth;
+                    const triggerId = trigger.id;
+                    const signal = triggerId.replace('-trigger', '');
+                    const isSelect = trigger.getAttribute('role') === 'combobox';
+                    const contentId = signal + '-content';
+                    const content = document.getElementById(contentId);
+                    
+                    console.log(`\\n--- ${isSelect ? 'SELECT' : 'DROPDOWN'} ${i}: ${trigger.textContent.trim()} ---`);
+                    console.log('Trigger ID:', triggerId);
+                    console.log('Signal:', signal);
+                    console.log('Trigger width:', triggerWidth + 'px');
+                    console.log('Trigger data-ref:', trigger.getAttribute('data-ref'));
+                    
+                    // Check for signal references
+                    const triggerRef = window[signal + '_trigger'];
+                    console.log('Window trigger ref exists:', !!triggerRef);
+                    if (triggerRef) {
+                        console.log('Trigger ref offsetWidth:', triggerRef.offsetWidth);
+                    }
+                    
+                    if (content) {
+                        const contentWidth = content.offsetWidth;
+                        const computedStyles = getComputedStyle(content);
+                        const cssMinWidth = computedStyles.minWidth;
+                        const inlineMinWidth = content.style.minWidth;
+                        
+                        console.log('Content width:', contentWidth + 'px');
+                        console.log('CSS min-width:', cssMinWidth);
+                        console.log('Inline min-width:', inlineMinWidth);
+                        
+                        // Check the computed signal attributes
+                        const computedAttr = content.getAttribute('data-computed-' + signal + '_content_min_width');
+                        const styleAttr = content.getAttribute('data-style-min-width');
+                        
+                        console.log('data-computed attr:', computedAttr);
+                        console.log('data-style attr:', styleAttr);
+                        
+                        // Check parent for signals
+                        const parent = content.closest('[data-signals]');
+                        if (parent) {
+                            const signals = parent.getAttribute('data-signals');
+                            console.log('Parent signals:', signals);
+                            
+                            // Check if our computed signal is there
+                            if (signals && signals.includes(signal + '_content_min_width')) {
+                                console.log('✓ Found content_min_width in parent signals');
+                            } else {
+                                console.log('✗ content_min_width NOT in parent signals');
+                            }
+                        }
+                        
+                        // Check for the computed value
+                        const computedValue = window[signal + '_content_min_width'];
+                        console.log('Window computed value exists:', !!computedValue);
+                        console.log('Window computed value:', computedValue);
+                        
+                        // Calculate what the width SHOULD be
+                        const shouldBeWidth = Math.max(triggerWidth, 128); // 8rem = 128px
+                        console.log('Expected width (max of trigger/8rem):', shouldBeWidth + 'px');
+                        
+                        // Check if the width mismatch is happening
+                        const widthMismatch = Math.abs(contentWidth - shouldBeWidth) > 5; // Allow 5px tolerance
+                        if (widthMismatch) {
+                            console.log('⚠️  WIDTH MISMATCH DETECTED!');
+                            console.log('Content is:', contentWidth + 'px');
+                            console.log('Should be:', shouldBeWidth + 'px');
+                            console.log('Difference:', (contentWidth - shouldBeWidth) + 'px');
+                        } else {
+                            console.log('✅ Width correct (within tolerance)');
+                        }
+                    } else {
+                        console.log('❌ Content element not found!');
+                    }
+                });
+                
+                console.log('\\n=== CHECKING DATASTAR STATE ===');
+                // Check if DataStar is initialized and what signals exist
+                if (window.ds && window.ds.store) {
+                    console.log('DataStar store signals:', Object.keys(window.ds.store).filter(k => k.includes('_')));
+                } else {
+                    console.log('DataStar store not accessible');
+                }
+                
+                console.log('\\n=== END DEBUG ===');
+            }, 1500); // Wait longer for datastar to fully initialize
+        """),
+        cls="min-h-screen relative"
     )
 
 

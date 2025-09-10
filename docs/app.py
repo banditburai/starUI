@@ -3,6 +3,7 @@
 
 import sys
 from pathlib import Path
+from contextlib import asynccontextmanager
 
 # Add docs directory to path so component modules can import utils
 sys.path.insert(0, str(Path(__file__).parent))
@@ -15,6 +16,90 @@ from component_registry import get_registry
 from layouts.base import DocsLayout, LayoutConfig, FooterConfig, SidebarConfig
 from pages.components_index import create_components_index
 
+# Global sidebar sections - initialized once at startup
+DOCS_SIDEBAR_SECTIONS = []
+
+
+@asynccontextmanager
+async def lifespan(app):
+    """Lifespan context manager for proper startup/shutdown."""
+    print("[STARTUP] Initializing StarUI Documentation Server...")
+    
+    # Initialize components and sidebar on startup
+    await initialize_docs_sidebar()
+    print(f"[STARTUP] Sidebar initialized with {len(DOCS_SIDEBAR_SECTIONS)} sections")
+    
+    # Pre-build and cache the sidebar navigation
+    from layouts.sidebar import build_sidebar_nav
+    nav = build_sidebar_nav(DOCS_SIDEBAR_SECTIONS)
+    print("[STARTUP] Sidebar navigation pre-built and cached")
+    
+    yield
+    
+    print("[SHUTDOWN] StarUI Documentation Server shutting down...")
+
+
+async def initialize_docs_sidebar():
+    """Initialize sidebar sections once at startup."""
+    global DOCS_SIDEBAR_SECTIONS
+    
+    print("[STARTUP] Discovering components...")
+    components_dir = Path(__file__).parent / "pages" / "components"
+    if not components_dir.exists():
+        print("[STARTUP] No components directory found")
+        return
+    
+    registry = get_registry()
+    component_count = 0
+    
+    for component_file in sorted(components_dir.glob("*.py")):
+        if component_file.stem in ["__init__", "__pycache__"]:
+            continue
+        
+        try:
+            module_name = f"pages.components.{component_file.stem}"
+            module = __import__(module_name, fromlist=["*"])
+            
+            if hasattr(module, "TITLE"):
+                registry.register(
+                    name=component_file.stem,
+                    title=getattr(module, "TITLE", component_file.stem.title()),
+                    description=getattr(module, "DESCRIPTION", ""),
+                    category=getattr(module, "CATEGORY", "ui"),
+                    order=getattr(module, "ORDER", 100),
+                    status=getattr(module, "STATUS", "stable"),
+                    examples=getattr(module, "examples", lambda: [])(),
+                    create_docs=getattr(module, f"create_{component_file.stem}_docs", lambda: None),
+                )
+                component_count += 1
+        except Exception as e:
+            print(f"[STARTUP] Failed to load component {component_file.stem}: {e}")
+    
+    print(f"[STARTUP] Loaded {component_count} components")
+    
+    # Build sidebar sections
+    all_components = []
+    for name, component in registry.components.items():
+        all_components.append({
+            "href": f"/components/{name}",
+            "label": component["title"],
+        })
+    
+    all_components.sort(key=lambda x: x["label"])
+    
+    DOCS_SIDEBAR_SECTIONS = [
+        {
+            "title": "Getting Started",
+            "items": [
+                {"href": "/docs", "label": "Introduction"},
+                {"href": "/installation", "label": "Installation"},
+            ]
+        },
+        {
+            "title": "Components",
+            "items": all_components
+        }
+    ]
 
 
 app, rt = star_app(
@@ -28,6 +113,7 @@ app, rt = star_app(
     htmlkw=dict(lang="en", dir="ltr"),
     bodykw=dict(cls="min-h-screen bg-background text-foreground"),
     plugins=get_starhtml_action_plugins(),
+    lifespan=lifespan,
 )
 
 DOCS_NAV_ITEMS = [
@@ -35,8 +121,6 @@ DOCS_NAV_ITEMS = [
     {"href": "/blocks", "label": "Blocks"},
     {"href": "/themes", "label": "Themes"},
 ]
-
-DOCS_SIDEBAR_SECTIONS = []
 
 
 @rt("/")
@@ -224,7 +308,6 @@ def _performance_metric(value: str, label: str, description: str) -> FT:
         ),
         cls="bg-gradient-to-br from-muted/30 to-muted/10 rounded-lg p-4 border hover:shadow-sm transition-shadow duration-200"
     )
-
 
 @rt("/docs")
 def docs_index():
@@ -766,65 +849,7 @@ def _next_step_card(icon: str, title: str, description: str, href: str, button_t
     )
 
 
-def discover_components():
-    """Auto-discover and register components."""
-    global DOCS_SIDEBAR_SECTIONS
-
-    components_dir = Path(__file__).parent / "pages" / "components"
-    if not components_dir.exists():
-        return
-
-    registry = get_registry()
-
-    for component_file in sorted(components_dir.glob("*.py")):
-        if component_file.stem in ["__init__", "__pycache__"]:
-            continue
-
-        try:
-            module_name = f"pages.components.{component_file.stem}"
-            module = __import__(module_name, fromlist=["*"])
-
-            if hasattr(module, "TITLE"):
-                registry.register(
-                    name=component_file.stem,
-                    title=getattr(module, "TITLE", component_file.stem.title()),
-                    description=getattr(module, "DESCRIPTION", ""),
-                    category=getattr(module, "CATEGORY", "ui"),
-                    order=getattr(module, "ORDER", 100),
-                    status=getattr(module, "STATUS", "stable"),
-                    examples=getattr(module, "examples", lambda: [])(),
-                    create_docs=getattr(module, f"create_{component_file.stem}_docs", lambda: None),
-                )
-        except Exception as e:
-            print(f"Failed to load component {component_file.stem}: {e}")
-
-    # Create single alphabetical components list for sidebar (like ShadCN)
-    all_components = []
-    for name, component in registry.components.items():
-        all_components.append({
-            "href": f"/components/{name}",
-            "label": component["title"],
-        })
-    
-    # Sort all components alphabetically by title
-    all_components.sort(key=lambda x: x["label"])
-
-    DOCS_SIDEBAR_SECTIONS = [
-        {
-            "title": "Getting Started",
-            "items": [
-                {"href": "/docs", "label": "Introduction"},
-                {"href": "/installation", "label": "Installation"},
-            ]
-        },
-        {
-            "title": "Components",
-            "items": all_components
-        }
-    ]
-
-
-discover_components()
+# Component discovery moved to lifespan startup for proper initialization
 
 
 iframe_app, iframe_rt = star_app(

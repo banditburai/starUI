@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Dict, Optional
 from uuid import uuid4
 
 from starhtml import FT, Div, Icon
@@ -50,14 +50,17 @@ def Checkbox(
         ),
         HTMLSpan(
             Icon("lucide:check"),
-            toggle_class(f"${signal}", "opacity-100", "opacity-0"),
-            data_slot="checkbox-indicator",
-            cls=cn(
-                "absolute inset-0 flex items-center justify-center text-background text-sm transition-opacity pointer-events-none",
-                indicator_cls,
-            ),
+            toggle_class(signal,
+                "opacity-100",
+                "opacity-0",
+                base=cn(
+                    "absolute inset-0 flex items-center justify-center text-background text-sm transition-opacity pointer-events-none",
+                    indicator_cls,
+                    ),            
+                ),
+            data_slot="checkbox-indicator",            
         ),
-        ds_signals(**{signal: checked or False}, ifmissing="true"),
+        ds_signals(**{signal: checked or False}),
         cls="relative inline-block",
     )
 
@@ -78,6 +81,7 @@ def CheckboxWithLabel(
     label_cls: str = "",
     checkbox_cls: str = "",
     indicator_cls: str = "",
+    slot_attrs: Optional[Dict[str, Any]] = None,
     **kwargs: Any,
 ) -> FT:
     checkbox_id = f"checkbox_{str(uuid4())[:8]}"
@@ -98,6 +102,7 @@ def CheckboxWithLabel(
             ),
             Div(
                 HTMLLabel(
+                    slot_attrs.get("label") if slot_attrs and "label" in slot_attrs else None,
                     label,
                     HTMLSpan(" *", cls="text-destructive") if required else None,
                     for_=checkbox_id,
