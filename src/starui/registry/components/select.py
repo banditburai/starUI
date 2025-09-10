@@ -6,7 +6,6 @@ from starhtml import Button as HTMLButton
 from starhtml import Label as HTMLLabel
 from starhtml import P as HTMLP
 from starhtml.datastar import (
-    ds_class,
     ds_computed,
     ds_on_click,    
     ds_position,
@@ -52,8 +51,6 @@ def SelectTrigger(
     **kwargs: Any,
 ):
     def _trigger(signal):
-        trigger_id = kwargs.pop("id", f"{signal}-trigger")
-        
         return HTMLButton(
             *[child(signal) if callable(child) else child for child in children],
             Icon("lucide:chevron-down", cls="size-4 shrink-0 opacity-50"),
@@ -65,7 +62,7 @@ def SelectTrigger(
             aria_haspopup="listbox",
             aria_controls=f"{signal}-content",
             data_placeholder=f"!${signal}_label",
-            id=trigger_id,
+            id=kwargs.pop("id", f"{signal}-trigger"),
             cls=cn(
                 "w-[180px] flex h-9 items-center justify-between gap-2 rounded-md border border-input",
                 "bg-transparent px-3 py-2 text-sm shadow-xs",
@@ -152,9 +149,7 @@ def SelectItem(
                 ds_show(f"${signal}_value === '{value}'"),
                 cls="absolute right-2 flex h-3.5 w-3.5 items-center justify-center",
             ),
-            ds_on_click(
-                f"${signal}_value='{value}';${signal}_label='{js_safe_label}';${signal}_content.hidePopover()"
-            ) if not disabled else None,
+            ds_on_click(f"${signal}_value='{value}';${signal}_label='{js_safe_label}';${signal}_content.hidePopover()") if not disabled else None,
             role="option",
             data_value=value,
             data_selected=f"${signal}_value === '{value}'",
@@ -235,20 +230,19 @@ def _find_initial_label(options: list, value: str | None) -> str:
 
 def _build_select_items(options: list) -> list:
     """Convert options list into SelectItem components."""
-    items = []
-    for opt in options:
+    def _process_option(opt):
         match opt:
             case str():
-                items.append(SelectItem(value=opt, label=opt))
+                return SelectItem(value=opt, label=opt)
             case (value, label):
-                items.append(SelectItem(value=value, label=label))
+                return SelectItem(value=value, label=label)
             case {"group": group_label, "items": group_items}:
-                items.append(SelectGroup(
-                    *[SelectItem(*_get_value_label(item)) 
-                      for item in group_items],
+                return SelectGroup(
+                    *[SelectItem(*_get_value_label(item)) for item in group_items],
                     label=group_label
-                ))
-    return items
+                )
+    
+    return [_process_option(opt) for opt in options]
 
 
 def SelectWithLabel(
@@ -269,14 +263,12 @@ def SelectWithLabel(
     **kwargs: Any,
 ) -> FT:
     signal = signal or f"select_{uuid4().hex[:8]}"
-    select_id = f"{signal}-trigger"
-    initial_label = _find_initial_label(options, value)
-
+    
     return Div(
         HTMLLabel(
             label,
             Span(" *", cls="text-destructive") if required else "",
-            for_=select_id,
+            for_=f"{signal}-trigger",
             cls=cn("block text-sm font-medium mb-1.5", label_cls),
         ),
         Select(
@@ -288,7 +280,7 @@ def SelectWithLabel(
             ),
             SelectContent(*_build_select_items(options)),
             initial_value=value,
-            initial_label=initial_label,
+            initial_label=_find_initial_label(options, value),
             signal=signal,
             cls="w-full",
             *attrs,
