@@ -15,27 +15,24 @@ def Accordion(
     collapsible: bool = False,
     default_value: str | list[str] | None = None,
     signal: str = "",
-    class_name: str = "",
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
     signal = signal or f"accordion_{uuid4().hex[:8]}"
 
-    match (type, default_value):
-        case ("single", _):
-            initial_value = value(default_value or "")
-        case ("multiple", None):
-            initial_value = value([])
-        case ("multiple", str() as val):
-            initial_value = value([val])
-        case ("multiple", val):
-            initial_value = value(val)
+    if type == "single":
+        initial_value = value(default_value or "")
+    else:
+        match default_value:
+            case None: initial_value = value([])
+            case str() as val: initial_value = value([val])
+            case val: initial_value = value(val)
 
     return Div(
         *[child(signal, type, collapsible) if callable(child) else child 
           for child in children],
         ds_signals(**{signal: initial_value}),
-        cls=cn("w-full min-w-0", class_name, cls),
+        cls=cn("w-full min-w-0", cls),
         **kwargs,
     )
 
@@ -43,7 +40,6 @@ def Accordion(
 def AccordionItem(
     *children: Any,
     value: str,
-    class_name: str = "",
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
@@ -52,7 +48,7 @@ def AccordionItem(
             *[child(signal, type, collapsible, value) if callable(child) else child
               for child in children],
             data_value=value,
-            cls=cn("border-b", class_name, cls),
+            cls=cn("border-b", cls),
             **kwargs,
         )
 
@@ -61,7 +57,6 @@ def AccordionItem(
 
 def AccordionTrigger(
     *children: Any,
-    class_name: str = "",
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
@@ -69,20 +64,13 @@ def AccordionTrigger(
         if not item_value:
             raise ValueError("AccordionTrigger must be used inside AccordionItem")
 
-        if type == "single":
-            click_expr = (
-                f"${signal} = ${signal} === '{item_value}' ? '' : '{item_value}'"
-                if collapsible
-                else f"${signal} = '{item_value}'"
-            )
-            is_open_expr = f"${signal} === '{item_value}'"
+        is_single = type == "single"
+        is_open_expr = f"${signal} === '{item_value}'" if is_single else f"${signal}.includes('{item_value}')"
+        
+        if is_single:
+            click_expr = f"${signal} = ${signal} === '{item_value}' ? '' : '{item_value}'" if collapsible else f"${signal} = '{item_value}'"
         else:
-            click_expr = (
-                f"${signal} = ${signal}.includes('{item_value}') "
-                f"? ${signal}.filter(v => v !== '{item_value}') "
-                f": [...${signal}, '{item_value}']"
-            )
-            is_open_expr = f"${signal}.includes('{item_value}')"
+            click_expr = f"${signal} = ${signal}.includes('{item_value}') ? ${signal}.filter(v => v !== '{item_value}') : [...${signal}, '{item_value}']"
 
         return Div(
             Button(
@@ -96,7 +84,6 @@ def AccordionTrigger(
                 type="button",
                 cls=cn(
                     "flex w-full items-center justify-between py-4 text-sm font-medium transition-all hover:underline text-left",
-                    class_name,
                     cls,
                 ),
                 **kwargs,
@@ -109,7 +96,6 @@ def AccordionTrigger(
 
 def AccordionContent(
     *children: Any,
-    class_name: str = "",
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
@@ -117,24 +103,14 @@ def AccordionContent(
         if not item_value:
             raise ValueError("AccordionContent must be used inside AccordionItem")
 
-        show_expr = (
-            f"${signal} === '{item_value}'"
-            if type == "single"
-            else f"${signal}.includes('{item_value}')"
-        )
+        show_expr = f"${signal} === '{item_value}'" if type == "single" else f"${signal}.includes('{item_value}')"
 
         return Div(
             Div(
-                Div(
-                    *children,
-                    cls=cn("pb-4 pt-0", class_name),
-                ),
+                Div(*children, cls="pb-4 pt-0"),
                 cls="overflow-hidden min-h-0"
             ),
-            cls=cn(
-                "text-sm grid transition-[grid-template-rows] duration-200 ease-out",
-                cls
-            ),
+            cls=cn("text-sm grid transition-[grid-template-rows] duration-200 ease-out", cls),
             data_attr_style=f"({show_expr}) ? 'grid-template-rows: 1fr' : 'grid-template-rows: 0fr'",
             data_state=f"({show_expr}) ? 'open' : 'closed'",
             **kwargs,
