@@ -20,33 +20,7 @@ from starhtml.datastar import (
     value,
 )
 
-from .utils import cn
-
-
-def _inject_signal_to_divs(element, signal):
-    """Helper to inject signals into SelectItem components inside Div containers."""
-    # Check if it's a factory function (not an HTML element)
-    if callable(element) and not hasattr(element, 'children'):
-        return element(signal)
-    elif hasattr(element, 'children') and element.children:
-        # This is a Div or similar element with children - process its children
-        processed_children = []
-        for child in element.children:
-            if callable(child):
-                processed_children.append(child(signal))
-            else:
-                processed_children.append(child)
-        
-        # Create a new Div with the processed children and same attributes
-        from starhtml import Div
-        # Extract attributes from the original element
-        attrs = {}
-        if hasattr(element, 'attrs'):
-            attrs = element.attrs.copy()
-        
-        return Div(*processed_children, **attrs)
-    else:
-        return element
+from .utils import cn, inject_signal_recursively
 
 
 def Select(
@@ -133,7 +107,7 @@ def SelectContent(
 ):
     def _content(signal):
         return Div(
-            Div(*[_inject_signal_to_divs(child, signal) for child in children], cls="p-1 max-h-[300px] overflow-auto"),
+            Div(*[inject_signal_recursively(child, signal) for child in children], cls="p-1 max-h-[300px] overflow-auto"),
             ds_ref(f"{signal}_content"),
             ds_computed(f"{signal}_content_min_width", f"${signal}_trigger ? ${signal}_trigger.offsetWidth + 'px' : 'auto'"),
             ds_style(min_width=f"${signal}_content_min_width"),
