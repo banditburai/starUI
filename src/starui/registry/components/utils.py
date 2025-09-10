@@ -66,44 +66,20 @@ def cva(base: str = "", config: dict[str, Any] | None = None) -> Callable[..., s
 
 
 def inject_signal_recursively(element, signal, *args):
-    """
-    Recursively inject signals into factory functions within nested HTML structures.
-    
-    This utility handles the common pattern where factory functions (like SelectItem, 
-    DropdownMenuItem, etc.) are nested inside HTML elements (like Div) with conditional 
-    visibility or grouping.
-    
-    Args:
-        element: Either a factory function or HTML element to process
-        signal: The signal to inject into factory functions
-        *args: Additional arguments to pass to factory functions (e.g., for tabs)
-    
-    Returns:
-        - If element is a factory function: calls element(signal, *args)
-        - If element is HTML with children: creates new element with processed children
-        - Otherwise: returns element unchanged
-    """
-    # Check if it's a factory function (callable but not an HTML element)
-    if callable(element) and not hasattr(element, 'children'):
-        return element(signal, *args) if args else element(signal)
-    elif hasattr(element, 'children') and element.children:
-        # This is an HTML element with children - process its children recursively
-        processed_children = []
-        for child in element.children:
-            if callable(child):
-                processed_children.append(child(signal, *args) if args else child(signal))
-            else:
-                processed_children.append(child)
-        
-        # Create a new element with the processed children and same attributes
-        from starhtml import Div
-        # Extract attributes from the original element
-        attrs = {}
-        if hasattr(element, 'attrs'):
-            attrs = element.attrs.copy()
-        
-        return Div(*processed_children, **attrs)
-    else:
-        return element
+    """Recursively inject signals into factory functions within nested HTML structures."""
+    match element:
+        case _ if callable(element) and not hasattr(element, 'children'):
+            return element(signal, *args)
+        case _ if hasattr(element, 'children') and element.children:
+            from starhtml import Div
+            
+            children = [
+                child(signal, *args) if callable(child) else child 
+                for child in element.children
+            ]
+            attrs = getattr(element, 'attrs', {}).copy()
+            return Div(*children, **attrs)
+        case _:
+            return element
 
 
