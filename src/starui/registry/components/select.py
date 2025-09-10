@@ -23,6 +23,32 @@ from starhtml.datastar import (
 from .utils import cn
 
 
+def _inject_signal_to_divs(element, signal):
+    """Helper to inject signals into SelectItem components inside Div containers."""
+    # Check if it's a factory function (not an HTML element)
+    if callable(element) and not hasattr(element, 'children'):
+        return element(signal)
+    elif hasattr(element, 'children') and element.children:
+        # This is a Div or similar element with children - process its children
+        processed_children = []
+        for child in element.children:
+            if callable(child):
+                processed_children.append(child(signal))
+            else:
+                processed_children.append(child)
+        
+        # Create a new Div with the processed children and same attributes
+        from starhtml import Div
+        # Extract attributes from the original element
+        attrs = {}
+        if hasattr(element, 'attrs'):
+            attrs = element.attrs.copy()
+        
+        return Div(*processed_children, **attrs)
+    else:
+        return element
+
+
 def Select(
     *children,
     initial_value: str | None = None,
@@ -33,7 +59,6 @@ def Select(
 ) -> FT:
     signal = signal or f"select_{uuid4().hex[:8]}"
     return Div(
-        *children,
         ds_signals(
             {
                 f"{signal}_value": value(initial_value or ""),
@@ -41,6 +66,7 @@ def Select(
                 f"{signal}_open": False,
             }
         ),
+        *[child(signal) if callable(child) else child for child in children],
         cls=cn("relative", cls),
         **kwargs,
     )
@@ -48,124 +74,127 @@ def Select(
 
 def SelectTrigger(
     *children,
-    signal: str | None = None,
     cls: str = "",
     **kwargs: Any,
-) -> FT:
-    signal = signal or "select"
-    trigger_id = kwargs.pop("id", f"{signal}-trigger")
-
-    return HTMLButton(
-        *children,
-        Icon("lucide:chevron-down", cls="size-4 shrink-0 opacity-50"),
-        ds_ref(f"{signal}_trigger"),
-        popovertarget=f"{signal}-content",
-        popoveraction="toggle",
-        type="button",
-        role="combobox",
-        aria_haspopup="listbox",
-        aria_controls=f"{signal}-content",
-        data_placeholder=f"!${signal}_label",
-        id=trigger_id,
-        cls=cn(
-            "w-[180px] flex h-9 items-center justify-between gap-2 rounded-md border border-input",
-            "bg-transparent px-3 py-2 text-sm shadow-xs",
-            "transition-[color,box-shadow] outline-none truncate",
-            "dark:bg-input/30 dark:hover:bg-input/50",
-            "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
-            "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40",
-            "aria-invalid:border-destructive",
-            "disabled:cursor-not-allowed disabled:opacity-50",
-            "data-[placeholder]:text-muted-foreground",
-            cls,
-        ),
-        **kwargs,
-    )
+):
+    def _trigger(signal):
+        trigger_id = kwargs.pop("id", f"{signal}-trigger")
+        
+        return HTMLButton(
+            *[child(signal) if callable(child) else child for child in children],
+            Icon("lucide:chevron-down", cls="size-4 shrink-0 opacity-50"),
+            ds_ref(f"{signal}_trigger"),
+            popovertarget=f"{signal}-content",
+            popoveraction="toggle",
+            type="button",
+            role="combobox",
+            aria_haspopup="listbox",
+            aria_controls=f"{signal}-content",
+            data_placeholder=f"!${signal}_label",
+            id=trigger_id,
+            cls=cn(
+                "w-[180px] flex h-9 items-center justify-between gap-2 rounded-md border border-input",
+                "bg-transparent px-3 py-2 text-sm shadow-xs",
+                "transition-[color,box-shadow] outline-none truncate",
+                "dark:bg-input/30 dark:hover:bg-input/50",
+                "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
+                "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40",
+                "aria-invalid:border-destructive",
+                "disabled:cursor-not-allowed disabled:opacity-50",
+                "data-[placeholder]:text-muted-foreground",
+                cls,
+            ),
+            **kwargs,
+        )
+    
+    return _trigger
 
 
 def SelectValue(
     placeholder: str = "Select an option",
-    signal: str | None = None,
     cls: str = "",
     **kwargs: Any,
-) -> FT:
-    signal = signal or "select"
-    return Span(
-        ds_text(f"${signal}_label || '{placeholder}'"),
-        toggle_class(f"${signal}_label", "", "text-muted-foreground"),
-        cls=cn("pointer-events-none truncate flex-1 text-left", cls),
-        **kwargs,
-    )
+):
+    def _value(signal):
+        return Span(
+            ds_text(f"${signal}_label || '{placeholder}'"),
+            toggle_class(f"${signal}_label", "", "text-muted-foreground"),
+            cls=cn("pointer-events-none truncate flex-1 text-left", cls),
+            **kwargs,
+        )
+    
+    return _value
 
 
 def SelectContent(
     *children,
-    signal: str | None = None,
     cls: str = "",
     **kwargs: Any,
-) -> FT:
-    signal = signal or "select"
-
-    return Div(
-        Div(*children, cls="p-1 max-h-[300px] overflow-auto"),
-        ds_ref(f"{signal}_content"),
-        ds_computed(f"{signal}_content_min_width", f"${signal}_trigger ? ${signal}_trigger.offsetWidth + 'px' : 'auto'"),
-        ds_style(min_width=f"${signal}_content_min_width"),
-        ds_position(
-            anchor=f"{signal}-trigger",
-            placement="bottom",
-            offset=4,
-            flip=True,
-            shift=True,
-            hide=True,
-        ),
-        popover="auto",
-        id=f"{signal}-content",
-        role="listbox",
-        aria_labelledby=f"{signal}-trigger",
-        tabindex="-1",
-        cls=cn(
-            "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md dark:border-input",
-            cls,
-        ),
-        **kwargs,
-    )
+):
+    def _content(signal):
+        return Div(
+            Div(*[_inject_signal_to_divs(child, signal) for child in children], cls="p-1 max-h-[300px] overflow-auto"),
+            ds_ref(f"{signal}_content"),
+            ds_computed(f"{signal}_content_min_width", f"${signal}_trigger ? ${signal}_trigger.offsetWidth + 'px' : 'auto'"),
+            ds_style(min_width=f"${signal}_content_min_width"),
+            ds_position(
+                anchor=f"{signal}-trigger",
+                placement="bottom",
+                offset=4,
+                flip=True,
+                shift=True,
+                hide=True,
+            ),
+            popover="auto",
+            id=f"{signal}-content",
+            role="listbox",
+            aria_labelledby=f"{signal}-trigger",
+            tabindex="-1",
+            cls=cn(
+                "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md dark:border-input",
+                cls,
+            ),
+            **kwargs,
+        )
+    
+    return _content
 
 
 def SelectItem(
     value: str,
     label: str | None = None,
-    signal: str | None = None,
     disabled: bool = False,
     cls: str = "",
     **kwargs: Any,
-) -> FT:
-    label = label or value
-    signal = signal or "select"
-    js_safe_label = label.replace("$", "\\u0024").replace("'", "\\'")
+):
+    def _item(signal):
+        label_text = label or value
+        js_safe_label = label_text.replace("$", "\\u0024").replace("'", "\\'")
 
-    return Div(
-        Span(label),
-        Span(
-            Icon("lucide:check", cls="h-4 w-4"),
-            ds_show(f"${signal}_value === '{value}'"),
-            cls="absolute right-2 flex h-3.5 w-3.5 items-center justify-center",
-        ),
-        ds_on_click(
-            f"${signal}_value='{value}';${signal}_label='{js_safe_label}';${signal}_content.hidePopover()"
-        ) if not disabled else None,
-        role="option",
-        data_value=value,
-        data_selected=f"${signal}_value === '{value}'",
-        data_disabled="true" if disabled else None,
-        cls=cn(
-            "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none",
-            "hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
-            "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-            cls,
-        ),
-        **kwargs,
-    )
+        return Div(
+            Span(label_text),
+            Span(
+                Icon("lucide:check", cls="h-4 w-4"),
+                ds_show(f"${signal}_value === '{value}'"),
+                cls="absolute right-2 flex h-3.5 w-3.5 items-center justify-center",
+            ),
+            ds_on_click(
+                f"${signal}_value='{value}';${signal}_label='{js_safe_label}';${signal}_content.hidePopover()"
+            ) if not disabled else None,
+            role="option",
+            data_value=value,
+            data_selected=f"${signal}_value === '{value}'",
+            data_disabled="true" if disabled else None,
+            cls=cn(
+                "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none",
+                "hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+                "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+                cls,
+            ),
+            **kwargs,
+        )
+    
+    return _item
 
 
 def SelectGroup(
@@ -173,25 +202,31 @@ def SelectGroup(
     label: str | None = None,
     cls: str = "",
     **kwargs: Any,
-) -> FT:
-    return Div(
-        SelectLabel(label) if label else None,
-        *children,
-        cls=cls,
-        **kwargs,
-    )
+):
+    def _group(signal):
+        return Div(
+            SelectLabel(label)(signal) if label else None,
+            *[child(signal) if callable(child) else child for child in children],
+            cls=cls,
+            **kwargs,
+        )
+    
+    return _group
 
 
 def SelectLabel(
     *children,
     cls: str = "",
     **kwargs: Any,
-) -> FT:
-    return Div(
-        *children,
-        cls=cn("text-muted-foreground px-2 py-1.5 text-xs", cls),
-        **kwargs,
-    )
+):
+    def _label(signal):
+        return Div(
+            *children,
+            cls=cn("text-muted-foreground px-2 py-1.5 text-xs", cls),
+            **kwargs,
+        )
+    
+    return _label
 
 
 def _get_value_label(item: str | tuple) -> tuple[str, str]:
@@ -224,18 +259,18 @@ def _find_initial_label(options: list, value: str | None) -> str:
     return ""
 
 
-def _build_select_items(options: list, signal: str) -> list:
+def _build_select_items(options: list) -> list:
     """Convert options list into SelectItem components."""
     items = []
     for opt in options:
         match opt:
             case str():
-                items.append(SelectItem(value=opt, label=opt, signal=signal))
+                items.append(SelectItem(value=opt, label=opt))
             case (value, label):
-                items.append(SelectItem(value=value, label=label, signal=signal))
+                items.append(SelectItem(value=value, label=label))
             case {"group": group_label, "items": group_items}:
                 items.append(SelectGroup(
-                    *[SelectItem(*_get_value_label(item), signal=signal) 
+                    *[SelectItem(*_get_value_label(item)) 
                       for item in group_items],
                     label=group_label
                 ))
@@ -272,13 +307,12 @@ def SelectWithLabel(
         ),
         Select(
             SelectTrigger(
-                SelectValue(placeholder=placeholder, signal=signal),
-                signal=signal,
+                SelectValue(placeholder=placeholder),
                 cls=select_cls,
                 disabled=disabled,
                 aria_invalid="true" if error_text else None,
             ),
-            SelectContent(*_build_select_items(options, signal), signal=signal),
+            SelectContent(*_build_select_items(options)),
             initial_value=value,
             initial_label=initial_label,
             signal=signal,

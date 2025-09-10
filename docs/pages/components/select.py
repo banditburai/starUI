@@ -34,56 +34,50 @@ def examples():
     yield ComponentPreview(
         Select(
             SelectTrigger(
-                SelectValue(placeholder="Select a timezone", signal="timezone"),
-                signal="timezone",
+                SelectValue(placeholder="Select a timezone"),
                 cls="w-[240px]"
             ),
             SelectContent(
                 SelectGroup(
                     SelectLabel("North America"),
-                    SelectItem("est", "Eastern Time (EST)", signal="timezone"),
-                    SelectItem("cst", "Central Time (CST)", signal="timezone"),
-                    SelectItem("mst", "Mountain Time (MST)", signal="timezone"),
-                    SelectItem("pst", "Pacific Time (PST)", signal="timezone")
+                    SelectItem("est", "Eastern Time (EST)"),
+                    SelectItem("cst", "Central Time (CST)"),
+                    SelectItem("mst", "Mountain Time (MST)"),
+                    SelectItem("pst", "Pacific Time (PST)")
                 ),
                 SelectGroup(
                     SelectLabel("Europe"),
-                    SelectItem("gmt", "Greenwich Mean Time (GMT)", signal="timezone"),
-                    SelectItem("cet", "Central European Time (CET)", signal="timezone"),
-                    SelectItem("eet", "Eastern European Time (EET)", signal="timezone")
+                    SelectItem("gmt", "Greenwich Mean Time (GMT)"),
+                    SelectItem("cet", "Central European Time (CET)"),
+                    SelectItem("eet", "Eastern European Time (EET)")
                 ),
                 SelectGroup(
                     SelectLabel("Asia"),
-                    SelectItem("jst", "Japan Standard Time (JST)", signal="timezone"),
-                    SelectItem("cst_china", "China Standard Time (CST)", signal="timezone"),
-                    SelectItem("ist", "India Standard Time (IST)", signal="timezone")
-                ),
-                signal="timezone"
+                    SelectItem("jst", "Japan Standard Time (JST)"),
+                    SelectItem("cst_china", "China Standard Time (CST)"),
+                    SelectItem("ist", "India Standard Time (IST)")
+                )
             ),
-            initial_value="pst",
-            signal="timezone"
+            initial_value="pst"
         ),
         '''Select(
     SelectTrigger(
-        SelectValue(placeholder="Select a timezone", signal="timezone"),
-        signal="timezone"
+        SelectValue(placeholder="Select a timezone")
     ),
     SelectContent(
         SelectGroup(
             SelectLabel("North America"),
-            SelectItem("est", "Eastern Time (EST)", signal="timezone"),
-            SelectItem("cst", "Central Time (CST)", signal="timezone"),
+            SelectItem("est", "Eastern Time (EST)"),
+            SelectItem("cst", "Central Time (CST)"),
             # ... more items
         ),
         SelectGroup(
             SelectLabel("Europe"),
-            SelectItem("gmt", "Greenwich Mean Time (GMT)", signal="timezone"),
+            SelectItem("gmt", "Greenwich Mean Time (GMT)"),
             # ... more items
-        ),
-        signal="timezone"
+        )
     ),
-    initial_value="pst",
-    signal="timezone"
+    initial_value="pst"
 )''',
         title="Grouped Options",
         description="Organize options into logical groups"
@@ -304,15 +298,13 @@ SelectWithLabel(
                         Label("Country", cls="text-sm font-medium"),
                         Select(
                             SelectTrigger(
-                                SelectValue(placeholder="Select country", signal="location_country"),
-                                signal="location_country",
+                                SelectValue(placeholder="Select country"),
                                 cls="w-full"
                             ),
                             SelectContent(
-                                SelectItem("us", "United States", signal="location_country"),
-                                SelectItem("ca", "Canada", signal="location_country"),
-                                SelectItem("mx", "Mexico", signal="location_country"),
-                                signal="location_country"
+                                SelectItem("us", "United States"),
+                                SelectItem("ca", "Canada"),
+                                SelectItem("mx", "Mexico")
                             ),
                             signal="location_country"
                         ),
@@ -322,41 +314,35 @@ SelectWithLabel(
                         Label("State/Province", cls="text-sm font-medium"),
                         Select(
                             SelectTrigger(
-                                SelectValue(
-                                    placeholder="Select state",
-                                    signal="location_state"
-                                ),
+                                SelectValue(placeholder="Select state"),
                                 ds_disabled("!$location_country_value"),
-                                signal="location_state",                                
-                                cls="w-full",
-                                
+                                cls="w-full"
                             ),
                             SelectContent(
                                 # US States
                                 Div(
-                                    SelectItem("ca", "California", signal="location_state"),
-                                    SelectItem("tx", "Texas", signal="location_state"),
-                                    SelectItem("ny", "New York", signal="location_state"),
-                                    SelectItem("fl", "Florida", signal="location_state"),
+                                    SelectItem("ca", "California"),
+                                    SelectItem("tx", "Texas"),
+                                    SelectItem("ny", "New York"),
+                                    SelectItem("fl", "Florida"),
                                     ds_show("$location_country_value === 'us'")
                                 ),
                                 # Canadian Provinces
                                 Div(
-                                    SelectItem("on", "Ontario", signal="location_state"),
-                                    SelectItem("qc", "Quebec", signal="location_state"),
-                                    SelectItem("bc", "British Columbia", signal="location_state"),
-                                    SelectItem("ab", "Alberta", signal="location_state"),
+                                    SelectItem("on", "Ontario"),
+                                    SelectItem("qc", "Quebec"),
+                                    SelectItem("bc", "British Columbia"),
+                                    SelectItem("ab", "Alberta"),
                                     ds_show("$location_country_value === 'ca'")
                                 ),
                                 # Mexican States
                                 Div(
-                                    SelectItem("mx_city", "Mexico City", signal="location_state"),
-                                    SelectItem("jal", "Jalisco", signal="location_state"),
-                                    SelectItem("nl", "Nuevo León", signal="location_state"),
-                                    SelectItem("ver", "Veracruz", signal="location_state"),
+                                    SelectItem("mx_city", "Mexico City"),
+                                    SelectItem("jal", "Jalisco"),
+                                    SelectItem("nl", "Nuevo León"),
+                                    SelectItem("ver", "Veracruz"),
                                     ds_show("$location_country_value === 'mx'")
-                                ),
-                                signal="location_state"
+                                )
                             ),
                             signal="location_state"
                         ),
@@ -449,16 +435,14 @@ Form(
                         ),
                         Select(
                             SelectTrigger(
-                                SelectValue(placeholder="Select role", signal="user1_role"),
-                                signal="user1_role",
+                                SelectValue(placeholder="Select role"),
                                 cls="w-[160px]"
                             ),
                             SelectContent(
-                                SelectItem("viewer", "Viewer", signal="user1_role"),
-                                SelectItem("editor", "Editor", signal="user1_role"),
-                                SelectItem("admin", "Admin", signal="user1_role"),
-                                SelectItem("owner", "Owner", signal="user1_role", disabled=True),
-                                signal="user1_role"
+                                SelectItem("viewer", "Viewer"),
+                                SelectItem("editor", "Editor"),
+                                SelectItem("admin", "Admin"),
+                                SelectItem("owner", "Owner", disabled=True)
                             ),
                             initial_value="editor",
                             initial_label="Editor",
@@ -474,16 +458,14 @@ Form(
                         ),
                         Select(
                             SelectTrigger(
-                                SelectValue(placeholder="Select role", signal="user2_role"),
-                                signal="user2_role",
+                                SelectValue(placeholder="Select role"),
                                 cls="w-[160px]"
                             ),
                             SelectContent(
-                                SelectItem("viewer", "Viewer", signal="user2_role"),
-                                SelectItem("editor", "Editor", signal="user2_role"),
-                                SelectItem("admin", "Admin", signal="user2_role"),
-                                SelectItem("owner", "Owner", signal="user2_role", disabled=True),
-                                signal="user2_role"
+                                SelectItem("viewer", "Viewer"),
+                                SelectItem("editor", "Editor"),
+                                SelectItem("admin", "Admin"),
+                                SelectItem("owner", "Owner", disabled=True)
                             ),
                             initial_value="viewer",
                             initial_label="Viewer",
@@ -499,16 +481,14 @@ Form(
                         ),
                         Select(
                             SelectTrigger(
-                                SelectValue(placeholder="Select role", signal="user3_role"),
-                                signal="user3_role",
+                                SelectValue(placeholder="Select role"),
                                 cls="w-[160px]"
                             ),
                             SelectContent(
-                                SelectItem("viewer", "Viewer", signal="user3_role"),
-                                SelectItem("editor", "Editor", signal="user3_role"),
-                                SelectItem("admin", "Admin", signal="user3_role"),
-                                SelectItem("owner", "Owner", signal="user3_role", disabled=True),
-                                signal="user3_role"
+                                SelectItem("viewer", "Viewer"),
+                                SelectItem("editor", "Editor"),
+                                SelectItem("admin", "Admin"),
+                                SelectItem("owner", "Owner", disabled=True)
                             ),
                             initial_value="admin",
                             initial_label="Admin",
@@ -535,14 +515,15 @@ Div(
             P("john@example.com", cls="text-sm text-muted-foreground")
         ),
         Select(
-            SelectTrigger(SelectValue(signal="user1_role")),
+            SelectTrigger(SelectValue(placeholder="Select role")),
             SelectContent(
-                SelectItem("viewer", "Viewer", signal="user1_role"),
-                SelectItem("editor", "Editor", signal="user1_role"),
-                SelectItem("admin", "Admin", signal="user1_role"),
-                SelectItem("owner", "Owner", signal="user1_role", disabled=True)
+                SelectItem("viewer", "Viewer"),
+                SelectItem("editor", "Editor"),
+                SelectItem("admin", "Admin"),
+                SelectItem("owner", "Owner", disabled=True)
             ),
-            initial_value="editor"
+            initial_value="editor",
+            signal="user1_role"
         ),
         cls="flex items-center justify-between"
     ),
