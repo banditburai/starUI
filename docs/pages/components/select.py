@@ -108,7 +108,7 @@ def examples():
                         "Save Preferences",
                         type="submit",
                         cls="w-full mt-4",
-                        ds_on_click="event.preventDefault(); alert(`Country: ${$country_form_value}, Language: ${$language_form_value}`)"
+                        ds_on_click="evt.preventDefault(); alert(`Country: ${$country_form_value}, Language: ${$language_form_value}`)"
                     ),
                     cls="space-y-4"
                 )

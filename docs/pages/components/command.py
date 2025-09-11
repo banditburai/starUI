@@ -229,7 +229,7 @@ def examples():
                 Input(
                     ds_bind("task_cmd_new"),
                     ds_on_keydown("""
-                        if(event.key==='Enter' && $task_cmd_new.trim()) { 
+                        if(evt.key==='Enter' && $task_cmd_new.trim()) { 
                             const text = $task_cmd_new.trim();
                             const isUrgent = text.startsWith('!');
                             const name = text.replace(/^!/, '').trim();

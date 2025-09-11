@@ -3,9 +3,8 @@ from datetime import datetime, timedelta
 from typing import Any
 from uuid import uuid4
 
-from starhtml import Div, Icon, Span
+from starhtml import FT, Div, Icon, Span
 from starhtml.datastar import (
-    ds_class,
     ds_effect,
     ds_on_click,
     ds_signals,
@@ -20,7 +19,7 @@ from .input import Input
 from .popover import Popover, PopoverContent, PopoverTrigger
 from .utils import cn
 
-from .calendar import MONTHS as MONTH_NAMES
+from .calendar import MONTHS
 
 
 def DatePicker(
@@ -30,12 +29,11 @@ def DatePicker(
     selected: str | list[str] | None = None,
     placeholder: str | None = None,
     disabled: bool = False,
-    class_name: str = "",
     cls: str = "",
     width: str = "w-[280px]",
     with_presets: bool = False,
     **kwargs: Any,
-) -> Div:
+) -> FT:
     signal = signal or f"date_picker_{uuid4().hex[:8]}"
     calendar_signal = f"{signal}_calendar"
     multi_modes = ("multiple", "range")
@@ -81,16 +79,16 @@ def DatePicker(
             )
         }),
         ds_effect(";".join(filter(None, effects))) if any(effects) else None,
-        cls=cn("inline-block", class_name, cls),
+        cls=cn("inline-block", cls),
         **kwargs,
     )
 
 
-def DateRangePicker(**kwargs: Any) -> Div:
+def DateRangePicker(**kwargs: Any) -> FT:
     return DatePicker(mode="range", **kwargs)
 
 
-def DatePickerWithPresets(**kwargs: Any) -> Div:
+def DatePickerWithPresets(**kwargs: Any) -> FT:
     return DatePicker(with_presets=True, **kwargs)
 
 
@@ -100,11 +98,10 @@ def DateTimePicker(
     selected: str | None = None,
     placeholder: str = "Select date and time",
     disabled: bool = False,
-    class_name: str = "",
     cls: str = "",
     width: str = "w-[280px]",
     **kwargs: Any,
-) -> Div:
+) -> FT:
     signal = signal or f"datetime_picker_{uuid4().hex[:8]}"
     calendar_signal = f"{signal}_calendar"
     
@@ -137,7 +134,7 @@ def DateTimePicker(
             f"{signal}_datetime": value(selected or ""),
         }),
         ds_effect(_datetime_sync_effect(signal, calendar_signal)),
-        cls=cn("inline-block", class_name, cls),
+        cls=cn("inline-block", cls),
         **kwargs,
     )
 
@@ -149,11 +146,10 @@ def DatePickerWithInput(
     placeholder: str = "Select date",
     format: str = "YYYY-MM-DD",
     disabled: bool = False,
-    class_name: str = "",
     cls: str = "",
     width: str = "w-[240px]",
     **kwargs: Any,
-) -> Div:
+) -> FT:
     signal = signal or f"date_input_{uuid4().hex[:8]}"
     calendar_signal = f"{signal}_calendar"
     initial_selected = selected or ""
@@ -195,7 +191,7 @@ def DatePickerWithInput(
         input_with_popover,
         ds_signals(**{f"{signal}_selected": value(initial_selected)}),
         ds_effect(f"{_input_sync_effect(signal, calendar_signal)};{_input_close_effect(signal)}"),
-        cls=cn("inline-block", class_name, cls),
+        cls=cn("inline-block", cls),
         **kwargs,
     )
 
@@ -208,8 +204,7 @@ def _build_trigger(signal: str, mode: CalendarMode, placeholder: str, width: str
         Span(
             Icon(icon, cls="mr-2 h-4 w-4"),
             Span(ds_text(display_text), cls="text-left"),
-            toggle_class(empty_check, "text-muted-foreground", ""),
-            cls="flex items-center",
+            toggle_class(empty_check, "text-muted-foreground", "", base="flex items-center"),            
         ),
         variant="outline",
         cls=cn(width, "justify-start text-left font-normal"),
@@ -302,7 +297,7 @@ def _datetime_sync_effect(signal: str, calendar_signal: str) -> str:
 
 
 def _input_sync_effect(signal: str, calendar_signal: str) -> str:
-    month_names = str(MONTH_NAMES)
+    month_names = str(MONTHS)
     return f"const c=typeof ${calendar_signal}_selected!=='undefined'?${calendar_signal}_selected:'',i=document.querySelector('[data-date-input=\"{signal}\"]'),ps=typeof ${signal}_selected!=='undefined'?${signal}_selected:'';if(i&&c&&c!==ps){{i.value=c;${signal}_selected=c}}if(i){{const u=()=>{{const v=i.value;if(/^\\d{{4}}-\\d{{2}}-\\d{{2}}$/.test(v)){{${signal}_selected=v;${calendar_signal}_selected=v;const[y,m,d]=v.split('-').map(Number);${calendar_signal}_month=m;${calendar_signal}_year=y;const M={month_names};${calendar_signal}_month_display=M[m-1]}}}};i.removeEventListener('change',u);i.addEventListener('change',u)}}"
 
 

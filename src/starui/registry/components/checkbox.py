@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any
 from uuid import uuid4
 
 from starhtml import FT, Div, Icon
@@ -79,7 +79,6 @@ def CheckboxWithLabel(
     label_cls: str = "",
     checkbox_cls: str = "",
     indicator_cls: str = "",
-    slot_attrs: Optional[Dict[str, Any]] = None,
     **kwargs: Any,
 ) -> FT:
     checkbox_id = f"checkbox_{str(uuid4())[:8]}"
@@ -100,7 +99,6 @@ def CheckboxWithLabel(
             ),
             Div(
                 HTMLLabel(
-                    slot_attrs.get("label") if slot_attrs else None,
                     label,
                     HTMLSpan(" *", cls="text-destructive") if required else None,
                     for_=checkbox_id,

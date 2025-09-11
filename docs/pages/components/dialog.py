@@ -248,7 +248,7 @@ def examples():
                             "Send Invitation",
                             ds_disabled("!$member_name || !$member_email"),
                             ds_on_click("""
-                                event.preventDefault();
+                                evt.preventDefault();
                                 if ($member_name && $member_email) {
                                     const roleLabel = $member_role === 'viewer' ? 'Viewer' : 
                                                      $member_role === 'editor' ? 'Editor' : 'Admin';

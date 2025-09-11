@@ -200,7 +200,7 @@ def examples():
                     ),
                     Button(
                         "Continue to Payment",
-                        ds_on_click("event.preventDefault(); alert(`Proceeding with ${$payment_method}`)"),
+                        ds_on_click("evt.preventDefault(); alert(`Proceeding with ${$payment_method}`)"),
                         type="submit",
                         cls="w-full mt-4",
                     ),

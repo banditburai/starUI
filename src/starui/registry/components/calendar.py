@@ -11,6 +11,7 @@ from starhtml.datastar import (
     ds_position,
     ds_ref,
     ds_signals,
+    ds_style,
     ds_text,
     value,
 )
@@ -99,7 +100,7 @@ def _build_dropdown(signal: str, type: str, current_display: str | int, items: l
         Span(ds_text(f"${signal}_{type}_display" if type == "month" else f"${signal}_{type}"), 
              cls="pointer-events-none"),
         Icon("lucide:chevron-down", cls="h-3 w-3 shrink-0 opacity-50 ml-1"),
-        ds_ref(f"{signal}{type.title()}Trigger"),
+        ds_ref(f"{signal}_{type}_trigger"),
         id=trigger_id,
         popovertarget=content_id,
         popoveraction="toggle",
@@ -124,7 +125,8 @@ def _build_dropdown(signal: str, type: str, current_display: str | int, items: l
     dropdown = Div(
         *dropdown_items,
         ds_on_click(_dropdown_handler(signal, type, content_id)) if not disabled else None,
-        ds_ref(f"{signal}{type.title()}Content"),
+        ds_ref(f"{signal}_{type}_content"),
+        ds_style(min_width=f"${signal}_{type}_trigger ? ${signal}_{type}_trigger.offsetWidth + 'px' : '8rem'"),
         ds_position(anchor=trigger_id, placement="bottom", offset=4, flip=True, shift=True, hide=True),
         popover="auto",
         id=content_id,

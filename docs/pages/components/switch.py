@@ -207,7 +207,7 @@ def examples():
                         "Update Preferences",
                         type="submit",
                         cls="w-full mt-4",
-                        ds_on_click="event.preventDefault(); alert('Email preferences updated!')"
+                        ds_on_click="evt.preventDefault(); alert('Email preferences updated!')"
                     ),
                     ds_signals(marketing_emails=False, newsletter=False),
                     ds_effect("if (!$marketing_emails) $newsletter = false"),

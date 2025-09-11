@@ -293,7 +293,7 @@ def examples():
                         Div(
                             Label("Custom Color:", cls="text-xs font-medium mb-2 block"),
                             Input(
-                                ds_on_input("$custom_color = event.target.value; $selected_color = event.target.value"),
+                                ds_on_input("$custom_color = evt.target.value; $selected_color = evt.target.value"),
                                 type="color",
                                 cls="w-full h-10 rounded border cursor-pointer",
                                 value="#3b82f6",                                

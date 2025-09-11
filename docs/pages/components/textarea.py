@@ -419,7 +419,7 @@ def examples():
                             type="submit",
                             ds_disabled="($comment_text || '').trim().length === 0",
                             ds_on_click="""
-                                event.preventDefault(); 
+                                evt.preventDefault(); 
                                 if (($comment_text || '').trim().length > 0) {
                                     alert('Comment posted successfully!');
                                     $comment_text = '';
@@ -602,7 +602,7 @@ def examples():
                             type="submit",
                             ds_disabled="($feedback || '').length < 10 || !$feedback_rating || ($feedback || '').length > 1000",
                             ds_on_click="""
-                                event.preventDefault();
+                                evt.preventDefault();
                                 $feedback_submitted = true;
                                 if (($feedback || '').length >= 10 && $feedback_rating && ($feedback || '').length <= 1000) {
                                     alert(`Thank you for your ${$feedback_rating}-star feedback!`);
@@ -769,7 +769,7 @@ def examples():
                             
                             // No need to manually update signal - the input event will handle it
                             
-                            // Trigger input event for reactivity
+                            // Trigger input evt for reactivity
                             targetTextarea.dispatchEvent(new Event('input', { bubbles: true }));
                             
                             // Set cursor after inserted variable
@@ -851,7 +851,7 @@ def examples():
                             type="submit",
                             ds_disabled="($email_subject || '').length === 0 || ($email_body || '').length === 0",
                             ds_on_click="""
-                                event.preventDefault();
+                                evt.preventDefault();
                                 if (($email_subject || '').length > 0 && ($email_body || '').length > 0) {
                                     alert('Template saved successfully!');
                                 }
