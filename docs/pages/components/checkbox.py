@@ -13,7 +13,7 @@ STATUS = "stable"
 from starhtml import Div, P, Input, Label, Icon, Span, H2, H3, Button as HTMLButton, Form
 from starhtml.datastar import (
     ds_on_click, ds_show, ds_text, ds_signals, value,
-    ds_bind, ds_disabled, ds_on_change, ds_effect, ds_class, ds_style, ds_computed, toggle_class
+    ds_bind, ds_disabled, ds_on_change, ds_effect, ds_class, ds_style, ds_computed, toggle_class, slot_attrs
 )
 from starui.registry.components.checkbox import Checkbox, CheckboxWithLabel
 from starui.registry.components.button import Button
@@ -62,7 +62,7 @@ def examples():
                         type="submit",
                         cls="w-full mt-4",
                         ds_disabled="!$terms_accepted || !$privacy_accepted",
-                        ds_on_click="event.preventDefault(); alert('Account created!')"
+                        ds_on_click="evt.preventDefault(); alert('Account created!')"
                     ),
                     ds_signals(terms_accepted=False, privacy_accepted=False, marketing_emails=True)
                 )
@@ -162,32 +162,32 @@ def examples():
             CardContent(
                 Div(
                     CheckboxWithLabel(
+                        slot_attrs(
+                            label=toggle_class("todo1", "line-through text-muted-foreground", "")
+                        ),
                         label="Write documentation",
-                        signal="todo1",
-                        slot_attrs={
-                            "label": toggle_class("todo1", "line-through text-muted-foreground", "")
-                        }
+                        signal="todo1"
                     ),
                     CheckboxWithLabel(
+                        slot_attrs(
+                            label=toggle_class("todo2", "line-through text-muted-foreground", "")
+                        ),
                         label="Review pull requests",
-                        signal="todo2",
-                        slot_attrs={
-                            "label": toggle_class("todo2", "line-through text-muted-foreground", "")
-                        }
+                        signal="todo2"
                     ),
                     CheckboxWithLabel(
+                        slot_attrs(
+                            label=toggle_class("todo3", "line-through text-muted-foreground", "")
+                        ),
                         label="Update dependencies",
-                        signal="todo3",
-                        slot_attrs={
-                            "label": toggle_class("todo3", "line-through text-muted-foreground", "")
-                        }
+                        signal="todo3"
                     ),
                     CheckboxWithLabel(
+                        slot_attrs(
+                            label=toggle_class("todo4", "line-through text-muted-foreground", "")
+                        ),
                         label="Deploy to production",
-                        signal="todo4",
-                        slot_attrs={
-                            "label": toggle_class("todo4", "line-through text-muted-foreground", "")
-                        }
+                        signal="todo4"
                     ),
                     cls="space-y-3"
                 ),
@@ -225,9 +225,47 @@ def examples():
         description="Task tracking with progress visualization"
     )
     
-    # Select all pattern
+    # Select all pattern - Server-side dynamic approach
     @with_code
     def select_all_pattern_example():
+        # Define file data server-side (this could come from a database, API, etc.)
+        files = [
+            {"id": "file1", "name": "invoice-2024-001.pdf", "size": "2.4 MB"},
+            {"id": "file2", "name": "report-q3.xlsx", "size": "1.8 MB"},
+            {"id": "file3", "name": "presentation.pptx", "size": "5.2 MB"},
+            {"id": "file4", "name": "contracts.zip", "size": "12.1 MB"}
+        ]
+        
+        # Generate signals dictionary dynamically
+        signals = {"selectAll": False}
+        for file in files:
+            signals[file["id"]] = False  # selected state
+            signals[f"{file['id']}_exists"] = True  # existence state
+        
+        # Generate selected count computation dynamically
+        selected_conditions = " + ".join([
+            f"(${file['id']} && ${file['id']}_exists ? 1 : 0)" 
+            for file in files
+        ])
+        
+        # Generate existing count computation dynamically
+        existing_conditions = " + ".join([
+            f"(${file['id']}_exists ? 1 : 0)" 
+            for file in files
+        ])
+        
+        # Generate select all change handler dynamically
+        select_all_logic = "; ".join([
+            f"if (${file['id']}_exists) ${file['id']} = $selectAll"
+            for file in files
+        ])
+        
+        # Generate delete logic dynamically
+        delete_logic = "; ".join([
+            f"if (${file['id']}) {{ ${file['id']}_exists = false; ${file['id']} = false; }}"
+            for file in files
+        ])
+        
         return Card(
             CardHeader(
                 CardTitle("Bulk Actions"),
@@ -244,79 +282,44 @@ def examples():
                         cls="border-b pb-2 mb-3"
                     ),
                     Div(
-                        Div(
-                            CheckboxWithLabel(
-                                label="invoice-2024-001.pdf",
-                                signal="file1",
-                                helper_text="2.4 MB"
-                            ),
-                            ds_show("$file1_exists")
-                        ),
-                        Div(
-                            CheckboxWithLabel(
-                                label="report-q3.xlsx",
-                                signal="file2",
-                                helper_text="1.8 MB"
-                            ),
-                            ds_show("$file2_exists")
-                        ),
-                        Div(
-                            CheckboxWithLabel(
-                                label="presentation.pptx",
-                                signal="file3",
-                                helper_text="5.2 MB"
-                            ),
-                            ds_show("$file3_exists")
-                        ),
-                        Div(
-                            CheckboxWithLabel(
-                                label="contracts.zip",
-                                signal="file4",
-                                helper_text="12.1 MB"
-                            ),
-                            ds_show("$file4_exists")
-                        ),
+                        # Generate checkboxes dynamically server-side
+                        *[
+                            Div(
+                                CheckboxWithLabel(
+                                    label=file["name"],
+                                    signal=file["id"],
+                                    helper_text=file["size"]
+                                ),
+                                ds_show(f"${file['id']}_exists")
+                            )
+                            for file in files
+                        ],
                         cls="space-y-2 pl-6"
                     ),
                     Div(
                         Button(
                             Icon("lucide:trash-2", cls="h-4 w-4 mr-2"),
-                            Span(ds_text("`Delete ${[$file1, $file2, $file3, $file4].filter(Boolean).length} Selected`")),
-                            ds_on_click("""
-                                if ($file1) $file1_exists = false;
-                                if ($file2) $file2_exists = false;
-                                if ($file3) $file3_exists = false;
-                                if ($file4) $file4_exists = false;
-                                $file1 = false;
-                                $file2 = false;
-                                $file3 = false;
-                                $file4 = false;
-                                $selectAll = false;
-                            """),
+                            Span(ds_text("$selectedCount > 0 ? `Delete ${$selectedCount} Selected` : 'Delete Selected'")),
+                            ds_on_click(f"{delete_logic}; $selectAll = false;"),
                             variant="destructive",
                             size="sm",
-                            ds_disabled="!$file1 && !$file2 && !$file3 && !$file4",                            
+                            ds_disabled="$selectedCount === 0"
                         ),
                         cls="flex items-center justify-start mt-4 pt-4 border-t"
                     ),
                     P(
                         "All files deleted!",
-                        ds_show("!$file1_exists && !$file2_exists && !$file3_exists && !$file4_exists"),
-                        cls="text-sm text-center text-muted-foreground mt-4",                        
+                        ds_show("$existingCount === 0"),
+                        cls="text-sm text-center text-muted-foreground mt-4"
                     ),
-                    ds_signals(
-                        selectAll=False, 
-                        file1=False, file2=False, file3=False, file4=False,
-                        file1_exists=True, file2_exists=True, file3_exists=True, file4_exists=True
-                    ),
-                    ds_effect("$selectAll = $file1 && $file2 && $file3 && $file4 && ($file1 || $file2 || $file3 || $file4)"),
-                    ds_on_change("""
-                        if (event.target.matches('[data-bind="selectAll"]')) {
-                            if ($file1_exists) $file1 = $selectAll;
-                            if ($file2_exists) $file2 = $selectAll;
-                            if ($file3_exists) $file3 = $selectAll;
-                            if ($file4_exists) $file4 = $selectAll;
-                        }
+                    ds_signals(**signals),
+                    ds_computed("selectedCount", selected_conditions),
+                    ds_computed("existingCount", existing_conditions),
+                    ds_effect("$selectAll = $existingCount > 0 && $selectedCount === $existingCount"),
+                    ds_on_change(f"""
+                        if (evt.target.matches('[data-bind="selectAll"]')) {{
+                            {select_all_logic};
+                        }}
                     """)
                 )
             ),
@@ -375,14 +378,14 @@ def examples():
                             "Apply Filters",
                             type="submit",
                             cls="w-full",
-                            ds_on_click="event.preventDefault(); applyFilters()"
+                            ds_on_click="evt.preventDefault(); applyFilters()"
                         ),
                         Button(
                             "Reset",
                             variant="outline",
                             cls="w-full mt-2",
                             ds_on_click="""
-                                event.preventDefault();
+                                evt.preventDefault();
                                 $cat_electronics = false; $cat_clothing = false; 
                                 $cat_books = false; $cat_home = false;
                                 $price_1 = false; $price_2 = false;
@@ -461,7 +464,7 @@ def examples():
                         "Save Settings",
                         type="submit",
                         ds_disabled="!$email_notif && !$push_notif && !$sms_notif",
-                        ds_on_click="event.preventDefault(); alert('Settings saved!')",
+                        ds_on_click="evt.preventDefault(); alert('Settings saved!')",
                         cls="w-full mt-4"
                     ),
                     Div(
