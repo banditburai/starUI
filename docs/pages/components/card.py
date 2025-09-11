@@ -21,18 +21,17 @@ from starui.registry.components.button import Button
 from starui.registry.components.badge import Badge
 from starui.registry.components.input import Input
 from starui.registry.components.label import Label
+from utils import auto_generate_page, Component, build_api_reference, with_code
 from widgets.component_preview import ComponentPreview
 
 
 def examples():
     """Generate Card examples using ComponentPreview with tabs."""
     
-    # Note: Basic card moved to hero example
-    # This will be the first example after the hero
-    
     # Interactive profile cards with follow functionality
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def interactive_profile_cards_example():
+        return Div(
             Card(
                 CardHeader(
                     Div(
@@ -101,40 +100,19 @@ def examples():
             ),
             ds_signals(following1=False, following2=False),
             cls="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl"
-        ),
-        '''Card(
-    CardHeader(
-        Div(
-            Div("JD", cls="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold"),
-            Div(
-                CardTitle("John Doe"),
-                CardDescription("Product Designer"),
-                Badge("online", variant="default"),
-                cls="ml-4"
-            ),
-            cls="flex items-center"
         )
-    ),
-    CardContent(
-        P("Passionate about creating user-centered designs.")
-    ),
-    CardFooter(
-        Button(
-            ds_text("$following ? 'Following' : 'Follow'"),
-            variant="outline",
-            ds_class={"bg-green-50 text-green-700": "$following"},
-            ds_on_click=toggle_signal("following")
-        ),
-        Button("Message", ds_on_click="alert('Message sent!')")
-    )
-)''',
+    
+    yield ComponentPreview(
+        interactive_profile_cards_example(),
+        interactive_profile_cards_example.code,
         title="Interactive Profile Cards",
         description="Profile cards with follow/unfollow functionality and status badges"
     )
     
     # Interactive dashboard stats with period selection
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def interactive_dashboard_stats_example():
+        return Div(
             # Dashboard header
             Div(
                 Div(
@@ -281,59 +259,19 @@ def examples():
             
             
             cls="w-full"
-        ),
-        '''Div(
-    # Period selector buttons
-    Div(
-        Button("Today", variant="ghost",
-               ds_class={"bg-muted": "$period === '1d'"},
-               ds_on_click="$period = '1d'"),
-        Button("Week", variant="ghost",
-               ds_class={"bg-muted": "$period === '7d'"},
-               ds_on_click="$period = '7d'"),
-        Button("Month", variant="ghost",
-               ds_class={"bg-muted": "$period === '30d'"},
-               ds_on_click="$period = '30d'"),
-        cls="inline-flex rounded-md bg-muted/30 p-1"
-    ),
-    
-    # Stats cards with dynamic updates
-    Card(
-        CardHeader(
-            CardTitle("Total Revenue"),
-            CardDescription(ds_text("`Last ${$period === '1d' ? 'day' : $period === '7d' ? 'week' : 'month'}`"))
-        ),
-        CardContent(
-            Div(
-                Span(ds_text("'$' + $revenue.toLocaleString()"), cls="text-2xl font-bold"),
-                P(
-                    Span(ds_text("`${$revenueChange >= 0 ? '+' : ''}${$revenueChange}%`"),
-                         ds_class={"text-emerald-600": "$revenueChange > 0", "text-red-600": "$revenueChange < 0"}),
-                    Span(" from last period", cls="text-muted-foreground"),
-                    cls="text-sm mt-1"
-                )
-            )
         )
-    ),
-    ds_signals(period=value("30d"), revenue=value(98234), revenueChange=value(23.2)),
-    ds_bind("""
-        // Auto-update stats when period changes
-        if ($period === '1d') {
-            $revenue = 3421; $revenueChange = 12.3;
-        } else if ($period === '7d') {
-            $revenue = 24567; $revenueChange = 18.5;
-        } else if ($period === '30d') {
-            $revenue = 98234; $revenueChange = 23.2;
-        }
-    """)
-)''',
+    
+    yield ComponentPreview(
+        interactive_dashboard_stats_example(),
+        interactive_dashboard_stats_example.code,
         title="Interactive Dashboard Stats",
         description="Dynamic stats cards with period selection and real-time updates"
     )
     
     # Interactive form card with validation
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def interactive_form_card_example():
+        return Card(
             CardHeader(
                 CardTitle("Create Account"),
                 CardDescription("Enter your details below to create your account")
@@ -400,70 +338,19 @@ def examples():
             ),
             
             cls="w-full max-w-md"
-        ),
-        '''Card(
-    CardHeader(
-        CardTitle("Create Account"),
-        CardDescription("Enter your details below")
-    ),
-    CardContent(
-        Div(
-            Div(
-                Label("Email", for_="email"),
-                Input(
-                    signal="email",
-                    type="email",
-                    placeholder="name@example.com",
-                    ds_class={
-                        "border-red-300": "$email.length > 0 && !$emailValid",
-                        "border-green-300": "$emailValid"
-                    }
-                ),
-                P(
-                    "Please enter a valid email address",
-                    ds_show="$email.length > 0 && !$emailValid",
-                    cls="text-red-500 text-sm mt-1"
-                ),
-                cls="space-y-2"
-            ),
-            Div(
-                Label("Password", for_="password"),
-                Input(
-                    signal="password",
-                    type="password",
-                    placeholder="Enter your password",
-                    ds_class={
-                        "border-red-300": "$password.length > 0 && $password.length < 8",
-                        "border-green-300": "$password.length >= 8"
-                    }
-                ),
-                P(
-                    "Password must be at least 8 characters",
-                    ds_show="$password.length > 0 && $password.length < 8",
-                    cls="text-red-500 text-sm mt-1"
-                )
-            ),
-            cls="space-y-4"
         )
-    ),
-    CardFooter(
-        Button(
-            ds_text("$creating ? 'Creating Account...' : 'Create Account'"),
-            ds_disabled("!$emailValid || $password.length < 8 || $creating"),
-            ds_on_click="createAccount()",
-            cls="w-full"
-        )
-    ),
-    ds_signals(email="", password="", emailValid=False, creating=False),
-    ds_bind("$emailValid = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test($email)")
-)''',
+    
+    yield ComponentPreview(
+        interactive_form_card_example(),
+        interactive_form_card_example.code,
         title="Interactive Form Card",
         description="Form with real-time validation and dynamic button states"
     )
     
     # Interactive shopping cart card
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def interactive_shopping_cart_example():
+        return Card(
             CardHeader(
                 CardTitle("Shopping Cart"),
                 CardDescription(ds_text("`${$items.length} item${$items.length !== 1 ? 's' : ''} in cart`"))
@@ -589,45 +476,19 @@ def examples():
             ),
             
             cls="w-full max-w-md"
-        ),
-        '''Card(
-    CardHeader(
-        CardTitle("Shopping Cart"),
-        CardDescription(ds_text("`${$items.length} item${$items.length !== 1 ? 's' : ''}`"))
-    ),
-    CardContent(
-        Div(
-            # Cart items list
-            Div(
-                Div(
-                    P("MacBook Pro 14\"", cls="font-medium"),
-                    P("$2,399", cls="font-bold"),
-                    Button(Icon("lucide:trash-2"), variant="ghost", size="sm",
-                           ds_on_click="removeItem(0)"),
-                    cls="flex justify-between items-center py-2"
-                ),
-                ds_show("$items.length > 0")
-            ),
-            # Empty state
-            P("Your cart is empty", ds_show("$items.length === 0"), cls="text-center py-8")
         )
-    ),
-    CardFooter(
-        Div(
-            Span("Total: ", Span(ds_text("`$${$total.toFixed(2)}`"), cls="font-bold")),
-            Button("Checkout", ds_disabled="$items.length === 0", ds_on_click="checkout()"),
-            cls="w-full flex justify-between items-center"
-        )
-    ),
-    ds_signals(items=["MacBook Pro 14"], total=2399.00)
-)''',
+    
+    yield ComponentPreview(
+        interactive_shopping_cart_example(),
+        interactive_shopping_cart_example.code,
         title="Interactive Shopping Cart",
         description="Dynamic cart with add/remove items, total calculation, and checkout flow"
     )
     
     # Notification cards
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def notification_cards_example():
+        return Div(
             Card(
                 CardContent(
                     Div(
@@ -665,29 +526,19 @@ def examples():
                 )
             ),
             cls="space-y-3 max-w-md"
-        ),
-        '''Card(
-    CardContent(
-        Div(
-            Icon("lucide:check-circle", width="20", height="20", cls="text-green-500"),
-            Div(
-                P("Payment successful", cls="font-medium"),
-                P("Your payment has been processed.", cls="text-muted-foreground"),
-                cls="ml-3"
-            ),
-            cls="flex items-start"
-        ),
-        Button("View Receipt", variant="ghost", size="sm", 
-               ds_on_click="alert('Receipt downloaded!')")
-    )
-)''',
+        )
+    
+    yield ComponentPreview(
+        notification_cards_example(),
+        notification_cards_example.code,
         title="Interactive Notifications",
         description="Alert and notification cards with action handlers"
     )
     
     # Product/E-commerce cards with interactive features
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def product_ecommerce_cards_example():
+        return Div(
             Card(
                 CardContent(
                     Div(
@@ -863,68 +714,23 @@ def examples():
             ),
             
             cls="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl"
-        ),
-        '''Card(
-    CardContent(
-        Div(
-            # Product image
-            Div("📱", cls="text-6xl h-32 bg-gray-50 rounded-lg mb-4"),
-            
-            CardTitle("iPhone 15 Pro"),
-            CardDescription("Natural Titanium, 128GB"),
-            
-            # Rating
-            Div(
-                Span("★★★★★", cls="text-yellow-400 text-sm"),
-                Span("4.9 (1,234 reviews)", cls="text-sm text-muted-foreground ml-2")
-            ),
-            
-            # Price
-            Div(
-                Span("$999", cls="text-2xl font-bold text-primary"),
-                Span("$1,099", cls="text-sm line-through text-muted-foreground"),
-                Badge("9% OFF", variant="destructive")
-            ),
-            
-            # Color selection
-            Div(
-                P("Color:", cls="text-sm font-medium"),
-                Div(
-                    Button("", cls="w-8 h-8 rounded-full bg-gray-800 border-2",
-                           ds_class={"border-primary": "$selectedColor === 'titanium'"},
-                           ds_on_click="$selectedColor = 'titanium'"),
-                    # More color options...
-                )
-            )
         )
-    ),
-    CardFooter(
-        Button(
-            Icon("lucide:heart", ds_class={"fill-current text-red-500": "$favorited"}),
-            ds_text("$favorited ? 'Favorited' : 'Add to Favorites'"),
-            variant="outline",
-            ds_on_click=toggle_signal("favorited")
-        ),
-        Button(
-            Icon("lucide:shopping-cart"),
-            ds_text("$addedToCart ? 'Added!' : 'Add to Cart'"),
-            ds_on_click="addToCart()"
-        )
-    ),
-    ds_signals(selectedColor="titanium", favorited=False, addedToCart=False)
-)''',
+    
+    yield ComponentPreview(
+        product_ecommerce_cards_example(),
+        product_ecommerce_cards_example.code,
         title="Product Cards",
         description="E-commerce product cards with color selection, favorites, and cart functionality"
     )
 
 
 def create_card_docs():
-    """Create card documentation page using convention-based approach."""
-    from utils import auto_generate_page
+    """Create card documentation page using convention-based approach."""    
     
     # Hero example - basic card structure
-    hero_example = ComponentPreview(
-        Card(
+    @with_code
+    def hero_card_example():
+        return Card(
             CardHeader(
                 CardTitle("Card Title"),
                 CardDescription("Card description with supporting text below.")
@@ -937,20 +743,12 @@ def create_card_docs():
                 Button("Cancel", variant="outline")
             ),
             cls="w-full max-w-md"
-        ),
-        '''Card(
-    CardHeader(
-        CardTitle("Card Title"),
-        CardDescription("Card description with supporting text below.")
-    ),
-    CardContent(
-        P("This is the main content area of the card.")
-    ),
-    CardFooter(
-        Button("Action"),
-        Button("Cancel", variant="outline")
-    )
-)'''
+        )
+    
+    hero_example = ComponentPreview(
+        hero_card_example(),
+        hero_card_example.code,
+        copy_button=True
     )
     
     return auto_generate_page(
@@ -960,32 +758,14 @@ def create_card_docs():
         cli_command="star add card",
         hero_example=hero_example,
         component_slug="card",
-        api_reference={
-            "components": [
-                {
-                    "name": "Card",
-                    "description": "The main card container"
-                },
-                {
-                    "name": "CardHeader",
-                    "description": "Contains the card title and description"
-                },
-                {
-                    "name": "CardTitle",
-                    "description": "The main heading of the card"
-                },
-                {
-                    "name": "CardDescription",
-                    "description": "Supporting text for the card title"
-                },
-                {
-                    "name": "CardContent",
-                    "description": "The main content area of the card"
-                },
-                {
-                    "name": "CardFooter",
-                    "description": "Contains actions and additional information"
-                }
+        api_reference=build_api_reference(
+            components=[
+                Component("Card", "The main card container"),
+                Component("CardHeader", "Contains the card title and description"),
+                Component("CardTitle", "The main heading of the card"),
+                Component("CardDescription", "Supporting text for the card title"),
+                Component("CardContent", "The main content area of the card"),
+                Component("CardFooter", "Contains actions and additional information"),
             ]
-        }
+        )
     )

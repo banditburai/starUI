@@ -15,18 +15,17 @@ from starui.registry.components.breadcrumb import (
     BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator, BreadcrumbEllipsis
 )
 from starui.registry.components.button import Button
+from utils import auto_generate_page, Component, build_api_reference, with_code
 from widgets.component_preview import ComponentPreview
 
 
 def examples():
     """Generate Breadcrumb examples using ComponentPreview with tabs."""
     
-    # Note: Basic breadcrumb moved to hero example
-    # This will be the first example after the hero
-    
     # Custom separator
-    yield ComponentPreview(
-        Breadcrumb(
+    @with_code
+    def custom_separator_example():
+        return Breadcrumb(
             BreadcrumbList(
                 BreadcrumbItem(
                     BreadcrumbLink("Home", href="/")
@@ -44,33 +43,19 @@ def examples():
                     BreadcrumbPage("Data")
                 )
             )
-        ),
-        '''Breadcrumb(
-    BreadcrumbList(
-        BreadcrumbItem(
-            BreadcrumbLink("Home", href="/")
-        ),
-        BreadcrumbSeparator(
-            Icon("lucide:slash", width="16", height="16", cls="align-middle")
-        ),
-        BreadcrumbItem(
-            BreadcrumbLink("Library", href="/library")
-        ),
-        BreadcrumbSeparator(
-            Icon("lucide:slash", width="16", height="16", cls="align-middle")
-        ),
-        BreadcrumbItem(
-            BreadcrumbPage("Data")
         )
-    )
-)''',
+    
+    yield ComponentPreview(
+        custom_separator_example(),
+        custom_separator_example.code,
         title="Custom Separator",
         description="Use custom icons as separators between items"
     )
     
     # Long breadcrumb with ellipsis
-    yield ComponentPreview(
-        Breadcrumb(
+    @with_code
+    def collapsed_breadcrumb_example():
+        return Breadcrumb(
             BreadcrumbList(
                 BreadcrumbItem(
                     BreadcrumbLink("Home", href="/")
@@ -88,33 +73,19 @@ def examples():
                     BreadcrumbPage("Breadcrumb")
                 )
             )
-        ),
-        '''Breadcrumb(
-    BreadcrumbList(
-        BreadcrumbItem(
-            BreadcrumbLink("Home", href="/")
-        ),
-        BreadcrumbSeparator(),
-        BreadcrumbItem(
-            BreadcrumbEllipsis()
-        ),
-        BreadcrumbSeparator(),
-        BreadcrumbItem(
-            BreadcrumbLink("Components", href="/docs/components")
-        ),
-        BreadcrumbSeparator(),
-        BreadcrumbItem(
-            BreadcrumbPage("Breadcrumb")
         )
-    )
-)''',
+    
+    yield ComponentPreview(
+        collapsed_breadcrumb_example(),
+        collapsed_breadcrumb_example.code,
         title="Collapsed",
         description="Use ellipsis to indicate hidden intermediate steps"
     )
     
     # Long path without ellipsis
-    yield ComponentPreview(
-        Breadcrumb(
+    @with_code
+    def long_path_example():
+        return Breadcrumb(
             BreadcrumbList(
                 BreadcrumbItem(
                     BreadcrumbLink("Home", href="/")
@@ -136,37 +107,19 @@ def examples():
                     BreadcrumbPage("Breadcrumb")
                 )
             )
-        ),
-        '''Breadcrumb(
-    BreadcrumbList(
-        BreadcrumbItem(
-            BreadcrumbLink("Home", href="/")
-        ),
-        BreadcrumbSeparator(),
-        BreadcrumbItem(
-            BreadcrumbLink("Documentation", href="/docs")
-        ),
-        BreadcrumbSeparator(),
-        BreadcrumbItem(
-            BreadcrumbLink("Components", href="/docs/components")
-        ),
-        BreadcrumbSeparator(),
-        BreadcrumbItem(
-            BreadcrumbLink("Navigation", href="/docs/components/navigation")
-        ),
-        BreadcrumbSeparator(),
-        BreadcrumbItem(
-            BreadcrumbPage("Breadcrumb")
         )
-    )
-)''',
+    
+    yield ComponentPreview(
+        long_path_example(),
+        long_path_example.code,
         title="Long Path",
         description="Full breadcrumb trail with multiple levels"
     )
     
     # Breadcrumb with icons
-    yield ComponentPreview(
-        Breadcrumb(
+    @with_code
+    def breadcrumb_with_icons_example():
+        return Breadcrumb(
             BreadcrumbList(
                 BreadcrumbItem(
                     BreadcrumbLink(
@@ -199,48 +152,19 @@ def examples():
                     )
                 )
             )
-        ),
-        '''Breadcrumb(
-    BreadcrumbList(
-        BreadcrumbItem(
-            BreadcrumbLink(
-                Icon("lucide:home", width="16", height="16", cls="mr-1 inline-block align-text-bottom"),
-                "Home",
-                href="/"
-            )
-        ),
-        BreadcrumbSeparator(),
-        BreadcrumbItem(
-            BreadcrumbLink(
-                Icon("lucide:folder", width="16", height="16", cls="mr-1 inline-block align-text-bottom"),
-                "Documents",
-                href="/documents"
-            )
-        ),
-        BreadcrumbSeparator(),
-        BreadcrumbItem(
-            BreadcrumbLink(
-                Icon("lucide:folder", width="16", height="16", cls="mr-1 inline-block align-text-bottom"),
-                "Projects",
-                href="/documents/projects"
-            )
-        ),
-        BreadcrumbSeparator(),
-        BreadcrumbItem(
-            BreadcrumbPage(
-                Icon("lucide:file-text", width="16", height="16", cls="mr-1 inline-block align-text-bottom"),
-                "README.md"
-            )
         )
-    )
-)''',
+    
+    yield ComponentPreview(
+        breadcrumb_with_icons_example(),
+        breadcrumb_with_icons_example.code,
         title="With Icons",
         description="Breadcrumb items with icons for better visual context"
     )
     
     # E-commerce product breadcrumb
-    yield ComponentPreview(
-        Breadcrumb(
+    @with_code
+    def ecommerce_breadcrumb_example():
+        return Breadcrumb(
             BreadcrumbList(
                 BreadcrumbItem(
                     BreadcrumbLink("Shop", href="/shop")
@@ -270,45 +194,19 @@ def examples():
                     BreadcrumbPage("iPhone 15 Pro")
                 )
             )
-        ),
-        '''Breadcrumb(
-    BreadcrumbList(
-        BreadcrumbItem(
-            BreadcrumbLink("Shop", href="/shop")
-        ),
-        BreadcrumbSeparator(
-            Icon("lucide:chevron-right", width="16", height="16")
-        ),
-        BreadcrumbItem(
-            BreadcrumbLink("Electronics", href="/shop/electronics")
-        ),
-        BreadcrumbSeparator(
-            Icon("lucide:chevron-right", width="16", height="16")
-        ),
-        BreadcrumbItem(
-            BreadcrumbLink("Smartphones", href="/shop/electronics/smartphones")
-        ),
-        BreadcrumbSeparator(
-            Icon("lucide:chevron-right", width="16", height="16")
-        ),
-        BreadcrumbItem(
-            BreadcrumbLink("Apple", href="/shop/electronics/smartphones/apple")
-        ),
-        BreadcrumbSeparator(
-            Icon("lucide:chevron-right", width="16", height="16")
-        ),
-        BreadcrumbItem(
-            BreadcrumbPage("iPhone 15 Pro")
         )
-    )
-)''',
+    
+    yield ComponentPreview(
+        ecommerce_breadcrumb_example(),
+        ecommerce_breadcrumb_example.code,
         title="E-commerce Product Path",
         description="Product category hierarchy with chevron separators"
     )
     
     # Different separator styles
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def separator_styles_example():
+        return Div(
             # Dot separator
             Breadcrumb(
                 BreadcrumbList(
@@ -371,46 +269,19 @@ def examples():
                     )
                 )
             )
-        ),
-        '''# Dot separator
-Breadcrumb(
-    BreadcrumbList(
-        BreadcrumbItem(BreadcrumbLink("Blog", href="/blog")),
-        BreadcrumbSeparator(Span("•", cls="px-2 text-muted-foreground")),
-        BreadcrumbItem(BreadcrumbLink("Technology", href="/blog/tech")),
-        BreadcrumbSeparator(Span("•", cls="px-2 text-muted-foreground")),
-        BreadcrumbItem(BreadcrumbPage("AI Trends 2024"))
-    )
-)
-
-# Arrow separator
-Breadcrumb(
-    BreadcrumbList(
-        BreadcrumbItem(BreadcrumbLink("Settings", href="/settings")),
-        BreadcrumbSeparator(Span("→", cls="px-2 text-muted-foreground")),
-        BreadcrumbItem(BreadcrumbLink("Security", href="/settings/security")),
-        BreadcrumbSeparator(Span("→", cls="px-2 text-muted-foreground")),
-        BreadcrumbItem(BreadcrumbPage("Two-Factor Auth"))
-    )
-)
-
-# Pipe separator
-Breadcrumb(
-    BreadcrumbList(
-        BreadcrumbItem(BreadcrumbLink("Docs", href="/docs")),
-        BreadcrumbSeparator(Span("|", cls="px-2 text-muted-foreground")),
-        BreadcrumbItem(BreadcrumbLink("API", href="/docs/api")),
-        BreadcrumbSeparator(Span("|", cls="px-2 text-muted-foreground")),
-        BreadcrumbItem(BreadcrumbPage("Authentication"))
-    )
-)''',
+        )
+    
+    yield ComponentPreview(
+        separator_styles_example(),
+        separator_styles_example.code,
         title="Separator Styles",
         description="Different separator styles: dots, arrows, and pipes"
     )
     
     # Responsive breadcrumb
-    yield ComponentPreview(
-        Breadcrumb(
+    @with_code
+    def responsive_breadcrumb_example():
+        return Breadcrumb(
             BreadcrumbList(
                 BreadcrumbItem(
                     BreadcrumbLink("Home", href="/")
@@ -437,35 +308,11 @@ Breadcrumb(
                     BreadcrumbPage("Breadcrumb")
                 )
             )
-        ),
-        '''Breadcrumb(
-    BreadcrumbList(
-        BreadcrumbItem(
-            BreadcrumbLink("Home", href="/")
-        ),
-        BreadcrumbSeparator(),
-        # Ellipsis shown on mobile
-        BreadcrumbItem(
-            BreadcrumbEllipsis(),
-            cls="md:hidden"
-        ),
-        BreadcrumbSeparator(cls="md:hidden"),
-        # Full path shown on desktop
-        BreadcrumbItem(
-            BreadcrumbLink("Documentation", href="/docs"),
-            cls="hidden md:inline-flex"
-        ),
-        BreadcrumbSeparator(cls="hidden md:inline-flex"),
-        BreadcrumbItem(
-            BreadcrumbLink("Components", href="/docs/components"),
-            cls="hidden md:inline-flex"
-        ),
-        BreadcrumbSeparator(cls="hidden md:inline-flex"),
-        BreadcrumbItem(
-            BreadcrumbPage("Breadcrumb")
         )
-    )
-)''',
+    
+    yield ComponentPreview(
+        responsive_breadcrumb_example(),
+        responsive_breadcrumb_example.code,
         title="Responsive",
         description="Shows ellipsis on mobile, full path on desktop"
     )
@@ -476,8 +323,9 @@ def create_breadcrumb_docs():
     from utils import auto_generate_page
     
     # Hero example - basic breadcrumb
-    hero_example = ComponentPreview(
-        Breadcrumb(
+    @with_code
+    def hero_breadcrumb_example():
+        return Breadcrumb(
             BreadcrumbList(
                 BreadcrumbItem(
                     BreadcrumbLink("Home", href="/")
@@ -491,22 +339,12 @@ def create_breadcrumb_docs():
                     BreadcrumbPage("Breadcrumb")
                 )
             )
-        ),
-        '''Breadcrumb(
-    BreadcrumbList(
-        BreadcrumbItem(
-            BreadcrumbLink("Home", href="/")
-        ),
-        BreadcrumbSeparator(),
-        BreadcrumbItem(
-            BreadcrumbLink("Components", href="/components")
-        ),
-        BreadcrumbSeparator(),
-        BreadcrumbItem(
-            BreadcrumbPage("Breadcrumb")
         )
-    )
-)'''
+    
+    hero_example = ComponentPreview(
+        hero_breadcrumb_example(),
+        hero_breadcrumb_example.code,
+        copy_button=True
     )
     
     return auto_generate_page(
@@ -516,36 +354,15 @@ def create_breadcrumb_docs():
         cli_command="star add breadcrumb",
         hero_example=hero_example,
         component_slug="breadcrumb",
-        api_reference={
-            "components": [
-                {
-                    "name": "Breadcrumb",
-                    "description": "The root breadcrumb container"
-                },
-                {
-                    "name": "BreadcrumbList",
-                    "description": "Contains the ordered list of breadcrumb items"
-                },
-                {
-                    "name": "BreadcrumbItem",
-                    "description": "Individual breadcrumb item container"
-                },
-                {
-                    "name": "BreadcrumbLink",
-                    "description": "Clickable breadcrumb link"
-                },
-                {
-                    "name": "BreadcrumbPage",
-                    "description": "Current page breadcrumb item (non-clickable)"
-                },
-                {
-                    "name": "BreadcrumbSeparator",
-                    "description": "Visual separator between breadcrumb items"
-                },
-                {
-                    "name": "BreadcrumbEllipsis",
-                    "description": "Collapsed breadcrumb indicator"
-                }
+        api_reference=build_api_reference(
+            components=[
+                Component("Breadcrumb", "The root breadcrumb container"),
+                Component("BreadcrumbList", "Contains the ordered list of breadcrumb items"),
+                Component("BreadcrumbItem", "Individual breadcrumb item container"),
+                Component("BreadcrumbLink", "Clickable breadcrumb link"),
+                Component("BreadcrumbPage", "Current page breadcrumb item (non-clickable)"),
+                Component("BreadcrumbSeparator", "Visual separator between breadcrumb items"),
+                Component("BreadcrumbEllipsis", "Collapsed breadcrumb indicator"),
             ]
-        }
+        )
     )

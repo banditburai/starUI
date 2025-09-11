@@ -94,19 +94,28 @@ def _usage(code: str | None, description: str | None = None) -> FT | None:
 
 
 def _api_reference(api_ref: dict[str, Any] | None) -> FT | None:
-    """API reference section with tables."""
+    """
+    API reference section with intentional table selection.
+    
+    Design philosophy:
+    - Simple components (Button, Input): Show props table
+    - Composite components (AlertDialog, Accordion): Show components table OR props table  
+    - Decision is made per-component based on what users need most
+    """
     if not api_ref:
         return None
     
     props = api_ref.get("props", [])
-    items = api_ref.get("api", api_ref.get("components", []))
+    components = api_ref.get("components", [])
     
-    if not (props or items):
+    if not (props or components):
         return None
     
+    # Intentionally show either props OR components table, not both
+    # The choice depends on what's most valuable for that specific component
     tables = filter(None, [
-        _props_table(props),
-        _api_items_table(items)
+        _props_table(props) if props else None,
+        _api_items_table(components) if components else None
     ])
     
     return Div(
@@ -248,6 +257,77 @@ def _markdown_props(api_ref: dict[str, Any] | None) -> str | None:
         )
     
     return "\n".join(lines)
+
+
+# ============================================================================
+# API REFERENCE BUILDERS
+# ============================================================================
+
+from dataclasses import dataclass
+from typing import Optional
+
+@dataclass
+class Prop:
+    """Represents a component prop for API documentation."""
+    name: str
+    type: str
+    description: str
+    default: Optional[str] = None
+
+@dataclass 
+class Component:
+    """Represents a component for API documentation."""
+    name: str
+    description: str
+    props: list[Prop] = None
+    
+    def __post_init__(self):
+        if self.props is None:
+            self.props = []
+
+def build_api_reference(main_props: list[Prop] = None, components: list[Component] = None) -> dict:
+    """
+    Build API reference dict from typed objects.
+    
+    Design note: Intentionally choose either main_props OR components, not both.
+    - main_props: For simple components where users need to understand parameters
+    - components: For composite components where users need to understand structure
+    """
+    result = {}
+    
+    if main_props:
+        result["props"] = [
+            {
+                "name": p.name,
+                "type": p.type,
+                "description": p.description,
+                **({"default": p.default} if p.default is not None else {})
+            }
+            for p in main_props
+        ]
+    
+    if components:
+        result["components"] = []
+        for comp in components:
+            comp_dict = {
+                "name": comp.name,
+                "description": comp.description
+            }
+            # Note: We generally don't show component props in the table
+            # since that creates too much detail. Component structure is the focus.
+            if comp.props:
+                comp_dict["props"] = [
+                    {
+                        "name": p.name,
+                        "type": p.type,
+                        "description": p.description,
+                        **({"default": p.default} if p.default is not None else {})
+                    }
+                    for p in comp.props
+                ]
+            result["components"].append(comp_dict)
+    
+    return result
 
 
 # ============================================================================

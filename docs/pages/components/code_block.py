@@ -17,14 +17,16 @@ from starui.registry.components.code_block import CodeBlock, InlineCode
 from starui.registry.components.badge import Badge
 from starui.registry.components.separator import Separator
 from widgets.component_preview import ComponentPreview
+from utils import with_code, Prop, Component, build_api_reference
 
 
 def examples():
     """Generate code block examples using ComponentPreview with tabs."""
     
     # Basic syntax highlighting
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def python_syntax_highlighting_example():
+        return Div(
             P("Python Code", cls="font-medium mb-3"),
             CodeBlock('''def fibonacci(n):
     """Generate Fibonacci sequence up to n."""
@@ -40,28 +42,19 @@ numbers = fibonacci(100)
 print(f"Fibonacci numbers up to 100: {numbers}")''', language="python"),
             cls="w-full overflow-x-auto",
             style="scrollbar-width: thin; scrollbar-color: transparent transparent;"
-        ),
-        '''from starui.registry.components.code_block import CodeBlock
-
-CodeBlock(\'\'\'def fibonacci(n):
-    """Generate Fibonacci sequence up to n."""
-    a, b = 0, 1
-    sequence = []
-    while a <= n:
-        sequence.append(a)
-        a, b = b, a + b
-    return sequence
-
-# Usage example
-numbers = fibonacci(100)
-print(f"Fibonacci numbers up to 100: {numbers}")\'\'\'', language="python")''',
+        )
+    
+    yield ComponentPreview(
+        python_syntax_highlighting_example(),
+        python_syntax_highlighting_example.code,
         title="Python Syntax Highlighting",
         description="Beautiful syntax highlighting for Python code with proper indentation and colors"
     )
     
     # Code block with copy functionality (manual implementation)
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def interactive_copy_feature_example():
+        return Div(
             P("Interactive Code Block", cls="font-medium mb-3"),
             
             # Code block with copy button - using relative positioning
@@ -167,49 +160,19 @@ if __name__ == "__main__":
             
             cls="w-full overflow-x-auto",
             style="scrollbar-width: thin; scrollbar-color: transparent transparent;"
-        ),
-        '''from starhtml import Div, Span, Icon
-from starhtml.datastar import ds_on_click, ds_show, ds_signals, value
-from starui.registry.components.code_block import CodeBlock
-from starui.registry.components.button import Button
-
-# Code block with copy functionality
-Div(
-    # Header
-    Div(
-        Span("example.py", cls="text-sm font-mono text-muted-foreground"),
-        Div(
-            Button(
-                Icon("lucide:copy", cls="w-4 h-4"),
-                ds_on_click("navigator.clipboard.writeText($code_content); $copied = true; setTimeout(() => $copied = false, 2000)"),
-                ds_show("!$copied"),
-                variant="ghost",
-                size="sm"
-            ),
-            Button(
-                Icon("lucide:check", cls="w-4 h-4"),
-                ds_show("$copied"),
-                variant="ghost",
-                size="sm",
-                cls="text-green-600"
-            ),
-            cls="flex"
-        ),
-        cls="flex items-center justify-between px-4 py-2 bg-muted rounded-t-lg"
-    ),
+        )
     
-    # Code content
-    CodeBlock(code_content, language="python", cls="rounded-t-none"),
-    
-    ds_signals(code_content=value("..."), copied=False)
-)''',
+    yield ComponentPreview(
+        interactive_copy_feature_example(),
+        interactive_copy_feature_example.code,
         title="Interactive Copy Feature",
         description="Add copy functionality to code blocks with visual feedback"
     )
     
     # Inline code usage
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def inline_code_snippets_example():
+        return Div(
             P(
                 "Use the ",
                 InlineCode("useState"),
@@ -245,32 +208,19 @@ Div(
             
             cls="prose prose-sm w-full max-w-none px-3 sm:px-4 py-4 sm:py-6 border rounded-lg overflow-x-auto",
             style="scrollbar-width: thin; scrollbar-color: transparent transparent;"
-        ),
-        '''from starui.registry.components.code_block import InlineCode
-from starhtml import P
-
-P(
-    "Use the ",
-    InlineCode("useState"),
-    " hook to manage component state in React. Import it like: ",
-    InlineCode("import { useState } from 'react'"),
-    "."
-)
-
-P(
-    "For styling, use CSS classes like ",
-    InlineCode("bg-blue-500"),
-    " for background and ",
-    InlineCode("text-white"),
-    " for text color."
-)''',
+        )
+    
+    yield ComponentPreview(
+        inline_code_snippets_example(),
+        inline_code_snippets_example.code,
         title="Inline Code Snippets",
         description="Highlight code snippets within paragraphs and documentation"
     )
     
     # Documentation examples
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def documentation_layout_example():
+        return Div(
             # Installation section
             Div(
                 H3("Installation", cls="text-lg font-semibold mb-3"),
@@ -386,42 +336,19 @@ def my_app():
             
             cls="w-full px-3 sm:px-4 py-4 sm:py-6 border rounded-lg overflow-x-auto",
             style="scrollbar-width: thin; scrollbar-color: transparent transparent;"
-        ),
-        '''from starui.registry.components.code_block import CodeBlock
-from starui.registry.components.badge import Badge
-from starhtml import H3, P, Div, Span
-from starui.registry.components.button import Button
-
-# Documentation with multiple code blocks
-H3("Installation")
-P("Install using your preferred package manager:")
-
-# Inline command with copy button
-Div(
-    Span("npm install starui", cls="font-mono text-sm"),
-    Button(
-        Icon("lucide:copy", cls="w-4 h-4"),
-        ds_on_click("navigator.clipboard.writeText('npm install starui')"),
-        variant="ghost",
-        size="sm"
-    ),
-    cls="flex items-center justify-between px-3 py-2 bg-muted rounded-md"
-)
-
-# Usage example
-H3("Quick Start")
-CodeBlock(\'\'\'from starhtml import Div, H1, P
-from starui.registry.components.button import Button
-
-def my_app():
-    return Button("Click me!")\'\'\'', language="python")''',
+        )
+    
+    yield ComponentPreview(
+        documentation_layout_example(),
+        documentation_layout_example.code,
         title="Documentation Layout",
         description="Structure documentation with code blocks for installation and usage examples"
     )
     
     # Terminal/command output
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def terminal_output_example():
+        return Div(
             P("Terminal Output", cls="font-medium mb-3"),
             
             # Terminal-style code block with overlay header
@@ -471,36 +398,11 @@ Run 'star dev' to see your changes.''',
             
             cls="w-full overflow-x-auto",
             style="scrollbar-width: thin; scrollbar-color: transparent transparent;"
-        ),
-        '''from starui.registry.components.code_block import CodeBlock
-from starhtml import Div, Span
-
-# Terminal-style code block
-Div(
-    # Terminal header
-    Div(
-        Div(
-            Div(cls="w-3 h-3 rounded-full bg-red-500"),
-            Div(cls="w-3 h-3 rounded-full bg-yellow-500"),
-            Div(cls="w-3 h-3 rounded-full bg-green-500"),
-            cls="flex gap-2"
-        ),
-        Span("Terminal"),
-        cls="flex items-center justify-between px-4 py-2 bg-gray-800 rounded-t-lg"
-    ),
+        )
     
-    # Terminal content
-    CodeBlock(\'\'\'$ star create my-project
-Creating new StarUI project...
-✓ Project directory created
-✓ Dependencies installed
-
-Success! Your project is ready.\'\'\', 
-              language="bash",
-              cls="bg-gray-900 text-green-400 font-mono rounded-t-none"),
-    
-    cls="bg-gray-900"
-)''',
+    yield ComponentPreview(
+        terminal_output_example(),
+        terminal_output_example.code,
         title="Terminal Output",
         description="Style code blocks to look like terminal output with custom colors"
     )
@@ -511,8 +413,9 @@ def create_code_block_docs():
     from utils import auto_generate_page
     
     # Hero example showcasing basic functionality
-    hero_example = ComponentPreview(
-        Div(
+    @with_code
+    def hero_code_block_example():
+        return Div(
             # Main code block
             Div(
                 CodeBlock('''from starhtml import Div, H1, P
@@ -539,84 +442,20 @@ def welcome_component():
             
             cls="w-full overflow-x-auto",
             style="scrollbar-width: thin; scrollbar-color: transparent transparent;"
-        ),
-        '''from starui.registry.components.code_block import CodeBlock, InlineCode
-
-# Syntax-highlighted code block
-CodeBlock(\'\'\'def hello_world():
-    print("Hello, World!")
+        )
     
-hello_world()\'\'\'', language="python")
-
-# Inline code within text
-P(
-    "Use ",
-    InlineCode("CodeBlock"),
-    " for multi-line code and ",
-    InlineCode("InlineCode"),
-    " for inline snippets."
-)''',
+    hero_example = ComponentPreview(
+        hero_code_block_example(),
+        hero_code_block_example.code,
         copy_button=True
     )
     
-    api_reference = {
-        "components": [
-            {
-                "name": "CodeBlock",
-                "description": "Display multi-line code with syntax highlighting",
-                "props": [
-                    {
-                        "name": "code",
-                        "type": "str",
-                        "default": "Required",
-                        "description": "The code content to display"
-                    },
-                    {
-                        "name": "language",
-                        "type": "str",
-                        "default": "'python'",
-                        "description": "Programming language for syntax highlighting"
-                    },
-                    {
-                        "name": "class_name",
-                        "type": "str",
-                        "default": "''",
-                        "description": "Additional CSS classes"
-                    },
-                    {
-                        "name": "cls",
-                        "type": "str",
-                        "default": "''",
-                        "description": "CSS classes (alternative to class_name)"
-                    }
-                ]
-            },
-            {
-                "name": "InlineCode",
-                "description": "Display inline code snippets without syntax highlighting",
-                "props": [
-                    {
-                        "name": "text",
-                        "type": "str",
-                        "default": "Required",
-                        "description": "The code text to display inline"
-                    },
-                    {
-                        "name": "class_name",
-                        "type": "str",
-                        "default": "''",
-                        "description": "Additional CSS classes"
-                    },
-                    {
-                        "name": "cls",
-                        "type": "str",
-                        "default": "''",
-                        "description": "CSS classes (alternative to class_name)"
-                    }
-                ]
-            }
+    api_reference = build_api_reference(
+        components=[
+            Component("CodeBlock", "Display multi-line code with syntax highlighting and copy functionality"),
+            Component("InlineCode", "Highlight short code snippets within text and documentation"),
         ]
-    }
+    )
     
     return auto_generate_page(
         TITLE,

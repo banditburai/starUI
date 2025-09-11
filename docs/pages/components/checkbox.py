@@ -20,7 +20,7 @@ from starui.registry.components.button import Button
 from starui.registry.components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
 from starui.registry.components.badge import Badge
 from starui.registry.components.progress import Progress
-from utils import auto_generate_page
+from utils import auto_generate_page, with_code, Prop, Component, build_api_reference
 from widgets.component_preview import ComponentPreview
 
 
@@ -28,8 +28,9 @@ def examples():
     """Generate checkbox examples using ComponentPreview with tabs."""
     
     # Terms and conditions example
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def terms_conditions_example():
+        return Card(
             CardHeader(
                 CardTitle("Complete Registration"),
                 CardDescription("Please review and accept our terms")
@@ -67,45 +68,19 @@ def examples():
                 )
             ),
             cls="max-w-md"
-        ),
-        '''Card(
-    CardContent(
-        Form(
-            Div(
-                CheckboxWithLabel(
-                    label="I accept the Terms of Service",
-                    helper_text="You must accept to continue",
-                    signal="terms_accepted",
-                    required=True
-                ),
-                CheckboxWithLabel(
-                    label="I accept the Privacy Policy",
-                    helper_text="Learn how we protect your data",
-                    signal="privacy_accepted",
-                    required=True
-                ),
-                CheckboxWithLabel(
-                    label="Send me product updates and offers",
-                    helper_text="You can unsubscribe at any time",
-                    signal="marketing_emails"
-                ),
-                cls="space-y-3"
-            ),
-            Button(
-                "Create Account",
-                ds_disabled="!$terms_accepted || !$privacy_accepted"
-            ),
-            ds_signals(terms_accepted=False, privacy_accepted=False, marketing_emails=True)
         )
-    )
-)''',
+    
+    yield ComponentPreview(
+        terms_conditions_example(),
+        terms_conditions_example.code,
         title="Terms & Conditions",
         description="Registration form with required checkboxes"
     )
     
     # Feature permissions
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def feature_permissions_example():
+        return Card(
             CardHeader(
                 CardTitle("App Permissions"),
                 CardDescription("Control what this app can access")
@@ -167,55 +142,19 @@ def examples():
                 )
             ),
             cls="max-w-md"
-        ),
-        '''Card(
-    CardHeader(
-        CardTitle("App Permissions"),
-        CardDescription("Control what this app can access")
-    ),
-    CardContent(
-        Div(
-            Div(
-                H3("Essential", cls="text-sm font-semibold"),
-                CheckboxWithLabel(
-                    label="Storage",
-                    helper_text="Save files and preferences",
-                    checked=True,
-                    disabled=True
-                ),
-                CheckboxWithLabel(
-                    label="Network",
-                    helper_text="Connect to the internet",
-                    checked=True,
-                    disabled=True
-                )
-            ),
-            Div(
-                H3("Optional", cls="text-sm font-semibold"),
-                CheckboxWithLabel(
-                    label="Camera",
-                    helper_text="Take photos and videos",
-                    signal="camera"
-                ),
-                CheckboxWithLabel(
-                    label="Location",
-                    helper_text="Access your location for maps",
-                    signal="location",
-                    checked=True
-                ),
-                # ... more permissions
-            ),
-            ds_signals(camera=False, location=True, contacts=False, notify=True)
         )
-    )
-)''',
+    
+    yield ComponentPreview(
+        feature_permissions_example(),
+        feature_permissions_example.code,
         title="Feature Permissions",
         description="Grouped checkboxes with disabled states"
     )
     
     # Todo list example
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def interactive_todo_list_example():
+        return Card(
             CardHeader(
                 CardTitle("✓ Todo List"),
                 CardDescription("Track your daily tasks")
@@ -277,39 +216,19 @@ def examples():
                 ds_computed("todo_progress", "([$todo1, $todo2, $todo3, $todo4].filter(Boolean).length / 4) * 100")
             ),
             cls="max-w-md"
-        ),
-        '''Card(
-    CardHeader(
-        CardTitle("✓ Todo List"),
-        CardDescription("Track your daily tasks")
-    ),
-    CardContent(
-        Div(
-            CheckboxWithLabel(
-                label="Write documentation",
-                signal="todo1",
-                label_cls=ds_class(**{"line-through text-muted-foreground": "$todo1"})
-            ),
-            # ... more todos
-            cls="space-y-3"
-        ),
-        Div(
-            P("Completed: ", Span(ds_text("[$todo1, $todo2, $todo3, $todo4].filter(Boolean).length")), " of 4"),
-            Progress(signal="todo_progress", cls="w-full h-2")
-        ),
-        ds_signals(
-            todo1=True, todo2=True, todo3=False, todo4=False
-        ),
-        ds_computed("todo_progress", "([$todo1, $todo2, $todo3, $todo4].filter(Boolean).length / 4) * 100")
-    )
-)''',
+        )
+    
+    yield ComponentPreview(
+        interactive_todo_list_example(),
+        interactive_todo_list_example.code,
         title="Interactive Todo List",
         description="Task tracking with progress visualization"
     )
     
     # Select all pattern
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def select_all_pattern_example():
+        return Card(
             CardHeader(
                 CardTitle("Bulk Actions"),
                 CardDescription("Select items for batch operations")
@@ -402,42 +321,19 @@ def examples():
                 )
             ),
             cls="max-w-md"
-        ),
-        '''Card(
-    CardContent(
-        Div(
-            CheckboxWithLabel(label="Select All", signal="selectAll"),
-            Div(
-                Div(CheckboxWithLabel(label="invoice.pdf", signal="file1"), ds_show("$file1_exists")),
-                Div(CheckboxWithLabel(label="report.xlsx", signal="file2"), ds_show("$file2_exists")),
-                # ... more files with ds_show
-            ),
-            Button(
-                Span(ds_text("`Delete ${count} Selected`")),
-                ds_disabled("!$file1 && !$file2 && !$file3 && !$file4"),
-                ds_on_click("""
-                    if ($file1) $file1_exists = false;
-                    if ($file2) $file2_exists = false;
-                    // Remove selected files and uncheck
-                """)
-            ),
-            P(ds_text("`${count} item${count !== 1 ? 's' : ''} selected`")),
-            ds_signals(
-                selectAll=False, file1=False, file2=False,
-                file1_exists=True, file2_exists=True
-            ),
-            ds_effect("$selectAll = $file1 && $file2 && ($file1 || $file2)"),
-            ds_on_change("if (event.target.matches('[data-bind=\\"selectAll\\"]')) { /* sync */ }")
         )
-    )
-)''',
+    
+    yield ComponentPreview(
+        select_all_pattern_example(),
+        select_all_pattern_example.code,
         title="Select All Pattern",
         description="Bulk selection with parent-child checkbox relationship"
     )
     
     # Filter/preferences form
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def filter_form_example():
+        return Card(
             CardHeader(
                 CardTitle("Filter Options"),
                 CardDescription("Customize your search results")
@@ -504,37 +400,19 @@ def examples():
                 )
             ),
             cls="max-w-sm"
-        ),
-        '''Card(
-    CardHeader(CardTitle("Filter Options")),
-    CardContent(
-        Form(
-            # Categories section
-            Div(
-                H3("Categories"),
-                CheckboxWithLabel(label="Electronics", signal="cat_electronics"),
-                # ... more categories
-            ),
-            # Price range section
-            Div(
-                H3("Price Range"),
-                CheckboxWithLabel(label="Under $25", signal="price_1"),
-                # ... more price ranges
-            ),
-            # Action buttons
-            Button("Apply Filters", type="submit"),
-            Button("Reset", variant="outline", ds_on_click="resetFilters()"),
-            ds_signals(/* initial filter states */)
         )
-    )
-)''',
+    
+    yield ComponentPreview(
+        filter_form_example(),
+        filter_form_example.code,
         title="Filter Form",
         description="Multi-category filtering interface"
     )
     
     # Settings panel with validation
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def settings_with_validation_example():
+        return Card(
             CardHeader(
                 CardTitle("Notification Settings"),
                 CardDescription("Choose how you want to be notified")
@@ -609,31 +487,11 @@ def examples():
                 )
             ),
             cls="w-80"
-        ),
-        '''Card(
-    CardContent(
-        Form(
-            Div(
-                CheckboxWithLabel(
-                    label="Email Notifications",
-                    helper_text="Receive important updates via email",
-                    signal="email_notif"
-                ),
-                # ... more notification options
-            ),
-            P(
-                "At least one notification method must be enabled",
-                ds_show("!$email_notif && !$push_notif && !$sms_notif"),
-                cls="text-destructive"
-            ),
-            Button(
-                "Save Settings",
-                ds_disabled("!$email_notif && !$push_notif && !$sms_notif")
-            ),
-            ds_signals(email_notif=True, push_notif=False, sms_notif=False)
         )
-    )
-)''',
+    
+    yield ComponentPreview(
+        settings_with_validation_example(),
+        settings_with_validation_example.code,
         title="Settings with Validation",
         description="Form validation based on checkbox selections"
     )
@@ -642,95 +500,23 @@ def examples():
 def create_checkbox_docs():
     """Create checkbox documentation page using convention-based approach."""
     
-    api_reference = {
-        "props": [
-            {
-                "name": "checked",
-                "type": "bool | None",
-                "default": "None",
-                "description": "Initial checked state of the checkbox"
-            },
-            {
-                "name": "name",
-                "type": "str | None",
-                "default": "None",
-                "description": "Name attribute for form submission"
-            },
-            {
-                "name": "value",
-                "type": "str | None",
-                "default": "'on'",
-                "description": "Value when checkbox is checked"
-            },
-            {
-                "name": "signal",
-                "type": "str | None",
-                "default": "auto-generated",
-                "description": "Datastar signal name for state management"
-            },
-            {
-                "name": "disabled",
-                "type": "bool",
-                "default": "False",
-                "description": "Whether checkbox is disabled"
-            },
-            {
-                "name": "required",
-                "type": "bool",
-                "default": "False",
-                "description": "Whether checkbox is required"
-            },
-            {
-                "name": "cls",
-                "type": "str",
-                "default": "''",
-                "description": "Additional CSS classes for checkbox"
-            },
-            {
-                "name": "indicator_cls",
-                "type": "str",
-                "default": "''",
-                "description": "Additional CSS classes for check indicator"
-            }
-        ],
-        "helper_components": [
-            {
-                "name": "CheckboxWithLabel",
-                "description": "Checkbox with integrated label and helper/error text",
-                "props": [
-                    {
-                        "name": "label",
-                        "type": "str",
-                        "description": "Label text for the checkbox"
-                    },
-                    {
-                        "name": "helper_text",
-                        "type": "str | None",
-                        "description": "Helper text displayed below the label"
-                    },
-                    {
-                        "name": "error_text",
-                        "type": "str | None",
-                        "description": "Error message displayed below the checkbox"
-                    },
-                    {
-                        "name": "label_cls",
-                        "type": "str",
-                        "description": "Additional CSS classes for the label"
-                    },
-                    {
-                        "name": "checkbox_cls",
-                        "type": "str",
-                        "description": "Additional CSS classes for the checkbox itself"
-                    }
-                ]
-            }
+    api_reference = build_api_reference(
+        main_props=[
+            Prop("checked", "bool | None", "Initial checked state of the checkbox", "None"),
+            Prop("signal", "str | None", "Datastar signal name for state management and reactive updates", "auto-generated"),
+            Prop("label", "str", "Label text for the checkbox (CheckboxWithLabel only)"),
+            Prop("helper_text", "str | None", "Helper text displayed below the label", "None"),
+            Prop("disabled", "bool", "Whether checkbox is disabled", "False"),
+            Prop("required", "bool", "Whether checkbox is required for form validation", "False"),
+            Prop("name", "str | None", "Name attribute for form submission", "None"),
+            Prop("cls", "str", "Additional CSS classes for styling", "''"),
         ]
-    }
+    )
     
     # Hero example - Interactive settings panel
-    hero_example = ComponentPreview(
-        Card(
+    @with_code
+    def hero_checkbox_example():
+        return Card(
             CardHeader(
                 CardTitle("Quick Setup"),
                 CardDescription("Configure your preferences in seconds")
@@ -773,46 +559,11 @@ def create_checkbox_docs():
                 )
             ),
             cls="max-w-md mx-auto"
-        ),
-        '''Card(
-    CardHeader(
-        CardTitle("Quick Setup"),
-        CardDescription("Configure your preferences in seconds")
-    ),
-    CardContent(
-        Div(
-            CheckboxWithLabel(
-                label="Enable dark mode",
-                helper_text="Reduce eye strain in low-light conditions",
-                signal="dark_mode",
-                checked=True
-            ),
-            CheckboxWithLabel(
-                label="Show notifications",
-                helper_text="Stay updated with real-time alerts",
-                signal="notifications"
-            ),
-            CheckboxWithLabel(
-                label="Auto-save drafts",
-                helper_text="Never lose your work",
-                signal="auto_save",
-                checked=True
-            ),
-            Div(
-                P("Your preferences: ", cls="text-sm text-muted-foreground mb-1"),
-                P(
-                    Span(
-                        ds_text("[$dark_mode && 'Dark Mode', $notifications && 'Notifications', $auto_save && 'Auto-save'].filter(Boolean).join(', ') || 'None selected'"),
-                        cls="font-medium text-sm break-words"
-                    ),
-                    cls="min-h-[1.25rem]"
-                ),
-                cls="mt-4 pt-4 border-t"
-            ),
-            ds_signals(dark_mode=True, notifications=False, auto_save=True)
         )
-    )
-)''',
+    
+    hero_example = ComponentPreview(
+        hero_checkbox_example(),
+        hero_checkbox_example.code,
         copy_button=True
     )
     

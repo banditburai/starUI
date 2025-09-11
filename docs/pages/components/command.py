@@ -11,7 +11,7 @@ from starui.registry.components.command import (
 )
 from starui.registry.components.button import Button
 from starui.registry.components.badge import Badge
-from utils import auto_generate_page
+from utils import auto_generate_page, with_code, Prop, Component, build_api_reference
 from widgets.component_preview import ComponentPreview
 
 # Component metadata for auto-discovery
@@ -26,7 +26,6 @@ def examples():
     """Generate command examples using ComponentPreview with tabs."""
     
     # Interactive task manager with dynamic groups
-    # Define tasks as Python data that will generate the UI
     tasks = [
         {"id": "task1", "name": "Review pull requests", "status": "progress", "priority": "normal"},
         {"id": "task2", "name": "Fix critical bug", "status": "pending", "priority": "urgent"},
@@ -62,7 +61,7 @@ def examples():
                     show_condition = f"${task_id}_visible && ${task_id}_status === 'pending'"
                     task_name = None  # Will use ds_text
                 
-                if task_name:  # Existing task
+                if task_name and existing_task:  # Existing task
                     items.append(
                         CommandItem(
                             Icon(icon_name, cls=f"mr-2 h-4 w-4 {icon_class}"),
@@ -288,8 +287,9 @@ def examples():
             )
         return _
     
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def interactive_task_manager_example():
+        return Div(
             Command(
                 TaskCommandInput(
                     placeholder="Add a new task (use ! for urgent)..."
@@ -315,56 +315,19 @@ def examples():
                 size="md"
             ),
             ds_signals(**task_signals)
-        ),
-        """# Custom CommandInput for task addition
-def TaskCommandInput(placeholder="Add a new task...", **kwargs):
-    def _(signal):
-        return Div(
-            Icon("lucide:plus", cls="size-4 shrink-0 opacity-50"),
-            Input(
-                ds_bind("task_cmd_new"),
-                ds_on_keydown("...task addition logic..."),
-                placeholder=placeholder,
-                **kwargs
-            ),
-            cls="flex h-9 items-center gap-2 border-b border-border px-3"
         )
-    return _
-
-Command(
-    TaskCommandInput(placeholder="Add a new task (use ! for urgent)..."),
-    CommandList(
-        CommandEmpty("No tasks found."),
-        CommandGroup(
-            "Active Tasks",
-            CommandItem(
-                Icon("lucide:circle", cls="mr-2 h-4 w-4 text-blue-500"),
-                "Review pull requests",
-                Badge("In Progress", variant="default", cls="ml-auto"),
-                value="task1",
-                onclick="alert('Task marked as complete')"
-            )
-        ),
-        CommandGroup(
-            "Completed",
-            CommandItem(
-                Icon("lucide:check-circle", cls="mr-2 h-4 w-4 text-green-500"),
-                Span("Deploy to production", cls="line-through opacity-60"),
-                Badge("Done", variant="outline", cls="ml-auto"),
-                value="task4",
-                disabled=True
-            )
-        )
-    ),
-    signal="task_cmd"
-)""",
+    
+    yield ComponentPreview(
+        interactive_task_manager_example(),
+        interactive_task_manager_example.code,
         title="Interactive Task Manager",
         description="Command component as a task manager with state transitions. Click tasks to move them: Pending → In Progress → Completed. Add new tasks with Enter (use ! prefix for urgent)."
     )
     
     # Command palette with real actions
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def command_palette_with_actions_example():
+        return Div(
             CommandDialog(
                 Button(
                     Icon("lucide:terminal", cls="mr-2 h-4 w-4"),
@@ -449,48 +412,19 @@ Command(
                 signal="action_cmd"
             ),
             cls="flex justify-center"
-        ),
-        """CommandDialog(
-    Button(
-        Icon("lucide:terminal", cls="mr-2 h-4 w-4"),
-        "Open command palette",
-        Kbd("⌘K", cls="ml-auto text-xs"),
-        variant="outline"
-    ),
-    [
-        CommandInput(placeholder="Type a command..."),
-        CommandList(
-            CommandEmpty("No commands found."),
-            CommandGroup(
-                "Navigation",
-                CommandItem(
-                    Icon("lucide:home", cls="mr-2 h-4 w-4"),
-                    "Go to Home",
-                    value="home",
-                    onclick="window.location.href='/'",
-                ),
-            ),
-            CommandGroup(
-                "Utilities",
-                CommandItem(
-                    Icon("lucide:copy", cls="mr-2 h-4 w-4"),
-                    "Copy Email",
-                    CommandShortcut("⌘C"),
-                    value="copy-email",
-                    onclick="navigator.clipboard.writeText('user@example.com')",
-                ),
-            ),
         )
-    ],
-    signal="cmd"
-)""",
+    
+    yield ComponentPreview(
+        command_palette_with_actions_example(),
+        command_palette_with_actions_example.code,
         title="Command Palette with Actions",
         description="Interactive command dialog with real actions: navigation, clipboard operations, and system controls"
     )
     
     # Compact context menu
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def compact_context_menu_example():
+        return Div(
             Command(
                 CommandList(
                     CommandGroup(
@@ -552,36 +486,11 @@ Command(
                 size="sm"
             ),
             cls="max-w-xs"
-        ),
-        """Command(
-    CommandList(
-        CommandGroup(
-            "Item Actions",
-            CommandItem(
-                Icon("lucide:edit", cls="mr-2 h-4 w-4"),
-                "Edit",
-                CommandShortcut("⌘E"),
-                value="edit",
-                onclick="alert('Edit mode')",
-                ),
-            CommandItem(
-                Icon("lucide:copy", cls="mr-2 h-4 w-4"),
-                "Duplicate",
-                value="duplicate",
-                onclick="alert('Duplicated')",
-                ),
-        ),
-        CommandSeparator(),
-        CommandItem(
-            Icon("lucide:trash", cls="mr-2 h-4 w-4 text-red-500"),
-            Span("Delete", cls="text-red-500"),
-            value="delete",
-            onclick="if(confirm('Delete?')) alert('Deleted')",
-        ),
-    ),
-    signal="context_cmd",
-    size="sm"
-)""",
+        )
+    
+    yield ComponentPreview(
+        compact_context_menu_example(),
+        compact_context_menu_example.code,
         title="Compact Context Menu",
         description="Small command menu for context-specific actions, perfect for dropdowns and right-click menus"
     )
@@ -591,8 +500,9 @@ def create_command_docs():
     """Create command documentation page using convention-based approach."""
     
     # Hero example - comprehensive command palette
-    hero_example = ComponentPreview(
-        Div(
+    @with_code
+    def hero_command_example():
+        return Div(
             Command(
                 CommandInput(
                     placeholder="Type a command or search...",
@@ -645,33 +555,12 @@ def create_command_docs():
                 size="md"
             ),
             cls="max-w-2xl mx-auto"
-        ),
-        """from starui.registry.components.command import *
-
-Command(
-    CommandInput(placeholder="Type a command or search..."),
-    CommandList(
-        CommandEmpty("No results found."),
-        CommandGroup(
-            "Suggestions",
-            CommandItem(
-                Icon("lucide:rocket", cls="mr-2 h-4 w-4"),
-                "Launch",
-                CommandShortcut("⌘L"),
-                value="launch"
-            ),
-            CommandItem(
-                Icon("lucide:search", cls="mr-2 h-4 w-4"),
-                "Search",
-                CommandShortcut("⌘K"),
-                value="search"
-            ),
-        ),
-    ),
-    signal="cmd"
-)""",
-        title="",
-        description=""
+        )
+    
+    hero_example = ComponentPreview(
+        hero_command_example(),
+        hero_command_example.code,
+        copy_button=True
     )
     
     return auto_generate_page(
@@ -681,82 +570,17 @@ Command(
         cli_command="star add command",
         hero_example=hero_example,
         component_slug="command",
-        api_reference={
-            "components": [
-                {
-                    "name": "Command",
-                    "description": "The root command container"
-                },
-                {
-                    "name": "CommandInput",
-                    "description": "Search input for filtering command items"
-                },
-                {
-                    "name": "CommandList",
-                    "description": "Container for command items and groups"
-                },
-                {
-                    "name": "CommandEmpty",
-                    "description": "Empty state when no results match the search"
-                },
-                {
-                    "name": "CommandGroup",
-                    "description": "Group related command items with a heading"
-                },
-                {
-                    "name": "CommandItem",
-                    "description": "Individual selectable command item"
-                },
-                {
-                    "name": "CommandSeparator",
-                    "description": "Visual separator between command groups"
-                },
-                {
-                    "name": "CommandShortcut",
-                    "description": "Display keyboard shortcut for a command"
-                },
-                {
-                    "name": "CommandDialog",
-                    "description": "Command palette in a modal dialog"
-                }
-            ],
-            "props": [
-                {
-                    "name": "signal",
-                    "type": "str",
-                    "description": "Unique identifier for command state management"
-                },
-                {
-                    "name": "size",
-                    "type": "Literal['sm', 'md', 'lg']",
-                    "description": "Size of the command palette",
-                    "default": "md"
-                },
-                {
-                    "name": "placeholder",
-                    "type": "str",
-                    "description": "Placeholder text for search input"
-                },
-                {
-                    "name": "on_select",
-                    "type": "str",
-                    "description": "JavaScript code to execute when item is selected"
-                },
-                {
-                    "name": "value",
-                    "type": "str",
-                    "description": "Value for search filtering (defaults to text content)"
-                },
-                {
-                    "name": "disabled",
-                    "type": "bool",
-                    "description": "Whether the command item is disabled",
-                    "default": "False"
-                }
+        api_reference=build_api_reference(
+            components=[
+                Component("Command", "The root command container with search and filtering"),
+                Component("CommandInput", "Search input for filtering command items"),
+                Component("CommandList", "Container for command items and groups"),
+                Component("CommandEmpty", "Empty state when no results match the search"),
+                Component("CommandGroup", "Group related command items with a heading"),
+                Component("CommandItem", "Individual selectable command item with actions"),
+                Component("CommandSeparator", "Visual separator between command groups"),
+                Component("CommandShortcut", "Display keyboard shortcut for a command"),
+                Component("CommandDialog", "Command palette in a modal dialog overlay"),
             ]
-        }
+        )
     )
-
-
-# Register the page
-__all__ = ["create_command_docs", "TITLE", "DESCRIPTION", "CATEGORY", "ORDER", "STATUS"]

@@ -9,7 +9,6 @@ from .utils import cn
 
 def Avatar(
     *children: Any,
-    class_name: str = "",
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
@@ -18,7 +17,6 @@ def Avatar(
         data_slot="avatar",
         cls=cn(
             "relative flex size-10 shrink-0 overflow-hidden rounded-full",
-            class_name,
             cls,
         ),
         **kwargs,
@@ -29,7 +27,6 @@ def AvatarImage(
     src: str,
     alt: str = "",
     loading: str = "lazy",
-    class_name: str = "",
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
@@ -38,26 +35,22 @@ def AvatarImage(
         alt=alt,
         loading=loading,
         data_slot="avatar-image",
-        cls=cn("aspect-square size-full object-cover", class_name, cls),
+        cls=cn("aspect-square size-full object-cover", cls),
         **kwargs,
     )
 
 
 def AvatarFallback(
     *children: Any,
-    class_name: str = "",
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    has_bg = "bg-" in f"{class_name} {cls}"
-
     return Div(
         *children,
         data_slot="avatar-fallback",
         cls=cn(
             "flex size-full items-center justify-center rounded-full",
-            "bg-muted" if not has_bg else "",
-            class_name,
+            "bg-muted" if "bg-" not in cls else "",
             cls,
         ),
         **kwargs,
@@ -69,18 +62,17 @@ def AvatarWithFallback(
     alt: str = "",
     fallback: str = "?",
     loading: str = "lazy",
-    class_name: str = "",
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
     if not src:
         return Avatar(
             AvatarFallback(fallback),
-            cls=cn(class_name, cls),
+            cls=cls,
             **kwargs,
         )
 
-    signal = f"avatar_{str(uuid4())[:8]}_error"
+    signal = f"avatar_{uuid4().hex[:8]}_error"
 
     return Avatar(
         ds_signals(**{signal: False}),
@@ -99,6 +91,6 @@ def AvatarWithFallback(
             cls="flex size-full items-center justify-center rounded-full bg-muted",
             data_slot="avatar-fallback",
         ),
-        cls=cn(class_name, cls),
+        cls=cls,
         **kwargs,
     )

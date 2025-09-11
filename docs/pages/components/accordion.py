@@ -23,7 +23,7 @@ from starui.registry.components.badge import Badge
 from starui.registry.components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
 from starui.registry.components.input import InputWithLabel
 from starui.registry.components.checkbox import CheckboxWithLabel
-from utils import auto_generate_page, with_code
+from utils import auto_generate_page, Prop, build_api_reference, with_code
 from widgets.component_preview import ComponentPreview
 
 
@@ -632,63 +632,17 @@ def examples():
 def create_accordion_docs():
     """Create accordion documentation page using convention-based approach."""
     
-    api_reference = {
-        "props": [
-            {
-                "name": "type",
-                "type": "Literal['single', 'multiple']",
-                "default": "'single'",
-                "description": "Whether one or multiple items can be open"
-            },
-            {
-                "name": "collapsible",
-                "type": "bool",
-                "default": "False",
-                "description": "When type='single', allows closing all items"
-            },
-            {
-                "name": "default_value",
-                "type": "str | list[str] | None",
-                "default": "None",
-                "description": "Initially open item(s)"
-            },
-            {
-                "name": "signal",
-                "type": "str",
-                "default": "auto-generated",
-                "description": "Datastar signal name for state management"
-            },
-            {
-                "name": "cls",
-                "type": "str",
-                "default": "''",
-                "description": "Additional CSS classes"
-            }
-        ],
-        "sub_components": [
-            {
-                "name": "AccordionItem",
-                "description": "Container for a single accordion section",
-                "props": [
-                    {
-                        "name": "value",
-                        "type": "str",
-                        "description": "Unique identifier for this item"
-                    }
-                ]
-            },
-            {
-                "name": "AccordionTrigger",
-                "description": "Clickable header that toggles content",
-                "props": []
-            },
-            {
-                "name": "AccordionContent",
-                "description": "Collapsible content area",
-                "props": []
-            }
+    # For Accordion, users need to understand the main behavioral props
+    # (single vs multiple, collapsible, default values) more than sub-component structure
+    api_reference = build_api_reference(
+        main_props=[
+            Prop("type", "Literal['single', 'multiple']", "Whether one or multiple items can be open", "'single'"),
+            Prop("collapsible", "bool", "When type='single', allows closing all items", "False"),
+            Prop("default_value", "str | list[str] | None", "Initially open item(s)", "None"),
+            Prop("signal", "str", "Datastar signal name for state management", "auto-generated"),
+            Prop("cls", "str", "Additional CSS classes", "''"),
         ]
-    }
+    )
     
     # Hero example
     @with_code

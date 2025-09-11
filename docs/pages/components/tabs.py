@@ -13,6 +13,7 @@ from starhtml import Div, P, H2, H3, H4, Pre, Code, Button as HTMLButton
 from starui.registry.components.tabs import Tabs, TabsList, TabsTrigger, TabsContent
 from starui.registry.components.button import Button
 from widgets.component_preview import ComponentPreview
+from utils import auto_generate_page, with_code, Component, build_api_reference
 
 
 def examples():
@@ -22,8 +23,9 @@ def examples():
     # This will be the first example after the hero
     
     # Dashboard tabs
-    yield ComponentPreview(
-        Tabs(
+    @with_code
+    def dashboard_tabs_example():
+        return Tabs(
             TabsList(
                 TabsTrigger("Overview", id="overview"),
                 TabsTrigger("Analytics", id="analytics"), 
@@ -58,34 +60,19 @@ def examples():
             ),
             default_id="overview",
             cls="w-full"
-        ),
-        '''Tabs(
-    TabsList(
-        TabsTrigger("Overview", id="overview"),
-        TabsTrigger("Analytics", id="analytics"),
-        TabsTrigger("Reports", id="reports")
-    ),
-    TabsContent(
-        P("Welcome to your dashboard with activity summary."),
-        id="overview"
-    ),
-    TabsContent(
-        P("View detailed analytics and metrics."),
-        id="analytics"
-    ),
-    TabsContent(
-        P("Generate and download reports."),
-        id="reports"
-    ),
-    default_id="overview"
-)''',
+        )
+
+    yield ComponentPreview(
+        dashboard_tabs_example(),
+        dashboard_tabs_example.code,
         title="Dashboard Tabs",
         description="Multiple tabs for different content sections"
     )
     
     # Code preview tabs
-    yield ComponentPreview(
-        Tabs(
+    @with_code
+    def code_preview_tabs_example():
+        return Tabs(
             TabsList(
                 TabsTrigger("Preview", id="preview"),
                 TabsTrigger("Code", id="code")
@@ -110,33 +97,19 @@ Button("Outline", variant="outline")'''),
             ),
             default_id="preview",
             cls="w-full"
-        ),
-        '''Tabs(
-    TabsList(
-        TabsTrigger("Preview", id="preview"),
-        TabsTrigger("Code", id="code")
-    ),
-    TabsContent(
-        Div(
-            Button("Click me!"),
-            Button("Secondary", variant="secondary"),
-            cls="p-6 border rounded-lg"
-        ),
-        id="preview"
-    ),
-    TabsContent(
-        Pre(Code("Button code here...")),
-        id="code"
-    ),
-    default_id="preview"
-)''',
+        )
+
+    yield ComponentPreview(
+        code_preview_tabs_example(),
+        code_preview_tabs_example.code,
         title="Code Preview",
         description="Tabs for showing preview and code"
     )
     
     # Settings tabs
-    yield ComponentPreview(
-        Tabs(
+    @with_code
+    def settings_tabs_example():
+        return Tabs(
             TabsList(
                 TabsTrigger("General", id="general"),
                 TabsTrigger("Security", id="security"),
@@ -174,29 +147,19 @@ Button("Outline", variant="outline")'''),
             ),
             default_id="general",
             cls="w-full"
-        ),
-        '''Tabs(
-    TabsList(
-        TabsTrigger("General", id="general"),
-        TabsTrigger("Security", id="security"),
-        TabsTrigger("Notifications", id="notifications")
-    ),
-    TabsContent(
-        Div(
-            P("Manage your account preferences."),
-            # Settings form here
-        ),
-        id="general"
-    ),
-    default_id="general"
-)''',
+        )
+
+    yield ComponentPreview(
+        settings_tabs_example(),
+        settings_tabs_example.code,
         title="Settings Tabs",
         description="Multi-section settings interface"
     )
     
     # Plain variant tabs
-    yield ComponentPreview(
-        Tabs(
+    @with_code
+    def plain_variant_tabs_example():
+        return Tabs(
             TabsList(
                 TabsTrigger("Documentation", id="docs"),
                 TabsTrigger("Examples", id="examples"),
@@ -226,27 +189,19 @@ Button("Outline", variant="outline")'''),
             default_id="docs",
             variant="plain",
             cls="w-full"
-        ),
-        '''Tabs(
-    TabsList(
-        TabsTrigger("Documentation", id="docs"),
-        TabsTrigger("Examples", id="examples"),
-        TabsTrigger("API Reference", id="api")
-    ),
-    TabsContent(
-        P("Read the comprehensive guides and tutorials to get started."),
-        id="docs"
-    ),
-    default_id="docs",
-    variant="plain"
-)''',
+        )
+
+    yield ComponentPreview(
+        plain_variant_tabs_example(),
+        plain_variant_tabs_example.code,
         title="Plain Variant",
         description="Clean minimal tabs without background styling"
     )
     
     # Navigation-style tabs
-    yield ComponentPreview(
-        Tabs(
+    @with_code
+    def navigation_tabs_example():
+        return Tabs(
             TabsList(
                 TabsTrigger("Home", id="home"),
                 TabsTrigger("About", id="about"),
@@ -294,24 +249,11 @@ Button("Outline", variant="outline")'''),
             default_id="home",
             variant="plain",
             cls="w-full"
-        ),
-        '''Tabs(
-    TabsList(
-        TabsTrigger("Home", id="home"),
-        TabsTrigger("About", id="about"),
-        TabsTrigger("Services", id="services"),
-        TabsTrigger("Contact", id="contact")
-    ),
-    TabsContent(
-        Div(
-            P("Welcome to our platform!"),
-            Button("Get Started")
-        ),
-        id="home"
-    ),
-    default_id="home",
-    variant="plain"
-)''',
+        )
+
+    yield ComponentPreview(
+        navigation_tabs_example(),
+        navigation_tabs_example.code,
         title="Navigation Tabs",
         description="Website navigation-style tabs using plain variant"
     )
@@ -319,11 +261,11 @@ Button("Outline", variant="outline")'''),
 
 def create_tabs_docs():
     """Create tabs documentation page using convention-based approach."""
-    from utils import auto_generate_page
     
     # Hero example - simple account/password tabs
-    hero_example = ComponentPreview(
-        Tabs(
+    @with_code
+    def hero_tabs_example():
+        return Tabs(
             TabsList(
                 TabsTrigger("Account", id="account"),
                 TabsTrigger("Password", id="password")
@@ -344,28 +286,12 @@ def create_tabs_docs():
             ),
             default_id="account",
             cls="w-full max-w-md"
-        ),
-        '''Tabs(
-    TabsList(
-        TabsTrigger("Account", id="account"),
-        TabsTrigger("Password", id="password")
-    ),
-    TabsContent(
-        Div(
-            H4("Account"),
-            P("Make changes to your account here.")
-        ),
-        id="account"
-    ),
-    TabsContent(
-        Div(
-            H4("Password"),
-            P("Change your password here.")
-        ),
-        id="password"
-    ),
-    default_id="account"
-)'''
+        )
+
+    hero_example = ComponentPreview(
+        hero_tabs_example(),
+        hero_tabs_example.code,
+        copy_button=True
     )
     
     return auto_generate_page(
@@ -375,32 +301,12 @@ def create_tabs_docs():
         cli_command="star add tabs",
         hero_example=hero_example,
         component_slug="tabs",
-        api_reference={
-            "props": [
-                {
-                    "name": "default_id",
-                    "type": "str",
-                    "default": "required",
-                    "description": "The id of the tab that should be active when initially rendered"
-                },
-                {
-                    "name": "variant",
-                    "type": "Literal['default', 'plain']",
-                    "default": "default",
-                    "description": "Visual style variant of the tabs"
-                },
-                {
-                    "name": "id",
-                    "type": "str",
-                    "default": "required",
-                    "description": "The unique identifier for each TabsTrigger and TabsContent pair"
-                },
-                {
-                    "name": "cls",
-                    "type": "str", 
-                    "default": "''",
-                    "description": "Additional CSS classes"
-                }
+        api_reference=build_api_reference(
+            components=[
+                Component("Tabs", "Main container managing active tab state"),
+                Component("TabsList", "Container for a set of tab triggers"),
+                Component("TabsTrigger", "Clickable tab; use matching id to pair with content"),
+                Component("TabsContent", "Panel content associated with a trigger id"),
             ]
-        }
+        )
     )

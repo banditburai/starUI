@@ -23,7 +23,7 @@ from starui.registry.components.button import Button
 from starui.registry.components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
 from starui.registry.components.badge import Badge
 from starui.registry.components.input import Input as UIInput
-from utils import auto_generate_page
+from utils import auto_generate_page, with_code, Component, build_api_reference
 from widgets.component_preview import ComponentPreview
 
 
@@ -31,8 +31,9 @@ def examples():
     """Generate select examples using ComponentPreview with tabs."""
     
     # Grouped options
-    yield ComponentPreview(
-        Select(
+    @with_code
+    def grouped_options_select_example():
+        return Select(
             SelectTrigger(
                 SelectValue(placeholder="Select a timezone"),
                 cls="w-[240px]"
@@ -59,33 +60,19 @@ def examples():
                 )
             ),
             initial_value="pst"
-        ),
-        '''Select(
-    SelectTrigger(
-        SelectValue(placeholder="Select a timezone")
-    ),
-    SelectContent(
-        SelectGroup(
-            SelectLabel("North America"),
-            SelectItem("est", "Eastern Time (EST)"),
-            SelectItem("cst", "Central Time (CST)"),
-            # ... more items
-        ),
-        SelectGroup(
-            SelectLabel("Europe"),
-            SelectItem("gmt", "Greenwich Mean Time (GMT)"),
-            # ... more items
         )
-    ),
-    initial_value="pst"
-)''',
+
+    yield ComponentPreview(
+        grouped_options_select_example(),
+        grouped_options_select_example.code,
         title="Grouped Options",
         description="Organize options into logical groups"
     )
     
     # With label and validation
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def form_integration_select_example():
+        return Card(
             CardContent(
                 Form(
                     SelectWithLabel(
@@ -127,38 +114,19 @@ def examples():
                 )
             ),
             cls="max-w-md"
-        ),
-        '''SelectWithLabel(
-    label="Country",
-    options=[
-        ("us", "United States"),
-        ("uk", "United Kingdom"),
-        ("ca", "Canada"),
-        # ... more countries
-    ],
-    placeholder="Choose your country",
-    helper_text="Select your country of residence",
-    required=True,
-    signal="country_form"
-)
+        )
 
-SelectWithLabel(
-    label="Preferred Language",
-    options=[
-        {"group": "Popular", "items": [("en", "English"), ("es", "Spanish")]},
-        {"group": "European", "items": [("fr", "French"), ("de", "German")]},
-    ],
-    value="en",
-    helper_text="We'll use this for communication",
-    signal="language_form"
-)''',
+    yield ComponentPreview(
+        form_integration_select_example(),
+        form_integration_select_example.code,
         title="Form Integration",
         description="Select with labels, helper text, and form submission"
     )
     
     # Dynamic filtering example
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def product_filtering_select_example():
+        return Card(
             CardHeader(
                 CardTitle("Product Filter"),
                 CardDescription("Find the perfect product for your needs")
@@ -237,7 +205,6 @@ SelectWithLabel(
                         cls="flex flex-col gap-1 mt-4",
                         ds_show="$category_filter_value !== 'All Categories' || $price_filter_value !== 'all' || $sort_filter_value !== 'relevance'"
                     ),
-                    # Initialize signals with proper labels
                     ds_signals(
                         price_filter_value=value("all"),
                         price_filter_label=value("All Prices"),
@@ -249,45 +216,19 @@ SelectWithLabel(
                 )
             ),
             cls="w-full max-w-md"
-        ),
-        '''Card(
-    CardContent(
-        SelectWithLabel(
-            label="Category",
-            options=["All Categories", "Electronics", "Clothing", "Books"],
-            signal="category_filter"
-        ),
-        SelectWithLabel(
-            label="Price Range",
-            options=[
-                ("all", "All Prices"),
-                ("0-25", "Under $25"),
-                ("25-50", "$25 - $50"),
-            ],
-            signal="price_filter"
-        ),
-        SelectWithLabel(
-            label="Sort By",
-            options=[
-                ("relevance", "Relevance"),
-                ("price-low", "Price: Low to High"),
-            ],
-            signal="sort_filter"
-        ),
-        Button("Apply Filters", ds_on_click="applyFilters()"),
-        Div(  # Active filters badges
-            Badge(ds_text("$category_filter_value"), ds_show="..."),
-            Badge(ds_text("$price_filter_label"), ds_show="...")
         )
-    )
-)''',
+
+    yield ComponentPreview(
+        product_filtering_select_example(),
+        product_filtering_select_example.code,
         title="Product Filtering",
         description="Multi-select filtering system with active filter display"
     )
     
     # Dependent selects
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def dependent_selects_example():
+        return Card(
             CardHeader(
                 CardTitle("Location Selection"),
                 CardDescription("Choose your location details")
@@ -384,43 +325,19 @@ SelectWithLabel(
                 )
             ),
             cls="w-full max-w-md"
-        ),
-        '''// Dependent selects that update based on parent selection
-Form(
-    SelectWithLabel(
-        label="Country",
-        options=["United States", "Canada", "Mexico"],
-        signal="location_country"
-    ),
-    SelectWithLabel(
-        label="State/Province",
-        options=[],  // Populated based on country
-        signal="location_state",
-        disabled=True  // Enabled when country selected
-    ),
-    SelectWithLabel(
-        label="City",
-        options=[],  // Populated based on state
-        signal="location_city",
-        disabled=True  // Enabled when state selected
-    ),
-    ds_effect("""
-        // Enable/disable and populate dependent selects
-        if ($location_country_value) {
-            // Fetch and populate states
-        }
-        if ($location_state_value) {
-            // Fetch and populate cities
-        }
-    """)
-)''',
+        )
+
+    yield ComponentPreview(
+        dependent_selects_example(),
+        dependent_selects_example.code,
         title="Dependent Selects",
         description="Cascading selects that update based on parent selection"
     )
     
     # Multi-action select
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def role_management_select_example():
+        return Card(
             CardHeader(
                 CardTitle("User Management"),
                 CardDescription("Manage user roles and permissions")
@@ -505,31 +422,11 @@ Form(
                 )
             ),
             cls="max-w-2xl"
-        ),
-        '''// User role management with multiple selects
-Div(
-    // User row
-    Div(
-        Div(
-            P("John Doe", cls="font-medium"),
-            P("john@example.com", cls="text-sm text-muted-foreground")
-        ),
-        Select(
-            SelectTrigger(SelectValue(placeholder="Select role")),
-            SelectContent(
-                SelectItem("viewer", "Viewer"),
-                SelectItem("editor", "Editor"),
-                SelectItem("admin", "Admin"),
-                SelectItem("owner", "Owner", disabled=True)
-            ),
-            initial_value="editor",
-            signal="user1_role"
-        ),
-        cls="flex items-center justify-between"
-    ),
-    // More user rows...
-    Button("Save Changes", ds_on_click="saveRoles()")
-)''',
+        )
+
+    yield ComponentPreview(
+        role_management_select_example(),
+        role_management_select_example.code,
         title="Role Management",
         description="Manage multiple user roles with inline selects"
     )
@@ -538,172 +435,25 @@ Div(
 def create_select_docs():
     """Create select documentation page using convention-based approach."""
     
-    api_reference = {
-        "props": [
-            {
-                "name": "initial_value",
-                "type": "str | None",
-                "default": "None",
-                "description": "Initial selected value"
-            },
-            {
-                "name": "signal",
-                "type": "str | None",
-                "default": "auto-generated",
-                "description": "Datastar signal name for state management"
-            },
-            {
-                "name": "cls",
-                "type": "str",
-                "default": "''",
-                "description": "Additional CSS classes"
-            }
-        ],
-        "sub_components": [
-            {
-                "name": "SelectTrigger",
-                "description": "Button that triggers the dropdown",
-                "props": [
-                    {
-                        "name": "signal",
-                        "type": "str",
-                        "description": "Signal name (must match parent Select)"
-                    },
-                    {
-                        "name": "width",
-                        "type": "str",
-                        "default": "'w-[180px]'",
-                        "description": "Width class for the trigger button"
-                    },
-                    {
-                        "name": "disabled",
-                        "type": "bool",
-                        "default": "False",
-                        "description": "Whether the select is disabled"
-                    }
-                ]
-            },
-            {
-                "name": "SelectValue",
-                "description": "Displays the selected value or placeholder",
-                "props": [
-                    {
-                        "name": "placeholder",
-                        "type": "str",
-                        "default": "'Select an option'",
-                        "description": "Placeholder text when no value selected"
-                    },
-                    {
-                        "name": "signal",
-                        "type": "str",
-                        "description": "Signal name (must match parent Select)"
-                    }
-                ]
-            },
-            {
-                "name": "SelectContent",
-                "description": "Container for select options",
-                "props": [
-                    {
-                        "name": "signal",
-                        "type": "str",
-                        "description": "Signal name (must match parent Select)"
-                    }
-                ]
-            },
-            {
-                "name": "SelectItem",
-                "description": "Individual select option",
-                "props": [
-                    {
-                        "name": "value",
-                        "type": "str",
-                        "description": "Value when this option is selected"
-                    },
-                    {
-                        "name": "label",
-                        "type": "str | None",
-                        "description": "Display text (defaults to value)"
-                    },
-                    {
-                        "name": "signal",
-                        "type": "str",
-                        "description": "Signal name (must match parent Select)"
-                    },
-                    {
-                        "name": "disabled",
-                        "type": "bool",
-                        "default": "False",
-                        "description": "Whether this option is disabled"
-                    }
-                ]
-            },
-            {
-                "name": "SelectGroup",
-                "description": "Groups related options together",
-                "props": [
-                    {
-                        "name": "label",
-                        "type": "str | None",
-                        "description": "Group label text"
-                    }
-                ]
-            },
-            {
-                "name": "SelectWithLabel",
-                "description": "Complete select with label and helper text",
-                "props": [
-                    {
-                        "name": "label",
-                        "type": "str",
-                        "description": "Label text"
-                    },
-                    {
-                        "name": "options",
-                        "type": "list[str | tuple | dict]",
-                        "description": "List of options (strings, (value, label) tuples, or group dicts)"
-                    },
-                    {
-                        "name": "value",
-                        "type": "str | None",
-                        "description": "Initial selected value"
-                    },
-                    {
-                        "name": "placeholder",
-                        "type": "str",
-                        "default": "'Select an option'",
-                        "description": "Placeholder text"
-                    },
-                    {
-                        "name": "helper_text",
-                        "type": "str | None",
-                        "description": "Helper text below the select"
-                    },
-                    {
-                        "name": "error_text",
-                        "type": "str | None",
-                        "description": "Error message"
-                    },
-                    {
-                        "name": "required",
-                        "type": "bool",
-                        "default": "False",
-                        "description": "Whether field is required"
-                    },
-                    {
-                        "name": "disabled",
-                        "type": "bool",
-                        "default": "False",
-                        "description": "Whether select is disabled"
-                    }
-                ]
-            }
+    # For Select, users benefit most from understanding the building blocks
+    # and composition rather than container props, so we show components.
+    api_reference = build_api_reference(
+        components=[
+            Component("Select", "Main container managing selected state via Datastar signals"),
+            Component("SelectTrigger", "Button that opens the dropdown menu"),
+            Component("SelectValue", "Displays current selection or placeholder"),
+            Component("SelectContent", "Dropdown panel listing available items"),
+            Component("SelectItem", "Individual selectable option with value and label"),
+            Component("SelectGroup", "Group related options for easier scanning"),
+            Component("SelectLabel", "Label heading for a group of options"),
+            Component("SelectWithLabel", "Convenience wrapper with label, helper, and error text")
         ]
-    }
+    )
     
     # Hero example - Interactive preferences panel
-    hero_example = ComponentPreview(
-        Card(
+    @with_code
+    def hero_select_example():
+        return Card(
             CardHeader(
                 CardTitle("Quick Settings"),
                 CardDescription("Configure your preferences")
@@ -791,45 +541,11 @@ def create_select_docs():
                 )
             ),
             cls="w-full max-w-2xl mx-auto"
-        ),
-        '''Card(
-    CardHeader(
-        CardTitle("Quick Settings"),
-        CardDescription("Configure your preferences")
-    ),
-    CardContent(
-        Div(
-            SelectWithLabel(
-                label="Theme",
-                options=[("light", "Light"), ("dark", "Dark"), ("auto", "System")],
-                value="auto",
-                signal="theme"
-            ),
-            SelectWithLabel(
-                label="Language",
-                options=[("en", "English"), ("es", "Español"), ("fr", "Français")],
-                value="en",
-                signal="language"
-            ),
-            SelectWithLabel(
-                label="Timezone",
-                options=[
-                    {"group": "Americas", "items": [("est", "Eastern"), ("pst", "Pacific")]},
-                    {"group": "Europe", "items": [("gmt", "GMT"), ("cet", "Central")]}
-                ],
-                value="pst",
-                signal="timezone"
-            ),
-            cls="grid grid-cols-1 md:grid-cols-3 gap-4"
-        ),
-        Div(
-            Badge(Icon("lucide:palette"), ds_text("$theme_label")),
-            Badge(Icon("lucide:globe"), ds_text("$language_label")),
-            Badge(Icon("lucide:clock"), ds_text("$timezone_label")),
-            cls="flex gap-2 mt-4"
         )
-    )
-)''',
+
+    hero_example = ComponentPreview(
+        hero_select_example(),
+        hero_select_example.code,
         copy_button=True
     )
     

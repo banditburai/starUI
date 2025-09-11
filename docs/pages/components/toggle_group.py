@@ -16,15 +16,16 @@ from starui.registry.components.toggle_group import ToggleGroup, SingleToggleGro
 from starui.registry.components.button import Button
 from starui.registry.components.separator import Separator
 from widgets.component_preview import ComponentPreview
+from utils import auto_generate_page, with_code, Component, Prop, build_api_reference
 
 
 def examples():
     """Generate toggle group examples using ComponentPreview with tabs."""
     
     # Text formatting toolbar
-    yield ComponentPreview(
-        Div(
-            # Rich text formatting
+    @with_code
+    def text_formatting_toolbar_example():
+        return Div(
             P("Text Formatting", cls="font-medium mb-4"),
             SingleToggleGroup(
                 ("bold", Icon("lucide:bold", cls="w-4 h-4")),
@@ -40,29 +41,19 @@ def examples():
                 cls="mt-4"
             ),
             cls="p-4 border rounded-lg"
-        ),
-        '''from starui.registry.components.toggle_group import SingleToggleGroup
-from starhtml import Icon, Div, P, Span
-from starhtml.datastar import ds_text
+        )
 
-SingleToggleGroup(
-    ("bold", Icon("lucide:bold", cls="w-4 h-4")),
-    ("italic", Icon("lucide:italic", cls="w-4 h-4")),
-    ("underline", Icon("lucide:underline", cls="w-4 h-4")),
-    ("strikethrough", Icon("lucide:strikethrough", cls="w-4 h-4")),
-    variant="outline",
-    signal="formatting"
-)
-
-# Show selected value
-Span(ds_text("$formatting_value || 'None'"))''',
+    yield ComponentPreview(
+        text_formatting_toolbar_example(),
+        text_formatting_toolbar_example.code,
         title="Text Formatting Toolbar",
         description="Single-selection toggle group for text formatting options"
     )
     
     # View switcher
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def view_mode_switcher_example():
+        return Div(
             P("View Mode", cls="font-medium mb-4"),
             SingleToggleGroup(
                 ("grid", Div(Icon("lucide:grid-3x3", cls="w-4 h-4"), "Grid", cls="flex items-center gap-2")),
@@ -113,47 +104,19 @@ Span(ds_text("$formatting_value || 'None'"))''',
             ),
             
             cls="p-4 border rounded-lg"
-        ),
-        '''from starui.registry.components.toggle_group import SingleToggleGroup
-from starhtml import Div, Icon, H4, P
-from starhtml.datastar import ds_show
+        )
 
-SingleToggleGroup(
-    ("grid", Div(Icon("lucide:grid-3x3"), "Grid", cls="flex items-center gap-2")),
-    ("list", Div(Icon("lucide:list"), "List", cls="flex items-center gap-2")),
-    ("card", Div(Icon("lucide:layout-grid"), "Card", cls="flex items-center gap-2")),
-    signal="view_mode"
-)
-
-# Content that changes based on selection
-Div(
-    # Grid view
-    Div(
-        "Grid content...",
-        ds_show("$view_mode_value === 'grid'"),
-        cls="grid grid-cols-2 gap-2"
-    ),
-    
-    # List view
-    Div(
-        "List content...",
-        ds_show("$view_mode_value === 'list'")
-    ),
-    
-    # Card view
-    Div(
-        "Card content...",
-        ds_show("$view_mode_value === 'card'")
-    ),
-    cls="mt-6"
-)''',
+    yield ComponentPreview(
+        view_mode_switcher_example(),
+        view_mode_switcher_example.code,
         title="View Mode Switcher",
         description="Toggle between different content layouts with dynamic content display"
     )
     
     # Multi-select filter options
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def multi_select_filters_example():
+        return Div(
             P("Filter Options", cls="font-medium mb-4"),
             MultipleToggleGroup(
                 ("featured", Div(Icon("lucide:star", cls="w-4 h-4"), "Featured", cls="flex items-center gap-2")),
@@ -175,29 +138,19 @@ Div(
             ),
             
             cls="p-4 border rounded-lg"
-        ),
-        '''from starui.registry.components.toggle_group import MultipleToggleGroup
-from starhtml import Div, Icon, P
-from starhtml.datastar import ds_text
+        )
 
-MultipleToggleGroup(
-    ("featured", Div(Icon("lucide:star"), "Featured", cls="flex items-center gap-2")),
-    ("sale", Div(Icon("lucide:percent"), "On Sale", cls="flex items-center gap-2")),
-    ("new", Div(Icon("lucide:sparkles"), "New", cls="flex items-center gap-2")),
-    ("popular", Div(Icon("lucide:trending-up"), "Popular", cls="flex items-center gap-2")),
-    variant="outline",
-    signal="filters"
-)
-
-# Show active filters
-Div(ds_text("$filters_value.length > 0 ? $filters_value.join(', ') : 'None selected'"))''',
+    yield ComponentPreview(
+        multi_select_filters_example(),
+        multi_select_filters_example.code,
         title="Multi-Select Filters",
         description="Multiple selection toggle group for filtering options"
     )
     
     # Size variations
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def size_variations_example():
+        return Div(
             # Small size
             Div(
                 P("Small", cls="text-sm font-medium mb-3"),
@@ -237,38 +190,19 @@ Div(ds_text("$filters_value.length > 0 ? $filters_value.join(', ') : 'None selec
             ),
             
             cls="p-4 border rounded-lg"
-        ),
-        '''from starui.registry.components.toggle_group import SingleToggleGroup
+        )
 
-# Small size
-SingleToggleGroup(
-    ("one", "One"),
-    ("two", "Two"),
-    ("three", "Three"),
-    size="sm"
-)
-
-# Default size
-SingleToggleGroup(
-    ("one", "One"),
-    ("two", "Two"),
-    ("three", "Three")
-)
-
-# Large size
-SingleToggleGroup(
-    ("one", "One"),
-    ("two", "Two"),
-    ("three", "Three"),
-    size="lg"
-)''',
+    yield ComponentPreview(
+        size_variations_example(),
+        size_variations_example.code,
         title="Size Variations",
         description="Toggle groups in different sizes for various use cases"
     )
     
     # Alignment and justification controls
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def editor_controls_example():
+        return Div(
             P("Text Alignment", cls="font-medium mb-4"),
             SingleToggleGroup(
                 ("left", Icon("lucide:align-left", cls="w-4 h-4")),
@@ -308,34 +242,19 @@ SingleToggleGroup(
             ),
             
             cls="p-4 border rounded-lg"
-        ),
-        '''from starui.registry.components.toggle_group import SingleToggleGroup, MultipleToggleGroup
-from starhtml import Icon, Div, P
+        )
 
-# Single selection for alignment
-SingleToggleGroup(
-    ("left", Icon("lucide:align-left")),
-    ("center", Icon("lucide:align-center")),
-    ("right", Icon("lucide:align-right")),
-    ("justify", Icon("lucide:align-justify")),
-    variant="outline",
-    signal="alignment"
-)
-
-# Multiple selection for text decoration
-MultipleToggleGroup(
-    ("bold", Icon("lucide:bold")),
-    ("italic", Icon("lucide:italic")),
-    ("underline", Icon("lucide:underline")),
-    signal="decoration"
-)''',
+    yield ComponentPreview(
+        editor_controls_example(),
+        editor_controls_example.code,
         title="Editor Controls",
         description="Combine single and multiple selection groups for rich text editing"
     )
     
     # Theme and variant combinations
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def variant_styles_example():
+        return Div(
             # Default variant
             Div(
                 P("Default Variant", cls="text-sm font-medium mb-3"),
@@ -376,40 +295,19 @@ MultipleToggleGroup(
             ),
             
             cls="p-4 border rounded-lg"
-        ),
-        '''from starui.registry.components.toggle_group import SingleToggleGroup
-from starhtml import Icon, Div
+        )
 
-# Default variant
-SingleToggleGroup(
-    ("option1", "Option 1"),
-    ("option2", "Option 2"),
-    ("option3", "Option 3"),
-    variant="default"
-)
-
-# Outline variant
-SingleToggleGroup(
-    ("option1", "Option 1"),
-    ("option2", "Option 2"),
-    ("option3", "Option 3"),
-    variant="outline"
-)
-
-# With icons
-SingleToggleGroup(
-    ("home", Div(Icon("lucide:home"), "Home", cls="flex items-center gap-2")),
-    ("settings", Div(Icon("lucide:settings"), "Settings", cls="flex items-center gap-2")),
-    ("profile", Div(Icon("lucide:user"), "Profile", cls="flex items-center gap-2")),
-    variant="outline"
-)''',
+    yield ComponentPreview(
+        variant_styles_example(),
+        variant_styles_example.code,
         title="Variant Styles",
         description="Different visual styles and combinations with icons"
     )
     
     # Advanced form integration
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def form_integration_example():
+        return Div(
             P("Notification Preferences", cls="font-medium mb-4"),
             
             # Communication methods
@@ -452,41 +350,19 @@ SingleToggleGroup(
             ),
             
             cls="p-4 border rounded-lg max-w-lg"
-        ),
-        '''from starui.registry.components.toggle_group import SingleToggleGroup, MultipleToggleGroup
-from starhtml import Div, Label, P, Icon
-from starhtml.datastar import ds_text
+        )
 
-# Multiple selection for methods
-Label("Communication Methods:")
-MultipleToggleGroup(
-    ("email", Div(Icon("lucide:mail"), "Email", cls="flex items-center gap-2")),
-    ("sms", Div(Icon("lucide:message-square"), "SMS", cls="flex items-center gap-2")),
-    ("push", Div(Icon("lucide:bell"), "Push", cls="flex items-center gap-2")),
-    variant="outline",
-    signal="communication_methods"
-)
-
-# Single selection for frequency
-Label("Notification Frequency:")
-SingleToggleGroup(
-    ("immediate", "Immediate"),
-    ("daily", "Daily Digest"),
-    ("weekly", "Weekly Summary"),
-    ("never", "Never"),
-    signal="frequency"
-)
-
-# Display selections
-P("Methods: ", ds_text("$communication_methods_value.join(', ')"))
-P("Frequency: ", ds_text("$frequency_value"))''',
+    yield ComponentPreview(
+        form_integration_example(),
+        form_integration_example.code,
         title="Form Integration",
         description="Complex form scenarios with multiple toggle groups and live feedback"
     )
     
     # Disabled states
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def disabled_states_example():
+        return Div(
             P("Disabled States", cls="font-medium mb-4"),
             
             # Partially disabled
@@ -524,30 +400,11 @@ P("Frequency: ", ds_text("$frequency_value"))''',
             ),
             
             cls="p-4 border rounded-lg"
-        ),
-        '''from starui.registry.components.toggle_group import SingleToggleGroup
-from starui.registry.components.button import Button
-from starhtml.datastar import ds_on_click, ds_signals
+        )
 
-# Interactive disable/enable
-Div(
-    SingleToggleGroup(
-        ("available", "Available"),
-        ("busy", "Busy"), 
-        ("away", "Away"),
-        signal="status"
-    ),
-    Button("Toggle Disabled", ds_on_click(toggle_signal("disabled"))),
-    ds_signals(disabled=False)
-)
-
-# Permanently disabled
-SingleToggleGroup(
-    ("option1", "Option 1"),
-    ("option2", "Option 2"),
-    ("option3", "Option 3"),
-    disabled=True
-)''',
+    yield ComponentPreview(
+        disabled_states_example(),
+        disabled_states_example.code,
         title="Disabled States",
         description="Toggle groups in disabled states for different scenarios"
     )
@@ -555,12 +412,11 @@ SingleToggleGroup(
 
 def create_toggle_group_docs():
     """Create toggle group documentation page using convention-based approach."""
-    from utils import auto_generate_page
     
     # Hero example showcasing both single and multiple selection
-    hero_example = ComponentPreview(
-        Div(
-            # Single selection
+    @with_code
+    def hero_toggle_group_example():
+        return Div(
             Div(
                 P("Single Selection", cls="text-sm font-medium mb-2"),
                 SingleToggleGroup(
@@ -571,8 +427,6 @@ def create_toggle_group_docs():
                 ),
                 cls="mb-6"
             ),
-            
-            # Multiple selection
             Div(
                 P("Multiple Selection", cls="text-sm font-medium mb-2"),
                 MultipleToggleGroup(
@@ -583,130 +437,47 @@ def create_toggle_group_docs():
                 ),
                 cls=""
             ),
-            
             cls="flex flex-col items-center"
-        ),
-        '''from starui.registry.components.toggle_group import SingleToggleGroup, MultipleToggleGroup
-from starhtml import Icon
+        )
 
-# Single selection (radio-like behavior)
-SingleToggleGroup(
-    ("left", Icon("lucide:align-left", cls="w-4 h-4")),
-    ("center", Icon("lucide:align-center", cls="w-4 h-4")),
-    ("right", Icon("lucide:align-right", cls="w-4 h-4")),
-    variant="outline"
-)
-
-# Multiple selection (checkbox-like behavior)  
-MultipleToggleGroup(
-    ("bold", Icon("lucide:bold", cls="w-4 h-4")),
-    ("italic", Icon("lucide:italic", cls="w-4 h-4")),
-    ("underline", Icon("lucide:underline", cls="w-4 h-4")),
-    variant="outline"
-)''',
+    hero_example = ComponentPreview(
+        hero_toggle_group_example(),
+        hero_toggle_group_example.code,
         copy_button=True
     )
     
-    api_reference = {
-        "components": [
-            {
-                "name": "ToggleGroup",
-                "description": "Base toggle group component supporting both single and multiple selection modes",
-                "props": [
-                    {
-                        "name": "type",
-                        "type": "Literal['single', 'multiple']",
-                        "default": "'single'",
-                        "description": "Selection mode - 'single' allows one selection, 'multiple' allows many"
-                    },
-                    {
-                        "name": "signal",
-                        "type": "str",
-                        "default": "''",
-                        "description": "Datastar signal name for state management"
-                    },
-                    {
-                        "name": "variant",
-                        "type": "Literal['default', 'outline']",
-                        "default": "'default'",
-                        "description": "Visual style variant"
-                    },
-                    {
-                        "name": "size",
-                        "type": "Literal['default', 'sm', 'lg']",
-                        "default": "'default'",
-                        "description": "Size of toggle buttons"
-                    },
-                    {
-                        "name": "disabled",
-                        "type": "bool",
-                        "default": "False",
-                        "description": "Whether the entire group is disabled"
-                    }
-                ]
-            },
-            {
-                "name": "SingleToggleGroup",
-                "description": "Convenience component for single-selection toggle groups (radio-like behavior)",
-                "props": [
-                    {
-                        "name": "signal",
-                        "type": "str",
-                        "default": "''",
-                        "description": "Datastar signal name for state management"
-                    },
-                    {
-                        "name": "variant",
-                        "type": "Literal['default', 'outline']",
-                        "default": "'default'",
-                        "description": "Visual style variant"
-                    },
-                    {
-                        "name": "size",
-                        "type": "Literal['default', 'sm', 'lg']",
-                        "default": "'default'",
-                        "description": "Size of toggle buttons"
-                    },
-                    {
-                        "name": "disabled",
-                        "type": "bool",
-                        "default": "False",
-                        "description": "Whether the group is disabled"
-                    }
-                ]
-            },
-            {
-                "name": "MultipleToggleGroup", 
-                "description": "Convenience component for multiple-selection toggle groups (checkbox-like behavior)",
-                "props": [
-                    {
-                        "name": "signal",
-                        "type": "str",
-                        "default": "''",
-                        "description": "Datastar signal name for state management"
-                    },
-                    {
-                        "name": "variant",
-                        "type": "Literal['default', 'outline']",
-                        "default": "'default'",
-                        "description": "Visual style variant"
-                    },
-                    {
-                        "name": "size",
-                        "type": "Literal['default', 'sm', 'lg']",
-                        "default": "'default'",
-                        "description": "Size of toggle buttons"
-                    },
-                    {
-                        "name": "disabled",
-                        "type": "bool",
-                        "default": "False",
-                        "description": "Whether the group is disabled"
-                    }
-                ]
-            }
+    api_reference = build_api_reference(
+        components=[
+            Component(
+                name="SingleToggleGroup",
+                description=(
+                    "Single-select group (radio-like). Pass items as (value, content) tuples. "
+                    "Current selection is exposed as `{signal}_value` (str)."
+                ),
+                props=[
+                    Prop("signal", "str", "Datastar signal for the group", "''"),
+                    Prop("variant", "Literal['default','outline']", "Visual style", "'default'"),
+                    Prop("size", "Literal['default','sm','lg']", "Button size", "'default'"),
+                    Prop("disabled", "bool", "Disable all items", "False"),
+                    Prop("cls", "str", "Additional CSS classes", "''"),
+                ],
+            ),
+            Component(
+                name="MultipleToggleGroup",
+                description=(
+                    "Multi-select group (checkbox-like). Pass items as (value, content) tuples. "
+                    "Selections are exposed as `{signal}_value` (list[str])."
+                ),
+                props=[
+                    Prop("signal", "str", "Datastar signal for the group", "''"),
+                    Prop("variant", "Literal['default','outline']", "Visual style", "'default'"),
+                    Prop("size", "Literal['default','sm','lg']", "Button size", "'default'"),
+                    Prop("disabled", "bool", "Disable all items", "False"),
+                    Prop("cls", "str", "Additional CSS classes", "''"),
+                ],
+            ),
         ]
-    }
+    )
     
     return auto_generate_page(
         TITLE,

@@ -27,7 +27,7 @@ from starui.registry.components.badge import Badge
 from starui.registry.components.separator import Separator
 from starui.registry.components.select import SelectWithLabel
 from starui.registry.components.checkbox import CheckboxWithLabel
-from utils import auto_generate_page
+from utils import auto_generate_page, with_code, Prop, Component, build_api_reference
 from widgets.component_preview import ComponentPreview
 
 
@@ -35,8 +35,9 @@ def examples():
     """Generate dialog examples using ComponentPreview with tabs."""
     
     # Basic dialog
-    yield ComponentPreview(
-        Dialog(
+    @with_code
+    def basic_dialog_example():
+        return Dialog(
             DialogTrigger("Open Dialog", ref_id="basic_dialog"),
             DialogContent(
                 DialogHeader(
@@ -51,28 +52,19 @@ def examples():
                 )
             ),
             ref_id="basic_dialog"
-        ),
-        '''Dialog(
-    DialogTrigger("Open Dialog", ref_id="basic_dialog"),
-    DialogContent(
-        DialogHeader(
-            DialogTitle("Welcome to StarUI"),
-            DialogDescription("This is a simple dialog...")
-        ),
-        P("Dialog content goes here."),
-        DialogFooter(
-            DialogClose("Got it", ref_id="basic_dialog")
         )
-    ),
-    ref_id="basic_dialog"
-)''',
+    
+    yield ComponentPreview(
+        basic_dialog_example(),
+        basic_dialog_example.code,
         title="Basic Dialog",
         description="Simple dialog with title, description, and close button"
     )
     
     # Confirmation dialog
-    yield ComponentPreview(
-        Dialog(
+    @with_code
+    def confirmation_dialog_example():
+        return Dialog(
             DialogTrigger(
                 Icon("lucide:trash-2", cls="h-4 w-4 mr-2"),
                 "Delete Account",
@@ -119,41 +111,19 @@ def examples():
                 )
             ),
             ref_id="confirm_dialog"
-        ),
-        '''Dialog(
-    DialogTrigger(
-        Icon("lucide:trash-2"),
-        "Delete Account",
-        ref_id="confirm_dialog",
-        variant="destructive"
-    ),
-    DialogContent(
-        DialogHeader(
-            DialogTitle("Are you absolutely sure?"),
-            DialogDescription("This action cannot be undone...")
-        ),
-        Div(
-            P(Icon("lucide:alert-triangle"), "Warning: This is irreversible"),
-            Ul(
-                Li("All projects will be deleted"),
-                Li("Subscription will be cancelled"),
-                Li("Access will be revoked")
-            )
-        ),
-        DialogFooter(
-            DialogClose("Cancel", variant="outline"),
-            DialogClose("Delete Account", variant="destructive", value="delete")
         )
-    ),
-    ref_id="confirm_dialog"
-)''',
+    
+    yield ComponentPreview(
+        confirmation_dialog_example(),
+        confirmation_dialog_example.code,
         title="Confirmation Dialog",
         description="Destructive action confirmation with warnings"
     )
     
     # Form dialog
-    yield ComponentPreview(
-        Dialog(
+    @with_code
+    def form_dialog_example():
+        return Dialog(
             DialogTrigger(
                 Icon("lucide:user-plus", cls="h-4 w-4 mr-2"),
                 "Add Team Member",
@@ -310,39 +280,19 @@ def examples():
             ),
             ref_id="form_dialog",
             size="lg"
-        ),
-        '''Dialog(
-    DialogTrigger("Add Team Member", ref_id="form_dialog"),
-    DialogContent(
-        DialogHeader(
-            DialogTitle("Invite Team Member"),
-            DialogDescription("Add a new member to your team")
-        ),
-        Form(
-            InputWithLabel(label="Name", signal="member_name", required=True),
-            InputWithLabel(label="Email", type="email", signal="member_email", required=True),
-            SelectWithLabel(
-                label="Role",
-                options=[("viewer", "Viewer"), ("editor", "Editor"), ("admin", "Admin")],
-                signal="member_role"
-            ),
-            CheckboxWithLabel(label="Send invitation email", signal="send_invite"),
-            DialogFooter(
-                DialogClose("Cancel", variant="outline"),
-                Button("Send Invitation", type="submit", ds_on_click="submitForm()")
-            ),
-            ds_signals(member_name="", member_email="", member_role="viewer")
         )
-    ),
-    ref_id="form_dialog"
-)''',
+    
+    yield ComponentPreview(
+        form_dialog_example(),
+        form_dialog_example.code,
         title="Form Dialog",
         description="Complex form with multiple input types in a dialog"
     )
     
     # Scrollable content dialog
-    yield ComponentPreview(
-        Dialog(
+    @with_code
+    def scrollable_content_example():
+        return Dialog(
             DialogTrigger("View Terms", ref_id="scroll_dialog"),
             DialogContent(
                 DialogHeader(
@@ -390,38 +340,19 @@ def examples():
             ),
             ref_id="scroll_dialog",
             size="lg"
-        ),
-        '''Dialog(
-    DialogTrigger("View Terms", ref_id="scroll_dialog"),
-    DialogContent(
-        DialogHeader(
-            DialogTitle("Terms of Service"),
-            DialogDescription("Please review our terms")
-        ),
-        Div(
-            // Long scrollable content
-            H3("1. Acceptance of Terms"),
-            P("By accessing this service..."),
-            // ... more sections
-            cls="max-h-[300px] overflow-y-auto"
-        ),
-        CheckboxWithLabel(label="I agree to the terms", signal="terms_accepted"),
-        DialogFooter(
-            DialogClose("Decline", variant="outline"),
-            Button("Accept", ds_disabled="!$terms_accepted")
-        ),
-        ds_signals(terms_accepted=False)
-    ),
-    ref_id="scroll_dialog",
-    size="lg"
-)''',
+        )
+    
+    yield ComponentPreview(
+        scrollable_content_example(),
+        scrollable_content_example.code,
         title="Scrollable Content",
         description="Dialog with scrollable content and conditional actions"
     )
     
     # Loading/async dialog
-    yield ComponentPreview(
-        Dialog(
+    @with_code
+    def loading_async_dialog_example():
+        return Dialog(
             DialogTrigger(
                 Icon("lucide:cloud-upload", cls="h-4 w-4 mr-2"),
                 "Upload File",
@@ -566,50 +497,19 @@ def examples():
                 )
             ),
             ref_id="upload_dialog"
-        ),
-        '''Dialog(
-    DialogTrigger("Upload File", ref_id="upload_dialog"),
-    DialogContent(
-        DialogHeader(
-            DialogTitle("Upload Document"),
-            DialogDescription("Upload and process your document")
-        ),
-        // Upload form
-        Div(
-            InputWithLabel(label="Document Title", signal="doc_title", required=True),
-            // File upload area
-            Div(/* file upload UI */),
-            ds_show="!$uploading"
-        ),
-        // Loading state
-        Div(
-            Icon("lucide:loader", cls="w-8 h-8 animate-spin [&>svg]:w-full [&>svg]:h-full", style="font-size: 32px;"),
-            P("Uploading document..."),
-            P(ds_text="`${$upload_progress}% complete`"),
-            // Progress bar
-            Div(/* progress bar */),
-            ds_show="$uploading && !$upload_complete"
-        ),
-        // Success state
-        Div(
-            Icon("lucide:check-circle", cls="w-8 h-8 text-green-500 [&>svg]:w-full [&>svg]:h-full", style="font-size: 32px;"),
-            P("Upload Complete!", cls="text-green-600"),
-            ds_show="$upload_complete"
-        ),
-        DialogFooter(
-            Button("Start Upload", ds_disabled="!$doc_title", ds_on_click="startUpload()"),
-            Button("Done", ds_show="$upload_complete")
-        ),
-        ds_signals(uploading=False, upload_complete=False, upload_progress=0)
-    )
-)''',
+        )
+    
+    yield ComponentPreview(
+        loading_async_dialog_example(),
+        loading_async_dialog_example.code,
         title="Loading/Async Dialog",
         description="Dialog with loading states, progress tracking, and async operations"
     )
     
     # Multi-step dialog
-    yield ComponentPreview(
-        Dialog(
+    @with_code
+    def multi_step_wizard_example():
+        return Dialog(
             DialogTrigger(
                 Icon("lucide:rocket", cls="h-4 w-4 mr-2"),
                 "Start Setup",
@@ -795,40 +695,19 @@ def examples():
             ),
             ref_id="wizard_dialog",
             size="lg"
-        ),
-    '''Dialog(
-    DialogTrigger("Start Setup", ref_id="wizard_dialog"),
-    DialogContent(
-        DialogHeader(
-            DialogTitle("Project Setup"),
-            DialogDescription(ds_text("Step description based on $step"))
-        ),
-        // Step indicators
-        Div(/* step bubbles and progress bars */),
-        // Step 1
-        Div(/* project type selection */, ds_show="$step === 1"),
-        // Step 2
-        Div(/* configuration form */, ds_show="$step === 2"),
-        // Step 3
-        Div(/* review and confirm */, ds_show="$step === 3"),
-        DialogFooter(
-            Button("Previous", ds_on_click="$step--", ds_disabled="$step === 1"),
-            Button(
-                ds_text("$step === 3 ? 'Create' : 'Next'"),
-                ds_on_click="handleStep()"
-            )
-        ),
-        ds_signals(step=1, project_type="", project_name="")
-    ),
-    ref_id="wizard_dialog"
-)''',
-    title="Multi-Step Wizard",
-    description="Complex wizard flow with step indicators and validation"
+        )
+    
+    yield ComponentPreview(
+        multi_step_wizard_example(),
+        multi_step_wizard_example.code,
+        title="Multi-Step Wizard",
+        description="Complex wizard flow with step indicators and validation"
     )
     
     # Settings dialog with tabs
-    yield ComponentPreview(
-        Dialog(
+    @with_code
+    def settings_dialog_example():
+        return Dialog(
             DialogTrigger(
                 Icon("lucide:settings", cls="h-4 w-4 mr-2"),
                 "Settings",
@@ -1026,56 +905,19 @@ def examples():
             ),
             ref_id="settings_dialog",
             size="lg"
-        ),
-        '''Dialog(
-    DialogTrigger("Settings", ref_id="settings_dialog"),
-    DialogContent(
-        DialogHeader(
-            DialogTitle("Settings"),
-            DialogDescription("Manage your preferences")
-        ),
-        // Tab navigation
-        Div(
-            Button("Profile", ds_on_click("$settings_tab = 'profile'")),
-            Button("Notifications", ds_on_click("$settings_tab = 'notifications'")),
-            Button("Security", ds_on_click("$settings_tab = 'security'")),
-            cls="flex gap-1 p-1 bg-muted/30 rounded-lg"
-        ),
-        // Profile tab
-        Div(
-            InputWithLabel(label="Display Name", signal="profile_name"),
-            InputWithLabel(label="Email", signal="profile_email"),
-            TextareaWithLabel(label="Bio", signal="profile_bio"),
-            ds_show="$settings_tab === 'profile'"
-        ),
-        // Notifications tab
-        Div(
-            CheckboxWithLabel(label="Email notifications", signal="notify_email"),
-            CheckboxWithLabel(label="Push notifications", signal="notify_push"),
-            SelectWithLabel(label="Frequency", signal="notify_frequency"),
-            ds_show="$settings_tab === 'notifications'"
-        ),
-        // Security tab
-        Div(
-            Button("Change Password"),
-            CheckboxWithLabel(label="Two-factor auth", signal="security_2fa"),
-            ds_show="$settings_tab === 'security'"
-        ),
-        DialogFooter(
-            DialogClose("Cancel"),
-            Button("Save Changes")
-        ),
-        ds_signals(settings_tab="profile", ...)
-    ),
-    size="lg"
-)''',
+        )
+    
+    yield ComponentPreview(
+        settings_dialog_example(),
+        settings_dialog_example.code,
         title="Settings Dialog",
         description="Tabbed interface for managing different categories of settings"
     )
     
     # Custom styled dialog with sizes
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def dialog_sizes_example():
+        return Div(
             Dialog(
                 DialogTrigger("Small", ref_id="small_dialog", variant="outline", cls="mr-2"),
                 DialogContent(
@@ -1116,12 +958,11 @@ def examples():
                 size="lg"
             ),
             cls="flex flex-wrap"
-        ),
-        '''// Different dialog sizes
-Dialog(DialogTrigger("Small"), DialogContent(...), ref_id="small", size="sm")
-Dialog(DialogTrigger("Medium"), DialogContent(...), ref_id="medium", size="md")
-Dialog(DialogTrigger("Large"), DialogContent(...), ref_id="large", size="lg")
-Dialog(DialogTrigger("XL"), DialogContent(...), ref_id="xl", size="xl")''',
+        )
+    
+    yield ComponentPreview(
+        dialog_sizes_example(),
+        dialog_sizes_example.code,
         title="Dialog Sizes",
         description="Different dialog sizes for various content needs"
     )
@@ -1130,105 +971,23 @@ Dialog(DialogTrigger("XL"), DialogContent(...), ref_id="xl", size="xl")''',
 def create_dialog_docs():
     """Create dialog documentation page using convention-based approach."""
     
-    api_reference = {
-        "props": [
-            {
-                "name": "trigger",
-                "type": "FT",
-                "description": "The trigger element (usually DialogTrigger)"
-            },
-            {
-                "name": "content",
-                "type": "FT",
-                "description": "The dialog content (usually DialogContent)"
-            },
-            {
-                "name": "ref_id",
-                "type": "str",
-                "description": "Unique identifier for the dialog instance"
-            },
-            {
-                "name": "modal",
-                "type": "bool",
-                "default": "True",
-                "description": "Whether dialog is modal (blocks interaction with rest of page)"
-            },
-            {
-                "name": "size",
-                "type": "Literal['sm', 'md', 'lg', 'xl', 'full']",
-                "default": "'md'",
-                "description": "Size of the dialog"
-            }
-        ],
-        "sub_components": [
-            {
-                "name": "DialogTrigger",
-                "description": "Button that opens the dialog",
-                "props": [
-                    {
-                        "name": "ref_id",
-                        "type": "str",
-                        "description": "Must match the Dialog's ref_id"
-                    },
-                    {
-                        "name": "variant",
-                        "type": "str",
-                        "default": "'default'",
-                        "description": "Button variant"
-                    }
-                ]
-            },
-            {
-                "name": "DialogContent",
-                "description": "Container for dialog content",
-                "props": [
-                    {
-                        "name": "show_close_button",
-                        "type": "bool",
-                        "default": "True",
-                        "description": "Whether to show the X close button"
-                    }
-                ]
-            },
-            {
-                "name": "DialogHeader",
-                "description": "Container for title and description"
-            },
-            {
-                "name": "DialogTitle",
-                "description": "The dialog's title"
-            },
-            {
-                "name": "DialogDescription",
-                "description": "Subtitle or description text"
-            },
-            {
-                "name": "DialogFooter",
-                "description": "Container for action buttons"
-            },
-            {
-                "name": "DialogClose",
-                "description": "Button that closes the dialog",
-                "props": [
-                    {
-                        "name": "ref_id",
-                        "type": "str",
-                        "description": "Must match the Dialog's ref_id"
-                    },
-                    {
-                        "name": "value",
-                        "type": "str",
-                        "default": "''",
-                        "description": "Return value when dialog closes"
-                    }
-                ]
-            }
+    api_reference = build_api_reference(
+        components=[
+            Component("Dialog", "The main dialog container with modal behavior and backdrop"),
+            Component("DialogTrigger", "Button that opens the dialog when clicked"),
+            Component("DialogContent", "Container for all dialog content with proper styling and positioning"),
+            Component("DialogHeader", "Header section containing title and description"),
+            Component("DialogTitle", "Main heading for the dialog"),
+            Component("DialogDescription", "Supporting text that describes the dialog purpose"),
+            Component("DialogFooter", "Footer section for action buttons and controls"),
+            Component("DialogClose", "Button that closes the dialog and optionally returns a value"),
         ]
-    }
+    )
     
     # Hero example
-    hero_example = ComponentPreview(
-        Dialog(
+    @with_code
+    def hero_dialog_example():
+        return Dialog(
             DialogTrigger("Open Dialog", ref_id="hero_dialog"),
             DialogContent(
                 DialogHeader(
@@ -1260,25 +1019,11 @@ def create_dialog_docs():
                 )
             ),
             ref_id="hero_dialog"
-        ),
-        '''Dialog(
-    DialogTrigger("Open Dialog", ref_id="hero_dialog"),
-    DialogContent(
-        DialogHeader(
-            DialogTitle("Edit Profile"),
-            DialogDescription("Make changes to your profile...")
-        ),
-        Div(
-            InputWithLabel(label="Username", signal="username"),
-            InputWithLabel(label="Email", type="email", signal="email")
-        ),
-        DialogFooter(
-            DialogClose("Cancel", variant="outline"),
-            DialogClose("Save Changes")
         )
-    ),
-    ref_id="hero_dialog"
-)''',
+    
+    hero_example = ComponentPreview(
+        hero_dialog_example(),
+        hero_dialog_example.code,
         copy_button=True
     )
     

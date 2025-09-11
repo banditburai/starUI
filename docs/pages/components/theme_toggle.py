@@ -12,9 +12,9 @@ STATUS = "stable"
 from starhtml import Div, H3, Icon, P, Span, FT
 from starhtml import Span as HTMLSpan
 from starhtml.datastar import ds_show, ds_on_click, ds_on_load, ds_signals, ds_effect, toggle_signal
-from starui.registry.components.theme_toggle import ThemeToggle
 from starui.registry.components.button import Button
 from widgets.component_preview import ComponentPreview
+from utils import auto_generate_page, with_code, Prop, build_api_reference
 
 
 def IsolatedThemeToggle(alt_theme="dark", default_theme="light", **kwargs) -> FT:
@@ -57,30 +57,31 @@ def IsolatedThemeToggle(alt_theme="dark", default_theme="light", **kwargs) -> FT
     )
 
 
+# Alias for docs rendering: use isolated behavior while examples show ThemeToggle()
+ThemeToggle = IsolatedThemeToggle
+
 def examples():
     """Generate Theme Toggle examples using ComponentPreview with tabs."""
     
     # Sizes example - showing different button sizes
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def size_variations_example():
+        return Div(
             Div(
                 P("Different Sizes", cls="font-medium mb-4"),
                 Div(
-                    # Small size
                     Div(
-                        IsolatedThemeToggle(cls="scale-75"),
+                        ThemeToggle(cls="scale-75"),
                         P("Small", cls="text-xs text-muted-foreground mt-1"),
                         cls="flex flex-col items-center"
                     ),
-                    # Default size
                     Div(
-                        IsolatedThemeToggle(),
+                        ThemeToggle(),
                         P("Default", cls="text-xs text-muted-foreground mt-1"),
                         cls="flex flex-col items-center"
                     ),
-                    # Large size
                     Div(
-                        IsolatedThemeToggle(cls="scale-125"),
+                        ThemeToggle(cls="scale-125"),
                         P("Large", cls="text-xs text-muted-foreground mt-1"),
                         cls="flex flex-col items-center"
                     ),
@@ -88,29 +89,28 @@ def examples():
                 ),
             ),
             cls="space-y-4"
-        ),
-        '''# Different sizes using CSS transforms
-ThemeToggle(cls="scale-75")   # Small
-ThemeToggle()                  # Default  
-ThemeToggle(cls="scale-125")   # Large''',
+        )
+
+    yield ComponentPreview(
+        size_variations_example(),
+        size_variations_example.code,
         title="Size Variations",
         description="Theme toggle in different sizes for various UI contexts",
         use_iframe=True
     )
     
     # Custom icons example
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def custom_icons_labels_example():
+        return Div(
             Div(
                 P("Custom Icons", cls="font-medium mb-4"),
                 Div(
-                    # Sun/Moon (default)
                     Div(
-                        IsolatedThemeToggle(),
+                        ThemeToggle(),
                         P("Sun/Moon", cls="text-xs text-muted-foreground mt-2"),
                         cls="flex flex-col items-center"
                     ),
-                    # Day/Night with different icons
                     Div(
                         Button(
                             Span(Icon("lucide:sun-medium", width="20", height="20"), ds_show("!$isDark1")),
@@ -130,7 +130,6 @@ ThemeToggle(cls="scale-125")   # Large''',
                         """),
                         cls="flex flex-col items-center"
                     ),
-                    # Light/Dark text
                     Div(
                         Button(
                             Span("Light", ds_show("!$isDark2")),
@@ -154,34 +153,20 @@ ThemeToggle(cls="scale-125")   # Large''',
                 )
             ),
             cls="space-y-4"
-        ),
-        '''# Default icons
-ThemeToggle()
+        )
 
-# Custom icons
-Button(
-    Span(Icon("lucide:sun-medium"), ds_show("!$isDark")),
-    Span(Icon("lucide:moon-star"), ds_show("$isDark")),
-    ds_on_click(toggle_signal("isDark")),
-    variant="ghost"
-)
-
-# Text labels instead of icons
-Button(
-    Span("Light", ds_show("!$isDark")),
-    Span("Dark", ds_show("$isDark")),
-    ds_on_click(toggle_signal("isDark")),
-    variant="outline",
-    size="sm"
-)''',
+    yield ComponentPreview(
+        custom_icons_labels_example(),
+        custom_icons_labels_example.code,
         title="Custom Icons & Labels",
         description="Different icon sets and text labels for theme switching",
         use_iframe=True
     )
     
     # Integration example - in a settings panel
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def settings_panel_integration_example():
+        return Div(
             Div(
                 H3("Appearance Settings", cls="text-lg font-semibold"),
                 Div(
@@ -190,7 +175,7 @@ Button(
                         P("Choose your preferred color scheme", cls="text-xs text-muted-foreground mt-1"),
                         cls="flex-1"
                     ),
-                    IsolatedThemeToggle(),
+                    ThemeToggle(),
                     cls="flex items-center justify-between"
                 ),
                 Div(
@@ -210,20 +195,11 @@ Button(
                 cls="bg-muted/30 rounded-lg p-6 w-full max-w-lg mx-auto space-y-4"
             ),
             cls="flex items-center justify-center min-h-[350px]"
-        ),
-        '''# Example: Settings panel integration
-Div(
-    H3("Appearance Settings", cls="text-lg font-semibold"),
-    Div(
-        Div(
-            P("Theme", cls="text-sm font-medium"),
-            P("Choose your preferred color scheme", cls="text-xs text-muted-foreground"),
-        ),
-        ThemeToggle(),
-        cls="flex items-center justify-between"
-    ),
-    cls="bg-muted/30 rounded-lg p-6"
-)''',
+        )
+
+    yield ComponentPreview(
+        settings_panel_integration_example(),
+        settings_panel_integration_example.code,
         title="Settings Panel Integration",
         description="Theme toggle integrated into a settings interface",
         use_iframe=True,
@@ -233,16 +209,19 @@ Div(
 
 def create_theme_toggle_docs():
     """Create theme toggle documentation page using convention-based approach."""
-    from utils import auto_generate_page
     
     # Hero example - basic theme toggle
-    hero_example = ComponentPreview(
-        Div(
-            IsolatedThemeToggle(),
+    @with_code
+    def hero_theme_toggle_example():
+        return Div(
+            ThemeToggle(),
             P("Click to toggle between light and dark themes", cls="text-sm text-muted-foreground mt-2"),
             cls="flex flex-col items-center"
-        ),
-        '''ThemeToggle()''',
+        )
+
+    hero_example = ComponentPreview(
+        hero_theme_toggle_example(),
+        hero_theme_toggle_example.code,
         use_iframe=True
     )
     
@@ -253,26 +232,11 @@ def create_theme_toggle_docs():
         cli_command="star add theme-toggle",
         hero_example=hero_example,
         component_slug="theme_toggle",
-        api_reference={
-            "props": [
-                {
-                    "name": "alt_theme",
-                    "type": "str",
-                    "default": "dark",
-                    "description": "Alternative theme name (typically dark mode)"
-                },
-                {
-                    "name": "default_theme", 
-                    "type": "str",
-                    "default": "light",
-                    "description": "Default theme name (typically light mode)"
-                },
-                {
-                    "name": "cls",
-                    "type": "str",
-                    "default": "''",
-                    "description": "Additional CSS classes"
-                }
+        api_reference=build_api_reference(
+            main_props=[
+                Prop("alt_theme", "str", "Alternative theme name (usually dark)", "dark"),
+                Prop("default_theme", "str", "Default theme name (usually light)", "light"),
+                Prop("cls", "str", "Additional CSS classes", "''"),
             ]
-        }
+        )
     )

@@ -20,7 +20,7 @@ from starui.registry.components.button import Button
 from starui.registry.components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
 from starui.registry.components.badge import Badge
 from starui.registry.components.separator import Separator
-from utils import auto_generate_page
+from utils import auto_generate_page, with_code, Prop, build_api_reference
 from widgets.component_preview import ComponentPreview
 
 
@@ -28,8 +28,9 @@ def examples():
     """Generate switch examples using ComponentPreview with tabs."""
     
     # Basic usage
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def basic_switch_example():
+        return Div(
             Div(
                 Switch(),
                 P("Default", cls="text-xs text-muted-foreground mt-2 text-center"),
@@ -51,18 +52,19 @@ def examples():
                 cls="flex flex-col items-center"
             ),
             cls="flex items-start gap-8 justify-center"
-        ),
-        '''Switch()
-Switch(checked=True)
-Switch(disabled=True)
-Switch(checked=True, disabled=True)''',
+        )
+
+    yield ComponentPreview(
+        basic_switch_example(),
+        basic_switch_example.code,
         title="Basic Switch",
         description="Different switch states"
     )
     
     # With label
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def switch_with_label_example():
+        return Div(
             SwitchWithLabel(
                 label="Enable notifications",
                 helper_text="Receive email and push notifications",
@@ -75,25 +77,19 @@ Switch(checked=True, disabled=True)''',
             ),
             ds_signals(notifications=True),
             cls="max-w-sm"
-        ),
-        '''SwitchWithLabel(
-    label="Enable notifications",
-    helper_text="Receive email and push notifications",
-    signal="notifications",
-    checked=True
-)
-P(
-    ds_text("$notifications ? 'Notifications enabled' : 'Notifications disabled'"),
-    cls="text-sm text-muted-foreground"
-)
-ds_signals(notifications=True)''',
+        )
+
+    yield ComponentPreview(
+        switch_with_label_example(),
+        switch_with_label_example.code,
         title="Switch with Label",
         description="Switch with label, helper text, and reactive feedback"
     )
     
     # Dark mode toggle
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def dark_mode_toggle_example():
+        return Card(
             CardHeader(
                 CardTitle("Appearance"),
                 CardDescription("Customize how the interface looks")
@@ -114,28 +110,19 @@ ds_signals(notifications=True)''',
                 )
             ),
             cls="max-w-md"
-        ),
-        '''Card(
-    CardContent(
-        Div(
-            Icon("lucide:moon"),
-            Div(
-                P("Dark Mode", cls="font-medium"),
-                P("Switch to dark theme", cls="text-sm text-muted-foreground")
-            ),
-            Switch(signal="dark_mode", checked=False),
-            cls="flex items-center gap-3"
-        ),
-        ds_signals(dark_mode=False)
-    )
-)''',
+        )
+
+    yield ComponentPreview(
+        dark_mode_toggle_example(),
+        dark_mode_toggle_example.code,
         title="Dark Mode Toggle",
         description="Theme switcher with icon and description"
     )
     
     # Auto-save feature
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def autosave_feature_example():
+        return Card(
             CardHeader(
                 CardTitle("Document Settings"),
                 CardDescription("Configure how your document is saved")
@@ -161,26 +148,19 @@ ds_signals(notifications=True)''',
                 )
             ),
             cls="max-w-md"
-        ),
-        '''SwitchWithLabel(
-    label="Auto-save",
-    helper_text="Automatically save changes as you type",
-    signal="auto_save",
-    checked=True
-)
-Badge(
-    Icon("lucide:check-circle"),
-    ds_text("$auto_save ? 'Changes saved automatically' : 'Remember to save manually'"),
-    variant=ds_text("$auto_save ? 'default' : 'secondary'")
-)
-ds_signals(auto_save=True)''',
+        )
+
+    yield ComponentPreview(
+        autosave_feature_example(),
+        autosave_feature_example.code,
         title="Auto-save Feature",
         description="Document setting with status feedback"
     )
     
     # Marketing emails
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def email_subscriptions_example():
+        return Card(
             CardHeader(
                 CardTitle("Email Preferences"),
                 CardDescription("Manage your email subscriptions")
@@ -202,10 +182,9 @@ ds_signals(auto_save=True)''',
                             ),
                             Switch(
                                 ds_disabled("!$marketing_emails"),
-                                signal="newsletter",                                                                
-                                checked=False, 
+                                signal="newsletter",
+                                checked=False,
                                 id="newsletter_switch",
-                                
                             ),
                             cls="flex items-center gap-3"
                         ),
@@ -221,7 +200,7 @@ ds_signals(auto_save=True)''',
                             ),
                             cls="flex items-start gap-2"
                         ),
-                        ds_show="!$marketing_emails",  # Show message when marketing emails is off
+                        ds_show="!$marketing_emails",
                         cls="mt-3"
                     ),
                     Button(
@@ -230,28 +209,17 @@ ds_signals(auto_save=True)''',
                         cls="w-full mt-4",
                         ds_on_click="event.preventDefault(); alert('Email preferences updated!')"
                     ),
-                    ds_signals(marketing_emails=False, newsletter=False),  # Both start as false
+                    ds_signals(marketing_emails=False, newsletter=False),
                     ds_effect("if (!$marketing_emails) $newsletter = false"),
                     cls="space-y-4"
                 )
             ),
             cls="max-w-md"
-        ),
-        '''SwitchWithLabel(
-    label="Marketing emails",
-    helper_text="Product updates and announcements",
-    signal="marketing_emails"
-)
-// Newsletter switch with reactive disabled state
-Div(
-    Label("Weekly newsletter"),
-    Switch(
-        signal="newsletter",
-        **{"data-attr-disabled": "!$marketing_emails"}
-    ),
-    P("Our weekly roundup of news and insights")
-)
-ds_effect("if (!$marketing_emails) $newsletter = false")  // Auto-disable newsletter''',
+        )
+
+    yield ComponentPreview(
+        email_subscriptions_example(),
+        email_subscriptions_example.code,
         title="Email Subscriptions",
         description="Dependent switches for email preferences"
     )
@@ -260,89 +228,32 @@ ds_effect("if (!$marketing_emails) $newsletter = false")  // Auto-disable newsle
 def create_switch_docs():
     """Create switch documentation page using convention-based approach."""
     
-    api_reference = {
-        "props": [
-            {
-                "name": "checked",
-                "type": "bool | None",
-                "default": "None",
-                "description": "Initial checked state of the switch"
-            },
-            {
-                "name": "signal",
-                "type": "str",
-                "default": "auto-generated",
-                "description": "Datastar signal name for state management"
-            },
-            {
-                "name": "disabled",
-                "type": "bool",
-                "default": "False",
-                "description": "Whether the switch is disabled"
-            },
-            {
-                "name": "required",
-                "type": "bool",
-                "default": "False",
-                "description": "Whether the switch is required"
-            },
-            {
-                "name": "cls",
-                "type": "str",
-                "default": "''",
-                "description": "Additional CSS classes"
-            }
-        ],
-        "helper_components": [
-            {
-                "name": "SwitchWithLabel",
-                "description": "Switch with integrated label and helper/error text",
-                "props": [
-                    {
-                        "name": "label",
-                        "type": "str",
-                        "description": "Label text for the switch"
-                    },
-                    {
-                        "name": "helper_text",
-                        "type": "str | None",
-                        "description": "Helper text displayed below the switch"
-                    },
-                    {
-                        "name": "error_text",
-                        "type": "str | None",
-                        "description": "Error message displayed below the switch"
-                    },
-                    {
-                        "name": "label_cls",
-                        "type": "str",
-                        "description": "Additional CSS classes for the label"
-                    },
-                    {
-                        "name": "switch_cls",
-                        "type": "str",
-                        "description": "Additional CSS classes for the switch itself"
-                    }
-                ]
-            }
+    # For Switch, users mostly need the main props for state/behavior.
+    api_reference = build_api_reference(
+        main_props=[
+            Prop("checked", "bool | None", "Initial checked state of the switch", "None"),
+            Prop("signal", "str", "Datastar signal name for state management", "auto-generated"),
+            Prop("disabled", "bool", "Whether the switch is disabled", "False"),
+            Prop("required", "bool", "Whether the switch is required", "False"),
+            Prop("cls", "str", "Additional CSS classes", "''"),
         ]
-    }
+    )
     
     # Hero example
-    hero_example = ComponentPreview(
-        Div(
+    @with_code
+    def hero_switch_example():
+        return Div(
             SwitchWithLabel(
                 label="Enable notifications",
                 signal="notifications",
                 checked=True
             ),
             cls="flex justify-center"
-        ),
-        '''SwitchWithLabel(
-    label="Enable notifications", 
-    signal="notifications",
-    checked=True
-)''',
+        )
+
+    hero_example = ComponentPreview(
+        hero_switch_example(),
+        hero_switch_example.code,
         copy_button=True
     )
     

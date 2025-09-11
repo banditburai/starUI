@@ -9,7 +9,13 @@ BadgeVariant = Literal["default", "secondary", "destructive", "outline"]
 
 
 badge_variants = cva(
-    base="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden",
+    base=(
+        "inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium "
+        "w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none "
+        "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] "
+        "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 "
+        "aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden"
+    ),
     config={
         "variants": {
             "variant": {
@@ -29,7 +35,6 @@ def Badge(
     variant: BadgeVariant = "default",
     href: str | None = None,
     clickable: bool = False,
-    class_name: str = "",
     cls: str = "",
     **kwargs,
 ) -> FT:
@@ -39,7 +44,7 @@ def Badge(
         return A(
             *children, 
             href=href, 
-            cls=cn(base_classes, class_name, cls), 
+            cls=cn(base_classes, cls), 
             data_slot="badge", 
             **kwargs
         )
@@ -47,7 +52,7 @@ def Badge(
     if clickable:
         return HTMLButton(
             *children,
-            cls=cn(base_classes, "cursor-pointer", class_name, cls),
+            cls=cn(base_classes, "cursor-pointer", cls),
             data_slot="badge",
             type="button",
             **kwargs,
@@ -55,7 +60,7 @@ def Badge(
 
     return Span(
         *children, 
-        cls=cn(base_classes, class_name, cls), 
+        cls=cn(base_classes, cls), 
         data_slot="badge", 
         **kwargs
     )

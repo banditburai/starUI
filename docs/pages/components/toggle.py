@@ -21,7 +21,7 @@ from starui.registry.components.badge import Badge
 from starui.registry.components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
 from starui.registry.components.separator import Separator
 from starui.registry.components.progress import Progress
-from utils import auto_generate_page
+from utils import auto_generate_page, with_code, Prop, build_api_reference
 from widgets.component_preview import ComponentPreview
 
 
@@ -29,8 +29,9 @@ def examples():
     """Generate toggle examples using ComponentPreview with tabs."""
     
     # Basic toggle
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def basic_toggle_example():
+        return Div(
             Toggle(
                 Icon("lucide:bold", cls="h-4 w-4"),
                 variant="outline",
@@ -42,19 +43,19 @@ def examples():
                 cls="text-sm text-muted-foreground mt-2"
             ),
             cls="flex flex-col items-center"
-        ),
-        '''Toggle(
-    Icon("lucide:bold", cls="h-4 w-4"),
-    variant="outline",
-    signal="bold_toggle"
-)''',
+        )
+
+    yield ComponentPreview(
+        basic_toggle_example(),
+        basic_toggle_example.code,
         title="Basic Toggle",
         description="Simple toggle button with icon"
     )
     
     # Feature toggles
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def feature_toggles_example():
+        return Card(
             CardHeader(
                 CardTitle("Feature Flags"),
                 CardDescription("Enable experimental features")
@@ -106,38 +107,19 @@ def examples():
                 )
             ),
             cls="w-80"
-        ),
-        '''Card(
-    CardContent(
-        Toggle(
-            Icon("lucide:flask"), "Experimental Mode",
-            variant="outline",
-            signal="experimental"
-        ),
-        Toggle(
-            Icon("lucide:bug"), "Debug Mode",
-            variant="outline",
-            signal="debug"
-        ),
-        Toggle(
-            Icon("lucide:zap"), "Performance Mode",
-            variant="outline",
-            signal="performance",
-            pressed=True
-        ),
-        Badge(
-            ds_text("active modes"),
-            variant="secondary"
         )
-    )
-)''',
+
+    yield ComponentPreview(
+        feature_toggles_example(),
+        feature_toggles_example.code,
         title="Feature Toggles",
         description="Enable/disable features with descriptive toggles"
     )
     
     # Size variations
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def size_variations_example():
+        return Div(
             Div(
                 H3("Small", cls="text-sm font-medium mb-2"),
                 Toggle(
@@ -188,23 +170,19 @@ def examples():
                 cls="space-y-2"
             ),
             cls="flex gap-8 justify-center"
-        ),
-        '''// Size variations
-Toggle(Icon("lucide:star"), variant="outline", size="sm")
-Toggle(Icon("lucide:heart"), "Like", variant="outline", size="sm")
+        )
 
-Toggle(Icon("lucide:star"), variant="outline")  // default size
-Toggle(Icon("lucide:heart"), "Like", variant="outline")
-
-Toggle(Icon("lucide:star"), variant="outline", size="lg")
-Toggle(Icon("lucide:heart"), "Like", variant="outline", size="lg")''',
+    yield ComponentPreview(
+        size_variations_example(),
+        size_variations_example.code,
         title="Size Variations",
         description="Small, default, and large toggle sizes"
     )
     
     # Social interaction toggles
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def social_interactions_example():
+        return Card(
             CardContent(
                 Div(
                     Div(
@@ -261,34 +239,19 @@ Toggle(Icon("lucide:heart"), "Like", variant="outline", size="lg")''',
                 )
             ),
             cls="max-w-sm"
-        ),
-        '''// Social media post interactions
-Card(
-    CardContent(
-        // Post content
-        Div(
-            Toggle(
-                Icon("lucide:heart"),
-                Span(ds_text("$liked ? '124' : '123'")),
-                variant="outline",
-                signal="liked"
-            ),
-            Toggle(Icon("lucide:message-circle"), "8", variant="outline"),
-            Toggle(Icon("lucide:bookmark"), variant="outline", signal="saved"),
-            Toggle(Icon("lucide:share-2"), variant="outline"),
-            cls="flex gap-2"
-        ),
-        P(ds_show("$liked"), Icon("lucide:heart"), "You liked this"),
-        P(ds_show("$saved"), Icon("lucide:bookmark"), "Saved")
-    )
-)''',
+        )
+
+    yield ComponentPreview(
+        social_interactions_example(),
+        social_interactions_example.code,
         title="Social Interactions",
         description="Like, comment, save, and share toggles"
     )
     
     # Music player controls with HTML5 Audio
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def music_player_simulation_example():
+        return Card(
             CardHeader(
                 CardTitle("Now Playing"),
                 CardDescription("Sunset Dreams - Ambient Mix")
@@ -428,42 +391,19 @@ Card(
                 )
             ),
             cls="max-w-sm"
-        ),
-        '''// Simulated Music Player with Toggle Controls
-Card(
-    CardContent(
-        // Progress bar synced with timer
-        Progress(signal="song_progress", cls="h-2"),
-        
-        // Time display
-        P(ds_text("Math.floor($current_time / 60) + ':' + String($current_time % 60).padStart(2, '0') + ' / 4:56'")),
-        ),
-        
-        // Control buttons
-        Div(
-            Toggle(Icon("lucide:shuffle"), size="sm", signal="shuffle"),
-            Button(Icon("lucide:skip-back"), ds_on_click="audio.currentTime = 0"),
-            Toggle(
-                Span(Icon("lucide:play"), ds_show="!$playing"),
-                Span(Icon("lucide:pause"), ds_show="$playing"),
-                signal="playing"
-            ),
-            Button(Icon("lucide:skip-forward"), ds_on_click="audio.currentTime += 10"),
-            Toggle(Icon("lucide:repeat"), size="sm", signal="repeat"),
-            cls="flex items-center justify-center gap-2"
-        ),
-        
-        // Audio control effect
-        Div(ds_effect="// Play/pause audio based on $playing state")
-    )
-)''',
+        )
+
+    yield ComponentPreview(
+        music_player_simulation_example(),
+        music_player_simulation_example.code,
         title="Music Player Simulation",
         description="Simulated music player with realistic timer and toggle controls"
     )
     
     # Disabled states
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def disabled_states_example():
+        return Div(
             Div(
                 H3("Enabled", cls="text-sm font-medium mb-2"),
                 Div(
@@ -502,18 +442,11 @@ Card(
                 )
             ),
             cls="space-y-4"
-        ),
-        '''// Disabled states
-Toggle(Icon("lucide:wifi"), variant="outline")  // Enabled
-Toggle(Icon("lucide:bluetooth"), "Bluetooth", variant="outline")
+        )
 
-Toggle(Icon("lucide:wifi"), variant="outline", disabled=True)  // Disabled
-Toggle(
-    Icon("lucide:bluetooth"), "Bluetooth",
-    variant="outline",
-    disabled=True,
-    pressed=True  // Disabled in pressed state
-)''',
+    yield ComponentPreview(
+        disabled_states_example(),
+        disabled_states_example.code,
         title="Disabled States",
         description="Disabled toggles in different states"
     )
@@ -522,56 +455,22 @@ Toggle(
 def create_toggle_docs():
     """Create toggle documentation page using convention-based approach."""
     
-    api_reference = {
-        "props": [
-            {
-                "name": "variant",
-                "type": "Literal['default', 'outline']",
-                "default": "'default'",
-                "description": "Visual style variant"
-            },
-            {
-                "name": "size",
-                "type": "Literal['default', 'sm', 'lg']",
-                "default": "'default'",
-                "description": "Size of the toggle button"
-            },
-            {
-                "name": "pressed",
-                "type": "bool",
-                "default": "False",
-                "description": "Initial pressed state"
-            },
-            {
-                "name": "signal",
-                "type": "str",
-                "default": "auto-generated",
-                "description": "Datastar signal name for state management"
-            },
-            {
-                "name": "disabled",
-                "type": "bool",
-                "default": "False",
-                "description": "Whether the toggle is disabled"
-            },
-            {
-                "name": "aria_label",
-                "type": "str | None",
-                "default": "None",
-                "description": "Accessibility label for screen readers"
-            },
-            {
-                "name": "cls",
-                "type": "str",
-                "default": "''",
-                "description": "Additional CSS classes"
-            }
+    api_reference = build_api_reference(
+        main_props=[
+            Prop("variant", "Literal['default','outline']", "Visual style variant", "'default'"),
+            Prop("size", "Literal['default','sm','lg']", "Button size", "'default'"),
+            Prop("pressed", "bool", "Initial pressed state", "False"),
+            Prop("signal", "str", "Datastar signal (auto-generated if blank)", "auto-generated"),
+            Prop("disabled", "bool", "Disable the toggle", "False"),
+            Prop("aria_label", "str | None", "ARIA label for accessibility", "None"),
+            Prop("cls", "str", "Additional CSS classes", "''"),
         ]
-    }
+    )
     
     # Hero example
-    hero_example = ComponentPreview(
-        Div(
+    @with_code
+    def hero_toggle_example():
+        return Div(
             Toggle(
                 Icon("lucide:bold", cls="h-4 w-4"),
                 Span("Bold"),
@@ -584,13 +483,11 @@ def create_toggle_docs():
                 cls="text-sm text-muted-foreground mt-2"
             ),
             cls="flex flex-col items-center"
-        ),
-        '''Toggle(
-    Icon("lucide:bold", cls="h-4 w-4"),
-    Span("Bold"),
-    variant="outline",
-    signal="hero_toggle"
-)''',
+        )
+
+    hero_example = ComponentPreview(
+        hero_toggle_example(),
+        hero_toggle_example.code,
         copy_button=True
     )
     

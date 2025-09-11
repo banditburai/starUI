@@ -21,7 +21,7 @@ from starui.registry.components.button import Button
 from starui.registry.components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
 from starui.registry.components.badge import Badge
 from starui.registry.components.separator import Separator
-from utils import auto_generate_page
+from utils import auto_generate_page, with_code, Component, build_api_reference
 from widgets.component_preview import ComponentPreview
 
 
@@ -29,8 +29,9 @@ def examples():
     """Generate radio group examples using ComponentPreview with tabs."""
     
     # Horizontal layout
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def horizontal_layout_example():
+        return Div(
             RadioGroupWithLabel(
                 label="Size",
                 options=[
@@ -47,21 +48,11 @@ def examples():
             ),
             ds_signals(size_radio=value("md")),
             cls="max-w-lg"
-        ),
-        '''RadioGroupWithLabel(
-    label="Size",
-    options=[
-        {"value": "xs", "label": "Extra Small"},
-        {"value": "sm", "label": "Small"},
-        {"value": "md", "label": "Medium"},
-        {"value": "lg", "label": "Large"},
-        {"value": "xl", "label": "Extra Large"}
-    ],
-    orientation="horizontal",
-    value="md",
-    signal="size_radio",
-    helper_text="Choose the appropriate size"
-)''',
+        )
+
+    yield ComponentPreview(
+        horizontal_layout_example(),
+        horizontal_layout_example.code,
         title="Horizontal Layout",
         description="Radio buttons arranged horizontally"
     )
@@ -98,8 +89,9 @@ def examples():
         )
     
     # Subscription tier selector with card-styled RadioGroupItems
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def subscription_plans_example():
+        return Card(
             CardHeader(
                 CardTitle("Choose Your Plan"),
                 CardDescription("Select the plan that best fits your needs")
@@ -132,8 +124,8 @@ def examples():
                         ),
                         initial_value="free",
                         signal="selected_plan",
-                        hide_indicators=True,  # Hide radio dots for card-style selection
-                        cls="grid grid-cols-1 gap-3 w-full"  # Use grid for truly consistent width
+                        hide_indicators=True,
+                        cls="grid grid-cols-1 gap-3 w-full"
                     ),
                     P(
                         "Selected plan: ",
@@ -148,39 +140,19 @@ def examples():
                 )
             ),
             cls="max-w-2xl"
-        ),
-        '''# Custom PlanCard component that works with RadioGroup
-def PlanCard(value, name, price, description, features, badge=None):
-    def create_plan_card(signal, group_name, default_value=None):
-        radio_id = f"plan_{uuid4()[:8]}"
-        return Div(
-            HTMLInput(
-                type="radio", id=radio_id, name=group_name, value=value,
-                ds_on_change(f"${signal} = '{value}'"), cls="sr-only peer"
-            ),
-            HTMLLabel(
-                Div(
-                    # Plan content with peer-checked: styling
-                    cls="p-4 border-2 rounded-lg cursor-pointer transition-all peer-checked:border-primary peer-checked:ring-2 peer-checked:shadow-md"
-                ),
-                for_=radio_id, cls="block w-full cursor-pointer"
-            )
         )
-    return create_plan_card
 
-# Use with RadioGroup for semantic structure
-RadioGroup(
-    PlanCard("free", "Free", "$0/month", "Perfect for trying out", ["10 projects"]),
-    PlanCard("pro", "Professional", "$29/month", "For developers", ["Unlimited"]),
-    initial_value="free", signal="selected_plan"
-)''',
+    yield ComponentPreview(
+        subscription_plans_example(),
+        subscription_plans_example.code,
         title="Subscription Plans",
         description="Rich radio options with proper RadioGroup semantics and CSS peer selectors"
     )
     
     # Payment method selector
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def payment_method_example():
+        return Card(
             CardHeader(
                 CardTitle("Payment Method"),
                 CardDescription("How would you like to pay?")
@@ -230,7 +202,7 @@ RadioGroup(
                         "Continue to Payment",
                         ds_on_click("event.preventDefault(); alert(`Proceeding with ${$payment_method}`)"),
                         type="submit",
-                        cls="w-full mt-4",                        
+                        cls="w-full mt-4",
                     ),
                     ds_signals(
                         payment_method=value("card")
@@ -238,32 +210,19 @@ RadioGroup(
                 )
             ),
             cls="max-w-lg"
-        ),
-        '''RadioGroupWithLabel(
-    label="Select payment method",
-    options=[
-        {"value": "card", "label": "Credit/Debit Card"},
-        {"value": "paypal", "label": "PayPal"},
-        {"value": "bank", "label": "Bank Transfer"},
-        {"value": "crypto", "label": "Cryptocurrency"}
-    ],
-    value="card",
-    signal="payment_method",
-    required=True
-)
-// Show context based on selection
-Div(
-    Icon("lucide:credit-card"),
-    P("Secure card payment"),
-    ds_show="$payment_method === 'card'"
-)''',
+        )
+
+    yield ComponentPreview(
+        payment_method_example(),
+        payment_method_example.code,
         title="Payment Method",
         description="Payment selection with contextual information"
     )
     
     # Interactive 3-question survey
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def interactive_survey_example():
+        return Card(
             CardHeader(
                 CardTitle(
                     ds_text("'Question ' + ($step + 1) + ' of 3'")
@@ -271,7 +230,7 @@ Div(
                 CardDescription("Web Development Survey")
             ),
             CardContent(
-                # Progress bar at the top
+                Div(
                     Div(
                         P(
                             ds_text("`Question ${$step + 1} of 3`"),
@@ -286,9 +245,6 @@ Div(
                         ),
                         cls="mb-4"
                     ),
-                    
-                    
-                    # Question 1 - Programming Language
                     Div(
                         RadioGroupWithLabel(
                             label="What is your primary programming language?",
@@ -306,8 +262,6 @@ Div(
                         ),
                         ds_show("$step === 0")
                     ),
-                    
-                    # Question 2 - Experience Level
                     Div(
                         RadioGroupWithLabel(
                             label="How many years of development experience do you have?",
@@ -323,8 +277,6 @@ Div(
                         ),
                         ds_show("$step === 1")
                     ),
-                    
-                    # Question 3 - Preferred Framework
                     Div(
                         RadioGroupWithLabel(
                             label="Which frontend framework do you prefer?",
@@ -342,22 +294,18 @@ Div(
                         ),
                         ds_show("$step === 2")
                     ),
-                    
-                    # Validation message - only show if submitted and no answer
                     P(
                         "Please select an answer to continue",
                         ds_show("$survey_error_visible"),
-                        cls="text-sm text-destructive mt-2",                        
+                        cls="text-sm text-destructive mt-2",
                     ),
-                    
-                    # Navigation buttons
                     Div(
                         Button(
                             ds_disabled("$step === 0"),
                             ds_on_click("if ($step > 0) { $step = $step - 1 }"),
                             "Previous",
                             variant="outline",
-                            disabled=True,  # Will be overridden by ds_disabled                            
+                            disabled=True,
                         ),
                         Button(
                             "Next",
@@ -366,64 +314,28 @@ Div(
                         ),
                         cls="flex justify-between mt-6"
                     ),
-                
-                ds_signals(
-                    step=0,
-                    survey_q1=value(""),
-                    survey_q2=value(""),
-                    survey_q3=value("")
+                    ds_signals(
+                        step=0,
+                        survey_q1=value(""),
+                        survey_q2=value(""),
+                        survey_q3=value("")
+                    )
                 )
             ),
             cls="max-w-lg"
-        ),
-        '''Card(
-    CardHeader(
-        CardTitle(ds_text("'Question ' + ($step + 1) + ' of 3'")),
-        CardDescription("Web Development Survey")
-    ),
-    CardContent(
-        # Progress bar at top
-        Div(
-            P(ds_text("`Step ${$step + 1} of 3`"), cls="text-xs text-muted-foreground mb-2"),
-            Div(
-                Div(
-                    ds_style(width="`${([$survey_q1, $survey_q2, $survey_q3].filter(q => q !== '').length / 3) * 100}%`"),
-                    cls="h-2 bg-primary rounded-full transition-all duration-300"
-                ),
-                cls="w-full bg-secondary rounded-full h-2 mb-6"
-            )
-        ),
-        
-        # Questions with conditional display
-        Div(
-            ds_show("$step === 0"),
-            RadioGroupWithLabel(
-                label="What is your primary programming language?",
-                options=[
-                    {"value": "javascript", "label": "JavaScript/TypeScript"},
-                    {"value": "python", "label": "Python"}
-                ],
-                signal="survey_q1"
-            )
-        ),
-        
-        # Navigation buttons  
-        Div(
-            Button("Previous", variant="outline", ds_disabled("$step === 0")),
-            Button(ds_text("$step === 2 ? 'Complete Survey' : 'Next'")),
-            cls="flex justify-between mt-6"
-        ),
-        
-        ds_signals(step=0, survey_q1=value(""), survey_q2=value(""), survey_q3=value(""))
-    )
-)''',
+        )
+
+    yield ComponentPreview(
+        interactive_survey_example(),
+        interactive_survey_example.code,
         title="Interactive Survey",
         description="Multi-step survey with progress tracking and validation"
     )
     
     # Settings panel
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def settings_panel_example():
+        return Card(
             CardHeader(
                 CardTitle("Display Settings"),
                 CardDescription("Customize your viewing experience")
@@ -479,33 +391,11 @@ Div(
                 )
             ),
             cls="max-w-lg"
-        ),
-        '''Card(
-    CardContent(
-        RadioGroupWithLabel(
-            label="Theme",
-            options=[
-                {"value": "light", "label": "Light"},
-                {"value": "dark", "label": "Dark"},
-                {"value": "system", "label": "System"}
-            ],
-            value="system",
-            signal="theme_setting"
-        ),
-        Separator(),
-        RadioGroupWithLabel(
-            label="Font Size",
-            options=[
-                {"value": "small", "label": "Small (14px)"},
-                {"value": "medium", "label": "Medium (16px)"},
-                {"value": "large", "label": "Large (18px)"}
-            ],
-            value="medium",
-            signal="font_setting"
-        ),
-        Button("Apply Settings", ds_on_click("applySettings()"))
-    )
-)''',
+        )
+
+    yield ComponentPreview(
+        settings_panel_example(),
+        settings_panel_example.code,
         title="Settings Panel",
         description="Multiple radio groups for configuration"
     )
@@ -514,116 +404,17 @@ Div(
 def create_radio_group_docs():
     """Create radio group documentation page using convention-based approach."""
     
-    api_reference = {
-        "props": [
-            {
-                "name": "initial_value",
-                "type": "str | None",
-                "default": "None",
-                "description": "Initially selected radio value"
-            },
-            {
-                "name": "signal",
-                "type": "str",
-                "default": "auto-generated",
-                "description": "Datastar signal name for state management"
-            },
-            {
-                "name": "disabled",
-                "type": "bool",
-                "default": "False",
-                "description": "Whether entire group is disabled"
-            },
-            {
-                "name": "required",
-                "type": "bool",
-                "default": "False",
-                "description": "Whether selection is required"
-            },
-            {
-                "name": "cls",
-                "type": "str",
-                "default": "''",
-                "description": "Additional CSS classes"
-            }
-        ],
-        "sub_components": [
-            {
-                "name": "RadioGroupItem",
-                "description": "Individual radio button option",
-                "props": [
-                    {
-                        "name": "value",
-                        "type": "str",
-                        "description": "Value when this option is selected"
-                    },
-                    {
-                        "name": "label",
-                        "type": "str | None",
-                        "description": "Display label for the radio button"
-                    },
-                    {
-                        "name": "disabled",
-                        "type": "bool",
-                        "default": "False",
-                        "description": "Whether this specific option is disabled"
-                    },
-                    {
-                        "name": "indicator_cls",
-                        "type": "str",
-                        "default": "''",
-                        "description": "Additional CSS classes for the indicator"
-                    }
-                ]
-            },
-            {
-                "name": "RadioGroupWithLabel",
-                "description": "Complete radio group with label and helper text",
-                "props": [
-                    {
-                        "name": "label",
-                        "type": "str",
-                        "description": "Label text for the radio group"
-                    },
-                    {
-                        "name": "options",
-                        "type": "list[dict[str, Any]]",
-                        "description": "List of option dictionaries with 'value', 'label', and optional 'disabled' keys"
-                    },
-                    {
-                        "name": "value",
-                        "type": "str | None",
-                        "description": "Initially selected value"
-                    },
-                    {
-                        "name": "signal",
-                        "type": "str | None",
-                        "description": "Datastar signal name"
-                    },
-                    {
-                        "name": "helper_text",
-                        "type": "str | None",
-                        "description": "Helper text below the radio group"
-                    },
-                    {
-                        "name": "error_text",
-                        "type": "str | None",
-                        "description": "Error message"
-                    },
-                    {
-                        "name": "orientation",
-                        "type": "str",
-                        "default": "'vertical'",
-                        "description": "Layout orientation ('vertical' or 'horizontal')"
-                    }
-                ]
-            }
+    api_reference = build_api_reference(
+        components=[
+            Component("RadioGroup", "Container that manages a single selection across contained items"),
+            Component("RadioGroupItem", "Individual option; provide a unique value and label content"),
+            Component("RadioGroupWithLabel", "Convenience wrapper that renders a labelled group from an options list"),
         ]
-    }
+    )
     
-    # Hero example
-    hero_example = ComponentPreview(
-        Div(
+    @with_code
+    def hero_radio_group_example():
+        return Div(
             RadioGroup(
                 RadioGroupItem(value="email", label="Email notifications"),
                 RadioGroupItem(value="sms", label="SMS notifications"),
@@ -633,15 +424,11 @@ def create_radio_group_docs():
                 initial_value="email"
             ),
             cls="max-w-md mx-auto"
-        ),
-        '''RadioGroup(
-    RadioGroupItem(value="email", label="Email notifications"),
-    RadioGroupItem(value="sms", label="SMS notifications"),
-    RadioGroupItem(value="push", label="Push notifications"),
-    RadioGroupItem(value="none", label="No notifications"),
-    signal="notification_pref",
-    initial_value="email"
-)''',
+        )
+
+    hero_example = ComponentPreview(
+        hero_radio_group_example(),
+        hero_radio_group_example.code,
         copy_button=True
     )
     

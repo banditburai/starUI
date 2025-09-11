@@ -14,18 +14,17 @@ from starhtml.datastar import ds_signals, ds_show, value
 from starui.registry.components.input import Input
 from starui.registry.components.button import Button
 from starui.registry.components.label import Label as UILabel
+from utils import auto_generate_page, with_code, Prop, build_api_reference
 from widgets.component_preview import ComponentPreview
 
 
 def examples():
     """Generate Input examples using ComponentPreview with tabs."""
     
-    # Note: Basic input moved to hero example
-    # This will be the first example after the hero
-    
     # Input types
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def input_types_example():
+        return Div(
             Div(
                 UILabel("Email", for_="email"),
                 Input(type="email", id="email", placeholder="you@example.com", cls="w-80"),
@@ -42,17 +41,19 @@ def examples():
                 cls="space-y-2"
             ),
             cls="grid gap-4 max-w-md"
-        ),
-        '''Input(type="email", placeholder="you@example.com")
-Input(type="password", placeholder="Enter your password")
-Input(type="tel", placeholder="+1 (555) 123-4567")''',
+        )
+
+    yield ComponentPreview(
+        input_types_example(),
+        input_types_example.code,
         title="Input Types",
         description="Different input types for various data"
     )
     
     # Reactive Input with validation
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def reactive_input_validation_example():
+        return Div(
             Div(
                 UILabel(
                     "Username", 
@@ -108,30 +109,19 @@ Input(type="tel", placeholder="+1 (555) 123-4567")''',
             ),
             ds_signals(username=value(""), username_valid=False, user_email=value(""), user_email_valid=False),
             cls="grid gap-4 max-w-md"
-        ),
-        '''Input(
-    placeholder="Enter username",
-    signal="username", 
-    validation="/^[a-zA-Z0-9_]{3,}$/.test($signal)"
-)
+        )
 
-Input(
-    type="email",
-    placeholder="you@example.com", 
-    signal="user_email",
-    validation="/^[^\\\\s@]+@[^\\\\s@]+\\\\.[^\\\\s@]+$/.test($signal)"
-)
-
-P("Username must be at least 3 characters...", 
-  ds_show="!$username_valid && $username.length > 0",
-  cls="text-xs text-destructive")''',
+    yield ComponentPreview(
+        reactive_input_validation_example(),
+        reactive_input_validation_example.code,
         title="Reactive Input with Validation",
         description="Real-time input validation using signals"
     )
     
     # Input with button
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def input_with_buttons_example():
+        return Div(
             Div(
                 UILabel("Subscribe to Newsletter", for_="newsletter"),
                 Div(
@@ -151,25 +141,19 @@ P("Username must be at least 3 characters...",
                 cls="space-y-2"
             ),
             cls="grid gap-4 max-w-md"
-        ),
-        '''Div(
-    Input(type="email", placeholder="Enter your email", cls="flex-1"),
-    Button("Subscribe"),
-    cls="flex gap-2"
-)
+        )
 
-Div(
-    Input(type="search", placeholder="Search products...", cls="flex-1"),
-    Button("Search", variant="outline"),
-    cls="flex gap-2"
-)''',
+    yield ComponentPreview(
+        input_with_buttons_example(),
+        input_with_buttons_example.code,
         title="Input with Buttons",
         description="Combine inputs with action buttons"
     )
     
     # Number and date inputs with icon styling
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def inputs_with_icons_example():
+        return Div(
             Div(
                 UILabel("Quantity", for_="quantity"),
                 Div(
@@ -207,38 +191,19 @@ Div(
                 cls="space-y-2"
             ),
             cls="grid gap-4 max-w-md"
-        ),
-        '''# Input with custom icons
-Div(
-    Icon("lucide:hash", width="16", height="16", cls="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"),
-    Input(type="number", placeholder="Enter quantity", cls="pl-10"),
-    cls="relative"
-)
+        )
 
-Div(
-    Icon("lucide:calendar", width="16", height="16", cls="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"),
-    Input(type="text", placeholder="MM/DD/YYYY", cls="pl-10"),
-    cls="relative"
-)
-
-Div(
-    Icon("lucide:clock", width="16", height="16", cls="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"),
-    Input(type="text", placeholder="HH:MM", cls="pl-10"),
-    cls="relative"
-)
-
-Div(
-    Icon("lucide:globe", width="16", height="16", cls="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"),
-    Input(type="url", placeholder="https://example.com", cls="pl-10"),
-    cls="relative"
-)''',
+    yield ComponentPreview(
+        inputs_with_icons_example(),
+        inputs_with_icons_example.code,
         title="Input with Icons",
         description="Inputs with custom icons that adapt to dark mode"
     )
     
     # Input states
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def input_states_example():
+        return Div(
             Div(
                 UILabel("Disabled Input", for_="disabled", cls="opacity-50"),
                 Input(id="disabled", placeholder="This field is disabled", disabled=True, cls="w-80"),
@@ -260,17 +225,19 @@ Div(
                 cls="space-y-2"
             ),
             cls="grid gap-4 max-w-md"
-        ),
-        '''Input(placeholder="This field is disabled", disabled=True)
-Input(value="This value cannot be changed", readonly=True)
-Input(placeholder="This field is required", required=True)''',
+        )
+
+    yield ComponentPreview(
+        input_states_example(),
+        input_states_example.code,
         title="Input States",
         description="Disabled, read-only, and required inputs"
     )
     
     # File upload
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def file_upload_inputs_example():
+        return Div(
             Div(
                 UILabel("Profile Picture", for_="avatar"),
                 Input(type="file", id="avatar", accept="image/*", cls="w-80"),
@@ -284,16 +251,19 @@ Input(placeholder="This field is required", required=True)''',
                 cls="space-y-2"
             ),
             cls="grid gap-4 max-w-md"
-        ),
-        '''Input(type="file", accept="image/*")
-Input(type="file", accept=".pdf,.doc,.docx", multiple=True)''',
+        )
+
+    yield ComponentPreview(
+        file_upload_inputs_example(),
+        file_upload_inputs_example.code,
         title="File Upload",
         description="File input fields with accept filters"
     )
     
     # Form layout
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def complete_form_example():
+        return Div(
             Div(
                 UILabel("First Name", for_="first"),
                 Input(id="first", placeholder="John", cls="w-80"),
@@ -319,26 +289,11 @@ Input(type="file", accept=".pdf,.doc,.docx", multiple=True)''',
                 cls="pt-2"
             ),
             cls="space-y-4 max-w-md"
-        ),
-        '''Div(
-    Div(
-        Label("First Name", for_="first"),
-        Input(id="first", placeholder="John"),
-        cls="space-y-2"
-    ),
-    Div(
-        Label("Last Name", for_="last"),
-        Input(id="last", placeholder="Doe"),
-        cls="space-y-2"
-    ),
-    Div(
-        Label("Email Address", for_="email"),
-        Input(type="email", id="email", placeholder="john.doe@example.com"),
-        cls="space-y-2"
-    ),
-    Button("Submit Form", cls="w-full"),
-    cls="space-y-4"
-)''',
+        )
+
+    yield ComponentPreview(
+        complete_form_example(),
+        complete_form_example.code,
         title="Complete Form",
         description="Multiple inputs in a form layout"
     )
@@ -346,19 +301,36 @@ Input(type="file", accept=".pdf,.doc,.docx", multiple=True)''',
 
 def create_input_docs():
     """Create input documentation page using convention-based approach."""
-    from utils import auto_generate_page
     
+    # Intentional API: focus on the props users set most when adding inputs
+    api_reference = build_api_reference(
+        main_props=[
+            Prop("type", "InputType", "Input type (text, email, password, number, etc.)", "text"),
+            Prop("placeholder", "str | None", "Placeholder text shown when empty", "None"),
+            Prop("signal", "str | None", "Datastar signal for reactive binding", "None"),
+            Prop("validation", "str | None", "JS expression to set <signal>_valid on input", "None"),
+            Prop("value", "str | None", "Initial value for non-reactive usage", "None"),
+            Prop("disabled", "bool", "Disable the input and style accordingly", "False"),
+            Prop("readonly", "bool", "Make input read-only without disabling", "False"),
+            Prop("required", "bool", "Mark the input as required", "False"),
+            Prop("cls", "str", "Additional CSS classes for layout/styling", "''"),
+        ]
+    )
+
     # Hero example - basic input showcase
-    hero_example = ComponentPreview(
-        Div(
+    @with_code
+    def hero_input_example():
+        return Div(
             Input(placeholder="Enter text...", cls="mb-3 w-80"),
             Input(type="email", placeholder="you@example.com", cls="mb-3 w-80"),
             Input(type="password", placeholder="Enter your password", cls="w-80"),
             cls="grid gap-3 max-w-sm"
-        ),
-        '''Input(placeholder="Enter text...")
-Input(type="email", placeholder="you@example.com")
-Input(type="password", placeholder="Enter your password")'''
+        )
+
+    hero_example = ComponentPreview(
+        hero_input_example(),
+        hero_input_example.code,
+        copy_button=True
     )
     
     return auto_generate_page(
@@ -368,56 +340,5 @@ Input(type="password", placeholder="Enter your password")'''
         cli_command="star add input",
         hero_example=hero_example,
         component_slug="input",
-        api_reference={
-            "props": [
-                {
-                    "name": "type",
-                    "type": "InputType",
-                    "default": "text",
-                    "description": "The type of input (text, email, password, etc.)"
-                },
-                {
-                    "name": "placeholder",
-                    "type": "str | None",
-                    "default": "None",
-                    "description": "Placeholder text when input is empty"
-                },
-                {
-                    "name": "value",
-                    "type": "str | None",
-                    "default": "None",
-                    "description": "Initial value (for non-reactive inputs)"
-                },
-                {
-                    "name": "signal",
-                    "type": "str | None",
-                    "default": "None",
-                    "description": "Signal name for reactive binding (enables reactivity)"
-                },
-                {
-                    "name": "validation",
-                    "type": "str | None",
-                    "default": "None",
-                    "description": "JavaScript validation expression (e.g., '/^[a-zA-Z0-9-]+$/.test($signal)')"
-                },
-                {
-                    "name": "disabled",
-                    "type": "bool",
-                    "default": "False",
-                    "description": "Whether the input is disabled"
-                },
-                {
-                    "name": "required",
-                    "type": "bool",
-                    "default": "False",
-                    "description": "Whether the input is required"
-                },
-                {
-                    "name": "cls",
-                    "type": "str",
-                    "default": "''",
-                    "description": "Additional CSS classes"
-                }
-            ]
-        }
+        api_reference=api_reference
     )

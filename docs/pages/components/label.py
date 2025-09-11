@@ -16,17 +16,16 @@ from starui.registry.components.input import Input
 from starui.registry.components.checkbox import Checkbox, CheckboxWithLabel
 from starui.registry.components.radio_group import RadioGroup, RadioGroupItem
 from widgets.component_preview import ComponentPreview
+from utils import with_code, Prop, build_api_reference, auto_generate_page
 
 
 def examples():
     """Generate Label examples using ComponentPreview with tabs."""
     
-    # Basic usage - moved to hero example
-    # This will be the first example after the hero
-    
     # Interactive validation
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def interactive_validation_example():
+        return Div(
             Div(
                 Label(
                     "Project Name",
@@ -54,46 +53,24 @@ def examples():
                 ),
                 cls="space-y-2"
             ),
-            # Initialize signals
             ds_signals(
                 project_name=value("my-project"), 
                 project_name_valid=True
             ),
             cls="w-full max-w-md"
-        ),
-        '''Label(
-    "Project Name",
-    Span(" *", cls="text-destructive"),
-    for_="project-name"
-)
-Input(
-    id="project-name", 
-    placeholder="awesome-project",
-    signal="project_name",
-    validation="/^[a-zA-Z0-9-]+$/.test($signal)"
-)
+        )
 
-# Validation messages
-P(
-    ds_show("!$project_name_valid && $project_name.length > 0"),
-    "Project names can only contain letters, numbers, and hyphens", 
-    cls="text-xs text-destructive"
-)
-P(
-    ds_show("$project_name_valid && $project_name.length > 0"),
-    "✓ Valid project name", 
-    cls="text-xs text-green-600"
-)
-
-# Initialize signals
-ds_signals(project_name=value("my-project"), project_name_valid=True)''',
+    yield ComponentPreview(
+        interactive_validation_example(),
+        interactive_validation_example.code,
         title="Interactive Validation",
         description="Labels with real-time validation feedback"
     )
     
     # Interactive label controls
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def interactive_label_controls_example():
+        return Div(
             Div(
                 Label(
                     Icon("lucide:database", cls="h-4 w-4"),
@@ -133,50 +110,19 @@ ds_signals(project_name=value("my-project"), project_name_valid=True)''',
                 cls="space-y-2"
             ),
             cls="grid gap-4 max-w-md"
-        ),
-        '''Label(
-    Icon("lucide:key", cls="h-4 w-4"),
-    "API Secret Key",
-    Button(
-        Icon("lucide:eye-off", cls="h-3 w-3"),
-        ds_on_click(toggle_signal("showSecret")),
-        ds_show("!$showSecret"),
-        cls="ml-auto p-0 h-auto bg-transparent border-0"
-    ),
-    Button(
-        Icon("lucide:eye", cls="h-3 w-3"), 
-        ds_on_click(toggle_signal("showSecret")),
-        ds_show("$showSecret"),
-        cls="ml-auto p-0 h-auto bg-transparent border-0"
-    ),
-    for_="api-secret",
-    cls="flex items-center gap-2"
-)
-Div(
-    Input(
-        id="api-secret", 
-        placeholder="sk_live_...",
-        value="sk_live_abc123xyz789",
-        type="password",
-        cls="font-mono text-sm w-full",
-        ds_show="!$showSecret"
-    ),
-    Input(
-        placeholder="sk_live_...",
-        value="sk_live_abc123xyz789", 
-        type="text",
-        cls="font-mono text-sm w-full",
-        ds_show="$showSecret"
-    ),
-    cls="relative"
-)''',
+        )
+
+    yield ComponentPreview(
+        interactive_label_controls_example(),
+        interactive_label_controls_example.code,
         title="Interactive Label Controls",
         description="Labels with interactive elements like visibility toggles"
     )
     
     # Advanced label patterns
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def advanced_label_patterns_example():
+        return Div(
             Div(
                 Label(
                     "Deployment Region",
@@ -200,27 +146,19 @@ Div(
                 cls="space-y-2"
             ),
             cls="grid gap-4 max-w-md"
-        ),
-        '''Label(
-    "Deployment Region",
-    Span("(affects latency)", cls="text-xs text-muted-foreground font-normal"),
-    for_="region",
-    cls="font-medium"
-)
+        )
 
-Label(
-    "Custom Domain",
-    Span("Optional", cls="text-xs bg-muted px-2 py-0.5 rounded-full ml-2"),
-    for_="domain",
-    cls="flex items-center font-medium"
-)''',
+    yield ComponentPreview(
+        advanced_label_patterns_example(),
+        advanced_label_patterns_example.code,
         title="Advanced Patterns",
         description="Labels with badges, annotations, and contextual information"
     )
     
     # Radio and checkbox groups  
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def radio_checkbox_groups_example():
+        return Div(
             Div(
                 Label("Preferred Contact Method", cls="text-base font-semibold mb-3 block"),
                 RadioGroup(
@@ -242,27 +180,19 @@ Label(
                 cls="p-4 border rounded-lg"
             ),
             cls="grid gap-4 max-w-md"
-        ),
-        '''Label("Preferred Contact Method", cls="text-base font-semibold mb-3 block")
-RadioGroup(
-    RadioGroupItem("email", "Email"),
-    RadioGroupItem("phone", "Phone"),
-    RadioGroupItem("mail", "Mail"),
-    initial_value="email"
-)
+        )
 
-Label("Notification Preferences", cls="text-base font-semibold mb-3 block")
-CheckboxWithLabel(label="Email notifications", name="notify-email")
-CheckboxWithLabel(label="SMS notifications", name="notify-sms")
-CheckboxWithLabel(label="Push notifications", name="notify-push")''',
+    yield ComponentPreview(
+        radio_checkbox_groups_example(),
+        radio_checkbox_groups_example.code,
         title="Radio & Checkbox Groups",
         description="Labels for grouped form controls"
     )
     
-    
     # Complete form layout
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def complete_form_layout_example():
+        return Div(
             Div(
                 Label("Developer Name", for_="dev-name-form"),
                 Input(id="dev-name-form", placeholder="Sarah Chen"),
@@ -290,21 +220,11 @@ CheckboxWithLabel(label="Push notifications", name="notify-push")''',
                 cls="space-y-2"
             ),
             cls="space-y-4 max-w-md border rounded-lg p-4"
-        ),
-        '''Label("Developer Name", for_="dev-name")
-Input(id="dev-name", placeholder="Sarah Chen")
+        )
 
-Label("GitHub Username", for_="github")
-Input(id="github", placeholder="sarahc", cls="font-mono text-sm")
-P("Used for repository access and commit attribution", 
-  cls="text-xs text-muted-foreground mt-1")
-
-Label(
-    "Team Role",
-    Span(" *", cls="text-destructive"),
-    for_="role"
-)
-Input(id="role", placeholder="Frontend Engineer")''',
+    yield ComponentPreview(
+        complete_form_layout_example(),
+        complete_form_layout_example.code,
         title="Complete Form Layout",
         description="Real-world form with various label patterns"
     )
@@ -312,18 +232,24 @@ Input(id="role", placeholder="Frontend Engineer")''',
 
 def create_label_docs():
     """Create label documentation page using convention-based approach."""
-    from utils import auto_generate_page
+    
+    # Intentional API: Label is simple, focus on key props users care about
+    api_reference = build_api_reference(
+        main_props=[
+            Prop("for_", "str | None", "ID of the associated form control (sets 'for' attribute)", "None"),
+            Prop("cls", "str", "Additional CSS classes for spacing/layout", "''"),
+        ]
+    )
     
     # Hero example - showcase different label patterns
-    hero_example = ComponentPreview(
-        Div(
-            # Basic form fields
+    @with_code
+    def hero_label_example():
+        return Div(
             Div(
                 Label("Email", for_="email"),
                 Input(type="email", id="email", placeholder="Enter your email"),
                 cls="space-y-2"
             ),
-            # Required field
             Div(
                 Label(
                     "Password",
@@ -333,7 +259,6 @@ def create_label_docs():
                 Input(type="password", id="password", placeholder="Enter your password"),
                 cls="space-y-2"
             ),
-            # Label with icon
             Div(
                 Label(
                     Icon("lucide:user", width="16", height="16"),
@@ -345,22 +270,12 @@ def create_label_docs():
                 cls="space-y-2"
             ),
             cls="grid gap-6 max-w-sm"
-        ),
-        '''Label("Email", for_="email")
-Input(type="email", id="email", placeholder="Enter your email")
+        )
 
-Label(
-    "Password",
-    Span(" *", cls="text-destructive"),
-    for_="password"
-)
-
-Label(
-    Icon("lucide:user", width="16", height="16"),
-    "Username", 
-    for_="username",
-    cls="flex items-center gap-2"
-)'''
+    hero_example = ComponentPreview(
+        hero_label_example(),
+        hero_label_example.code,
+        copy_button=True
     )
     
     return auto_generate_page(
@@ -370,20 +285,5 @@ Label(
         cli_command="star add label",
         hero_example=hero_example,
         component_slug="label",
-        api_reference={
-            "props": [
-                {
-                    "name": "for_",
-                    "type": "str | None",
-                    "default": "None",
-                    "description": "ID of the form control this label is for"
-                },
-                {
-                    "name": "cls",
-                    "type": "str",
-                    "default": "''",
-                    "description": "Additional CSS classes"
-                }
-            ]
-        }
+        api_reference=api_reference
     )

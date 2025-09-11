@@ -21,7 +21,7 @@ from starui.registry.components.button import Button
 from starui.registry.components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
 from starui.registry.components.badge import Badge
 from starui.registry.components.separator import Separator
-from utils import auto_generate_page
+from utils import auto_generate_page, with_code, Prop, build_api_reference
 from widgets.component_preview import ComponentPreview
 
 
@@ -29,8 +29,9 @@ def examples():
     """Generate textarea examples using ComponentPreview with tabs."""
     
     # Basic usage
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def basic_textarea_example():
+        return Div(
             Textarea(placeholder="Type your message here..."),
             Textarea(
                 placeholder="With initial value",
@@ -43,20 +44,19 @@ def examples():
                 cls="mt-4"
             ),
             cls="space-y-4 w-full max-w-3xl mx-auto"
-        ),
-        '''Textarea(placeholder="Type your message here...")
-Textarea(
-    placeholder="With initial value",
-    value="This textarea starts with content that you can edit."
-)
-Textarea(placeholder="Disabled textarea", disabled=True)''',
+        )
+
+    yield ComponentPreview(
+        basic_textarea_example(),
+        basic_textarea_example.code,
         title="Basic Textarea",
         description="Simple textarea with different states"
     )
     
     # Contextual usage examples
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def contextual_textarea_examples():
+        return Div(
             Card(
                 CardHeader(
                     CardTitle("Quick Note"),
@@ -142,50 +142,19 @@ Textarea(placeholder="Disabled textarea", disabled=True)''',
                 cls="w-full"
             ),
             cls="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-6xl mx-auto"
-        ),
-        '''// Different textarea sizes for different contexts
-Card(
-    CardContent(
-        TextareaWithLabel(
-            label="Quick Note",
-            placeholder="Jot down your thoughts...",
-            rows=2,
-            signal="quick_note"
-        ),
-        Button("Save Note", size="sm")
-    )
-)
+        )
 
-Card(
-    CardContent(
-        TextareaWithLabel(
-            label="Article Summary",
-            placeholder="Write a concise summary...",
-            rows=4,
-            signal="summary"
-        ),
-        Badge(ds_text("$summary.split(' ').length + ' words'"))
-    )
-)
-
-Card(
-    CardContent(
-        TextareaWithLabel(
-            label="Essay Draft",
-            placeholder="Begin writing...",
-            rows=8,
-            signal="essay"
-        ),
-        P("Words: ", Span(ds_text("wordCount")))
-    )
-)''',
+    yield ComponentPreview(
+        contextual_textarea_examples(),
+        contextual_textarea_examples.code,
         title="Contextual Usage",
         description="Textarea sizes matched to specific use cases"
     )
     
     # Character counter
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def character_counter_example():
+        return Card(
             CardHeader(
                 CardTitle("Bio"),
                 CardDescription("Tell us about yourself")
@@ -228,42 +197,19 @@ Card(
                 ds_signals(bio=value(""))
             ),
             cls="w-full max-w-3xl"
-        ),
-        '''Card(
-    CardContent(
-        TextareaWithLabel(
-            label="Your Bio",
-            placeholder="Share your background...",
-            maxlength=280,
-            signal="bio"
-        ),
-        Div(
-            // Progress bar
-            Div(
-                ds_style(width="`${Math.min(100, ($bio || '').length / 280 * 100)}%`"),
-                cls="h-1 bg-primary rounded-full"
-            ),
-            // Character count
-            P(
-                Span(ds_text("($bio || '').length")),
-                " / 280 characters",
-                ds_class({
-                    "text-muted-foreground": "($bio || '').length < 250",
-                    "text-orange-500": "($bio || '').length >= 250",
-                    "text-destructive": "($bio || '').length >= 280"
-                })
-            )
-        ),
-        ds_signals(bio=value(""))
-    )
-)''',
+        )
+
+    yield ComponentPreview(
+        character_counter_example(),
+        character_counter_example.code,
         title="Character Counter",
         description="Track character count with visual feedback"
     )
     
     # Comment box with live markdown preview
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def comment_box_live_preview_example():
+        return Div(
             Card(
                 CardHeader(
                     CardTitle("Comment Box with Live Preview"),
@@ -488,65 +434,19 @@ Card(
             cls="w-full max-w-6xl"
         ),
         cls="w-full"
-    ),
-        '''Card(
-    CardContent(
-        Form(
-            // Stacked layout with editor and live preview
-            Div(
-                // Editor section with formatting toolbar
-                Div(
-                    // Formatting toolbar
-                    Div(
-                        Button(Icon("lucide:bold"), title="Bold", 
-                            ds_on_click="applyFormatting('**', '**', 'bold text')"),
-                        Button(Icon("lucide:italic"), title="Italic",
-                            ds_on_click="applyFormatting('*', '*', 'italic text')"),
-                        Button(Icon("lucide:link"), title="Link",
-                            ds_on_click="applyFormatting('[', '](https://example.com)', 'link text', 'link')"),
-                        Button(Icon("lucide:code"), title="Code",
-                            ds_on_click="applyFormatting('`', '`', 'code')"),
-                        P(ds_text="($comment_text || '').length + ' characters'", cls="text-xs"),
-                        cls="toolbar-layout"
-                    ),
-                    Textarea(
-                        placeholder="What are your thoughts? Supports markdown...",
-                        signal="comment_text",
-                        rows=6,
-                        cls="rounded-t-none"
-                    ),
-                    cls="flex-1"
-                ),
-                
-                // Live preview section  
-                Div(
-                    P("Live Preview", cls="text-sm font-semibold"),
-                    Div(
-                        P(ds_text="$comment_text || 'Start typing to see a preview...'"),
-                        cls="preview-area"
-                    ),
-                    cls="w-full"
-                ),
-                cls="flex flex-col gap-4"
-            ),
-            
-            // Actions
-            Div(
-                Button("Cancel", variant="outline", ds_on_click="$comment_text = ''"),
-                Button("Post Comment", ds_disabled="!($comment_text || '').trim()"),
-                cls="flex gap-3 justify-end"
-            ),
-            ds_signals(comment_text=value(""))
-        )
     )
-)''',
+
+    yield ComponentPreview(
+        comment_box_live_preview_example(),
+        comment_box_live_preview_example.code,
         title="Comment Box with Live Preview", 
         description="Rich text editor with real-time preview and formatting toolbar"
     )
     
     # Auto-expanding textarea
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def auto_expanding_textarea_example():
+        return Card(
             CardHeader(
                 CardTitle("Auto-Expanding"),
                 CardDescription("Grows with your content")
@@ -570,21 +470,19 @@ Card(
                 ds_signals(auto_expand=value(""))
             ),
             cls="w-full max-w-3xl"
-        ),
-        '''TextareaWithLabel(
-    label="Message",
-    placeholder="Start typing and watch it grow...",
-    signal="auto_expand",
-    cls="[&_textarea]:field-sizing-content [&_textarea]:min-h-[60px] [&_textarea]:max-h-[300px]"
-)
-// The field-sizing-content CSS property makes it auto-expand''',
+        )
+
+    yield ComponentPreview(
+        auto_expanding_textarea_example(),
+        auto_expanding_textarea_example.code,
         title="Auto-Expanding",
         description="Textarea that grows with content"
     )
     
     # Enhanced feedback form with advanced validation
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def enhanced_feedback_form_example():
+        return Card(
             CardHeader(
                 CardTitle("Customer Feedback"),
                 CardDescription("Help us improve our service")
@@ -727,42 +625,19 @@ Card(
                 )
             ),
             cls="w-full max-w-3xl"
-        ),
-        '''Card(
-    CardContent(
-        Form(
-            TextareaWithLabel(
-                label="How was your experience?",
-                required=True,
-                signal="feedback",
-                error_text=ds_show("$feedback_submitted && $feedback.length < 10") 
-                    and "Minimum 10 characters" or None,
-                helper_text="Minimum 10 characters required"
-            ),
-            TextareaWithLabel(
-                label="Suggestions for improvement",
-                placeholder="Any ideas? (optional)",
-                signal="suggestions"
-            ),
-            Badge(
-                "Ready to submit",
-                ds_show="$feedback.length >= 10"
-            ),
-            Button(
-                "Submit Feedback",
-                ds_on_click="validateAndSubmit()"
-            ),
-            ds_signals(feedback="", suggestions="", feedback_submitted=False)
         )
-    )
-)''',
+
+    yield ComponentPreview(
+        enhanced_feedback_form_example(),
+        enhanced_feedback_form_example.code,
         title="Feedback Form",
         description="Multi-field form with validation"
     )
     
     # Code editor style
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def code_editor_textarea_example():
+        return Card(
             CardHeader(
                 CardTitle("Code Editor"),
                 CardDescription("Write and format code")
@@ -813,26 +688,19 @@ Card(
                 )
             ),
             cls="w-full max-w-3xl"
-        ),
-        '''Textarea(
-    placeholder="# Enter your code here...",
-    signal="code_editor",
-    rows=8,
-    cls="font-mono text-sm",
-    resize="vertical"
-)
-// With line/char count and copy button
-Div(
-    P("Lines: ", Span(ds_text("lines")), " | Characters: ", Span(ds_text("chars"))),
-    Button(Icon("lucide:copy"), "Copy", ds_on_click="copyCode()")
-)''',
+        )
+
+    yield ComponentPreview(
+        code_editor_textarea_example(),
+        code_editor_textarea_example.code,
         title="Code Editor",
         description="Code input with monospace font and utilities"
     )
     
     # Email template composer
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def email_template_composer_example():
+        return Card(
             CardHeader(
                 CardTitle("Email Template Composer"),
                 CardDescription("Create professional email templates with variables")
@@ -999,37 +867,11 @@ Div(
                 )
             ),
             cls="max-w-3xl"
-        ),
-        '''Card(
-    CardContent(
-        Form(
-            TextareaWithLabel(
-                label="Subject Line",
-                placeholder="Welcome to {{company_name}}, {{first_name}}!",
-                signal="email_subject"
-            ),
-            TextareaWithLabel(
-                label="Email Body",
-                placeholder="Template with {{variables}}...",
-                rows=8,
-                signal="email_body"
-            ),
-            // Variable insertion buttons
-            Div(
-                Button("{{first_name}}", ds_on_click="insertVariable('first_name')"),
-                Button("{{company_name}}", ds_on_click="insertVariable('company_name')"),
-                cls="flex gap-2"
-            ),
-            // Preview with variable substitution
-            Div(
-                P(ds_text("$email_subject.replace(/{{([^}]+)}}/g, '[Sample $1]')")),
-                P(ds_text("$email_body.replace(/{{([^}]+)}}/g, '[Sample $1]')")),
-                cls="preview-area"
-            ),
-            Button("Save Template", ds_disabled="!$email_subject || !$email_body")
         )
-    )
-)''',
+
+    yield ComponentPreview(
+        email_template_composer_example(),
+        email_template_composer_example.code,
         title="Email Template Composer",
         description="Professional template system with variable substitution"
     )
@@ -1038,119 +880,25 @@ Div(
 def create_textarea_docs():
     """Create textarea documentation page using convention-based approach."""
     
-    api_reference = {
-        "props": [
-            {
-                "name": "placeholder",
-                "type": "str | None",
-                "default": "None",
-                "description": "Placeholder text when empty"
-            },
-            {
-                "name": "value",
-                "type": "str | None",
-                "default": "None",
-                "description": "Initial text value"
-            },
-            {
-                "name": "signal",
-                "type": "str | None",
-                "default": "None",
-                "description": "Datastar signal for two-way binding"
-            },
-            {
-                "name": "name",
-                "type": "str | None",
-                "default": "None",
-                "description": "Name attribute for form submission"
-            },
-            {
-                "name": "disabled",
-                "type": "bool",
-                "default": "False",
-                "description": "Whether textarea is disabled"
-            },
-            {
-                "name": "readonly",
-                "type": "bool",
-                "default": "False",
-                "description": "Whether textarea is read-only"
-            },
-            {
-                "name": "required",
-                "type": "bool",
-                "default": "False",
-                "description": "Whether textarea is required"
-            },
-            {
-                "name": "rows",
-                "type": "int | None",
-                "default": "None",
-                "description": "Number of visible text rows"
-            },
-            {
-                "name": "cols",
-                "type": "int | None",
-                "default": "None",
-                "description": "Visible width in character columns"
-            },
-            {
-                "name": "maxlength",
-                "type": "int | None",
-                "default": "None",
-                "description": "Maximum number of characters"
-            },
-            {
-                "name": "resize",
-                "type": "Literal['none', 'both', 'horizontal', 'vertical'] | None",
-                "default": "None",
-                "description": "Controls textarea resizing behavior"
-            },
-            {
-                "name": "cls",
-                "type": "str",
-                "default": "''",
-                "description": "Additional CSS classes"
-            }
-        ],
-        "helper_components": [
-            {
-                "name": "TextareaWithLabel",
-                "description": "Textarea with integrated label and helper/error text",
-                "props": [
-                    {
-                        "name": "label",
-                        "type": "str",
-                        "description": "Label text for the textarea"
-                    },
-                    {
-                        "name": "helper_text",
-                        "type": "str | None",
-                        "description": "Helper text displayed below the textarea"
-                    },
-                    {
-                        "name": "error_text",
-                        "type": "str | None",
-                        "description": "Error message displayed below the textarea"
-                    },
-                    {
-                        "name": "label_cls",
-                        "type": "str",
-                        "description": "Additional CSS classes for the label"
-                    },
-                    {
-                        "name": "textarea_cls",
-                        "type": "str",
-                        "description": "Additional CSS classes for the textarea itself"
-                    }
-                ]
-            }
+    # For Textarea, users need the key props they will set most often.
+    api_reference = build_api_reference(
+        main_props=[
+            Prop("placeholder", "str | None", "Placeholder text shown when empty", "None"),
+            Prop("value", "str | None", "Initial text value", "None"),
+            Prop("signal", "str | None", "Datastar signal for two-way binding", "None"),
+            Prop("rows", "int | None", "Number of visible text rows", "None"),
+            Prop("maxlength", "int | None", "Maximum number of characters", "None"),
+            Prop("resize", "Literal['none','both','horizontal','vertical'] | None", "Controls textarea resizing behavior", "None"),
+            Prop("disabled", "bool", "Whether the textarea is disabled", "False"),
+            Prop("required", "bool", "Whether the textarea is required", "False"),
+            Prop("cls", "str", "Additional CSS classes", "''"),
         ]
-    }
+    )
     
     # Hero example
-    hero_example = ComponentPreview(
-        Div(
+    @with_code
+    def hero_textarea_example():
+        return Div(
             TextareaWithLabel(
                 label="Description",
                 placeholder="Enter a detailed description...",
@@ -1159,14 +907,11 @@ def create_textarea_docs():
                 helper_text="Provide as much detail as needed"
             ),
             cls="w-full max-w-4xl mx-auto"
-        ),
-        '''TextareaWithLabel(
-    label="Description",
-    placeholder="Enter a detailed description...",
-    rows=4,
-    signal="description",
-    helper_text="Provide as much detail as needed"
-)''',
+        )
+
+    hero_example = ComponentPreview(
+        hero_textarea_example(),
+        hero_textarea_example.code,
         copy_button=True
     )
     

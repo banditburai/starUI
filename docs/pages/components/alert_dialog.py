@@ -25,7 +25,7 @@ from starui.registry.components.card import Card, CardHeader, CardContent, CardT
 from starui.registry.components.badge import Badge
 from starui.registry.components.input import InputWithLabel
 from starui.registry.components.checkbox import CheckboxWithLabel
-from utils import auto_generate_page
+from utils import auto_generate_page, with_code, Prop, Component, build_api_reference
 from widgets.component_preview import ComponentPreview
 
 
@@ -33,8 +33,9 @@ def examples():
     """Generate alert dialog examples using ComponentPreview with tabs."""
     
     # Basic alert dialog
-    yield ComponentPreview(
-        AlertDialog(
+    @with_code
+    def basic_alert_dialog_example():
+        return AlertDialog(
             AlertDialogTrigger("Show Alert", ref_id="basic_alert"),
             AlertDialogContent(
                 AlertDialogHeader(
@@ -49,28 +50,19 @@ def examples():
                 )
             ),
             ref_id="basic_alert"
-        ),
-        '''AlertDialog(
-    AlertDialogTrigger("Show Alert", ref_id="basic_alert"),
-    AlertDialogContent(
-        AlertDialogHeader(
-            AlertDialogTitle("Heads up!"),
-            AlertDialogDescription("This is an important message...")
-        ),
-        AlertDialogFooter(
-            AlertDialogCancel("Dismiss", ref_id="basic_alert"),
-            AlertDialogAction("Understood", ref_id="basic_alert")
         )
-    ),
-    ref_id="basic_alert"
-)''',
+    
+    yield ComponentPreview(
+        basic_alert_dialog_example(),
+        basic_alert_dialog_example.code,
         title="Basic Alert",
         description="Simple alert dialog with cancel and action buttons"
     )
     
     # Destructive confirmation
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def destructive_alert_dialog_example():
+        return Card(
             CardHeader(
                 CardTitle("Danger Zone"),
                 CardDescription("Irreversible actions")
@@ -130,44 +122,19 @@ def examples():
                 )
             ),
             cls="max-w-lg"
-        ),
-        '''AlertDialog(
-    AlertDialogTrigger(
-        Icon("lucide:trash-2"),
-        "Delete",
-        ref_id="delete_repo",
-        variant="destructive"
-    ),
-    AlertDialogContent(
-        Icon("lucide:alert-triangle", cls="h-12 w-12 text-destructive"),
-        AlertDialogHeader(
-            AlertDialogTitle("Delete Repository"),
-            AlertDialogDescription("This action cannot be undone...")
-        ),
-        Ul(
-            Li("All source code will be deleted"),
-            Li("Issues and PRs will be lost"),
-            Li("Wiki pages will be removed")
-        ),
-        AlertDialogFooter(
-            AlertDialogCancel("Cancel", ref_id="delete_repo"),
-            AlertDialogAction(
-                "Delete Repository",
-                ref_id="delete_repo",
-                variant="destructive",
-                action="deleteRepo()"
-            )
         )
-    ),
-    ref_id="delete_repo"
-)''',
+    
+    yield ComponentPreview(
+        destructive_alert_dialog_example(),
+        destructive_alert_dialog_example.code,
         title="Destructive Action",
         description="High-risk action with clear warnings and consequences"
     )
     
     # Unsaved changes warning
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def unsaved_changes_alert_dialog_example():
+        return Card(
             CardHeader(
                 CardTitle("Document Editor"),
                 CardDescription("Edit your document details")
@@ -229,7 +196,7 @@ def examples():
                                         "Discard Changes",
                                         ref_id="unsaved_dialog",
                                         variant="destructive",
-                                        action="$doc_title=''; $doc_author=''; console.log('Changes discarded')"
+                                        action="$doc_title='My Document'; $doc_author='John Doe'; console.log('Changes discarded')"
                                     ),
                                     AlertDialogCancel("Keep Editing", ref_id="unsaved_dialog"),
                                     AlertDialogAction(
@@ -252,33 +219,19 @@ def examples():
                 cls="space-y-4"
             ),
             cls="max-w-md"
-        ),
-        '''AlertDialog(
-    Button("Save & Exit", /* trigger */),
-    AlertDialogContent(
-        AlertDialogHeader(
-            AlertDialogTitle("Save changes?"),
-            AlertDialogDescription("You have unsaved changes...")
-        ),
-        Div(
-            P("Your changes:"),
-            Div(/* display changes */)
-        ),
-        AlertDialogFooter(
-            AlertDialogAction("Discard Changes", variant="destructive"),
-            AlertDialogCancel("Keep Editing"),
-            AlertDialogAction("Save & Exit")
         )
-    ),
-    ref_id="unsaved_dialog"
-)''',
+    
+    yield ComponentPreview(
+        unsaved_changes_alert_dialog_example(),
+        unsaved_changes_alert_dialog_example.code,
         title="Unsaved Changes",
         description="Three-option dialog for handling unsaved work"
     )
     
     # Session timeout warning
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def session_timeout_alert_dialog_example():
+        return Div(
             Card(
                 CardHeader(
                 CardTitle("Session Management"),
@@ -411,39 +364,19 @@ def examples():
             cls="w-full max-w-lg"
         ),
         cls="w-full max-w-2xl"
-    ),
-        '''// Auto-show alert when session is about to expire
-AlertDialog(
-    Div(ds_effect("""
-        const timer = setInterval(() => {
-            $session_time--;
-            if ($session_time === 10) {
-                $timeout_dialog.showModal();
-            }
-        }, 1000);
-    """)),
-    AlertDialogContent(
-        Icon("lucide:clock"),
-        AlertDialogTitle("Session Expiring Soon"),
-        AlertDialogDescription(
-            "Your session will expire in ",
-            Span(ds_text("$session_time")),
-            " seconds"
-        ),
-        AlertDialogFooter(
-            AlertDialogAction("Logout", variant="destructive"),
-            AlertDialogAction("Continue Session")
-        )
-    ),
-    ref_id="timeout_dialog"
-)''',
+    )
+    
+    yield ComponentPreview(
+        session_timeout_alert_dialog_example(),
+        session_timeout_alert_dialog_example.code,
         title="Session Timeout",
         description="Auto-triggered alert with countdown timer"
     )
     
     # Batch operation confirmation
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def batch_operation_alert_dialog_example():
+        return Card(
             CardHeader(
                 CardTitle("Batch Operations"),
                 CardDescription("Confirm actions on multiple items")
@@ -525,38 +458,19 @@ AlertDialog(
                 )
             ),
             cls="max-w-md"
-        ),
-        '''AlertDialog(
-    Button(
-        "Delete Selected",
-        ds_disabled="!hasSelection",
-        variant="destructive"
-    ),
-    AlertDialogContent(
-        AlertDialogTitle("Delete Multiple Items"),
-        AlertDialogDescription(
-            "You are about to delete ",
-            Span(ds_text("selectedCount")),
-            " items"
-        ),
-        Ul(/* list selected items */),
-        AlertDialogFooter(
-            AlertDialogCancel("Cancel"),
-            AlertDialogAction(
-                ds_text("'Delete ' + selectedCount + ' Items'"),
-                variant="destructive"
-            )
         )
-    ),
-    ref_id="batch_dialog"
-)''',
+    
+    yield ComponentPreview(
+        batch_operation_alert_dialog_example(),
+        batch_operation_alert_dialog_example.code,
         title="Batch Operations",
         description="Confirm actions on multiple selected items"
     )
     
     # Payment confirmation
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def payment_confirmation_alert_dialog_example():
+        return Card(
             CardHeader(
                 CardTitle("Complete Purchase"),
                 CardDescription("Review your order")
@@ -630,27 +544,11 @@ AlertDialog(
                 )
             ),
             cls="max-w-sm"
-        ),
-        '''AlertDialog(
-    Button("Complete Purchase"),
-    AlertDialogContent(
-        Icon("lucide:shield-check", cls="text-green-500"),
-        AlertDialogTitle("Confirm Payment"),
-        Div(
-            Div(
-                Icon("lucide:lock"),
-                P("Secure Payment")
-            ),
-            P("Amount: $108.90"),
-            P("Card: ****4242")
-        ),
-        AlertDialogFooter(
-            AlertDialogCancel("Cancel"),
-            AlertDialogAction("Confirm Payment")
         )
-    ),
-    ref_id="payment_dialog"
-)''',
+    
+    yield ComponentPreview(
+        payment_confirmation_alert_dialog_example(),
+        payment_confirmation_alert_dialog_example.code,
         title="Payment Confirmation",
         description="Secure payment confirmation with trust indicators"
     )
@@ -659,102 +557,26 @@ AlertDialog(
 def create_alert_dialog_docs():
     """Create alert dialog documentation page using convention-based approach."""
     
-    api_reference = {
-        "props": [
-            {
-                "name": "trigger",
-                "type": "FT",
-                "description": "The trigger element (usually AlertDialogTrigger)"
-            },
-            {
-                "name": "content",
-                "type": "FT",
-                "description": "The dialog content (usually AlertDialogContent)"
-            },
-            {
-                "name": "ref_id",
-                "type": "str",
-                "description": "Unique identifier for the alert dialog instance"
-            }
-        ],
-        "sub_components": [
-            {
-                "name": "AlertDialogTrigger",
-                "description": "Button that opens the alert dialog",
-                "props": [
-                    {
-                        "name": "ref_id",
-                        "type": "str",
-                        "description": "Must match the AlertDialog's ref_id"
-                    },
-                    {
-                        "name": "variant",
-                        "type": "str",
-                        "default": "'default'",
-                        "description": "Button variant"
-                    }
-                ]
-            },
-            {
-                "name": "AlertDialogContent",
-                "description": "Container for alert dialog content"
-            },
-            {
-                "name": "AlertDialogHeader",
-                "description": "Container for title and description"
-            },
-            {
-                "name": "AlertDialogTitle",
-                "description": "The alert's title"
-            },
-            {
-                "name": "AlertDialogDescription",
-                "description": "Subtitle or description text"
-            },
-            {
-                "name": "AlertDialogFooter",
-                "description": "Container for action buttons"
-            },
-            {
-                "name": "AlertDialogAction",
-                "description": "Primary action button",
-                "props": [
-                    {
-                        "name": "ref_id",
-                        "type": "str",
-                        "description": "Must match the AlertDialog's ref_id"
-                    },
-                    {
-                        "name": "action",
-                        "type": "str",
-                        "default": "''",
-                        "description": "JavaScript to execute before closing"
-                    },
-                    {
-                        "name": "variant",
-                        "type": "Literal['default', 'destructive']",
-                        "default": "'default'",
-                        "description": "Button variant"
-                    }
-                ]
-            },
-            {
-                "name": "AlertDialogCancel",
-                "description": "Cancel button",
-                "props": [
-                    {
-                        "name": "ref_id",
-                        "type": "str",
-                        "description": "Must match the AlertDialog's ref_id"
-                    }
-                ]
-            }
+    # For AlertDialog, users need to understand the building blocks (sub-components)
+    # rather than the main props, since examples show usage patterns clearly
+    api_reference = build_api_reference(
+        components=[
+            Component("AlertDialog", "Main container component that manages dialog state"),
+            Component("AlertDialogTrigger", "Button that opens the alert dialog"),
+            Component("AlertDialogContent", "Container for all dialog content"),
+            Component("AlertDialogHeader", "Container for title and description"),
+            Component("AlertDialogTitle", "Primary heading text for the alert"),
+            Component("AlertDialogDescription", "Supporting description text"),
+            Component("AlertDialogFooter", "Container for action buttons"),
+            Component("AlertDialogAction", "Primary action button (confirms/proceeds)"),
+            Component("AlertDialogCancel", "Secondary button (dismisses dialog)"),
         ]
-    }
+    )
     
     # Hero example
-    hero_example = ComponentPreview(
-        AlertDialog(
+    @with_code
+    def hero_alert_dialog_example():
+        return AlertDialog(
             AlertDialogTrigger(
                 "Delete Item",
                 ref_id="hero_alert",
@@ -778,21 +600,11 @@ def create_alert_dialog_docs():
                 )
             ),
             ref_id="hero_alert"
-        ),
-        '''AlertDialog(
-    AlertDialogTrigger("Delete Item", ref_id="hero_alert", variant="destructive"),
-    AlertDialogContent(
-        AlertDialogHeader(
-            AlertDialogTitle("Are you absolutely sure?"),
-            AlertDialogDescription("This action cannot be undone...")
-        ),
-        AlertDialogFooter(
-            AlertDialogCancel("Cancel", ref_id="hero_alert"),
-            AlertDialogAction("Delete", ref_id="hero_alert", variant="destructive")
         )
-    ),
-    ref_id="hero_alert"
-)''',
+    
+    hero_example = ComponentPreview(
+        hero_alert_dialog_example(),
+        hero_alert_dialog_example.code,
         copy_button=True
     )
     

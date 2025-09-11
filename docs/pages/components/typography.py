@@ -21,7 +21,7 @@ from starui.registry.components.typography import (
 from starui.registry.components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
 from starui.registry.components.badge import Badge
 from starui.registry.components.separator import Separator
-from utils import auto_generate_page
+from utils import auto_generate_page, with_code, Component, Prop, build_api_reference
 from widgets.component_preview import ComponentPreview
 
 
@@ -29,8 +29,9 @@ def examples():
     """Generate typography examples using ComponentPreview with tabs."""
     
     # Headings showcase
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def headings_showcase_example():
+        return Div(
             Display("Display Heading"),
             H1("Heading 1"),
             H2("Heading 2"),
@@ -39,21 +40,19 @@ def examples():
             H5("Heading 5"),
             H6("Heading 6"),
             cls="space-y-4"
-        ),
-        '''Display("Display Heading")
-H1("Heading 1")
-H2("Heading 2")
-H3("Heading 3")
-H4("Heading 4")
-H5("Heading 5")
-H6("Heading 6")''',
+        )
+
+    yield ComponentPreview(
+        headings_showcase_example(),
+        headings_showcase_example.code,
         title="Headings",
         description="All heading levels from Display to H6"
     )
     
     # Text variants
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def text_variants_example():
+        return Div(
             Lead("This is lead text. It stands out with larger font size and muted color, perfect for introductions."),
             P("This is a regular paragraph. It contains the main body text with comfortable spacing and readability. Use it for most of your content."),
             Large("This is large text for emphasis."),
@@ -61,20 +60,19 @@ H6("Heading 6")''',
             Small("This is small text for secondary information."),
             Muted("This is muted text for less important content."),
             cls="space-y-4 max-w-prose"
-        ),
-        '''Lead("This is lead text...")
-P("This is a regular paragraph...")
-Large("This is large text...")
-Text("This is default body text...")
-Small("This is small text...")
-Muted("This is muted text...")''',
+        )
+
+    yield ComponentPreview(
+        text_variants_example(),
+        text_variants_example.code,
         title="Text Variants",
         description="Different text styles for various content types"
     )
     
     # Blog post example
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def blog_post_example():
+        return Card(
             CardContent(
                 Div(
                     Caption("Technology • 5 min read"),
@@ -102,31 +100,19 @@ Muted("This is muted text...")''',
                 cls="py-8"
             ),
             cls="max-w-3xl"
-        ),
-        '''Card(
-    CardContent(
-        Caption("Technology • 5 min read"),
-        H1("The Future of Web Development"),
-        Subtitle("Exploring emerging trends..."),
-        Hr(),
-        Lead("The web development landscape..."),
-        P("In recent years...", Strong("component-based"), "..."),
-        H2("Key Trends to Watch", section=True),
-        List(
-            "AI-powered tools",
-            "WebAssembly",
-            "PWAs"
-        ),
-        Blockquote("The best way to predict...")
-    )
-)''',
+        )
+
+    yield ComponentPreview(
+        blog_post_example(),
+        blog_post_example.code,
         title="Blog Post",
         description="Complete blog post layout with typography"
     )
     
     # Code documentation
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def code_documentation_example():
+        return Card(
             CardHeader(
                 CardTitle("API Reference"),
                 CardDescription("Component usage documentation")
@@ -165,30 +151,19 @@ Muted("This is muted text...")''',
                 )
             ),
             cls="max-w-2xl"
-        ),
-        '''Card(
-    CardContent(
-        H3("Installation"),
-        P("Install the package:"),
-        InlineCode("npm install @starui/components"),
-        
-        H3("Props"),
-        List(
-            Div(InlineCode("variant"), " - Visual style"),
-            Div(InlineCode("size"), " - Button size"),
-        ),
-        
-        H3("Keyboard Shortcuts"),
-        P(Kbd("⌘"), " + ", Kbd("K"), " - Open command")
-    )
-)''',
+        )
+
+    yield ComponentPreview(
+        code_documentation_example(),
+        code_documentation_example.code,
         title="Code Documentation",
         description="API reference with inline code and keyboard shortcuts"
     )
     
     # Article with emphasis
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def text_emphasis_example():
+        return Card(
             CardContent(
                 Div(
                     H2("Understanding ", Mark("Typography"), " in Design"),
@@ -218,27 +193,19 @@ Muted("This is muted text...")''',
                 )
             ),
             cls="max-w-2xl"
-        ),
-        '''H2("Understanding ", Mark("Typography"), " in Design")
-P("Typography is ", Em("more than just choosing fonts"), "...")
+        )
 
-P("Good typography can ", Mark("make or break"), " a design.")
-List(
-    Div(Strong("Readability"), " - How easily..."),
-    Div(Strong("Hierarchy"), " - How users..."),
-    ordered=True
-)
-
-Blockquote(
-    "Typography is the ", Em("craft"), " of..."
-)''',
+    yield ComponentPreview(
+        text_emphasis_example(),
+        text_emphasis_example.code,
         title="Text Emphasis",
         description="Using marks, emphasis, and strong text"
     )
     
     # Prose wrapper
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def prose_component_example():
+        return Card(
             CardContent(
                 Prose(
                     H2("Using the Prose Component"),
@@ -264,26 +231,19 @@ Blockquote(
                 cls="py-4"
             ),
             cls="max-w-3xl"
-        ),
-        '''Prose(
-    H2("Using the Prose Component"),
-    P("The ", InlineCode("Prose"), " component..."),
-    H3("Features"),
-    List(
-        "Automatic spacing",
-        "Beautiful defaults",
-        "Dark mode support"
-    ),
-    Blockquote("Makes content look professional..."),
-    size="base"  // or "sm", "lg", "xl"
-)''',
+        )
+
+    yield ComponentPreview(
+        prose_component_example(),
+        prose_component_example.code,
         title="Prose Component",
         description="Automatic typography styling for long-form content"
     )
     
     # Figure with caption
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def figures_captions_example():
+        return Card(
             CardContent(
                 Div(
                     H2("Visual Content"),
@@ -302,21 +262,19 @@ Blockquote(
                 )
             ),
             cls="max-w-2xl"
-        ),
-        '''Figure(
-    Div(
-        Icon("lucide:image", cls="h-48 w-full"),
-        cls="bg-muted rounded-md"
-    ),
-    Figcaption("Figure 1: Example image with caption")
-)''',
+        )
+
+    yield ComponentPreview(
+        figures_captions_example(),
+        figures_captions_example.code,
         title="Figures & Captions",
         description="Images and content with descriptive captions"
     )
     
     # Complete article example
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def complete_article_example():
+        return Card(
             CardContent(
                 Prose(
                     Caption("Tutorial • Advanced • 15 min read"),
@@ -373,29 +331,11 @@ Blockquote(
                 cls="py-8"
             ),
             cls="max-w-4xl"
-        ),
-        '''Prose(
-    Caption("Tutorial • Advanced • 15 min"),
-    Display("Master Typography"),
-    Subtitle("A comprehensive guide..."),
-    
-    Lead("Typography is the foundation..."),
-    
-    H2("The Basics", section=True),
-    P("Every great system starts with..."),
-    
-    List(
-        "Headlines - Large, bold",
-        "Body text - Comfortable",
-        ordered=True
-    ),
-    
-    Blockquote("Good typography is invisible..."),
-    
-    Hr(),
-    
-    size="lg"  // Large prose size
-)''',
+        )
+
+    yield ComponentPreview(
+        complete_article_example(),
+        complete_article_example.code,
         title="Complete Article",
         description="Full article layout with all typography elements"
     )
@@ -404,89 +344,47 @@ Blockquote(
 def create_typography_docs():
     """Create typography documentation page using convention-based approach."""
     
-    api_reference = {
-        "components": [
-            {
-                "name": "Headings",
-                "description": "Heading components from Display to H6",
-                "items": [
-                    {"name": "Display", "description": "Extra large display heading (6xl)"},
-                    {"name": "H1", "description": "Primary heading (4xl)"},
-                    {"name": "H2", "description": "Secondary heading (3xl) with optional section border"},
-                    {"name": "H3", "description": "Tertiary heading (2xl)"},
-                    {"name": "H4", "description": "Quaternary heading (xl)"},
-                    {"name": "H5", "description": "Quinary heading (lg)"},
-                    {"name": "H6", "description": "Senary heading (base)"}
-                ]
-            },
-            {
-                "name": "Text Components",
-                "description": "Various text styles and components",
-                "items": [
-                    {"name": "P", "description": "Standard paragraph with comfortable spacing"},
-                    {"name": "Lead", "description": "Larger, muted text for introductions"},
-                    {"name": "Large", "description": "Large emphasized text"},
-                    {"name": "Small", "description": "Small text for secondary information"},
-                    {"name": "Muted", "description": "Muted color text"},
-                    {"name": "Subtitle", "description": "Subtitle text for headings"},
-                    {"name": "Caption", "description": "Small uppercase caption text"},
-                    {"name": "Text", "description": "Generic text with variant prop"}
-                ]
-            },
-            {
-                "name": "Inline Elements",
-                "description": "Inline text formatting components",
-                "items": [
-                    {"name": "InlineCode", "description": "Inline code snippets"},
-                    {"name": "Kbd", "description": "Keyboard key representation"},
-                    {"name": "Mark", "description": "Highlighted/marked text"},
-                    {"name": "Strong", "description": "Bold/strong emphasis"},
-                    {"name": "Em", "description": "Italic/emphasis"}
-                ]
-            },
-            {
-                "name": "Block Elements",
-                "description": "Block-level typography components",
-                "items": [
-                    {"name": "Blockquote", "description": "Quoted text blocks"},
-                    {"name": "List", "description": "Ordered or unordered lists"},
-                    {"name": "Hr", "description": "Horizontal rule/separator"},
-                    {"name": "Figure", "description": "Figure container"},
-                    {"name": "Figcaption", "description": "Figure caption"}
-                ]
-            },
-            {
-                "name": "Prose",
-                "description": "Automatic typography styling wrapper",
-                "props": [
-                    {
-                        "name": "size",
-                        "type": "Literal['sm', 'base', 'lg', 'xl']",
-                        "default": "'base'",
-                        "description": "Prose content size"
-                    }
-                ]
-            }
+    api_reference = build_api_reference(
+        components=[
+            Component(
+                "Headings",
+                "Headings Display → H6. `H2(section=True)` draws a section divider.",
+            ),
+            Component(
+                "Text Components",
+                "`P`, `Lead`, `Large`, `Small`, `Muted`, `Subtitle`, `Caption`, and `Text(variant='body'|'lead'|'large'|'small'|'muted')",
+            ),
+            Component(
+                "Inline Elements",
+                "`InlineCode`, `Kbd`, `Mark`, `Strong`, `Em` for inline emphasis and notation.",
+            ),
+            Component(
+                "Block Elements",
+                "`Blockquote`, `List(ordered=True|False)`, `Hr`, `Figure`, `Figcaption`.",
+            ),
+            Component(
+                "Prose",
+                "Typography wrapper to style content; supports sizes.",
+                [
+                    Prop("size", "Literal['sm','base','lg','xl']", "Typography scale for prose content", "'base'"),
+                ],
+            ),
         ]
-    }
+    )
     
     # Hero example
-    hero_example = ComponentPreview(
-        Div(
+    @with_code
+    def hero_typography_example():
+        return Div(
             H1("Beautiful Typography"),
             Lead("Create stunning text layouts with our comprehensive typography system."),
             P("From headings to paragraphs, ", Strong("bold text"), " to ", Em("italics"), ", and everything in between. Our typography components provide ", Mark("consistent styling"), " across your entire application."),
             cls="space-y-4 max-w-prose"
-        ),
-        '''H1("Beautiful Typography")
-Lead("Create stunning text layouts...")
-P(
-    "From headings to paragraphs, ",
-    Strong("bold text"),
-    " to ",
-    Em("italics"),
-    ", and everything in between."
-)''',
+        )
+
+    hero_example = ComponentPreview(
+        hero_typography_example(),
+        hero_typography_example.code,
         copy_button=True
     )
     

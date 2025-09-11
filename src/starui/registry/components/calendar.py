@@ -35,7 +35,6 @@ def Calendar(
     year: int | None = None,
     disabled: bool = False,
     on_select: str | None = None,
-    class_name: str = "",
     cls: str = "",
     **kwargs: Any,
 ) -> Div:
@@ -45,11 +44,10 @@ def Calendar(
     current_year = year or today.year
     today_str = today.strftime("%Y-%m-%d")
     
-    initial_selected = (
-        selected if isinstance(selected, str) else ""
-    ) if mode == "single" else (
-        selected if isinstance(selected, list) else []
-    )
+    if mode == "single":
+        initial_selected = selected if isinstance(selected, str) else ""
+    else:
+        initial_selected = selected if isinstance(selected, list) else []
     
     return Div(
         Style(_CALENDAR_STYLES),
@@ -62,20 +60,22 @@ def Calendar(
         *attrs,
         ds_signals(**_create_signals(signal, current_month, current_year, initial_selected)),
         data_calendar=signal,
-        cls=cn("p-3 border border-input rounded-md w-fit", class_name, cls),
+        cls=cn("p-3 border border-input rounded-md w-fit", cls),
         **kwargs,
     )
 
 
 def _build_navigation(signal: str, month: int, year: int, disabled: bool) -> Div:
-    nav_button = lambda is_next: Button(
-        Icon(f"lucide:chevron-{'right' if is_next else 'left'}", cls="h-4 w-4"),
-        ds_on_click(_nav_handler(signal, is_next)) if not disabled else None,
-        variant="outline",
-        size="icon",
-        disabled=disabled,
-        cls=f"h-7 w-7 absolute {'right' if is_next else 'left'}-0",
-    )
+    def nav_button(is_next: bool):
+        direction = "right" if is_next else "left"
+        return Button(
+            Icon(f"lucide:chevron-{direction}", cls="h-4 w-4"),
+            ds_on_click(_nav_handler(signal, is_next)) if not disabled else None,
+            variant="outline",
+            size="icon",
+            disabled=disabled,
+            cls=f"h-7 w-7 absolute {direction}-0",
+        )
     
     return Div(
         nav_button(False),
@@ -135,9 +135,12 @@ def _build_dropdown(signal: str, type: str, current_display: str | int, items: l
 
 
 def _build_weekdays() -> Div:
+    weekdays = ("Su", "Mo", "Tu", "We", "Th", "Fr", "Sa")
     return Div(
-        *[Div(day, cls="h-9 w-9 text-[0.8rem] font-normal text-muted-foreground text-center")
-          for day in ("Su", "Mo", "Tu", "We", "Th", "Fr", "Sa")],
+        *[
+            Div(day, cls="h-9 w-9 text-[0.8rem] font-normal text-muted-foreground text-center")
+            for day in weekdays
+        ],
         cls="grid grid-cols-7 border-b border-input mb-1",
     )
 

@@ -20,7 +20,7 @@ from starui.registry.components.button import Button
 from starui.registry.components.badge import Badge
 from starui.registry.components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
 from starui.registry.components.separator import Separator
-from utils import auto_generate_page
+from utils import auto_generate_page, with_code, Prop, build_api_reference
 from widgets.component_preview import ComponentPreview
 
 
@@ -28,8 +28,9 @@ def examples():
     """Generate progress examples using ComponentPreview with tabs."""
     
     # Interactive progress control
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def interactive_controls_example():
+        return Card(
             CardHeader(
                 CardTitle("Volume Control"),
                 CardDescription("Adjust system volume")
@@ -67,38 +68,25 @@ def examples():
                 )
             ),
             cls="w-full max-w-xl"
-        ),
-        '''Card(
-    CardContent(
-        Div(
-            Icon("lucide:volume-2"),
-            Progress(signal="volume", cls="flex-1 h-2"),
-            Span(ds_text("$volume + '%'")),
-            cls="flex items-center gap-3"
-        ),
-        Div(
-            Button(Icon("lucide:minus"), ds_on_click("$volume = Math.max(0, $volume - 10)")),
-            Button("Mute", ds_on_click("$volume = 0")),
-            Button(Icon("lucide:plus"), ds_on_click("$volume = Math.min(100, $volume + 10)")),
-            cls="flex gap-2 mt-4"
-        ),
-        ds_signals(volume=50)
-    )
-)''',
+        )
+
+    yield ComponentPreview(
+        interactive_controls_example(),
+        interactive_controls_example.code,
         title="Interactive Controls",
         description="Progress bar with interactive controls for adjusting values"
     )
     
     # File upload progress
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def file_upload_progress_example():
+        return Card(
             CardHeader(
                 CardTitle("Upload Progress"),
                 CardDescription("Uploading 3 files")
             ),
             CardContent(
                 Div(
-                    # File 1 - Complete
                     Div(
                         Div(
                             Icon("lucide:file-text", cls="h-4 w-4 text-muted-foreground"),
@@ -115,7 +103,6 @@ def examples():
                         cls="pb-3"
                     ),
                     Separator(cls="my-3"),
-                    # File 2 - In Progress
                     Div(
                         Div(
                             Icon("lucide:image", cls="h-4 w-4 text-muted-foreground"),
@@ -132,7 +119,6 @@ def examples():
                         cls="pb-3"
                     ),
                     Separator(cls="my-3"),
-                    # File 3 - In Progress
                     Div(
                         Div(
                             Icon("lucide:video", cls="h-4 w-4 text-muted-foreground"),
@@ -149,7 +135,6 @@ def examples():
                         ),
                         cls="pb-3"
                     ),
-                    # Total Progress
                     Div(
                         P("Total: 49.4 MB", cls="text-sm font-medium mb-2"),
                         Progress(progress_value=54, signal="total", cls="h-3"),
@@ -159,33 +144,19 @@ def examples():
                 )
             ),
             cls="max-w-lg"
-        ),
-        '''Card(
-    CardContent(
-        Div(
-            Icon("lucide:file-text"), P("document.pdf"),
-            Progress(progress_value=100),
-            P(Icon("lucide:check-circle"), "Complete")
-        ),
-        Separator(),
-        Div(
-            Icon("lucide:image"), P("photo.jpg"),
-            Progress(progress_value=65),
-            P("65% • 1.2 MB of 1.8 MB")
-        ),
-        Div(
-            P("Total: 49.4 MB"),
-            Progress(progress_value=54, cls="h-3")
         )
-    )
-)''',
+
+    yield ComponentPreview(
+        file_upload_progress_example(),
+        file_upload_progress_example.code,
         title="File Upload",
         description="Multiple file upload with individual and total progress"
     )
     
     # Animated loading progress
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def animated_loading_example():
+        return Card(
             CardHeader(
                 CardTitle("System Initialization"),
                 CardDescription("Starting up services")
@@ -222,29 +193,25 @@ def examples():
                 )
             ),
             cls="w-full max-w-xl"
-        ),
-        '''// Animated multi-step progress
-Progress(signal="loading_progress")
-P(ds_text("$loading_step === 1 ? 'Initializing...' : ..."))
-Button("Start", ds_on_click="""
-    $loading_step = 1; $loading_progress = 20;
-    setTimeout(() => { $loading_step++; $loading_progress += 20; }, 1000);
-    // ... more steps
-""")''',
+        )
+
+    yield ComponentPreview(
+        animated_loading_example(),
+        animated_loading_example.code,
         title="Animated Loading",
         description="Multi-step loading with animated progress"
     )
     
     # Battery status indicator
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def system_monitoring_example():
+        return Card(
             CardHeader(
                 CardTitle("Device Status"),
                 CardDescription("System resource monitoring")
             ),
             CardContent(
                 Div(
-                    # Battery
                     Div(
                         Div(
                             Icon("lucide:battery-charging", cls="h-5 w-5 text-green-500 mr-3"),
@@ -257,7 +224,6 @@ Button("Start", ds_on_click="""
                         cls="space-y-2"
                     ),
                     Separator(cls="my-3"),
-                    # CPU
                     Div(
                         Div(
                             Icon("lucide:cpu", cls="h-5 w-5 text-blue-500 mr-3"),
@@ -268,7 +234,6 @@ Button("Start", ds_on_click="""
                         Progress(progress_value=42, cls="h-2"),
                         cls="space-y-2"
                     ),
-                    # Memory
                     Div(
                         Div(
                             Icon("lucide:hard-drive", cls="h-5 w-5 text-purple-500 mr-3"),
@@ -279,7 +244,6 @@ Button("Start", ds_on_click="""
                         Progress(progress_value=42.5, cls="h-2"),
                         cls="space-y-2"
                     ),
-                    # Temperature
                     Div(
                         Div(
                             Icon("lucide:thermometer", cls="h-5 w-5 text-orange-500 mr-3"),
@@ -295,36 +259,25 @@ Button("Start", ds_on_click="""
                 )
             ),
             cls="w-full max-w-2xl"
-        ),
-        '''Card(
-    CardContent(
-        Div(
-            Icon("lucide:battery-charging"), P("Battery"), Span("87%"),
-            Progress(progress_value=87, cls="h-2"),
-            P("Charging • 23 min to full")
-        ),
-        Separator(),
-        Div(
-            Icon("lucide:cpu"), P("CPU Usage"), Span("42%"),
-            Progress(progress_value=42, cls="h-2")
-        ),
-        // More system stats...
-    )
-)''',
+        )
+
+    yield ComponentPreview(
+        system_monitoring_example(),
+        system_monitoring_example.code,
         title="System Monitoring",
         description="Real-time system resource monitoring with progress indicators"
     )
     
     # Download progress with speed
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def download_manager_example():
+        return Card(
             CardHeader(
                 CardTitle("Download Manager"),
                 CardDescription("Active downloads")
             ),
             CardContent(
                 Div(
-                    # Download 1
                     Div(
                         Div(
                             Icon("lucide:download", cls="h-5 w-5 text-blue-500"),
@@ -352,7 +305,6 @@ Button("Start", ds_on_click="""
                         ),
                         cls="p-4 border rounded-lg"
                     ),
-                    # Download 2
                     Div(
                         Div(
                             Icon("lucide:download", cls="h-5 w-5 text-blue-500"),
@@ -389,25 +341,19 @@ Button("Start", ds_on_click="""
                 )
             ),
             cls="max-w-2xl"
-        ),
-        '''Card(
-    CardContent(
-        Div(
-            Icon("lucide:download"), P("StarUI-v2.0.zip"),
-            Progress(progress_value=42, cls="h-3"),
-            P("42% • 52.5 MB of 125 MB"),
-            P(Icon("lucide:arrow-down"), "2.4 MB/s • ~30s")
-        ),
-        // More downloads...
-    )
-)''',
+        )
+
+    yield ComponentPreview(
+        download_manager_example(),
+        download_manager_example.code,
         title="Download Manager",
         description="Download progress with speed and time remaining"
     )
     
     # Storage usage
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def storage_usage_example():
+        return Card(
             CardHeader(
                 CardTitle("Storage Usage"),
                 CardDescription("Cloud storage breakdown")
@@ -492,30 +438,19 @@ Button("Start", ds_on_click="""
                 )
             ),
             cls="w-full max-w-2xl"
-        ),
-        '''Card(
-    CardContent(
-        Div(
-            P("Total Usage"),
-            P("68.4 GB of 100 GB"),
-            Progress(progress_value=68.4, cls="h-4")
-        ),
-        Separator(),
-        Div(
-            Div(Div(cls="w-3 h-3 bg-blue-500"), P("Documents")),
-            P("24.2 GB"),
-            Progress(progress_value=24.2, cls="h-1")
-        ),
-        // More categories...
-    )
-)''',
+        )
+
+    yield ComponentPreview(
+        storage_usage_example(),
+        storage_usage_example.code,
         title="Storage Usage",
         description="Storage breakdown with categorized progress bars"
     )
     
     # Course progress
-    yield ComponentPreview(
-        Card(
+    @with_code
+    def course_progress_example():
+        return Card(
             CardHeader(
                 CardTitle("Course Progress"),
                 CardDescription("Web Development Bootcamp")
@@ -581,26 +516,11 @@ Button("Start", ds_on_click="""
                 )
             ),
             cls="w-full max-w-2xl"
-        ),
-        '''Card(
-    CardContent(
-        Div(
-            P("Overall Progress"),
-            Progress(progress_value=72, cls="h-3"),
-            P("18 of 25 lessons completed")
-        ),
-        Separator(),
-        Div(
-            Icon("lucide:check-circle"), P("HTML & CSS"), Badge("Complete"),
-            Progress(progress_value=100, cls="h-1")
-        ),
-        Div(
-            Icon("lucide:loader-2"), P("React"), P("3 of 8"),
-            Progress(progress_value=37.5, cls="h-1")
-        ),
-        // More modules...
-    )
-)''',
+        )
+
+    yield ComponentPreview(
+        course_progress_example(),
+        course_progress_example.code,
         title="Course Progress",
         description="Educational progress tracking with module breakdown"
     )
@@ -609,38 +529,20 @@ Button("Start", ds_on_click="""
 def create_progress_docs():
     """Create progress documentation page using convention-based approach."""
     
-    api_reference = {
-        "props": [
-            {
-                "name": "progress_value",
-                "type": "float | None",
-                "default": "None",
-                "description": "Current progress value (0-100 or 0-max_value)"
-            },
-            {
-                "name": "max_value",
-                "type": "float",
-                "default": "100",
-                "description": "Maximum value for the progress bar"
-            },
-            {
-                "name": "signal",
-                "type": "str",
-                "default": "auto-generated",
-                "description": "Datastar signal name for dynamic updates"
-            },
-            {
-                "name": "cls",
-                "type": "str",
-                "default": "''",
-                "description": "Additional CSS classes (e.g., 'h-4' for height)"
-            }
+    # Intentional API: users mostly set value, max, signal, and height (cls)
+    api_reference = build_api_reference(
+        main_props=[
+            Prop("progress_value", "float | None", "Current value in the range [0, max_value]", "None"),
+            Prop("max_value", "float", "Maximum value that represents 100%", "100"),
+            Prop("signal", "str | None", "Datastar signal name for reactive updates", "auto-generated"),
+            Prop("cls", "str", "Additional CSS classes (e.g., 'h-2', 'h-3')", "''"),
         ]
-    }
+    )
     
     # Hero example
-    hero_example = ComponentPreview(
-        Div(
+    @with_code
+    def hero_progress_example():
+        return Div(
             Progress(progress_value=60),
             P(
                 "Processing... ",
@@ -648,9 +550,11 @@ def create_progress_docs():
                 cls="text-sm text-muted-foreground mt-2 text-center"
             ),
             cls="w-full max-w-md mx-auto"
-        ),
-        '''Progress(progress_value=60)
-P("Processing... ", Span("60%", cls="font-bold"))''',
+        )
+
+    hero_example = ComponentPreview(
+        hero_progress_example(),
+        hero_progress_example.code,
         copy_button=True
     )
     

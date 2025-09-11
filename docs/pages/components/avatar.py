@@ -17,6 +17,7 @@ from starui.registry.components.avatar import (
     AvatarImage,
     AvatarWithFallback,
 )
+from utils import with_code, Component, build_api_reference
 from widgets.component_preview import ComponentPreview
 
 
@@ -24,8 +25,9 @@ def examples():
     """Generate avatar examples using ComponentPreview with tabs."""
     
     # Basic composition
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def basic_avatar_example():
+        return Div(
             Avatar(
                 AvatarImage(
                     src="https://github.com/shadcn.png",
@@ -42,24 +44,19 @@ def examples():
                 )
             ),
             cls="flex items-center gap-4"
-        ),
-        '''Avatar(
-    AvatarImage(
-        src="https://github.com/shadcn.png",
-        alt="@shadcn"
-    )
-)
-
-Avatar(
-    AvatarFallback("CN")
-)''',
+        )
+    
+    yield ComponentPreview(
+        basic_avatar_example(),
+        basic_avatar_example.code,
         title="Basic Avatar",
         description="Compose avatars with image and fallback components"
     )
     
     # Sizes using custom classes
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def avatar_sizes_example():
+        return Div(
             Avatar(AvatarFallback("XS"), cls="size-6"),
             Avatar(AvatarFallback("SM"), cls="size-8"),
             Avatar(AvatarFallback("MD")),  # default size-10
@@ -67,46 +64,36 @@ Avatar(
             Avatar(AvatarFallback("XL"), cls="size-16"),
             Avatar(AvatarFallback("2X"), cls="size-20"),
             cls="flex items-center gap-4"
-        ),
-        '''# Extra small
-Avatar(AvatarFallback("XS"), cls="size-6")
-
-# Small
-Avatar(AvatarFallback("SM"), cls="size-8")
-
-# Default
-Avatar(AvatarFallback("MD"))
-
-# Large
-Avatar(AvatarFallback("LG"), cls="size-12")
-
-# Extra large
-Avatar(AvatarFallback("XL"), cls="size-16")
-
-# 2X large
-Avatar(AvatarFallback("2X"), cls="size-20")''',
+        )
+    
+    yield ComponentPreview(
+        avatar_sizes_example(),
+        avatar_sizes_example.code,
         title="Avatar Sizes",
         description="Use size classes to create different avatar sizes"
     )
     
     # With Fallback
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def avatar_fallback_example():
+        return Div(
             Avatar(AvatarFallback("CN")),
             Avatar(AvatarFallback("JD")),
             Avatar(AvatarFallback("AB")),
             cls="flex items-center gap-4"
-        ),
-        '''Avatar(AvatarFallback("CN"))
-Avatar(AvatarFallback("JD"))
-Avatar(AvatarFallback("AB"))''',
+        )
+    
+    yield ComponentPreview(
+        avatar_fallback_example(),
+        avatar_fallback_example.code,
         title="Avatar Fallback",
         description="Display initials when no image is available"
     )
     
     # Automatic Fallback with Datastar
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def automatic_fallback_avatar_example():
+        return Div(
             Div(
                 AvatarWithFallback(
                     src="https://github.com/shadcn.png",
@@ -131,30 +118,19 @@ Avatar(AvatarFallback("AB"))''',
                 cls="flex flex-col items-center"
             ),
             cls="flex items-start gap-4"
-        ),
-        '''# Valid image with fallback ready
-AvatarWithFallback(
-    src="https://github.com/shadcn.png",
-    alt="@shadcn",
-    fallback="CN"
-)
-
-# Invalid URL - will show fallback
-AvatarWithFallback(
-    src="https://invalid-url.com/image.jpg",
-    alt="Invalid", 
-    fallback="IN"
-)
-
-# No image - shows fallback immediately
-AvatarWithFallback(fallback="NI")''',
+        )
+    
+    yield ComponentPreview(
+        automatic_fallback_avatar_example(),
+        automatic_fallback_avatar_example.code,
         title="Automatic Fallback",
         description="Uses Datastar signals to automatically show fallback when image fails"
     )
     
     # Avatar Group Pattern
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def avatar_group_example():
+        return Div(
             # Basic group
             Div(
                 Avatar(AvatarFallback("JD")),
@@ -164,22 +140,19 @@ AvatarWithFallback(fallback="NI")''',
                 cls="flex -space-x-2 [&>*[data-slot=avatar]]:ring-2 [&>*[data-slot=avatar]]:ring-background"
             ),
             cls="mb-4"
-        ),
-        '''# Avatar group with overlap
-Div(
-    Avatar(AvatarFallback("JD")),
-    Avatar(AvatarFallback("AS")),
-    Avatar(AvatarFallback("PQ")),
-    Avatar(AvatarFallback("+2", cls="text-xs font-medium")),
-    cls="flex -space-x-2 [&>*[data-slot=avatar]]:ring-2 [&>*[data-slot=avatar]]:ring-background"
-)''',
+        )
+    
+    yield ComponentPreview(
+        avatar_group_example(),
+        avatar_group_example.code,
         title="Avatar Group",
         description="Create overlapping avatar groups with Tailwind utilities"
     )
     
     # With Badge Pattern
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def avatar_with_badge_example():
+        return Div(
             # Green status badge
             Div(
                 Avatar(AvatarFallback("JD")),
@@ -205,51 +178,30 @@ Div(
                 cls="relative inline-block"
             ),
             cls="flex items-center gap-4"
-        ),
-        '''# Status indicator
-Div(
-    Avatar(AvatarFallback("JD")),
-    Span(cls="absolute bottom-0 right-0 size-3 bg-green-500 rounded-full ring-2 ring-background"),
-    cls="relative inline-block"
-)
-
-# Notification badge with count
-Div(
-    Avatar(AvatarFallback("MN")),
-    Span(
-        "5",
-        cls="absolute bottom-0 right-0 size-4 bg-red-500 rounded-full ring-2 ring-background flex items-center justify-center text-[8px] font-bold text-white"
-    ),
-    cls="relative inline-block"
-)''',
+        )
+    
+    yield ComponentPreview(
+        avatar_with_badge_example(),
+        avatar_with_badge_example.code,
         title="Avatar with Badge",
         description="Add status indicators or notification badges using absolute positioning"
     )
     
     # Colored Initials Pattern
-    yield ComponentPreview(
-        Div(
+    @with_code
+    def colored_initials_avatar_example():
+        return Div(
             Avatar(AvatarFallback("JD", cls="bg-red-600 dark:bg-red-500 text-white font-semibold")),
             Avatar(AvatarFallback("AS", cls="bg-blue-600 dark:bg-blue-500 text-white font-semibold")),
             Avatar(AvatarFallback("PQ", cls="bg-green-600 dark:bg-green-500 text-white font-semibold")),
             Avatar(AvatarFallback("MN", cls="bg-purple-600 dark:bg-purple-500 text-white font-semibold")),
             Avatar(AvatarFallback("XY", cls="bg-orange-600 dark:bg-orange-500 text-white font-semibold")),
             cls="flex items-center gap-4"
-        ),
-        '''# Colored initials with theme support
-Avatar(
-    AvatarFallback(
-        "JD",
-        cls="bg-red-600 dark:bg-red-500 text-white font-semibold"
-    )
-)
-
-Avatar(
-    AvatarFallback(
-        "AS",
-        cls="bg-blue-600 dark:bg-blue-500 text-white font-semibold"
-    )
-)''',
+        )
+    
+    yield ComponentPreview(
+        colored_initials_avatar_example(),
+        colored_initials_avatar_example.code,
         title="Colored Initials",
         description="Create colorful initial avatars with theme-aware backgrounds"
     )
@@ -257,98 +209,22 @@ Avatar(
 
 def create_avatar_docs():
     """Create the Avatar component documentation page."""
-    from utils import auto_generate_page
     
-    api_reference = {
-        "components": [
-            {
-                "name": "Avatar",
-                "description": "Container component for avatar content",
-                "props": [
-                    {
-                        "name": "class_name / cls",
-                        "type": "str",
-                        "default": "''",
-                        "description": "Additional CSS classes for customization"
-                    },
-                    {
-                        "name": "*children",
-                        "type": "Any",
-                        "description": "Avatar content (usually AvatarImage or AvatarFallback)"
-                    }
-                ]
-            },
-            {
-                "name": "AvatarImage",
-                "description": "The image element for the avatar",
-                "props": [
-                    {
-                        "name": "src",
-                        "type": "str",
-                        "required": True,
-                        "description": "Image source URL"
-                    },
-                    {
-                        "name": "alt",
-                        "type": "str",
-                        "default": "''",
-                        "description": "Alt text for accessibility"
-                    },
-                    {
-                        "name": "loading",
-                        "type": "str",
-                        "default": "'lazy'",
-                        "description": "Loading strategy ('lazy' or 'eager')"
-                    }
-                ]
-            },
-            {
-                "name": "AvatarFallback",
-                "description": "Fallback content shown when image fails to load",
-                "props": [
-                    {
-                        "name": "*children",
-                        "type": "Any",
-                        "description": "Content to display (usually initials)"
-                    },
-                    {
-                        "name": "class_name / cls",
-                        "type": "str",
-                        "default": "''",
-                        "description": "Additional CSS classes"
-                    }
-                ]
-            },
-            {
-                "name": "AvatarWithFallback",
-                "description": "Complete avatar with automatic error handling",
-                "props": [
-                    {
-                        "name": "src",
-                        "type": "Optional[str]",
-                        "default": "None",
-                        "description": "Optional image source URL"
-                    },
-                    {
-                        "name": "alt",
-                        "type": "str",
-                        "default": "''",
-                        "description": "Alt text"
-                    },
-                    {
-                        "name": "fallback",
-                        "type": "str",
-                        "default": "'?'",
-                        "description": "Fallback text/initials"
-                    }
-                ]
-            }
+    # For Avatar, users need to understand component composition and structure
+    # rather than detailed props - examples demonstrate usage patterns clearly
+    api_reference = build_api_reference(
+        components=[
+            Component("Avatar", "Main container component for avatar content"),
+            Component("AvatarImage", "Image element with automatic loading and fallback support"),
+            Component("AvatarFallback", "Fallback content (usually initials) when image unavailable"),
+            Component("AvatarWithFallback", "Complete avatar with automatic Datastar-powered error handling"),
         ]
-    }
+    )
     
     # Hero example showing diverse avatar types
-    hero_example = ComponentPreview(
-        Div(
+    @with_code
+    def hero_avatar_example():
+        return Div(
             # Regular avatars with images
             Avatar(
                 AvatarImage(
@@ -391,33 +267,11 @@ def create_avatar_docs():
                 cls="flex -space-x-3 [&>*[data-slot=avatar]]:ring-2 [&>*[data-slot=avatar]]:ring-background [&>*[data-slot=avatar]]:size-8"
             ),
             cls="flex items-center gap-3 flex-wrap justify-center"
-        ),
-        '''# Basic avatars
-Avatar(AvatarImage(src="...", alt="..."))
-Avatar(AvatarFallback("CN"))
-
-# Colored initials
-Avatar(
-    AvatarFallback(
-        "JD",
-        cls="bg-red-600 dark:bg-red-500 text-white font-semibold"
-    )
-)
-
-# With status badge
-Div(
-    Avatar(AvatarImage(...)),
-    Span(cls="absolute bottom-0 right-0 size-3 bg-green-500 rounded-full ring-2 ring-background"),
-    cls="relative inline-block"
-)
-
-# Grouped avatars
-Div(
-    Avatar(AvatarFallback("A")),
-    Avatar(AvatarFallback("B")),
-    Avatar(AvatarFallback("+2")),
-    cls="flex -space-x-3 [&>*[data-slot=avatar]]:ring-2 [&>*[data-slot=avatar]]:ring-background"
-)''',
+        )
+    
+    hero_example = ComponentPreview(
+        hero_avatar_example(),
+        hero_avatar_example.code,
         copy_button=True
     )
     

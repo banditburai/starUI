@@ -23,7 +23,12 @@ from starhtml.datastar import (
 from .utils import cn, cva
 
 CommandSize = Literal["sm", "md", "lg"]
-_command_item_counters = {}
+
+_SEARCH_DEBOUNCE_MS = 50
+_DIALOG_FOCUS_DELAY_MS = 50
+
+# Global counter registry for command item indexing
+_command_item_counters: dict[str, int] = {}
 
 
 def _get_filter_effect(signal: str) -> str:
@@ -31,7 +36,7 @@ def _get_filter_effect(signal: str) -> str:
 
 
 def _get_search_handler(signal: str) -> str:
-    return f'clearTimeout(window._st_{signal});window._st_{signal}=setTimeout(()=>{{const v=document.querySelectorAll(\'[data-command-item="{signal}"]:not([style*="none"]):not([data-disabled="true"])\');if(v.length>0)${signal}_selected=parseInt(v[0].dataset.index||\'0\')}},50)'
+    return f'clearTimeout(window._st_{signal});window._st_{signal}=setTimeout(()=>{{const v=document.querySelectorAll(\'[data-command-item="{signal}"]:not([style*="none"]):not([data-disabled="true"])\');if(v.length>0)${signal}_selected=parseInt(v[0].dataset.index||\'0\')}},{_SEARCH_DEBOUNCE_MS})'
 
 
 def _get_nav_handler(signal: str, ref_id: str = None) -> str:
@@ -40,19 +45,22 @@ def _get_nav_handler(signal: str, ref_id: str = None) -> str:
 
 
 def _get_dialog_open_effect(signal: str, ref_id: str) -> str:
-    return f"{_get_filter_effect(signal)};if(${ref_id}_open&&!${signal}_search)setTimeout(()=>{{const f=document.querySelector('[data-command-item=\"{signal}\"]:not([data-disabled=\"true\"])');if(f)${signal}_selected=parseInt(f.dataset.index||'0')}},50)"
+    return f"{_get_filter_effect(signal)};if(${ref_id}_open&&!${signal}_search)setTimeout(()=>{{const f=document.querySelector('[data-command-item=\"{signal}\"]:not([data-disabled=\"true\"])');if(f)${signal}_selected=parseInt(f.dataset.index||'0')}},{_DIALOG_FOCUS_DELAY_MS})"
 
 
 def _init_command_signals(signal: str) -> dict:
     return {f"{signal}_search": value(""), f"{signal}_selected": 0}
 
 
-def _process_children(children, signal):
+def _process_children(children: Any, signal: str) -> list[Any]:
     return [c(signal) if callable(c) else c for c in children]
 
 
 command_variants = cva(
-    base="flex w-full flex-col overflow-hidden rounded-lg border border-input bg-popover text-popover-foreground shadow-md",
+    base=(
+        "flex w-full flex-col overflow-hidden rounded-lg border border-input "
+        "bg-popover text-popover-foreground shadow-md"
+    ),
     config={
         "variants": {
             "size": {
@@ -70,7 +78,6 @@ def Command(
     *children: Any,
     signal: str | None = None,
     size: CommandSize = "md",
-    class_name: str = "",
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
@@ -86,7 +93,7 @@ def Command(
         data_command_root=signal,
         data_slot="command",
         tabindex="-1",
-        cls=cn(command_variants(size=size), class_name, cls),
+        cls=cn(command_variants(size=size), cls),
         **kwargs,
     )
 
@@ -96,7 +103,6 @@ def CommandDialog(
     content: list[FT],
     signal: str | None = None,
     modal: bool = True,
-    class_name: str = "",
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
@@ -142,7 +148,6 @@ def CommandDialog(
             "flex flex-col overflow-hidden rounded-lg",
             "border border-input bg-popover text-popover-foreground shadow-lg",
             "md:min-w-[450px]",
-            class_name,
             cls,
         ),
         **kwargs,
@@ -165,7 +170,6 @@ def CommandDialog(
 
 def CommandInput(
     placeholder: str = "Type a command or search...",
-    class_name: str = "",
     cls: str = "",
     **kwargs: Any,
 ):
@@ -188,7 +192,6 @@ def CommandInput(
             data_slot="command-input-wrapper",
             cls=cn(
                 "flex h-9 items-center gap-2 border-b border-border px-3",
-                class_name,
                 cls,
             ),
         )
@@ -198,7 +201,6 @@ def CommandInput(
 
 def CommandList(
     *children,
-    class_name: str = "",
     cls: str = "",
     **kwargs: Any,
 ):
@@ -211,7 +213,6 @@ def CommandList(
             data_slot="command-list",
             cls=cn(
                 "max-h-[300px] scroll-py-1 overflow-x-hidden overflow-y-auto",
-                class_name,
                 cls,
             ),
             **kwargs,
@@ -222,7 +223,6 @@ def CommandList(
 
 def CommandEmpty(
     *children,
-    class_name: str = "",
     cls: str = "",
     **kwargs: Any,
 ):
@@ -232,7 +232,7 @@ def CommandEmpty(
             data_command_empty=signal,
             data_slot="command-empty",
             style="display: none;",
-            cls=cn("py-6 text-center text-sm", class_name, cls),
+            cls=cn("py-6 text-center text-sm", cls),
             **kwargs,
         )
 
@@ -242,7 +242,6 @@ def CommandEmpty(
 def CommandGroup(
     *children,
     heading: str | None = None,
-    class_name: str = "",
     cls: str = "",
     **kwargs: Any,
 ):
@@ -263,7 +262,6 @@ def CommandGroup(
             cls=cn(
                 "overflow-hidden p-1 text-foreground",
                 "[&_[data-slot='command-group-heading']]:text-muted-foreground [&_[data-slot='command-group-heading']]:px-2 [&_[data-slot='command-group-heading']]:py-1.5 [&_[data-slot='command-group-heading']]:text-xs [&_[data-slot='command-group-heading']]:font-medium",
-                class_name,
                 cls,
             ),
             **kwargs,
@@ -279,7 +277,6 @@ def CommandItem(
     disabled: bool = False,
     keywords: str | None = None,
     show: str | None = None,
-    class_name: str = "",
     cls: str = "",
     **kwargs: Any,
 ):
@@ -319,7 +316,6 @@ def CommandItem(
                 "relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none select-none transition-colors",
                 "[&_svg:not([class*='text-'])]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
                 "hover:bg-accent/50 data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground" if not disabled else "opacity-50 cursor-not-allowed pointer-events-none",
-                class_name,
                 cls,
             ),
             **kwargs,
@@ -328,18 +324,17 @@ def CommandItem(
     return _
 
 
-def CommandSeparator(class_name: str = "", cls: str = "", **kwargs: Any):
+def CommandSeparator(cls: str = "", **kwargs: Any):
     return lambda signal: Div(
         role="separator",
         data_slot="command-separator",
-        cls=cn("-mx-1 h-px bg-border", class_name, cls),
+        cls=cn("-mx-1 h-px bg-border", cls),
         **kwargs,
     )
 
 
 def CommandShortcut(
     *children,
-    class_name: str = "",
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
@@ -348,7 +343,6 @@ def CommandShortcut(
         data_slot="command-shortcut",
         cls=cn(
             "ml-auto text-xs tracking-widest text-muted-foreground",
-            class_name,
             cls,
         ),
         **kwargs,
