@@ -335,39 +335,80 @@ def build_api_reference(main_props: list[Prop] = None, components: list[Componen
 # ============================================================================
 
 def extract_code(func: Callable) -> str:
-    """Extract and normalize code from function's return statement."""
+    """Extract and normalize code from function body, handling both patterns."""
     try:
         source = dedent(inspect.getsource(func))
-        match = re.search(r'return\s+(.*?)(?=\n(?:def |class |@|$))', source, re.DOTALL)
+        lines = source.split('\n')
         
-        if not match:
-            return "# Could not extract return statement"
+        # Find where the actual function body starts
+        body_start = 0
+        for i, line in enumerate(lines):
+            if line.strip().startswith('def ') and func.__name__ in line:
+                body_start = i + 1
+                break
         
-        code = match.group(1).strip()
-        lines = code.split('\n')
+        # Get everything after the function definition
+        body_lines = lines[body_start:]
         
-        if not lines:
-            return code
+        # Remove empty lines at the start
+        while body_lines and not body_lines[0].strip():
+            body_lines.pop(0)
         
-        # Keep first line as-is, normalize indentation for rest
-        result = [lines[0]]
+        if not body_lines:
+            return "# Could not extract function body"
         
-        if len(lines) > 1:
-            # Calculate indent adjustment needed
-            actual_indent = len(lines[1]) - len(lines[1].lstrip())
-            expected_indent = 4  # Standard Python indent
-            adjustment = actual_indent - expected_indent
-            
-            # Apply adjustment to remaining lines
-            for line in lines[1:]:
-                if line.strip():
-                    current_indent = len(line) - len(line.lstrip())
-                    new_indent = max(0, current_indent - adjustment)
-                    result.append(' ' * new_indent + line.lstrip())
+        # Find the base indentation level
+        first_line = body_lines[0]
+        base_indent = len(first_line) - len(first_line.lstrip())
+        
+        # Remove the base indentation from all lines
+        normalized_lines = []
+        for line in body_lines:
+            if line.strip():
+                if line.startswith(' ' * base_indent):
+                    normalized_lines.append(line[base_indent:])
                 else:
-                    result.append('')
+                    normalized_lines.append(line.lstrip())
+            else:
+                normalized_lines.append('')
         
-        return '\n'.join(line.rstrip() for line in result)
+        # Check if this is a simple return-only function (old pattern)
+        # Old pattern: starts with 'return' and has no 'def' statements
+        has_inner_def = any('def ' in line for line in normalized_lines[1:])  # Skip first line check
+        first_code_line = next((line for line in normalized_lines if line.strip()), '')
+        
+        if first_code_line.strip().startswith('return ') and not has_inner_def:
+            # Old pattern: just a return statement, extract what's being returned
+            # Find where return starts
+            return_index = 0
+            for i, line in enumerate(normalized_lines):
+                if line.strip().startswith('return '):
+                    return_index = i
+                    break
+            
+            # Get the return statement and everything after
+            return_lines = normalized_lines[return_index:]
+            # Remove 'return ' from the first line
+            if return_lines:
+                # Handle the indentation properly
+                first_line = return_lines[0]
+                indent = len(first_line) - len(first_line.lstrip())
+                return_lines[0] = ' ' * indent + first_line.lstrip()[7:]  # Remove 'return ' but keep indent
+            
+            return '\n'.join(line.rstrip() for line in return_lines)
+        else:
+            # New pattern: has helper functions or assignments before return
+            # Find all return statements and remove the 'return ' keyword
+            result_lines = []
+            for line in normalized_lines:
+                if line.strip().startswith('return '):
+                    # Replace 'return ' with proper indentation maintained
+                    indent = len(line) - len(line.lstrip())
+                    result_lines.append(' ' * indent + line.lstrip()[7:])  # Remove 'return '
+                else:
+                    result_lines.append(line)
+            
+            return '\n'.join(line.rstrip() for line in result_lines)
         
     except Exception as e:
         return f"# Error: {e}"

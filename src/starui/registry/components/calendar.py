@@ -93,8 +93,8 @@ def _build_navigation(signal: str, month: int, year: int, disabled: bool) -> Div
 
 
 def _build_dropdown(signal: str, type: str, current_display: str | int, items: list[tuple], disabled: bool) -> Div:
-    trigger_id = f"{signal}-{type}-trigger"
-    content_id = f"{signal}-{type}-content"
+    trigger_id = f"{signal}_{type}_trigger"
+    content_id = f"{signal}_{type}_content"
     
     trigger = HTMLButton(
         Span(ds_text(f"${signal}_{type}_display" if type == "month" else f"${signal}_{type}"), 
@@ -127,7 +127,7 @@ def _build_dropdown(signal: str, type: str, current_display: str | int, items: l
         ds_on_click(_dropdown_handler(signal, type, content_id)) if not disabled else None,
         ds_ref(f"{signal}_{type}_content"),
         ds_style(min_width=f"${signal}_{type}_trigger ? ${signal}_{type}_trigger.offsetWidth + 'px' : '8rem'"),
-        ds_position(anchor=trigger_id, placement="bottom", offset=4, flip=True, shift=True, hide=True),
+        ds_position(anchor=trigger_id, placement="bottom", offset=8, flip=True, shift=True, hide=True, container="none"),
         popover="auto",
         id=content_id,
         cls="z-50 max-h-[200px] overflow-y-auto scrollbar-hide rounded-md border bg-popover text-popover-foreground shadow-md outline-none dark:border-input",

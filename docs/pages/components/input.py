@@ -19,7 +19,6 @@ from widgets.component_preview import ComponentPreview
 
 
 def examples():
-    """Generate Input examples using ComponentPreview with tabs."""
     
     # Input types
     @with_code
@@ -50,9 +49,23 @@ def examples():
         description="Different input types for various data"
     )
     
-    # Reactive Input with validation
     @with_code
     def reactive_input_validation_example():
+        def create_validation_messages(signal_name, invalid_message, valid_message):
+            return Div(
+                P(
+                    ds_show(f"!${signal_name}_valid && ${signal_name}.length > 0"),
+                    invalid_message,
+                    cls="text-xs text-destructive break-words"
+                ),
+                P(
+                    ds_show(f"${signal_name}_valid && ${signal_name}.length > 0"),
+                    valid_message,
+                    cls="text-xs text-green-600"
+                ),
+                cls="mt-1 min-h-[1rem] w-80"
+            )
+        
         return Div(
             Div(
                 UILabel(
@@ -67,18 +80,10 @@ def examples():
                     validation="/^[a-zA-Z0-9_]{3,}$/.test($signal)",
                     cls="w-80"
                 ),
-                Div(
-                    P(
-                        ds_show("!$username_valid && $username.length > 0"),
-                        "Username must be at least 3 characters, letters/numbers/underscores only",
-                        cls="text-xs text-destructive break-words"
-                    ),
-                    P(
-                        ds_show("$username_valid && $username.length > 0"),
-                        "✓ Username is available",
-                        cls="text-xs text-green-600"
-                    ),
-                    cls="mt-1 min-h-[1rem] w-80"
+                create_validation_messages(
+                    "username",
+                    "Username must be at least 3 characters, letters/numbers/underscores only",
+                    "✓ Username is available"
                 ),
                 cls="space-y-2"
             ),
@@ -92,18 +97,10 @@ def examples():
                     validation="/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test($signal)",
                     cls="w-80"
                 ),
-                Div(
-                    P(
-                        ds_show("!$user_email_valid && $user_email.length > 0"),
-                        "Please enter a valid email address",
-                        cls="text-xs text-destructive break-words"
-                    ),
-                    P(
-                        ds_show("$user_email_valid && $user_email.length > 0"),
-                        "✓ Valid email format",
-                        cls="text-xs text-green-600"
-                    ),
-                    cls="mt-1 min-h-[1rem] w-80"
+                create_validation_messages(
+                    "user_email",
+                    "Please enter a valid email address",
+                    "✓ Valid email format"
                 ),
                 cls="space-y-2"
             ),
@@ -150,46 +147,29 @@ def examples():
         description="Combine inputs with action buttons"
     )
     
-    # Number and date inputs with icon styling
     @with_code
     def inputs_with_icons_example():
+        inputs_with_icons = [
+            ("quantity", "Quantity", "lucide:hash", "number", "Enter quantity", {"min": 1, "max": 99, "step": 1}),
+            ("dob", "Date of Birth", "lucide:calendar", "text", "MM/DD/YYYY", {}),
+            ("time", "Appointment Time", "lucide:clock", "text", "HH:MM", {}),
+            ("website", "Website", "lucide:globe", "url", "https://example.com", {})
+        ]
+        
+        def create_input_with_icon(field_id, label, icon, input_type, placeholder, extra_props):
+            return Div(
+                UILabel(label, for_=field_id),
+                Div(
+                    Icon(icon, width="16", height="16", cls="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"),
+                    Input(type=input_type, id=field_id, placeholder=placeholder, cls="pl-10 w-80", **extra_props),
+                    cls="relative"
+                ),
+                cls="space-y-2"
+            )
+        
         return Div(
-            Div(
-                UILabel("Quantity", for_="quantity"),
-                Div(
-                    Icon("lucide:hash", width="16", height="16", cls="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"),
-                    Input(type="number", id="quantity", placeholder="Enter quantity", min=1, max=99, step=1, cls="pl-10 w-80"),
-                    cls="relative"
-                ),
-                cls="space-y-2"
-            ),
-            Div(
-                UILabel("Date of Birth", for_="dob"),
-                Div(
-                    Icon("lucide:calendar", width="16", height="16", cls="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"),
-                    Input(type="text", id="dob", placeholder="MM/DD/YYYY", cls="pl-10 w-80"),
-                    cls="relative"
-                ),
-                cls="space-y-2"
-            ),
-            Div(
-                UILabel("Appointment Time", for_="time"),
-                Div(
-                    Icon("lucide:clock", width="16", height="16", cls="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"),
-                    Input(type="text", id="time", placeholder="HH:MM", cls="pl-10 w-80"),
-                    cls="relative"
-                ),
-                cls="space-y-2"
-            ),
-            Div(
-                UILabel("Website", for_="website"),
-                Div(
-                    Icon("lucide:globe", width="16", height="16", cls="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"),
-                    Input(type="url", id="website", placeholder="https://example.com", cls="pl-10 w-80"),
-                    cls="relative"
-                ),
-                cls="space-y-2"
-            ),
+            *[create_input_with_icon(field_id, label, icon, input_type, placeholder, extra_props)
+              for field_id, label, icon, input_type, placeholder, extra_props in inputs_with_icons],
             cls="grid gap-4 max-w-md"
         )
 
@@ -300,7 +280,6 @@ def examples():
 
 
 def create_input_docs():
-    """Create input documentation page using convention-based approach."""
     
     # Intentional API: focus on the props users set most when adding inputs
     api_reference = build_api_reference(

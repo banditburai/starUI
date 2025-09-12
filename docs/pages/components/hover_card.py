@@ -30,7 +30,6 @@ from widgets.component_preview import ComponentPreview
 
 
 def examples():
-    """Generate hover card examples using ComponentPreview with tabs."""
 
     @with_code
     def basic_hover_card_example():
@@ -58,21 +57,11 @@ def examples():
                         ),
                         P("Build beautiful interfaces with our comprehensive collection of customizable UI components.", cls="text-sm text-muted-foreground mb-3"),
                         Div(
-                            Div(
-                                Div("50+", cls="font-semibold text-sm"),
-                                Div("Components", cls="text-xs text-muted-foreground"),
+                            *[Div(
+                                Div(value, cls="font-semibold text-sm"),
+                                Div(label, cls="text-xs text-muted-foreground"),
                                 cls="text-center space-y-1"
-                            ),
-                            Div(
-                                Div("TypeScript", cls="font-semibold text-sm"),
-                                Div("Support", cls="text-xs text-muted-foreground"),
-                                cls="text-center space-y-1"
-                            ),
-                            Div(
-                                Div("Dark", cls="font-semibold text-sm"),
-                                Div("Mode", cls="text-xs text-muted-foreground"),
-                                cls="text-center space-y-1"
-                            ),
+                            ) for value, label in [("50+", "Components"), ("TypeScript", "Support"), ("Dark", "Mode")]],
                             cls="flex justify-between py-3 px-3 bg-muted/30 rounded-md"
                         ),
                         cls="space-y-2"
@@ -127,21 +116,11 @@ def examples():
                             ),
                             P("Building beautiful and accessible UI components. Creator of ui/shadcn.", cls="text-sm text-muted-foreground mb-4"),
                             Div(
-                                Div(
-                                    Strong("1.2k", cls="text-sm"),
-                                    P("Following", cls="text-xs text-muted-foreground"),
+                                *[Div(
+                                    Strong(value, cls="text-sm"),
+                                    P(label, cls="text-xs text-muted-foreground"),
                                     cls="text-center"
-                                ),
-                                Div(
-                                    Strong("12.5k", cls="text-sm"),
-                                    P("Followers", cls="text-xs text-muted-foreground"),
-                                    cls="text-center"
-                                ),
-                                Div(
-                                    Strong("342", cls="text-sm"),
-                                    P("Repos", cls="text-xs text-muted-foreground"),
-                                    cls="text-center"
-                                ),
+                                ) for value, label in [("1.2k", "Following"), ("12.5k", "Followers"), ("342", "Repos")]],
                                 cls="flex justify-around py-3 border-t border-b border-border my-4"
                             ),
                             Div(
@@ -285,62 +264,35 @@ def examples():
 
     @with_code
     def positioning_hover_card_examples():
+        positions = [
+            ("Top", "top", "This hover card appears above the trigger", {}),
+            ("Bottom", "bottom", "This hover card appears below the trigger", {}),
+            ("Left", "left", "This hover card appears to the left", {}),
+            ("Right", "right", "This hover card appears to the right", {"align": "start"})
+        ]
+        
+        def create_positioned_hover_card(label, side, description, extra_props):
+            signal = f"{side}_hover"
+            return HoverCard(
+                HoverCardTrigger(Button(label, variant="outline", size="sm"), signal=signal),
+                HoverCardContent(
+                    Div(
+                        H4(f"{label} Position", cls="font-semibold mb-2"),
+                        P(description, cls="text-sm text-muted-foreground"),
+                        cls="text-center"
+                    ),
+                    signal=signal,
+                    side=side,
+                    **extra_props
+                ),
+                signal=signal
+            )
+        
         return Div(
             P("Hover over the buttons to see different positioning options:", cls="text-sm text-muted-foreground mb-4"),
             Div(
-                HoverCard(
-                    HoverCardTrigger(Button("Top", variant="outline", size="sm"), signal="top_hover"),
-                    HoverCardContent(
-                        Div(
-                            H4("Top Position", cls="font-semibold mb-2"),
-                            P("This hover card appears above the trigger", cls="text-sm text-muted-foreground"),
-                            cls="text-center"
-                        ),
-                        signal="top_hover",
-                        side="top"
-                    ),
-                    signal="top_hover"
-                ),
-                HoverCard(
-                    HoverCardTrigger(Button("Bottom", variant="outline", size="sm"), signal="bottom_hover"),
-                    HoverCardContent(
-                        Div(
-                            H4("Bottom Position", cls="font-semibold mb-2"),
-                            P("This hover card appears below the trigger", cls="text-sm text-muted-foreground"),
-                            cls="text-center"
-                        ),
-                        signal="bottom_hover",
-                        side="bottom"
-                    ),
-                    signal="bottom_hover"
-                ),
-                HoverCard(
-                    HoverCardTrigger(Button("Left", variant="outline", size="sm"), signal="left_hover"),
-                    HoverCardContent(
-                        Div(
-                            H4("Left Position", cls="font-semibold mb-2"),
-                            P("This hover card appears to the left", cls="text-sm text-muted-foreground"),
-                            cls="text-center"
-                        ),
-                        signal="left_hover",
-                        side="left"
-                    ),
-                    signal="left_hover"
-                ),
-                HoverCard(
-                    HoverCardTrigger(Button("Right", variant="outline", size="sm"), signal="right_hover"),
-                    HoverCardContent(
-                        Div(
-                            H4("Right Position", cls="font-semibold mb-2"),
-                            P("This hover card appears to the right", cls="text-sm text-muted-foreground"),
-                            cls="text-center"
-                        ),
-                        signal="right_hover",
-                        side="right",
-                        align="start"
-                    ),
-                    signal="right_hover"
-                ),
+                *[create_positioned_hover_card(label, side, description, extra_props) 
+                  for label, side, description, extra_props in positions],
                 cls="flex gap-4 items-center justify-center py-8 flex-wrap"
             ),
             cls="space-y-4 overflow-visible"
@@ -508,7 +460,6 @@ def examples():
 
 
 def create_hover_card_docs():
-    """Create hover card documentation page using convention-based approach."""
 
     api_reference = build_api_reference(
         components=[

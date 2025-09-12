@@ -23,13 +23,12 @@ from widgets.component_preview import ComponentPreview
 def examples():
     """Generate button examples using ComponentPreview with tabs."""
     
-    # Sizes
     @with_code
     def button_sizes_example():
         return Div(
-            Button("Small", size="sm", cls="mr-2"),
-            Button("Default", cls="mr-2"),
-            Button("Large", size="lg", cls="mr-2"),
+            Button("Small", size="sm"),
+            Button("Default"),
+            Button("Large", size="lg"),
             Button(Icon("lucide:chevron-right", cls="h-4 w-4"), variant="outline", size="icon"),
             cls="flex items-center gap-2"
         )
@@ -41,11 +40,10 @@ def examples():
         description="Different sizes including icon-only buttons"
     )
     
-    # With icons
     @with_code
     def buttons_with_icons_example():
         return Div(
-            Button(Icon("lucide:mail", cls="mr-2 h-4 w-4"), "Login with Email", cls="mr-2"),
+            Button(Icon("lucide:mail", cls="mr-2 h-4 w-4"), "Login with Email"),
             Button(Icon("lucide:loader-2", cls="mr-2 h-4 w-4 animate-spin"), "Please wait", disabled=True),
             cls="flex gap-2"
         )
@@ -150,15 +148,14 @@ def create_button_docs():
         ]
     )
     
-    # Hero example to show at the top
     @with_code
     def hero_button_example():
         return Div(
-            Button("Default", cls="mr-2"),
-            Button("Secondary", variant="secondary", cls="mr-2"),
-            Button("Destructive", variant="destructive", cls="mr-2"),
-            Button("Outline", variant="outline", cls="mr-2"),
-            Button("Ghost", variant="ghost", cls="mr-2"),
+            Button("Default"),
+            Button("Secondary", variant="secondary"),
+            Button("Destructive", variant="destructive"),
+            Button("Outline", variant="outline"),
+            Button("Ghost", variant="ghost"),
             Button("Link", variant="link"),
             cls="flex flex-wrap gap-2 justify-center"
         )

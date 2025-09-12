@@ -25,7 +25,6 @@ STATUS = "stable"
 def examples():
     """Generate command examples using ComponentPreview with tabs."""
     
-    # Interactive task manager with dynamic groups
     tasks = [
         {"id": "task1", "name": "Review pull requests", "status": "progress", "priority": "normal"},
         {"id": "task2", "name": "Fix critical bug", "status": "pending", "priority": "urgent"},
@@ -43,144 +42,122 @@ def examples():
         for i in range(len(tasks_list) + 1, len(tasks_list) + 6):
             all_task_ids.append(f"task{i}")
         
+        def create_task_icon(task_id, icon_name, icon_class=None):
+            if icon_class:
+                return Icon(icon_name, cls=f"mr-2 h-4 w-4 {icon_class}")
+            else:
+                return Span(
+                    Icon(icon_name, cls="mr-2 h-4 w-4"),
+                    ds_class(**{
+                        "text-yellow-500": f"${task_id}_priority === 'urgent'",
+                        "text-gray-400": f"${task_id}_priority === 'normal'"
+                    })
+                )
+        
+        def create_task_badge(task, task_id, status_filter):
+            if task:  # Existing task
+                if status_filter == "pending":
+                    badge_text = "Urgent" if task["priority"] == "urgent" else "Pending"
+                    badge_variant = "destructive" if task["priority"] == "urgent" else "secondary"
+                elif status_filter == "progress":
+                    badge_text = "Urgent" if task["priority"] == "urgent" else "In Progress"
+                    badge_variant = "destructive" if task["priority"] == "urgent" else "default"
+                else:  # completed
+                    badge_text = "Done"
+                    badge_variant = "outline"
+                return Badge(badge_text, variant=badge_variant, cls="ml-auto")
+            else:  # Dynamic task
+                if status_filter == "pending":
+                    urgent_badge = Badge("Urgent", ds_show(f"${task_id}_priority === 'urgent'"), 
+                                       variant="destructive", cls="ml-auto")
+                    normal_badge = Badge("Pending", ds_show(f"${task_id}_priority === 'normal'"), 
+                                       variant="secondary", cls="ml-auto")
+                elif status_filter == "progress":
+                    urgent_badge = Badge("Urgent", ds_show(f"${task_id}_priority === 'urgent'"), 
+                                       variant="destructive", cls="ml-auto")
+                    normal_badge = Badge("In Progress", ds_show(f"${task_id}_priority === 'normal'"), 
+                                       variant="default", cls="ml-auto")
+                else:  # completed
+                    return Badge("Done", variant="outline", cls="ml-auto opacity-60")
+                
+                return Div(urgent_badge, normal_badge, cls="ml-auto")
+        
         # Generate CommandItems for all possible tasks
         for task_id in all_task_ids:
-            # Find existing task data or use dynamic placeholders
             existing_task = next((t for t in tasks_list if t["id"] == task_id), None)
+            show_condition = f"${task_id}_visible && ${task_id}_status === '{status_filter}'"
             
             if status_filter == "pending":
                 if existing_task:
-                    # Use existing task data
                     icon_class = "text-yellow-500" if existing_task["priority"] == "urgent" else "text-gray-400"
                     icon_name = "lucide:alert-circle" if existing_task["priority"] == "urgent" else "lucide:circle-dot"
-                    task_name = existing_task["name"]
-                    show_condition = f"${task_id}_visible && ${task_id}_status === 'pending'"
+                    task_icon = create_task_icon(task_id, icon_name, icon_class)
+                    task_text = existing_task["name"]
+                    task_badge = create_task_badge(existing_task, task_id, status_filter)
                 else:
-                    # Dynamic task
-                    icon_name = "lucide:circle-dot"
-                    show_condition = f"${task_id}_visible && ${task_id}_status === 'pending'"
-                    task_name = None  # Will use ds_text
+                    task_icon = create_task_icon(task_id, "lucide:circle-dot")
+                    task_text = Span(ds_text(f"${task_id}_name"))
+                    task_badge = create_task_badge(None, task_id, status_filter)
                 
-                if task_name and existing_task:  # Existing task
-                    items.append(
-                        CommandItem(
-                            Icon(icon_name, cls=f"mr-2 h-4 w-4 {icon_class}"),
-                            task_name,
-                            Badge("Urgent" if existing_task["priority"] == "urgent" else "Pending", 
-                                  variant="destructive" if existing_task["priority"] == "urgent" else "secondary", 
-                                  cls="ml-auto"),
-                            value=f"{task_id}_pending",
-                            onclick=f"${task_id}_status = 'progress'",
-                            show=show_condition
-                        )
+                items.append(
+                    CommandItem(
+                        task_icon,
+                        task_text,
+                        task_badge,
+                        value=f"{task_id}_pending",
+                        onclick=f"${task_id}_status = 'progress'",
+                        show=show_condition
                     )
-                else:  # Dynamic task
-                    items.append(
-                        CommandItem(
-                            Span(
-                                Icon(icon_name, cls="mr-2 h-4 w-4"),
-                                ds_class(**{
-                                    "text-yellow-500": f"${task_id}_priority === 'urgent'",
-                                    "text-gray-400": f"${task_id}_priority === 'normal'"
-                                })
-                            ),
-                            Span(ds_text(f"${task_id}_name")),
-                            Div(
-                                Badge(
-                                    "Urgent",
-                                    ds_show(f"${task_id}_priority === 'urgent'"),
-                                    variant="destructive",
-                                    cls="ml-auto"
-                                ),
-                                Badge(
-                                    "Pending",
-                                    ds_show(f"${task_id}_priority === 'normal'"),
-                                    variant="secondary", 
-                                    cls="ml-auto"
-                                ),
-                                cls="ml-auto"
-                            ),
-                            value=f"{task_id}_pending",
-                            onclick=f"${task_id}_status = 'progress'",
-                            show=show_condition
-                        )
-                    )
+                )
                     
             elif status_filter == "progress":
                 if existing_task:
-                    task_name = existing_task["name"]
-                    show_condition = f"${task_id}_visible && ${task_id}_status === 'progress'"
-                    badge_variant = "destructive" if existing_task["priority"] == "urgent" else "default"
-                    badge_text = "Urgent" if existing_task["priority"] == "urgent" else "In Progress"
                     icon_name = "lucide:alert-circle" if existing_task["priority"] == "urgent" else "lucide:circle"
                     icon_color = "text-yellow-500" if existing_task["priority"] == "urgent" else "text-blue-500"
-                    items.append(
-                        CommandItem(
-                            Icon(icon_name, cls=f"mr-2 h-4 w-4 {icon_color}"),
-                            task_name,
-                            Badge(badge_text, variant=badge_variant, cls="ml-auto"),
-                            value=f"{task_id}_progress",
-                            onclick=f"${task_id}_status = 'completed'",
-                            show=show_condition
-                        )
+                    task_icon = create_task_icon(task_id, icon_name, icon_color)
+                    task_text = existing_task["name"]
+                    task_badge = create_task_badge(existing_task, task_id, status_filter)
+                else:
+                    task_icon = Span(
+                        Icon("lucide:circle", cls="mr-2 h-4 w-4"),
+                        ds_class(**{
+                            "text-yellow-500": f"${task_id}_priority === 'urgent'",
+                            "text-blue-500": f"${task_id}_priority === 'normal'"
+                        })
                     )
-                else:  # Dynamic task
-                    items.append(
-                        CommandItem(
-                            Span(
-                                Icon("lucide:alert-circle", cls="mr-2 h-4 w-4"),
-                                ds_class(**{
-                                    "text-yellow-500": f"${task_id}_priority === 'urgent'",
-                                    "text-blue-500": f"${task_id}_priority === 'normal'"
-                                })
-                            ),
-                            Span(ds_text(f"${task_id}_name")),
-                            Div(
-                                Badge(
-                                    "Urgent",
-                                    ds_show(f"${task_id}_priority === 'urgent'"),
-                                    variant="destructive",
-                                    cls="ml-auto"
-                                ),
-                                Badge(
-                                    "In Progress",
-                                    ds_show(f"${task_id}_priority === 'normal'"),
-                                    variant="default",
-                                    cls="ml-auto"
-                                ),
-                                cls="ml-auto"
-                            ),
-                            value=f"{task_id}_progress",
-                            onclick=f"${task_id}_status = 'completed'",
-                            show=f"${task_id}_visible && ${task_id}_status === 'progress'",
-                        )
+                    task_text = Span(ds_text(f"${task_id}_name"))
+                    task_badge = create_task_badge(None, task_id, status_filter)
+                
+                items.append(
+                    CommandItem(
+                        task_icon,
+                        task_text,
+                        task_badge,
+                        value=f"{task_id}_progress",
+                        onclick=f"${task_id}_status = 'completed'",
+                        show=show_condition
                     )
+                )
                     
             else:  # completed
+                task_icon = Icon("lucide:check-circle", cls="mr-2 h-4 w-4 text-green-500")
+                task_badge = Badge("Done", variant="outline", cls="ml-auto opacity-60")
+                
                 if existing_task:
-                    task_name = existing_task["name"]
-                    show_condition = f"${task_id}_visible && ${task_id}_status === 'completed'"
-                    items.append(
-                        CommandItem(
-                            Icon("lucide:check-circle", cls="mr-2 h-4 w-4 text-green-500"),
-                            Span(task_name, cls="line-through opacity-60"),
-                            Badge("Done", variant="outline", cls="ml-auto opacity-60"),
-                            value=f"{task_id}_completed",
-                            onclick=f"${task_id}_visible = false",
-                            show=show_condition
-                        )
+                    task_text = Span(existing_task["name"], cls="line-through opacity-60")
+                else:
+                    task_text = Span(ds_text(f"${task_id}_name"), cls="line-through opacity-60")
+                
+                items.append(
+                    CommandItem(
+                        task_icon,
+                        task_text,
+                        task_badge,
+                        value=f"{task_id}_completed",
+                        onclick=f"${task_id}_visible = false",
+                        show=show_condition
                     )
-                else:  # Dynamic task
-                    items.append(
-                        CommandItem(
-                            Icon("lucide:check-circle", cls="mr-2 h-4 w-4 text-green-500"),
-                            Span(ds_text(f"${task_id}_name"), cls="line-through opacity-60"),
-                            Badge("Done", variant="outline", cls="ml-auto opacity-60"),
-                            value=f"{task_id}_completed",
-                            onclick=f"${task_id}_visible = false",
-                            show=f"${task_id}_visible && ${task_id}_status === 'completed'",
-                        )
-                    )
+                )
         
         # Add empty state placeholder
         empty_icons = {"pending": "lucide:inbox", "progress": "lucide:clock", "completed": "lucide:check"}
@@ -324,7 +301,6 @@ def examples():
         description="Command component as a task manager with state transitions. Click tasks to move them: Pending → In Progress → Completed. Add new tasks with Enter (use ! prefix for urgent)."
     )
     
-    # Command palette with real actions
     @with_code
     def command_palette_with_actions_example():
         return Div(
@@ -421,7 +397,6 @@ def examples():
         description="Interactive command dialog with real actions: navigation, clipboard operations, and system controls"
     )
     
-    # Compact context menu
     @with_code
     def compact_context_menu_example():
         return Div(

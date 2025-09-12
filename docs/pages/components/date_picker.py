@@ -21,9 +21,6 @@ STATUS = "stable"
 
 
 def examples():
-    """Generate date picker examples using ComponentPreview with tabs."""
-
-    # Date picker with presets
     @with_code
     def date_picker_with_presets_example():
         return Div(
@@ -52,7 +49,6 @@ def examples():
         description="Quick date selection with predefined options",
     )
 
-    # Date range picker
     @with_code
     def date_range_picker_example():
         return Div(
@@ -83,7 +79,6 @@ def examples():
         description="Select a start and end date for filtering or booking",
     )
 
-    # Multiple date selection
     @with_code
     def multiple_date_selection_example():
         return Div(
@@ -124,13 +119,9 @@ def examples():
 
 
 def create_date_picker_docs():
-    """Create date picker documentation page using convention-based approach."""
-
-    # Hero example - single date picker
     @with_code
     def hero_date_picker_example():
         return Div(
-            # All three main variations
             Div(
                 Div(
                     P("Single Date", cls="text-sm font-medium mb-2"),

@@ -24,7 +24,6 @@ from widgets.component_preview import ComponentPreview
 
 
 def examples():
-    """Generate table examples using ComponentPreview with tabs."""
     
     # Basic data table
     @with_code
@@ -72,12 +71,29 @@ def examples():
     signal_id = uuid4().hex[:8]
     @with_code
     def interactive_table_example():
+        def create_task_row(signal, visible_signal, task, priority, variant, date):
+            return TableRow(
+                ds_show(f"${visible_signal}"),
+                TableCell(Checkbox(signal=signal)),
+                TableCell(task),
+                TableCell(Badge(priority, variant=variant)),
+                TableCell(date),
+                TableCell(
+                    Button(
+                        Icon("lucide:edit", cls="h-4 w-4"),
+                        variant="ghost",
+                        size="icon",
+                        onclick="alert('Edit task')"
+                    ),
+                    cls="text-right"
+                )
+            )
         return Div(
             Table(
                 TableHeader(
                     TableRow(
                         TableHead(
-                            Checkbox(signal="selectAll", cls="mr-2"),
+                            Checkbox(signal="select_all", cls="mr-2"),
                             cls="w-12"
                         ),
                         TableHead("Task"),
@@ -87,54 +103,12 @@ def examples():
                     )
                 ),
                 TableBody(
-                    TableRow(
-                        ds_show("$task1Visible"),
-                        TableCell(Checkbox(signal="task1")),
-                        TableCell("Fix login bug"),
-                        TableCell(Badge("High", variant="destructive")),
-                        TableCell("2024-01-15"),
-                        TableCell(
-                            Button(
-                                Icon("lucide:edit", cls="h-4 w-4"),
-                                variant="ghost",
-                                size="icon",
-                                onclick="alert('Edit task')"
-                            ),
-                            cls="text-right"
-                        )
-                    ),
-                    TableRow(
-                        ds_show("$task2Visible"),
-                        TableCell(Checkbox(signal="task2")),
-                        TableCell("Update documentation"),
-                        TableCell(Badge("Medium", variant="secondary")),
-                        TableCell("2024-01-20"),
-                        TableCell(
-                            Button(
-                                Icon("lucide:edit", cls="h-4 w-4"),
-                                variant="ghost",
-                                size="icon",
-                                onclick="alert('Edit task')"
-                            ),
-                            cls="text-right"
-                        )
-                    ),
-                    TableRow(
-                        ds_show("$task3Visible"),
-                        TableCell(Checkbox(signal="task3")),
-                        TableCell("Code review"),
-                        TableCell(Badge("Low", variant="outline")),
-                        TableCell("2024-01-25"),
-                        TableCell(
-                            Button(
-                                Icon("lucide:edit", cls="h-4 w-4"),
-                                variant="ghost",
-                                size="icon",
-                                onclick="alert('Edit task')"
-                            ),
-                            cls="text-right"
-                        )
-                    )
+                    *[create_task_row(signal, visible_signal, task, priority, variant, date)
+                      for signal, visible_signal, task, priority, variant, date in [
+                          ("task1", "task1_visible", "Fix login bug", "High", "destructive", "2024-01-15"),
+                          ("task2", "task2_visible", "Update documentation", "Medium", "secondary", "2024-01-20"),
+                          ("task3", "task3_visible", "Code review", "Low", "outline", "2024-01-25")
+                      ]]
                 )
             ),
             Div(
@@ -145,20 +119,20 @@ def examples():
                   ),
                   " of ",
                   Span(
-                      ds_text("($task1Visible ? 1 : 0) + ($task2Visible ? 1 : 0) + ($task3Visible ? 1 : 0)"),
+                      ds_text("($task1_visible ? 1 : 0) + ($task2_visible ? 1 : 0) + ($task3_visible ? 1 : 0)"),
                       cls="font-bold"
                   ),
                   " remaining"
                 ),
                 Button(
                     "Complete Selected",
-                    ds_on_click("let count = ($task1 ? 1 : 0) + ($task2 ? 1 : 0) + ($task3 ? 1 : 0); if(count > 0) { alert('Completing ' + count + ' task' + (count !== 1 ? 's' : '')); if($task1) { $task1Visible = false; $task1 = false; } if($task2) { $task2Visible = false; $task2 = false; } if($task3) { $task3Visible = false; $task3 = false; } } else { alert('No tasks selected'); }"),
+                    ds_on_click("let count = ($task1 ? 1 : 0) + ($task2 ? 1 : 0) + ($task3 ? 1 : 0); if(count > 0) { alert('Completing ' + count + ' task' + (count !== 1 ? 's' : '')); if($task1) { $task1_visible = false; $task1 = false; } if($task2) { $task2_visible = false; $task2 = false; } if($task3) { $task3_visible = false; $task3 = false; } } else { alert('No tasks selected'); }"),
                     size="sm",
                     cls="mt-2"
                 ),
                 cls="mt-4 p-3 bg-muted rounded text-sm"
             ),
-            ds_signals(selectAll=False, task1=False, task2=False, task3=False, task1Visible=True, task2Visible=True, task3Visible=True),
+            ds_signals(select_all=False, task1=False, task2=False, task3=False, task1_visible=True, task2_visible=True, task3_visible=True),
             cls="space-y-4"
         )
 
@@ -231,7 +205,7 @@ def examples():
                 TableHeader(
                     TableRow(
                         TableHead(
-                            Checkbox(signal="selectAll"),
+                            Checkbox(signal="select_all"),
                             cls="w-12"
                         ),
                         TableHead("Name"),
@@ -242,7 +216,7 @@ def examples():
                 ),
                 TableBody(
                     TableRow(
-                        ds_show("$file1Visible"),
+                        ds_show("$file1_visible"),
                         TableCell(Checkbox(signal="file1")),
                         TableCell(
                             Div(
@@ -264,7 +238,7 @@ def examples():
                         )
                     ),
                     TableRow(
-                        ds_show("$file2Visible"),
+                        ds_show("$file2_visible"),
                         TableCell(Checkbox(signal="file2")),
                         TableCell(
                             Div(
@@ -286,7 +260,7 @@ def examples():
                         )
                     ),
                     TableRow(
-                        ds_show("$file3Visible"),
+                        ds_show("$file3_visible"),
                         TableCell(Checkbox(signal="file3")),
                         TableCell(
                             Div(
@@ -317,7 +291,7 @@ def examples():
                   ),
                   " of ",
                   Span(
-                      ds_text("($file1Visible ? 1 : 0) + ($file2Visible ? 1 : 0) + ($file3Visible ? 1 : 0)"),
+                      ds_text("($file1_visible ? 1 : 0) + ($file2_visible ? 1 : 0) + ($file3_visible ? 1 : 0)"),
                       cls="font-bold"
                   ),
                   " files",
@@ -325,14 +299,14 @@ def examples():
                 ),
                 Button(
                     "Delete Selected",
-                    ds_on_click("let count = ($file1 ? 1 : 0) + ($file2 ? 1 : 0) + ($file3 ? 1 : 0); if(count > 0) { alert('Deleting ' + count + ' selected file' + (count > 1 ? 's' : '')); if($file1) { $file1Visible = false; $file1 = false; } if($file2) { $file2Visible = false; $file2 = false; } if($file3) { $file3Visible = false; $file3 = false; } } else { alert('No files selected'); }"),
+                    ds_on_click("let count = ($file1 ? 1 : 0) + ($file2 ? 1 : 0) + ($file3 ? 1 : 0); if(count > 0) { alert('Deleting ' + count + ' selected file' + (count > 1 ? 's' : '')); if($file1) { $file1_visible = false; $file1 = false; } if($file2) { $file2_visible = false; $file2 = false; } if($file3) { $file3_visible = false; $file3 = false; } } else { alert('No files selected'); }"),
                     variant="destructive",
                     size="sm",                    
                     cls="mt-2"
                 ),
                 cls="mt-4 p-3 bg-muted rounded"
             ),
-            ds_signals(selectAll=False, file1=False, file2=False, file3=False, file1Visible=True, file2Visible=True, file3Visible=True),
+            ds_signals(select_all=False, file1=False, file2=False, file3=False, file1_visible=True, file2_visible=True, file3_visible=True),
             cls="space-y-4"
         )
 
@@ -490,7 +464,6 @@ def examples():
 
 
 def create_table_docs():
-    """Create table documentation page using convention-based approach."""
     from utils import auto_generate_page
     
     # For Table, users benefit from understanding the building blocks

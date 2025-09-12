@@ -1,5 +1,4 @@
 from typing import Any
-from uuid import uuid4
 
 from starhtml import FT, Div, Icon
 from starhtml import Input as HTMLInput
@@ -8,7 +7,7 @@ from starhtml import P as HTMLP
 from starhtml import Span as HTMLSpan
 from starhtml.datastar import ds_bind, ds_class, ds_signals, toggle_class
 
-from .utils import cn
+from .utils import cn, gen_id, ensure_signal
 
 
 def Checkbox(
@@ -22,7 +21,7 @@ def Checkbox(
     indicator_cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    signal = signal or f"checkbox_{str(uuid4())[:8]}"
+    signal = ensure_signal(signal, "checkbox")
 
     return Div(
         HTMLInput(
@@ -71,6 +70,7 @@ def CheckboxWithLabel(
     name: str | None = None,
     value: str | None = None,
     signal: str | None = None,
+    id: str | None = None,
     helper_text: str | None = None,
     error_text: str | None = None,
     disabled: bool = False,
@@ -81,7 +81,7 @@ def CheckboxWithLabel(
     indicator_cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    checkbox_id = f"checkbox_{str(uuid4())[:8]}"
+    checkbox_id = id or gen_id("checkbox")
 
     return Div(
         Div(

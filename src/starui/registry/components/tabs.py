@@ -35,7 +35,7 @@ def Tabs(
     )
 
 
-def TabsList(*children, class_name: str = "", cls: str = "", **kwargs) -> FT:
+def TabsList(*children, cls: str = "", **kwargs) -> FT:
     def create_list(signal, default_id=None, variant="default"):
         processed_children = [
             child(signal, default_id, variant) if callable(child) else child
@@ -50,7 +50,7 @@ def TabsList(*children, class_name: str = "", cls: str = "", **kwargs) -> FT:
         return Div(
             *processed_children,
             data_slot="tabs-list",
-            cls=cn(base_classes, class_name, cls),
+            cls=cn(base_classes, cls),
             role="tablist",
             **kwargs,
         )
@@ -62,7 +62,6 @@ def TabsTrigger(
     *children,
     id: str,
     disabled: bool = False,
-    class_name: str = "",
     cls: str = "",
     **kwargs,
 ) -> FT:
@@ -94,21 +93,18 @@ def TabsTrigger(
             cls=cn(
                 base,
                 variant_styles[variant],
-                class_name,
                 cls,
             ),
             data_state="active" if is_active else "inactive",
-            **{
-                "data-attr-data-state": f"${signal} === '{id}' ? 'active' : 'inactive'",
-                "data-attr-aria-selected": f"${signal} === '{id}'",
-                **kwargs,
-            },
+            data_slot="tabs-trigger",
+            data_attr_data_state=f"${signal} === '{id}' ? 'active' : 'inactive'",
+            data_attr_aria_selected=f"${signal} === '{id}'",            
         )
 
     return create_trigger
 
 
-def TabsContent(*children, id: str, class_name: str = "", cls: str = "", **kwargs) -> FT:
+def TabsContent(*children, id: str, cls: str = "", **kwargs) -> FT:
     def create_content(signal, default_id=None, variant="default"):
         return Div(
             *children,
@@ -118,7 +114,7 @@ def TabsContent(*children, id: str, class_name: str = "", cls: str = "", **kwarg
             id=f"panel-{id}",
             aria_labelledby=id,
             tabindex="0",
-            cls=cn("mt-2 outline-none overflow-x-auto", class_name, cls),
+            cls=cn("mt-2 outline-none overflow-x-auto", cls),
             style=None if default_id == id else "display: none",
             **kwargs,
         )

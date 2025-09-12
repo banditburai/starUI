@@ -26,7 +26,6 @@ from widgets.component_preview import ComponentPreview
 
 
 def examples():
-    """Generate textarea examples using ComponentPreview with tabs."""
     
     # Basic usage
     @with_code
@@ -209,6 +208,14 @@ def examples():
     # Comment box with live markdown preview
     @with_code
     def comment_box_live_preview_example():
+        def create_format_button(icon, action, title):
+            return HTMLButton(
+                Icon(icon, cls="h-4 w-4"),
+                ds_on_click(action),
+                type="button",
+                title=title,
+                cls="p-2 rounded-md hover:bg-accent transition-colors border"
+            )
         return Div(
             Card(
                 CardHeader(
@@ -317,48 +324,12 @@ def examples():
                             # Formatting toolbar
                             Div(
                                 Div(
-                                    HTMLButton(
-                                        Icon("lucide:bold", cls="h-4 w-4"),
-                                        ds_on_click("applyFormatting('**', '**', 'bold text')"),
-                                        type="button",
-                                        title="Bold (Ctrl+B)",
-                                        cls="p-2 rounded-md hover:bg-accent transition-colors border"
-                                    ),
-                                    HTMLButton(
-                                        Icon("lucide:italic", cls="h-4 w-4"),
-                                        ds_on_click("applyFormatting('*', '*', 'italic text')"),
-                                        type="button",
-                                        title="Italic (Ctrl+I)",
-                                        cls="p-2 rounded-md hover:bg-accent transition-colors border"
-                                    ),
-                                    HTMLButton(
-                                        Icon("lucide:link", cls="h-4 w-4"),
-                                        ds_on_click("applyFormatting('[', '](https://example.com)', 'link text', 'link')"),
-                                        type="button",
-                                        title="Insert Link",
-                                        cls="p-2 rounded-md hover:bg-accent transition-colors border"
-                                    ),
-                                    HTMLButton(
-                                        Icon("lucide:code", cls="h-4 w-4"),
-                                        ds_on_click("applyFormatting('`', '`', 'code')"),
-                                        type="button",
-                                        title="Inline Code",
-                                        cls="p-2 rounded-md hover:bg-accent transition-colors border"
-                                    ),
-                                    HTMLButton(
-                                        Icon("lucide:list", cls="h-4 w-4"),
-                                        ds_on_click("applyListFormatting('- ')"),
-                                        type="button",
-                                        title="Bullet List",
-                                        cls="p-2 rounded-md hover:bg-accent transition-colors border"
-                                    ),
-                                    HTMLButton(
-                                        Icon("lucide:quote", cls="h-4 w-4"),
-                                        ds_on_click("applyListFormatting('> ', 'Quote text')"),
-                                        type="button",
-                                        title="Quote",
-                                        cls="p-2 rounded-md hover:bg-accent transition-colors border"
-                                    ),
+                                    create_format_button("lucide:bold", "applyFormatting('**', '**', 'bold text')", "Bold (Ctrl+B)"),
+                                    create_format_button("lucide:italic", "applyFormatting('*', '*', 'italic text')", "Italic (Ctrl+I)"),
+                                    create_format_button("lucide:link", "applyFormatting('[', '](https://example.com)', 'link text', 'link')", "Insert Link"),
+                                    create_format_button("lucide:code", "applyFormatting('`', '`', 'code')", "Inline Code"),
+                                    create_format_button("lucide:list", "applyListFormatting('- ')", "Bullet List"),
+                                    create_format_button("lucide:quote", "applyListFormatting('> ', 'Quote text')", "Quote"),
                                     cls="flex gap-1"
                                 ),
                                 P(
@@ -700,6 +671,13 @@ def examples():
     # Email template composer
     @with_code
     def email_template_composer_example():
+        def create_variable_button(var_name):
+            return HTMLButton(
+                f"{{{{{{var_name}}}}}}",
+                ds_on_click(f"insertVariable('{var_name}')"),
+                type="button",
+                cls="px-2 py-1 text-xs bg-muted hover:bg-accent rounded border"
+            )
         return Card(
             CardHeader(
                 CardTitle("Email Template Composer"),
@@ -783,30 +761,10 @@ def examples():
                     Div(
                         P("Quick Variables:", cls="text-sm font-medium mb-2"),
                         Div(
-                            HTMLButton(
-                                "{{first_name}}",
-                                ds_on_click("insertVariable('first_name')"),
-                                type="button",
-                                cls="px-2 py-1 text-xs bg-muted hover:bg-accent rounded border"
-                            ),
-                            HTMLButton(
-                                "{{last_name}}",
-                                ds_on_click("insertVariable('last_name')"),
-                                type="button",
-                                cls="px-2 py-1 text-xs bg-muted hover:bg-accent rounded border"
-                            ),
-                            HTMLButton(
-                                "{{company_name}}",
-                                ds_on_click("insertVariable('company_name')"),
-                                type="button",
-                                cls="px-2 py-1 text-xs bg-muted hover:bg-accent rounded border"
-                            ),
-                            HTMLButton(
-                                "{{sender_name}}",
-                                ds_on_click("insertVariable('sender_name')"),
-                                type="button",
-                                cls="px-2 py-1 text-xs bg-muted hover:bg-accent rounded border"
-                            ),
+                            create_variable_button("first_name"),
+                            create_variable_button("last_name"),
+                            create_variable_button("company_name"),
+                            create_variable_button("sender_name"),
                             cls="flex flex-wrap gap-2"
                         ),
                         cls="p-3 border rounded-md bg-muted/30 mb-4"
@@ -878,7 +836,6 @@ def examples():
 
 
 def create_textarea_docs():
-    """Create textarea documentation page using convention-based approach."""
     
     # For Textarea, users need the key props they will set most often.
     api_reference = build_api_reference(

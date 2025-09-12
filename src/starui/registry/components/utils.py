@@ -1,5 +1,7 @@
 from collections.abc import Callable
 from typing import Any
+import json
+from uuid import uuid4
 from starhtml import Div
 
 def cn(*classes: Any) -> str:
@@ -80,4 +82,18 @@ def inject_signal_recursively(element, signal, *args):
         case _:
             return element
 
+
+def gen_id(prefix: str) -> str:
+    """Generate a short, unique id with a given prefix."""
+    return f"{prefix}_{uuid4().hex[:8]}"
+
+
+def ensure_signal(signal: str | None, prefix: str) -> str:
+    """Return the provided signal or generate one with the prefix."""
+    return signal or gen_id(prefix)
+
+
+def js_literal(value: str) -> str:
+    """Return a JSON-encoded JS string literal for safe embedding in JS expressions."""
+    return json.dumps(value)
 

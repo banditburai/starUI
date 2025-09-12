@@ -15,28 +15,22 @@ def Sheet(
     signal: str,
     modal: bool = True,
     default_open: bool = False,
-    class_name: str = "",
     cls: str = "",
     **kwargs,
 ) -> FT:
     signal_open = f"{signal}_open"
 
-    scroll_lock = (
-        Div(ds_effect(f"document.body.style.overflow = ${signal_open} ? 'hidden' : ''"))
-        if modal
-        else None
-    )
+    scroll_lock = Div(ds_effect(f"document.body.style.overflow = ${signal_open} ? 'hidden' : ''")) if modal else None
 
     return Div(
         *children,
         ds_signals(**{signal_open: default_open}),
-        ds_on_keydown(f"evt.key === 'Escape' && (${signal_open} = false)", "window")
-        if modal
-        else None,
+        ds_on_keydown(f"evt.key === 'Escape' && (${signal_open} = false)", "window") if modal else None,
         scroll_lock,
+        data_slot="sheet",
         data_sheet_root=signal,
         data_state=t("{signal_open} ? 'open' : 'closed'"),
-        cls=cn("relative", class_name, cls),
+        cls=cn("relative", cls),
         **kwargs,
     )
 
@@ -45,25 +39,23 @@ def SheetTrigger(
     *children,
     signal: str,
     variant: str = "outline",
-    class_name: str = "",
     cls: str = "",
     **kwargs,
 ) -> FT:
     from .button import Button
 
     signal_open = f"{signal}_open"
-    content_id = f"{signal}-content"
-
+    content_id = f"{signal}_content"
     return Button(
         *children,
         ds_on_click(f"${signal_open} = true"),
-        id=f"{signal}-trigger",
+        id=f"{signal}_trigger",
         aria_expanded=t("{signal_open}"),
         aria_haspopup="dialog",
         aria_controls=content_id,
-        data_sheet_role="trigger",
+        data_slot="sheet-trigger",
         variant=variant,
-        cls=cn(class_name, cls),
+        cls=cls,
         **kwargs,
     )
 
@@ -75,12 +67,11 @@ def SheetContent(
     size: SheetSize = "sm",
     modal: bool = True,
     show_close: bool = True,
-    class_name: str = "",
     cls: str = "",
     **kwargs,
 ) -> FT:
     signal_open = f"{signal}_open"
-    content_id = f"{signal}-content"
+    content_id = f"{signal}_content"
 
     side_classes = {
         "right": "inset-y-0 right-0 h-full border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right",
@@ -102,17 +93,11 @@ def SheetContent(
     )
 
     close_button = (
-        (
-            SheetClose(
-                Span(
-                    "×",
-                    aria_hidden="true",
-                    cls="text-2xl font-light leading-none -mt-0.5",
-                ),
-                signal=signal,
-                size="icon",
-                cls="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary",
-            )
+        SheetClose(
+            Span("×", aria_hidden="true", cls="text-2xl font-light leading-none -mt-0.5"),
+            signal=signal,
+            size="icon",
+            cls="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary",
         )
         if show_close
         else None
@@ -124,8 +109,8 @@ def SheetContent(
             ds_on_click(f"${signal_open} = false"),
             data_state=t("{signal_open} ? 'open' : 'closed'"),
             cls="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm animate-in fade-in-0",
-            data_sheet_role="overlay",
-            style="display: none;",  # Initial state to prevent flash
+            data_slot="sheet-overlay",
+            style="display: none;",
         )
         if modal
         else None
@@ -141,7 +126,7 @@ def SheetContent(
         aria_labelledby=f"{content_id}-title",
         aria_describedby=f"{content_id}-description",
         data_state=t("{signal_open} ? 'open' : 'closed'"),
-        data_sheet_role="content",
+        data_slot="sheet-content",
         cls=cn(
             "fixed z-[110] bg-background shadow-lg border flex flex-col",
             "transition-all duration-300 ease-in-out",
@@ -150,14 +135,13 @@ def SheetContent(
             side_classes.get(side, ""),
             size_classes.get(size, ""),
             "overflow-y-auto",
-            class_name,
             cls,
         ),
-        style="display: none;",  # Initial state to prevent flash
+        style="display: none;",
         **kwargs,
     )
 
-    return Div(overlay, content_panel, data_sheet_role="content-wrapper")
+    return Div(overlay, content_panel, data_slot="sheet-content-wrapper")
 
 
 def SheetClose(
@@ -165,41 +149,38 @@ def SheetClose(
     signal: str,
     variant: str = "ghost",
     size: str = "sm",
-    class_name: str = "",
     cls: str = "",
     **kwargs,
 ) -> FT:
     from .button import Button
 
     signal_open = f"{signal}_open"
-
     return Button(
         *children,
         ds_on_click(f"${signal_open} = false"),
-        data_sheet_role="close",
+        data_slot="sheet-close",
         variant=variant,
         size=size,
-        cls=cn(class_name, cls),
+        cls=cls,
         **kwargs,
     )
 
 
-def SheetHeader(*children, class_name: str = "", cls: str = "", **kwargs) -> FT:
+def SheetHeader(*children, cls: str = "", **kwargs) -> FT:
     return Div(
         *children,
-        data_sheet_role="header",
-        cls=cn("flex flex-col space-y-1.5 p-6", class_name, cls),
+        data_slot="sheet-header",
+        cls=cn("flex flex-col space-y-1.5 p-6", cls),
         **kwargs,
     )
 
 
-def SheetFooter(*children, class_name: str = "", cls: str = "", **kwargs) -> FT:
+def SheetFooter(*children, cls: str = "", **kwargs) -> FT:
     return Div(
         *children,
-        data_sheet_role="footer",
+        data_slot="sheet-footer",
         cls=cn(
             "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 p-6",
-            class_name,
             cls,
         ),
         **kwargs,
@@ -207,28 +188,26 @@ def SheetFooter(*children, class_name: str = "", cls: str = "", **kwargs) -> FT:
 
 
 def SheetTitle(
-    *children, signal: str, class_name: str = "", cls: str = "", **kwargs
+    *children, signal: str, cls: str = "", **kwargs
 ) -> FT:
-    content_id = f"{signal}-content"
-
+    content_id = f"{signal}_content"
     return HTMLH2(
         *children,
         id=f"{content_id}-title",
-        data_sheet_role="title",
-        cls=cn("text-lg font-semibold text-foreground", class_name, cls),
+        data_slot="sheet-title",
+        cls=cn("text-lg font-semibold text-foreground", cls),
         **kwargs,
     )
 
 
 def SheetDescription(
-    *children, signal: str, class_name: str = "", cls: str = "", **kwargs
+    *children, signal: str, cls: str = "", **kwargs
 ) -> FT:
-    content_id = f"{signal}-content"
-
+    content_id = f"{signal}_content"
     return P(
         *children,
         id=f"{content_id}-description",
-        data_sheet_role="description",
-        cls=cn("text-sm text-muted-foreground", class_name, cls),
+        data_slot="sheet-description",
+        cls=cn("text-sm text-muted-foreground", cls),
         **kwargs,
     )

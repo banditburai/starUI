@@ -5,7 +5,7 @@ from starhtml import FT, Div
 from starhtml import Button as HTMLButton
 from starhtml.datastar import ds_on_click, ds_signals, toggle_signal
 
-from .utils import cn, cva
+from .utils import cn, cva, ensure_signal, gen_id
 
 ToggleVariant = Literal["default", "outline"]
 ToggleSize = Literal["default", "sm", "lg"]
@@ -38,15 +38,14 @@ def Toggle(
     variant: ToggleVariant = "default",
     size: ToggleSize = "default",
     pressed: bool = False,
-    signal: str = "",
+    signal: str | None = None,
     disabled: bool = False,
     aria_label: str | None = None,
-    class_name: str = "",
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    signal = signal or f"toggle_{str(uuid4())[:8]}"
-    toggle_id = kwargs.pop("id", f"toggle_{str(uuid4())[:8]}")
+    signal = ensure_signal(signal, "toggle")
+    toggle_id = kwargs.pop("id", gen_id("toggle"))
 
     return Div(
         HTMLButton(
@@ -58,11 +57,10 @@ def Toggle(
             aria_label=aria_label,
             aria_pressed=str(pressed).lower(),
             data_slot="toggle",
-            data_attr_aria_pressed=f"${signal}.toString()",
+            data_attr_aria_pressed=f"${signal} ? 'true' : 'false'",
             data_attr_data_state=f"${signal} ? 'on' : 'off'",
             cls=cn(
                 toggle_variants(variant=variant, size=size),
-                class_name,
                 cls,
             ),
             **kwargs,

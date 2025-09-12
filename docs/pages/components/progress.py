@@ -25,7 +25,6 @@ from widgets.component_preview import ComponentPreview
 
 
 def examples():
-    """Generate progress examples using ComponentPreview with tabs."""
     
     # Interactive progress control
     @with_code
@@ -205,6 +204,24 @@ def examples():
     # Battery status indicator
     @with_code
     def system_monitoring_example():
+        def create_metric(icon, color, label, value_text, progress_val, note=None, with_separator=False):
+            items = [
+                Div(
+                    Div(
+                        Icon(icon, cls=f"h-5 w-5 text-{color}-500 mr-3"),
+                        P(label, cls="font-medium"),
+                        Span(value_text, cls="text-sm font-mono ml-auto"),
+                        cls="flex items-center"
+                    ),
+                    Progress(progress_value=progress_val, cls="h-2"),
+                    P(note, cls="text-xs text-muted-foreground mt-1") if note else None,
+                    cls="space-y-2"
+                )
+            ]
+            if with_separator:
+                items.insert(0, Separator(cls="my-3"))
+            return items
+        
         return Card(
             CardHeader(
                 CardTitle("Device Status"),
@@ -212,49 +229,13 @@ def examples():
             ),
             CardContent(
                 Div(
-                    Div(
-                        Div(
-                            Icon("lucide:battery-charging", cls="h-5 w-5 text-green-500 mr-3"),
-                            P("Battery", cls="font-medium"),
-                            Span("87%", cls="text-sm font-mono ml-auto"),
-                            cls="flex items-center"
-                        ),
-                        Progress(progress_value=87, cls="h-2"),
-                        P("Charging • 23 min to full", cls="text-xs text-muted-foreground mt-1"),
-                        cls="space-y-2"
-                    ),
-                    Separator(cls="my-3"),
-                    Div(
-                        Div(
-                            Icon("lucide:cpu", cls="h-5 w-5 text-blue-500 mr-3"),
-                            P("CPU Usage", cls="font-medium"),
-                            Span("42%", cls="text-sm font-mono ml-auto"),
-                            cls="flex items-center"
-                        ),
-                        Progress(progress_value=42, cls="h-2"),
-                        cls="space-y-2"
-                    ),
-                    Div(
-                        Div(
-                            Icon("lucide:hard-drive", cls="h-5 w-5 text-purple-500 mr-3"),
-                            P("Memory", cls="font-medium"),
-                            Span("6.8/16 GB", cls="text-sm font-mono ml-auto"),
-                            cls="flex items-center"
-                        ),
-                        Progress(progress_value=42.5, cls="h-2"),
-                        cls="space-y-2"
-                    ),
-                    Div(
-                        Div(
-                            Icon("lucide:thermometer", cls="h-5 w-5 text-orange-500 mr-3"),
-                            P("Temperature", cls="font-medium"),
-                            Span("65°C", cls="text-sm font-mono ml-auto"),
-                            cls="flex items-center"
-                        ),
-                        Progress(progress_value=65, cls="h-2"),
-                        P("Normal operating range", cls="text-xs text-muted-foreground mt-1"),
-                        cls="space-y-2"
-                    ),
+                    *create_metric("lucide:battery-charging", "green", "Battery", "87%", 87, 
+                                  "Charging • 23 min to full"),
+                    *create_metric("lucide:cpu", "blue", "CPU Usage", "42%", 42, 
+                                  with_separator=True),
+                    *create_metric("lucide:hard-drive", "purple", "Memory", "6.8/16 GB", 42.5),
+                    *create_metric("lucide:thermometer", "orange", "Temperature", "65°C", 65, 
+                                  "Normal operating range"),
                     cls="space-y-3"
                 )
             ),
@@ -350,9 +331,30 @@ def examples():
         description="Download progress with speed and time remaining"
     )
     
-    # Storage usage
     @with_code
     def storage_usage_example():
+        storage_categories = [
+            ("blue-500", "Documents", "24.2 GB", 24.2),
+            ("green-500", "Photos", "18.6 GB", 18.6),
+            ("purple-500", "Videos", "15.8 GB", 15.8),
+            ("orange-500", "Other", "9.8 GB", 9.8)
+        ]
+        
+        def create_storage_item(color, category, size, value):
+            return Div(
+                Div(
+                    Div(
+                        Div(cls=f"w-3 h-3 bg-{color} rounded-full"),
+                        P(category, cls="text-sm"),
+                        cls="flex items-center gap-2"
+                    ),
+                    P(size, cls="text-sm text-muted-foreground"),
+                    cls="flex items-center justify-between"
+                ),
+                Progress(progress_value=value, max_value=100, cls="h-1"),
+                cls="space-y-2"
+            )
+        
         return Card(
             CardHeader(
                 CardTitle("Storage Usage"),
@@ -376,58 +378,8 @@ def examples():
                         cls="space-y-2"
                     ),
                     Separator(cls="my-4"),
-                    Div(
-                        Div(
-                            Div(
-                                Div(cls="w-3 h-3 bg-blue-500 rounded-full"),
-                                P("Documents", cls="text-sm"),
-                                cls="flex items-center gap-2"
-                            ),
-                            P("24.2 GB", cls="text-sm text-muted-foreground"),
-                            cls="flex items-center justify-between"
-                        ),
-                        Progress(progress_value=24.2, max_value=100, cls="h-1"),
-                        cls="space-y-2"
-                    ),
-                    Div(
-                        Div(
-                            Div(
-                                Div(cls="w-3 h-3 bg-green-500 rounded-full"),
-                                P("Photos", cls="text-sm"),
-                                cls="flex items-center gap-2"
-                            ),
-                            P("18.6 GB", cls="text-sm text-muted-foreground"),
-                            cls="flex items-center justify-between"
-                        ),
-                        Progress(progress_value=18.6, max_value=100, cls="h-1"),
-                        cls="space-y-2"
-                    ),
-                    Div(
-                        Div(
-                            Div(
-                                Div(cls="w-3 h-3 bg-purple-500 rounded-full"),
-                                P("Videos", cls="text-sm"),
-                                cls="flex items-center gap-2"
-                            ),
-                            P("15.8 GB", cls="text-sm text-muted-foreground"),
-                            cls="flex items-center justify-between"
-                        ),
-                        Progress(progress_value=15.8, max_value=100, cls="h-1"),
-                        cls="space-y-2"
-                    ),
-                    Div(
-                        Div(
-                            Div(
-                                Div(cls="w-3 h-3 bg-orange-500 rounded-full"),
-                                P("Other", cls="text-sm"),
-                                cls="flex items-center gap-2"
-                            ),
-                            P("9.8 GB", cls="text-sm text-muted-foreground"),
-                            cls="flex items-center justify-between"
-                        ),
-                        Progress(progress_value=9.8, max_value=100, cls="h-1"),
-                        cls="space-y-2"
-                    ),
+                    *[create_storage_item(color, category, size, value)
+                      for color, category, size, value in storage_categories],
                     Button(
                         Icon("lucide:hard-drive", cls="h-4 w-4 mr-2"),
                         "Manage Storage",
@@ -527,7 +479,6 @@ def examples():
 
 
 def create_progress_docs():
-    """Create progress documentation page using convention-based approach."""
     
     # Intentional API: users mostly set value, max, signal, and height (cls)
     api_reference = build_api_reference(

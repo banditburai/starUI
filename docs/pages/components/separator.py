@@ -20,7 +20,6 @@ from widgets.component_preview import ComponentPreview
 
 
 def examples():
-    """Generate separator examples using ComponentPreview with tabs."""
     
     # Card content separation
     @with_code
@@ -231,33 +230,25 @@ def examples():
     # Custom styled separators
     @with_code
     def custom_styling_example():
+        separator_styles = [
+            ("Default separator", ""),
+            ("Thick separator", "h-0.5 bg-muted-foreground"),
+            ("Colored separator", "bg-blue-500"),
+            ("Dashed separator", "border-t border-dashed border-muted-foreground bg-transparent h-0"),
+            ("Gradient separator", "bg-gradient-to-r from-transparent via-muted-foreground to-transparent")
+        ]
+        
+        def create_separator_demo(label, separator_cls, is_last=False):
+            return Div(
+                P(label, cls="text-center text-sm text-muted-foreground mb-2"),
+                Separator(cls=separator_cls) if separator_cls else Separator(),
+                cls="" if is_last else "mb-6"
+            )
+        
         return Div(
             H4("Custom Separator Styles", cls="text-center mb-6"),
-            Div(
-                P("Default separator", cls="text-center text-sm text-muted-foreground mb-2"),
-                Separator(),
-                cls="mb-6"
-            ),
-            Div(
-                P("Thick separator", cls="text-center text-sm text-muted-foreground mb-2"),
-                Separator(cls="h-0.5 bg-muted-foreground"),
-                cls="mb-6"
-            ),
-            Div(
-                P("Colored separator", cls="text-center text-sm text-muted-foreground mb-2"),
-                Separator(cls="bg-blue-500"),
-                cls="mb-6"
-            ),
-            Div(
-                P("Dashed separator", cls="text-center text-sm text-muted-foreground mb-2"),
-                Separator(cls="border-t border-dashed border-muted-foreground bg-transparent h-0"),
-                cls="mb-6"
-            ),
-            Div(
-                P("Gradient separator", cls="text-center text-sm text-muted-foreground mb-2"),
-                Separator(cls="bg-gradient-to-r from-transparent via-muted-foreground to-transparent"),
-                cls=""
-            ),
+            *[create_separator_demo(label, cls_val, i == len(separator_styles) - 1) 
+              for i, (label, cls_val) in enumerate(separator_styles)],
             cls="max-w-md mx-auto p-6 border rounded-lg"
         )
 
@@ -270,7 +261,6 @@ def examples():
 
 
 def create_separator_docs():
-    """Create separator documentation page using convention-based approach."""
     
     # Hero example showcasing both orientations
     @with_code

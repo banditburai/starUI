@@ -11,8 +11,8 @@ ORDER = 40
 STATUS = "stable"
 
 from starhtml import Div, P, H3, H4, Span, Icon, Label, Input
-from starhtml.datastar import ds_signals, ds_on_click, ds_text, ds_show, value, ds_bind, ds_class, toggle_signal
-from starui.registry.components.toggle_group import ToggleGroup, SingleToggleGroup, MultipleToggleGroup
+from starhtml.datastar import ds_signals, ds_on_click, ds_text, ds_show, value, ds_bind, ds_class, toggle_signal, ds_disabled, slot_attrs, ds_attr
+from starui.registry.components.toggle_group import ToggleGroup
 from starui.registry.components.button import Button
 from starui.registry.components.separator import Separator
 from widgets.component_preview import ComponentPreview
@@ -20,18 +20,18 @@ from utils import auto_generate_page, with_code, Component, Prop, build_api_refe
 
 
 def examples():
-    """Generate toggle group examples using ComponentPreview with tabs."""
     
     # Text formatting toolbar
     @with_code
     def text_formatting_toolbar_example():
         return Div(
             P("Text Formatting", cls="font-medium mb-4"),
-            SingleToggleGroup(
+            ToggleGroup(                
                 ("bold", Icon("lucide:bold", cls="w-4 h-4")),
                 ("italic", Icon("lucide:italic", cls="w-4 h-4")),
                 ("underline", Icon("lucide:underline", cls="w-4 h-4")),
                 ("strikethrough", Icon("lucide:strikethrough", cls="w-4 h-4")),
+                type="single",
                 variant="outline",
                 signal="formatting"
             ),
@@ -55,11 +55,13 @@ def examples():
     def view_mode_switcher_example():
         return Div(
             P("View Mode", cls="font-medium mb-4"),
-            SingleToggleGroup(
+            ToggleGroup(                
                 ("grid", Div(Icon("lucide:grid-3x3", cls="w-4 h-4"), "Grid", cls="flex items-center gap-2")),
                 ("list", Div(Icon("lucide:list", cls="w-4 h-4"), "List", cls="flex items-center gap-2")),
                 ("card", Div(Icon("lucide:layout-grid", cls="w-4 h-4"), "Card", cls="flex items-center gap-2")),
-                signal="view_mode"
+                type="single",
+                signal="view_mode",
+                initial_value="grid"
             ),
             
             # Content area that changes based on selection
@@ -118,11 +120,12 @@ def examples():
     def multi_select_filters_example():
         return Div(
             P("Filter Options", cls="font-medium mb-4"),
-            MultipleToggleGroup(
+            ToggleGroup(
                 ("featured", Div(Icon("lucide:star", cls="w-4 h-4"), "Featured", cls="flex items-center gap-2")),
                 ("sale", Div(Icon("lucide:percent", cls="w-4 h-4"), "On Sale", cls="flex items-center gap-2")),
                 ("new", Div(Icon("lucide:sparkles", cls="w-4 h-4"), "New", cls="flex items-center gap-2")),
                 ("popular", Div(Icon("lucide:trending-up", cls="w-4 h-4"), "Popular", cls="flex items-center gap-2")),
+                type="multiple",
                 variant="outline",
                 signal="filters"
             ),
@@ -154,10 +157,11 @@ def examples():
             # Small size
             Div(
                 P("Small", cls="text-sm font-medium mb-3"),
-                SingleToggleGroup(
+                ToggleGroup(
                     ("sm1", "One"),
                     ("sm2", "Two"), 
                     ("sm3", "Three"),
+                    type="single",
                     size="sm",
                     signal="small_group"
                 ),
@@ -167,10 +171,11 @@ def examples():
             # Default size
             Div(
                 P("Default", cls="text-sm font-medium mb-3"),
-                SingleToggleGroup(
+                ToggleGroup(
                     ("def1", "One"),
                     ("def2", "Two"),
                     ("def3", "Three"),
+                    type="single",
                     signal="default_group"
                 ),
                 cls="mb-6"
@@ -179,10 +184,11 @@ def examples():
             # Large size
             Div(
                 P("Large", cls="text-sm font-medium mb-3"),
-                SingleToggleGroup(
+                ToggleGroup(
                     ("lg1", "One"),
                     ("lg2", "Two"),
                     ("lg3", "Three"),
+                    type="single",
                     size="lg",
                     signal="large_group"
                 ),
@@ -204,11 +210,12 @@ def examples():
     def editor_controls_example():
         return Div(
             P("Text Alignment", cls="font-medium mb-4"),
-            SingleToggleGroup(
+            ToggleGroup(                
                 ("left", Icon("lucide:align-left", cls="w-4 h-4")),
                 ("center", Icon("lucide:align-center", cls="w-4 h-4")),
                 ("right", Icon("lucide:align-right", cls="w-4 h-4")),
                 ("justify", Icon("lucide:align-justify", cls="w-4 h-4")),
+                type="single",
                 variant="outline",
                 signal="alignment"
             ),
@@ -216,10 +223,11 @@ def examples():
             Separator(cls="my-6"),
             
             P("Text Decoration", cls="font-medium mb-4"),
-            MultipleToggleGroup(
+            ToggleGroup(                
                 ("bold", Icon("lucide:bold", cls="w-4 h-4")),
                 ("italic", Icon("lucide:italic", cls="w-4 h-4")),
                 ("underline", Icon("lucide:underline", cls="w-4 h-4")),
+                type="multiple",
                 signal="decoration"
             ),
             
@@ -258,10 +266,11 @@ def examples():
             # Default variant
             Div(
                 P("Default Variant", cls="text-sm font-medium mb-3"),
-                SingleToggleGroup(
+                ToggleGroup(                    
                     ("option1", "Option 1"),
                     ("option2", "Option 2"),
                     ("option3", "Option 3"),
+                    type="single",
                     variant="default",
                     signal="default_variant"
                 ),
@@ -271,10 +280,11 @@ def examples():
             # Outline variant
             Div(
                 P("Outline Variant", cls="text-sm font-medium mb-3"),
-                SingleToggleGroup(
+                ToggleGroup(                    
                     ("option1", "Option 1"),
                     ("option2", "Option 2"),
                     ("option3", "Option 3"),
+                    type="single",
                     variant="outline",
                     signal="outline_variant"
                 ),
@@ -284,10 +294,11 @@ def examples():
             # Mixed with icons
             Div(
                 P("With Icons", cls="text-sm font-medium mb-3"),
-                SingleToggleGroup(
+                ToggleGroup(                    
                     ("home", Div(Icon("lucide:home", cls="w-4 h-4"), "Home", cls="flex items-center gap-2")),
                     ("settings", Div(Icon("lucide:settings", cls="w-4 h-4"), "Settings", cls="flex items-center gap-2")),
                     ("profile", Div(Icon("lucide:user", cls="w-4 h-4"), "Profile", cls="flex items-center gap-2")),
+                    type="single",
                     variant="outline",
                     signal="icon_variant"
                 ),
@@ -313,10 +324,11 @@ def examples():
             # Communication methods
             Div(
                 Label("Communication Methods:", cls="text-sm font-medium mb-2 block"),
-                MultipleToggleGroup(
+                ToggleGroup(                    
                     ("email", Div(Icon("lucide:mail", cls="w-4 h-4"), "Email", cls="flex items-center gap-2")),
                     ("sms", Div(Icon("lucide:message-square", cls="w-4 h-4"), "SMS", cls="flex items-center gap-2")),
                     ("push", Div(Icon("lucide:bell", cls="w-4 h-4"), "Push", cls="flex items-center gap-2")),
+                    type="multiple",
                     variant="outline",
                     signal="communication_methods"
                 ),
@@ -326,11 +338,12 @@ def examples():
             # Frequency
             Div(
                 Label("Notification Frequency:", cls="text-sm font-medium mb-2 block"),
-                SingleToggleGroup(
+                ToggleGroup(
                     ("immediate", "Immediate"),
                     ("daily", "Daily Digest"),
                     ("weekly", "Weekly Summary"),
                     ("never", "Never"),
+                    type="single",
                     signal="frequency"
                 ),
                 cls="mb-6"
@@ -365,21 +378,24 @@ def examples():
         return Div(
             P("Disabled States", cls="font-medium mb-4"),
             
-            # Partially disabled
+            # Dynamic disabling
             Div(
-                P("Partially Disabled", cls="text-sm text-muted-foreground mb-2"),
+                P("Dynamic Disabling", cls="text-sm text-muted-foreground mb-2"),
                 Div(
-                    SingleToggleGroup(
+                    ToggleGroup(                                    
                         ("available", "Available"),
                         ("busy", "Busy"),
                         ("away", "Away"),
-                        signal="status_partial"
+                        type="single",      
+                        slot_attrs={"toggle_group_item": ds_attr(disabled="$disabled_partial")}
                     ),
-                    Button("Disable", 
-                           ds_on_click(toggle_signal("disabled_partial")),
-                           variant="outline",
-                           size="sm",
-                           cls="ml-4"),
+                    Button(
+                        ds_text("$disabled_partial ? 'Enable' : 'Disable'"),
+                        ds_on_click(toggle_signal("disabled_partial")),
+                        variant="outline",
+                        size="sm",
+                        cls="ml-4"
+                    ),
                     ds_signals(disabled_partial=False),
                     cls="flex items-center"
                 ),
@@ -389,10 +405,11 @@ def examples():
             # Fully disabled
             Div(
                 P("Fully Disabled", cls="text-sm text-muted-foreground mb-2"),
-                SingleToggleGroup(
+                ToggleGroup(
                     ("option1", "Option 1"),
                     ("option2", "Option 2"),
                     ("option3", "Option 3"),
+                    type="single",
                     disabled=True,
                     variant="outline"
                 ),
@@ -411,7 +428,6 @@ def examples():
 
 
 def create_toggle_group_docs():
-    """Create toggle group documentation page using convention-based approach."""
     
     # Hero example showcasing both single and multiple selection
     @with_code
@@ -419,20 +435,22 @@ def create_toggle_group_docs():
         return Div(
             Div(
                 P("Single Selection", cls="text-sm font-medium mb-2"),
-                SingleToggleGroup(
+                ToggleGroup(                    
                     ("left", Icon("lucide:align-left", cls="w-4 h-4")),
                     ("center", Icon("lucide:align-center", cls="w-4 h-4")),
                     ("right", Icon("lucide:align-right", cls="w-4 h-4")),
+                    type="single",
                     variant="outline"
                 ),
                 cls="mb-6"
             ),
             Div(
                 P("Multiple Selection", cls="text-sm font-medium mb-2"),
-                MultipleToggleGroup(
+                ToggleGroup(                    
                     ("bold", Icon("lucide:bold", cls="w-4 h-4")),
                     ("italic", Icon("lucide:italic", cls="w-4 h-4")),
                     ("underline", Icon("lucide:underline", cls="w-4 h-4")),
+                    type="multiple",
                     variant="outline"
                 ),
                 cls=""
@@ -449,27 +467,15 @@ def create_toggle_group_docs():
     api_reference = build_api_reference(
         components=[
             Component(
-                name="SingleToggleGroup",
+                name="ToggleGroup",
                 description=(
-                    "Single-select group (radio-like). Pass items as (value, content) tuples. "
-                    "Current selection is exposed as `{signal}_value` (str)."
+                    "A toggle group with single or multiple selection. Pass items as (value, content) tuples. "
+                    "Selection is exposed as `{signal}_value` (str for single, list[str] for multiple)."
                 ),
                 props=[
-                    Prop("signal", "str", "Datastar signal for the group", "''"),
-                    Prop("variant", "Literal['default','outline']", "Visual style", "'default'"),
-                    Prop("size", "Literal['default','sm','lg']", "Button size", "'default'"),
-                    Prop("disabled", "bool", "Disable all items", "False"),
-                    Prop("cls", "str", "Additional CSS classes", "''"),
-                ],
-            ),
-            Component(
-                name="MultipleToggleGroup",
-                description=(
-                    "Multi-select group (checkbox-like). Pass items as (value, content) tuples. "
-                    "Selections are exposed as `{signal}_value` (list[str])."
-                ),
-                props=[
-                    Prop("signal", "str", "Datastar signal for the group", "''"),
+                    Prop("type", "Literal['single','multiple']", "Selection mode", "'single'"),
+                    Prop("signal", "str | None", "Datastar signal prefix; autogenerated when None", "None"),
+                    Prop("initial_value", "str | list[str] | None", "Initial selection value(s)", "None"),
                     Prop("variant", "Literal['default','outline']", "Visual style", "'default'"),
                     Prop("size", "Literal['default','sm','lg']", "Button size", "'default'"),
                     Prop("disabled", "bool", "Disable all items", "False"),

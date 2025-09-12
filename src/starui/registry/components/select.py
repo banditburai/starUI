@@ -1,5 +1,4 @@
 from typing import Any
-from uuid import uuid4
 
 from starhtml import FT, Div, Icon, Span
 from starhtml import Button as HTMLButton
@@ -7,19 +6,18 @@ from starhtml import Label as HTMLLabel
 from starhtml import P as HTMLP
 from starhtml.datastar import (
     ds_computed,
-    ds_on_click,    
+    ds_on_click,
     ds_position,
     ds_ref,
     ds_show,
     ds_signals,
     ds_style,
     ds_text,
-    t,
     toggle_class,
     value,
 )
 
-from .utils import cn, inject_signal_recursively
+from .utils import cn, inject_signal_recursively, ensure_signal, js_literal
 
 
 def Select(
@@ -30,7 +28,7 @@ def Select(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    signal = signal or f"select_{uuid4().hex[:8]}"
+    signal = ensure_signal(signal, "select")
     return Div(
         ds_signals(
             {
@@ -41,6 +39,7 @@ def Select(
         ),
         *[child(signal) if callable(child) else child for child in children],
         cls=cn("relative", cls),
+        data_slot="select",
         **kwargs,
     )
 
@@ -55,14 +54,14 @@ def SelectTrigger(
             *[child(signal) if callable(child) else child for child in children],
             Icon("lucide:chevron-down", cls="size-4 shrink-0 opacity-50"),
             ds_ref(f"{signal}_trigger"),
-            popovertarget=f"{signal}-content",
+            popovertarget=f"{signal}_content",
             popoveraction="toggle",
             type="button",
             role="combobox",
             aria_haspopup="listbox",
-            aria_controls=f"{signal}-content",
+            aria_controls=f"{signal}_content",
             data_placeholder=f"!${signal}_label",
-            id=kwargs.pop("id", f"{signal}-trigger"),
+            id=kwargs.pop("id", f"{signal}_trigger"),
             cls=cn(
                 "w-[180px] flex h-9 items-center justify-between gap-2 rounded-md border border-input",
                 "bg-transparent px-3 py-2 text-sm shadow-xs",
@@ -75,6 +74,7 @@ def SelectTrigger(
                 "data-[placeholder]:text-muted-foreground",
                 cls,
             ),
+            data_slot="select-trigger",
             **kwargs,
         )
     
@@ -109,7 +109,7 @@ def SelectContent(
             ds_computed(f"{signal}_content_min_width", f"${signal}_trigger ? ${signal}_trigger.offsetWidth + 'px' : 'auto'"),
             ds_style(min_width=f"${signal}_content_min_width"),
             ds_position(
-                anchor=f"{signal}-trigger",
+                anchor=f"{signal}_trigger",
                 placement="bottom",
                 offset=4,
                 flip=True,
@@ -117,14 +117,15 @@ def SelectContent(
                 hide=True,
             ),
             popover="auto",
-            id=f"{signal}-content",
+            id=f"{signal}_content",
             role="listbox",
-            aria_labelledby=f"{signal}-trigger",
+            aria_labelledby=f"{signal}_trigger",
             tabindex="-1",
             cls=cn(
                 "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md dark:border-input",
                 cls,
             ),
+            data_slot="select-content",
             **kwargs,
         )
     
@@ -140,7 +141,7 @@ def SelectItem(
 ):
     def _item(signal):
         label_text = label or value
-        js_safe_label = label_text.replace("$", "\\u0024").replace("'", "\\'")
+        js_safe_label = js_literal(label_text)
 
         return Div(
             Span(label_text),
@@ -149,7 +150,7 @@ def SelectItem(
                 ds_show(f"${signal}_value === '{value}'"),
                 cls="absolute right-2 flex h-3.5 w-3.5 items-center justify-center",
             ),
-            ds_on_click(f"${signal}_value='{value}';${signal}_label='{js_safe_label}';${signal}_content.hidePopover()") if not disabled else None,
+            ds_on_click(f"${signal}_value='{value}';${signal}_label={js_safe_label};${signal}_content.hidePopover()") if not disabled else None,
             role="option",
             data_value=value,
             data_selected=f"${signal}_value === '{value}'",
@@ -160,6 +161,7 @@ def SelectItem(
                 "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
                 cls,
             ),
+            data_slot="select-item",
             **kwargs,
         )
     
@@ -253,6 +255,7 @@ def SelectWithLabel(
     placeholder: str = "Select an option",
     name: str | None = None,
     signal: str | None = None,
+    id: str | None = None,
     helper_text: str | None = None,
     error_text: str | None = None,
     required: bool = False,
@@ -262,13 +265,14 @@ def SelectWithLabel(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    signal = signal or f"select_{uuid4().hex[:8]}"
+    signal = ensure_signal(signal, "select")
+    trigger_id = id or f"{signal}_trigger"
     
     return Div(
         HTMLLabel(
             label,
             Span(" *", cls="text-destructive") if required else "",
-            for_=f"{signal}-trigger",
+            for_=trigger_id,
             cls=cn("block text-sm font-medium mb-1.5", label_cls),
         ),
         Select(
@@ -277,6 +281,7 @@ def SelectWithLabel(
                 cls=select_cls,
                 disabled=disabled,
                 aria_invalid="true" if error_text else None,
+                id=trigger_id,
             ),
             SelectContent(*_build_select_items(options)),
             initial_value=value,

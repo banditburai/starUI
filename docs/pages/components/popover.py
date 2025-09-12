@@ -34,7 +34,6 @@ from widgets.component_preview import ComponentPreview
 
 
 def examples():
-    """Generate popover examples using ComponentPreview with tabs."""
     
     # Basic popover
     @with_code
@@ -57,38 +56,27 @@ def examples():
         description="Simple popover with text content and automatic positioning"
     )
     
-    # Popover with different placements
     @with_code
     def popover_placement_examples():
+        placements = [
+            ("Top", "top", "This popover appears above the trigger"),
+            ("Right", "right", "This popover appears to the right"),
+            ("Bottom", "bottom", "This popover appears below (default)"),
+            ("Left", "left", "This popover appears to the left")
+        ]
+        
+        def create_placement_popover(label, side, description):
+            return Popover(
+                PopoverTrigger(label, variant="outline", cls="mr-2" if label != "Left" else ""),
+                PopoverContent(
+                    P(description, cls="text-sm"),
+                    side=side
+                )
+            )
+        
         return Div(
-            Popover(
-                PopoverTrigger("Top", variant="outline", cls="mr-2"),
-                PopoverContent(
-                    P("This popover appears above the trigger", cls="text-sm"),
-                    side="top"
-                )
-            ),
-            Popover(
-                PopoverTrigger("Right", variant="outline", cls="mr-2"),
-                PopoverContent(
-                    P("This popover appears to the right", cls="text-sm"),
-                    side="right"
-                )
-            ),
-            Popover(
-                PopoverTrigger("Bottom", variant="outline", cls="mr-2"),
-                PopoverContent(
-                    P("This popover appears below (default)", cls="text-sm"),
-                    side="bottom"
-                )
-            ),
-            Popover(
-                PopoverTrigger("Left", variant="outline"),
-                PopoverContent(
-                    P("This popover appears to the left", cls="text-sm"),
-                    side="left"
-                )
-            ),
+            *[create_placement_popover(label, side, description) 
+              for label, side, description in placements],
             cls="flex flex-wrap gap-2 justify-center"
         )
 
@@ -132,21 +120,11 @@ def examples():
                         ),
                         P("Building beautiful and accessible UI components. Creator of ui/shadcn.", cls="text-sm text-muted-foreground mb-3"),
                         Div(
-                            Div(
-                                Strong("1.2k", cls="text-sm"),
-                                P("Following", cls="text-xs text-muted-foreground"),
+                            *[Div(
+                                Strong(value, cls="text-sm"),
+                                P(label, cls="text-xs text-muted-foreground"),
                                 cls="text-center"
-                            ),
-                            Div(
-                                Strong("12.5k", cls="text-sm"),
-                                P("Followers", cls="text-xs text-muted-foreground"),
-                                cls="text-center"
-                            ),
-                            Div(
-                                Strong("342", cls="text-sm"),
-                                P("Repos", cls="text-xs text-muted-foreground"),
-                                cls="text-center"
-                            ),
+                            ) for value, label in [("1.2k", "Following"), ("12.5k", "Followers"), ("342", "Repos")]],
                             cls="flex justify-around py-2 border-t border-b border-border my-3"
                         ),
                         Div(
@@ -536,7 +514,6 @@ def examples():
 
 
 def create_popover_docs():
-    """Create popover documentation page using convention-based approach."""
     
     # Intentional API: users care about component structure for Popover
     api_reference = build_api_reference(

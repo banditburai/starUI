@@ -1,4 +1,5 @@
 from typing import Any, Literal
+from .utils import js_literal
 
 from starhtml import FT, Button, Div, Icon, Span
 from starhtml.datastar import ds_on_click, ds_show, ds_signals, ds_text, value
@@ -54,7 +55,7 @@ def Toaster(
     position: ToastPosition = "bottom-right",
     signal: str = "toasts",
     max_visible: int = 3,
-    class_name: str = "",
+    cls: str = "",
     **kwargs: Any,
 ) -> FT:
     return Div(
@@ -69,7 +70,7 @@ def Toaster(
             cls=cn(
                 "fixed z-[100] flex flex-col-reverse gap-2 p-4 max-w-[420px] pointer-events-none",
                 position_map.get(position, "bottom-right"),
-                class_name,
+                cls,
             ),
             **kwargs,
         ),
@@ -148,16 +149,17 @@ def toast(
     signal: str = "toasts",
     max_visible: int = 3,
 ) -> str:
-    """Generate Datastar action to trigger a toast notification."""
-    message = message.replace("'", "\\'")
-    description = description.replace("'", "\\'")
+    """Generate Datastar action to trigger a toast notification."""    
+    _msg = js_literal(message)
+    _desc = js_literal(description)
+    _variant = js_literal(variant)
 
     return f"""
         const newToast = {{
             id: ++${signal}_counter,
-            title: '{message}',
-            description: '{description}',
-            variant: '{variant}',
+            title: {_msg},
+            description: {_desc},
+            variant: {_variant},
             timestamp: Date.now()
         }};
 

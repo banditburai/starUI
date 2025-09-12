@@ -217,92 +217,46 @@ if __name__ == "__main__":
         description="Highlight code snippets within paragraphs and documentation"
     )
     
-    # Documentation examples
     @with_code
     def documentation_layout_example():
+        def create_package_manager_block(manager, command, margin_cls):
+            signal_name = f"{manager}_copied"
+            return Div(
+                P(manager, cls="text-xs text-muted-foreground mb-1"),
+                Div(
+                    CodeBlock(command, language="bash", cls="text-sm py-3"),
+                    Button(
+                        Icon("lucide:copy", cls="w-4 h-4"),
+                        ds_on_click(f"navigator.clipboard.writeText('{command}'); ${signal_name} = true; setTimeout(() => ${signal_name} = false, 2000)"),
+                        ds_show(f"!${signal_name}"),
+                        variant="ghost",
+                        size="icon",
+                        cls="absolute top-1/2 right-2 -translate-y-1/2 h-8 w-8"
+                    ),
+                    Button(
+                        Icon("lucide:check", cls="w-4 h-4"),
+                        ds_show(f"${signal_name}"),
+                        variant="ghost",
+                        size="icon",
+                        cls="absolute top-1/2 right-2 -translate-y-1/2 h-8 w-8 text-green-600"
+                    ),
+                    ds_signals(**{signal_name: False}),
+                    cls="relative"
+                ),
+                cls=margin_cls
+            )
+        
         return Div(
             # Installation section
             Div(
                 H3("Installation", cls="text-lg font-semibold mb-3"),
                 P("Install StarUI using your preferred package manager:", cls="text-sm text-muted-foreground mb-3"),
                 
-                # npm with proper CodeBlock
-                Div(
-                    P("npm", cls="text-xs text-muted-foreground mb-1"),
-                    Div(
-                        CodeBlock("npm install starui", language="bash", cls="text-sm py-3"),
-                        Button(
-                            Icon("lucide:copy", cls="w-4 h-4"),
-                            ds_on_click("navigator.clipboard.writeText('npm install starui'); $npm_copied = true; setTimeout(() => $npm_copied = false, 2000)"),
-                            ds_show("!$npm_copied"),
-                            variant="ghost",
-                            size="icon",
-                            cls="absolute top-1/2 right-2 -translate-y-1/2 h-8 w-8"
-                        ),
-                        Button(
-                            Icon("lucide:check", cls="w-4 h-4"),
-                            ds_show("$npm_copied"),
-                            variant="ghost",
-                            size="icon",
-                            cls="absolute top-1/2 right-2 -translate-y-1/2 h-8 w-8 text-green-600"
-                        ),
-                        ds_signals(npm_copied=False),
-                        cls="relative"
-                    ),
-                    cls="mb-4"
-                ),
-                
-                # pnpm with proper CodeBlock
-                Div(
-                    P("pnpm", cls="text-xs text-muted-foreground mb-1"),
-                    Div(
-                        CodeBlock("pnpm add starui", language="bash", cls="text-sm py-3"),
-                        Button(
-                            Icon("lucide:copy", cls="w-4 h-4"),
-                            ds_on_click("navigator.clipboard.writeText('pnpm add starui'); $pnpm_copied = true; setTimeout(() => $pnpm_copied = false, 2000)"),
-                            ds_show("!$pnpm_copied"),
-                            variant="ghost",
-                            size="icon",
-                            cls="absolute top-1/2 right-2 -translate-y-1/2 h-8 w-8"
-                        ),
-                        Button(
-                            Icon("lucide:check", cls="w-4 h-4"),
-                            ds_show("$pnpm_copied"),
-                            variant="ghost",
-                            size="icon",
-                            cls="absolute top-1/2 right-2 -translate-y-1/2 h-8 w-8 text-green-600"
-                        ),
-                        ds_signals(pnpm_copied=False),
-                        cls="relative"
-                    ),
-                    cls="mb-4"
-                ),
-                
-                # yarn with proper CodeBlock
-                Div(
-                    P("yarn", cls="text-xs text-muted-foreground mb-1"),
-                    Div(
-                        CodeBlock("yarn add starui", language="bash", cls="text-sm py-3"),
-                        Button(
-                            Icon("lucide:copy", cls="w-4 h-4"),
-                            ds_on_click("navigator.clipboard.writeText('yarn add starui'); $yarn_copied = true; setTimeout(() => $yarn_copied = false, 2000)"),
-                            ds_show("!$yarn_copied"),
-                            variant="ghost",
-                            size="icon",
-                            cls="absolute top-1/2 right-2 -translate-y-1/2 h-8 w-8"
-                        ),
-                        Button(
-                            Icon("lucide:check", cls="w-4 h-4"),
-                            ds_show("$yarn_copied"),
-                            variant="ghost",
-                            size="icon",
-                            cls="absolute top-1/2 right-2 -translate-y-1/2 h-8 w-8 text-green-600"
-                        ),
-                        ds_signals(yarn_copied=False),
-                        cls="relative"
-                    ),
-                    cls="mb-6"
-                ),
+                *[create_package_manager_block(*pm) for pm in [
+                    ("npm", "npm install starui", "mb-4"),
+                    ("pnpm", "pnpm add starui", "mb-4"), 
+                    ("yarn", "yarn add starui", "mb-6")
+                ]],
                 
                 cls="mb-8"
             ),

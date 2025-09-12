@@ -25,7 +25,6 @@ from widgets.component_preview import ComponentPreview
 
 
 def examples():
-    """Generate switch examples using ComponentPreview with tabs."""
     
     # Basic usage
     @with_code
@@ -226,7 +225,6 @@ def examples():
 
 
 def create_switch_docs():
-    """Create switch documentation page using convention-based approach."""
     
     # For Switch, users mostly need the main props for state/behavior.
     api_reference = build_api_reference(

@@ -116,7 +116,6 @@ def examples():
         description="Full breadcrumb trail with multiple levels"
     )
     
-    # Breadcrumb with icons
     @with_code
     def breadcrumb_with_icons_example():
         return Breadcrumb(
@@ -161,40 +160,31 @@ def examples():
         description="Breadcrumb items with icons for better visual context"
     )
     
-    # E-commerce product breadcrumb
     @with_code
     def ecommerce_breadcrumb_example():
-        return Breadcrumb(
-            BreadcrumbList(
-                BreadcrumbItem(
-                    BreadcrumbLink("Shop", href="/shop")
-                ),
-                BreadcrumbSeparator(
-                    Icon("lucide:chevron-right", width="16", height="16")
-                ),
-                BreadcrumbItem(
-                    BreadcrumbLink("Electronics", href="/shop/electronics")
-                ),
-                BreadcrumbSeparator(
-                    Icon("lucide:chevron-right", width="16", height="16")
-                ),
-                BreadcrumbItem(
-                    BreadcrumbLink("Smartphones", href="/shop/electronics/smartphones")
-                ),
-                BreadcrumbSeparator(
-                    Icon("lucide:chevron-right", width="16", height="16")
-                ),
-                BreadcrumbItem(
-                    BreadcrumbLink("Apple", href="/shop/electronics/smartphones/apple")
-                ),
-                BreadcrumbSeparator(
-                    Icon("lucide:chevron-right", width="16", height="16")
-                ),
-                BreadcrumbItem(
-                    BreadcrumbPage("iPhone 15 Pro")
-                )
-            )
-        )
+        path_items = [
+            ("Shop", "/shop"),
+            ("Electronics", "/shop/electronics"),
+            ("Smartphones", "/shop/electronics/smartphones"),
+            ("Apple", "/shop/electronics/smartphones/apple"),
+            ("iPhone 15 Pro", None)  # None for current page
+        ]
+        
+        def create_chevron_separator():
+            return BreadcrumbSeparator(Icon("lucide:chevron-right", width="16", height="16"))
+        
+        breadcrumb_items = []
+        for i, (label, href) in enumerate(path_items):
+            if href:  # Link item
+                breadcrumb_items.append(BreadcrumbItem(BreadcrumbLink(label, href=href)))
+            else:  # Current page
+                breadcrumb_items.append(BreadcrumbItem(BreadcrumbPage(label)))
+            
+            # Add separator except after last item
+            if i < len(path_items) - 1:
+                breadcrumb_items.append(create_chevron_separator())
+        
+        return Breadcrumb(BreadcrumbList(*breadcrumb_items))
     
     yield ComponentPreview(
         ecommerce_breadcrumb_example(),
@@ -203,70 +193,36 @@ def examples():
         description="Product category hierarchy with chevron separators"
     )
     
-    # Different separator styles
     @with_code
     def separator_styles_example():
         return Div(
-            # Dot separator
             Breadcrumb(
                 BreadcrumbList(
-                    BreadcrumbItem(
-                        BreadcrumbLink("Blog", href="/blog")
-                    ),
-                    BreadcrumbSeparator(
-                        Span("•", cls="px-2 text-muted-foreground")
-                    ),
-                    BreadcrumbItem(
-                        BreadcrumbLink("Technology", href="/blog/tech")
-                    ),
-                    BreadcrumbSeparator(
-                        Span("•", cls="px-2 text-muted-foreground")
-                    ),
-                    BreadcrumbItem(
-                        BreadcrumbPage("AI Trends 2024")
-                    )
+                    BreadcrumbItem(BreadcrumbLink("Blog", href="/blog")),
+                    BreadcrumbSeparator(Span("•", cls="px-2 text-muted-foreground")),
+                    BreadcrumbItem(BreadcrumbLink("Technology", href="/blog/tech")),
+                    BreadcrumbSeparator(Span("•", cls="px-2 text-muted-foreground")),
+                    BreadcrumbItem(BreadcrumbPage("AI Trends 2024"))
                 ),
                 cls="mb-4"
             ),
-            # Arrow separator
             Breadcrumb(
                 BreadcrumbList(
-                    BreadcrumbItem(
-                        BreadcrumbLink("Settings", href="/settings")
-                    ),
-                    BreadcrumbSeparator(
-                        Span("→", cls="px-2 text-muted-foreground")
-                    ),
-                    BreadcrumbItem(
-                        BreadcrumbLink("Security", href="/settings/security")
-                    ),
-                    BreadcrumbSeparator(
-                        Span("→", cls="px-2 text-muted-foreground")
-                    ),
-                    BreadcrumbItem(
-                        BreadcrumbPage("Two-Factor Auth")
-                    )
+                    BreadcrumbItem(BreadcrumbLink("Settings", href="/settings")),
+                    BreadcrumbSeparator(Span("→", cls="px-2 text-muted-foreground")),
+                    BreadcrumbItem(BreadcrumbLink("Security", href="/settings/security")),
+                    BreadcrumbSeparator(Span("→", cls="px-2 text-muted-foreground")),
+                    BreadcrumbItem(BreadcrumbPage("Two-Factor Auth"))
                 ),
                 cls="mb-4"
             ),
-            # Pipe separator
             Breadcrumb(
                 BreadcrumbList(
-                    BreadcrumbItem(
-                        BreadcrumbLink("Docs", href="/docs")
-                    ),
-                    BreadcrumbSeparator(
-                        Span("|", cls="px-2 text-muted-foreground")
-                    ),
-                    BreadcrumbItem(
-                        BreadcrumbLink("API", href="/docs/api")
-                    ),
-                    BreadcrumbSeparator(
-                        Span("|", cls="px-2 text-muted-foreground")
-                    ),
-                    BreadcrumbItem(
-                        BreadcrumbPage("Authentication")
-                    )
+                    BreadcrumbItem(BreadcrumbLink("Docs", href="/docs")),
+                    BreadcrumbSeparator(Span("|", cls="px-2 text-muted-foreground")),
+                    BreadcrumbItem(BreadcrumbLink("API", href="/docs/api")),
+                    BreadcrumbSeparator(Span("|", cls="px-2 text-muted-foreground")),
+                    BreadcrumbItem(BreadcrumbPage("Authentication"))
                 )
             )
         )

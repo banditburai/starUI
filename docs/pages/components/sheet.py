@@ -33,7 +33,6 @@ from widgets.component_preview import ComponentPreview
 
 
 def examples():
-    """Generate sheet examples using ComponentPreview with tabs."""
     
     # Navigation menu sheet (left side)
     @with_code
@@ -123,6 +122,42 @@ def examples():
     # Shopping cart sheet (right side)
     @with_code
     def shopping_cart_sheet_example():
+        def create_cart_item(image_url, name, description, price, qty_signal):
+            return Div(
+                Img(
+                    src=image_url,
+                    alt="Product",
+                    cls="w-16 h-16 rounded-lg object-cover"
+                ),
+                Div(
+                    H4(name, cls="text-sm font-medium"),
+                    P(description, cls="text-xs text-muted-foreground"),
+                    Div(
+                        Span(price, cls="text-sm font-bold"),
+                        Div(
+                            Button(
+                                "-",
+                                ds_on_click(f"${qty_signal} = Math.max(0, ${qty_signal} - 1)"),
+                                size="sm", 
+                                variant="outline", 
+                                cls="h-6 w-6 p-0"
+                            ),
+                            Span(ds_text(f"${qty_signal}"), cls="mx-2 text-sm"),
+                            Button(
+                                "+",
+                                ds_on_click(f"${qty_signal} = ${qty_signal} + 1"),
+                                size="sm", 
+                                variant="outline", 
+                                cls="h-6 w-6 p-0"
+                            ),
+                            cls="flex items-center ml-auto"
+                        ),
+                        cls="flex items-center justify-between mt-2"
+                    ),
+                    cls="flex-1 ml-3"
+                ),
+                cls="flex items-start p-4 border-b"
+            )
         return Sheet(
             SheetTrigger(
                 Icon("lucide:shopping-cart", cls="h-4 w-4 mr-2"),
@@ -139,75 +174,19 @@ def examples():
                     )
                 ),
                 Div(
-                    Div(
-                        Img(
-                            src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=100&h=100&fit=crop",
-                            alt="Product",
-                            cls="w-16 h-16 rounded-lg object-cover"
-                        ),
-                        Div(
-                            H4("Wireless Headphones", cls="text-sm font-medium"),
-                            P("Premium quality sound", cls="text-xs text-muted-foreground"),
-                            Div(
-                                Span("$99.99", cls="text-sm font-bold"),
-                                Div(
-                                    Button(
-                                        "-",
-                                        ds_on_click("$qty_headphones = Math.max(0, $qty_headphones - 1)"),
-                                        size="sm", 
-                                        variant="outline", 
-                                        cls="h-6 w-6 p-0"
-                                    ),
-                                    Span(ds_text("$qty_headphones"), cls="mx-2 text-sm"),
-                                    Button(
-                                        "+",
-                                        ds_on_click("$qty_headphones = $qty_headphones + 1"),
-                                        size="sm", 
-                                        variant="outline", 
-                                        cls="h-6 w-6 p-0"
-                                    ),
-                                    cls="flex items-center ml-auto"
-                                ),
-                                cls="flex items-center justify-between mt-2"
-                            ),
-                            cls="flex-1 ml-3"
-                        ),
-                        cls="flex items-start p-4 border-b"
+                    create_cart_item(
+                        "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=100&h=100&fit=crop",
+                        "Wireless Headphones",
+                        "Premium quality sound",
+                        "$99.99",
+                        "qty_headphones"
                     ),
-                    Div(
-                        Img(
-                            src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=100&h=100&fit=crop",
-                            alt="Product",
-                            cls="w-16 h-16 rounded-lg object-cover"
-                        ),
-                        Div(
-                            H4("Running Shoes", cls="text-sm font-medium"),
-                            P("Comfortable and durable", cls="text-xs text-muted-foreground"),
-                            Div(
-                                Span("$129.99", cls="text-sm font-bold"),
-                                Div(
-                                    Button(
-                                        "-",
-                                        ds_on_click("$qty_shoes = Math.max(0, $qty_shoes - 1)"),
-                                        size="sm", 
-                                        variant="outline", 
-                                        cls="h-6 w-6 p-0"
-                                    ),
-                                    Span(ds_text("$qty_shoes"), cls="mx-2 text-sm"),
-                                    Button(
-                                        "+",
-                                        ds_on_click("$qty_shoes = $qty_shoes + 1"),
-                                        size="sm", 
-                                        variant="outline", 
-                                        cls="h-6 w-6 p-0"
-                                    ),
-                                    cls="flex items-center ml-auto"
-                                ),
-                                cls="flex items-center justify-between mt-2"
-                            ),
-                            cls="flex-1 ml-3"
-                        ),
-                        cls="flex items-start p-4 border-b"
+                    create_cart_item(
+                        "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=100&h=100&fit=crop",
+                        "Running Shoes",
+                        "Comfortable and durable",
+                        "$129.99",
+                        "qty_shoes"
                     ),
                     Div(
                         Div(
@@ -515,6 +494,25 @@ def examples():
     # Notification panel (top side)
     @with_code
     def notification_panel_sheet_example():
+        def create_notification(icon, icon_color, title, message, time, signal_num):
+            return Div(
+                Icon(icon, cls=f"h-5 w-5 {icon_color} mt-1 mr-3"),
+                Div(
+                    P(title, cls="text-sm font-medium"),
+                    P(message, cls="text-xs text-muted-foreground mb-2"),
+                    P(time, cls="text-xs text-muted-foreground"),
+                    cls="flex-1"
+                ),
+                Button(
+                    Icon("lucide:x", cls="h-4 w-4"), 
+                    ds_on_click(f"$notif_{signal_num} = false"), 
+                    variant="ghost", 
+                    size="sm", 
+                    cls="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-muted"
+                ),
+                ds_show(f"$notif_{signal_num}"),
+                cls="flex items-start p-4 border-b hover:bg-muted/30 transition-colors"
+            )
         return Sheet(
             SheetTrigger(
                 Icon("lucide:bell", cls="h-4 w-4 mr-2"),
@@ -559,53 +557,25 @@ def examples():
                     SheetDescription("Stay up to date with your latest activity", signal="notifications_sheet")
                 ),
                 Div(
-                    Div(
-                        Icon("lucide:check-circle", cls="h-5 w-5 text-green-500 mt-1 mr-3"),
-                        Div(
-                            P("Payment successful", cls="text-sm font-medium"),
-                            P("Your monthly subscription has been processed", cls="text-xs text-muted-foreground mb-2"),
-                            P("2 minutes ago", cls="text-xs text-muted-foreground"),
-                            cls="flex-1"
-                        ),
-                        Button(Icon("lucide:x", cls="h-4 w-4"), ds_on_click("$notif_1 = false"), variant="ghost", size="sm", cls="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-muted"),
-                        ds_show("$notif_1"),
-                        cls="flex items-start p-4 border-b hover:bg-muted/30 transition-colors"
+                    create_notification(
+                        "lucide:check-circle", "text-green-500",
+                        "Payment successful", "Your monthly subscription has been processed",
+                        "2 minutes ago", 1
                     ),
-                    Div(
-                        Icon("lucide:user-plus", cls="h-5 w-5 text-blue-500 mt-1 mr-3"),
-                        Div(
-                            P("New team member", cls="text-sm font-medium"),
-                            P("Sarah Johnson joined your workspace", cls="text-xs text-muted-foreground mb-2"),
-                            P("1 hour ago", cls="text-xs text-muted-foreground"),
-                            cls="flex-1"
-                        ),
-                        Button(Icon("lucide:x", cls="h-4 w-4"), ds_on_click("$notif_2 = false"), variant="ghost", size="sm", cls="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-muted"),
-                        ds_show("$notif_2"),
-                        cls="flex items-start p-4 border-b hover:bg-muted/30 transition-colors"
+                    create_notification(
+                        "lucide:user-plus", "text-blue-500",
+                        "New team member", "Sarah Johnson joined your workspace",
+                        "1 hour ago", 2
                     ),
-                    Div(
-                        Icon("lucide:alert-triangle", cls="h-5 w-5 text-orange-500 mt-1 mr-3"),
-                        Div(
-                            P("Action required", cls="text-sm font-medium"),
-                            P("Please update your billing information", cls="text-xs text-muted-foreground mb-2"),
-                            P("3 hours ago", cls="text-xs text-muted-foreground"),
-                            cls="flex-1"
-                        ),
-                        Button(Icon("lucide:x", cls="h-4 w-4"), ds_on_click("$notif_3 = false"), variant="ghost", size="sm", cls="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-muted"),
-                        ds_show("$notif_3"),
-                        cls="flex items-start p-4 border-b hover:bg-muted/30 transition-colors"
+                    create_notification(
+                        "lucide:alert-triangle", "text-orange-500",
+                        "Action required", "Please update your billing information",
+                        "3 hours ago", 3
                     ),
-                    Div(
-                        Icon("lucide:calendar", cls="h-5 w-5 text-purple-500 mt-1 mr-3"),
-                        Div(
-                            P("Meeting reminder", cls="text-sm font-medium"),
-                            P("Team standup in 15 minutes", cls="text-xs text-muted-foreground mb-2"),
-                            P("5 hours ago", cls="text-xs text-muted-foreground"),
-                            cls="flex-1"
-                        ),
-                        Button(Icon("lucide:x", cls="h-4 w-4"), ds_on_click("$notif_4 = false"), variant="ghost", size="sm", cls="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-muted"),
-                        ds_show("$notif_4"),
-                        cls="flex items-start p-4 border-b hover:bg-muted/30 transition-colors"
+                    create_notification(
+                        "lucide:calendar", "text-purple-500",
+                        "Meeting reminder", "Team standup in 15 minutes",
+                        "5 hours ago", 4
                     ),
                     Div(
                         Icon("lucide:inbox", cls="h-12 w-12 text-muted-foreground mb-2"),
@@ -706,56 +676,38 @@ def examples():
     # Different sizes demo
     @with_code
     def sheet_sizes_example():
+        sheet_configs = [
+            ("Small", "small_size_sheet", "sm", "Small Sheet", "Compact size for simple content",
+             "This is a small sheet (max-w-sm) - perfect for simple forms, quick actions, or narrow content."),
+            ("Medium", "medium_size_sheet", "md", "Medium Sheet", "Standard size for most content",
+             "This is a medium sheet (max-w-md) - the default size for most use cases including forms, settings, and moderate content."),
+            ("Large", "large_size_sheet", "lg", "Large Sheet", "More space for complex content",
+             "This is a large sheet (max-w-lg) - great for detailed forms, complex interfaces, shopping carts, and content that needs more horizontal space."),
+            ("Extra Large", "xl_size_sheet", "xl", "Extra Large Sheet", "Maximum width for extensive content",
+             "This is an extra large sheet (max-w-xl) - ideal for comprehensive dashboards, data tables, detailed settings panels, or any content requiring maximum horizontal space.")
+        ]
+        
+        def create_size_demo(button_label, signal, size, title, description, content):
+            return Sheet(
+                SheetTrigger(button_label, signal=signal, variant="outline", size="sm"),
+                SheetContent(
+                    SheetHeader(
+                        SheetTitle(title, signal=signal),
+                        SheetDescription(description, signal=signal)
+                    ),
+                    Div(P(content, cls="text-sm"), cls="px-6"),
+                    signal=signal,
+                    side="right",
+                    size=size
+                ),
+                signal=signal,
+                cls="mr-2" if button_label != "Extra Large" else ""
+            )
         return Div(
             P("Different sheet sizes for various content needs:", cls="text-sm text-muted-foreground mb-4"),
             Div(
-                Sheet(
-                    SheetTrigger("Small", signal="small_size_sheet", variant="outline", size="sm"),
-                    SheetContent(
-                        SheetHeader(SheetTitle("Small Sheet", signal="small_size_sheet"), SheetDescription("Compact size for simple content", signal="small_size_sheet")),
-                        Div(P("This is a small sheet (max-w-sm) - perfect for simple forms, quick actions, or narrow content.", cls="text-sm"), cls="px-6"),
-                        signal="small_size_sheet",
-                        side="right",
-                        size="sm"
-                    ),
-                    signal="small_size_sheet",
-                    cls="mr-2"
-                ),
-                Sheet(
-                    SheetTrigger("Medium", signal="medium_size_sheet", variant="outline", size="sm"),
-                    SheetContent(
-                        SheetHeader(SheetTitle("Medium Sheet", signal="medium_size_sheet"), SheetDescription("Standard size for most content", signal="medium_size_sheet")),
-                        Div(P("This is a medium sheet (max-w-md) - the default size for most use cases including forms, settings, and moderate content.", cls="text-sm"), cls="px-6"),
-                        signal="medium_size_sheet",
-                        side="right",
-                        size="md"
-                    ),
-                    signal="medium_size_sheet",
-                    cls="mr-2"
-                ),
-                Sheet(
-                    SheetTrigger("Large", signal="large_size_sheet", variant="outline", size="sm"),
-                    SheetContent(
-                        SheetHeader(SheetTitle("Large Sheet", signal="large_size_sheet"), SheetDescription("More space for complex content", signal="large_size_sheet")),
-                        Div(P("This is a large sheet (max-w-lg) - great for detailed forms, complex interfaces, shopping carts, and content that needs more horizontal space.", cls="text-sm"), cls="px-6"),
-                        signal="large_size_sheet",
-                        side="right",
-                        size="lg"
-                    ),
-                    signal="large_size_sheet",
-                    cls="mr-2"
-                ),
-                Sheet(
-                    SheetTrigger("Extra Large", signal="xl_size_sheet", variant="outline", size="sm"),
-                    SheetContent(
-                        SheetHeader(SheetTitle("Extra Large Sheet", signal="xl_size_sheet"), SheetDescription("Maximum width for extensive content", signal="xl_size_sheet")),
-                        Div(P("This is an extra large sheet (max-w-xl) - ideal for comprehensive dashboards, data tables, detailed settings panels, or any content requiring maximum horizontal space.", cls="text-sm"), cls="px-6"),
-                        signal="xl_size_sheet",
-                        side="right",
-                        size="xl"
-                    ),
-                    signal="xl_size_sheet"
-                ),
+                *[create_size_demo(button_label, signal, size, title, description, content)
+                  for button_label, signal, size, title, description, content in sheet_configs],
                 cls="flex flex-wrap gap-2 justify-center"
             ),
             cls="text-center"
@@ -770,7 +722,6 @@ def examples():
 
 
 def create_sheet_docs():
-    """Create sheet documentation page using convention-based approach."""
     
     # Intentional API: Sheet is a composite. Users benefit from understanding
     # the building blocks and key content props (side, size), not every prop.

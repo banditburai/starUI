@@ -19,7 +19,6 @@ from widgets.component_preview import ComponentPreview
 
 
 def examples():
-    """Generate skeleton examples using ComponentPreview with tabs."""
     
     # Basic skeleton shapes with proper circles
     @with_code
@@ -181,7 +180,6 @@ def examples():
 
 
 def create_skeleton_docs():
-    """Create skeleton documentation page using convention-based approach."""
     from utils import auto_generate_page
     
     api_reference = build_api_reference(

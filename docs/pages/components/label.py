@@ -20,7 +20,6 @@ from utils import with_code, Prop, build_api_reference, auto_generate_page
 
 
 def examples():
-    """Generate Label examples using ComponentPreview with tabs."""
     
     # Interactive validation
     @with_code
@@ -231,7 +230,6 @@ def examples():
 
 
 def create_label_docs():
-    """Create label documentation page using convention-based approach."""
     
     # Intentional API: Label is simple, focus on key props users care about
     api_reference = build_api_reference(

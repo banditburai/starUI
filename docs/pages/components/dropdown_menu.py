@@ -23,7 +23,6 @@ from widgets.component_preview import ComponentPreview
 
 
 def examples():
-    """Generate dropdown menu examples using ComponentPreview with tabs."""
     
     # Basic menu with actions
     @with_code
@@ -195,9 +194,17 @@ def examples():
         description="Menu with mutually exclusive options"
     )
     
-    # Advanced menu with shortcuts and grouping
     @with_code
     def context_menu_example():
+        def create_menu_item_with_shortcut(icon, label, shortcut, action, variant=None):
+            return DropdownMenuItem(
+                Icon(icon, cls="mr-2 h-4 w-4"),
+                Span(label, cls="flex-1"),
+                Span(shortcut, cls="ml-auto text-xs tracking-widest text-muted-foreground"),
+                onclick=f"alert('{action}')",
+                variant=variant
+            )
+        
         return Div(
             DropdownMenu(
             DropdownMenuTrigger(
@@ -207,48 +214,17 @@ def examples():
             ),
             DropdownMenuContent(
                 DropdownMenuGroup(
-                    DropdownMenuItem(
-                        Icon("lucide:copy", cls="mr-2 h-4 w-4"),
-                        Span("Copy", cls="flex-1"),
-                        Span("⌘C", cls="ml-auto text-xs tracking-widest text-muted-foreground"),
-                        onclick="alert('Copy action')"
-                    ),
-                    DropdownMenuItem(
-                        Icon("lucide:scissors", cls="mr-2 h-4 w-4"),
-                        Span("Cut", cls="flex-1"),
-                        Span("⌘X", cls="ml-auto text-xs tracking-widest text-muted-foreground"),
-                        onclick="alert('Cut action')"
-                    ),
-                    DropdownMenuItem(
-                        Icon("lucide:clipboard", cls="mr-2 h-4 w-4"),
-                        Span("Paste", cls="flex-1"),
-                        Span("⌘V", cls="ml-auto text-xs tracking-widest text-muted-foreground"),
-                        onclick="alert('Paste action')"
-                    )
+                    create_menu_item_with_shortcut("lucide:copy", "Copy", "⌘C", "Copy action"),
+                    create_menu_item_with_shortcut("lucide:scissors", "Cut", "⌘X", "Cut action"),
+                    create_menu_item_with_shortcut("lucide:clipboard", "Paste", "⌘V", "Paste action")
                 ),
                 DropdownMenuSeparator(),
                 DropdownMenuGroup(
-                    DropdownMenuItem(
-                        Icon("lucide:search", cls="mr-2 h-4 w-4"),
-                        Span("Find", cls="flex-1"),
-                        Span("⌘F", cls="ml-auto text-xs tracking-widest text-muted-foreground"),
-                        onclick="alert('Find action')"
-                    ),
-                    DropdownMenuItem(
-                        Icon("lucide:repeat", cls="mr-2 h-4 w-4"),
-                        Span("Replace", cls="flex-1"),
-                        Span("⌘H", cls="ml-auto text-xs tracking-widest text-muted-foreground"),
-                        onclick="alert('Replace action')"
-                    )
+                    create_menu_item_with_shortcut("lucide:search", "Find", "⌘F", "Find action"),
+                    create_menu_item_with_shortcut("lucide:repeat", "Replace", "⌘H", "Replace action")
                 ),
                 DropdownMenuSeparator(),
-                DropdownMenuItem(
-                    Icon("lucide:trash", cls="mr-2 h-4 w-4"),
-                    Span("Delete", cls="flex-1"),
-                    Span("⌘⌫", cls="ml-auto text-xs tracking-widest text-muted-foreground"),
-                    variant="destructive",
-                    onclick="alert('Delete action')"
-                ),
+                create_menu_item_with_shortcut("lucide:trash", "Delete", "⌘⌫", "Delete action", "destructive"),
                 align="end"
             )
         ),
@@ -392,10 +368,22 @@ def examples():
         description="Grouped menu for creating different types of content"
     )
     
-    # Complex sorting menu with state
     @with_code
     def complex_data_controls_example():
         signal_id4 = uuid4().hex[:8]
+        
+        sort_options = [
+            ("name", "Name"),
+            ("date", "Date Created"),
+            ("size", "Size"),
+            ("type", "Type")
+        ]
+        
+        view_options = [
+            ("grid", "Grid View"),
+            ("list", "List View")
+        ]
+        
         return Div(
             Div(
                 Div(
@@ -427,26 +415,8 @@ def examples():
                     ),
                     DropdownMenuContent(
                         DropdownMenuRadioGroup(
-                            DropdownMenuRadioItem(
-                                "Name",
-                                value="name",
-                                signal="sort_by"
-                            ),
-                            DropdownMenuRadioItem(
-                                "Date Created",
-                                value="date",
-                                signal="sort_by"
-                            ),
-                            DropdownMenuRadioItem(
-                                "Size",
-                                value="size",
-                                signal="sort_by"
-                            ),
-                            DropdownMenuRadioItem(
-                                "Type",
-                                value="type",
-                                signal="sort_by"
-                            ),
+                            *[DropdownMenuRadioItem(label, value=value, signal="sort_by") 
+                              for value, label in sort_options],
                             signal="sort_by"
                         ),
                         DropdownMenuSeparator(),
@@ -476,16 +446,8 @@ def examples():
                         ),
                         DropdownMenuSeparator(),
                         DropdownMenuRadioGroup(
-                            DropdownMenuRadioItem(
-                                "Grid View",
-                                value="grid",
-                                signal="view_mode"
-                            ),
-                            DropdownMenuRadioItem(
-                                "List View", 
-                                value="list",
-                                signal="view_mode"
-                            ),
+                            *[DropdownMenuRadioItem(label, value=value, signal="view_mode") 
+                              for value, label in view_options],
                             signal="view_mode"
                         ),
                         align="start"
@@ -507,7 +469,6 @@ def examples():
 
 
 def create_dropdown_menu_docs():
-    """Create dropdown menu documentation page using convention-based approach."""
     
     api_reference = build_api_reference(
         components=[

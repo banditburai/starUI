@@ -7,7 +7,7 @@ from starhtml import Span as HTMLSpan
 from starhtml import Textarea as HTMLTextarea
 from starhtml.datastar import ds_bind
 
-from .utils import cn
+from .utils import cn, gen_id
 
 ResizeType = Literal["none", "both", "horizontal", "vertical"]
 
@@ -28,7 +28,6 @@ def Textarea(
     maxlength: int | None = None,
     wrap: str | None = None,
     resize: ResizeType | None = None,
-    class_name: str = "",
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
@@ -50,7 +49,6 @@ def Textarea(
         "md:text-sm",
         "field-sizing-content" if rows is None else "",
         resize_classes.get(resize, "") if resize else "",
-        class_name,
         cls,
     )
 
@@ -78,23 +76,13 @@ def Textarea(
         **kwargs,
     }
 
-    if signal:
-        # Add reactive binding (following the input component pattern)
-        bind_attrs = ds_bind(signal)
-        textarea_attrs.update(bind_attrs.attrs)
-        # NOTE: Don't add bind_attrs to attrs - it's already in textarea_attrs!
-
     # For HTML textarea, the initial value should be passed as children content
-    initial_content = value if value and not signal else None
-    
-    # Create the base textarea
-    if initial_content:
-        base_textarea = HTMLTextarea(initial_content, *attrs, **textarea_attrs)
-    else:
-        base_textarea = HTMLTextarea(*attrs, **textarea_attrs)
-    
-    # CRITICAL FIX: Remove auto-generated name attribute for reactive textareas
-    # StarHTML automatically sets name=id, which conflicts with ds_bind
+    base_textarea = HTMLTextarea(
+        *((ds_bind(signal),) if signal else ()) + ((value,) if (value and not signal) else ()),
+        *attrs,
+        **textarea_attrs,
+    )
+    # Remove auto-generated name attribute for reactive textareas: StarHTML may set name=id
     if signal and 'name' in base_textarea.attrs and base_textarea.attrs.get('name') == base_textarea.attrs.get('id'):
         base_textarea.attrs = {k: v for k, v in base_textarea.attrs.items() if k != 'name'}
     
@@ -102,7 +90,7 @@ def Textarea(
 
 
 def TextareaWithLabel(
-    *,  # Force keyword-only arguments for consistency and flexibility
+    *attrs: Any,
     label: str,
     placeholder: str | None = None,
     value: str | None = None,
@@ -120,19 +108,16 @@ def TextareaWithLabel(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    if not id:
-        import uuid
-
-        id = f"textarea_{str(uuid.uuid4())[:8]}"
+    textarea_id = id or gen_id("textarea")
 
     if error_text:
-        attrs["aria_invalid"] = "true"
+        kwargs["aria_invalid"] = "true"
 
     return Div(
         HTMLLabel(
             label,
             HTMLSpan(" *", cls="text-destructive") if required else "",
-            for_=id,
+            for_=textarea_id,
             cls=cn("block text-sm font-medium mb-1.5", label_cls),
         ),
         Textarea(
@@ -140,7 +125,7 @@ def TextareaWithLabel(
             value=value,
             signal=signal,
             name=name,
-            id=id,
+            id=textarea_id,
             disabled=disabled,
             readonly=readonly,
             required=required,
@@ -153,4 +138,5 @@ def TextareaWithLabel(
         and not error_text
         and HTMLP(helper_text, cls="text-sm text-muted-foreground mt-1.5"),
         cls=cn("space-y-1.5", cls),
+        *attrs,
     )

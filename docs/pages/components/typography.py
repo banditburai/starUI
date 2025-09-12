@@ -26,7 +26,6 @@ from widgets.component_preview import ComponentPreview
 
 
 def examples():
-    """Generate typography examples using ComponentPreview with tabs."""
     
     # Headings showcase
     @with_code
@@ -342,33 +341,15 @@ def examples():
 
 
 def create_typography_docs():
-    """Create typography documentation page using convention-based approach."""
     
     api_reference = build_api_reference(
         components=[
-            Component(
-                "Headings",
-                "Headings Display → H6. `H2(section=True)` draws a section divider.",
-            ),
-            Component(
-                "Text Components",
-                "`P`, `Lead`, `Large`, `Small`, `Muted`, `Subtitle`, `Caption`, and `Text(variant='body'|'lead'|'large'|'small'|'muted')",
-            ),
-            Component(
-                "Inline Elements",
-                "`InlineCode`, `Kbd`, `Mark`, `Strong`, `Em` for inline emphasis and notation.",
-            ),
-            Component(
-                "Block Elements",
-                "`Blockquote`, `List(ordered=True|False)`, `Hr`, `Figure`, `Figcaption`.",
-            ),
-            Component(
-                "Prose",
-                "Typography wrapper to style content; supports sizes.",
-                [
-                    Prop("size", "Literal['sm','base','lg','xl']", "Typography scale for prose content", "'base'"),
-                ],
-            ),
+            Component("Headings", "Headings Display → H6. `H2(section=True)` draws a section divider."),
+            Component("Text Components", "`P`, `Lead`, `Large`, `Small`, `Muted`, `Subtitle`, `Caption`, and `Text(variant='body'|'lead'|'large'|'small'|'muted')"),
+            Component("Inline Elements", "`InlineCode`, `Kbd`, `Mark`, `Strong`, `Em` for inline emphasis and notation."),
+            Component("Block Elements", "`Blockquote`, `List(ordered=True|False)`, `Hr`, `Figure`, `Figcaption`."),
+            Component("Prose", "Typography wrapper to style content; supports sizes.",
+                [Prop("size", "Literal['sm','base','lg','xl']", "Typography scale for prose content", "'base'")]),
         ]
     )
     

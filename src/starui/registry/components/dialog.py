@@ -1,9 +1,9 @@
 from typing import Any, Literal
 
 from starhtml import FT, Div, Icon, Span
-from starhtml import H2 as HTMLH2, P as HTMLP
-from starhtml import Button as BaseButton
+from starhtml import Button as HTMLButton
 from starhtml import Dialog as HTMLDialog
+from starhtml import H2 as HTMLH2, P as HTMLP
 from starhtml.datastar import ds_effect, ds_on_click, ds_on_close, ds_ref, ds_signals
 
 from .button import Button
@@ -34,7 +34,6 @@ def Dialog(
     ref_id: str,
     modal: bool = True,
     size: DialogSize = "md",
-    class_name: str = "",
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
@@ -55,10 +54,14 @@ def Dialog(
             content,
             *dialog_attrs,
             id=ref_id,
-            cls=cn(dialog_variants(size=size), class_name, cls),
+            cls=cn(dialog_variants(size=size), cls),
             **kwargs
         ),
-        _scroll_lock(signal_name),
+        Div(
+            ds_signals(**{signal_name: False}),
+            ds_effect(f"document.body.style.overflow = ${signal_name} ? 'hidden' : ''"),
+            style="display: none;",
+        ),
     )
 
 
@@ -67,7 +70,6 @@ def DialogTrigger(
     ref_id: str,
     modal: bool = True,
     variant: str = "default",
-    class_name: str = "",
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
@@ -80,7 +82,7 @@ def DialogTrigger(
         type="button",
         aria_haspopup="dialog",
         variant=variant,
-        cls=cn(class_name, cls),
+        cls=cls,
         **kwargs,
     )
 
@@ -88,15 +90,14 @@ def DialogTrigger(
 def DialogContent(
     *children: Any,
     show_close_button: bool = True,
-    class_name: str = "",
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
     close_button = (
-        BaseButton(
+        HTMLButton(
             Icon("lucide:x", cls="h-4 w-4"),
             Span("Close", cls="sr-only"),
-            ds_on_click(_close_dialog_js()),
+            ds_on_click("$[evt.target.closest('dialog').id + '_open'] = false, evt.target.closest('dialog').close()"),
             cls="absolute top-4 right-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none ring-offset-background focus:ring-ring",
             type="button",
             aria_label="Close",
@@ -107,7 +108,7 @@ def DialogContent(
     return Div(
         *children,
         close_button,
-        cls=cn("relative p-6", class_name, cls),
+        cls=cn("relative p-6", cls),
         **kwargs,
     )
 
@@ -116,80 +117,63 @@ def DialogClose(
     *children: Any,
     value: str = "",
     variant: str = "outline",
-    class_name: str = "",
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
+    close_arg = f"'{value}'" if value else ""
     return Button(
         *children,
-        ds_on_click(_close_dialog_js(value)),
+        ds_on_click(f"$[evt.target.closest('dialog').id + '_open'] = false, evt.target.closest('dialog').close({close_arg})"),
         type="button",
         variant=variant,
-        cls=cn(class_name, cls),
+        cls=cls,
         **kwargs,
     )
 
 
 def DialogHeader(
     *children: Any,
-    class_name: str = "",
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
     return Div(
         *children,
-        cls=cn("flex flex-col gap-2 text-center sm:text-left", class_name, cls),
+        cls=cn("flex flex-col gap-2 text-center sm:text-left", cls),
         **kwargs,
     )
 
 
 def DialogFooter(
     *children: Any,
-    class_name: str = "",
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
     return Div(
         *children,
-        cls=cn("flex flex-col-reverse gap-2 sm:flex-row sm:justify-end mt-6", class_name, cls),
+        cls=cn("flex flex-col-reverse gap-2 sm:flex-row sm:justify-end mt-6", cls),
         **kwargs,
     )
 
 
 def DialogTitle(
     *children: Any,
-    class_name: str = "",
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
     return HTMLH2(
         *children,
-        cls=cn("text-lg leading-none font-semibold text-foreground", class_name, cls),
+        cls=cn("text-lg leading-none font-semibold text-foreground", cls),
         **kwargs,
     )
 
 
 def DialogDescription(
     *children: Any,
-    class_name: str = "",
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
     return HTMLP(
         *children,
-        cls=cn("text-muted-foreground text-sm", class_name, cls),
+        cls=cn("text-muted-foreground text-sm", cls),
         **kwargs,
     )
-
-
-def _scroll_lock(signal_name: str) -> Div:
-    return Div(
-        ds_signals(**{signal_name: False}),
-        ds_effect(f"document.body.style.overflow = ${signal_name} ? 'hidden' : ''"),
-        style="display: none;",
-    )
-
-
-def _close_dialog_js(value: str = "") -> str:
-    close_arg = f"'{value}'" if value else ""
-    return f"$[evt.target.closest('dialog').id + '_open'] = false, evt.target.closest('dialog').close({close_arg})"

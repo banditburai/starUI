@@ -28,7 +28,6 @@ from widgets.component_preview import ComponentPreview
 
 
 def examples():
-    """Generate select examples using ComponentPreview with tabs."""
     
     # Grouped options
     @with_code
@@ -334,9 +333,39 @@ def examples():
         description="Cascading selects that update based on parent selection"
     )
     
-    # Multi-action select
     @with_code
     def role_management_select_example():
+        users = [
+            ("John Doe", "john@example.com", "editor", "Editor", "user1_role"),
+            ("Jane Smith", "jane@example.com", "viewer", "Viewer", "user2_role"),
+            ("Bob Wilson", "bob@example.com", "admin", "Admin", "user3_role")
+        ]
+        
+        def create_user_role_row(name, email, initial_value, initial_label, signal):
+            return Div(
+                Div(
+                    P(name, cls="font-medium"),
+                    P(email, cls="text-sm text-muted-foreground"),
+                    cls="flex-1"
+                ),
+                Select(
+                    SelectTrigger(
+                        SelectValue(placeholder="Select role"),
+                        cls="w-[160px]"
+                    ),
+                    SelectContent(
+                        SelectItem("viewer", "Viewer"),
+                        SelectItem("editor", "Editor"),
+                        SelectItem("admin", "Admin"),
+                        SelectItem("owner", "Owner", disabled=True)
+                    ),
+                    initial_value=initial_value,
+                    initial_label=initial_label,
+                    signal=signal
+                ),
+                cls="flex items-center justify-between gap-6 px-4 py-3 first:pt-4 last:pb-4"
+            )
+        
         return Card(
             CardHeader(
                 CardTitle("User Management"),
@@ -344,75 +373,8 @@ def examples():
             ),
             CardContent(
                 Div(
-                    Div(
-                        Div(
-                            P("John Doe", cls="font-medium"),
-                            P("john@example.com", cls="text-sm text-muted-foreground"),
-                            cls="flex-1"
-                        ),
-                        Select(
-                            SelectTrigger(
-                                SelectValue(placeholder="Select role"),
-                                cls="w-[160px]"
-                            ),
-                            SelectContent(
-                                SelectItem("viewer", "Viewer"),
-                                SelectItem("editor", "Editor"),
-                                SelectItem("admin", "Admin"),
-                                SelectItem("owner", "Owner", disabled=True)
-                            ),
-                            initial_value="editor",
-                            initial_label="Editor",
-                            signal="user1_role"
-                        ),
-                        cls="flex items-center justify-between gap-6 px-4 py-3 first:pt-4 last:pb-4"
-                    ),
-                    Div(
-                        Div(
-                            P("Jane Smith", cls="font-medium"),
-                            P("jane@example.com", cls="text-sm text-muted-foreground"),
-                            cls="flex-1"
-                        ),
-                        Select(
-                            SelectTrigger(
-                                SelectValue(placeholder="Select role"),
-                                cls="w-[160px]"
-                            ),
-                            SelectContent(
-                                SelectItem("viewer", "Viewer"),
-                                SelectItem("editor", "Editor"),
-                                SelectItem("admin", "Admin"),
-                                SelectItem("owner", "Owner", disabled=True)
-                            ),
-                            initial_value="viewer",
-                            initial_label="Viewer",
-                            signal="user2_role"
-                        ),
-                        cls="flex items-center justify-between gap-6 px-4 py-3 first:pt-4 last:pb-4"
-                    ),
-                    Div(
-                        Div(
-                            P("Bob Wilson", cls="font-medium"),
-                            P("bob@example.com", cls="text-sm text-muted-foreground"),
-                            cls="flex-1"
-                        ),
-                        Select(
-                            SelectTrigger(
-                                SelectValue(placeholder="Select role"),
-                                cls="w-[160px]"
-                            ),
-                            SelectContent(
-                                SelectItem("viewer", "Viewer"),
-                                SelectItem("editor", "Editor"),
-                                SelectItem("admin", "Admin"),
-                                SelectItem("owner", "Owner", disabled=True)
-                            ),
-                            initial_value="admin",
-                            initial_label="Admin",
-                            signal="user3_role"
-                        ),
-                        cls="flex items-center justify-between gap-6 px-4 py-3 first:pt-4 last:pb-4"
-                    ),
+                    *[create_user_role_row(name, email, initial_value, initial_label, signal)
+                      for name, email, initial_value, initial_label, signal in users],
                     cls="divide-y border rounded-lg"
                 ),
                 Button(
@@ -433,7 +395,6 @@ def examples():
 
 
 def create_select_docs():
-    """Create select documentation page using convention-based approach."""
     
     # For Select, users benefit most from understanding the building blocks
     # and composition rather than container props, so we show components.

@@ -1,3 +1,5 @@
+from typing import Any
+
 from starhtml import FT, Div
 
 from .utils import cn
@@ -5,18 +7,18 @@ from .utils import cn
 
 def Skeleton(
     *children,
-    class_name: str = "",
     cls: str = "",
-    **kwargs,
+    **kwargs: Any,
 ) -> FT:
+    combined = cls.split()
+    has_custom_rounded = any(c.startswith("rounded") for c in combined)
+
     return Div(
         *children,
         data_slot="skeleton",
         cls=cn(
             "animate-pulse bg-muted",
-            {"rounded-md": not any(c.startswith("rounded") 
-                                   for c in f"{class_name} {cls}".split())},
-            class_name,
+            "rounded-md" if not has_custom_rounded else "",
             cls,
         ),
         **kwargs,

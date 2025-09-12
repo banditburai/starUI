@@ -32,7 +32,6 @@ from widgets.component_preview import ComponentPreview
 
 
 def examples():
-    """Generate dialog examples using ComponentPreview with tabs."""
     
     # Basic dialog
     @with_code
@@ -120,9 +119,27 @@ def examples():
         description="Destructive action confirmation with warnings"
     )
     
-    # Form dialog
     @with_code
     def form_dialog_example():
+        def create_role_preview(role, icon, title, description, color):
+            return Div(
+                Icon(icon, cls=f"h-5 w-5 text-{color}-500"),
+                Div(
+                    P(title, cls="font-medium text-sm"),
+                    P(description, cls="text-xs text-muted-foreground"),
+                    cls="ml-3"
+                ),
+                ds_show(f"$member_role_value === '{role}'"),
+                cls=f"flex items-center p-3 bg-{color}-50 dark:bg-{color}-950/20 rounded-md border border-{color}-200 dark:border-{color}-800"
+            )
+        
+        def create_section_header(icon, title):
+            return P(
+                Icon(icon, cls="h-4 w-4 inline mr-2"),
+                title,
+                cls="text-sm font-semibold text-foreground mb-3 flex items-center"
+            )
+        
         return Dialog(
             DialogTrigger(
                 Icon("lucide:user-plus", cls="h-4 w-4 mr-2"),
@@ -135,13 +152,8 @@ def examples():
                     DialogDescription("Add a new member to your team and assign their role")
                 ),
                 Form(
-                    # Personal Information Section
                     Div(
-                        P(
-                            Icon("lucide:user", cls="h-4 w-4 inline mr-2"),
-                            "Personal Information",
-                            cls="text-sm font-semibold text-foreground mb-3 flex items-center"
-                        ),
+                        create_section_header("lucide:user", "Personal Information"),
                         InputWithLabel(
                             label="Full Name",
                             placeholder="Enter full name",
@@ -162,13 +174,8 @@ def examples():
                     
                     Separator(cls="my-6"),
                     
-                    # Access & Permissions Section
                     Div(
-                        P(
-                            Icon("lucide:shield-check", cls="h-4 w-4 inline mr-2"),
-                            "Access & Permissions",
-                            cls="text-sm font-semibold text-foreground mb-3 flex items-center"
-                        ),
+                        create_section_header("lucide:shield-check", "Access & Permissions"),
                         SelectWithLabel(
                             label="Role",
                             options=[
@@ -180,38 +187,10 @@ def examples():
                             signal="member_role",
                             helper_text="Choose the appropriate permission level for this user"
                         ),
-                        # Role preview card
                         Div(
-                            Div(
-                                Icon("lucide:eye", cls="h-5 w-5 text-blue-500"),
-                                Div(
-                                    P("Viewer Access", cls="font-medium text-sm"),
-                                    P("Can view and comment on projects", cls="text-xs text-muted-foreground"),
-                                    cls="ml-3"
-                                ),
-                                ds_show("$member_role_value === 'viewer'"),
-                                cls="flex items-center p-3 bg-blue-50 dark:bg-blue-950/20 rounded-md border border-blue-200 dark:border-blue-800"
-                            ),
-                            Div(
-                                Icon("lucide:edit-3", cls="h-5 w-5 text-green-500"),
-                                Div(
-                                    P("Editor Access", cls="font-medium text-sm"),
-                                    P("Can edit, create, and manage projects", cls="text-xs text-muted-foreground"),
-                                    cls="ml-3"
-                                ),
-                                ds_show("$member_role_value === 'editor'"),
-                                cls="flex items-center p-3 bg-green-50 dark:bg-green-950/20 rounded-md border border-green-200 dark:border-green-800"
-                            ),
-                            Div(
-                                Icon("lucide:crown", cls="h-5 w-5 text-amber-500"),
-                                Div(
-                                    P("Admin Access", cls="font-medium text-sm"),
-                                    P("Full control including user and billing management", cls="text-xs text-muted-foreground"),
-                                    cls="ml-3"
-                                ),
-                                ds_show("$member_role_value === 'admin'"),
-                                cls="flex items-center p-3 bg-amber-50 dark:bg-amber-950/20 rounded-md border border-amber-200 dark:border-amber-800"
-                            ),
+                            create_role_preview("viewer", "lucide:eye", "Viewer Access", "Can view and comment on projects", "blue"),
+                            create_role_preview("editor", "lucide:edit-3", "Editor Access", "Can edit, create, and manage projects", "green"),
+                            create_role_preview("admin", "lucide:crown", "Admin Access", "Full control including user and billing management", "amber"),
                             cls="mt-3"
                         ),
                         cls="space-y-4"
@@ -219,13 +198,8 @@ def examples():
                     
                     Separator(cls="my-6"),
                     
-                    # Notification Settings
                     Div(
-                        P(
-                            Icon("lucide:mail", cls="h-4 w-4 inline mr-2"),
-                            "Notification Settings",
-                            cls="text-sm font-semibold text-foreground mb-3 flex items-center"
-                        ),
+                        create_section_header("lucide:mail", "Notification Settings"),
                         CheckboxWithLabel(
                             label="Send invitation email immediately",
                             checked=True,
@@ -333,6 +307,7 @@ def examples():
                         "Accept",
                         ds_disabled("!$terms_accepted"),
                         ref_id="scroll_dialog",
+                        variant="default",
                         onclick="alert('Terms accepted!')"
                     )
                 ),
@@ -506,9 +481,39 @@ def examples():
         description="Dialog with loading states, progress tracking, and async operations"
     )
     
-    # Multi-step dialog
     @with_code
     def multi_step_wizard_example():
+        def create_step_indicator(number, label):
+            return Div(
+                Div(
+                    Span(
+                        Icon("lucide:check", cls="w-3 h-3 text-white"),
+                        ds_show(f"$step > {number}")
+                    ),
+                    Span(str(number), ds_show(f"$step <= {number}")),
+                    ds_style(
+                        background_color=f"$step >= {number} ? 'rgb(59, 130, 246)' : 'rgb(203, 213, 225)'",
+                        color=f"$step >= {number} ? 'white' : 'rgb(71, 85, 105)'"
+                    ),
+                    cls="w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold"
+                ),
+                P(label,
+                    ds_style(color=f"$step >= {number} ? 'hsl(var(--foreground))' : 'hsl(var(--muted-foreground))'"),
+                    cls="text-xs font-medium mt-2 text-center"
+                ),
+                cls="flex flex-col items-center"
+            )
+        
+        def create_project_type_button(icon, title, description, type_value):
+            return Button(
+                Icon(icon, cls="h-8 w-8 mb-2"),
+                P(title, cls="font-semibold"),
+                P(description, cls="text-xs text-muted-foreground"),
+                ds_on_click(f"$project_type = '{type_value}'; $step = 2"),
+                variant="outline",                            
+                cls="h-auto flex-col p-4 w-full"
+            )
+        
         return Dialog(
             DialogTrigger(
                 Icon("lucide:rocket", cls="h-4 w-4 mr-2"),
@@ -522,110 +527,27 @@ def examples():
                         ds_text("$step === 1 ? 'Choose your project type' : $step === 2 ? 'Configure settings' : 'Review and confirm'")
                     )
                 ),
-                # Step progress indicator
                 Div(
-                    # Background line with rounded ends
                     Div(cls="absolute top-3 left-0 w-full h-1 bg-muted rounded-full"),
-                    # Progress bar with rounded ends
                     Div(
                         ds_style(
                             width="$step === 1 ? '0%' : $step === 2 ? '50%' : '100%'"
                         ),
                         cls="absolute top-3 left-0 h-1 bg-primary rounded-full transition-all duration-500"
                     ),
-                    # Steps container
                     Div(
-                        # Step 1
-                        Div(
-                            Div(
-                                Span(
-                                    Icon("lucide:check", cls="w-3 h-3 text-white"),
-                                    ds_show("$step > 1")
-                                ),
-                                Span("1", ds_show("$step <= 1")),
-                                ds_style(
-                                    background_color="$step >= 1 ? 'rgb(59, 130, 246)' : 'rgb(203, 213, 225)'",
-                                    color="$step >= 1 ? 'white' : 'rgb(71, 85, 105)'"
-                                ),
-                                cls="w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold"
-                            ),
-                            P("Project Type",
-                                ds_style(color="$step >= 1 ? 'hsl(var(--foreground))' : 'hsl(var(--muted-foreground))'"),
-                                cls="text-xs font-medium mt-2 text-center"
-                            ),
-                            cls="flex flex-col items-center"
-                        ),
-                        # Step 2
-                        Div(
-                            Div(
-                                Span(
-                                    Icon("lucide:check", cls="w-3 h-3 text-white"),
-                                    ds_show("$step > 2")
-                                ),
-                                Span("2", ds_show("$step <= 2")),
-                                ds_style(
-                                    background_color="$step >= 2 ? 'rgb(59, 130, 246)' : 'rgb(203, 213, 225)'",
-                                    color="$step >= 2 ? 'white' : 'rgb(71, 85, 105)'"
-                                ),
-                                cls="w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold"
-                            ),
-                            P("Configuration",
-                                ds_style(color="$step >= 2 ? 'hsl(var(--foreground))' : 'hsl(var(--muted-foreground))'"),
-                                cls="text-xs font-medium mt-2 text-center"
-                            ),
-                            cls="flex flex-col items-center"
-                        ),
-                        # Step 3
-                        Div(
-                            Div(
-                                Span(
-                                    Icon("lucide:check", cls="w-3 h-3 text-white"),
-                                    ds_show("$step > 3")
-                                ),
-                                Span("3", ds_show("$step <= 3")),
-                                ds_style(
-                                    background_color="$step >= 3 ? 'rgb(59, 130, 246)' : 'rgb(203, 213, 225)'",
-                                    color="$step >= 3 ? 'white' : 'rgb(71, 85, 105)'"
-                                ),
-                                cls="w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold"
-                            ),
-                            P("Review",
-                                ds_style(color="$step >= 3 ? 'hsl(var(--foreground))' : 'hsl(var(--muted-foreground))'"),
-                                cls="text-xs font-medium mt-2 text-center"
-                            ),
-                            cls="flex flex-col items-center"
-                        ),
+                        create_step_indicator(1, "Project Type"),
+                        create_step_indicator(2, "Configuration"),
+                        create_step_indicator(3, "Review"),
                         cls="flex justify-between items-start relative z-10"
                     ),
                     cls="relative w-full mb-8 px-8"
                 ),
-                # Step 1: Project Type
                 Div(
                     Div(
-                        Button(
-                            Icon("lucide:globe", cls="h-8 w-8 mb-2"),
-                            P("Web Application", cls="font-semibold"),
-                            P("React, Vue, or vanilla JS", cls="text-xs text-muted-foreground"),
-                            ds_on_click("$project_type = 'web'; $step = 2"),
-                            variant="outline",                            
-                            cls="h-auto flex-col p-4 w-full"
-                        ),
-                        Button(
-                            Icon("lucide:smartphone", cls="h-8 w-8 mb-2"),
-                            P("Mobile App", cls="font-semibold"),
-                            P("iOS or Android", cls="text-xs text-muted-foreground"),
-                            ds_on_click("$project_type = 'mobile'; $step = 2"),
-                            variant="outline",                            
-                            cls="h-auto flex-col p-4 w-full"
-                        ),
-                        Button(
-                            Icon("lucide:server", cls="h-8 w-8 mb-2"),
-                            P("API Service", cls="font-semibold"),
-                            P("REST or GraphQL", cls="text-xs text-muted-foreground"),
-                            ds_on_click("$project_type = 'api'; $step = 2"),
-                            variant="outline",                            
-                            cls="h-auto flex-col p-4 w-full"
-                        ),
+                        create_project_type_button("lucide:globe", "Web Application", "React, Vue, or vanilla JS", "web"),
+                        create_project_type_button("lucide:smartphone", "Mobile App", "iOS or Android", "mobile"),
+                        create_project_type_button("lucide:server", "API Service", "REST or GraphQL", "api"),
                         cls="grid grid-cols-3 gap-3"
                     ),
                     ds_show("$step === 1"),
@@ -704,9 +626,23 @@ def examples():
         description="Complex wizard flow with step indicators and validation"
     )
     
-    # Settings dialog with tabs
     @with_code
     def settings_dialog_example():
+        def create_tab_button(icon, label, tab_id):
+            return Button(
+                Icon(icon, cls="h-4 w-4 mr-2"),
+                label,
+                ds_on_click(f"$settings_tab = '{tab_id}'; console.log('{label} clicked, settings_tab:', $settings_tab)"),
+                ds_style(
+                    background_color=f"$settings_tab === '{tab_id}' ? '#f1f5f9' : 'transparent'",
+                    color=f"$settings_tab === '{tab_id}' ? '#0f172a' : '#71717a'",
+                    box_shadow=f"$settings_tab === '{tab_id}' ? '0 1px 2px rgba(0,0,0,0.1)' : 'none'"
+                ),
+                variant="ghost",
+                size="sm",
+                cls="flex-1"
+            )
+        
         return Dialog(
             DialogTrigger(
                 Icon("lucide:settings", cls="h-4 w-4 mr-2"),
@@ -718,50 +654,10 @@ def examples():
                     DialogTitle("Settings"),
                     DialogDescription("Manage your account and application preferences")
                 ),
-                # Tab navigation
                 Div(
-                    Button(
-                        Icon("lucide:user", cls="h-4 w-4 mr-2"),
-                        "Profile",
-                        ds_on_click("$settings_tab = 'profile'; console.log('Profile clicked, settings_tab:', $settings_tab)"),
-                        ds_style(
-                            background_color="$settings_tab === 'profile' ? '#f1f5f9' : 'transparent'",
-                            color="$settings_tab === 'profile' ? '#0f172a' : '#71717a'",
-                            box_shadow="$settings_tab === 'profile' ? '0 1px 2px rgba(0,0,0,0.1)' : 'none'"
-                        ),
-                        variant="ghost",
-                        size="sm",
-                        
-                        cls="flex-1"
-                    ),
-                    Button(
-                        Icon("lucide:bell", cls="h-4 w-4 mr-2"),
-                        "Notifications",
-                        ds_on_click("$settings_tab = 'notifications'; console.log('Notifications clicked, settings_tab:', $settings_tab)"),
-                        ds_style(
-                            background_color="$settings_tab === 'notifications' ? '#f1f5f9' : 'transparent'",
-                            color="$settings_tab === 'notifications' ? '#0f172a' : '#71717a'",
-                            box_shadow="$settings_tab === 'notifications' ? '0 1px 2px rgba(0,0,0,0.1)' : 'none'"
-                        ),
-                        variant="ghost",
-                        size="sm",
-                        
-                        cls="flex-1"
-                    ),
-                    Button(
-                        Icon("lucide:shield", cls="h-4 w-4 mr-2"),
-                        "Security",
-                        ds_on_click("$settings_tab = 'security'; console.log('Security clicked, settings_tab:', $settings_tab)"),
-                        ds_style(
-                            background_color="$settings_tab === 'security' ? '#f1f5f9' : 'transparent'",
-                            color="$settings_tab === 'security' ? '#0f172a' : '#71717a'",
-                            box_shadow="$settings_tab === 'security' ? '0 1px 2px rgba(0,0,0,0.1)' : 'none'"
-                        ),
-                        variant="ghost",
-                        size="sm",
-                        
-                        cls="flex-1"
-                    ),
+                    create_tab_button("lucide:user", "Profile", "profile"),
+                    create_tab_button("lucide:bell", "Notifications", "notifications"),
+                    create_tab_button("lucide:shield", "Security", "security"),
                     cls="flex gap-1 mb-6 p-1 bg-muted/30 rounded-lg"
                 ),
                 # Profile tab
@@ -969,7 +865,6 @@ def examples():
 
 
 def create_dialog_docs():
-    """Create dialog documentation page using convention-based approach."""
     
     api_reference = build_api_reference(
         components=[

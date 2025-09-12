@@ -384,14 +384,7 @@ def examples():
                             "Reset",
                             variant="outline",
                             cls="w-full mt-2",
-                            ds_on_click="""
-                                evt.preventDefault();
-                                $cat_electronics = false; $cat_clothing = false; 
-                                $cat_books = false; $cat_home = false;
-                                $price_1 = false; $price_2 = false;
-                                $price_3 = false; $price_4 = false;
-                                $free_shipping = false; $express = false;
-                            """
+                            ds_on_click="evt.preventDefault(); $cat_electronics=false; $cat_clothing=false; $cat_books=false; $cat_home=false; $price_1=false; $price_2=false; $price_3=false; $price_4=false; $free_shipping=false; $express=false;"
                         ),
                         cls="mt-6"
                     ),

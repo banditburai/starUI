@@ -19,7 +19,6 @@ from widgets.component_preview import ComponentPreview
 def examples():
     """Generate alert examples using ComponentPreview with tabs."""
 
-    # Different message types
     @with_code
     def message_types_alert_example():
         return Div(
@@ -50,21 +49,28 @@ def examples():
         description="Success, warning, and info styled alerts"
     )
     
-    # Complex content
     @with_code
     def rich_content_alert_example():
+        payment_checks = [
+            "Verify your card details are correct",
+            "Ensure you have sufficient funds", 
+            "Check that your billing address matches"
+        ]
+        
+        check_list = Ul(
+            *[Li(check) for check in payment_checks],
+            cls="mt-2 ml-6 list-disc space-y-1 text-sm"
+        )
+        
+        description = AlertDescription(
+            P("There was an issue processing your payment. Please check the following:"),
+            check_list
+        )
+        
         return Alert(
             Icon("lucide:alert-circle", width="16", height="16"),
             AlertTitle("Unable to process payment"),
-            AlertDescription(
-                P("There was an issue processing your payment. Please check the following:"),
-                Ul(
-                    Li("Verify your card details are correct"),
-                    Li("Ensure you have sufficient funds"),
-                    Li("Check that your billing address matches"),
-                    cls="mt-2 ml-6 list-disc space-y-1 text-sm"
-                )
-            ),
+            description,
             variant="destructive"
         )
     
@@ -75,7 +81,6 @@ def examples():
         description="Alerts with lists and formatted text"
     )
     
-    # Without icon
     @with_code
     def simple_alert_example():
         return Alert(
@@ -94,7 +99,6 @@ def examples():
 def create_alert_docs():
     """Create alert documentation page using convention-based approach."""    
     
-    # Hero example - basic alert variants showcase
     @with_code
     def hero_alert_example():
         return Div(

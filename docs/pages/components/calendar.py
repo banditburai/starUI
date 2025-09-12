@@ -19,7 +19,6 @@ STATUS = "stable"
 def examples():
     """Generate calendar examples using ComponentPreview with tabs."""
 
-    # Date range selection
     @with_code
     def date_range_selection_example():
         return Div(
@@ -28,20 +27,17 @@ def examples():
                 mode="range",
                 selected=["2025-09-15", "2025-09-25"],
                 month=9,
-                year=2025,
+                year=2025
             ),
             Div(
                 P(
                     "Range: ",
-                    Span(
-                        ds_text("JSON.stringify($demo_range_selected)"),
-                        cls="font-mono text-xs",
-                    ),
+                    Span(ds_text("JSON.stringify($demo_range_selected)"), cls="font-mono text-xs")
                 ),
-                cls="mt-4 text-sm",
+                cls="mt-4 text-sm"
             ),
             ds_signals(demo_range_selected=value('["2025-09-15", "2025-09-25"]')),
-            cls="flex flex-col items-center",
+            cls="flex flex-col items-center"
         )
     
     yield ComponentPreview(
@@ -51,7 +47,6 @@ def examples():
         description="Select a start and end date for booking or filtering",
     )
 
-    # Multiple date selection - with correct month
     @with_code
     def multiple_date_selection_example():
         return Div(
@@ -60,23 +55,18 @@ def examples():
                 mode="multiple",
                 selected=["2025-09-10", "2025-09-15", "2025-09-20"],
                 month=9,
-                year=2025,
+                year=2025
             ),
             Div(
                 P(
                     "Selected: ",
-                    Span(
-                        ds_text("(JSON.parse($demo_multiple_selected || '[]')).length"),
-                        cls="font-mono",
-                    ),
-                    " dates",
+                    Span(ds_text("(JSON.parse($demo_multiple_selected || '[]')).length"), cls="font-mono"),
+                    " dates"
                 ),
-                cls="mt-4 text-sm",
+                cls="mt-4 text-sm"
             ),
-            ds_signals(
-                demo_multiple_selected=value('["2025-09-10", "2025-09-15", "2025-09-20"]')
-            ),
-            cls="flex flex-col items-center",
+            ds_signals(demo_multiple_selected=value('["2025-09-10", "2025-09-15", "2025-09-20"]')),
+            cls="flex flex-col items-center"
         )
     
     yield ComponentPreview(
@@ -90,19 +80,14 @@ def examples():
 def create_calendar_docs():
     """Create calendar documentation page using convention-based approach."""
 
-    # Hero example - single date picker
     @with_code
     def hero_calendar_example():
         return Div(
-            # All three modes showcased
             Div(
                 Div(
                     P("Single", cls="text-sm font-medium mb-2"),
-                    Calendar(
-                        signal="hero_single",
-                        mode="single",
-                    ),
-                    cls="flex flex-col items-center",
+                    Calendar(signal="hero_single", mode="single"),
+                    cls="flex flex-col items-center"
                 ),
                 Div(
                     P("Range", cls="text-sm font-medium mb-2"),
@@ -111,9 +96,9 @@ def create_calendar_docs():
                         mode="range",
                         selected=["2025-09-10", "2025-09-20"],
                         month=9,
-                        year=2025,
+                        year=2025
                     ),
-                    cls="flex flex-col items-center",
+                    cls="flex flex-col items-center"
                 ),
                 Div(
                     P("Multiple", cls="text-sm font-medium mb-2"),
@@ -122,18 +107,18 @@ def create_calendar_docs():
                         mode="multiple",
                         selected=["2025-09-05", "2025-09-15", "2025-09-25"],
                         month=9,
-                        year=2025,
+                        year=2025
                     ),
-                    cls="flex flex-col items-center",
+                    cls="flex flex-col items-center"
                 ),
-                cls="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl mx-auto",
+                cls="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl mx-auto"
             ),
             ds_signals(
                 hero_single_selected=value(""),
                 hero_range_selected=value('["2025-09-10", "2025-09-20"]'),
                 hero_multiple_selected=value('["2025-09-05", "2025-09-15", "2025-09-25"]')
             ),
-            cls="w-full",
+            cls="w-full"
         )
     
     hero_example = ComponentPreview(

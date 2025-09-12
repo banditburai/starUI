@@ -17,10 +17,6 @@ from utils import auto_generate_page, with_code, Component, build_api_reference
 
 
 def examples():
-    """Generate Tabs examples using ComponentPreview with tabs."""
-    
-    # Note: Basic tabs moved to hero example
-    # This will be the first example after the hero
     
     # Dashboard tabs
     @with_code
@@ -260,7 +256,6 @@ Button("Outline", variant="outline")'''),
 
 
 def create_tabs_docs():
-    """Create tabs documentation page using convention-based approach."""
     
     # Hero example - simple account/password tabs
     @with_code

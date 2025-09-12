@@ -1,10 +1,9 @@
 from typing import Any
-from uuid import uuid4
 
 from starhtml import FT, Div, Img
 from starhtml.datastar import ds_on, ds_show, ds_signals
 
-from .utils import cn
+from .utils import cn, gen_id
 
 
 def Avatar(
@@ -72,7 +71,7 @@ def AvatarWithFallback(
             **kwargs,
         )
 
-    signal = f"avatar_{uuid4().hex[:8]}_error"
+    signal = f"{gen_id('avatar')}_error"
 
     return Avatar(
         ds_signals(**{signal: False}),

@@ -17,7 +17,7 @@ from starui.registry.components.avatar import (
     AvatarImage,
     AvatarWithFallback,
 )
-from utils import with_code, Component, build_api_reference
+from utils import auto_generate_page, with_code, Component, build_api_reference
 from widgets.component_preview import ComponentPreview
 
 
@@ -53,18 +53,23 @@ def examples():
         description="Compose avatars with image and fallback components"
     )
     
-    # Sizes using custom classes
     @with_code
     def avatar_sizes_example():
-        return Div(
-            Avatar(AvatarFallback("XS"), cls="size-6"),
-            Avatar(AvatarFallback("SM"), cls="size-8"),
-            Avatar(AvatarFallback("MD")),  # default size-10
-            Avatar(AvatarFallback("LG"), cls="size-12"),
-            Avatar(AvatarFallback("XL"), cls="size-16"),
-            Avatar(AvatarFallback("2X"), cls="size-20"),
-            cls="flex items-center gap-4"
-        )
+        sizes = [
+            ("XS", "size-6"),
+            ("SM", "size-8"), 
+            ("MD", ""),  # default size-10
+            ("LG", "size-12"),
+            ("XL", "size-16"),
+            ("2X", "size-20")
+        ]
+        
+        size_avatars = [
+            Avatar(AvatarFallback(label), cls=size_cls) 
+            for label, size_cls in sizes
+        ]
+        
+        return Div(*size_avatars, cls="flex items-center gap-4")
     
     yield ComponentPreview(
         avatar_sizes_example(),
@@ -90,35 +95,22 @@ def examples():
         description="Display initials when no image is available"
     )
     
-    # Automatic Fallback with Datastar
     @with_code
     def automatic_fallback_avatar_example():
-        return Div(
-            Div(
-                AvatarWithFallback(
-                    src="https://github.com/shadcn.png",
-                    alt="@shadcn",
-                    fallback="CN",
-                ),
-                P("Valid URL", cls="text-xs text-muted-foreground text-center mt-1"),
-                cls="flex flex-col items-center"
-            ),
-            Div(
-                AvatarWithFallback(
-                    src="https://invalid-url.com/image.jpg",
-                    alt="Invalid",
-                    fallback="IN",
-                ),
-                P("Invalid URL", cls="text-xs text-muted-foreground text-center mt-1"),
-                cls="flex flex-col items-center"
-            ),
-            Div(
-                AvatarWithFallback(fallback="NI"),
-                P("No URL", cls="text-xs text-muted-foreground text-center mt-1"),
-                cls="flex flex-col items-center"
-            ),
-            cls="flex items-start gap-4"
-        )
+        examples = [
+            ("https://github.com/shadcn.png", "@shadcn", "CN", "Valid URL"),
+            ("https://invalid-url.com/image.jpg", "Invalid", "IN", "Invalid URL"),
+            (None, None, "NI", "No URL")
+        ]
+        
+        def create_avatar_demo(src, alt, fallback, description):
+            avatar = AvatarWithFallback(src=src, alt=alt, fallback=fallback) if src else AvatarWithFallback(fallback=fallback)
+            label = P(description, cls="text-xs text-muted-foreground text-center mt-1")
+            return Div(avatar, label, cls="flex flex-col items-center")
+        
+        avatar_demos = [create_avatar_demo(*example) for example in examples]
+        
+        return Div(*avatar_demos, cls="flex items-start gap-4")
     
     yield ComponentPreview(
         automatic_fallback_avatar_example(),
@@ -149,34 +141,23 @@ def examples():
         description="Create overlapping avatar groups with Tailwind utilities"
     )
     
-    # With Badge Pattern
     @with_code
     def avatar_with_badge_example():
+        def create_status_avatar(initials, badge_color):
+            avatar = Avatar(AvatarFallback(initials))
+            badge = Span(cls=f"absolute bottom-0 right-0 size-3 {badge_color} rounded-full ring-2 ring-background")
+            return Div(avatar, badge, cls="relative inline-block")
+        
+        def create_count_avatar(initials, count):
+            avatar = Avatar(AvatarFallback(initials))
+            badge = Span(count, cls="absolute bottom-0 right-0 size-4 bg-red-500 rounded-full ring-2 ring-background flex items-center justify-center text-[8px] font-bold text-white")
+            return Div(avatar, badge, cls="relative inline-block")
+        
         return Div(
-            # Green status badge
-            Div(
-                Avatar(AvatarFallback("JD")),
-                Span(cls="absolute bottom-0 right-0 size-3 bg-green-500 rounded-full ring-2 ring-background"),
-                cls="relative inline-block"
-            ),
-            # Red status badge
-            Div(
-                Avatar(AvatarFallback("AS")),
-                Span(cls="absolute bottom-0 right-0 size-3 bg-red-500 rounded-full ring-2 ring-background"),
-                cls="relative inline-block"
-            ),
-            # Yellow status badge
-            Div(
-                Avatar(AvatarFallback("PQ")),
-                Span(cls="absolute bottom-0 right-0 size-3 bg-yellow-500 rounded-full ring-2 ring-background"),
-                cls="relative inline-block"
-            ),
-            # Badge with count
-            Div(
-                Avatar(AvatarFallback("MN")),
-                Span("5", cls="absolute bottom-0 right-0 size-4 bg-red-500 rounded-full ring-2 ring-background flex items-center justify-center text-[8px] font-bold text-white"),
-                cls="relative inline-block"
-            ),
+            create_status_avatar("JD", "bg-green-500"),
+            create_status_avatar("AS", "bg-red-500"),  
+            create_status_avatar("PQ", "bg-yellow-500"),
+            create_count_avatar("MN", "5"),
             cls="flex items-center gap-4"
         )
     
@@ -187,17 +168,22 @@ def examples():
         description="Add status indicators or notification badges using absolute positioning"
     )
     
-    # Colored Initials Pattern
     @with_code
     def colored_initials_avatar_example():
-        return Div(
-            Avatar(AvatarFallback("JD", cls="bg-red-600 dark:bg-red-500 text-white font-semibold")),
-            Avatar(AvatarFallback("AS", cls="bg-blue-600 dark:bg-blue-500 text-white font-semibold")),
-            Avatar(AvatarFallback("PQ", cls="bg-green-600 dark:bg-green-500 text-white font-semibold")),
-            Avatar(AvatarFallback("MN", cls="bg-purple-600 dark:bg-purple-500 text-white font-semibold")),
-            Avatar(AvatarFallback("XY", cls="bg-orange-600 dark:bg-orange-500 text-white font-semibold")),
-            cls="flex items-center gap-4"
-        )
+        avatars = [
+            ("JD", "red"),
+            ("AS", "blue"),
+            ("PQ", "green"), 
+            ("MN", "purple"),
+            ("XY", "orange")
+        ]
+        
+        colored_avatars = [
+            Avatar(AvatarFallback(initials, cls=f"bg-{color}-600 dark:bg-{color}-500 text-white font-semibold"))
+            for initials, color in avatars
+        ]
+        
+        return Div(*colored_avatars, cls="flex items-center gap-4")
     
     yield ComponentPreview(
         colored_initials_avatar_example(),

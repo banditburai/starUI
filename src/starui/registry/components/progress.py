@@ -1,25 +1,21 @@
-"""Progress component - Loading and completion indicators."""
-
 from typing import Any
-from uuid import uuid4
 
 from starhtml import FT, Div
 from starhtml.datastar import ds_signals, ds_style, value
 
-from .utils import cn
+from .utils import cn, ensure_signal
 
 
 def Progress(
     progress_value: float | None = None,
     max_value: float = 100,
-    signal: str = "",
-    class_name: str = "",
+    signal: str | None = None,
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    signal = signal or f"progress_{str(uuid4())[:8]}"
+    signal = ensure_signal(signal, "progress")
 
-    initial_percentage = max(
+    percentage = max(
         0,
         min(
             100,
@@ -28,18 +24,14 @@ def Progress(
             else 0,
         ),
     )
-    initial_percentage = (
-        int(initial_percentage)
-        if initial_percentage.is_integer()
-        else initial_percentage
-    )
+    percentage = int(percentage) if percentage.is_integer() else percentage
 
     return Div(
-        ds_signals({signal: value(initial_percentage)}),
+        ds_signals({signal: value(percentage)}),
         Div(
             ds_style(width=f"${signal} + '%'"),
             cls="bg-primary h-full transition-all duration-300 ease-out",
-            style=f"width: {initial_percentage}%",
+            style=f"width: {percentage}%",
         ),
         role="progressbar",
         aria_valuemin="0",
@@ -47,8 +39,8 @@ def Progress(
         aria_valuenow=str(progress_value) if progress_value is not None else None,
         cls=cn(
             "bg-primary/20 relative h-2 w-full overflow-hidden rounded-full",
-            class_name,
             cls,
         ),
+        data_slot="progress",
         **kwargs,
     )

@@ -28,76 +28,48 @@ from widgets.component_preview import ComponentPreview
 def examples():
     """Generate Card examples using ComponentPreview with tabs."""
     
-    # Interactive profile cards with follow functionality
     @with_code
     def interactive_profile_cards_example():
+        profiles = [
+            ("JD", "bg-blue-500", "John Doe", "Product Designer", "online", "bg-green-100 text-green-800", "Passionate about creating user-centered designs that solve real problems.", "following1", "John"),
+            ("AS", "bg-green-500", "Anna Smith", "Frontend Developer", "away", "bg-yellow-100 text-yellow-800", "Full-stack developer with expertise in Python and modern web technologies.", "following2", "Anna")
+        ]
+        
+        def create_profile_card(initials, avatar_color, name, role, status, status_color, bio, follow_signal, message_name):
+            return Card(
+                CardHeader(
+                    Div(
+                        Div(initials, cls=f"w-12 h-12 rounded-full {avatar_color} flex items-center justify-center text-white font-bold"),
+                        Div(
+                            CardTitle(name, cls="text-lg"),
+                            CardDescription(role),
+                            Badge(status, variant="default", cls=f"{status_color} text-xs"),
+                            cls="ml-4 space-y-1"
+                        ),
+                        cls="flex items-center"
+                    )
+                ),
+                CardContent(
+                    P(bio, cls="text-sm text-muted-foreground")
+                ),
+                CardFooter(
+                    Button(
+                        ds_text(f"${follow_signal} ? 'Following' : 'Follow'"),
+                        ds_on_click(toggle_signal(follow_signal)),
+                        variant="outline", size="sm", cls="mr-2",
+                        ds_class={
+                            "bg-green-50 text-green-700 border-green-200": f"${follow_signal}",
+                            "hover:bg-green-50": f"${follow_signal}"
+                        }
+                    ),
+                    Button("Message", size="sm", ds_on_click=f"alert('Message sent to {message_name}!')")
+                )
+            )
+        
+        profile_cards = [create_profile_card(*profile) for profile in profiles]
+        
         return Div(
-            Card(
-                CardHeader(
-                    Div(
-                        Div("JD", cls="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold"),
-                        Div(
-                            CardTitle("John Doe", cls="text-lg"),
-                            CardDescription("Product Designer"),
-                            Badge(
-                                "online",
-                                variant="default",
-                                cls="bg-green-100 text-green-800 text-xs"
-                            ),
-                            cls="ml-4 space-y-1"
-                        ),
-                        cls="flex items-center"
-                    )
-                ),
-                CardContent(
-                    P("Passionate about creating user-centered designs that solve real problems.", cls="text-sm text-muted-foreground")
-                ),
-                CardFooter(
-                    Button(
-                        ds_text("$following1 ? 'Following' : 'Follow'"),
-                        ds_on_click(toggle_signal("following1")),
-                        variant="outline", size="sm", cls="mr-2",
-                        ds_class={
-                            "bg-green-50 text-green-700 border-green-200": "$following1",
-                            "hover:bg-green-50": "$following1"
-                        },                        
-                    ),
-                    Button("Message", size="sm", ds_on_click="alert('Message sent to John!')")
-                )
-            ),
-            Card(
-                CardHeader(
-                    Div(
-                        Div("AS", cls="w-12 h-12 rounded-full bg-green-500 flex items-center justify-center text-white font-bold"),
-                        Div(
-                            CardTitle("Anna Smith", cls="text-lg"),
-                            CardDescription("Frontend Developer"),
-                            Badge(
-                                "away",
-                                variant="secondary",
-                                cls="bg-yellow-100 text-yellow-800 text-xs"
-                            ),
-                            cls="ml-4 space-y-1"
-                        ),
-                        cls="flex items-center"
-                    )
-                ),
-                CardContent(
-                    P("Full-stack developer with expertise in Python and modern web technologies.", cls="text-sm text-muted-foreground")
-                ),
-                CardFooter(
-                    Button(
-                        ds_text("$following2 ? 'Following' : 'Follow'"),
-                        ds_on_click(toggle_signal("following2")),
-                        variant="outline", size="sm", cls="mr-2",
-                        ds_class={
-                            "bg-green-50 text-green-700 border-green-200": "$following2",
-                            "hover:bg-green-50": "$following2"
-                        },                        
-                    ),
-                    Button("Message", size="sm", ds_on_click="alert('Message sent to Anna!')")
-                )
-            ),
+            *profile_cards,
             ds_signals(following1=False, following2=False),
             cls="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl"
         )
@@ -109,7 +81,6 @@ def examples():
         description="Profile cards with follow/unfollow functionality and status badges"
     )
     
-    # Interactive dashboard stats with period selection
     @with_code
     def interactive_dashboard_stats_example():
         return Div(
@@ -180,7 +151,7 @@ def examples():
                                 Span(
                                     ds_style(color="$revenue_change > 0 ? 'rgb(34, 197, 94)' : ($revenue_change < 0 ? 'rgb(239, 68, 68)' : 'rgb(107, 114, 128)')"),
                                     ds_text("($revenue_change >= 0 ? '+' : '') + $revenue_change + '%'"),
-                                    cls="font-medium",                                    
+                                    cls="font-medium"
                                 ),
                                 Span(" from last period", cls="text-muted-foreground"),
                                 cls="text-sm mt-1"
@@ -207,7 +178,7 @@ def examples():
                                 Span(
                                     ds_style(color="$users_change > 0 ? 'rgb(34, 197, 94)' : ($users_change < 0 ? 'rgb(239, 68, 68)' : 'rgb(107, 114, 128)')"),
                                     ds_text("($users_change >= 0 ? '+' : '') + $users_change + '%'"),
-                                    cls="font-medium",                                    
+                                    cls="font-medium"
                                 ),
                                 Span(" from last period", cls="text-muted-foreground"),
                                 cls="text-sm mt-1"
@@ -234,8 +205,7 @@ def examples():
                                 Span(
                                     ds_style(color="$conversion_change > 0 ? 'rgb(34, 197, 94)' : ($conversion_change < 0 ? 'rgb(239, 68, 68)' : 'rgb(107, 114, 128)')"),
                                     ds_text("($conversion_change >= 0 ? '+' : '') + $conversion_change"),
-                                    cls="font-medium",
-                                    
+                                    cls="font-medium"
                                 ),
                                 Span(" percentage points", cls="text-muted-foreground"),
                                 cls="text-sm mt-1"

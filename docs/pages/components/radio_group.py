@@ -26,7 +26,6 @@ from widgets.component_preview import ComponentPreview
 
 
 def examples():
-    """Generate radio group examples using ComponentPreview with tabs."""
     
     # Horizontal layout
     @with_code
@@ -149,9 +148,23 @@ def examples():
         description="Rich radio options with proper RadioGroup semantics and CSS peer selectors"
     )
     
-    # Payment method selector
     @with_code
     def payment_method_example():
+        payment_icons = {
+            "card": "lucide:credit-card",
+            "paypal": "lucide:wallet", 
+            "bank": "lucide:building-2",
+            "crypto": "lucide:bitcoin"
+        }
+        
+        def create_payment_info(method, icon):
+            return Div(
+                Icon(icon, cls="h-5 w-5 mr-2"),
+                P("Secure payment processing", cls="text-sm"),
+                ds_show(f"$payment_method === '{method}'"),
+                cls="flex items-center p-3 bg-muted rounded-md w-full"
+            )
+        
         return Card(
             CardHeader(
                 CardTitle("Payment Method"),
@@ -172,30 +185,8 @@ def examples():
                         required=True
                     ),
                     Div(
-                        Div(
-                            Icon("lucide:credit-card", cls="h-5 w-5 mr-2"),
-                            P("Secure payment processing", cls="text-sm"),
-                            ds_show("$payment_method === 'card'"),
-                            cls="flex items-center p-3 bg-muted rounded-md w-full"
-                        ),
-                        Div(
-                            Icon("lucide:wallet", cls="h-5 w-5 mr-2"),
-                            P("Secure payment processing", cls="text-sm"),
-                            ds_show("$payment_method === 'paypal'"),
-                            cls="flex items-center p-3 bg-muted rounded-md w-full"
-                        ),
-                        Div(
-                            Icon("lucide:building-2", cls="h-5 w-5 mr-2"),
-                            P("Secure payment processing", cls="text-sm"),
-                            ds_show("$payment_method === 'bank'"),
-                            cls="flex items-center p-3 bg-muted rounded-md w-full"
-                        ),
-                        Div(
-                            Icon("lucide:bitcoin", cls="h-5 w-5 mr-2"),
-                            P("Secure payment processing", cls="text-sm"),
-                            ds_show("$payment_method === 'crypto'"),
-                            cls="flex items-center p-3 bg-muted rounded-md w-full"
-                        ),
+                        *[create_payment_info(method, icon) 
+                          for method, icon in payment_icons.items()],
                         cls="mt-4 h-16 flex items-center"
                     ),
                     Button(
@@ -402,7 +393,6 @@ def examples():
 
 
 def create_radio_group_docs():
-    """Create radio group documentation page using convention-based approach."""
     
     api_reference = build_api_reference(
         components=[

@@ -26,7 +26,6 @@ from widgets.component_preview import ComponentPreview
 
 
 def examples():
-    """Generate toggle examples using ComponentPreview with tabs."""
     
     # Basic toggle
     @with_code
@@ -55,6 +54,18 @@ def examples():
     # Feature toggles
     @with_code
     def feature_toggles_example():
+        def create_feature_toggle(icon, color_class, title, description, signal, pressed=False):
+            return Div(
+                Toggle(
+                    Icon(icon, cls=f"h-4 w-4 mr-2", ds_class=ds_class(**{color_class: f"${signal}"})),
+                    Span(title),
+                    variant="outline",
+                    signal=signal,
+                    pressed=pressed
+                ),
+                P(description, cls="text-sm text-muted-foreground mt-1"),
+                cls="space-y-1"
+            )
         return Card(
             CardHeader(
                 CardTitle("Feature Flags"),
@@ -62,37 +73,9 @@ def examples():
             ),
             CardContent(
                 Div(
-                    Div(
-                        Toggle(
-                            Icon("lucide:flask-conical", cls="h-4 w-4 mr-2", ds_class=ds_class(**{"text-orange-500": "$experimental"})),
-                            Span("Experimental Mode"),
-                            variant="outline",
-                            signal="experimental"
-                        ),
-                        P("Enable beta features", cls="text-sm text-muted-foreground mt-1"),
-                        cls="space-y-1"
-                    ),
-                    Div(
-                        Toggle(
-                            Icon("lucide:bug", cls="h-4 w-4 mr-2", ds_class=ds_class(**{"text-red-500": "$debug"})),
-                            Span("Debug Mode"),
-                            variant="outline",
-                            signal="debug"
-                        ),
-                        P("Show debug information", cls="text-sm text-muted-foreground mt-1"),
-                        cls="space-y-1"
-                    ),
-                    Div(
-                        Toggle(
-                            Icon("lucide:zap", cls="h-4 w-4 mr-2", ds_class=ds_class(**{"text-yellow-500": "$performance"})),
-                            Span("Performance Mode"),
-                            variant="outline",
-                            signal="performance",
-                            pressed=True
-                        ),
-                        P("Optimize for speed", cls="text-sm text-muted-foreground mt-1"),
-                        cls="space-y-1"
-                    ),
+                    create_feature_toggle("lucide:flask-conical", "text-orange-500", "Experimental Mode", "Enable beta features", "experimental"),
+                    create_feature_toggle("lucide:bug", "text-red-500", "Debug Mode", "Show debug information", "debug"),
+                    create_feature_toggle("lucide:zap", "text-yellow-500", "Performance Mode", "Optimize for speed", "performance", pressed=True),
                     Separator(cls="my-4"),
                     Div(
                         Badge(
@@ -182,6 +165,14 @@ def examples():
     # Social interaction toggles
     @with_code
     def social_interactions_example():
+        def create_social_toggle(icon, count_signal, signal, label):
+            return Toggle(
+                Icon(icon, cls="h-4 w-4 mr-1"),
+                Span(ds_text(count_signal), cls="text-sm"),
+                variant="outline",
+                signal=signal,
+                aria_label=label
+            )
         return Card(
             CardContent(
                 Div(
@@ -192,20 +183,8 @@ def examples():
                     P("Beautiful sunset over the mountains", cls="font-medium mb-2"),
                     P("Posted 2 hours ago", cls="text-sm text-muted-foreground mb-4"),
                     Div(
-                        Toggle(
-                            Icon("lucide:heart", cls="h-4 w-4 mr-1"),
-                            Span(ds_text("$liked ? '124' : '123'"), cls="text-sm"),
-                            variant="outline",
-                            signal="liked",
-                            aria_label="Like post"
-                        ),
-                        Toggle(
-                            Icon("lucide:message-circle", cls="h-4 w-4 mr-1"),
-                            Span(ds_text("$comment ? '9' : '8'"), cls="text-sm"),
-                            variant="outline",
-                            signal="comment",
-                            aria_label="Comment"
-                        ),
+                        create_social_toggle("lucide:heart", "$liked ? '124' : '123'", "liked", "Like post"),
+                        create_social_toggle("lucide:message-circle", "$comment ? '9' : '8'", "comment", "Comment"),
                         Toggle(
                             Icon("lucide:bookmark", cls="h-4 w-4"),
                             variant="outline",
@@ -453,7 +432,6 @@ def examples():
 
 
 def create_toggle_docs():
-    """Create toggle documentation page using convention-based approach."""
     
     api_reference = build_api_reference(
         main_props=[

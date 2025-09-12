@@ -61,7 +61,6 @@ def IsolatedThemeToggle(alt_theme="dark", default_theme="light", **kwargs) -> FT
 ThemeToggle = IsolatedThemeToggle
 
 def examples():
-    """Generate Theme Toggle examples using ComponentPreview with tabs."""
     
     # Sizes example - showing different button sizes
     @with_code
@@ -208,7 +207,6 @@ def examples():
 
 
 def create_theme_toggle_docs():
-    """Create theme toggle documentation page using convention-based approach."""
     
     # Hero example - basic theme toggle
     @with_code

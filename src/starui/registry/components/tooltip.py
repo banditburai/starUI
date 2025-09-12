@@ -1,6 +1,5 @@
 from collections.abc import Callable
 from typing import Any, Literal
-from uuid import uuid4
 
 from starhtml import FT, Div
 from starhtml.datastar import (
@@ -15,53 +14,58 @@ from starhtml.datastar import (
     ds_signals,
 )
 
-from .utils import cn
+from .utils import cn, ensure_signal
 
 
-def Tooltip(*children, cls: str = "relative inline-block", **kwargs: Any) -> FT:
-    tooltip_id = f"tooltip_{uuid4().hex[:8]}"
+def Tooltip(
+    *children: FT | Callable[[str], FT],
+    signal: str | None = None,
+    cls: str = "relative inline-block",
+    **kwargs: Any,
+) -> FT:
+    signal = ensure_signal(signal, "tooltip")
     return Div(
-        *[child(tooltip_id) if callable(child) else child for child in children],
-        ds_signals({f"{tooltip_id}_open": False}),
+        *[child(signal) if callable(child) else child for child in children],
+        ds_signals({f"{signal}_open": False}),
+        data_slot="tooltip",
         cls=cls,
         **kwargs,
     )
 
 
 def TooltipTrigger(
-    *children,
+    *children: FT,
     delay_duration: int = 700,
     hide_delay: int = 0,
-    class_name: str = "",
     cls: str = "",
     **kwargs: Any,
 ) -> Callable[[str], FT]:
-    def _(tooltip_id: str) -> FT:
+    def _(signal: str) -> FT:
+        timer = f"_tt_{signal}_timer"
         return Div(
             *children,
-            ds_ref(f"{tooltip_id}Trigger"),
+            ds_ref(f"{signal}_trigger"),
             ds_on_mouseenter(
-                f"clearTimeout(window.tooltipTimer_{tooltip_id}); window.tooltipTimer_{tooltip_id} = setTimeout(() => ${tooltip_id}_open = true, {delay_duration})"
+                f"clearTimeout({timer}); {timer} = setTimeout(() => ${signal}_open = true, {delay_duration})"
             ),
             ds_on_mouseleave(
-                f"clearTimeout(window.tooltipTimer_{tooltip_id}); window.tooltipTimer_{tooltip_id} = setTimeout(() => ${tooltip_id}_open = false, {hide_delay})"
+                f"clearTimeout({timer}); {timer} = setTimeout(() => ${signal}_open = false, {hide_delay})"
                 if hide_delay > 0
-                else f"clearTimeout(window.tooltipTimer_{tooltip_id}); ${tooltip_id}_open = false"
+                else f"clearTimeout({timer}); ${signal}_open = false"
             ),
             ds_on_focus(
-                f"clearTimeout(window.tooltipTimer_{tooltip_id}); window.tooltipTimer_{tooltip_id} = setTimeout(() => ${tooltip_id}_open = true, {delay_duration})"
+                f"clearTimeout({timer}); {timer} = setTimeout(() => ${signal}_open = true, {delay_duration})"
             ),
-            ds_on_blur(
-                f"clearTimeout(window.tooltipTimer_{tooltip_id}); ${tooltip_id}_open = false"
-            ),
+            ds_on_blur(f"clearTimeout({timer}); ${signal}_open = false"),
             ds_on_keydown(
-                f"event.key === 'Escape' && (clearTimeout(window.tooltipTimer_{tooltip_id}), ${tooltip_id}_open = false)"
+                f"event.key === 'Escape' && (clearTimeout({timer}), ${signal}_open = false)"
             ),
-            id=f"{tooltip_id}-trigger",
+            id=f"{signal}_trigger",
             tabindex="0",
-            aria_describedby=f"{tooltip_id}-content",
-            aria_expanded=f"${tooltip_id}_open",
-            cls=cn("inline-block outline-none", class_name, cls),
+            aria_describedby=f"{signal}_content",
+            aria_expanded=f"${signal}_open",
+            data_slot="tooltip-trigger",
+            cls=cn("inline-block outline-none", cls),
             **kwargs,
         )
 
@@ -69,16 +73,15 @@ def TooltipTrigger(
 
 
 def TooltipContent(
-    *children,
+    *children: FT,
     side: Literal["top", "right", "bottom", "left"] = "top",
     align: Literal["start", "center", "end"] = "center",
     side_offset: int = 8,
     allow_flip: bool = True,
-    class_name: str = "",
     cls: str = "",
     **kwargs: Any,
 ) -> Callable[[str], FT]:
-    def _(tooltip_id: str) -> FT:
+    def _(signal: str) -> FT:
         placement = f"{side}-{align}" if align != "center" else side
         arrow_classes = {
             "top": "bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2",
@@ -90,29 +93,30 @@ def TooltipContent(
         return Div(
             *children,
             Div(cls=cn("absolute w-2 h-2 bg-primary rotate-45", arrow_classes[side])),
-            ds_ref(f"{tooltip_id}Content"),
-            ds_show(f"${tooltip_id}_open"),
+            ds_ref(f"{signal}_content"),
+            ds_show(f"${signal}_open"),
             ds_position(
-                anchor=f"{tooltip_id}-trigger",
+                anchor=f"{signal}_trigger",
                 placement=placement,
                 offset=side_offset,
                 flip=allow_flip,
                 shift=True,
                 hide=True,
+                strategy="fixed",
             ),
-            id=f"{tooltip_id}-content",
+            id=f"{signal}_content",
             role="tooltip",
-            data_state=f"${tooltip_id}_open ? 'open' : 'closed'",
+            data_state=f"${signal}_open ? 'open' : 'closed'",
             data_side=side,
+            data_slot="tooltip-content",
             cls=cn(
-                "relative z-50 w-fit rounded-md px-3 py-1.5",
+                "fixed z-50 w-fit rounded-md px-3 py-1.5",
                 "bg-primary text-primary-foreground text-xs text-balance",
                 "pointer-events-none",
                 "animate-in fade-in-0 zoom-in-95",
                 "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
                 "data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2",
                 "data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-                class_name,
                 cls,
             ),
             **kwargs,
