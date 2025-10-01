@@ -1,12 +1,19 @@
+"""Documentation utilities for StarUI components."""
+
 import inspect
 import re
 from functools import wraps
 from textwrap import dedent
 from typing import Any, Callable
+
 from starhtml import *
 from widgets.installation_section import InstallationSection
 from widgets.code_block import CodeBlock
 
+
+# ============================================================================
+# MAIN API
+# ============================================================================
 
 def auto_generate_page(
     component_name: str,
@@ -28,16 +35,16 @@ def auto_generate_page(
     from layouts.base import DocsLayout, LayoutConfig, SidebarConfig
     from app import DOCS_SIDEBAR_SECTIONS
     
-    sections = filter(None, [
+    sections = [
         hero_example,
         _installation(cli_command, manual_files, dependencies),
         _examples(examples),
         _usage(usage_code, usage_description),
         _api_reference(api_reference)
-    ])
+    ]
     
     return DocsLayout(
-        Div(*sections),
+        Div(*filter(None, sections)),
         layout=LayoutConfig(
             title=component_name,
             description=description,
@@ -47,6 +54,10 @@ def auto_generate_page(
         **layout_attrs
     )
 
+
+# ============================================================================
+# SECTIONS
+# ============================================================================
 
 def _installation(cli_command, manual_files, dependencies):
     """Installation section."""
@@ -95,7 +106,7 @@ def _api_reference(api_ref: dict[str, Any] | None) -> FT | None:
         return None
     
     props = api_ref.get("props", [])
-    components = api_ref.get("api", api_ref.get("components", []))
+    components = api_ref.get("components", [])
     
     if not (props or components):
         return None
@@ -113,6 +124,10 @@ def _api_reference(api_ref: dict[str, Any] | None) -> FT | None:
         cls="space-y-6"
     )
 
+
+# ============================================================================
+# TABLES
+# ============================================================================
 
 def _props_table(props: list[dict]) -> FT | None:
     """Props table."""
@@ -178,6 +193,10 @@ def _table(headers: list[str], rows: list[list]) -> FT:
     )
 
 
+# ============================================================================
+# MARKDOWN
+# ============================================================================
+
 def generate_component_markdown(
     component_name: str,
     description: str,
@@ -240,164 +259,6 @@ def _markdown_props(api_ref: dict[str, Any] | None) -> str | None:
     return "\n".join(lines)
 
 
-def extract_code(func: Callable) -> str:
-    """
-    Extract code from function body.
-    
-    Supports directives:
-    - #: hide - Exclude line from output
-    - #: include function_name() - Inline function body
-    """
-    try:
-        source = dedent(inspect.getsource(func))
-        lines = source.split('\n')
-        
-        # Find function body start
-        body_start = next(
-            (i + 1 for i, line in enumerate(lines) 
-             if line.strip().startswith('def ') and func.__name__ in line),
-            0
-        )
-        
-        body_lines = lines[body_start:]
-        
-        # Skip leading empty lines
-        while body_lines and not body_lines[0].strip():
-            body_lines.pop(0)
-        
-        if not body_lines:
-            return "# Could not extract function body"
-        
-        # Normalize indentation
-        base_indent = len(body_lines[0]) - len(body_lines[0].lstrip())
-        normalized = [
-            line[base_indent:] if line.strip() and line.startswith(' ' * base_indent) 
-            else line.lstrip() if line.strip() 
-            else ''
-            for line in body_lines
-        ]
-        
-        # Process directives
-        processed = []
-        for line in normalized:
-            # Skip #: hide lines
-            if line.rstrip().endswith('#: hide'):
-                continue
-            
-            # Process #: include
-            if match := re.search(r'#: include (\w+)\(\)', line):
-                func_name = match.group(1)
-                frame = inspect.currentframe()
-                if frame and frame.f_back and frame.f_back.f_back:
-                    caller_globals = frame.f_back.f_back.f_globals
-                    if func_name in caller_globals:
-                        included_code = _extract_function_body(caller_globals[func_name])
-                        if included_code:
-                            indent = len(line) - len(line.lstrip())
-                            for inc_line in included_code.split('\n'):
-                                if inc_line.strip():
-                                    processed.append(' ' * indent + inc_line)
-                                else:
-                                    processed.append('')
-                            continue
-            
-            processed.append(line)
-        
-        # Handle simple return-only functions vs complex functions
-        has_inner_def = any('def ' in line for line in processed[1:])
-        first_code = next((line for line in processed if line.strip()), '')
-        
-        if first_code.strip().startswith('return ') and not has_inner_def:
-            # Simple pattern: extract return value
-            return_idx = next(
-                (i for i, line in enumerate(processed) 
-                 if line.strip().startswith('return ')),
-                -1
-            )
-            if return_idx >= 0:
-                result = processed[return_idx:]
-                if result:
-                    first = result[0]
-                    indent = len(first) - len(first.lstrip())
-                    result[0] = ' ' * indent + first.lstrip()[7:]
-                return '\n'.join(line.rstrip() for line in result)
-        else:
-            # Complex pattern: remove 'return' keywords
-            result = [
-                ' ' * (len(line) - len(line.lstrip())) + line.lstrip()[7:]
-                if line.strip().startswith('return ')
-                else line
-                for line in processed
-            ]
-            return '\n'.join(line.rstrip() for line in result)
-        
-    except Exception as e:
-        return f"# Error: {e}"
-
-
-def _extract_function_body(func: Callable) -> str:
-    """Extract complete function body."""
-    try:
-        source = dedent(inspect.getsource(func))
-        lines = source.split('\n')
-        
-        # Find function body
-        body_start = next(
-            (i + 1 for i, line in enumerate(lines)
-             if 'def ' in line and func.__name__ in line and ':' in line),
-            0
-        )
-        
-        body_lines = lines[body_start:]
-        
-        # Skip docstrings
-        clean_lines = []
-        in_docstring = False
-        for line in body_lines:
-            stripped = line.strip()
-            if stripped.startswith(('"""', "'''")):
-                quotes = '"""' if '"""' in stripped else "'''"
-                if in_docstring or stripped.count(quotes) >= 2:
-                    in_docstring = not in_docstring
-                    continue
-                in_docstring = True
-            elif not in_docstring:
-                clean_lines.append(line)
-        
-        body_lines = clean_lines
-        
-        # Skip leading empty lines
-        while body_lines and not body_lines[0].strip():
-            body_lines.pop(0)
-        
-        if not body_lines:
-            return ""
-        
-        # Normalize indentation
-        base_indent = len(body_lines[0]) - len(body_lines[0].lstrip())
-        normalized = [
-            line[base_indent:] if line.strip() and len(line) >= base_indent and line[:base_indent].isspace()
-            else line.lstrip() if line.strip()
-            else ''
-            for line in body_lines
-        ]
-        
-        return '\n'.join(line.rstrip() for line in normalized)
-        
-    except Exception:
-        return ""
-
-
-def with_code(func: Callable) -> Callable:
-    """Decorator to attach extracted code to function."""
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        return func(*args, **kwargs)
-    
-    wrapper.code = extract_code(func)
-    return wrapper
-
-
 # ============================================================================
 # API REFERENCE BUILDERS
 # ============================================================================
@@ -407,7 +268,7 @@ from typing import Optional
 
 @dataclass
 class Prop:
-    """Component prop for API documentation."""
+    """Represents a component prop for API documentation."""
     name: str
     type: str
     description: str
@@ -415,7 +276,7 @@ class Prop:
 
 @dataclass 
 class Component:
-    """Component for API documentation."""
+    """Represents a component for API documentation."""
     name: str
     description: str
     props: list[Prop] = None
@@ -426,11 +287,11 @@ class Component:
 
 def build_api_reference(main_props: list[Prop] = None, components: list[Component] = None) -> dict:
     """
-    Build API reference from typed objects.
+    Build API reference dict from typed objects.
     
-    Design: Choose either main_props OR components based on what's most useful:
-    - main_props: For simple components (Button, Input)  
-    - components: For composite components (AlertDialog, Accordion)
+    Design note: Intentionally choose either main_props OR components, not both.
+    - main_props: For simple components where users need to understand parameters
+    - components: For composite components where users need to understand structure
     """
     result = {}
     
@@ -446,11 +307,16 @@ def build_api_reference(main_props: list[Prop] = None, components: list[Componen
         ]
     
     if components:
-        result["components"] = [
-            {
+        result["components"] = []
+        for comp in components:
+            comp_dict = {
                 "name": comp.name,
-                "description": comp.description,
-                **({"props": [
+                "description": comp.description
+            }
+            # Note: We generally don't show component props in the table
+            # since that creates too much detail. Component structure is the focus.
+            if comp.props:
+                comp_dict["props"] = [
                     {
                         "name": p.name,
                         "type": p.type,
@@ -458,9 +324,101 @@ def build_api_reference(main_props: list[Prop] = None, components: list[Componen
                         **({"default": p.default} if p.default is not None else {})
                     }
                     for p in comp.props
-                ]} if comp.props else {})
-            }
-            for comp in components
-        ]
+                ]
+            result["components"].append(comp_dict)
     
     return result
+
+
+# ============================================================================
+# CODE EXTRACTION
+# ============================================================================
+
+def extract_code(func: Callable) -> str:
+    """Extract and normalize code from function body, handling both patterns."""
+    try:
+        source = dedent(inspect.getsource(func))
+        lines = source.split('\n')
+        
+        # Find where the actual function body starts
+        body_start = 0
+        for i, line in enumerate(lines):
+            if line.strip().startswith('def ') and func.__name__ in line:
+                body_start = i + 1
+                break
+        
+        # Get everything after the function definition
+        body_lines = lines[body_start:]
+        
+        # Remove empty lines at the start
+        while body_lines and not body_lines[0].strip():
+            body_lines.pop(0)
+        
+        if not body_lines:
+            return "# Could not extract function body"
+        
+        # Find the base indentation level
+        first_line = body_lines[0]
+        base_indent = len(first_line) - len(first_line.lstrip())
+        
+        # Remove the base indentation from all lines
+        normalized_lines = []
+        for line in body_lines:
+            if line.strip():
+                if line.startswith(' ' * base_indent):
+                    normalized_lines.append(line[base_indent:])
+                else:
+                    normalized_lines.append(line.lstrip())
+            else:
+                normalized_lines.append('')
+        
+        # Check if this is a simple return-only function (old pattern)
+        # Old pattern: starts with 'return' and has no 'def' statements
+        has_inner_def = any('def ' in line for line in normalized_lines[1:])  # Skip first line check
+        first_code_line = next((line for line in normalized_lines if line.strip()), '')
+        
+        if first_code_line.strip().startswith('return ') and not has_inner_def:
+            # Old pattern: just a return statement, extract what's being returned
+            # Find where return starts
+            return_index = 0
+            for i, line in enumerate(normalized_lines):
+                if line.strip().startswith('return '):
+                    return_index = i
+                    break
+            
+            # Get the return statement and everything after
+            return_lines = normalized_lines[return_index:]
+            # Remove 'return ' from the first line
+            if return_lines:
+                # Handle the indentation properly
+                first_line = return_lines[0]
+                indent = len(first_line) - len(first_line.lstrip())
+                return_lines[0] = ' ' * indent + first_line.lstrip()[7:]  # Remove 'return ' but keep indent
+            
+            return '\n'.join(line.rstrip() for line in return_lines)
+        else:
+            # New pattern: has helper functions or assignments before return
+            # Find all return statements and remove the 'return ' keyword
+            result_lines = []
+            for line in normalized_lines:
+                if line.strip().startswith('return '):
+                    # Replace 'return ' with proper indentation maintained
+                    indent = len(line) - len(line.lstrip())
+                    result_lines.append(' ' * indent + line.lstrip()[7:])  # Remove 'return '
+                else:
+                    result_lines.append(line)
+            
+            return '\n'.join(line.rstrip() for line in result_lines)
+        
+    except Exception as e:
+        return f"# Error: {e}"
+
+
+def with_code(func: Callable) -> Callable:
+    """Add .code attribute with extracted source to a function."""
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+    
+    wrapper.code = extract_code(func)
+    return wrapper

@@ -101,7 +101,7 @@ def TooltipContent(
                 offset=side_offset,
                 flip=allow_flip,
                 shift=True,
-                hide=True,
+                hide=False,  # Changed from True to False to prevent initial visibility issues
                 strategy=strategy,
             ),
             id=f"{signal}_content",
@@ -110,7 +110,7 @@ def TooltipContent(
             data_side=side,
             data_slot="tooltip-content",
             cls=cn(
-                f"{strategy} z-50 w-fit rounded-md px-3 py-1.5",
+                "z-50 w-fit rounded-md px-3 py-1.5",  # Removed "fixed" from here
                 "bg-primary text-primary-foreground text-xs text-balance",
                 "pointer-events-none",
                 "animate-in fade-in-0 zoom-in-95",
