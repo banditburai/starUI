@@ -13,6 +13,8 @@ from src.starui.registry.components.alert_dialog import (
     AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
     AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger
 )
+from src.starui.registry.components.avatar import Avatar, AvatarImage, AvatarFallback, AvatarWithFallback
+from src.starui.registry.components.badge import Badge
 from src.starui.registry.components.theme_toggle import ThemeToggle
 
 styles = Link(rel="stylesheet", href="/static/css/starui.css", type="text/css")
@@ -47,6 +49,8 @@ def index():
             A("Accordion", href="/accordion", cls="text-primary hover:underline block"),
             A("Alert", href="/alert", cls="text-primary hover:underline block"),
             A("Alert Dialog", href="/alert-dialog", cls="text-primary hover:underline block"),
+            A("Avatar", href="/avatar", cls="text-primary hover:underline block"),
+            A("Badge", href="/badge", cls="text-primary hover:underline block"),
             A("Theme Toggle", href="/theme-toggle", cls="text-primary hover:underline block"),
             cls="space-y-2"
         ),
@@ -150,6 +154,128 @@ def test_alert():
                 variant="destructive",
             ),
             cls="space-y-4 max-w-2xl"
+        ),
+
+        cls="container mx-auto"
+    )
+
+
+@rt("/avatar")
+def test_avatar():
+    return Div(
+        # Theme toggle in top-right
+        Div(ThemeToggle(), cls="absolute top-4 right-4"),
+
+        H1("Avatar Component Test", cls="text-3xl font-bold mb-6"),
+        A("← Back to Index", href="/", cls="text-primary hover:underline mb-4 inline-block"),
+
+        H2("Basic Avatar", cls="text-2xl font-semibold mb-4 mt-8"),
+        Div(
+            Avatar(
+                AvatarImage(
+                    src="https://github.com/shadcn.png",
+                    alt="@shadcn"
+                )
+            ),
+            Avatar(
+                AvatarFallback("CN")
+            ),
+            Avatar(
+                AvatarImage(
+                    src="https://avatars.githubusercontent.com/u/1?v=4",
+                    alt="User"
+                )
+            ),
+            cls="flex gap-4 items-center"
+        ),
+
+        H2("Avatar Sizes", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Use size classes to customize:", cls="text-sm text-muted-foreground mb-2"),
+        Div(
+            Avatar(AvatarFallback("XS"), cls="size-6"),
+            Avatar(AvatarFallback("SM"), cls="size-8"),
+            Avatar(AvatarFallback("MD")),
+            Avatar(AvatarFallback("LG"), cls="size-12"),
+            Avatar(AvatarFallback("XL"), cls="size-16"),
+            Avatar(AvatarFallback("2X"), cls="size-20"),
+            cls="flex gap-4 items-center"
+        ),
+
+        H2("Automatic Fallback", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("The second avatar will show fallback as the image URL is invalid:", cls="text-sm text-muted-foreground mb-2"),
+        Div(
+            AvatarWithFallback(
+                src="https://github.com/shadcn.png",
+                alt="@shadcn",
+                fallback="CN"
+            ),
+            AvatarWithFallback(
+                src="https://invalid-url.com/image.jpg",
+                alt="Invalid",
+                fallback="IN"
+            ),
+            AvatarWithFallback(
+                fallback="NI"
+            ),
+            cls="flex gap-4 items-center"
+        ),
+
+        cls="container mx-auto"
+    )
+
+
+@rt("/badge")
+def test_badge():
+    return Div(
+        # Theme toggle in top-right
+        Div(ThemeToggle(), cls="absolute top-4 right-4"),
+
+        H1("Badge Component Test", cls="text-3xl font-bold mb-6"),
+        A("← Back to Index", href="/", cls="text-primary hover:underline mb-4 inline-block"),
+
+        H2("Badge Variants", cls="text-2xl font-semibold mb-4 mt-8"),
+        Div(
+            Badge("Default"),
+            Badge("Secondary", variant="secondary"),
+            Badge("Destructive", variant="destructive"),
+            Badge("Outline", variant="outline"),
+            cls="flex flex-wrap gap-2 max-w-2xl"
+        ),
+
+        H2("Badge with Icons", cls="text-2xl font-semibold mb-4 mt-8"),
+        Div(
+            Badge(Icon("lucide:check"), "Verified", variant="secondary"),
+            Badge(Icon("lucide:star"), "Featured"),
+            Badge(Icon("lucide:alert-triangle"), "Warning", variant="destructive"),
+            Badge(Icon("lucide:info"), "Info", variant="outline"),
+            cls="flex flex-wrap gap-2 max-w-2xl"
+        ),
+
+        H2("Clickable Badges", cls="text-2xl font-semibold mb-4 mt-8"),
+        Div(
+            (click_count := Signal("badge_clicks", 0)),
+            Badge(
+                "Click me",
+                clickable=True,
+                data_on_click=click_count.add(1),
+            ),
+            Badge(
+                Icon("lucide:x"),
+                "Dismiss",
+                variant="destructive",
+                clickable=True,
+                data_on_click=js("alert('Dismissed!')"),
+            ),
+            P(data_text="Clicks: " + click_count, cls="text-sm text-muted-foreground mt-2"),
+            cls="flex flex-wrap gap-2 max-w-2xl"
+        ),
+
+        H2("Badge as Link", cls="text-2xl font-semibold mb-4 mt-8"),
+        Div(
+            Badge("Home", href="/", variant="secondary"),
+            Badge("Documentation", href="#docs", variant="outline"),
+            Badge("GitHub", href="https://github.com", variant="default"),
+            cls="flex flex-wrap gap-2 max-w-2xl"
         ),
 
         cls="container mx-auto"

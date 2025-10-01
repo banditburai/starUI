@@ -1,9 +1,8 @@
 from typing import Any
 
-from starhtml import FT, Div, Img
-from starhtml.datastar import ds_on, ds_show, ds_signals
+from starhtml import FT, Div, Img, Signal
 
-from .utils import cn, gen_id
+from .utils import cn, ensure_signal
 
 
 def Avatar(
@@ -61,6 +60,7 @@ def AvatarWithFallback(
     alt: str = "",
     fallback: str = "?",
     loading: str = "lazy",
+    signal: str = "",
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
@@ -71,22 +71,22 @@ def AvatarWithFallback(
             **kwargs,
         )
 
-    signal = f"{gen_id('avatar')}_error"
+    sig_name = ensure_signal(signal, "avatar_error")    
 
     return Avatar(
-        ds_signals(**{signal: False}),
+        (error_state := Signal(sig_name, False)),
         Img(
-            ds_show(f"!${signal}"),
-            ds_on("error", f"${signal} = true"),
             src=src,
             alt=alt,
             loading=loading,
+            data_show=~error_state,
+            data_on_error=error_state.set(True),
             cls="aspect-square size-full object-cover",
             data_slot="avatar-image",
         ),
         Div(
             fallback,
-            ds_show(f"${signal}"),
+            data_show=error_state,
             cls="flex size-full items-center justify-center rounded-full bg-muted",
             data_slot="avatar-fallback",
         ),
