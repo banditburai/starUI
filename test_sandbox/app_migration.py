@@ -15,6 +15,8 @@ from src.starui.registry.components.alert_dialog import (
 )
 from src.starui.registry.components.avatar import Avatar, AvatarImage, AvatarFallback, AvatarWithFallback
 from src.starui.registry.components.badge import Badge
+from src.starui.registry.components.button import Button
+from src.starui.registry.components.calendar import Calendar
 from src.starui.registry.components.theme_toggle import ThemeToggle
 
 styles = Link(rel="stylesheet", href="/static/css/starui.css", type="text/css")
@@ -51,6 +53,8 @@ def index():
             A("Alert Dialog", href="/alert-dialog", cls="text-primary hover:underline block"),
             A("Avatar", href="/avatar", cls="text-primary hover:underline block"),
             A("Badge", href="/badge", cls="text-primary hover:underline block"),
+            A("Button", href="/button", cls="text-primary hover:underline block"),
+            A("Calendar", href="/calendar", cls="text-primary hover:underline block"),
             A("Theme Toggle", href="/theme-toggle", cls="text-primary hover:underline block"),
             cls="space-y-2"
         ),
@@ -282,6 +286,198 @@ def test_badge():
     )
 
 
+@rt("/api/data")
+async def api_data():
+    """Simulates a slow API endpoint for data-indicator demo."""
+    import asyncio
+    await asyncio.sleep(2)  # Simulate slow network
+
+    content = Div(
+        P("✓ Data fetched successfully!", cls="text-green-600 font-medium"),
+        P(f"Fetched at: {__import__('datetime').datetime.now().strftime('%H:%M:%S')}", cls="text-xs text-green-600"),
+        id="api-response",
+        cls="mt-2 p-2 bg-green-50 rounded border border-green-200"
+    )
+
+    # Test: Response without to_xml()
+    return Response(
+        content=content,  # Pass FT directly - does Response handle conversion?
+        media_type="text/html",
+        headers={
+            "datastar-selector": "#api-response",
+            "datastar-mode": "outer"
+        }
+    )
+
+
+@rt("/button")
+def test_button():
+    return Div(
+        # Theme toggle in top-right
+        Div(ThemeToggle(), cls="absolute top-4 right-4"),
+
+        H1("Button Component Test", cls="text-3xl font-bold mb-6"),
+        A("← Back to Index", href="/", cls="text-primary hover:underline mb-4 inline-block"),
+
+        H2("Button Variants", cls="text-2xl font-semibold mb-4 mt-8"),
+        Div(
+            Button("Default"),
+            Button("Destructive", variant="destructive"),
+            Button("Outline", variant="outline"),
+            Button("Secondary", variant="secondary"),
+            Button("Ghost", variant="ghost"),
+            Button("Link", variant="link"),
+            cls="flex flex-wrap gap-2 max-w-2xl"
+        ),
+
+        H2("Button Sizes", cls="text-2xl font-semibold mb-4 mt-8"),
+        Div(
+            Button("Small", size="sm"),
+            Button("Default", size="default"),
+            Button("Large", size="lg"),
+            Button(Icon("lucide:settings"), size="icon", variant="outline"),
+            Button(Icon("lucide:trash"), size="icon", variant="destructive"),
+            cls="flex flex-wrap gap-2 items-center max-w-2xl"
+        ),
+
+        H2("Buttons with Icons", cls="text-2xl font-semibold mb-4 mt-8"),
+        Div(
+            Button(Icon("lucide:mail"), "Email"),
+            Button(Icon("lucide:download"), "Download", variant="secondary"),
+            Button("Delete", Icon("lucide:trash"), variant="destructive"),
+            Button(Icon("lucide:settings"), "Settings", variant="outline"),
+            cls="flex flex-wrap gap-2 max-w-2xl"
+        ),
+
+        H2("Interactive Buttons", cls="text-2xl font-semibold mb-4 mt-8"),
+        Div(
+            (count := Signal("button_count", 0)),
+            Button(
+                Icon("lucide:plus"),
+                "Increment",
+                data_on_click=count.add(1),
+            ),
+            Button(
+                Icon("lucide:minus"),
+                "Decrement",
+                variant="secondary",
+                data_on_click=count.sub(1),
+            ),
+            Button(
+                Icon("lucide:rotate-ccw"),
+                "Reset",
+                variant="outline",
+                data_on_click=count.set(0),
+            ),
+            P(data_text="Count: " + count, cls="text-lg font-semibold"),
+            cls="flex flex-wrap gap-2 items-center max-w-2xl"
+        ),
+
+        H2("Disabled State", cls="text-2xl font-semibold mb-4 mt-8"),
+        Div(
+            Button("Disabled Default", disabled=True),
+            Button("Disabled Destructive", variant="destructive", disabled=True),
+            Button("Disabled Outline", variant="outline", disabled=True),
+            cls="flex flex-wrap gap-2 max-w-2xl"
+        ),
+
+        H2("Loading State Pattern 1: data-show Toggle (Best for 2 states)", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Both icons in DOM, toggled with data-show. Fast CSS-only switching.", cls="text-sm text-muted-foreground mb-2"),
+        Div(
+            (is_loading := Signal("is_loading", False)),
+            Button(
+                Icon("lucide:loader-2", cls="animate-spin", data_show=is_loading),
+                Icon("lucide:save", data_show=~is_loading),
+                Span(data_text=is_loading.if_("Loading...", "Save")),
+                data_on_click=is_loading.toggle(),
+                data_attr_disabled=is_loading,
+            ),
+            Button(
+                Icon("lucide:loader-2", cls="animate-spin", data_show=is_loading),
+                Icon("lucide:upload", data_show=~is_loading),
+                Span(data_text=is_loading.if_("Uploading...", "Upload")),
+                variant="secondary",
+                data_on_click=is_loading.toggle(),
+                data_attr_disabled=is_loading,
+            ),
+            P("✓ Fastest: Both icons preloaded, CSS toggle only", cls="text-xs text-muted-foreground mt-2"),
+            cls="flex flex-wrap gap-2 items-start max-w-2xl"
+        ),
+
+        H2("Loading State Pattern 2: Signal Value (Best for 3+ states)", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Icon name stored in signal. Useful for multiple states, but requires icon re-render.", cls="text-sm text-muted-foreground mb-2"),
+        Div(
+            (status := Signal("status", "pending")),
+            Button(
+                Icon(
+                    "lucide:clock",  # Initial icon
+                    data_attr_icon=match(status,
+                        pending="lucide:clock",
+                        processing="lucide:loader-2",
+                        success="lucide:check",
+                        error="lucide:x"
+                    ),
+                    data_attr_class=match(status,
+                        processing="animate-spin"
+                    )
+                ),
+                Span(
+                    data_text=match(status,
+                        pending="Start Process",
+                        processing="Processing...",
+                        success="Success!",
+                        error="Failed"
+                    )
+                ),
+                data_on_click=js(
+                    "$status = $status === 'pending' ? 'processing' : "
+                    "$status === 'processing' ? 'success' : "
+                    "$status === 'success' ? 'error' : 'pending'"
+                ),
+                data_attr_variant=match(status,
+                    pending="default",
+                    processing="secondary",
+                    success="secondary",
+                    error="destructive"
+                ),
+            ),
+            Button(
+                Icon("lucide:rotate-ccw"),
+                "Reset",
+                variant="outline",
+                size="sm",
+                data_on_click=status.set("pending"),
+            ),
+            P("✓ Better for 3+ states: Only one icon element, state-driven", cls="text-xs text-muted-foreground mt-2"),
+            cls="flex flex-wrap gap-2 items-start max-w-2xl"
+        ),
+
+        H2("Pattern 3: Real Backend Loading (data-indicator)", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Uses Datastar's built-in data-indicator for actual backend requests:", cls="text-sm text-muted-foreground mb-2"),
+        Div(
+            Button(
+                Icon("lucide:loader-2", cls="animate-spin", data_show="$fetching"),
+                Icon("lucide:download", data_show="!$fetching"),
+                data_text="$fetching ? 'Fetching...' : 'Fetch Data'",
+                data_on_click=get("/api/data"),
+                data_indicator_fetching=True,
+                data_attr_disabled="$fetching",
+                variant="outline",
+            ),
+            Div(
+                P("Response will appear here...", cls="text-muted-foreground text-sm italic"),
+                id="api-response",
+                cls="mt-2"
+            ),
+            P("✓ Automatic: $fetching signal created by Datastar during requests", cls="text-xs text-muted-foreground mt-2"),
+            P("Click button to see 2-second simulated network delay", cls="text-xs text-muted-foreground"),
+            cls="flex flex-col gap-2 max-w-2xl"
+        ),
+
+        cls="container mx-auto"
+    )
+
+
 @rt("/alert-dialog")
 def test_alert_dialog():
     return Div(
@@ -353,6 +549,67 @@ def test_alert_dialog():
                 ),
             ),
             cls="flex flex-wrap gap-4",
+        ),
+
+        cls="container mx-auto"
+    )
+
+
+@rt("/calendar")
+def test_calendar():
+    return Div(
+        # Theme toggle in top-right
+        Div(ThemeToggle(), cls="absolute top-4 right-4"),
+
+        H1("Calendar Component Test", cls="text-3xl font-bold mb-6"),
+        A("← Back to Index", href="/", cls="text-primary hover:underline mb-4 inline-block"),
+
+        H2("Single Mode", cls="text-2xl font-semibold mb-4 mt-8"),
+        Div(
+            Calendar(signal="test_single", mode="single"),
+            Div(
+                P("Selected: ", Span(data_text="$test_single_selected || 'None'", cls="font-mono text-sm")),
+                cls="mt-4 text-sm"
+            ),
+            cls="flex flex-col items-center"
+        ),
+
+        H2("Range Mode", cls="text-2xl font-semibold mb-4 mt-8"),
+        Div(
+            Calendar(
+                signal="test_range",
+                mode="range",
+                selected=["2025-09-15", "2025-09-25"],
+                month=9,
+                year=2025
+            ),
+            Div(                
+                P("Range: ", Span(data_text="JSON.stringify($test_range_selected)", cls="font-mono text-sm")),
+                cls="mt-4 text-sm"
+            ),
+            cls="flex flex-col items-center"
+        ),
+
+        H2("Multiple Mode", cls="text-2xl font-semibold mb-4 mt-8"),
+        Div(
+            Calendar(
+                signal="test_multiple",
+                mode="multiple",
+                selected=["2025-09-10", "2025-09-15", "2025-09-20"],
+                month=9,
+                year=2025
+            ),
+            Div(
+                P("Selected: ", Span(data_text="($test_multiple_selected || []).length", cls="font-mono"), " dates"),
+                cls="mt-4 text-sm"
+            ),
+            cls="flex flex-col items-center"
+        ),
+
+        H2("Disabled", cls="text-2xl font-semibold mb-4 mt-8"),
+        Div(
+            Calendar(signal="test_disabled", mode="single", disabled=True),
+            cls="flex flex-col items-center"
         ),
 
         cls="container mx-auto"

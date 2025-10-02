@@ -117,3 +117,9 @@
   --color-sidebar-ring: var(--sidebar-ring);
   --radius: var(--radius);
 }
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+}

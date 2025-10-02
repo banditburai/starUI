@@ -12,7 +12,6 @@ def Breadcrumb(*children, cls: str = "", **kwargs) -> FT:
     return HTMLNav(
         *children,
         aria_label="breadcrumb",
-        data_slot="breadcrumb",
         cls=cls,
         **kwargs,
     )
@@ -21,7 +20,6 @@ def Breadcrumb(*children, cls: str = "", **kwargs) -> FT:
 def BreadcrumbList(*children, cls: str = "", **kwargs) -> FT:
     return HTMLOl(
         *children,
-        data_slot="breadcrumb-list",
         cls=cn(
             "text-muted-foreground flex flex-wrap items-center gap-1.5 text-sm break-words sm:gap-2.5",
             cls,
@@ -33,7 +31,6 @@ def BreadcrumbList(*children, cls: str = "", **kwargs) -> FT:
 def BreadcrumbItem(*children, cls: str = "", **kwargs) -> FT:
     return HTMLLi(
         *children,
-        data_slot="breadcrumb-item",
         cls=cn("inline-flex items-center gap-1.5", cls),
         **kwargs,
     )
@@ -45,7 +42,6 @@ def BreadcrumbLink(
     return HTMLA(
         *children,
         href=href,
-        data_slot="breadcrumb-link",
         cls=cn("hover:text-foreground transition-colors", cls),
         **kwargs,
     )
@@ -57,7 +53,6 @@ def BreadcrumbPage(*children, cls: str = "", **kwargs) -> FT:
         role="link",
         aria_disabled="true",
         aria_current="page",
-        data_slot="breadcrumb-page",
         cls=cn("text-foreground font-normal", cls),
         **kwargs,
     )
@@ -68,7 +63,6 @@ def BreadcrumbSeparator(*children, cls: str = "", **kwargs) -> FT:
         *(children or (Icon("lucide:chevron-right"),)),
         role="presentation",
         aria_hidden="true",
-        data_slot="breadcrumb-separator",
         cls=cn("[&>svg]:size-3.5", cls),
         **kwargs,
     )
@@ -80,7 +74,6 @@ def BreadcrumbEllipsis(cls: str = "", **kwargs) -> FT:
         HTMLSpan("More", cls="sr-only"),
         role="presentation",
         aria_hidden="true",
-        data_slot="breadcrumb-ellipsis",
         cls=cn("flex size-9 items-center justify-center", cls),
         **kwargs,
     )

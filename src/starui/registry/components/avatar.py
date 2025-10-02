@@ -12,7 +12,6 @@ def Avatar(
 ) -> FT:
     return Div(
         *children,
-        data_slot="avatar",
         cls=cn(
             "relative flex size-10 shrink-0 overflow-hidden rounded-full",
             cls,
@@ -32,7 +31,6 @@ def AvatarImage(
         src=src,
         alt=alt,
         loading=loading,
-        data_slot="avatar-image",
         cls=cn("aspect-square size-full object-cover", cls),
         **kwargs,
     )
@@ -45,7 +43,6 @@ def AvatarFallback(
 ) -> FT:
     return Div(
         *children,
-        data_slot="avatar-fallback",
         cls=cn(
             "flex size-full items-center justify-center rounded-full",
             "bg-muted" if "bg-" not in cls else "",
@@ -82,13 +79,11 @@ def AvatarWithFallback(
             data_show=~error_state,
             data_on_error=error_state.set(True),
             cls="aspect-square size-full object-cover",
-            data_slot="avatar-image",
         ),
         Div(
             fallback,
             data_show=error_state,
             cls="flex size-full items-center justify-center rounded-full bg-muted",
-            data_slot="avatar-fallback",
         ),
         cls=cls,
         **kwargs,

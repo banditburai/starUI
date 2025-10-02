@@ -32,8 +32,11 @@ def AlertDialog(
             data_on_close=open_state.set(False),
             data_on_click=js(f"evt.target === evt.currentTarget && (${dialog_ref}.close(), {open_state.set(False)})"),
             id=dialog_ref,
+            role="alertdialog",
+            aria_labelledby=f"{dialog_ref}-title",
+            aria_describedby=f"{dialog_ref}-description",
             cls=cn(
-                "fixed max-h-[85vh] w-full max-w-lg overflow-auto m-auto bg-background text-foreground border border-input rounded-lg shadow-lg p-0 backdrop:bg-black/50 backdrop:backdrop-blur-sm open:animate-in open:fade-in-0 open:zoom-in-95 open:duration-200 open:backdrop:animate-in open:backdrop:fade-in-0 open:backdrop:duration-200",
+                "fixed max-h-[85vh] w-full max-w-lg overflow-auto m-auto bg-background text-foreground border rounded-lg shadow-lg p-0 backdrop:bg-black/50 backdrop:backdrop-blur-sm open:animate-in open:fade-in-0 open:zoom-in-95 open:duration-200 open:backdrop:animate-in open:backdrop:fade-in-0 open:backdrop:duration-200",
                 cls,
             ),
             **kwargs,
@@ -116,9 +119,10 @@ def AlertDialogTitle(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    def _(_open_state, _dialog_ref):
+    def _(_open_state, dialog_ref):
         return HTMLH2(
             *children,
+            id=f"{dialog_ref}-title",
             cls=cn("text-lg leading-none font-semibold text-foreground", cls),
             **kwargs,
         )
@@ -131,9 +135,10 @@ def AlertDialogDescription(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    def _(_open_state, _dialog_ref):
+    def _(_open_state, dialog_ref):
         return HTMLP(
             *children,
+            id=f"{dialog_ref}-description",
             cls=cn("text-muted-foreground text-sm", cls),
             **kwargs,
         )

@@ -18,10 +18,7 @@ alert_variants = cva(
         "variants": {
             "variant": {
                 "default": "bg-card text-card-foreground",
-                "destructive": (
-                    "text-destructive bg-card [&>iconify-icon]:text-destructive "
-                    "*:data-[slot=alert-description]:text-destructive/90"
-                ),
+                "destructive": "text-destructive bg-card [&>iconify-icon]:text-destructive",
             }
         },
         "defaultVariants": {"variant": "default"},
@@ -38,7 +35,6 @@ def Alert(
     return Div(
         *children,
         role="alert",
-        data_slot="alert",
         cls=cn(alert_variants(variant=variant), cls),
         **kwargs,
     )
@@ -51,7 +47,6 @@ def AlertTitle(
 ) -> FT:
     return Div(
         *children,
-        data_slot="alert-title",
         cls=cn(
             "col-start-2 line-clamp-1 min-h-4 font-medium tracking-tight",
             cls,
@@ -67,9 +62,8 @@ def AlertDescription(
 ) -> FT:
     return Div(
         *children,
-        data_slot="alert-description",
         cls=cn(
-            "text-muted-foreground col-start-2 grid justify-items-start gap-1 text-sm [&_p]:leading-relaxed",
+            "col-start-2 grid justify-items-start gap-1 text-sm [&_p]:leading-relaxed",
             cls,
         ),
         **kwargs,

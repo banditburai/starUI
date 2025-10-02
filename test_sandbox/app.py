@@ -15,11 +15,6 @@ from src.starui.registry.components.date_picker import (
     DateTimePicker, DatePickerWithInput
 )
 
-# Import our CSS debugging tools
-from css_debug_agent import CSSDebugAgent
-from css_cascade_analyzer import CSSCascadeAnalyzer
-from width_conflict_detector import WidthConflictDetector
-
 styles = Link(rel="stylesheet", href="/static/css/starui.css", type="text/css")
 
 app, rt = star_app(
@@ -27,10 +22,12 @@ app, rt = star_app(
     hdrs=(        
         fouc_script(use_data_theme=True),
         styles,        
-        position_handler(),  # Enhanced handler is now built-in
+        position_handler(),
     ),
     htmlkw=dict(lang="en", dir="ltr"),
     bodykw=dict(cls="min-h-screen bg-background text-foreground"),
+    iconify=True,
+    clipboard=True
 )
 
 

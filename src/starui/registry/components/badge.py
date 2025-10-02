@@ -42,10 +42,9 @@ def Badge(
     
     if href:
         return A(
-            *children, 
-            href=href, 
-            cls=cn(base_classes, cls), 
-            data_slot="badge", 
+            *children,
+            href=href,
+            cls=cn(base_classes, cls),
             **kwargs
         )
 
@@ -53,14 +52,12 @@ def Badge(
         return HTMLButton(
             *children,
             cls=cn(base_classes, "cursor-pointer", cls),
-            data_slot="badge",
             type="button",
             **kwargs,
         )
 
     return Span(
-        *children, 
-        cls=cn(base_classes, cls), 
-        data_slot="badge", 
+        *children,
+        cls=cn(base_classes, cls),
         **kwargs
     )

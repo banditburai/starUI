@@ -74,6 +74,9 @@ def AccordionTrigger(
                 ),
                 data_on_click=click_action,
                 type="button",
+                id=f"{item_value}-trigger",
+                aria_controls=f"{item_value}-content",
+                data_attr_aria_expanded=is_open,
                 cls=cn(
                     "flex w-full items-center justify-between py-4 text-sm font-medium transition-all hover:underline text-left",
                     cls,
@@ -102,6 +105,9 @@ def AccordionContent(
                 Div(*children, cls="pb-4 pt-0"),
                 cls="overflow-hidden min-h-0"
             ),
+            role="region",
+            id=f"{item_value}-content",
+            aria_labelledby=f"{item_value}-trigger",
             cls=cn("text-sm grid transition-[grid-template-rows] duration-200 ease-out", cls),
             data_attr_style=is_open.if_("grid-template-rows: 1fr", "grid-template-rows: 0fr"),
             data_attr_state=is_open.if_("open", "closed"),
