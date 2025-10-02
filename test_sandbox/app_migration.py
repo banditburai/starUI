@@ -17,6 +17,7 @@ from src.starui.registry.components.avatar import Avatar, AvatarImage, AvatarFal
 from src.starui.registry.components.badge import Badge
 from src.starui.registry.components.button import Button
 from src.starui.registry.components.calendar import Calendar
+from src.starui.registry.components.card import Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter
 from src.starui.registry.components.theme_toggle import ThemeToggle
 
 styles = Link(rel="stylesheet", href="/static/css/starui.css", type="text/css")
@@ -55,6 +56,7 @@ def index():
             A("Badge", href="/badge", cls="text-primary hover:underline block"),
             A("Button", href="/button", cls="text-primary hover:underline block"),
             A("Calendar", href="/calendar", cls="text-primary hover:underline block"),
+            A("Card", href="/card", cls="text-primary hover:underline block"),
             A("Theme Toggle", href="/theme-toggle", cls="text-primary hover:underline block"),
             cls="space-y-2"
         ),
@@ -610,6 +612,113 @@ def test_calendar():
         Div(
             Calendar(signal="test_disabled", mode="single", disabled=True),
             cls="flex flex-col items-center"
+        ),
+
+        cls="container mx-auto"
+    )
+
+
+@rt("/card")
+def test_card():
+    return Div(
+        # Theme toggle in top-right
+        Div(ThemeToggle(), cls="absolute top-4 right-4"),
+
+        H1("Card Component Test", cls="text-3xl font-bold mb-6"),
+        A("← Back to Index", href="/", cls="text-primary hover:underline mb-4 inline-block"),
+
+        H2("Basic Card", cls="text-2xl font-semibold mb-4 mt-8"),
+        Card(
+            CardHeader(
+                CardTitle("Card Title"),
+                CardDescription(
+                    "This is a card description with some example text."
+                ),
+            ),
+            CardContent(
+                P("Card content goes here. You can add any elements you want."),
+            ),
+            CardFooter(
+                Button("Cancel", variant="outline"),
+                Button("Save"),
+                cls="flex gap-2",
+            ),
+            cls="max-w-md",
+        ),
+
+        H2("Card with Input", cls="text-2xl font-semibold mb-4 mt-8"),
+        Card(
+            CardHeader(
+                CardTitle("Login to your account"),
+                CardDescription("Enter your email below to login to your account"),
+            ),
+            CardContent(
+                Div(
+                    Label("Email", For="email", cls="text-sm font-medium"),
+                    Input(id="email", type="email", placeholder="m@example.com", cls="mt-1"),
+                    cls="mb-4"
+                ),
+                Div(
+                    Label("Password", For="password", cls="text-sm font-medium"),
+                    Input(id="password", type="password", cls="mt-1"),
+                    cls="mb-4"
+                ),
+            ),
+            CardFooter(
+                Button("Login", cls="w-full"),
+            ),
+            cls="max-w-md",
+        ),
+
+        H2("Card with Action", cls="text-2xl font-semibold mb-4 mt-8"),
+        Card(
+            CardHeader(
+                CardTitle("Notifications", level="h4"),
+                CardDescription("You have 3 unread messages"),
+            ),
+            CardContent(
+                Div(
+                    Div(
+                        P("New message from Alice", cls="font-medium"),
+                        P("Hey, are you available for a call?", cls="text-sm text-muted-foreground"),
+                        cls="mb-3"
+                    ),
+                    Div(
+                        P("Project update", cls="font-medium"),
+                        P("The new feature has been deployed.", cls="text-sm text-muted-foreground"),
+                        cls="mb-3"
+                    ),
+                    Div(
+                        P("Reminder", cls="font-medium"),
+                        P("Team meeting at 3 PM today.", cls="text-sm text-muted-foreground"),
+                    ),
+                ),
+            ),
+            CardFooter(
+                Button("Mark all as read", variant="outline", cls="w-full"),
+            ),
+            cls="max-w-md",
+        ),
+
+        H2("Compact Card", cls="text-2xl font-semibold mb-4 mt-8"),
+        Card(
+            CardHeader(
+                CardTitle("Quick Stats", level="h5"),
+            ),
+            CardContent(
+                Div(
+                    Div(
+                        P("Total Users", cls="text-sm text-muted-foreground"),
+                        P("1,234", cls="text-2xl font-bold"),
+                        cls="mb-2"
+                    ),
+                    Div(
+                        P("Active Sessions", cls="text-sm text-muted-foreground"),
+                        P("89", cls="text-2xl font-bold"),
+                    ),
+                ),
+            ),
+            cls="max-w-xs",
         ),
 
         cls="container mx-auto"
