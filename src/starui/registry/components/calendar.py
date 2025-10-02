@@ -131,18 +131,23 @@ def _build_dropdown(signal: str, type: str, current_display: str | int, items: l
             attrs["data_year"] = value
         return Div(str(display), **attrs)
 
+    # Build position modifiers dict (modern StarHTML pattern)
+    # Using container="none" so dropdowns position at their own triggers, not parent edge
+    position_mods = {
+        "placement": "bottom",
+        "offset": 8,
+        "flip": True,
+        "shift": True,
+        "hide": True,
+        "container": "none",  # Key for calendar dropdowns to position correctly
+    }
+
     dropdown = Div(
         *[make_item(value, display) for value, display in items],
         data_on_click=js(_dropdown_handler(signal, type, content_ref)) if not disabled else None,
         data_ref=content_ref,
         data_style_min_width=f"${trigger_ref} ? ${trigger_ref}.offsetWidth + 'px' : '8rem'",
-        data_position_anchor=trigger_ref,
-        data_position_placement="bottom",
-        data_position_offset="8",
-        data_position_flip="true",
-        data_position_shift="true",
-        data_position_hide="true",
-        data_position_container="none",
+        data_position=(trigger_ref, position_mods),  # Modern tuple syntax
         popover="auto",
         id=content_ref,
         role="listbox",

@@ -4,6 +4,11 @@ import json
 from uuid import uuid4
 from starhtml import Div
 
+# Theme configuration
+DEFAULT_THEME = "light"
+ALT_THEME = "dark"
+
+
 def cn(*classes: Any) -> str:
     result_classes: list[str] = []
 

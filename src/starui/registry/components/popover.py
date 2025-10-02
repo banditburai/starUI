@@ -1,7 +1,6 @@
 from typing import Callable, Literal
 
 from starhtml import FT, Div
-from starhtml.datastar import ds_position, ds_ref
 
 from .button import Button
 from .utils import cn, ensure_signal
@@ -28,22 +27,25 @@ def PopoverTrigger(
     cls: str = "",
     **kwargs,
 ) -> Callable[[str], FT]:
-    def _(signal: str) -> FT:
+    def trigger(signal: str) -> FT:
+        trigger_id = f"{signal}_trigger"
+        content_id = f"{signal}_content"
+
         return Button(
             *children,
-            ds_ref(f"{signal}_trigger"),
-            variant=variant,
-            popovertarget=f"{signal}_content",
+            data_ref=trigger_id,
+            id=trigger_id,
+            popovertarget=content_id,
             popoveraction="toggle",
-            id=f"{signal}_trigger",
+            variant=variant,
             aria_haspopup="dialog",
-            aria_describedby=f"{signal}_content",
+            aria_describedby=content_id,
             data_slot="popover-trigger",
             cls=cls,
             **kwargs,
         )
 
-    return _
+    return trigger
 
 
 def PopoverContent(
@@ -51,51 +53,47 @@ def PopoverContent(
     cls: str = "",
     side: Literal["top", "right", "bottom", "left"] = "bottom",
     align: Literal["start", "center", "end"] = "center",
+    offset: int | None = None,
+    container: Literal["auto", "none", "parent"] = "auto",
     **kwargs,
 ) -> Callable[[str], FT]:
-    def _(signal: str) -> FT:
+    def content(signal: str) -> FT:
+        trigger_id = f"{signal}_trigger"
+        content_id = f"{signal}_content"
         placement = side if align == "center" else f"{side}-{align}"
 
         def process_element(element: FT | Callable[[str], FT]):
-            if callable(element) and getattr(element, "_is_popover_close", False):
+            if callable(element) and getattr(element, '__name__', None) == 'close':
                 return element(signal)
 
-            if (
-                hasattr(element, "tag")
-                and hasattr(element, "children")
-                and getattr(element, "children")
-            ):
-                processed_children = tuple(
-                    process_element(child) for child in element.children
-                )
-                return FT(element.tag, processed_children, element.attrs)
+            children = getattr(element, "children", None)
+            if children:
+                return FT(element.tag, tuple(process_element(c) for c in children), element.attrs)
 
             return element
 
         processed_children = [process_element(child) for child in children]
+        has_width = any(w in cls for w in ["w-", "max-w-", "min-w-"])
+        has_padding = any(p in cls for p in ["p-", "px-", "py-", "pt-", "pr-", "pb-", "pl-"])
 
-        combined_classes = cls
-        has_width = any(w in combined_classes for w in ["w-", "max-w-", "min-w-"])
-        has_padding = any(
-            p in combined_classes for p in ["p-", "px-", "py-", "pt-", "pr-", "pb-", "pl-"]
-        )
+        position_mods = {
+            "placement": placement,
+            "flip": True,
+            "shift": True,
+            "hide": True,
+            "container": container,
+        }
+        if offset is not None:
+            position_mods["offset"] = offset
 
         return Div(
             *processed_children,
-            ds_ref(f"{signal}_content"),
-            ds_position(
-                anchor=f"{signal}_trigger",
-                placement=placement,
-                offset=8,
-                flip=True,
-                shift=True,
-                hide=True,
-                strategy="fixed",
-            ),
+            data_ref=content_id,
+            data_position=(trigger_id, position_mods),
             popover="auto",
-            id=f"{signal}_content",
+            id=content_id,
             role="dialog",
-            aria_labelledby=f"{signal}_trigger",
+            aria_labelledby=trigger_id,
             tabindex="-1",
             data_slot="popover-content",
             cls=cn(
@@ -107,7 +105,7 @@ def PopoverContent(
             **kwargs,
         )
 
-    return _
+    return content
 
 
 def PopoverClose(
@@ -117,7 +115,8 @@ def PopoverClose(
     size: str = "sm",
     **kwargs,
 ) -> Callable[[str], FT]:
-    def _(signal: str) -> FT:
+    def close(signal: str) -> FT:
+
         return Button(
             *children,
             popovertarget=f"{signal}_content",
@@ -130,5 +129,4 @@ def PopoverClose(
             **kwargs,
         )
 
-    _._is_popover_close = True
-    return _
+    return close

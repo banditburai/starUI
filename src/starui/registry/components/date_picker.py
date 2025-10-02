@@ -1,17 +1,9 @@
-import json
 from datetime import datetime, timedelta
 from typing import Any
 from uuid import uuid4
 
-from starhtml import FT, Div, Icon, Span
-from starhtml.datastar import (
-    ds_effect,
-    ds_on_click,
-    ds_signals,
-    ds_text,
-    toggle_class,
-    value,
-)
+from starhtml import FT, Div, Icon, Span, Signal, js
+from starhtml.datastar import f
 
 from .button import Button
 from .calendar import Calendar, CalendarMode
@@ -67,18 +59,20 @@ def DatePicker(
         _build_trigger(signal, mode, placeholder, width, disabled, "lucide:calendar"),
         PopoverContent(content, cls=popover_cls, align="start"),
     )
-    
+
+    # Pass the actual value - Signal() handles lists directly, no json.dumps needed
+    # This matches how calendar.py does it
+    initial_value = initial_selected
+
+    # Build effects list - filter out empty strings
     effects = [_sync_effect(signal, calendar_signal, mode)]
-    
+    effects = [e for e in effects if e]  # Remove empty strings
+
     return Div(
+        Signal(f"{signal}_selected", initial_value),
         popover,
-        *attrs,  # DS helpers like ds_on_change, etc.
-        ds_signals(**{
-            f"{signal}_selected": value(
-                json.dumps(initial_selected) if isinstance(initial_selected, list) else initial_selected
-            )
-        }),
-        ds_effect(";".join(filter(None, effects))) if any(effects) else None,
+        *attrs,  # Datastar attributes like data_on_change, etc.
+        data_effect=js(";".join(effects)) if effects else None,
         cls=cn("inline-block", cls),
         **kwargs,
     )
@@ -120,20 +114,18 @@ def DateTimePicker(
     )
     
     display_text = f"${signal}_selected ? (()=>{{const [y,m,d]=${signal}_selected.split('-').map(Number);return new Date(y,m-1,d).toLocaleDateString('en-US', {{year: 'numeric', month: 'long', day: 'numeric'}})}})() + ' at ' + ${signal}_time : '{placeholder}'"
-    
+
     popover = Popover(
         _build_trigger(signal, "single", placeholder, width, disabled, "lucide:calendar-clock", display_text),
         PopoverContent(content, cls="w-fit p-0", align="start"),
     )
-    
+
     return Div(
+        Signal(f"{signal}_selected", initial_date),
+        Signal(f"{signal}_time", initial_time),
+        Signal(f"{signal}_datetime", selected or ""),
         popover,
-        ds_signals(**{
-            f"{signal}_selected": value(initial_date),
-            f"{signal}_time": value(initial_time),
-            f"{signal}_datetime": value(selected or ""),
-        }),
-        ds_effect(_datetime_sync_effect(signal, calendar_signal)),
+        data_effect=js(_datetime_sync_effect(signal, calendar_signal)),
         cls=cn("inline-block", cls),
         **kwargs,
     )
@@ -188,9 +180,9 @@ def DatePickerWithInput(
     )
     
     return Div(
+        Signal(f"{signal}_selected", initial_selected),
         input_with_popover,
-        ds_signals(**{f"{signal}_selected": value(initial_selected)}),
-        ds_effect(f"{_input_sync_effect(signal, calendar_signal)};{_input_close_effect(signal)}"),
+        data_effect=js(f"{_input_sync_effect(signal, calendar_signal)};{_input_close_effect(signal)}"),
         cls=cn("inline-block", cls),
         **kwargs,
     )
@@ -198,13 +190,14 @@ def DatePickerWithInput(
 
 def _build_trigger(signal: str, mode: CalendarMode, placeholder: str, width: str, disabled: bool, icon: str, custom_display: str = None) -> PopoverTrigger:
     display_text = custom_display or _get_display_text(signal, mode, placeholder)
-    empty_check = f"!${signal}_selected" if mode == "single" else f"!(JSON.parse(${signal}_selected||'[]')??[]).length"
-    
+    # Check if empty - for arrays, check length directly (no JSON.parse needed)
+    empty_check = f"!${signal}_selected" if mode == "single" else f"!(${signal}_selected||[]).length"
+
     return PopoverTrigger(
         Span(
             Icon(icon, cls="mr-2 h-4 w-4"),
-            Span(ds_text(display_text), cls="text-left"),
-            toggle_class(empty_check, "text-muted-foreground", "", base="flex items-center"),            
+            Span(data_text=js(display_text), cls="text-left"),
+            data_attr_class=js(empty_check).if_("text-muted-foreground flex items-center", "flex items-center"),
         ),
         variant="outline",
         cls=cn(width, "justify-start text-left font-normal"),
@@ -228,7 +221,7 @@ def _build_picker_content(signal: str, calendar_signal: str, calendar: Calendar,
         *[
             Button(
                 label,
-                ds_on_click(f"${signal}_selected='{date}';${calendar_signal}_selected='{date}';{close_js}"),
+                data_on_click=js(f"${signal}_selected='{date}';${calendar_signal}_selected='{date}';{close_js}"),
                 variant="ghost",
                 size="sm",
                 cls="w-full justify-start",
@@ -268,13 +261,10 @@ def _parse_datetime(selected: str | None) -> tuple[str, str]:
 
 
 def _sync_effect(signal: str, calendar_signal: str, mode: CalendarMode) -> str:
-    if mode not in ("multiple", "range"):
-        return ""
-    
-    sync_from = f"if(typeof ${calendar_signal}_selected!=='undefined'&&typeof ${signal}_selected!=='undefined'&&!window._syncingToCalendar_{signal}){{const c=${calendar_signal}_selected,p=${signal}_selected;if(c!==p){{window._syncingFromCalendar_{signal}=true;${signal}_selected=c;setTimeout(()=>{{window._syncingFromCalendar_{signal}=false}},0)}}}}"
-    sync_to = f"if(typeof ${signal}_selected!=='undefined'&&typeof ${calendar_signal}_selected!=='undefined'&&!window._syncingFromCalendar_{signal}){{const p=${signal}_selected,c=${calendar_signal}_selected,r=typeof p==='string'&&(p.startsWith('[')||p==='[]');if(r){{const e=c===''||c==='[]',pe=p==='[]';if(!pe&&e){{window._syncingToCalendar_{signal}=true;${calendar_signal}_selected=p;setTimeout(()=>{{window._syncingToCalendar_{signal}=false}},0)}}}}else if(p!==c){{window._syncingToCalendar_{signal}=true;${calendar_signal}_selected=p;setTimeout(()=>{{window._syncingToCalendar_{signal}=false}},0)}}}}"
-    
-    return f"{sync_from};{sync_to}"
+    # For multi-select modes, we don't need complex sync logic
+    # The calendar's on_select already updates the picker signal
+    # No sync effect needed - just let the on_select handler do its job
+    return ""
 
 
 def _close_popover_js(signal: str) -> str:
@@ -286,10 +276,12 @@ def _get_display_text(signal: str, mode: CalendarMode, placeholder: str) -> str:
         case "single":
             return f"${signal}_selected?(()=>{{const[y,m,d]=${signal}_selected.split('-').map(Number);return new Date(y,m-1,d).toLocaleDateString('en-US',{{year:'numeric',month:'long',day:'numeric'}})}})():'{placeholder}'"
         case "multiple":
-            return f"(()=>{{const a=(JSON.parse(${signal}_selected||'[]')??[]);return a.length?`${{a.length}} date${{a.length>1?'s':''}} selected`:'{placeholder}'}})()"
+            # Signal is already an array, no JSON.parse needed
+            return f"(()=>{{const a=${signal}_selected||[];return a.length?`${{a.length}} date${{a.length>1?'s':''}} selected`:'{placeholder}'}})()"
         case "range":
             fmt = "toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})"
-            return f"(()=>{{const a=(JSON.parse(${signal}_selected||'[]')??[]);return a.length===2?(()=>{{const[y1,m1,d1]=a[0].split('-').map(Number);const[y2,m2,d2]=a[1].split('-').map(Number);return new Date(y1,m1-1,d1).{fmt}+' - '+new Date(y2,m2-1,d2).{fmt}}})():a.length===1?(()=>{{const[y,m,d]=a[0].split('-').map(Number);return new Date(y,m-1,d).{fmt}}})():'{placeholder}'}})()"
+            # Signal is already an array, no JSON.parse needed
+            return f"(()=>{{const a=${signal}_selected||[];return a.length===2?(()=>{{const[y1,m1,d1]=a[0].split('-').map(Number);const[y2,m2,d2]=a[1].split('-').map(Number);return new Date(y1,m1-1,d1).{fmt}+' - '+new Date(y2,m2-1,d2).{fmt}}})():a.length===1?(()=>{{const[y,m,d]=a[0].split('-').map(Number);return new Date(y,m-1,d).{fmt}}})():'{placeholder}'}})()"
 
 
 def _datetime_sync_effect(signal: str, calendar_signal: str) -> str:

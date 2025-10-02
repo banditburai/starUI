@@ -11,8 +11,7 @@ AlertDialogVariant = Literal["default", "destructive"]
 
 
 def AlertDialog(
-    trigger: FT,
-    content: FT,
+    *children: Any,
     signal: str = "",
     cls: str = "",
     **kwargs: Any,
@@ -20,14 +19,14 @@ def AlertDialog(
     dialog_ref = ensure_signal(signal, "alert_dialog")
     open_state = Signal(f"{dialog_ref}_open", False)
 
-    trigger_element = trigger(open_state, dialog_ref) if callable(trigger) else trigger
-    content_element = content(open_state, dialog_ref) if callable(content) else content
+    trigger = next((c for c in children if callable(c) and c.__name__ == 'trigger'), None)
+    content = next((c for c in children if callable(c) and c.__name__ == 'content'), None)
 
     return Div(
-        trigger_element,
+        trigger(open_state, dialog_ref) if trigger else None,
         HTMLDialog(
             open_state,
-            content_element,
+            content(open_state, dialog_ref) if content else None,
             data_ref=dialog_ref,
             data_on_close=open_state.set(False),
             data_on_click=js(f"evt.target === evt.currentTarget && (${dialog_ref}.close(), {open_state.set(False)})"),
@@ -54,7 +53,7 @@ def AlertDialogTrigger(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    def _(open_state, dialog_ref):
+    def trigger(open_state, dialog_ref):
         from .button import Button
 
         return Button(
@@ -66,7 +65,7 @@ def AlertDialogTrigger(
             **kwargs,
         )
 
-    return _
+    return trigger
 
 
 def AlertDialogContent(
@@ -74,14 +73,14 @@ def AlertDialogContent(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    def _(open_state, dialog_ref):
+    def content(open_state, dialog_ref):
         return Div(
             *[child(open_state, dialog_ref) if callable(child) else child for child in children],
             cls=cn("relative p-6", cls),
             **kwargs,
         )
 
-    return _
+    return content
 
 
 def AlertDialogHeader(

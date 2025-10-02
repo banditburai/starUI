@@ -1,10 +1,9 @@
 from typing import Literal
 
-from starhtml import FT, Div, Span
+from starhtml import FT, Div, Span, js
 from starhtml import Input as HTMLInput
 from starhtml import Label as HTMLLabel
 from starhtml import P as HTMLP
-from starhtml.datastar import ds_bind, ds_on_input, ds_on_load
 
 from .utils import cn, gen_id
 
@@ -75,14 +74,12 @@ def Input(
     }
 
     if signal:
-        input_attrs.update(ds_bind(signal))
+        input_attrs["data_bind"] = signal
         if validation:
             validation_signal = f"{signal}_valid"
             validation_js = f"${validation_signal} = {validation.replace('$signal', f'${signal}')}"
-            input_attrs.update({
-                ds_on_input(validation_js),
-                ds_on_load(validation_js),
-            })
+            input_attrs["data_on_input"] = js(validation_js)
+            input_attrs["data_on_load"] = js(validation_js)
 
     filtered_kwargs = {k: v for k, v in kwargs.items() if k not in {"signal", "validation"}}
     input_attrs.update(filtered_kwargs)

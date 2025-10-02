@@ -1,26 +1,9 @@
 from typing import Any, Literal
-from uuid import uuid4
 
-from starhtml import FT, Div, Icon, Input, Span
+from starhtml import FT, Div, Icon, Input, Span, Signal, js
 from starhtml import Dialog as HTMLDialog
-from starhtml.datastar import (
-    ds_attr,
-    ds_bind,
-    ds_effect,
-    ds_on,
-    ds_on_click,
-    ds_on_close,
-    ds_on_input,
-    ds_on_keydown,
-    ds_on_mouseenter,
-    ds_ref,
-    ds_show,
-    ds_signals,
-    value,
-    t,
-)
 
-from .utils import cn, cva
+from .utils import cn, cva, ensure_signal
 
 CommandSize = Literal["sm", "md", "lg"]
 
@@ -48,8 +31,8 @@ def _get_dialog_open_effect(signal: str, ref_id: str) -> str:
     return f"{_get_filter_effect(signal)};if(${ref_id}_open&&!${signal}_search)setTimeout(()=>{{const f=document.querySelector('[data-command-item=\"{signal}\"]:not([data-disabled=\"true\"])');if(f)${signal}_selected=parseInt(f.dataset.index||'0')}},{_DIALOG_FOCUS_DELAY_MS})"
 
 
-def _init_command_signals(signal: str) -> dict:
-    return {f"{signal}_search": value(""), f"{signal}_selected": 0}
+def _init_command_signals(signal: str) -> list:
+    return [Signal(f"{signal}_search", ""), Signal(f"{signal}_selected", 0)]
 
 
 def _process_children(children: Any, signal: str) -> list[Any]:
@@ -76,21 +59,21 @@ command_variants = cva(
 
 def Command(
     *children: Any,
-    signal: str | None = None,
+    signal: str = "",
     size: CommandSize = "md",
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    signal = signal or f"command_{uuid4().hex[:8]}"
+    sig_name = ensure_signal(signal, "command")
 
     global _command_item_counters
-    _command_item_counters[signal] = 0
+    _command_item_counters[sig_name] = 0
 
     return Div(
-        *_process_children(children, signal),
-        ds_signals(**_init_command_signals(signal)),
-        ds_effect(_get_filter_effect(signal)),
-        data_command_root=signal,
+        *_init_command_signals(sig_name),
+        *_process_children(children, sig_name),
+        data_effect=js(_get_filter_effect(sig_name)),
+        data_command_root=sig_name,
         data_slot="command",
         tabindex="-1",
         cls=cn(command_variants(size=size), cls),
@@ -101,43 +84,35 @@ def Command(
 def CommandDialog(
     trigger: FT,
     content: list[FT],
-    signal: str | None = None,
+    signal: str = "",
     modal: bool = True,
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    signal = signal or f"command_{uuid4().hex[:8]}"
-    ref_id = f"{signal}_dialog"
+    sig_name = ensure_signal(signal, "command")
+    ref_id = f"{sig_name}_dialog"
     signal_open = f"{ref_id}_open"
 
     global _command_item_counters
-    _command_item_counters[signal] = 0
+    _command_item_counters[sig_name] = 0
 
-    reset_signals = f"${signal_open}=false;${signal}_search='';${signal}_selected=0;document.body.style.overflow=''"
-
-    dialog_attrs = [
-        ds_signals(**{**_init_command_signals(signal), signal_open: False}),
-        ds_ref(ref_id),
-        ds_on_close(reset_signals),
-        ds_on_keydown(
-            f"if(evt.key==='Escape'){{evt.preventDefault();const d=document.getElementById('{ref_id}');if(d){{d.close();d.style.display='none';{reset_signals};setTimeout(()=>{{d.style.display=''}},100)}}}}"
-        ),
-        ds_effect(_get_dialog_open_effect(signal, ref_id)),
-    ]
-
-    if modal:
-        dialog_attrs.append(
-            ds_on(
-                "click",
-                f"if(evt.target===evt.currentTarget){{evt.currentTarget.close();{reset_signals}}}",
-            )
-        )
+    reset_signals = f"${signal_open}=false;${sig_name}_search='';${sig_name}_selected=0;document.body.style.overflow=''"
 
     command_dialog = HTMLDialog(
-        *_process_children(content, signal),
-        *dialog_attrs,
+        *_init_command_signals(sig_name),
+        Signal(signal_open, False),
+        *_process_children(content, sig_name),
+        data_ref=ref_id,
+        data_on_close=js(reset_signals),
+        data_on_keydown=js(
+            f"if(event.key==='Escape'){{event.preventDefault();const d=document.getElementById('{ref_id}');if(d){{d.close();d.style.display='none';{reset_signals};setTimeout(()=>{{d.style.display=''}},100)}}}}"
+        ),
+        data_on_click=js(
+            f"if(event.target===event.currentTarget){{event.currentTarget.close();{reset_signals}}}"
+        ) if modal else None,
+        data_effect=js(_get_dialog_open_effect(sig_name, ref_id)),
         id=ref_id,
-        data_command_root=signal,
+        data_command_root=sig_name,
         data_slot="command",
         tabindex="-1",
         cls=cn(
@@ -156,12 +131,12 @@ def CommandDialog(
     method = "showModal" if modal else "show"
     trigger_elem = Div(
         trigger,
-        ds_on_click(f"${ref_id}.{method}();${signal_open}=true"),
+        data_on_click=js(f"${ref_id}.{method}();${signal_open}=true"),
         style="display:contents",
     )
 
     scroll_lock = Div(
-        ds_effect(f"document.body.style.overflow=${signal_open}?'hidden':''"),
+        data_effect=js(f"document.body.style.overflow=${signal_open}?'hidden':''"),
         style="display:none",
     )
 
@@ -177,9 +152,9 @@ def CommandInput(
         return Div(
             Icon("lucide:search", cls="size-4 shrink-0 opacity-50"),
             Input(
-                ds_bind(f"{signal}_search"),
-                ds_on_keydown(_get_nav_handler(signal, f"{signal}_dialog")),
-                ds_on_input(_get_search_handler(signal)),
+                data_bind=f"{signal}_search",
+                data_on_keydown=js(_get_nav_handler(signal, f"{signal}_dialog")),
+                data_on_input=js(_get_search_handler(signal)),
                 placeholder=placeholder,
                 data_slot="command-input",
                 cls="flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
@@ -289,22 +264,18 @@ def CommandItem(
             index = _command_item_counters[signal]
             _command_item_counters[signal] += 1
 
-        event_attrs = []
-        if not disabled:
-            if onclick:
-                click_handler = f"{onclick};const d=document.querySelector('dialog[data-command-root=\"{signal}\"]');if(d){{d.close();d.style.display='none';${signal}_dialog_open=false;${signal}_search='';${signal}_selected=0;document.body.style.overflow='';setTimeout(()=>{{d.style.display=''}},100)}}"
-                event_attrs.append(ds_on_click(click_handler))
-            event_attrs.append(ds_on_mouseenter(f"${signal}_selected={index}"))
-        
-        show_attrs = [ds_show(show)] if show else []
+        selected_sig = Signal(f"{signal}_selected", _ref_only=True)
 
         return Div(
             *children,
-            *event_attrs,
-            *show_attrs,
-            ds_attr(data_selected=f"${signal}_selected==={index}?'true':'false'"),
+            data_on_click=js(
+                f"{onclick};const d=document.querySelector('dialog[data-command-root=\"{signal}\"]');if(d){{d.close();d.style.display='none';${signal}_dialog_open=false;${signal}_search='';${signal}_selected=0;document.body.style.overflow='';setTimeout(()=>{{d.style.display=''}},100)}}"
+            ) if onclick and not disabled else None,
+            data_on_mouseenter=js(f"${signal}_selected={index}") if not disabled else None,
+            data_show=show if show else None,
+            data_attr_data_selected=selected_sig.eq(index).if_("true", "false"),
+            data_attr_aria_selected=selected_sig.eq(index),
             role="option",
-            aria_selected=t("{signal}_selected === {index}"),
             aria_disabled="true" if disabled else "false",
             data_command_item=signal,
             data_slot="command-item",
