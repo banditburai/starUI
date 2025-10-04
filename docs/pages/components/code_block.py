@@ -13,7 +13,7 @@ STATUS = "stable"
 from starhtml import Div, P, H3, H4, Pre, Code, Button as HTMLButton, Span, Icon
 from starhtml.datastar import ds_signals, ds_on_click, ds_text, ds_show, value, ds_bind
 from starui.registry.components.button import Button
-from starui.registry.components.code_block import CodeBlock, InlineCode
+from starui.registry.components.code_block import CodeBlock, CodeBlockStyles, InlineCode
 from starui.registry.components.badge import Badge
 from starui.registry.components.separator import Separator
 from widgets.component_preview import ComponentPreview
@@ -406,7 +406,8 @@ def welcome_component():
     
     api_reference = build_api_reference(
         components=[
-            Component("CodeBlock", "Display multi-line code with syntax highlighting and copy functionality"),
+            Component("CodeBlock", "Display multi-line code with syntax highlighting"),
+            Component("CodeBlockStyles", "Generate theme-aware styles for code blocks (add once to app headers)"),
             Component("InlineCode", "Highlight short code snippets within text and documentation"),
         ]
     )

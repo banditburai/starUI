@@ -6,7 +6,7 @@ from starhtml import Label as HTMLLabel
 from starhtml import P as HTMLP
 from starhtml import Span as HTMLSpan
 
-from .utils import cn, gen_id, ensure_signal
+from .utils import cn, gen_id
 
 
 def Checkbox(
@@ -21,28 +21,26 @@ def Checkbox(
     indicator_cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig_name = ensure_signal(signal, "checkbox")
+    sig = signal or gen_id("checkbox")
     initial = "indeterminate" if indeterminate else (checked or False)
 
     return Div(
-        (sig := Signal(sig_name, initial)),
+        (checked_state := Signal(sig, initial)),
         HTMLInput(
-            data_bind=sig_name,
+            data_bind=checked_state,
             type="checkbox",
             name=name,
             value=value or "on",
             disabled=disabled,
             required=required,
             data_slot="checkbox",
-            data_state="indeterminate" if indeterminate else sig.if_("checked", "unchecked"),
+            data_state="indeterminate" if indeterminate else checked_state.if_("checked", "unchecked"),
             cls=cn(
                 "peer appearance-none size-4 shrink-0 rounded-[4px] border shadow-xs transition-all outline-none",
                 "border-input bg-background dark:bg-input/30",
-                "checked:bg-foreground checked:border-foreground",
-                "dark:checked:bg-foreground dark:checked:border-foreground",
+                "checked:bg-foreground checked:border-foreground dark:checked:bg-foreground dark:checked:border-foreground",
                 "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
-                "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40",
-                "aria-invalid:border-destructive aria-invalid:checked:border-destructive",
+                "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive aria-invalid:checked:border-destructive",
                 "disabled:cursor-not-allowed disabled:opacity-50",
                 cls,
             ),
@@ -50,7 +48,7 @@ def Checkbox(
         ),
         HTMLSpan(
             Icon("lucide:minus" if indeterminate else "lucide:check"),
-            data_attr_style="opacity: 1" if indeterminate else sig.if_("opacity: 1", "opacity: 0"),
+            data_attr_style="opacity: 1" if indeterminate else checked_state.if_("opacity: 1", "opacity: 0"),
             data_slot="checkbox-indicator",
             cls=cn(
                 "absolute inset-0 flex items-center justify-center text-background text-sm transition-opacity pointer-events-none",
@@ -79,8 +77,8 @@ def CheckboxWithLabel(
     indicator_cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig_name = ensure_signal(signal, "checkbox")
-    checkbox_id = kwargs.pop("id", None) or sig_name
+    sig = signal or gen_id("checkbox")
+    checkbox_id = kwargs.pop("id", signal)
 
     return Div(
         Div(
@@ -101,23 +99,19 @@ def CheckboxWithLabel(
                 HTMLLabel(
                     label,
                     HTMLSpan(" *", cls="text-destructive") if required else None,
-                    for_=checkbox_id,
+                    fr=checkbox_id,
                     cls=cn(
                         "flex items-center gap-2 text-sm leading-none font-medium select-none",
                         "peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
-                        "opacity-50 cursor-not-allowed" if disabled else "",
                         label_cls,
                     ),
                     data_slot="label",
                 ),
                 HTMLP(
                     helper_text,
-                    cls=cn(
-                        "text-muted-foreground text-sm",
-                        "opacity-50" if disabled else "",
-                    ),
+                    cls=cn("text-muted-foreground text-sm", disabled and "opacity-50"),
                 ) if helper_text else None,
-                cls="grid gap-1.5" if helper_text else None,
+                cls="grid gap-1.5",
             ),
             cls="flex items-start gap-3",
         ),

@@ -2,7 +2,7 @@ from typing import Any
 
 from starhtml import FT, Div, Img, Signal
 
-from .utils import cn, ensure_signal
+from .utils import cn, gen_id
 
 
 def Avatar(
@@ -44,8 +44,7 @@ def AvatarFallback(
     return Div(
         *children,
         cls=cn(
-            "flex size-full items-center justify-center rounded-full",
-            "bg-muted" if "bg-" not in cls else "",
+            "flex size-full items-center justify-center rounded-full bg-muted",
             cls,
         ),
         **kwargs,
@@ -68,10 +67,10 @@ def AvatarWithFallback(
             **kwargs,
         )
 
-    sig_name = ensure_signal(signal, "avatar_error")    
+    sig = signal or gen_id("avatar_error")
 
     return Avatar(
-        (error_state := Signal(sig_name, False)),
+        (error_state := Signal(sig, False)),
         Img(
             src=src,
             alt=alt,

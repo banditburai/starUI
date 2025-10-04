@@ -20,7 +20,7 @@ def Switch(
     **kwargs: Any,
 ) -> FT:
     
-    signal = ensure_signal(signal, "switch")
+    sig = signal or gen_id("switch")
     switch_id = kwargs.pop("id", gen_id("switch"))
 
     return Div(
@@ -76,7 +76,7 @@ def SwitchWithLabel(
     switch_cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    signal = ensure_signal(signal, "switch")
+    sig = signal or gen_id("switch")
     switch_id = id or gen_id("switch")
 
     return Div(
@@ -84,7 +84,7 @@ def SwitchWithLabel(
             HTMLLabel(
                 label,
                 required and HTMLSpan(" *", cls="text-destructive") or None,
-                for_=switch_id,
+                fr=switch_id,
                 cls=cn(
                     "text-sm font-medium",
                     "cursor-pointer"

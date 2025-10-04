@@ -4,8 +4,9 @@ from starhtml import Div, FT, Signal, js
 from starhtml import Dialog as HTMLDialog
 from starhtml import H2 as HTMLH2
 from starhtml import P as HTMLP
+from starhtml.datastar import evt, document, seq
 
-from .utils import cn, ensure_signal
+from .utils import cn, gen_id
 
 AlertDialogVariant = Literal["default", "destructive"]
 
@@ -16,24 +17,26 @@ def AlertDialog(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    dialog_ref = ensure_signal(signal, "alert_dialog")
-    open_state = Signal(f"{dialog_ref}_open", False)
+    sig = signal or gen_id("alert_dialog")
+    open_state = Signal(f"{sig}_open", False)
+    dialog_ref = Signal(sig, _ref_only=True)
 
     trigger = next((c for c in children if callable(c) and c.__name__ == 'trigger'), None)
     content = next((c for c in children if callable(c) and c.__name__ == 'content'), None)
 
+    ctx = dict(open_state=open_state, dialog_ref=dialog_ref, sig=sig)
+
     return Div(
-        trigger(open_state, dialog_ref) if trigger else None,
+        trigger(**ctx) if trigger else None,
         HTMLDialog(
-            open_state,
-            content(open_state, dialog_ref) if content else None,
-            data_ref=dialog_ref,
+            content(**ctx) if content else None,
+            data_ref=sig,
             data_on_close=open_state.set(False),
-            data_on_click=js(f"evt.target === evt.currentTarget && (${dialog_ref}.close(), {open_state.set(False)})"),
-            id=dialog_ref,
+            data_on_click=(evt.target == evt.currentTarget) & seq(dialog_ref.close(), open_state.set(False)),
+            id=sig,
             role="alertdialog",
-            aria_labelledby=f"{dialog_ref}-title",
-            aria_describedby=f"{dialog_ref}-description",
+            aria_labelledby=f"{sig}-title",
+            aria_describedby=f"{sig}-description",
             cls=cn(
                 "fixed max-h-[85vh] w-full max-w-lg overflow-auto m-auto bg-background text-foreground border rounded-lg shadow-lg p-0 backdrop:bg-black/50 backdrop:backdrop-blur-sm open:animate-in open:fade-in-0 open:zoom-in-95 open:duration-200 open:backdrop:animate-in open:backdrop:fade-in-0 open:backdrop:duration-200",
                 cls,
@@ -41,7 +44,7 @@ def AlertDialog(
             **kwargs,
         ),
         Div(
-            data_effect=js(f"document.body.style.overflow = {open_state} ? 'hidden' : ''"),
+            data_effect=document.body.style.overflow.set(open_state.if_('hidden', '')),
             style="display: none;",
         ),
     )
@@ -53,12 +56,12 @@ def AlertDialogTrigger(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    def trigger(open_state, dialog_ref):
+    def trigger(*, open_state, dialog_ref, **_):
         from .button import Button
 
         return Button(
             *children,
-            data_on_click=[js(f"${dialog_ref}.showModal()"), open_state.set(True)],
+            data_on_click=[dialog_ref.showModal(), open_state.set(True)],
             aria_haspopup="dialog",
             variant=variant,
             cls=cls,
@@ -73,9 +76,9 @@ def AlertDialogContent(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    def content(open_state, dialog_ref):
+    def content(**ctx):
         return Div(
-            *[child(open_state, dialog_ref) if callable(child) else child for child in children],
+            *[child(**ctx) if callable(child) else child for child in children],
             cls=cn("relative p-6", cls),
             **kwargs,
         )
@@ -88,9 +91,9 @@ def AlertDialogHeader(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    def _(open_state, dialog_ref):
+    def _(**ctx):
         return Div(
-            *[child(open_state, dialog_ref) if callable(child) else child for child in children],
+            *[child(**ctx) if callable(child) else child for child in children],
             cls=cn("flex flex-col gap-2 text-center sm:text-left", cls),
             **kwargs,
         )
@@ -103,9 +106,9 @@ def AlertDialogFooter(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    def _(open_state, dialog_ref):
+    def _(**ctx):
         return Div(
-            *[child(open_state, dialog_ref) if callable(child) else child for child in children],
+            *[child(**ctx) if callable(child) else child for child in children],
             cls=cn("flex flex-col-reverse gap-2 sm:flex-row sm:justify-end mt-6", cls),
             **kwargs,
         )
@@ -118,10 +121,10 @@ def AlertDialogTitle(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    def _(_open_state, dialog_ref):
+    def _(*, sig, **_):
         return HTMLH2(
             *children,
-            id=f"{dialog_ref}-title",
+            id=f"{sig}-title",
             cls=cn("text-lg leading-none font-semibold text-foreground", cls),
             **kwargs,
         )
@@ -134,10 +137,10 @@ def AlertDialogDescription(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    def _(_open_state, dialog_ref):
+    def _(*, sig, **_):
         return HTMLP(
             *children,
-            id=f"{dialog_ref}-description",
+            id=f"{sig}-description",
             cls=cn("text-muted-foreground text-sm", cls),
             **kwargs,
         )
@@ -147,17 +150,15 @@ def AlertDialogDescription(
 
 def AlertDialogAction(
     *children: Any,
-    action: str = "",
+    action: Any = None,
     variant: AlertDialogVariant = "default",
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    def _(open_state, dialog_ref):
+    def _(*, open_state, dialog_ref, **_):
         from .button import Button
 
-        click_actions = [open_state.set(False), js(f"${dialog_ref}.close()")]
-        if action:
-            click_actions.insert(0, js(action))
+        click_actions = ([action] if action else []) + [open_state.set(False), dialog_ref.close()]
 
         return Button(
             *children,
@@ -175,12 +176,12 @@ def AlertDialogCancel(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    def _(open_state, dialog_ref):
+    def _(*, open_state, dialog_ref, **_):
         from .button import Button
 
         return Button(
             *children,
-            data_on_click=[open_state.set(False), js(f"${dialog_ref}.close()")],
+            data_on_click=[open_state.set(False), dialog_ref.close()],
             variant="outline",
             cls=cls,
             **kwargs,

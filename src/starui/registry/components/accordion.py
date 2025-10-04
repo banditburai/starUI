@@ -1,8 +1,8 @@
 from typing import Any, Literal
 
-from starhtml import FT, Button, Div, Icon, Signal, js
+from starhtml import FT, Button, Div, Icon, Signal
 
-from .utils import cn, ensure_signal
+from .utils import cn, gen_id
 
 AccordionType = Literal["single", "multiple"]
 
@@ -16,16 +16,18 @@ def Accordion(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig_name = ensure_signal(signal, "accordion")
+    sig = signal or gen_id("accordion")
 
     if type == "single":
         initial = default_value or ""
     else:
         initial = [default_value] if isinstance(default_value, str) else (default_value or [])
 
+    ctx = dict(accordion_state=(accordion_state := Signal(sig, initial)), type=type, collapsible=collapsible)
+
     return Div(
-        (sig := Signal(sig_name, initial)),
-        *[child(sig, type, collapsible) if callable(child) else child for child in children],
+        accordion_state,
+        *[child(**ctx) if callable(child) else child for child in children],
         cls=cn("w-full min-w-0", cls),
         **kwargs,
     )
@@ -37,9 +39,9 @@ def AccordionItem(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    def _(sig, type="single", collapsible=False):
+    def _(**ctx):
         return Div(
-            *[child(sig, type, collapsible, value) if callable(child) else child for child in children],
+            *[child(item_value=value, **ctx) if callable(child) else child for child in children],
             data_value=value,
             cls=cn("border-b", cls),
             **kwargs,
@@ -53,16 +55,16 @@ def AccordionTrigger(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    def _(sig, type="single", collapsible=False, item_value=None):
+    def _(*, accordion_state, type, collapsible, item_value, **_):
         if not item_value:
             raise ValueError("AccordionTrigger must be used inside AccordionItem")
 
-        is_open = (sig == item_value) if type == "single" else sig.contains(item_value)
+        is_open = (accordion_state == item_value) if type == "single" else accordion_state.contains(item_value)
 
         if type == "single":
-            click_action = sig.toggle(item_value, "") if collapsible else sig.set(item_value)
+            click_action = accordion_state.toggle(item_value, "") if collapsible else accordion_state.set(item_value)
         else:
-            click_action = js(f"{sig} = {sig}.includes('{item_value}') ? {sig}.filter(v => v !== '{item_value}') : [...{sig}, '{item_value}']")
+            click_action = accordion_state.toggle_in(item_value)
 
         return Div(
             Button(
@@ -94,11 +96,11 @@ def AccordionContent(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    def _(sig, type="single", _collapsible=False, item_value=None):
+    def _(*, accordion_state, type, item_value, **_):
         if not item_value:
             raise ValueError("AccordionContent must be used inside AccordionItem")
 
-        is_open = (sig == item_value) if type == "single" else sig.contains(item_value)
+        is_open = (accordion_state == item_value) if type == "single" else accordion_state.contains(item_value)
 
         return Div(
             Div(

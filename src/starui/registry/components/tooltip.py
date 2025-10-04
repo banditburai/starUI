@@ -14,7 +14,7 @@ from starhtml.datastar import (
     ds_signals,
 )
 
-from .utils import cn, ensure_signal
+from .utils import cn, gen_id
 
 
 def Tooltip(
@@ -23,7 +23,7 @@ def Tooltip(
     cls: str = "relative inline-block",
     **kwargs: Any,
 ) -> FT:
-    signal = ensure_signal(signal, "tooltip")
+    sig = signal or gen_id("tooltip")
     return Div(
         *[child(signal) if callable(child) else child for child in children],
         ds_signals({f"{signal}_open": False, f"{signal}_timer": 0}),

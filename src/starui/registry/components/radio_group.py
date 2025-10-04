@@ -1,46 +1,38 @@
-from itertools import count
-from typing import Any
-from uuid import uuid4
+from typing import Any, Literal
 
-from starhtml import FT, Div
+from starhtml import Div, FT, Signal
 from starhtml import Input as HTMLInput
 from starhtml import Label as HTMLLabel
 from starhtml import P as HTMLP
 from starhtml import Span as HTMLSpan
-from starhtml.datastar import ds_on_change, ds_signals, value, toggle_class
 
-from .utils import cn
-
-_radio_group_ids = count(1)
+from .utils import cn, gen_id
 
 
 def RadioGroup(
     *children: Any,
-    initial_value: str | None = None,
-    signal: str | None = None,
-    name: str | None = None,
-    disabled: bool = False,
+    initial_value: str = "",
+    signal: str = "",
+    name: str = "",
     required: bool = False,
     hide_indicators: bool = False,
+    aria_label: str = "",
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    signal = signal or f"radio_{next(_radio_group_ids)}"
-    group_name = name or f"radio_group_{signal}"
+    sig = signal or gen_id("radio")
+    group_name = name or f"radio_group_{sig}"
+    selected = Signal(sig, initial_value)
 
-    processed_children = [
-        child(signal, group_name, initial_value, hide_indicators) if callable(child) else child
-        for child in children
-    ]
+    ctx = dict(sig=sig, selected=selected, group_name=group_name, hide_indicators=hide_indicators)
 
     return Div(
-        *processed_children,
-        ds_signals({signal: value(initial_value or "")}),
+        selected,
+        *[child(**ctx) if callable(child) else child for child in children],
         cls=cn("grid gap-2", cls),
         data_slot="radio-group",
-        data_radio_signal=signal,
-        data_radio_name=group_name,
         role="radiogroup",
+        aria_label=aria_label or None,
         aria_required="true" if required else None,
         **kwargs,
     )
@@ -48,138 +40,138 @@ def RadioGroup(
 
 def RadioGroupItem(
     value: str,
-    label: str | None = None,
+    label: str = "",
     disabled: bool = False,
     cls: str = "",
     indicator_cls: str = "",
     **kwargs: Any,
-) -> FT:
-    def create_item(signal, group_name, default_value=None, hide_indicators=False):
-        radio_id = f"radio_{str(uuid4())[:8]}"
-        filtered_kwargs = {k: v for k, v in kwargs.items() if k != "name"}
+):
+    def item(*, sig, selected, group_name, hide_indicators, **_):
+        radio_id = gen_id("radio")
+        is_checked = selected.eq(value)
 
         radio_input = HTMLInput(
-            ds_on_change(f"${signal} = '{value}'"),
+            data_on_change=selected.set(value),
             type="radio",
             id=radio_id,
             value=value,
             name=group_name,
             disabled=disabled,
+            data_state=is_checked.if_("checked", "unchecked"),
+            data_disabled="" if disabled else None,
             data_slot="radio-input",
             cls="sr-only peer",
-            **filtered_kwargs,
+            **kwargs,
         )
 
-        visual_radio_cls = cn(
-            "relative aspect-square size-4 shrink-0 rounded-full border transition-all",
-            "border-input bg-background dark:bg-input/30",
-            "peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
-            "sr-only" if hide_indicators else None,
-            cls,
-        )
-        
+        if hide_indicators:
+            return Div(
+                radio_input,
+                cls="relative inline-flex items-center",
+                data_slot="radio-container",
+            ) if not label else HTMLLabel(
+                radio_input,
+                HTMLSpan(label, cls="block w-full"),
+                fr=radio_id,
+                cls="block w-full cursor-pointer",
+                data_slot="radio-container",
+            )
+
         visual_radio = Div(
             Div(
                 Div(cls="size-2 rounded-full bg-primary"),
-                toggle_class(
-                    signal,
-                    "opacity-100",
-                    "opacity-0",
-                    base=cn(
+                style="opacity: 0; transition: opacity 0.15s",
+                data_style_opacity=is_checked.if_("1", "0"),
+                cls=cn(
                     "absolute inset-0 flex items-center justify-center",
-                    "sr-only" if hide_indicators else indicator_cls
-                ),
+                    indicator_cls,
                 ),
                 data_slot="radio-indicator",
             ),
-            cls=visual_radio_cls,
+            cls=cn(
+                "relative aspect-square size-4 shrink-0 rounded-full border transition-all",
+                "border-input bg-background dark:bg-input/30",
+                "peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
+                cls,
+            ),
             data_slot="radio-visual",
         )
 
         if not label:
             return Div(
                 radio_input,
-                visual_radio if not hide_indicators else None,
+                visual_radio,
                 cls="relative inline-flex items-center",
                 data_slot="radio-container",
             )
 
-        label_cls = "block w-full cursor-pointer" if hide_indicators else "flex items-center gap-2 cursor-pointer"
-        span_cls = "block w-full" if hide_indicators else "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
-
         return HTMLLabel(
             radio_input,
-            visual_radio if not hide_indicators else None,
+            visual_radio,
             HTMLSpan(
                 label,
-                cls=span_cls,
+                cls="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
             ),
-            for_=radio_id,
-            cls=label_cls,
+            fr=radio_id,
+            cls="flex items-center gap-2 cursor-pointer",
             data_slot="radio-container",
         )
 
-    return create_item
+    return item
 
 
 def RadioGroupWithLabel(
     *attrs: Any,
     label: str,
     options: list[dict[str, Any]],
-    value: str | None = None,
-    signal: str | None = None,
-    name: str | None = None,
-    id: str | None = None,
-    helper_text: str | None = None,
-    error_text: str | None = None,
+    value: str = "",
+    signal: str = "",
+    name: str = "",
+    id: str = "",
+    helper_text: str = "",
+    error_text: str = "",
     disabled: bool = False,
     required: bool = False,
     hide_indicators: bool = False,
-    orientation: str = "vertical",
+    orientation: Literal["vertical", "horizontal"] = "vertical",
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    base_id = str(uuid4())[:8]
-    signal = signal or f"radio_{base_id}"
-    name = name or f"radio_group_{signal}"
-    group_id = id or f"radiogroup_{base_id}"
-
-    radio_group_classes = cn(
-        "flex gap-2",
-        "flex-col" if orientation == "vertical" else "flex-row gap-6",
-    )
+    sig = signal or gen_id("radio")
+    group_name = name or f"radio_group_{sig}"
+    group_id = id or gen_id("radiogroup")
 
     return Div(
-        label
-        and HTMLLabel(
+        HTMLLabel(
             label,
-            required and HTMLSpan(" *", cls="text-destructive") or None,
+            HTMLSpan(" *", cls="text-destructive") if required else None,
             cls="text-sm font-medium mb-3 block",
-            for_=group_id,
-        )
-        or None,
+            fr=group_id,
+        ),
         RadioGroup(
             *[
                 RadioGroupItem(
                     value=option["value"],
-                    label=option.get("label"),
+                    label=option.get("label", ""),
                     disabled=disabled or option.get("disabled", False),
                 )
                 for option in options
             ],
             initial_value=value,
-            signal=signal,
-            name=name,
-            disabled=disabled,
+            signal=sig,
+            name=group_name,
             required=required,
             hide_indicators=hide_indicators,
-            cls=radio_group_classes,
+            cls=cn(
+                "flex gap-2",
+                "flex-col" if orientation == "vertical" else "flex-row gap-6",
+            ),
             id=group_id,
             aria_invalid="true" if error_text else None,
             *attrs,
             **kwargs,
         ),
-        error_text and HTMLP(error_text, cls="text-sm text-destructive mt-1.5") or None,
-        helper_text and not error_text and HTMLP(helper_text, cls="text-sm text-muted-foreground mt-1.5") or None,
+        HTMLP(error_text, cls="text-sm text-destructive mt-1.5") if error_text else None,
+        HTMLP(helper_text, cls="text-sm text-muted-foreground mt-1.5") if helper_text and not error_text else None,
         cls=cn("space-y-1.5", cls),
     )

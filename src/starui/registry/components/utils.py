@@ -4,30 +4,37 @@ import json
 from uuid import uuid4
 from starhtml import Div
 
+try:
+    from starmerge import merge
+except ImportError:
+    def merge(*classes: str) -> str:
+        return " ".join(c for c in classes if c)
+
 # Theme configuration
 DEFAULT_THEME = "light"
 ALT_THEME = "dark"
 
 
 def cn(*classes: Any) -> str:
-    result_classes: list[str] = []
+    """Merge Tailwind classes intelligently, resolving conflicts."""
+    processed: list[str] = []
 
     for cls in classes:
         if not cls:
             continue
 
         if isinstance(cls, str):
-            result_classes.append(cls)
+            processed.append(cls)
         elif isinstance(cls, dict):
             for class_name, condition in cls.items():
                 if condition:
-                    result_classes.append(str(class_name))
+                    processed.append(str(class_name))
         elif isinstance(cls, list | tuple):
-            result_classes.append(cn(*cls))
+            processed.append(cn(*cls))
         else:
-            result_classes.append(str(cls))
+            processed.append(str(cls))
 
-    return " ".join(result_classes)
+    return merge(*processed) if processed else ""
 
 
 def cva(base: str = "", config: dict[str, Any] | None = None) -> Callable[..., str]:

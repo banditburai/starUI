@@ -44,7 +44,7 @@ def Toggle(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    signal = ensure_signal(signal, "toggle")
+    sig = signal or gen_id("toggle")
     toggle_id = kwargs.pop("id", gen_id("toggle"))
 
     return Div(

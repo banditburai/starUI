@@ -1,12 +1,13 @@
 from typing import Any, Literal
 
-from starhtml import FT, Div, Icon, Signal, Span, js
+from starhtml import Div, FT, Icon, Signal, Span
 from starhtml import Button as HTMLButton
 from starhtml import Dialog as HTMLDialog
-from starhtml import H2 as HTMLH2, P as HTMLP
+from starhtml import H2 as HTMLH2
+from starhtml import P as HTMLP
+from starhtml.datastar import document, evt, seq
 
-from .button import Button
-from .utils import cn, cva, ensure_signal
+from .utils import cn, cva, gen_id
 
 DialogSize = Literal["sm", "md", "lg", "xl", "full"]
 
@@ -35,28 +36,30 @@ def Dialog(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    dialog_ref = ensure_signal(signal, "dialog")
-    open_state = Signal(f"{dialog_ref}_open", False)
+    sig = signal or gen_id("dialog")
+    open_state = Signal(f"{sig}_open", False)
+    dialog_ref = Signal(sig, _ref_only=True)
 
     trigger = next((c for c in children if callable(c) and c.__name__ == 'trigger'), None)
     content = next((c for c in children if callable(c) and c.__name__ == 'content'), None)
 
+    ctx = dict(open_state=open_state, dialog_ref=dialog_ref, sig=sig, modal=modal)
+
     return Div(
-        trigger(open_state, dialog_ref, modal) if trigger else None,
+        trigger(**ctx) if trigger else None,
         HTMLDialog(
-            open_state,
-            content(open_state, dialog_ref) if content else None,
-            data_ref=dialog_ref,
+            content(**ctx) if content else None,
+            data_ref=sig,
             data_on_close=open_state.set(False),
-            data_on_click=js(f"evt.target === evt.currentTarget && (${dialog_ref}.close(), {open_state.set(False)})") if modal else None,
-            id=dialog_ref,
-            aria_labelledby=f"{dialog_ref}-title",
-            aria_describedby=f"{dialog_ref}-description",
+            data_on_click=(evt.target == evt.currentTarget) & seq(dialog_ref.close(), open_state.set(False)) if modal else None,
+            id=sig,
+            aria_labelledby=f"{sig}-title",
+            aria_describedby=f"{sig}-description",
             cls=cn(dialog_variants(size=size), cls),
             **kwargs,
         ),
         Div(
-            data_effect=js(f"document.body.style.overflow = {open_state} ? 'hidden' : ''"),
+            data_effect=document.body.style.overflow.set(open_state.if_('hidden', '')),
             style="display: none;",
         ),
     )
@@ -68,11 +71,13 @@ def DialogTrigger(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    def trigger(open_state, dialog_ref, modal):
-        method = "showModal" if modal else "show"
+    def trigger(*, open_state, dialog_ref, modal, **_):
+        from .button import Button
+
+        show_method = dialog_ref.showModal() if modal else dialog_ref.show()
         return Button(
             *children,
-            data_on_click=[js(f"${dialog_ref}.{method}()"), open_state.set(True)],
+            data_on_click=[show_method, open_state.set(True)],
             type="button",
             aria_haspopup="dialog",
             variant=variant,
@@ -89,22 +94,20 @@ def DialogContent(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    def content(open_state, dialog_ref):
-        close_button = (
+    def content(**ctx):
+        open_state = ctx["open_state"]
+        dialog_ref = ctx["dialog_ref"]
+
+        return Div(
+            *[child(**ctx) if callable(child) else child for child in children],
             HTMLButton(
                 Icon("lucide:x", cls="h-4 w-4"),
                 Span("Close", cls="sr-only"),
-                data_on_click=[open_state.set(False), js(f"${dialog_ref}.close()")],
+                data_on_click=[open_state.set(False), dialog_ref.close()],
                 cls="absolute top-4 right-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none ring-offset-background focus:ring-ring",
                 type="button",
                 aria_label="Close",
-            )
-            if show_close_button else None
-        )
-
-        return Div(
-            *[child(open_state, dialog_ref) if callable(child) else child for child in children],
-            close_button,
+            ) if show_close_button else None,
             cls=cn("relative p-6", cls),
             **kwargs,
         )
@@ -119,11 +122,12 @@ def DialogClose(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    def _(open_state, dialog_ref):
-        close_actions = [open_state.set(False), js(f"${dialog_ref}.close('{value}')" if value else f"${dialog_ref}.close()")]
+    def _(*, open_state, dialog_ref, **_):
+        from .button import Button
+
         return Button(
             *children,
-            data_on_click=close_actions,
+            data_on_click=[open_state.set(False), dialog_ref.close(value) if value else dialog_ref.close()],
             type="button",
             variant=variant,
             cls=cls,
@@ -138,9 +142,9 @@ def DialogHeader(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    def _(open_state, dialog_ref):
+    def _(**ctx):
         return Div(
-            *[child(open_state, dialog_ref) if callable(child) else child for child in children],
+            *[child(**ctx) if callable(child) else child for child in children],
             cls=cn("flex flex-col gap-2 text-center sm:text-left", cls),
             **kwargs,
         )
@@ -153,9 +157,9 @@ def DialogFooter(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    def _(open_state, dialog_ref):
+    def _(**ctx):
         return Div(
-            *[child(open_state, dialog_ref) if callable(child) else child for child in children],
+            *[child(**ctx) if callable(child) else child for child in children],
             cls=cn("flex flex-col-reverse gap-2 sm:flex-row sm:justify-end mt-6", cls),
             **kwargs,
         )
@@ -168,10 +172,10 @@ def DialogTitle(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    def _(_open_state, dialog_ref):
+    def _(*, sig, **_):
         return HTMLH2(
             *children,
-            id=f"{dialog_ref}-title",
+            id=f"{sig}-title",
             cls=cn("text-lg leading-none font-semibold text-foreground", cls),
             **kwargs,
         )
@@ -184,10 +188,10 @@ def DialogDescription(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    def _(_open_state, dialog_ref):
+    def _(*, sig, **_):
         return HTMLP(
             *children,
-            id=f"{dialog_ref}-description",
+            id=f"{sig}-description",
             cls=cn("text-muted-foreground text-sm", cls),
             **kwargs,
         )

@@ -28,7 +28,7 @@ def Select(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    signal = ensure_signal(signal, "select")
+    sig = signal or gen_id("select")
     return Div(
         ds_signals(
             {
@@ -265,14 +265,14 @@ def SelectWithLabel(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    signal = ensure_signal(signal, "select")
+    sig = signal or gen_id("select")
     trigger_id = id or f"{signal}_trigger"
     
     return Div(
         HTMLLabel(
             label,
             Span(" *", cls="text-destructive") if required else "",
-            for_=trigger_id,
+            fr=trigger_id,
             cls=cn("block text-sm font-medium mb-1.5", label_cls),
         ),
         Select(

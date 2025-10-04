@@ -6,7 +6,7 @@ from starhtml import Button as HTMLButton
 from starhtml.datastar import ds_on_click, ds_signals, value
 
 from .toggle import toggle_variants
-from .utils import cn, ensure_signal
+from .utils import cn, gen_id
 
 ToggleGroupType = Literal["single", "multiple"]
 ToggleGroupVariant = Literal["default", "outline"]
@@ -24,7 +24,7 @@ def ToggleGroup(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    signal = ensure_signal(signal, "toggle_group")
+    sig = signal or gen_id("toggle_group")
     value_signal = f"{signal}_value"
 
     if initial_value is None:

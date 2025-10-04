@@ -310,8 +310,8 @@ def index():
             Div(
                 H2("Dialog (Modal)", cls="text-2xl font-semibold mb-4"),
                 Dialog(
-                    trigger=DialogTrigger("Edit Profile", ref_id="edit-profile-dialog"),
-                    content=DialogContent(
+                    DialogTrigger("Edit Profile"),
+                    DialogContent(
                         DialogHeader(
                             DialogTitle("Edit Profile"),
                             DialogDescription(
@@ -345,7 +345,7 @@ def index():
                             DialogClose("Save changes"),
                         ),
                     ),
-                    ref_id="edit-profile-dialog",
+                    signal="edit_profile_dialog",
                     size="md",
                 ),
                 cls="mb-8",
@@ -354,10 +354,8 @@ def index():
             Div(
                 H2("Dialog (Small Size)", cls="text-2xl font-semibold mb-4"),
                 Dialog(
-                    trigger=DialogTrigger(
-                        "Delete Account", ref_id="delete-dialog", variant="destructive"
-                    ),
-                    content=DialogContent(
+                    DialogTrigger("Delete Account", variant="destructive"),
+                    DialogContent(
                         DialogHeader(
                             DialogTitle("Are you absolutely sure?"),
                             DialogDescription(
@@ -370,7 +368,7 @@ def index():
                             DialogClose("Yes, delete account", variant="destructive"),
                         ),
                     ),
-                    ref_id="delete-dialog",
+                    signal="delete_dialog",
                     size="sm",
                 ),
                 cls="mb-8",
@@ -381,11 +379,8 @@ def index():
                 Div(
                     # Basic alert dialog
                     AlertDialog(
-                        trigger=AlertDialogTrigger(
-                            "Show Alert", 
-                            ref_id="basic_alert"
-                        ),
-                        content=AlertDialogContent(
+                        AlertDialogTrigger("Show Alert"),
+                        AlertDialogContent(
                             AlertDialogHeader(
                                 AlertDialogTitle("Are you absolutely sure?"),
                                 AlertDialogDescription(
@@ -394,24 +389,19 @@ def index():
                                 ),
                             ),
                             AlertDialogFooter(
-                                AlertDialogCancel("Cancel", ref_id="basic_alert"),
+                                AlertDialogCancel("Cancel"),
                                 AlertDialogAction(
                                     "Continue",
-                                    ref_id="basic_alert",
                                     action="console.log('Action confirmed!')",
                                 ),
                             ),
                         ),
-                        ref_id="basic_alert",
+                        signal="basic_alert",
                     ),
                     # Destructive alert dialog
                     AlertDialog(
-                        trigger=AlertDialogTrigger(
-                            "Delete Item", 
-                            ref_id="destructive_alert",
-                            variant="destructive"
-                        ),
-                        content=AlertDialogContent(
+                        AlertDialogTrigger("Delete Item", variant="destructive"),
+                        AlertDialogContent(
                             AlertDialogHeader(
                                 AlertDialogTitle("Delete Item"),
                                 AlertDialogDescription(
@@ -419,25 +409,20 @@ def index():
                                 ),
                             ),
                             AlertDialogFooter(
-                                AlertDialogCancel("Cancel", ref_id="destructive_alert"),
+                                AlertDialogCancel("Cancel"),
                                 AlertDialogAction(
                                     "Delete",
-                                    ref_id="destructive_alert",
                                     variant="destructive",
                                     action="console.log('Item deleted!')",
                                 ),
                             ),
                         ),
-                        ref_id="destructive_alert",
+                        signal="destructive_alert",
                     ),
                     # Alert dialog with custom action
                     AlertDialog(
-                        trigger=AlertDialogTrigger(
-                            "Confirm Action", 
-                            ref_id="custom_alert",
-                            variant="outline"
-                        ),
-                        content=AlertDialogContent(
+                        AlertDialogTrigger("Confirm Action", variant="outline"),
+                        AlertDialogContent(
                             AlertDialogHeader(
                                 AlertDialogTitle("Confirm Action"),
                                 AlertDialogDescription(
@@ -445,15 +430,14 @@ def index():
                                 ),
                             ),
                             AlertDialogFooter(
-                                AlertDialogCancel("Not now", ref_id="custom_alert"),
+                                AlertDialogCancel("Not now"),
                                 AlertDialogAction(
                                     "Yes, apply changes",
-                                    ref_id="custom_alert",
                                     action="alert('Changes applied successfully!')",
                                 ),
                             ),
                         ),
-                        ref_id="custom_alert",
+                        signal="custom_alert",
                     ),
                     cls="flex flex-wrap gap-4",
                 ),

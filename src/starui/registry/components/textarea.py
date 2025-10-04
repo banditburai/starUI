@@ -117,7 +117,7 @@ def TextareaWithLabel(
         HTMLLabel(
             label,
             HTMLSpan(" *", cls="text-destructive") if required else "",
-            for_=textarea_id,
+            fr=textarea_id,
             cls=cn("block text-sm font-medium mb-1.5", label_cls),
         ),
         Textarea(
