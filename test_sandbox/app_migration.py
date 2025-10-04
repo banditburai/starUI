@@ -49,6 +49,7 @@ from src.starui.registry.components.input import Input, InputWithLabel
 from src.starui.registry.components.label import Label
 from src.starui.registry.components.progress import Progress
 from src.starui.registry.components.radio_group import RadioGroup, RadioGroupItem, RadioGroupWithLabel
+from src.starui.registry.components.separator import Separator
 from src.starui.registry.components.theme_toggle import ThemeToggle
 
 styles = Link(rel="stylesheet", href="/static/css/starui.css", type="text/css")
@@ -118,6 +119,7 @@ def index():
             A("Popover", href="/popover", cls="text-primary hover:underline block"),
             A("Progress", href="/progress", cls="text-primary hover:underline block"),
             A("Radio Group", href="/radio-group", cls="text-primary hover:underline block"),
+            A("Separator", href="/separator", cls="text-primary hover:underline block"),
             A("Theme Toggle", href="/theme-toggle", cls="text-primary hover:underline block"),
             cls="space-y-2"
         ),
@@ -129,13 +131,7 @@ def index():
 
 @rt("/accordion")
 def test_accordion():
-    return Div(
-        # Theme toggle in top-right
-        Div(ThemeToggle(), cls="absolute top-4 right-4"),
-
-        H1("Accordion Component Test", cls="text-3xl font-bold mb-6"),
-        A("← Back to Index", href="/", cls="text-primary hover:underline mb-4 inline-block"),
-
+    return Page(
         H2("Single Mode (Collapsible)", cls="text-2xl font-semibold mb-4 mt-8"),
         Accordion(
             AccordionItem(
@@ -179,20 +175,13 @@ def test_accordion():
             default_value=["multi-1"],
             cls="max-w-2xl"
         ),
-
-        cls="container mx-auto"
+        title="Accordion"
     )
 
 
 @rt("/alert")
 def test_alert():
-    return Div(
-        # Theme toggle in top-right
-        Div(ThemeToggle(), cls="absolute top-4 right-4"),
-
-        H1("Alert Component Test", cls="text-3xl font-bold mb-6"),
-        A("← Back to Index", href="/", cls="text-primary hover:underline mb-4 inline-block"),
-
+    return Page(
         H2("Alert Variants", cls="text-2xl font-semibold mb-4 mt-8"),
         Div(
             Alert(
@@ -223,19 +212,13 @@ def test_alert():
             cls="space-y-4 max-w-2xl"
         ),
 
-        cls="container mx-auto"
+        title="Alert"
     )
 
 
 @rt("/avatar")
 def test_avatar():
-    return Div(
-        # Theme toggle in top-right
-        Div(ThemeToggle(), cls="absolute top-4 right-4"),
-
-        H1("Avatar Component Test", cls="text-3xl font-bold mb-6"),
-        A("← Back to Index", href="/", cls="text-primary hover:underline mb-4 inline-block"),
-
+    return Page(
         H2("Basic Avatar", cls="text-2xl font-semibold mb-4 mt-8"),
         Div(
             Avatar(
@@ -287,19 +270,13 @@ def test_avatar():
             cls="flex gap-4 items-center"
         ),
 
-        cls="container mx-auto"
+        title="Avatar"
     )
 
 
 @rt("/badge")
 def test_badge():
-    return Div(
-        # Theme toggle in top-right
-        Div(ThemeToggle(), cls="absolute top-4 right-4"),
-
-        H1("Badge Component Test", cls="text-3xl font-bold mb-6"),
-        A("← Back to Index", href="/", cls="text-primary hover:underline mb-4 inline-block"),
-
+    return Page(
         H2("Badge Variants", cls="text-2xl font-semibold mb-4 mt-8"),
         Div(
             Badge("Default"),
@@ -345,7 +322,7 @@ def test_badge():
             cls="flex flex-wrap gap-2 max-w-2xl"
         ),
 
-        cls="container mx-auto"
+        title="Badge"
     )
 
 
@@ -367,13 +344,7 @@ async def api_data():
 
 @rt("/button")
 def test_button():
-    return Div(
-        # Theme toggle in top-right
-        Div(ThemeToggle(), cls="absolute top-4 right-4"),
-
-        H1("Button Component Test", cls="text-3xl font-bold mb-6"),
-        A("← Back to Index", href="/", cls="text-primary hover:underline mb-4 inline-block"),
-
+    return Page(
         H2("Button Variants", cls="text-2xl font-semibold mb-4 mt-8"),
         Div(
             Button("Default"),
@@ -484,10 +455,13 @@ def test_button():
                         error="Failed"
                     )
                 ),
-                data_on_click=js(
-                    "$status = $status === 'pending' ? 'processing' : "
-                    "$status === 'processing' ? 'success' : "
-                    "$status === 'success' ? 'error' : 'pending'"
+                data_on_click=status.set(
+                    match(status,
+                        pending="processing",
+                        processing="success",
+                        success="error",
+                        error="pending"
+                    )
                 ),
                 data_attr_variant=match(status,
                     pending="default",
@@ -500,7 +474,6 @@ def test_button():
                 Icon("lucide:rotate-ccw"),
                 "Reset",
                 variant="outline",
-                size="sm",
                 data_on_click=status.set("pending"),
             ),
             P("✓ Better for 3+ states: Only one icon element, state-driven", cls="text-xs text-muted-foreground mt-2"),
@@ -510,13 +483,14 @@ def test_button():
         H2("Pattern 3: Real Backend Loading (data-indicator)", cls="text-2xl font-semibold mb-4 mt-8"),
         P("Uses Datastar's built-in data-indicator for actual backend requests:", cls="text-sm text-muted-foreground mb-2"),
         Div(
+            (fetching := Signal("fetching", _ref_only=True)),
             Button(
-                Icon("lucide:loader-2", cls="animate-spin", data_show="$fetching"),
-                Icon("lucide:download", data_show="!$fetching"),
-                data_text="$fetching ? 'Fetching...' : 'Fetch Data'",
+                Icon("lucide:loader-2", cls="animate-spin", data_show=fetching),
+                Icon("lucide:download", data_show=~fetching),
+                data_text=fetching.if_("Fetching...", "Fetch Data"),
                 data_on_click=get("/api/data"),
-                data_indicator_fetching=True,
-                data_attr_disabled="$fetching",
+                data_indicator=fetching,
+                data_attr_disabled=fetching,
                 variant="outline",
             ),
             Div(
@@ -524,24 +498,18 @@ def test_button():
                 id="api-response",
                 cls="mt-2"
             ),
-            P("✓ Automatic: $fetching signal created by Datastar during requests", cls="text-xs text-muted-foreground mt-2"),
+            P("✓ Automatic: 'fetching' signal created by Datastar during requests", cls="text-xs text-muted-foreground mt-2"),
             P("Click button to see 2-second simulated network delay", cls="text-xs text-muted-foreground"),
             cls="flex flex-col gap-2 max-w-2xl"
         ),
 
-        cls="container mx-auto"
+        title="Button"
     )
 
 
 @rt("/alert-dialog")
 def test_alert_dialog():
-    return Div(
-        # Theme toggle in top-right
-        Div(ThemeToggle(), cls="absolute top-4 right-4"),
-
-        H1("Alert Dialog Component Test", cls="text-3xl font-bold mb-6"),
-        A("← Back to Index", href="/", cls="text-primary hover:underline mb-4 inline-block"),
-
+    return Page(
         H2("Alert Dialog Variants", cls="text-2xl font-semibold mb-4 mt-8"),
         Div(
             # Basic alert dialog
@@ -605,25 +573,32 @@ def test_alert_dialog():
             ),
             cls="flex flex-wrap gap-4",
         ),
-
-        cls="container mx-auto"
+        title="Alert Dialog"
     )
 
 
 @rt("/calendar")
 def test_calendar():
-    return Div(
-        # Theme toggle in top-right
-        Div(ThemeToggle(), cls="absolute top-4 right-4"),
+    cal_single = Calendar(mode="single")
+    cal_range = Calendar(        
+        mode="range",
+        selected=["2025-09-15", "2025-09-25"],
+        month=9,
+        year=2025
+    )
+    cal_multiple = Calendar(        
+        mode="multiple",
+        selected=["2025-09-10", "2025-09-15", "2025-09-20"],
+        month=9,
+        year=2025
+    )
 
-        H1("Calendar Component Test", cls="text-3xl font-bold mb-6"),
-        A("← Back to Index", href="/", cls="text-primary hover:underline mb-4 inline-block"),
-
+    return Page(
         H2("Single Mode", cls="text-2xl font-semibold mb-4 mt-8"),
         Div(
-            (cal_single := Calendar(signal="test_single", mode="single")),
+            cal_single,
             Div(
-                P("Selected: ", Span(data_text=cal_single.selected.if_(cal_single.selected, "'None'"), cls="font-mono text-sm")),
+                P("Selected: ", Span(data_text=cal_single.selected.or_("None"), cls="font-mono text-sm")),
                 cls="mt-4 text-sm"
             ),
             cls="flex flex-col items-center"
@@ -631,15 +606,9 @@ def test_calendar():
 
         H2("Range Mode", cls="text-2xl font-semibold mb-4 mt-8"),
         Div(
-            (cal_range := Calendar(
-                signal="test_range",
-                mode="range",
-                selected=["2025-09-15", "2025-09-25"],
-                month=9,
-                year=2025
-            )),
+            cal_range,
             Div(
-                P("Range: ", Span(data_text="JSON.stringify(" + cal_range.selected + ")", cls="font-mono text-sm")),
+                P("Range: ", Span(data_text=cal_range.selected.or_("None"), cls="font-mono text-sm")),
                 cls="mt-4 text-sm"
             ),
             cls="flex flex-col items-center"
@@ -647,15 +616,9 @@ def test_calendar():
 
         H2("Multiple Mode", cls="text-2xl font-semibold mb-4 mt-8"),
         Div(
-            (cal_multiple := Calendar(
-                signal="test_multiple",
-                mode="multiple",
-                selected=["2025-09-10", "2025-09-15", "2025-09-20"],
-                month=9,
-                year=2025
-            )),
+            cal_multiple,
             Div(
-                P("Selected: ", Span(data_text="(" + cal_multiple.selected + " || []).length", cls="font-mono"), " dates"),
+                P("Selected: ", Span(data_text=cal_multiple.selected.join(' | ').or_("None"), cls="font-mono")),
                 cls="mt-4 text-sm"
             ),
             cls="flex flex-col items-center"
@@ -663,23 +626,16 @@ def test_calendar():
 
         H2("Disabled", cls="text-2xl font-semibold mb-4 mt-8"),
         Div(
-            Calendar(signal="test_disabled", mode="single", disabled=True),
+            Calendar(mode="single", disabled=True),
             cls="flex flex-col items-center"
         ),
-
-        cls="container mx-auto"
+        title="Calendar"
     )
 
 
 @rt("/card")
 def test_card():
-    return Div(
-        # Theme toggle in top-right
-        Div(ThemeToggle(), cls="absolute top-4 right-4"),
-
-        H1("Card Component Test", cls="text-3xl font-bold mb-6"),
-        A("← Back to Index", href="/", cls="text-primary hover:underline mb-4 inline-block"),
-
+    return Page(
         H2("Basic Card", cls="text-2xl font-semibold mb-4 mt-8"),
         Card(
             CardHeader(
@@ -773,35 +729,25 @@ def test_card():
             ),
             cls="max-w-xs",
         ),
-
-        cls="container mx-auto"
+        title="Card"
     )
 
 
 @rt("/checkbox")
 def test_checkbox():
-    return Div(
-        # Theme toggle in top-right
-        Div(ThemeToggle(), cls="absolute top-4 right-4"),
-
-        H1("Checkbox Component Test", cls="text-3xl font-bold mb-6"),
-        A("← Back to Index", href="/", cls="text-primary hover:underline mb-4 inline-block"),
-
+    return Page(
         H2("Checkbox Variants", cls="text-2xl font-semibold mb-4 mt-8"),
         Div(
             CheckboxWithLabel(
-                label="Accept terms and conditions",
-                signal="terms",
+                label="Accept terms and conditions",                
                 required=True
             ),
             CheckboxWithLabel(
-                label="Subscribe to newsletter",
-                signal="newsletter",
+                label="Subscribe to newsletter",                
                 helper_text="Get weekly updates about new features",
             ),
             CheckboxWithLabel(
-                label="Enable notifications",
-                signal="notifications",
+                label="Enable notifications",                
                 checked=True
             ),
             CheckboxWithLabel(
@@ -810,8 +756,7 @@ def test_checkbox():
                 helper_text="This option is currently unavailable",
             ),
             CheckboxWithLabel(
-                label="Error state example",
-                signal="error_checkbox",
+                label="Error state example",                
                 error_text="This field is required",
             ),
             cls="space-y-4"
@@ -820,27 +765,20 @@ def test_checkbox():
         H2("Custom Styled Checkbox", cls="text-2xl font-semibold mb-4 mt-8"),
         Div(
             CheckboxWithLabel(
-                label="Custom blue checkbox",
-                signal="blue_checkbox",
+                label="Custom blue checkbox",                
                 helper_text="With custom blue styling when checked",
                 checkbox_cls="checked:!bg-blue-600 checked:!border-blue-600 dark:checked:!bg-blue-700 dark:checked:!border-blue-700",
                 indicator_cls="!text-white",
             ),
             cls="p-4 border rounded-lg max-w-md",
         ),
-
-        cls="container mx-auto"
+        title="Checkbox"
     )
 
 
 @rt("/code-block")
 def test_code_block():
-    return Div(
-        Div(ThemeToggle(), cls="absolute top-4 right-4"),
-
-        H1("Code Block Component Test", cls="text-3xl font-bold mb-6"),
-        A("← Back to Index", href="/", cls="text-primary hover:underline mb-4 inline-block"),
-
+    return Page(
         H2("Python Code", cls="text-2xl font-semibold mb-4 mt-8"),
         CodeBlock('''def hello_world():
     """A simple greeting function"""
@@ -884,114 +822,95 @@ console.log(factorial(5));''', "javascript"),
         CodeBlock('''print("Custom styling test")
 x = 1 + 2
 print(f"Result: {x}")''', "python", cls="!border-4 !border-primary !rounded-xl"),
-
-        cls="container mx-auto"
+        title="Code Block"
     )
 
 
 @rt("/date-picker")
 def test_date_picker():
-    return Div(
-        # Theme toggle in top-right
-        Div(ThemeToggle(), cls="absolute top-4 right-4"),
-
-        H1("Date Picker Component Test", cls="text-3xl font-bold mb-6"),
-        A("← Back to Index", href="/", cls="text-primary hover:underline mb-4 inline-block"),
-
+    return Page(
         H2("Date Picker Variants", cls="text-2xl font-semibold mb-4 mt-8"),
 
         Div(
             # Single date picker
             Div(
                 H3("Single Date", cls="text-lg font-medium mb-2"),
-                DatePicker(
-                    signal="single_date",
+                (single_picker := DatePicker(           
                     mode="single",
                     placeholder="Pick a date",
-                ),
+                )),
                 Div(
-                    P("Selected: ", Span(data_text="$single_date_selected || 'None'", cls="font-mono text-sm")),
+                    P("Selected: ", Span(data_text=single_picker.selected.or_("None"), cls="font-mono text-sm")),
                     cls="mt-2 text-sm text-muted-foreground"
                 ),
             ),
             # Date range picker
             Div(
                 H3("Date Range", cls="text-lg font-medium mb-2"),
-                DatePicker(
-                    signal="date_range",
+                (range_picker := DatePicker(                    
                     mode="range",
                     placeholder="Pick a date range",
-                ),
+                )),
                 Div(
-                    P("Range: ", Span(data_text="$date_range_selected || '[]'", cls="font-mono text-sm")),
+                    P("Range: ", Span(data_text=range_picker.selected.join(' - ').or_("None"), cls="font-mono text-sm")),
                     cls="mt-2 text-sm text-muted-foreground"
                 ),
             ),
             # Date picker with presets
             Div(
                 H3("With Presets", cls="text-lg font-medium mb-2"),
-                DatePicker(
-                    signal="date_presets",
+                (presets_picker := DatePicker(                    
                     with_presets=True,
                     placeholder="Select a date",
-                ),
+                )),
                 Div(
-                    P("Selected: ", Span(data_text="$date_presets_selected || 'None'", cls="font-mono text-sm")),
+                    P("Selected: ", Span(data_text=presets_picker.selected.or_("None"), cls="font-mono text-sm")),
                     cls="mt-2 text-sm text-muted-foreground"
                 ),
             ),
             # Multiple date selection
             Div(
                 H3("Multiple Dates", cls="text-lg font-medium mb-2"),
-                DatePicker(
-                    signal="multiple_dates",
+                (multiple_picker := DatePicker(                    
                     mode="multiple",
                     placeholder="Select multiple dates",
-                ),
+                )),
                 Div(
-                    P("Selected: ", Span(data_text="JSON.stringify($multiple_dates_selected || [])", cls="font-mono text-sm")),
+                    P("Selected: ", Span(data_text=multiple_picker.selected.join(' | ').or_("None"), cls="font-mono text-sm")),
                     cls="mt-2 text-sm text-muted-foreground"
                 ),
             ),
             # Date and time picker
             Div(
                 H3("Date & Time", cls="text-lg font-medium mb-2"),
-                DateTimePicker(
-                    signal="datetime",
+                (datetime_picker := DateTimePicker(
                     placeholder="Select date and time",
-                ),
+                )),
                 Div(
-                    P("Selected: ", Span(data_text="$datetime_datetime || 'None'", cls="font-mono text-sm")),
+                    P("Selected: ", Span(data_text=js(f"{datetime_picker.datetime}.replace('T', ' at ').replace(':00', '') || 'None'"), cls="font-mono text-sm")),
                     cls="mt-2 text-sm text-muted-foreground"
                 ),
             ),
             # Date picker with input
             Div(
                 H3("With Input Field", cls="text-lg font-medium mb-2"),
-                DatePickerWithInput(
-                    signal="date_input",
+                (input_picker := DatePickerWithInput(
                     placeholder="YYYY-MM-DD",
-                ),
+                )),
                 Div(
-                    P("Value: ", Span(data_text="$date_input_selected || 'None'", cls="font-mono text-sm")),
+                    P("Value: ", Span(data_text=input_picker.selected.or_("None"), cls="font-mono text-sm")),
                     cls="mt-2 text-sm text-muted-foreground"
                 ),
             ),
             cls="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
         ),
-
-        cls="container mx-auto"
+        title="Date Picker"
     )
 
 
 @rt("/dialog")
 def test_dialog():
-    return Div(
-        Div(ThemeToggle(), cls="absolute top-4 right-4"),
-
-        H1("Dialog Component Test", cls="text-3xl font-bold mb-6"),
-        A("← Back to Index", href="/", cls="text-primary hover:underline mb-4 inline-block"),
-
+    return Page(
         H2("Basic Dialog (Modal)", cls="text-2xl font-semibold mb-4 mt-8"),
         Dialog(
             DialogTrigger("Edit Profile"),
@@ -1084,20 +1003,13 @@ def test_dialog():
             size="md",
             cls="top-4 right-4 left-auto m-0",
         ),
-
-        cls="container mx-auto"
+        title="Dialog"
     )
 
 
 @rt("/popover")
 def test_popover():
-    return Div(
-        # Theme toggle in top-right
-        Div(ThemeToggle(), cls="absolute top-4 right-4"),
-
-        H1("Popover Component Test", cls="text-3xl font-bold mb-6"),
-        A("← Back to Index", href="/", cls="text-primary hover:underline mb-4 inline-block"),
-
+    return Page(
         H2("Popover Examples", cls="text-2xl font-semibold mb-4 mt-8"),
         Div(
             # Basic popover
@@ -1142,19 +1054,13 @@ def test_popover():
             cls="flex flex-wrap gap-4"
         ),
 
-        cls="container mx-auto"
+        title="Popover"
     )
 
 
 @rt("/command")
 def test_command():
-    return Div(
-        # Theme toggle in top-right
-        Div(ThemeToggle(), cls="absolute top-4 right-4"),
-
-        H1("Command Component Test", cls="text-3xl font-bold mb-6"),
-        A("← Back to Index", href="/", cls="text-primary hover:underline mb-4 inline-block"),
-
+    return Page(
         H2("Basic Command Palette", cls="text-2xl font-semibold mb-4 mt-8"),
         Command(
             CommandInput(placeholder="Type a command or search..."),
@@ -1398,19 +1304,13 @@ def test_command():
             cls="max-w-md",
         ),
 
-        cls="container mx-auto"
+        title="Command"
     )
 
 
 @rt("/theme-toggle")
 def test_theme_toggle():
-    return Div(
-        # Theme toggle in top-right
-        Div(ThemeToggle(), cls="absolute top-4 right-4"),
-
-        H1("Theme Toggle Component Test", cls="text-3xl font-bold mb-6"),
-        A("← Back to Index", href="/", cls="text-primary hover:underline mb-4 inline-block"),
-
+    return Page(
         H2("Instructions", cls="text-2xl font-semibold mb-4 mt-8"),
         P("Click the theme toggle button in the top-right corner to switch between light and dark themes.", cls="text-muted-foreground mb-4"),
         P("The theme preference is saved to localStorage and will persist across page reloads.", cls="text-muted-foreground mb-4"),
@@ -1423,16 +1323,13 @@ def test_theme_toggle():
             cls="space-y-4 max-w-2xl"
         ),
 
-        cls="container mx-auto"
+        title="Theme Toggle"
     )
 
 
 @rt("/input")
 def test_input():
-    return Div(
-        H1("Input Component Test", cls="text-3xl font-bold mb-6"),
-        A("← Back to Index", href="/", cls="text-primary hover:underline mb-4 inline-block"),
-
+    return Page(
         H2("Basic Inputs", cls="text-2xl font-semibold mb-4 mt-8"),
         Div(
             Div(
@@ -1524,35 +1421,32 @@ def test_input():
 
         H2("Validation Example", cls="text-2xl font-semibold mb-4 mt-8"),
         Div(
+            (age := Signal("age", _ref_only=True)),
+            (age_valid := Signal("age_valid", _ref_only=True)),
             Label("Age (must be >= 18)", for_="age-input", cls="block text-sm font-medium mb-1.5"),
             Input(
                 id="age-input",
                 type="text",
                 placeholder="Enter age",
-                signal="age",
-                data_on_input="$age_valid = Number($age) >= 18",
+                signal=age,
+                data_on_input=js(f"{age_valid} = Number({age}) >= 18"),
             ),
             P(
-                Span("✓ Valid", cls="text-green-600", style="display: none", data_show="$age && $age_valid"),
-                Span("✗ Must be 18+", cls="text-destructive", style="display: none", data_show="$age && !$age_valid"),
-                Span("Enter your age to validate", cls="text-muted-foreground", data_show="!$age || $age === ''"),
+                Span("✓ Valid", cls="text-green-600", style="display: none", data_show=age & age_valid),
+                Span("✗ Must be 18+", cls="text-destructive", style="display: none", data_show=age & ~age_valid),
+                Span("Enter your age to validate", cls="text-muted-foreground", data_show=~age | age.eq("")),
                 cls="text-sm mt-1.5",
             ),
             cls="max-w-md mb-8",
         ),
 
-        cls="container mx-auto"
+        title="Input"
     )
 
 
 @rt("/label")
 def test_label():
-    return Div(
-        Div(ThemeToggle(), cls="absolute top-4 right-4"),
-
-        H1("Label Component Test", cls="text-3xl font-bold mb-6"),
-        A("← Back to Index", href="/", cls="text-primary hover:underline mb-4 inline-block"),
-
+    return Page(
         H2("Basic Label Usage", cls="text-2xl font-semibold mb-4 mt-8"),
         P("Labels are used with form inputs to provide accessible names:", cls="text-muted-foreground mb-4"),
         Div(
@@ -1618,35 +1512,30 @@ def test_label():
         P("Labels can be customized with additional classes:", cls="text-muted-foreground mb-4"),
         Div(
             Div(
-                Label("Bold Label", for_="bold-input", cls="!font-bold text-lg"),
+                Label("Bold Label", fr="bold-input", cls="!font-bold text-lg"),
                 Input(id="bold-input", placeholder="With bold label"),
                 cls="space-y-2",
             ),
             Div(
-                Label("Primary Colored Label", for_="primary-input", cls="!text-primary !text-base"),
+                Label("Primary Colored Label", fr="primary-input", cls="!text-primary !text-base"),
                 Input(id="primary-input", placeholder="With primary colored label"),
                 cls="space-y-2",
             ),
             Div(
-                Label("Destructive Label", for_="destructive-input", cls="!text-destructive"),
+                Label("Destructive Label", fr="destructive-input", cls="!text-destructive"),
                 Input(id="destructive-input", placeholder="With destructive colored label"),
                 cls="space-y-2",
             ),
             cls="space-y-6 max-w-md",
         ),
 
-        cls="container mx-auto"
+        title="Label"
     )
 
 
 @rt("/progress")
 def test_progress():
-    return Div(
-        Div(ThemeToggle(), cls="absolute top-4 right-4"),
-
-        H1("Progress Component Test", cls="text-3xl font-bold mb-6"),
-        A("← Back to Index", href="/", cls="text-primary hover:underline mb-4 inline-block"),
-
+    return Page(
         H2("Basic Progress", cls="text-2xl font-semibold mb-4 mt-8"),
         P("Static progress bars showing different completion levels:", cls="text-muted-foreground mb-4"),
         Div(
@@ -1664,19 +1553,19 @@ def test_progress():
         H2("Interactive Progress", cls="text-2xl font-semibold mb-4 mt-8"),
         P("Control progress with buttons:", cls="text-muted-foreground mb-4"),
         Div(
-            (demo_progress := Signal("demo_progress", 35)),
-            Progress(value=35, signal="demo_progress"),
+            (demo_progress := Signal("demo_progress", _ref_only=True)),
+            Progress(value=35, signal=demo_progress),
             Div(
                 Button(
                     Icon("lucide:plus"),
                     "Increase",
-                    data_on_click=js(f"{demo_progress} = Math.min(100, {demo_progress} + 10)"),
+                    data_on_click=demo_progress.set((demo_progress + 10).min(100)),
                 ),
                 Button(
                     Icon("lucide:minus"),
                     "Decrease",
                     variant="secondary",
-                    data_on_click=js(f"{demo_progress} = Math.max(0, {demo_progress} - 10)"),
+                    data_on_click=demo_progress.set((demo_progress - 10).max(0)),
                 ),
                 Button(
                     Icon("lucide:rotate-ccw"),
@@ -1688,7 +1577,7 @@ def test_progress():
             ),
             P(
                 "Current: ",
-                Span(data_text="Math.round(" + demo_progress + ") + '%'", cls="font-mono"),
+                Span(data_text=demo_progress.round() + " + '%'", cls="font-mono"),
                 cls="text-sm text-muted-foreground mt-4"
             ),
             cls="max-w-2xl"
@@ -1697,8 +1586,8 @@ def test_progress():
         H2("Auto-incrementing Progress", cls="text-2xl font-semibold mb-4 mt-8"),
         P("Automatically increment progress over time:", cls="text-muted-foreground mb-4"),
         Div(
-            (auto_progress := Signal("auto_progress", 0)),
-            Progress(value=0, signal="auto_progress"),
+            (auto_progress := Signal("auto_progress", _ref_only=True)),
+            Progress(value=0, signal=auto_progress),
             Div(
                 Button(
                     Icon("lucide:play"),
@@ -1759,7 +1648,7 @@ def test_progress():
             cls="max-w-2xl"
         ),
 
-        cls="container mx-auto"
+        title="Progress"
     )
 
 
@@ -2073,6 +1962,41 @@ def test_radio_group():
             cls="p-4 border rounded-lg",
         ),
         title="Radio Group",
+    )
+
+
+@rt("/separator")
+def test_separator():
+    return Page(
+        H2("Basic Separator", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Horizontal separator dividing content:", cls="text-muted-foreground mb-4"),
+        Div(
+            P("Content above separator", cls="mb-4"),
+            Separator(),
+            P("Content below separator", cls="mt-4"),
+            cls="mb-8",
+        ),
+
+        H2("Vertical Separators", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Vertical separator in flex layout:", cls="text-muted-foreground mb-4"),
+        Div(
+            Span("Left content"),
+            Separator(orientation="vertical", cls="mx-4"),
+            Span("Right content"),
+            cls="flex items-center h-8 mb-8",
+        ),
+
+        H2("Custom Styling", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Separators with custom colors and thickness:", cls="text-muted-foreground mb-4"),
+        Div(
+            P("Custom colored separator below:", cls="mb-2"),
+            Separator(cls="bg-red-500 h-0.5"),
+            P("Thicker separator with different color:", cls="mt-4 mb-2"),
+            Separator(cls="bg-blue-500 h-1"),
+            cls="mb-8",
+        ),
+
+        title="Separator",
     )
 
 

@@ -7,11 +7,11 @@ from .utils import cn, gen_id
 
 def Popover(
     *children,
-    signal: str = "",
+    signal: str | Signal = "",
     cls: str = "",
     **kwargs,
 ) -> FT:
-    sig = signal or gen_id("popover")
+    sig = getattr(signal, 'id', signal) or gen_id("popover")
     ctx = dict(sig=sig)
 
     return Div(

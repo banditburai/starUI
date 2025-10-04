@@ -26,11 +26,11 @@ dropdown_item_variants = cva(
 
 def DropdownMenu(
     *children,
-    signal: str = "",
+    signal: str | Signal = "",
     cls: str = "",
     **kwargs: Any
 ) -> FT:
-    sig = signal or gen_id("dropdown")
+    sig = getattr(signal, 'id', signal) or gen_id("dropdown")
 
     ctx = dict(sig=sig)
 
@@ -286,12 +286,12 @@ def DropdownMenuGroup(
 
 def DropdownMenuSub(
     *children,
-    signal: str = "",
+    signal: str | Signal = "",
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
     def _(**ctx):
-        sub = signal or gen_id("dropdown_sub")
+        sub = getattr(signal, 'id', signal) or gen_id("dropdown_sub")
         sub_ctx = dict(sub=sub, **ctx)
 
         return Div(

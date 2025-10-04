@@ -38,13 +38,13 @@ def Toggle(
     variant: ToggleVariant = "default",
     size: ToggleSize = "default",
     pressed: bool = False,
-    signal: str | None = None,
+    signal: str | Signal | None = None,
     disabled: bool = False,
     aria_label: str | None = None,
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = signal or gen_id("toggle")
+    sig = getattr(signal, 'id', signal) or gen_id("toggle")
     toggle_id = kwargs.pop("id", gen_id("toggle"))
 
     return Div(

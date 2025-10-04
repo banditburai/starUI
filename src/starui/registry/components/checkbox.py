@@ -13,7 +13,7 @@ def Checkbox(
     checked: bool | None = None,
     name: str | None = None,
     value: str | None = None,
-    signal: str = "",
+    signal: str | Signal = "",
     indeterminate: bool = False,
     disabled: bool = False,
     required: bool = False,
@@ -21,7 +21,7 @@ def Checkbox(
     indicator_cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = signal or gen_id("checkbox")
+    sig = getattr(signal, 'id', signal) or gen_id("checkbox")
     initial = "indeterminate" if indeterminate else (checked or False)
 
     return Div(
@@ -65,7 +65,7 @@ def CheckboxWithLabel(
     checked: bool | None = None,
     name: str | None = None,
     value: str | None = None,
-    signal: str = "",
+    signal: str | Signal = "",
     indeterminate: bool = False,
     helper_text: str | None = None,
     error_text: str | None = None,
@@ -77,7 +77,7 @@ def CheckboxWithLabel(
     indicator_cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = signal or gen_id("checkbox")
+    sig = getattr(signal, 'id', signal) or gen_id("checkbox")
     checkbox_id = kwargs.pop("id", signal)
 
     return Div(

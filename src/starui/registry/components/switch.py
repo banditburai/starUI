@@ -13,14 +13,14 @@ from .utils import cn, gen_id, ensure_signal
 def Switch(
     *children,
     checked: bool | None = None,
-    signal: str | None = None,
+    signal: str | Signal | None = None,
     disabled: bool = False,
     required: bool = False,
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    
-    sig = signal or gen_id("switch")
+
+    sig = getattr(signal, 'id', signal) or gen_id("switch")
     switch_id = kwargs.pop("id", gen_id("switch"))
 
     return Div(
@@ -65,7 +65,7 @@ def SwitchWithLabel(
     *attrs: Any,
     label: str,
     checked: bool | None = None,
-    signal: str | None = None,
+    signal: str | Signal | None = None,
     id: str | None = None,
     helper_text: str | None = None,
     error_text: str | None = None,
@@ -76,7 +76,7 @@ def SwitchWithLabel(
     switch_cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = signal or gen_id("switch")
+    sig = getattr(signal, 'id', signal) or gen_id("switch")
     switch_id = id or gen_id("switch")
 
     return Div(

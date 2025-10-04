@@ -7,12 +7,12 @@ from .utils import cn, gen_id
 
 def HoverCard(
     *children,
-    signal: str = "",
+    signal: str | Signal = "",
     default_open: bool = False,
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = signal or gen_id("hover_card")
+    sig = getattr(signal, 'id', signal) or gen_id("hover_card")
     open_state = Signal(f"{sig}_open", default_open)
 
     ctx = dict(sig=sig, open_state=open_state)

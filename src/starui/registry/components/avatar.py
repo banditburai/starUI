@@ -56,7 +56,7 @@ def AvatarWithFallback(
     alt: str = "",
     fallback: str = "?",
     loading: str = "lazy",
-    signal: str = "",
+    signal: str | Signal = "",
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
@@ -67,7 +67,7 @@ def AvatarWithFallback(
             **kwargs,
         )
 
-    sig = signal or gen_id("avatar_error")
+    sig = getattr(signal, 'id', signal) or gen_id("avatar_error")
 
     return Avatar(
         (error_state := Signal(sig, False)),

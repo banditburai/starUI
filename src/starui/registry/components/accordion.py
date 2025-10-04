@@ -12,11 +12,11 @@ def Accordion(
     type: AccordionType = "single",
     collapsible: bool = False,
     default_value: str | list[str] | None = None,
-    signal: str = "",
+    signal: str | Signal = "",
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = signal or gen_id("accordion")
+    sig = getattr(signal, 'id', signal) or gen_id("accordion")
 
     if type == "single":
         initial = default_value or ""

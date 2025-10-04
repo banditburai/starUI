@@ -12,7 +12,7 @@ from .utils import cn, gen_id
 def RadioGroup(
     *children: Any,
     initial_value: str = "",
-    signal: str = "",
+    signal: str | Signal = "",
     name: str = "",
     required: bool = False,
     hide_indicators: bool = False,
@@ -20,7 +20,7 @@ def RadioGroup(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = signal or gen_id("radio")
+    sig = getattr(signal, 'id', signal) or gen_id("radio")
     group_name = name or f"radio_group_{sig}"
     selected = Signal(sig, initial_value)
 
@@ -125,7 +125,7 @@ def RadioGroupWithLabel(
     label: str,
     options: list[dict[str, Any]],
     value: str = "",
-    signal: str = "",
+    signal: str | Signal = "",
     name: str = "",
     id: str = "",
     helper_text: str = "",
@@ -137,7 +137,7 @@ def RadioGroupWithLabel(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = signal or gen_id("radio")
+    sig = getattr(signal, 'id', signal) or gen_id("radio")
     group_name = name or f"radio_group_{sig}"
     group_id = id or gen_id("radiogroup")
 

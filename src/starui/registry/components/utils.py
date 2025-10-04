@@ -2,13 +2,31 @@ from collections.abc import Callable
 from typing import Any
 import json
 from uuid import uuid4
-from starhtml import Div
+from starhtml import Div, Signal
 
 try:
     from starmerge import merge
 except ImportError:
     def merge(*classes: str) -> str:
         return " ".join(c for c in classes if c)
+
+
+def with_signals(component, **signals):
+    """
+    Attach signals as attributes to a component for IDE autocomplete and type hints.
+
+    Usage:
+        return with_signals(
+            Div(...),
+            selected=selected_sig,
+            month=month_sig,
+        )
+
+    This allows users to access component.selected, component.month, etc.
+    """
+    for name, signal in signals.items():
+        setattr(component, name, signal)
+    return component
 
 # Theme configuration
 DEFAULT_THEME = "light"

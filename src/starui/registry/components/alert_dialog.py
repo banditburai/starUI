@@ -13,11 +13,11 @@ AlertDialogVariant = Literal["default", "destructive"]
 
 def AlertDialog(
     *children: Any,
-    signal: str = "",
+    signal: str | Signal = "",
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = signal or gen_id("alert_dialog")
+    sig = getattr(signal, 'id', signal) or gen_id("alert_dialog")
     open_state = Signal(f"{sig}_open", False)
     dialog_ref = Signal(sig, _ref_only=True)
 

@@ -1,22 +1,58 @@
 from datetime import datetime, timedelta
-from typing import Any
+from typing import Any, Protocol
 
 from starhtml import FT, Div, Icon, Span, Signal, js
 from starhtml import Button as HTMLButton
 from starhtml.datastar import f
 
 from .button import Button
-from .calendar import Calendar, CalendarMode
+from .calendar import Calendar, CalendarElement, CalendarMode, MONTHS
 from .input import Input
 from .popover import Popover, PopoverContent, PopoverTrigger
-from .utils import cn, gen_id
+from .utils import cn, gen_id, with_signals
 
-from .calendar import MONTHS
+
+class DatePickerElement(Protocol):
+    """
+    DatePicker component with exposed signals.
+
+    Attributes:
+        selected: Signal containing the selected date(s) - string for single mode, list for range/multiple
+        calendar: CalendarElement with exposed calendar signals (month, year, etc.)
+    """
+    selected: Signal
+    calendar: CalendarElement
+
+
+class DateTimePickerElement(Protocol):
+    """
+    DateTimePicker component with exposed signals.
+
+    Attributes:
+        datetime: Signal containing the combined datetime string
+        date: Signal containing just the date portion
+        time: Signal containing just the time portion
+        calendar: CalendarElement with exposed calendar signals
+    """
+    datetime: Signal
+    date: Signal
+    time: Signal
+    calendar: CalendarElement
+
+
+class DatePickerWithInputElement(Protocol):
+    """
+    DatePickerWithInput component with exposed signals.
+
+    Attributes:
+        selected: Signal containing the selected date string
+    """
+    selected: Signal
 
 
 def DatePicker(
     *attrs,
-    signal: str = "",
+    signal: str | Signal = "",
     mode: CalendarMode = "single",
     selected: str | list[str] | None = None,
     placeholder: str | None = None,
@@ -25,8 +61,8 @@ def DatePicker(
     width: str = "w-[280px]",
     with_presets: bool = False,
     **kwargs: Any,
-) -> FT:
-    sig = signal or gen_id("date_picker")
+) -> DatePickerElement:
+    sig = getattr(signal, 'id', signal) or gen_id("date_picker")
     cal = f"{sig}_calendar"
 
     if not placeholder:
@@ -86,26 +122,30 @@ def DatePicker(
         signal=f"{sig}_popover",
     )
 
-    return Div(
-        selected,
-        popover,
-        *attrs,
-        cls=cn("inline-block", cls),
-        **kwargs,
+    return with_signals(
+        Div(
+            selected,
+            popover,
+            *attrs,
+            cls=cn("inline-block", cls),
+            **kwargs,
+        ),
+        selected=selected,
+        calendar=calendar,
     )
 
 
 def DateTimePicker(
     *attrs,
-    signal: str = "",
+    signal: str | Signal = "",
     selected: str | None = None,
     placeholder: str = "Select date and time",
     disabled: bool = False,
     cls: str = "",
     width: str = "w-[280px]",
     **kwargs: Any,
-) -> FT:
-    sig = signal or gen_id("datetime_picker")
+) -> DateTimePickerElement:
+    sig = getattr(signal, 'id', signal) or gen_id("datetime_picker")
     cal = f"{sig}_calendar"
 
     initial_date, initial_time = _parse_datetime(selected)
@@ -122,14 +162,16 @@ def DateTimePicker(
     datetime = Signal(f"{sig}_datetime", f"{initial_date}T{initial_time}" if initial_date and initial_time else "")
     cal_selected = Signal(f"{cal}_selected", initial_date, _ref_only=True)
 
+    calendar = Calendar(
+        signal=cal,
+        mode="single",
+        selected=initial_date,
+        disabled=disabled,
+        cls="border-0 rounded-none",
+    )
+
     content = Div(
-        Calendar(
-            signal=cal,
-            mode="single",
-            selected=initial_date,
-            disabled=disabled,
-            cls="border-0 rounded-none",
-        ),
+        calendar,
         _build_time_section(sig, hour_display, minute_display, pm, time, disabled),
         cls="flex flex-col",
     )
@@ -139,24 +181,30 @@ def DateTimePicker(
         PopoverContent(content, cls="w-fit p-0 max-h-[600px] overflow-y-auto", align="start", offset=8),
     )
 
-    return Div(
-        selected,
-        hour_display,
-        minute_display,
-        pm,
-        time,
-        datetime,
-        popover,
-        *attrs,
-        data_effect=js(_datetime_sync_effect(selected, cal_selected, hour_display, minute_display, pm, time, datetime)),
-        cls=cn("inline-block", cls),
-        **kwargs,
+    return with_signals(
+        Div(
+            selected,
+            hour_display,
+            minute_display,
+            pm,
+            time,
+            datetime,
+            popover,
+            *attrs,
+            data_effect=js(_datetime_sync_effect(selected, cal_selected, hour_display, minute_display, pm, time, datetime)),
+            cls=cn("inline-block", cls),
+            **kwargs,
+        ),
+        datetime=datetime,
+        date=selected,
+        time=time,
+        calendar=calendar,
     )
 
 
 def DatePickerWithInput(
     *attrs,
-    signal: str = "",
+    signal: str | Signal = "",
     selected: str | None = None,
     placeholder: str = "Select date",
     format: str = "YYYY-MM-DD",
@@ -164,8 +212,8 @@ def DatePickerWithInput(
     cls: str = "",
     width: str = "w-[280px]",
     **kwargs: Any,
-) -> FT:
-    sig = signal or gen_id("date_input")
+) -> DatePickerWithInputElement:
+    sig = getattr(signal, 'id', signal) or gen_id("date_input")
     cal = f"{sig}_calendar"
     initial_selected = selected or ""
 
@@ -191,7 +239,7 @@ def DatePickerWithInput(
             disabled=disabled,
         ),
         Button(
-            Icon("lucide:calendar", cls="h-4 w-4"),
+            Icon("lucide:calendar", cls="h-4 w-4 text-muted-foreground"),
             data_ref=trigger_id,
             id=trigger_id,
             popovertarget=content_id,
@@ -208,13 +256,16 @@ def DatePickerWithInput(
         cls="relative inline-block",
     )
 
-    return Div(
-        selected_sig,
-        input_with_popover,
-        *attrs,
-        data_effect=js(f"{_input_sync_effect(selected_sig, cal_selected, cal_month, cal_year, cal_month_display, input_ref)};{_input_close_effect(selected_sig, content_ref)}"),
-        cls=cn("inline-block", cls),
-        **kwargs,
+    return with_signals(
+        Div(
+            selected_sig,
+            input_with_popover,
+            *attrs,
+            data_effect=js(f"{_input_sync_effect(selected_sig, cal_selected, cal_month, cal_year, cal_month_display, input_ref)};{_input_close_effect(selected_sig, content_ref)}"),
+            cls=cn("inline-block", cls),
+            **kwargs,
+        ),
+        selected=selected_sig,
     )
 
 
@@ -344,21 +395,18 @@ def _build_time_dropdown(sig: str, hour_display, minute_display, pm, time, field
 
 
 def _build_ampm_toggle(hour_display, minute_display, pm, time, disabled: bool) -> Div:
-    def make_button(label: str, is_pm: bool):
+    def make_button(label: str, is_pm: bool, rounding: str):
         is_selected = pm if is_pm else ~pm
         return HTMLButton(
             label,
             data_on_click=[pm.set(is_pm), js(_update_time_signal(hour_display, minute_display, pm, time))] if not disabled else None,
-            data_attr_class=is_selected.if_(
-                "bg-primary text-primary-foreground font-semibold border-primary",
-                "hover:bg-accent hover:text-accent-foreground border-input"
-            ),
+            data_attr_cls=is_selected.if_("bg-primary text-primary-foreground font-semibold", ""),
             type="button",
             disabled=disabled,
-            cls="h-8 px-3 text-xs rounded-md transition-colors flex-1 border",
+            cls=f"h-8 w-10 text-xs {rounding} transition-colors border hover:bg-accent hover:text-accent-foreground",
         )
 
-    return Div(*[make_button(label, is_pm) for label, is_pm in [("AM", False), ("PM", True)]], cls="flex gap-1 ml-2")
+    return Div(make_button("AM", False, "rounded-l-md"), make_button("PM", True, "rounded-r-md"), cls="flex ml-2")
 
 
 def _time_select_handler(display, hour_display, minute_display, pm, time, content_ref) -> str:

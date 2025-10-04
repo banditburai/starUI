@@ -8,11 +8,11 @@ from .utils import cn, gen_id
 def Progress(
     value: float | None = None,
     max_value: float = 100,
-    signal: str = "",
+    signal: str | Signal = "",
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = signal or gen_id("progress")
+    sig = getattr(signal, 'id', signal) or gen_id("progress")
 
     pct = max(0, min(100, (value / max_value * 100) if value is not None and max_value > 0 else 0))
     pct = int(pct) if pct == int(pct) else pct

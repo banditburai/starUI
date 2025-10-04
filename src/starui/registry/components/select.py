@@ -1,43 +1,34 @@
 from typing import Any
 
-from starhtml import FT, Div, Icon, Span
+from starhtml import Div, FT, Icon, Signal, Span
 from starhtml import Button as HTMLButton
 from starhtml import Label as HTMLLabel
 from starhtml import P as HTMLP
-from starhtml.datastar import (
-    ds_computed,
-    ds_on_click,
-    ds_position,
-    ds_ref,
-    ds_show,
-    ds_signals,
-    ds_style,
-    ds_text,
-    toggle_class,
-    value,
-)
 
-from .utils import cn, inject_signal_recursively, ensure_signal, js_literal
+from .utils import cn, gen_id, inject_signal_recursively, js_literal
 
 
 def Select(
     *children,
     initial_value: str | None = None,
     initial_label: str | None = None,
-    signal: str | None = None,
+    signal: str | Signal = "",
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = signal or gen_id("select")
+    sig = getattr(signal, 'id', signal) or gen_id("select")
+
+    selected = Signal(f"{sig}_value", initial_value or "")
+    selected_label = Signal(f"{sig}_label", initial_label or "")
+    open_state = Signal(f"{sig}_open", False)
+
+    ctx = dict(sig=sig, selected=selected, selected_label=selected_label, open_state=open_state)
+
     return Div(
-        ds_signals(
-            {
-                f"{signal}_value": value(initial_value or ""),
-                f"{signal}_label": value(initial_label or ""),
-                f"{signal}_open": False,
-            }
-        ),
-        *[child(signal) if callable(child) else child for child in children],
+        selected,
+        selected_label,
+        open_state,
+        *[child(**ctx) if callable(child) else child for child in children],
         cls=cn("relative", cls),
         data_slot="select",
         **kwargs,
@@ -49,19 +40,21 @@ def SelectTrigger(
     cls: str = "",
     **kwargs: Any,
 ):
-    def _trigger(signal):
+    def trigger(*, sig, selected_label, **ctx):
+        trigger_id = kwargs.pop("id", f"{sig}_trigger")
+
         return HTMLButton(
-            *[child(signal) if callable(child) else child for child in children],
+            *[child(sig=sig, selected_label=selected_label, **ctx) if callable(child) else child for child in children],
             Icon("lucide:chevron-down", cls="size-4 shrink-0 opacity-50"),
-            ds_ref(f"{signal}_trigger"),
-            popovertarget=f"{signal}_content",
+            data_ref=f"{sig}_trigger",
+            popovertarget=f"{sig}_content",
             popoveraction="toggle",
             type="button",
             role="combobox",
             aria_haspopup="listbox",
-            aria_controls=f"{signal}_content",
-            data_placeholder=f"!${signal}_label",
-            id=kwargs.pop("id", f"{signal}_trigger"),
+            aria_controls=f"{sig}_content",
+            data_placeholder=~selected_label,
+            id=trigger_id,
             cls=cn(
                 "w-[180px] flex h-9 items-center justify-between gap-2 rounded-md border border-input",
                 "bg-transparent px-3 py-2 text-sm shadow-xs",
@@ -77,8 +70,8 @@ def SelectTrigger(
             data_slot="select-trigger",
             **kwargs,
         )
-    
-    return _trigger
+
+    return trigger
 
 
 def SelectValue(
@@ -86,15 +79,17 @@ def SelectValue(
     cls: str = "",
     **kwargs: Any,
 ):
-    def _value(signal):
+    def value_component(*, selected_label, **_):
+        from starhtml.datastar import js
+
         return Span(
-            ds_text(f"${signal}_label || '{placeholder}'"),
-            toggle_class(f"${signal}_label", "", "text-muted-foreground"),
+            data_text=js(f"${selected_label.name} || '{placeholder}'"),
+            data_attr_class=selected_label.if_("", "text-muted-foreground"),
             cls=cn("pointer-events-none truncate flex-1 text-left", cls),
             **kwargs,
         )
-    
-    return _value
+
+    return value_component
 
 
 def SelectContent(
@@ -102,24 +97,33 @@ def SelectContent(
     cls: str = "",
     **kwargs: Any,
 ):
-    def _content(signal):
+    def content(*, sig, **ctx):
+        from starhtml.datastar import js
+
+        content_min_width = Signal(
+            f"{sig}_content_min_width",
+            js(f"${sig}_trigger ? ${sig}_trigger.offsetWidth + 'px' : 'auto'")
+        )
+
         return Div(
-            Div(*[inject_signal_recursively(child, signal) for child in children], cls="p-1 max-h-[300px] overflow-auto"),
-            ds_ref(f"{signal}_content"),
-            ds_computed(f"{signal}_content_min_width", f"${signal}_trigger ? ${signal}_trigger.offsetWidth + 'px' : 'auto'"),
-            ds_style(min_width=f"${signal}_content_min_width"),
-            ds_position(
-                anchor=f"{signal}_trigger",
-                placement="bottom",
-                offset=4,
-                flip=True,
-                shift=True,
-                hide=True,
+            content_min_width,
+            Div(*[inject_signal_recursively(child, sig) for child in children], cls="p-1 max-h-[300px] overflow-auto"),
+            data_ref=f"{sig}_content",
+            data_style_min_width=content_min_width,
+            data_position=(
+                f"{sig}_trigger",
+                {
+                    "placement": "bottom",
+                    "offset": 4,
+                    "flip": True,
+                    "shift": True,
+                    "hide": True,
+                }
             ),
             popover="auto",
-            id=f"{signal}_content",
+            id=f"{sig}_content",
             role="listbox",
-            aria_labelledby=f"{signal}_trigger",
+            aria_labelledby=f"{sig}_trigger",
             tabindex="-1",
             cls=cn(
                 "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md dark:border-input",
@@ -128,8 +132,8 @@ def SelectContent(
             data_slot="select-content",
             **kwargs,
         )
-    
-    return _content
+
+    return content
 
 
 def SelectItem(
@@ -139,21 +143,29 @@ def SelectItem(
     cls: str = "",
     **kwargs: Any,
 ):
-    def _item(signal):
+    def item(*, sig, selected, selected_label, **_):
+        from starhtml.datastar import js
+
         label_text = label or value
         js_safe_label = js_literal(label_text)
+        is_selected = selected.eq(value)
 
         return Div(
             Span(label_text),
             Span(
                 Icon("lucide:check", cls="h-4 w-4"),
-                ds_show(f"${signal}_value === '{value}'"),
+                style="opacity: 0; transition: opacity 0.15s",
+                data_style_opacity=is_selected.if_("1", "0"),
                 cls="absolute right-2 flex h-3.5 w-3.5 items-center justify-center",
             ),
-            ds_on_click(f"${signal}_value='{value}';${signal}_label={js_safe_label};${signal}_content.hidePopover()") if not disabled else None,
+            data_on_click=[
+                selected.set(value),
+                selected_label.set(js_safe_label),
+                js(f"${sig}_content.hidePopover()")
+            ] if not disabled else None,
             role="option",
             data_value=value,
-            data_selected=f"${signal}_value === '{value}'",
+            data_selected=is_selected,
             data_disabled="true" if disabled else None,
             cls=cn(
                 "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none",
@@ -164,8 +176,8 @@ def SelectItem(
             data_slot="select-item",
             **kwargs,
         )
-    
-    return _item
+
+    return item
 
 
 def SelectGroup(
@@ -174,15 +186,15 @@ def SelectGroup(
     cls: str = "",
     **kwargs: Any,
 ):
-    def _group(signal):
+    def group(*, sig, **ctx):
         return Div(
-            SelectLabel(label)(signal) if label else None,
-            *[child(signal) if callable(child) else child for child in children],
+            SelectLabel(label)(sig=sig, **ctx) if label else None,
+            *[child(sig=sig, **ctx) if callable(child) else child for child in children],
             cls=cls,
             **kwargs,
         )
-    
-    return _group
+
+    return group
 
 
 def SelectLabel(
@@ -190,14 +202,14 @@ def SelectLabel(
     cls: str = "",
     **kwargs: Any,
 ):
-    def _label(signal):
+    def label(**_):
         return Div(
             *children,
             cls=cn("text-muted-foreground px-2 py-1.5 text-xs", cls),
             **kwargs,
         )
-    
-    return _label
+
+    return label
 
 
 def _get_value_label(item: str | tuple) -> tuple[str, str]:
@@ -254,10 +266,10 @@ def SelectWithLabel(
     value: str | None = None,
     placeholder: str = "Select an option",
     name: str | None = None,
-    signal: str | None = None,
-    id: str | None = None,
-    helper_text: str | None = None,
-    error_text: str | None = None,
+    signal: str | Signal = "",
+    id: str = "",
+    helper_text: str = "",
+    error_text: str = "",
     required: bool = False,
     disabled: bool = False,
     label_cls: str = "",
@@ -265,13 +277,13 @@ def SelectWithLabel(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = signal or gen_id("select")
-    trigger_id = id or f"{signal}_trigger"
-    
+    sig = getattr(signal, 'id', signal) or gen_id("select")
+    trigger_id = id or f"{sig}_trigger"
+
     return Div(
         HTMLLabel(
             label,
-            Span(" *", cls="text-destructive") if required else "",
+            Span(" *", cls="text-destructive") if required else None,
             fr=trigger_id,
             cls=cn("block text-sm font-medium mb-1.5", label_cls),
         ),
@@ -279,19 +291,19 @@ def SelectWithLabel(
             SelectTrigger(
                 SelectValue(placeholder=placeholder),
                 cls=select_cls,
-                disabled=disabled,
+                disabled=disabled or None,
                 aria_invalid="true" if error_text else None,
                 id=trigger_id,
             ),
             SelectContent(*_build_select_items(options)),
             initial_value=value,
             initial_label=_find_initial_label(options, value),
-            signal=signal,
+            signal=sig,
             cls="w-full",
             *attrs,
             **kwargs,
         ),
-        error_text and HTMLP(error_text, cls="text-sm text-destructive mt-1.5"),
-        helper_text and not error_text and HTMLP(helper_text, cls="text-sm text-muted-foreground mt-1.5"),
+        HTMLP(error_text, cls="text-sm text-destructive mt-1.5") if error_text else None,
+        HTMLP(helper_text, cls="text-sm text-muted-foreground mt-1.5") if helper_text and not error_text else None,
         cls=cn("space-y-1.5", cls),
     )

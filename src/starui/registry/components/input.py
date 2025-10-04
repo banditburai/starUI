@@ -1,6 +1,6 @@
 from typing import Literal
 
-from starhtml import FT, Div, Span, js
+from starhtml import FT, Div, Span, Signal, js
 from starhtml import Input as HTMLInput
 from starhtml import Label as HTMLLabel
 from starhtml import P as HTMLP
@@ -28,7 +28,7 @@ def Input(
     max: str | int | None = None,
     step: str | int | None = None,
     pattern: str | None = None,
-    signal: str | None = None,
+    signal: str | Signal | None = None,
     cls: str = "",
     **kwargs,
 ) -> FT:

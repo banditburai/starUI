@@ -1,8 +1,8 @@
 from typing import Literal
 
-from starhtml import FT, Div, P, Span
+from starhtml import FT, Div, P, Span, Signal
 from starhtml import H2 as HTMLH2
-from starhtml.datastar import ds_effect, ds_on_click, ds_on_keydown, ds_show, ds_signals, t
+from starhtml.datastar import js
 
 from .utils import cn
 
@@ -18,18 +18,17 @@ def Sheet(
     cls: str = "",
     **kwargs,
 ) -> FT:
-    signal_open = f"{signal}_open"
-
-    scroll_lock = Div(ds_effect(f"document.body.style.overflow = ${signal_open} ? 'hidden' : ''")) if modal else None
+    signal_name = f"{signal}_open"
+    sheet_open = Signal(signal_name, default_open)
 
     return Div(
+        sheet_open,
+        Div(data_effect=js(f"document.body.style.overflow = ${signal_name} ? 'hidden' : ''")) if modal else None,
         *children,
-        ds_signals(**{signal_open: default_open}),
-        ds_on_keydown(f"evt.key === 'Escape' && (${signal_open} = false)", "window") if modal else None,
-        scroll_lock,
+        **{"data-on-keydown__window__key.Escape": sheet_open.set(False)} if modal else {},
         data_slot="sheet",
         data_sheet_root=signal,
-        data_state=t("{signal_open} ? 'open' : 'closed'"),
+        data_attr_state=sheet_open.if_("open", "closed"),
         cls=cn("relative", cls),
         **kwargs,
     )
@@ -44,13 +43,14 @@ def SheetTrigger(
 ) -> FT:
     from .button import Button
 
-    signal_open = f"{signal}_open"
+    signal_name = f"{signal}_open"
     content_id = f"{signal}_content"
+
     return Button(
         *children,
-        ds_on_click(f"${signal_open} = true"),
+        data_on_click=js(f"${signal_name} = true"),
         id=f"{signal}_trigger",
-        aria_expanded=t("{signal_open}"),
+        data_attr_aria_expanded=js(f"${signal_name}"),
         aria_haspopup="dialog",
         aria_controls=content_id,
         data_slot="sheet-trigger",
@@ -70,7 +70,7 @@ def SheetContent(
     cls: str = "",
     **kwargs,
 ) -> FT:
-    signal_open = f"{signal}_open"
+    signal_name = f"{signal}_open"
     content_id = f"{signal}_content"
 
     side_classes = {
@@ -105,9 +105,9 @@ def SheetContent(
 
     overlay = (
         Div(
-            ds_show(f"${signal_open}"),
-            ds_on_click(f"${signal_open} = false"),
-            data_state=t("{signal_open} ? 'open' : 'closed'"),
+            data_show=js(f"${signal_name}"),
+            data_on_click=js(f"${signal_name} = false"),
+            data_attr_state=js(f"${signal_name} ? 'open' : 'closed'"),
             cls="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm animate-in fade-in-0",
             data_slot="sheet-overlay",
             style="display: none;",
@@ -117,15 +117,15 @@ def SheetContent(
     )
 
     content_panel = Div(
-        close_button or None,
+        close_button,
         *children,
-        ds_show(f"${signal_open}"),
+        data_show=js(f"${signal_name}"),
         id=content_id,
         role="dialog",
         aria_modal="true" if modal else None,
         aria_labelledby=f"{content_id}-title",
         aria_describedby=f"{content_id}-description",
-        data_state=t("{signal_open} ? 'open' : 'closed'"),
+        data_attr_state=js(f"${signal_name} ? 'open' : 'closed'"),
         data_slot="sheet-content",
         cls=cn(
             "fixed z-[110] bg-background shadow-lg border flex flex-col",
@@ -154,10 +154,10 @@ def SheetClose(
 ) -> FT:
     from .button import Button
 
-    signal_open = f"{signal}_open"
+    signal_name = f"{signal}_open"
     return Button(
         *children,
-        ds_on_click(f"${signal_open} = false"),
+        data_on_click=js(f"${signal_name} = false"),
         data_slot="sheet-close",
         variant=variant,
         size=size,

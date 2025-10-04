@@ -49,13 +49,13 @@ command_variants = cva(
 
 def Command(
     *children: Any,
-    signal: str = "",
+    signal: str | Signal = "",
     size: CommandSize = "md",
     label: str = "Command Menu",
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = signal or gen_id("command")
+    sig = getattr(signal, 'id', signal) or gen_id("command")
     counter = {"value": 0}
     search = Signal(f"{sig}_search", "")
     selected = Signal(f"{sig}_selected", 0)
@@ -79,13 +79,13 @@ def Command(
 def CommandDialog(
     trigger: FT,
     content: list[FT],
-    signal: str = "",
+    signal: str | Signal = "",
     modal: bool = True,
     label: str = "Command Menu",
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = signal or gen_id("command")
+    sig = getattr(signal, 'id', signal) or gen_id("command")
     dialog_id = f"{sig}_dialog"
     dialog_ref = Signal(dialog_id, _ref_only=True)
     counter = {"value": 0}

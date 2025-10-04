@@ -1,14 +1,30 @@
 import json
 from datetime import datetime
-from typing import Any, Literal
+from typing import Any, Literal, Protocol
 
 from starhtml import Button as HTMLButton
 from starhtml import Div, Icon, Span, Style, Signal, js
 
 from .button import Button
-from .utils import cn, gen_id
+from .utils import cn, gen_id, with_signals
 
 CalendarMode = Literal["single", "range", "multiple"]
+
+
+class CalendarElement(Protocol):
+    """
+    Calendar component with exposed signals for reactive state management.
+
+    Attributes:
+        selected: Signal containing the selected date(s) - string for single mode, list for range/multiple
+        month: Signal containing the current month (1-12)
+        year: Signal containing the current year
+        month_display: Signal containing the month name string (e.g., "January")
+    """
+    selected: Signal
+    month: Signal
+    year: Signal
+    month_display: Signal
 
 MONTHS = [
     "January", "February", "March", "April", "May", "June",
@@ -18,7 +34,7 @@ MONTHS = [
 
 def Calendar(
     *attrs,
-    signal: str = "",
+    signal: str | Signal = "",
     mode: CalendarMode = "single",
     selected: str | list[str] | None = None,
     month: int | None = None,
@@ -27,8 +43,8 @@ def Calendar(
     on_select: str | list | None = None,
     cls: str = "",
     **kwargs: Any,
-) -> Div:
-    sig = signal or gen_id("calendar")
+) -> CalendarElement:
+    sig = getattr(signal, 'id', signal) or gen_id("calendar")
     today = datetime.now()
     current_month = month or today.month
     current_year = year or today.year
@@ -39,32 +55,31 @@ def Calendar(
     else:
         initial_selected = selected if isinstance(selected, list) else []
 
-    calendar = Div(
-        Style(_CALENDAR_STYLES),
-        (month_sig := Signal(sig + "_month", current_month)),
-        (year_sig := Signal(sig + "_year", current_year)),
-        (month_display_sig := Signal(sig + "_month_display", MONTHS[current_month - 1])),
-        (selected_sig := Signal(sig + "_selected", initial_selected)),
-        _build_navigation(sig, month_sig, year_sig, month_display_sig, current_month, current_year, disabled),
+    return with_signals(
         Div(
-            _build_weekdays(),
-            _build_calendar_grid(sig, selected_sig, mode, disabled, today_str, on_select),
-            cls="w-full"
+            Style(_CALENDAR_STYLES),
+            (month_sig := Signal(sig + "_month", current_month)),
+            (year_sig := Signal(sig + "_year", current_year)),
+            (month_display_sig := Signal(sig + "_month_display", MONTHS[current_month - 1])),
+            (selected_sig := Signal(sig + "_selected", initial_selected)),
+            _build_navigation(sig, month_sig, year_sig, month_display_sig, current_month, current_year, disabled),
+            Div(
+                _build_weekdays(),
+                _build_calendar_grid(sig, selected_sig, mode, disabled, today_str, on_select),
+                cls="w-full"
+            ),
+            *attrs,
+            data_calendar=sig,
+            role="application",
+            aria_label="Calendar",
+            cls=cn("p-3 border rounded-md w-fit", cls),
+            **kwargs,
         ),
-        *attrs,
-        data_calendar=sig,
-        role="application",
-        aria_label="Calendar",
-        cls=cn("p-3 border rounded-md w-fit", cls),
-        **kwargs,
+        selected=selected_sig,
+        month=month_sig,
+        year=year_sig,
+        month_display=month_display_sig,
     )
-
-    calendar.selected = selected_sig
-    calendar.month = month_sig
-    calendar.year = year_sig
-    calendar.month_display = month_display_sig
-
-    return calendar
 
 
 def _build_navigation(sig: str, month, year, month_display, current_month: int, current_year: int, disabled: bool) -> Div:

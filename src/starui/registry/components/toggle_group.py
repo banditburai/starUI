@@ -16,7 +16,7 @@ ToggleGroupSize = Literal["default", "sm", "lg"]
 def ToggleGroup(
     *children: Any,
     type: ToggleGroupType = "single",
-    signal: str | None = None,
+    signal: str | Signal | None = None,
     initial_value: str | list[str] | None = None,
     variant: ToggleGroupVariant = "default",
     size: ToggleGroupSize = "default",
@@ -24,7 +24,7 @@ def ToggleGroup(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = signal or gen_id("toggle_group")
+    sig = getattr(signal, 'id', signal) or gen_id("toggle_group")
     value_signal = f"{signal}_value"
 
     if initial_value is None:
