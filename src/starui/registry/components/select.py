@@ -5,7 +5,7 @@ from starhtml import Button as HTMLButton
 from starhtml import Label as HTMLLabel
 from starhtml import P as HTMLP
 
-from .utils import cn, gen_id, inject_signal_recursively, js_literal
+from .utils import cn, gen_id
 
 
 def Select(
@@ -39,22 +39,23 @@ def SelectTrigger(
     *children,
     cls: str = "",
     **kwargs: Any,
-):
-    def trigger(*, sig, selected_label, **ctx):
-        trigger_id = kwargs.pop("id", f"{sig}_trigger")
+) -> FT:
+    def trigger(*, sig, selected_label, **ctx):        
+        custom_id = kwargs.pop("id", None)
+        trigger_id = custom_id or f"{sig}_trigger"
+        trigger_ref = Signal(trigger_id, _ref_only=True)
 
         return HTMLButton(
             *[child(sig=sig, selected_label=selected_label, **ctx) if callable(child) else child for child in children],
             Icon("lucide:chevron-down", cls="size-4 shrink-0 opacity-50"),
-            data_ref=f"{sig}_trigger",
+            data_ref=trigger_ref,
             popovertarget=f"{sig}_content",
             popoveraction="toggle",
             type="button",
             role="combobox",
             aria_haspopup="listbox",
             aria_controls=f"{sig}_content",
-            data_placeholder=~selected_label,
-            id=trigger_id,
+            id=trigger_ref.id,
             cls=cn(
                 "w-[180px] flex h-9 items-center justify-between gap-2 rounded-md border border-input",
                 "bg-transparent px-3 py-2 text-sm shadow-xs",
@@ -64,7 +65,6 @@ def SelectTrigger(
                 "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40",
                 "aria-invalid:border-destructive",
                 "disabled:cursor-not-allowed disabled:opacity-50",
-                "data-[placeholder]:text-muted-foreground",
                 cls,
             ),
             data_slot="select-trigger",
@@ -75,17 +75,19 @@ def SelectTrigger(
 
 
 def SelectValue(
+    *children,
     placeholder: str = "Select an option",
     cls: str = "",
     **kwargs: Any,
-):
+) -> FT:
     def value_component(*, selected_label, **_):
-        from starhtml.datastar import js
+        if children:
+            return Span(*children, cls=cn("pointer-events-none truncate flex-1 text-left", cls), **kwargs)
 
         return Span(
-            data_text=js(f"${selected_label.name} || '{placeholder}'"),
-            data_attr_class=selected_label.if_("", "text-muted-foreground"),
+            data_text=selected_label.or_(placeholder),
             cls=cn("pointer-events-none truncate flex-1 text-left", cls),
+            data_class_text_muted_foreground=~selected_label,
             **kwargs,
         )
 
@@ -94,36 +96,36 @@ def SelectValue(
 
 def SelectContent(
     *children,
+    side: str = "bottom",
+    align: str = "start",
+    side_offset: int = 4,
+    container: str = "auto",
     cls: str = "",
     **kwargs: Any,
-):
+) -> FT:
     def content(*, sig, **ctx):
-        from starhtml.datastar import js
+        trigger_ref = Signal(f"{sig}_trigger", _ref_only=True)
+        content_ref = Signal(f"{sig}_content", _ref_only=True)
+        placement = side if align == "center" else f"{side}-{align}"
 
-        content_min_width = Signal(
-            f"{sig}_content_min_width",
-            js(f"${sig}_trigger ? ${sig}_trigger.offsetWidth + 'px' : 'auto'")
-        )
+        position_mods = {
+            "placement": placement,
+            "offset": side_offset,
+            "flip": True,
+            "shift": True,
+            "hide": True,
+            "container": container,
+        }
 
         return Div(
-            content_min_width,
-            Div(*[inject_signal_recursively(child, sig) for child in children], cls="p-1 max-h-[300px] overflow-auto"),
-            data_ref=f"{sig}_content",
-            data_style_min_width=content_min_width,
-            data_position=(
-                f"{sig}_trigger",
-                {
-                    "placement": "bottom",
-                    "offset": 4,
-                    "flip": True,
-                    "shift": True,
-                    "hide": True,
-                }
-            ),
+            Div(*[child(sig=sig, **ctx) if callable(child) else child for child in children], cls="p-1 max-h-[300px] overflow-auto"),
+            data_ref=content_ref,
+            data_style_min_width=trigger_ref.if_(trigger_ref.offsetWidth + 'px', '8rem'),
+            data_position=(trigger_ref.id, position_mods),
             popover="auto",
-            id=f"{sig}_content",
+            id=content_ref.id,
             role="listbox",
-            aria_labelledby=f"{sig}_trigger",
+            aria_labelledby=trigger_ref.id,
             tabindex="-1",
             cls=cn(
                 "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md dark:border-input",
@@ -137,21 +139,21 @@ def SelectContent(
 
 
 def SelectItem(
-    value: str,
-    label: str | None = None,
+    *children,
+    value: str = "",
     disabled: bool = False,
     cls: str = "",
     **kwargs: Any,
-):
+) -> FT:
     def item(*, sig, selected, selected_label, **_):
-        from starhtml.datastar import js
+        content_ref = Signal(f"{sig}_content", _ref_only=True)
 
-        label_text = label or value
-        js_safe_label = js_literal(label_text)
-        is_selected = selected.eq(value)
+        item_value = value or (children[0] if children and isinstance(children[0], str) else "")
+        label_text = children[0] if (children and isinstance(children[0], str)) else item_value
+        is_selected = selected.eq(item_value)
 
         return Div(
-            Span(label_text),
+            *children,
             Span(
                 Icon("lucide:check", cls="h-4 w-4"),
                 style="opacity: 0; transition: opacity 0.15s",
@@ -159,12 +161,12 @@ def SelectItem(
                 cls="absolute right-2 flex h-3.5 w-3.5 items-center justify-center",
             ),
             data_on_click=[
-                selected.set(value),
-                selected_label.set(js_safe_label),
-                js(f"${sig}_content.hidePopover()")
+                selected.set(item_value),
+                selected_label.set(label_text),
+                content_ref.hidePopover()
             ] if not disabled else None,
             role="option",
-            data_value=value,
+            data_value=item_value,
             data_selected=is_selected,
             data_disabled="true" if disabled else None,
             cls=cn(
@@ -185,7 +187,7 @@ def SelectGroup(
     label: str | None = None,
     cls: str = "",
     **kwargs: Any,
-):
+) -> FT:
     def group(*, sig, **ctx):
         return Div(
             SelectLabel(label)(sig=sig, **ctx) if label else None,
@@ -201,7 +203,7 @@ def SelectLabel(
     *children,
     cls: str = "",
     **kwargs: Any,
-):
+) -> FT:
     def label(**_):
         return Div(
             *children,
@@ -213,7 +215,6 @@ def SelectLabel(
 
 
 def _get_value_label(item: str | tuple) -> tuple[str, str]:
-    """Extract value and label from an option item."""
     match item:
         case str():
             return item, item
@@ -224,10 +225,9 @@ def _get_value_label(item: str | tuple) -> tuple[str, str]:
 
 
 def _find_initial_label(options: list, value: str | None) -> str:
-    """Find the display label for a given value in options."""
     if not value:
         return ""
-    
+
     for opt in options:
         match opt:
             case str() if opt == value:
@@ -243,19 +243,21 @@ def _find_initial_label(options: list, value: str | None) -> str:
 
 
 def _build_select_items(options: list) -> list:
-    """Convert options list into SelectItem components."""
     def _process_option(opt):
         match opt:
             case str():
-                return SelectItem(value=opt, label=opt)
+                return SelectItem(opt)
             case (value, label):
-                return SelectItem(value=value, label=label)
+                return SelectItem(label, value=value)
             case {"group": group_label, "items": group_items}:
                 return SelectGroup(
-                    *[SelectItem(*_get_value_label(item)) for item in group_items],
+                    *[
+                        SelectItem(item_label, value=item_value)
+                        for item_value, item_label in [_get_value_label(item) for item in group_items]
+                    ],
                     label=group_label
                 )
-    
+
     return [_process_option(opt) for opt in options]
 
 

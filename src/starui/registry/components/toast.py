@@ -1,8 +1,6 @@
 from typing import Any, Literal
-from .utils import js_literal
 
-from starhtml import FT, Button, Div, Icon, Span
-from starhtml.datastar import ds_on_click, ds_show, ds_signals, ds_text, value
+from starhtml import FT, Button, Div, Icon, Span, Signal, js
 
 from .utils import cn, cva
 
@@ -16,7 +14,7 @@ ToastPosition = Literal[
     "bottom-right",
 ]
 
-position_map = {
+position_classes = {
     "top-left": "top-0 left-0",
     "top-center": "top-0 left-1/2 -translate-x-1/2",
     "top-right": "top-0 right-0",
@@ -58,18 +56,17 @@ def Toaster(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
+    toasts_signal = Signal(signal, [])
+    counter_signal = Signal(f"{signal}_counter", 0)
+
     return Div(
-        ds_signals(
-            **{
-                signal: value([]),
-                f"{signal}_counter": value(0),
-            }
-        ),
+        toasts_signal,
+        counter_signal,
         Div(
             *[_toast_slot(signal, i) for i in range(max_visible)],
             cls=cn(
-                "fixed z-[100] flex flex-col-reverse gap-2 p-4 max-w-[420px] pointer-events-none",
-                position_map.get(position, "bottom-right"),
+                "fixed z-[100] flex flex-col-reverse gap-2 p-4 w-[calc(100%-2rem)] sm:w-[420px] pointer-events-none",
+                position_classes[position],
                 cls,
             ),
             **kwargs,
@@ -100,41 +97,35 @@ def _toast_element(signal: str, index: int, variant: str) -> FT:
         else f"${signal}[{index}] && ${signal}[{index}].variant === '{variant}'"
     )
 
-    icon_name, icon_cls = variant_icons.get(variant, (None, None))
+    icon_name, icon_cls = variant_icons.get(variant, (None, None)) if variant != "default" else (None, None)
 
     return Div(
         Div(
-            Span(Icon(icon_name, cls=f"h-4 w-4 {icon_cls}"), cls="shrink-0")
-            if icon_name
-            else None,
+            Span(Icon(icon_name, cls=cn("h-4 w-4", icon_cls)), cls="shrink-0") if icon_name else None,
             Div(
                 Div(
-                    ds_text(f"${signal}[{index}] ? ${signal}[{index}].title : ''"),
+                    data_text=f"${signal}[{index}]?.title ?? ''",
                     cls="text-sm font-semibold",
                 ),
                 Div(
-                    ds_text(
-                        f"${signal}[{index}] && ${signal}[{index}].description ? ${signal}[{index}].description : ''"
-                    ),
-                    ds_show(f"${signal}[{index}] && ${signal}[{index}].description"),
+                    data_text=f"${signal}[{index}]?.description ?? ''",
+                    data_show=f"${signal}[{index}]?.description",
+                    style="display: none",
                     cls="text-sm opacity-90",
                 ),
                 cls="grid gap-1",
             ),
-            cls="flex items-start space-x-3" if icon_name else "flex items-start",
+            cls=cn("flex items-start", "space-x-3" if icon_name else ""),
         ),
         Button(
             Icon("lucide:x", cls="h-4 w-4"),
-            ds_on_click(f"""
-                const toastId = ${signal}[{index}].id;
-                ${signal} = ${signal}.filter(t => t.id !== toastId);
-            """),
+            data_on_click=js(f"const id=${signal}[{index}].id;${signal}=${signal}.filter(t=>t.id!==id)"),
             type="button",
             cls="absolute right-2 top-2 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none",
         ),
-        ds_show(show_condition),
+        data_show=show_condition,
         cls=toast_variants(variant=variant),
-        style="display: none;",  # Initial state to prevent flash
+        style="display: none",
         role="status",
         aria_live="polite",
         aria_atomic="true",
@@ -149,32 +140,17 @@ def toast(
     signal: str = "toasts",
     max_visible: int = 3,
 ) -> str:
-    """Generate Datastar action to trigger a toast notification."""    
-    _msg = js_literal(message)
-    _desc = js_literal(description)
-    _variant = js_literal(variant)
+    """Generate JavaScript to trigger a toast notification.
 
-    return f"""
-        const newToast = {{
-            id: ++${signal}_counter,
-            title: {_msg},
-            description: {_desc},
-            variant: {_variant},
-            timestamp: Date.now()
-        }};
-
-        ${signal} = [newToast, ...${signal}];
-
-        if (${signal}.length > {max_visible}) {{
-            ${signal} = ${signal}.slice(0, {max_visible});
-        }}
-
-        if ({duration} > 0) {{
-            setTimeout(() => {{
-                ${signal} = ${signal}.filter(t => t.id !== newToast.id);
-            }}, {duration});
-        }}
+    Works in both client-side and server-side contexts:
+    - Client-side: data_on_click=toast('msg')
+    - Server-side (SSE): yield execute_script(toast('msg'))
     """
+    msg = message.replace("'", "\\'").replace('"', '\\"')
+    desc = description.replace("'", "\\'").replace('"', '\\"')
+
+    # Wrap in IIFE for SSE compatibility (each script gets its own scope)
+    return f"""(()=>{{const t={{id:++${signal}_counter,title:'{msg}',description:'{desc}',variant:'{variant}',timestamp:Date.now()}};${signal}=[t,...${signal}].slice(0,{max_visible});{f'setTimeout(()=>{{${signal}=${signal}.filter(x=>x.id!==t.id)}},{duration})' if duration > 0 else ''}}})()"""
 
 
 def success_toast(

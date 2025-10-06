@@ -217,9 +217,8 @@ def DatePickerWithInput(
     cal = f"{sig}_calendar"
     initial_selected = selected or ""
 
-    trigger_id = f"{sig}_trigger"
-    content_id = f"{sig}_content"
-    content_ref = Signal(content_id, _ref_only=True)
+    trigger_ref = Signal(f"{sig}_trigger", _ref_only=True)
+    content_ref = Signal(f"{sig}_content", _ref_only=True)
 
     selected_sig = Signal(f"{sig}_selected", initial_selected)
     cal_selected = Signal(f"{cal}_selected", initial_selected, _ref_only=True)
@@ -234,25 +233,25 @@ def DatePickerWithInput(
             type="text",
             placeholder=format,
             value=initial_selected,
-            data_ref=f"{sig}_input",
+            data_ref=input_ref,
             cls=cn(width, "pr-10"),
             disabled=disabled,
         ),
         Button(
             Icon("lucide:calendar", cls="h-4 w-4 text-muted-foreground"),
-            data_ref=trigger_id,
-            id=trigger_id,
-            popovertarget=content_id,
+            data_ref=trigger_ref,
+            id=trigger_ref.id,
+            popovertarget=content_ref.id,
             popoveraction="toggle",
             variant="ghost",
             size="icon",
             aria_haspopup="dialog",
-            aria_describedby=content_id,
+            aria_describedby=content_ref.id,
             data_slot="popover-trigger",
             cls="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 px-0 hover:bg-transparent",
             disabled=disabled,
         ),
-        _build_input_popover_content(content_id, trigger_id, cal, initial_selected, disabled),
+        _build_input_popover_content(content_ref.id, trigger_ref.id, cal, initial_selected, disabled),
         cls="relative inline-block",
     )
 
@@ -329,10 +328,8 @@ def _build_time_section(sig: str, hour_display, minute_display, pm, time, disabl
 
 
 def _build_time_dropdown(sig: str, hour_display, minute_display, pm, time, field: str, disabled: bool) -> Div:
-    trigger_id = f"{sig}_{field}_trigger"
-    content_id = f"{sig}_{field}_content"
-    trigger_ref = Signal(trigger_id, _ref_only=True)
-    content_ref = Signal(content_id, _ref_only=True)
+    trigger_ref = Signal(f"{sig}_{field}_trigger", _ref_only=True)
+    content_ref = Signal(f"{sig}_{field}_content", _ref_only=True)
     display = hour_display if field == "hour" else minute_display
 
     base_items = list(range(1, 13)) if field == "hour" else list(range(0, 60))
@@ -342,9 +339,9 @@ def _build_time_dropdown(sig: str, hour_display, minute_display, pm, time, field
     trigger = HTMLButton(
         Span(data_text=display, cls="pointer-events-none font-mono text-base"),
         Icon("lucide:chevron-down", cls="h-3 w-3 shrink-0 opacity-50 ml-1"),
-        data_ref=trigger_id,
-        id=trigger_id,
-        popovertarget=content_id,
+        data_ref=trigger_ref,
+        id=trigger_ref.id,
+        popovertarget=content_ref.id,
         popoveraction="toggle",
         type="button",
         disabled=disabled,
@@ -374,9 +371,9 @@ def _build_time_dropdown(sig: str, hour_display, minute_display, pm, time, field
         data_on_click=js(_time_select_handler(display, hour_display, minute_display, pm, time, content_ref)) if not disabled else None,
         data_on_scroll=js(_circular_scroll_handler(base_count)) if not disabled else None,
         data_effect=js(_init_scroll_position(content_ref, base_count, display)),
-        data_ref=content_id,
+        data_ref=content_ref,
         data_style_min_width=trigger_ref.if_(trigger_ref.offsetWidth + 'px', '4rem'),
-        data_position=(trigger_id, {
+        data_position=(trigger_ref.id, {
             "placement": "top",
             "offset": 4,
             "flip": True,
@@ -385,7 +382,7 @@ def _build_time_dropdown(sig: str, hour_display, minute_display, pm, time, field
             "container": "none",
         }),
         popover="auto",
-        id=content_id,
+        id=content_ref.id,
         role="listbox",
         aria_label=f"{field.capitalize()} selection",
         cls="z-50 max-h-[180px] overflow-y-auto scrollbar-hide rounded-md border bg-popover text-popover-foreground shadow-md outline-none",

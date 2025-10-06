@@ -96,23 +96,6 @@ def cva(base: str = "", config: dict[str, Any] | None = None) -> Callable[..., s
 
     return variant_function
 
-
-def inject_signal_recursively(element, signal, *args):
-    """Recursively inject signals into factory functions within nested HTML structures."""
-    match element:
-        case _ if callable(element) and not hasattr(element, 'children'):
-            return element(signal, *args)
-        case _ if hasattr(element, 'children') and element.children:                        
-            children = [
-                child(signal, *args) if callable(child) else child 
-                for child in element.children
-            ]
-            attrs = getattr(element, 'attrs', {}).copy()
-            return Div(*children, **attrs)
-        case _:
-            return element
-
-
 def gen_id(prefix: str) -> str:
     """Generate a short, unique id with a given prefix."""
     return f"{prefix}_{uuid4().hex[:8]}"

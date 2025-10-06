@@ -30,7 +30,7 @@ def AlertDialog(
         trigger(**ctx) if trigger else None,
         HTMLDialog(
             content(**ctx) if content else None,
-            data_ref=sig,
+            data_ref=dialog_ref,
             data_on_close=open_state.set(False),
             data_on_click=(evt.target == evt.currentTarget) & seq(dialog_ref.close(), open_state.set(False)),
             id=sig,

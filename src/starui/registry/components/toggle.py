@@ -1,11 +1,10 @@
 from typing import Any, Literal
 from uuid import uuid4
 
-from starhtml import FT, Div
+from starhtml import FT, Signal
 from starhtml import Button as HTMLButton
-from starhtml.datastar import ds_on_click, ds_signals, toggle_signal
 
-from .utils import cn, cva, ensure_signal, gen_id
+from .utils import cn, cva, gen_id
 
 ToggleVariant = Literal["default", "outline"]
 ToggleSize = Literal["default", "sm", "lg"]
@@ -38,7 +37,7 @@ def Toggle(
     variant: ToggleVariant = "default",
     size: ToggleSize = "default",
     pressed: bool = False,
-    signal: str | Signal | None = None,
+    signal: str | Signal = "",
     disabled: bool = False,
     aria_label: str | None = None,
     cls: str = "",
@@ -46,24 +45,23 @@ def Toggle(
 ) -> FT:
     sig = getattr(signal, 'id', signal) or gen_id("toggle")
     toggle_id = kwargs.pop("id", gen_id("toggle"))
+    toggle_signal = Signal(sig, pressed)
 
-    return Div(
-        HTMLButton(
-            *children,
-            ds_on_click(toggle_signal(signal)) if not disabled else None,
-            type="button",
-            id=toggle_id,
-            disabled=disabled,
-            aria_label=aria_label,
-            aria_pressed=str(pressed).lower(),
-            data_slot="toggle",
-            data_attr_aria_pressed=f"${signal} ? 'true' : 'false'",
-            data_attr_data_state=f"${signal} ? 'on' : 'off'",
-            cls=cn(
-                toggle_variants(variant=variant, size=size),
-                cls,
-            ),
-            **kwargs,
+    return HTMLButton(
+        toggle_signal,
+        *children,
+        data_on_click=toggle_signal.toggle() if not disabled else None,
+        type="button",
+        id=toggle_id,
+        disabled=disabled,
+        aria_label=aria_label,
+        aria_pressed=str(pressed).lower(),
+        data_slot="toggle",
+        data_attr_aria_pressed=toggle_signal.if_('true', 'false'),
+        data_attr_data_state=toggle_signal.if_('on', 'off'),
+        cls=cn(
+            toggle_variants(variant=variant, size=size),
+            cls,
         ),
-        ds_signals(**{signal: pressed}),
+        **kwargs,
     )

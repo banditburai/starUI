@@ -20,9 +20,8 @@ def _get_search_handler(sig: str, selected) -> str:
     return f"clearTimeout(window._st_{sig});window._st_{sig}=setTimeout(()=>{{const v=document.querySelectorAll('[data-command-item=\"{sig}\"]:not([style*=\"none\"]):not([data-disabled=\"true\"])');if(v.length>0){selected}=parseInt(v[0].dataset.index||'0')}},{_SEARCH_DEBOUNCE_MS})"
 
 
-def _get_nav_handler(sig: str, search, selected, dialog_ref=None) -> str:
-    esc = f"!{dialog_ref}" if dialog_ref else "true"
-    return f"const i=[...document.querySelectorAll('[data-command-item=\"{sig}\"]:not([data-filtered=\"true\"]):not([data-disabled=\"true\"])')];let c=-1;i.forEach((e,x)=>{{if(parseInt(e.dataset.index)==={selected})c=x}});switch(event.key){{case'ArrowDown':event.preventDefault();if(i.length>0){{const n=c<i.length-1?c+1:0;{selected}=parseInt(i[n].dataset.index);i[n].scrollIntoView({{block:'nearest'}})}}break;case'ArrowUp':event.preventDefault();if(i.length>0){{const p=c>0?c-1:i.length-1;{selected}=parseInt(i[p].dataset.index);i[p].scrollIntoView({{block:'nearest'}})}}break;case'Enter':event.preventDefault();if(c>=0&&i[c])i[c].click();break;case'Escape':if({esc}){{event.preventDefault();{search}='';{selected}=0}}break}}"
+def _get_nav_handler(sig: str, search, selected) -> str:
+    return f"const i=[...document.querySelectorAll('[data-command-item=\"{sig}\"]:not([data-filtered=\"true\"]):not([data-disabled=\"true\"])')];let c=-1;i.forEach((e,x)=>{{if(parseInt(e.dataset.index)==={selected})c=x}});switch(event.key){{case'ArrowDown':event.preventDefault();if(i.length>0){{const n=c<i.length-1?c+1:0;{selected}=parseInt(i[n].dataset.index);i[n].scrollIntoView({{block:'nearest'}})}}break;case'ArrowUp':event.preventDefault();if(i.length>0){{const p=c>0?c-1:i.length-1;{selected}=parseInt(i[p].dataset.index);i[p].scrollIntoView({{block:'nearest'}})}}break;case'Enter':event.preventDefault();if(c>=0&&i[c])i[c].click();break;case'Escape':if({search}){{event.preventDefault();{search}='';{selected}=0}}break}}"
 
 
 def _get_dialog_open_effect(sig: str, search, selected, dialog_open, dialog_ref) -> str:
@@ -86,13 +85,12 @@ def CommandDialog(
     **kwargs: Any,
 ) -> FT:
     sig = getattr(signal, 'id', signal) or gen_id("command")
-    dialog_id = f"{sig}_dialog"
-    dialog_ref = Signal(dialog_id, _ref_only=True)
+    dialog_ref = Signal(f"{sig}_dialog", _ref_only=True)
     counter = {"value": 0}
 
     search = Signal(f"{sig}_search", "")
     selected = Signal(f"{sig}_selected", 0)
-    dialog_open = Signal(f"{dialog_id}_open", False)
+    dialog_open = Signal(f"{dialog_ref.id}_open", False)
 
     reset_signals = [
         dialog_open.set(False),
@@ -107,12 +105,11 @@ def CommandDialog(
         selected,
         dialog_open,
         *[c(**ctx) if callable(c) else c for c in content],
-        data_ref=dialog_id,
+        data_ref=dialog_ref,
         data_on_close=reset_signals,
-        data_on_keydown=(evt.key == 'Escape') & seq(evt.preventDefault(), evt.currentTarget.close()),
         data_on_click=(evt.target == evt.currentTarget) & evt.currentTarget.close() if modal else None,
         data_effect=js(_get_dialog_open_effect(sig, search, selected, dialog_open, dialog_ref)),
-        id=dialog_id,
+        id=dialog_ref.id,
         data_command_root=sig,
         data_slot="command",
         aria_label=label,
@@ -155,7 +152,7 @@ def CommandInput(
             Icon("lucide:search", cls="size-4 shrink-0 opacity-50"),
             Input(
                 data_bind=search,
-                data_on_keydown=js(_get_nav_handler(sig, search, selected, dialog_ref)) if dialog_ref else js(_get_nav_handler(sig, search, selected)),
+                data_on_keydown=js(_get_nav_handler(sig, search, selected)),
                 data_on_input=js(_get_search_handler(sig, selected)),
                 placeholder=placeholder,
                 data_slot="command-input",

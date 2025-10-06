@@ -114,10 +114,8 @@ def _build_navigation(sig: str, month, year, month_display, current_month: int, 
 
 def _build_dropdown(sig: str, month, year, month_display, type: str, current_display: str | int, items: list[tuple], disabled: bool) -> Div:
     type_sig = month if type == "month" else year
-    trigger_id = f"{sig}_{type}_trigger"
-    trigger_ref = Signal(trigger_id, _ref_only=True)
-    content_id = f"{sig}_{type}_content"
-    content_ref = Signal(content_id, _ref_only=True)
+    trigger_ref = Signal(f"{sig}_{type}_trigger", _ref_only=True)
+    content_ref = Signal(f"{sig}_{type}_content", _ref_only=True)
     display_sig = month_display if type == "month" else type_sig
 
     trigger = HTMLButton(
@@ -126,9 +124,9 @@ def _build_dropdown(sig: str, month, year, month_display, type: str, current_dis
             cls="pointer-events-none"
         ),
         Icon("lucide:chevron-down", cls="h-3 w-3 shrink-0 opacity-50 ml-1"),
-        data_ref=trigger_id,
-        id=trigger_id,
-        popovertarget=content_id,
+        data_ref=trigger_ref,
+        id=trigger_ref.id,
+        popovertarget=content_ref.id,
         popoveraction="toggle",
         type="button",
         disabled=disabled,
@@ -167,11 +165,11 @@ def _build_dropdown(sig: str, month, year, month_display, type: str, current_dis
     dropdown = Div(
         *[make_item(value, display) for value, display in items],
         data_on_click=js(_dropdown_handler(month, year, month_display, type, content_ref)) if not disabled else None,
-        data_ref=content_id,
+        data_ref=content_ref,
         data_style_min_width=trigger_ref.if_(trigger_ref.offsetWidth + 'px', '8rem'),
-        data_position=(trigger_id, position_mods),
+        data_position=(trigger_ref.id, position_mods),
         popover="auto",
-        id=content_id,
+        id=content_ref.id,
         role="listbox",
         aria_label=type.capitalize() + " selection",
         cls="z-50 max-h-[200px] overflow-y-auto scrollbar-hide rounded-md border bg-popover text-popover-foreground shadow-md outline-none dark:border",

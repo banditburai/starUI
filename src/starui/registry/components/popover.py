@@ -1,6 +1,6 @@
 from typing import Literal
 
-from starhtml import Div, FT
+from starhtml import Div, FT, Signal
 
 from .utils import cn, gen_id
 
@@ -31,12 +31,12 @@ def PopoverTrigger(
     def trigger(*, sig, **_):
         from .button import Button
 
-        trigger_id = f"{sig}_trigger"
+        trigger_ref = Signal(f"{sig}_trigger", _ref_only=True)
 
         return Button(
             *children,
-            data_ref=trigger_id,
-            id=trigger_id,
+            data_ref=trigger_ref,
+            id=trigger_ref.id,
             popovertarget=f"{sig}_content",
             popoveraction="toggle",
             variant=variant,
@@ -59,7 +59,7 @@ def PopoverContent(
     **kwargs,
 ):
     def content(*, sig, **ctx):
-        content_id = f"{sig}_content"
+        content_ref = Signal(f"{sig}_content", _ref_only=True)
         placement = side if align == "center" else f"{side}-{align}"
 
         position_mods = {
@@ -74,10 +74,10 @@ def PopoverContent(
 
         return Div(
             *[child(sig=sig, **ctx) if callable(child) else child for child in children],
-            data_ref=content_id,
+            data_ref=content_ref,
             data_position=(f"{sig}_trigger", position_mods),
             popover="auto",
-            id=content_id,
+            id=content_ref.id,
             role="dialog",
             aria_label=aria_label,
             tabindex="-1",

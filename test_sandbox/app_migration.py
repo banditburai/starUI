@@ -5,7 +5,7 @@
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
-import patch_datastar  # noqa: F401
+# import patch_datastar
 
 from starhtml import *
 # Use registry_loader to set up paths, but don't load all components yet
@@ -49,8 +49,35 @@ from src.starui.registry.components.input import Input, InputWithLabel
 from src.starui.registry.components.label import Label
 from src.starui.registry.components.progress import Progress
 from src.starui.registry.components.radio_group import RadioGroup, RadioGroupItem, RadioGroupWithLabel
+from src.starui.registry.components.select import (
+    Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
+    SelectGroup, SelectLabel, SelectWithLabel
+)
 from src.starui.registry.components.separator import Separator
+from src.starui.registry.components.sheet import (
+    Sheet, SheetTrigger, SheetContent, SheetHeader, SheetFooter,
+    SheetTitle, SheetDescription, SheetClose
+)
+from src.starui.registry.components.skeleton import Skeleton
+from src.starui.registry.components.switch import Switch, SwitchWithLabel
+from src.starui.registry.components.table import (
+    Table, TableHeader, TableBody, TableFooter, TableRow,
+    TableHead, TableCell, TableCaption
+)
+from src.starui.registry.components.textarea import Textarea, TextareaWithLabel
+from src.starui.registry.components.tabs import Tabs, TabsList, TabsTrigger, TabsContent
 from src.starui.registry.components.theme_toggle import ThemeToggle
+from src.starui.registry.components.toast import Toaster, toast, success_toast, error_toast, warning_toast, info_toast
+from src.starui.registry.components.toggle_group import ToggleGroup
+from src.starui.registry.components.tooltip import Tooltip, TooltipTrigger, TooltipContent, TooltipProvider
+from src.starui.registry.components.typography import (
+    Display, Subtitle, Lead, Large, Small, Muted, Caption,
+    Text, InlineCode, Blockquote, List, Prose, Figure, Figcaption, Hr
+)
+
+import asyncio
+import time
+from starhtml import execute_script, sse as sse_decorator, signals as sse_signals
 
 styles = Link(rel="stylesheet", href="/static/css/starui.css", type="text/css")
 
@@ -58,6 +85,7 @@ styles = Link(rel="stylesheet", href="/static/css/starui.css", type="text/css")
 def Page(*children, title="Component Test", show_back_link=True):
     """Wrapper for consistent page layout with theme toggle and back link."""
     return Div(
+        Toaster(position="bottom-right"),
         A(
             Icon("lucide:arrow-left", width=20, height=20),
             href="/",
@@ -119,7 +147,19 @@ def index():
             A("Popover", href="/popover", cls="text-primary hover:underline block"),
             A("Progress", href="/progress", cls="text-primary hover:underline block"),
             A("Radio Group", href="/radio-group", cls="text-primary hover:underline block"),
+            A("Select", href="/select", cls="text-primary hover:underline block"),
             A("Separator", href="/separator", cls="text-primary hover:underline block"),
+            A("Sheet", href="/sheet", cls="text-primary hover:underline block"),
+            A("Skeleton", href="/skeleton", cls="text-primary hover:underline block"),
+            A("Switch", href="/switch", cls="text-primary hover:underline block"),
+            A("Table", href="/table", cls="text-primary hover:underline block"),
+            A("Textarea", href="/textarea", cls="text-primary hover:underline block"),
+            A("Tabs", href="/tabs", cls="text-primary hover:underline block"),
+            A("Toast", href="/toast", cls="text-primary hover:underline block"),
+            A("Toast - Server & Client Patterns", href="/toast-server", cls="text-primary hover:underline block ml-4 text-sm"),
+            A("Toggle Group", href="/toggle_group", cls="text-primary hover:underline block"),
+            A("Tooltip", href="/tooltip", cls="text-primary hover:underline block"),
+            A("Typography", href="/typography", cls="text-primary hover:underline block"),
             A("Theme Toggle", href="/theme-toggle", cls="text-primary hover:underline block"),
             cls="space-y-2"
         ),
@@ -923,7 +963,7 @@ def test_dialog():
                 ),
                 Div(
                     Div(
-                        Label("Name", for_="dialog-name"),
+                        Label("Name", fr="dialog-name"),
                         Input(
                             id="dialog-name",
                             placeholder="Your name",
@@ -932,7 +972,7 @@ def test_dialog():
                         cls="space-y-2",
                     ),
                     Div(
-                        Label("Email", for_="dialog-email"),
+                        Label("Email", fr="dialog-email"),
                         Input(
                             id="dialog-email",
                             type="email",
@@ -948,7 +988,6 @@ def test_dialog():
                     DialogClose("Save changes"),
                 ),
             ),
-            signal="edit_profile_dialog",
             size="md",
         ),
 
@@ -968,7 +1007,6 @@ def test_dialog():
                     DialogClose("Yes, delete account", variant="destructive"),
                 ),
             ),
-            signal="delete_dialog",
             size="sm",
         ),
 
@@ -998,7 +1036,6 @@ def test_dialog():
                     DialogClose("Close"),
                 ),
             ),
-            signal="nonmodal_dialog",
             modal=False,
             size="md",
             cls="top-4 right-4 left-auto m-0",
@@ -1044,7 +1081,7 @@ def test_popover():
                     ),
                     Div(
                         Label("Notifications", cls="text-sm font-medium"),
-                        Checkbox(signal="notif_setting"),
+                        Checkbox(),
                         cls="flex justify-between items-center mb-2",
                     ),
                     PopoverClose("Done", variant="ghost"),
@@ -1112,7 +1149,6 @@ def test_command():
                     heading="User",
                 ),
             ),
-            signal="basic_command",
             size="md",
             cls="max-w-md mb-8",
         ),
@@ -1189,7 +1225,6 @@ def test_command():
                     ),
                 ),
             ],
-            signal="cmd_dialog",
         ),
 
         H2("Searchable Command Palette", cls="text-2xl font-semibold mb-4 mt-8"),
@@ -1263,7 +1298,6 @@ def test_command():
                     heading="Full Stack",
                 ),
             ),
-            signal="framework_command",
             size="lg",
             cls="max-w-md mb-8",
         ),
@@ -1299,7 +1333,6 @@ def test_command():
                     onclick="alert('Task started')",
                 ),
             ),
-            signal="disabled_command",
             size="sm",
             cls="max-w-md",
         ),
@@ -1333,24 +1366,26 @@ def test_input():
         H2("Basic Inputs", cls="text-2xl font-semibold mb-4 mt-8"),
         Div(
             Div(
-                Label("Text Input", for_="text-input", cls="block text-sm font-medium mb-1.5"),
-                Input(id="text-input", placeholder="Enter text...", signal="name"),
-                P(Signal("name"), cls="text-sm text-muted-foreground mt-1.5"),
+                (name := Signal("name", _ref_only=True)),
+                Label("Text Input", fr="text-input", cls="block text-sm font-medium mb-1.5"),
+                Input(id="text-input", placeholder="Enter text...", signal=name),
+                P(data_text=name, cls="text-sm text-muted-foreground mt-1.5"),
                 cls="space-y-1",
             ),
             Div(
-                Label("Email Input", for_="email-input", cls="block text-sm font-medium mb-1.5"),
-                Input(id="email-input", type="email", placeholder="email@example.com", signal="email"),
-                P(Signal("email"), cls="text-sm text-muted-foreground mt-1.5"),
+                (email := Signal("email", _ref_only=True)),
+                Label("Email Input", fr="email-input", cls="block text-sm font-medium mb-1.5"),
+                Input(id="email-input", type="email", placeholder="email@example.com", signal=email),
+                P(data_text=email, cls="text-sm text-muted-foreground mt-1.5"),
                 cls="space-y-1",
             ),
             Div(
-                Label("Password Input", for_="password-input", cls="block text-sm font-medium mb-1.5"),
+                Label("Password Input", fr="password-input", cls="block text-sm font-medium mb-1.5"),
                 Input(id="password-input", type="password", placeholder="••••••••"),
                 cls="space-y-1",
             ),
             Div(
-                Label("Disabled Input", for_="disabled-input", cls="block text-sm font-medium mb-1.5"),
+                Label("Disabled Input", fr="disabled-input", cls="block text-sm font-medium mb-1.5"),
                 Input(id="disabled-input", placeholder="Cannot edit", disabled=True),
                 cls="space-y-1",
             ),
@@ -1392,14 +1427,12 @@ def test_input():
             InputWithLabel(
                 label="Full Name",
                 placeholder="John Doe",
-                signal="full_name",
                 required=True,
             ),
             InputWithLabel(
                 label="Email Address",
                 type="email",
                 placeholder="john@example.com",
-                signal="user_email",
                 helper_text="We'll never share your email.",
             ),
             InputWithLabel(
@@ -1423,7 +1456,7 @@ def test_input():
         Div(
             (age := Signal("age", _ref_only=True)),
             (age_valid := Signal("age_valid", _ref_only=True)),
-            Label("Age (must be >= 18)", for_="age-input", cls="block text-sm font-medium mb-1.5"),
+            Label("Age (must be >= 18)", fr="age-input", cls="block text-sm font-medium mb-1.5"),
             Input(
                 id="age-input",
                 type="text",
@@ -1451,26 +1484,24 @@ def test_label():
         P("Labels are used with form inputs to provide accessible names:", cls="text-muted-foreground mb-4"),
         Div(
             Div(
-                Label("Text Input", for_="text-input"),
+                Label("Text Input", fr="text-input"),
                 Input(
                     id="text-input",
                     placeholder="Enter text...",
-                    signal="name",
                 ),
                 cls="space-y-2",
             ),
             Div(
-                Label("Email Input", for_="email-input"),
+                Label("Email Input", fr="email-input"),
                 Input(
                     id="email-input",
                     type="email",
                     placeholder="email@example.com",
-                    signal="email",
                 ),
                 cls="space-y-2",
             ),
             Div(
-                Label("Password Input", for_="password-input"),
+                Label("Password Input", fr="password-input"),
                 Input(
                     id="password-input",
                     type="password",
@@ -1489,7 +1520,7 @@ def test_label():
                 placeholder="Cannot edit",
                 disabled=True,
             ),
-            Label("Disabled Input", for_="disabled-input"),
+            Label("Disabled Input", fr="disabled-input"),
             cls="flex flex-col-reverse gap-2 max-w-md",
         ),
 
@@ -1498,11 +1529,9 @@ def test_label():
         Div(
             CheckboxWithLabel(
                 label="Accept terms and conditions",
-                signal="terms",
             ),
             CheckboxWithLabel(
                 label="Enable notifications",
-                signal="notifications",
                 checked=True,
             ),
             cls="space-y-4 max-w-md",
@@ -1690,17 +1719,17 @@ def test_dropdown_menu():
         H2("Checkbox Items", cls="text-2xl font-semibold mb-4 mt-8"),
         P("Dropdown with checkbox items for toggling options:", cls="text-muted-foreground mb-4"),
         Div(
-            (status_bar := Signal("status_bar", True)),
-            (activity_bar := Signal("activity_bar", False)),
-            (panel := Signal("panel", False)),
+            (status_bar := Signal("status_bar", _ref_only=True)),
+            (activity_bar := Signal("activity_bar", _ref_only=True)),
+            (panel := Signal("panel", _ref_only=True)),
             DropdownMenu(
                 DropdownMenuTrigger("View Options", variant="secondary"),
                 DropdownMenuContent(
                     DropdownMenuLabel("Appearance"),
                     DropdownMenuSeparator(),
-                    DropdownMenuCheckboxItem("Status Bar", signal="status_bar"),
-                    DropdownMenuCheckboxItem("Activity Bar", signal="activity_bar"),
-                    DropdownMenuCheckboxItem("Panel", signal="panel"),
+                    DropdownMenuCheckboxItem("Status Bar", signal=status_bar, checked=True),
+                    DropdownMenuCheckboxItem("Activity Bar", signal=activity_bar),
+                    DropdownMenuCheckboxItem("Panel", signal=panel),
                 ),
             ),
             P(
@@ -1717,7 +1746,7 @@ def test_dropdown_menu():
         H2("Radio Group", cls="text-2xl font-semibold mb-4 mt-8"),
         P("Dropdown with radio items for single selection:", cls="text-muted-foreground mb-4"),
         Div(
-            (position := Signal("position", "bottom")),
+            (position := Signal("position", _ref_only=True)),
             DropdownMenu(
                 DropdownMenuTrigger("Select Position", variant="outline"),
                 DropdownMenuContent(
@@ -1727,7 +1756,8 @@ def test_dropdown_menu():
                         DropdownMenuRadioItem("Top", value="top"),
                         DropdownMenuRadioItem("Bottom", value="bottom"),
                         DropdownMenuRadioItem("Right", value="right"),
-                        signal="position",
+                        signal=position,
+                        value="bottom",
                     ),
                 ),
             ),
@@ -1888,7 +1918,6 @@ def test_radio_group():
                     {"value": "enterprise", "label": "Enterprise - Custom"},
                 ],
                 value="free",
-                signal="plan",
                 helper_text="Choose the plan that best fits your needs",
             ),
             cls="mb-8",
@@ -1903,7 +1932,6 @@ def test_radio_group():
                 {"value": "important", "label": "Important only"},
                 {"value": "none", "label": "No notifications"},
             ],
-            signal="notifications_radio",
             orientation="horizontal",
             required=True,
         ),
@@ -1918,7 +1946,6 @@ def test_radio_group():
                 {"value": "lg", "label": "Large"},
                 {"value": "xl", "label": "Extra Large", "disabled": True},
             ],
-            signal="size_radio",
             required=True,
             error_text="Please select a size",
         ),
@@ -1930,8 +1957,7 @@ def test_radio_group():
                 RadioGroupItem("small", "Small"),
                 RadioGroupItem("medium", "Medium"),
                 RadioGroupItem("large", "Large"),
-                initial_value="medium",
-                signal="simple_radio",
+                default_value="medium",
             ),
             cls="p-4 border rounded-lg",
         ),
@@ -1956,12 +1982,122 @@ def test_radio_group():
                     disabled=True,
                     indicator_cls="[&>div]:bg-blue-600 dark:[&>div]:bg-blue-500",
                 ),
-                initial_value="option2",
-                signal="custom_radio",
+                default_value="option2",
             ),
             cls="p-4 border rounded-lg",
         ),
         title="Radio Group",
+    )
+
+
+@rt("/select")
+def test_select():
+    return Page(
+        H2("Basic Select", cls="text-2xl font-semibold mb-4"),
+        P("Select component with string options:", cls="text-muted-foreground mb-4"),
+        Div(
+            SelectWithLabel(
+                label="Country",
+                options=["United States", "Canada", "Mexico", "United Kingdom", "France", "Germany"],
+                placeholder="Choose a country",
+                helper_text="Select your country of residence",
+            ),
+            cls="mb-8",
+        ),
+
+        H2("Value/Label Tuples", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Select with separate values and labels:", cls="text-muted-foreground mb-4"),
+        SelectWithLabel(
+            label="Language",
+            options=[
+                ("en", "English"),
+                ("es", "Spanish"),
+                ("fr", "French"),
+                ("de", "German"),
+                ("jp", "Japanese"),
+            ],
+            value="en",
+            helper_text="Choose your preferred language",
+        ),
+
+        H2("Grouped Options", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Select with option groups:", cls="text-muted-foreground mb-4"),
+        SelectWithLabel(
+            label="Framework",
+            options=[
+                {"group": "Frontend", "items": ["React", "Vue", "Angular", "Svelte"]},
+                {"group": "Backend", "items": [("django", "Django"), ("fastapi", "FastAPI"), ("flask", "Flask")]},
+                {"group": "Full Stack", "items": ["Next.js", "Nuxt", "SvelteKit"]},
+            ],
+            placeholder="Select a framework",
+            required=True,
+        ),
+
+        H2("Error State", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Select with validation error:", cls="text-muted-foreground mb-4"),
+        SelectWithLabel(
+            label="Department",
+            options=["Engineering", "Design", "Marketing", "Sales", "Support"],
+            error_text="Please select a valid department",
+            required=True,
+        ),
+
+        H2("Disabled State", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Disabled select with pre-selected value:", cls="text-muted-foreground mb-4"),
+        SelectWithLabel(
+            label="Plan",
+            options=["Free", "Pro", "Enterprise"],
+            value="Free",
+            disabled=True,
+            helper_text="Upgrade your account to change plans",
+        ),
+
+        H2("Simple Select", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Basic select without label wrapper:", cls="text-muted-foreground mb-4"),
+        Div(
+            Select(
+                SelectTrigger(
+                    SelectValue(placeholder="Pick an option"),
+                ),
+                SelectContent(
+                    SelectItem("Option 1", value="opt1"),
+                    SelectItem("Option 2", value="opt2"),
+                    SelectItem("Option 3", value="opt3"),
+                    SelectItem("Disabled", value="disabled", disabled=True),
+                ),
+            ),
+            cls="p-4 border rounded-lg mb-8",
+        ),
+
+        H2("With Icons", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Select items with icons (using children):", cls="text-muted-foreground mb-4"),
+        Div(
+            Select(
+                SelectTrigger(
+                    SelectValue(placeholder="Select a status"),
+                ),
+                SelectContent(
+                    SelectItem(
+                        Icon("lucide:check-circle", cls="mr-2 h-4 w-4"),
+                        "Completed",
+                        value="completed"
+                    ),
+                    SelectItem(
+                        Icon("lucide:clock", cls="mr-2 h-4 w-4"),
+                        "In Progress",
+                        value="in-progress"
+                    ),
+                    SelectItem(
+                        Icon("lucide:circle", cls="mr-2 h-4 w-4"),
+                        "Not Started",
+                        value="not-started"
+                    ),
+                ),
+            ),
+            cls="p-4 border rounded-lg",
+        ),
+
+        title="Select",
     )
 
 
@@ -1997,6 +2133,1548 @@ def test_separator():
         ),
 
         title="Separator",
+    )
+
+
+@rt("/sheet")
+def test_sheet():
+    right_sheet_open = Signal("right_sheet_open", _ref_only=True)
+    left_sheet_open = Signal("left_sheet_open", _ref_only=True)
+    bottom_sheet_open = Signal("bottom_sheet_open", _ref_only=True)
+    large_sheet_open = Signal("large_sheet_open", _ref_only=True)
+
+    return Page(
+        H2("Right Side Sheet", cls="text-2xl font-semibold mb-4"),
+        P("Modal drawer that slides in from the right:", cls="text-muted-foreground mb-4"),
+        Div(
+            Sheet(
+                SheetTrigger("Open Right Sheet"),
+                SheetContent(
+                    SheetHeader(
+                        SheetTitle("Edit Profile"),
+                        SheetDescription(
+                            "Make changes to your profile here. Click save when you're done."
+                        ),
+                    ),
+                    Div(
+                        P("Sheet content goes here. Press ESC or click outside to close."),
+                        Input(placeholder="Enter your name"),
+                        Input(placeholder="Enter your email", type="email"),
+                        cls="p-6 space-y-4",
+                    ),
+                    SheetFooter(
+                        SheetClose("Cancel", variant="outline"),
+                        Button("Save Changes", data_on_click=right_sheet_open.set(False)),
+                    ),
+                    side="right",
+                    size="md",
+                ),
+            ),
+            cls="mb-8",
+        ),
+
+        H2("Left Side Sheet", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Sheet sliding from the left side:", cls="text-muted-foreground mb-4"),
+        Div(
+            Sheet(
+                SheetTrigger("Open Left Sheet", variant="secondary"),
+                SheetContent(
+                    SheetHeader(
+                        SheetTitle("Navigation"),
+                        SheetDescription("Browse through the menu items."),
+                    ),
+                    Div(
+                        P("Menu Item 1", data_on_click=left_sheet_open.set(False), cls="p-2 hover:bg-accent rounded cursor-pointer"),
+                        P("Menu Item 2", data_on_click=left_sheet_open.set(False), cls="p-2 hover:bg-accent rounded cursor-pointer"),
+                        P("Menu Item 3", data_on_click=left_sheet_open.set(False), cls="p-2 hover:bg-accent rounded cursor-pointer"),
+                        P("Menu Item 4", data_on_click=left_sheet_open.set(False), cls="p-2 hover:bg-accent rounded cursor-pointer"),
+                        cls="p-6 space-y-2",
+                    ),
+                    side="left",
+                    size="sm",
+                ),
+            ),
+            cls="mb-8",
+        ),
+
+        H2("Top Side Sheet", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Sheet sliding from the top:", cls="text-muted-foreground mb-4"),
+        Div(
+            Sheet(
+                SheetTrigger("Open Top Sheet", variant="outline"),
+                SheetContent(
+                    SheetHeader(
+                        SheetTitle("Notification"),
+                        SheetDescription("You have a new message."),
+                    ),
+                    Div(
+                        P("This is a notification banner that slides in from the top."),
+                        cls="p-6",
+                    ),
+                    side="top",
+                ),
+            ),
+            cls="mb-8",
+        ),
+
+        H2("Bottom Side Sheet", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Sheet sliding from the bottom:", cls="text-muted-foreground mb-4"),
+        Div(
+            Sheet(
+                SheetTrigger("Open Bottom Sheet", variant="destructive"),
+                SheetContent(
+                    SheetHeader(
+                        SheetTitle("Confirm Action"),
+                        SheetDescription(
+                            "Are you sure you want to proceed?"
+                        ),
+                    ),
+                    Div(
+                        P("This action cannot be undone. Please confirm to continue."),
+                        cls="p-6",
+                    ),
+                    SheetFooter(
+                        SheetClose("Cancel", variant="outline"),
+                        Button("Confirm", data_on_click=bottom_sheet_open.set(False), variant="destructive"),
+                    ),
+                    side="bottom",
+                ),
+            ),
+            cls="mb-8",
+        ),
+
+        H2("Large Sheet", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Sheet with large size:", cls="text-muted-foreground mb-4"),
+        Div(
+            Sheet(
+                SheetTrigger("Open Large Sheet"),
+                SheetContent(
+                    SheetHeader(
+                        SheetTitle("Large Content Area"),
+                        SheetDescription("A wider sheet for more content."),
+                    ),
+                    Div(
+                        P("This sheet has more horizontal space for complex layouts."),
+                        Div(
+                            Input(placeholder="First Name", cls="mb-2"),
+                            Input(placeholder="Last Name", cls="mb-2"),
+                            Input(placeholder="Email", type="email", cls="mb-2"),
+                            Input(placeholder="Phone", type="tel"),
+                        ),
+                        cls="p-6 space-y-4",
+                    ),
+                    SheetFooter(
+                        SheetClose("Close"),
+                        Button("Submit", data_on_click=large_sheet_open.set(False)),
+                    ),
+                    side="right",
+                    size="lg",
+                ),
+            ),
+            cls="mb-8",
+        ),
+
+        title="Sheet",
+    )
+
+
+@rt("/skeleton")
+def test_skeleton():
+    return Page(
+        H2("Basic Shapes", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Simple skeleton placeholders for text content:", cls="text-muted-foreground mb-4"),
+        Div(
+            Skeleton(cls="h-4 w-64"),  # Text line
+            Skeleton(cls="h-4 w-48"),  # Shorter text line
+            Skeleton(cls="h-4 w-56"),  # Another text line
+            cls="space-y-2 max-w-2xl"
+        ),
+
+        H2("Card Skeleton", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Skeleton for a card with avatar and content:", cls="text-muted-foreground mb-4"),
+        Div(
+            Div(
+                Skeleton(cls="h-12 w-12 rounded-full"),  # Avatar
+                Div(
+                    Skeleton(cls="h-4 w-32"),  # Name
+                    Skeleton(cls="h-3 w-24"),  # Subtitle
+                    cls="space-y-2",
+                ),
+                cls="flex items-center space-x-4",
+            ),
+            Skeleton(cls="h-32 w-full mt-4"),  # Content area
+            Skeleton(cls="h-4 w-full mt-4"),  # Footer line
+            cls="p-4 border rounded-lg max-w-2xl"
+        ),
+
+        H2("Article Skeleton", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Skeleton for an article with title, date, text, and image:", cls="text-muted-foreground mb-4"),
+        Div(
+            Skeleton(cls="h-8 w-3/4 mb-4"),  # Title
+            Skeleton(cls="h-3 w-32 mb-6"),  # Date
+            Div(
+                Skeleton(cls="h-4 w-full"),
+                Skeleton(cls="h-4 w-full"),
+                Skeleton(cls="h-4 w-2/3"),
+                cls="space-y-2 mb-4",
+            ),
+            Skeleton(cls="h-40 w-full"),  # Image placeholder
+            cls="p-4 border rounded-lg max-w-2xl"
+        ),
+
+        H2("Loading State Toggle", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Toggle between skeleton loading state and actual content:", cls="text-muted-foreground mb-4"),
+        Div(
+            (loading := Signal("loading", True)),
+            Button(
+                data_text=loading.if_("Stop Loading", "Start Loading"),
+                data_on_click=loading.toggle(),
+                variant="outline",
+                cls="mb-4",
+            ),
+            # Skeleton shown while loading
+            Div(
+                Skeleton(cls="h-6 w-48 mb-2"),
+                Skeleton(cls="h-4 w-64 mb-4"),
+                Skeleton(cls="h-20 w-full"),
+                style="display: none",
+                data_show=loading,
+            ),
+            # Actual content shown when loaded
+            Div(
+                H4("Content Loaded!", cls="text-lg font-semibold mb-2"),
+                P("This content appears when loading is complete.", cls="mb-4"),
+                Div(
+                    "This is the actual content that would load.",
+                    cls="p-4 bg-muted rounded-lg",
+                ),
+                style="display: none",
+                data_show=~loading,
+            ),
+            cls="p-4 border rounded-lg max-w-2xl"
+        ),
+
+        title="Skeleton"
+    )
+
+
+@rt("/switch")
+def test_switch():
+    return Page(
+        H2("Switch Variants", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Switches with labels, helper text, and various states:", cls="text-muted-foreground mb-4"),
+        Div(
+            SwitchWithLabel(
+                label="Enable notifications",
+                checked=True,
+                helper_text="Receive email notifications about updates",
+            ),
+            SwitchWithLabel(
+                label="Marketing emails",
+                helper_text="Get promotional emails and special offers",
+            ),
+            SwitchWithLabel(
+                label="Two-factor authentication",
+                required=True,
+                helper_text="Enhanced security for your account",
+            ),
+            SwitchWithLabel(
+                label="Disabled option",
+                disabled=True,
+                helper_text="This feature is not available in your plan",
+            ),
+            SwitchWithLabel(
+                label="Error state example",
+                error_text="This setting requires admin approval",
+            ),
+            cls="space-y-4"
+        ),
+
+        H2("Simple Switches", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Basic switches without labels:", cls="text-muted-foreground mb-4"),
+        Div(
+            P("Simple switches:", cls="text-sm font-medium mb-2"),
+            Div(
+                Switch(checked=True),
+                Switch(),
+                Switch(disabled=True),
+                cls="flex gap-4",
+            ),
+            cls="p-4 border rounded-lg max-w-md"
+        ),
+
+        H2("Interactive Demo", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Toggle the switch to see state changes in real-time:", cls="text-muted-foreground mb-4"),
+        Div(
+            (demo_switch := Signal("demo_switch", _ref_only=True)),
+            SwitchWithLabel(
+                label="Demo Switch",
+                signal=demo_switch,
+                helper_text="Toggle to see the state below",
+            ),
+            Div(
+                P(
+                    Span("Status: ", cls="font-medium"),
+                    Span(
+                        data_text=demo_switch.if_("ON", "OFF"),
+                        data_attr_class=demo_switch.if_(
+                            "text-green-600 dark:text-green-400 font-semibold",
+                            "text-red-600 dark:text-red-400 font-semibold"
+                        ),
+                    ),
+                    cls="text-sm"
+                ),
+                cls="mt-4 p-4 bg-muted rounded-lg"
+            ),
+            cls="p-4 border rounded-lg max-w-md"
+        ),
+
+        title="Switch"
+    )
+
+
+@rt("/table")
+def test_table():
+    return Page(
+        H2("Basic Table", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("A simple table with invoices and payment information:", cls="text-muted-foreground mb-4"),
+        Table(
+            TableHeader(
+                TableRow(
+                    TableHead("Invoice"),
+                    TableHead("Status"),
+                    TableHead("Method"),
+                    TableHead("Amount", cls="text-right"),
+                )
+            ),
+            TableBody(
+                TableRow(
+                    TableCell("INV001"),
+                    TableCell(Badge("Paid", variant="secondary")),
+                    TableCell("Credit Card"),
+                    TableCell("$250.00", cls="text-right"),
+                ),
+                TableRow(
+                    TableCell("INV002"),
+                    TableCell(Badge("Pending", variant="outline")),
+                    TableCell("PayPal"),
+                    TableCell("$150.00", cls="text-right"),
+                ),
+                TableRow(
+                    TableCell("INV003"),
+                    TableCell(Badge("Unpaid", variant="destructive")),
+                    TableCell("Bank Transfer"),
+                    TableCell("$350.00", cls="text-right"),
+                ),
+                TableRow(
+                    TableCell("INV004"),
+                    TableCell(Badge("Paid", variant="secondary")),
+                    TableCell("Credit Card"),
+                    TableCell("$450.00", cls="text-right"),
+                ),
+            ),
+            TableFooter(
+                TableRow(
+                    TableCell("Total", colspan="3", cls="font-medium"),
+                    TableCell("$1,200.00", cls="text-right font-medium"),
+                )
+            ),
+        ),
+
+        H2("Table with Selection", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Table with selectable rows and checkboxes:", cls="text-muted-foreground mb-4"),
+        Table(
+            TableCaption("A list of users with selection capabilities."),
+            TableHeader(
+                TableRow(
+                    TableHead("Select"),
+                    TableHead("Name"),
+                    TableHead("Email"),
+                    TableHead("Role"),
+                    TableHead("Actions"),
+                )
+            ),
+            TableBody(
+                TableRow(
+                    TableCell(Checkbox()),
+                    TableCell("John Doe"),
+                    TableCell("john@example.com"),
+                    TableCell(Badge("Admin")),
+                    TableCell(
+                        Button("Edit", variant="ghost", size="sm"),
+                    ),
+                ),
+                TableRow(
+                    TableCell(Checkbox(checked=True)),
+                    TableCell("Jane Smith"),
+                    TableCell("jane@example.com"),
+                    TableCell(Badge("User", variant="secondary")),
+                    TableCell(
+                        Button("Edit", variant="ghost", size="sm"),
+                    ),
+                    selected=True,
+                ),
+                TableRow(
+                    TableCell(Checkbox()),
+                    TableCell("Bob Johnson"),
+                    TableCell("bob@example.com"),
+                    TableCell(Badge("User", variant="secondary")),
+                    TableCell(
+                        Button("Edit", variant="ghost", size="sm"),
+                    ),
+                ),
+            ),
+        ),
+
+        H2("Compact Table", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("A compact table with custom sizing:", cls="text-muted-foreground mb-4"),
+        Table(
+            TableHeader(
+                TableRow(
+                    TableHead("Product"),
+                    TableHead("Price"),
+                    TableHead("Stock"),
+                    TableHead("Category"),
+                )
+            ),
+            TableBody(
+                TableRow(
+                    TableCell("Laptop"),
+                    TableCell("$999"),
+                    TableCell("12"),
+                    TableCell("Electronics"),
+                ),
+                TableRow(
+                    TableCell("Mouse"),
+                    TableCell("$29"),
+                    TableCell("45"),
+                    TableCell("Electronics"),
+                ),
+                TableRow(
+                    TableCell("Keyboard"),
+                    TableCell("$79"),
+                    TableCell("8"),
+                    TableCell("Electronics"),
+                ),
+                TableRow(
+                    TableCell("Monitor"),
+                    TableCell("$299"),
+                    TableCell("15"),
+                    TableCell("Electronics"),
+                ),
+            ),
+            cls="text-xs [&_th]:h-8 [&_td]:p-1 [&_th]:p-1",
+        ),
+
+        title="Table"
+    )
+
+
+@rt("/textarea")
+def test_textarea():
+    return Page(
+        H2("Textarea Variants", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Textareas with labels, helper text, and various states:", cls="text-muted-foreground mb-4"),
+        Div(
+            TextareaWithLabel(
+                label="Description",
+                placeholder="Enter your description here...",
+                helper_text="Provide a detailed description",
+            ),
+            TextareaWithLabel(
+                label="Bio",
+                placeholder="Tell us about yourself",
+                required=True,
+                error_text="Bio is required and must be at least 50 characters",
+            ),
+            TextareaWithLabel(
+                label="Notes",
+                value="This field is currently disabled",
+                disabled=True,
+                helper_text="This field will be enabled after verification",
+            ),
+            TextareaWithLabel(
+                label="Comments",
+                placeholder="Share your thoughts...",
+                rows=5,
+                helper_text="Fixed height with 5 rows",
+            ),
+            cls="space-y-4"
+        ),
+
+        H2("Simple Textarea", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Basic textarea without label:", cls="text-muted-foreground mb-4"),
+        Div(
+            P("Simple textarea:", cls="text-sm font-medium mb-2"),
+            Textarea(
+                placeholder="Type something...",
+                resize="vertical",
+            ),
+            cls="p-4 border rounded-lg max-w-2xl"
+        ),
+
+        H2("Interactive Demo", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Type in the textarea to see live preview:", cls="text-muted-foreground mb-4"),
+        Div(
+            (reactive_text := Signal("reactive_text", _ref_only=True)),
+            Textarea(
+                placeholder="Type here to test reactive binding...",
+                signal=reactive_text,
+                rows=3,
+                cls="mb-4",
+            ),
+            Div(
+                P("Live Preview:", cls="font-medium mb-2"),
+                P(
+                    data_text=reactive_text.if_(reactive_text, "(nothing typed yet)"),
+                    cls="p-3 border rounded bg-muted min-h-[3rem]"
+                ),
+            ),
+            cls="p-4 border rounded-lg max-w-2xl"
+        ),
+
+        title="Textarea"
+    )
+
+
+@rt("/tabs")
+def test_tabs():
+    return Page(
+        H2("Default Variant (Boxed Style)", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Auto-indexed tabs - no need to specify id, defaults to first tab:", cls="text-muted-foreground mb-4"),
+        Tabs(
+            TabsList(
+                TabsTrigger("Preview"),
+                TabsTrigger("Code"),
+                TabsTrigger("Settings"),
+            ),
+            TabsContent(
+                Div(
+                    H3("Preview Content", cls="text-lg font-semibold mb-2"),
+                    P("This is the preview tab content with the default boxed style."),
+                    Button("Action in Preview", variant="secondary", cls="mt-4"),
+                ),
+            ),
+            TabsContent(
+                Div(
+                    H3("Code Content", cls="text-lg font-semibold mb-2"),
+                    Pre(
+                        Code("# Example code\ndef hello_world():\n    print('Hello, World!')", cls="text-sm"),
+                        cls="bg-muted p-4 rounded-md overflow-x-auto"
+                    ),
+                ),
+            ),
+            TabsContent(
+                Div(
+                    H3("Settings Content", cls="text-lg font-semibold mb-2"),
+                    P("Configure your preferences here."),
+                    Div(
+                        Label("Enable notifications", fr="notifications_default"),
+                        Checkbox(checked=True),
+                        cls="flex items-center gap-2 mt-4",
+                    ),
+                ),
+            ),
+            variant="default",
+        ),
+
+        H2("Plain Variant (Text Style)", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Plain variant with auto-indexed tabs:", cls="text-muted-foreground mb-4"),
+        Tabs(
+            TabsList(
+                TabsTrigger("Account"),
+                TabsTrigger("Password"),
+                TabsTrigger("Team"),
+                TabsTrigger("Billing"),
+            ),
+            TabsContent(
+                Div(
+                    H3("Account Settings", cls="text-lg font-semibold mb-2"),
+                    P("Manage your account settings and preferences."),
+                    Div(
+                        Label("Username", fr="username_plain"),
+                        Input(id="username_plain", placeholder="Enter username"),
+                        Label("Email", fr="email_plain", cls="mt-2"),
+                        Input(id="email_plain", type="email", placeholder="Enter email"),
+                        cls="space-y-2 mt-4",
+                    ),
+                ),
+            ),
+            TabsContent(
+                Div(
+                    H3("Password & Security", cls="text-lg font-semibold mb-2"),
+                    P("Update your password and security settings."),
+                    Button("Change Password", variant="outline", cls="mt-4"),
+                ),
+            ),
+            TabsContent(
+                Div(
+                    H3("Team Members", cls="text-lg font-semibold mb-2"),
+                    P("Manage your team and collaborate with others."),
+                ),
+            ),
+            TabsContent(
+                Div(
+                    H3("Billing Information", cls="text-lg font-semibold mb-2"),
+                    P("View and manage your subscription and payment methods."),
+                ),
+            ),
+            variant="plain",
+        ),
+
+        H2("With Semantic IDs", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Using semantic string IDs with custom default_id (starts on 'profile' tab):", cls="text-muted-foreground mb-4"),
+        Tabs(
+            TabsList(
+                TabsTrigger(
+                    Icon("lucide:home"),
+                    "Home",
+                    id="home",
+                ),
+                TabsTrigger(
+                    Icon("lucide:user"),
+                    "Profile",
+                    id="profile",
+                ),
+                TabsTrigger(
+                    Icon("lucide:settings"),
+                    "Settings",
+                    id="settings_icon",
+                ),
+            ),
+            TabsContent(
+                Div(
+                    H3("Home Tab", cls="text-lg font-semibold mb-2"),
+                    P("Welcome to the home section."),
+                ),
+                id="home",
+            ),
+            TabsContent(
+                Div(
+                    H3("Profile Tab", cls="text-lg font-semibold mb-2"),
+                    P("View and edit your profile information."),
+                ),
+                id="profile",
+            ),
+            TabsContent(
+                Div(
+                    H3("Settings Tab", cls="text-lg font-semibold mb-2"),
+                    P("Manage your application settings."),
+                ),
+                id="settings_icon",
+            ),
+            default_id="profile",
+            variant="default",
+        ),
+
+        title="Tabs"
+    )
+
+
+@rt("/toggle_group")
+def test_toggle_group():
+    return Page(
+        H2("Single Selection Toggle Groups", cls="text-2xl font-semibold mb-4"),
+        P("Click items to toggle selection. Only one item can be selected at a time.", cls="text-muted-foreground mb-4"),
+
+        Div(
+            P("Text formatting (bold pre-selected):", cls="text-sm font-medium mb-2"),
+            ToggleGroup(
+                ("bold", Icon("lucide:bold")),
+                ("italic", Icon("lucide:italic")),
+                ("underline", Icon("lucide:underline")),
+                type="single",
+                variant="outline",
+                default_value="bold",
+            ),
+            cls="mb-6",
+        ),
+
+        Div(
+            P("Text alignment (center pre-selected):", cls="text-sm font-medium mb-2"),
+            ToggleGroup(
+                ("left", Icon("lucide:align-left")),
+                ("center", Icon("lucide:align-center")),
+                ("right", Icon("lucide:align-right")),
+                ("justify", Icon("lucide:align-justify")),
+                type="single",
+                variant="default",
+                default_value="center",
+            ),
+            cls="mb-6",
+        ),
+
+        Div(
+            P("Size selection (no pre-selection):", cls="text-sm font-medium mb-2"),
+            ToggleGroup(
+                ("sm", "Small"),
+                ("md", "Medium"),
+                ("lg", "Large"),
+                ("xl", "Extra Large"),
+                type="single",
+                variant="outline",
+                size="lg",
+            ),
+            cls="mb-6",
+        ),
+
+        Div(
+            P("View mode:", cls="text-sm font-medium mb-2"),
+            ToggleGroup(
+                ("list", Div(Icon("lucide:list"), Span("List", cls="ml-1"), cls="flex items-center")),
+                ("grid", Div(Icon("lucide:layout-grid"), Span("Grid", cls="ml-1"), cls="flex items-center")),
+                ("gallery", Div(Icon("lucide:image"), Span("Gallery", cls="ml-1"), cls="flex items-center")),
+                type="single",
+                variant="outline",
+            ),
+            cls="mb-8",
+        ),
+
+        H2("Multiple Selection Toggle Groups", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Click items to toggle selection. Multiple items can be selected.", cls="text-muted-foreground mb-4"),
+
+        Div(
+            P("Text options (multiple selection, bold and italic pre-selected):", cls="text-sm font-medium mb-2"),
+            ToggleGroup(
+                ("bold", Icon("lucide:bold")),
+                ("italic", Icon("lucide:italic")),
+                ("underline", Icon("lucide:underline")),
+                ("strikethrough", Icon("lucide:strikethrough")),
+                type="multiple",
+                variant="outline",
+                default_value=["bold", "italic"],
+            ),
+            cls="mb-8",
+        ),
+
+        H2("States", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Toggle groups in different states:", cls="text-muted-foreground mb-4"),
+
+        Div(
+            P("Disabled group:", cls="text-sm font-medium mb-2"),
+            ToggleGroup(
+                ("option1", "Option 1"),
+                ("option2", "Option 2"),
+                ("option3", "Option 3"),
+                type="single",
+                variant="outline",
+                disabled=True,
+            ),
+            cls="mb-6",
+        ),
+
+        title="Toggle Group"
+    )
+
+
+@rt("/toast")
+def test_toast():
+    return Page(
+        H2("Basic Toast Types", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Click the buttons to trigger different toast variants:", cls="text-muted-foreground mb-4"),
+        Div(
+            Button(
+                "Default Toast",
+                data_on_click=toast('Event has been created', 'Your event is now live'),
+                variant="outline"
+            ),
+            Button(
+                "Success Toast",
+                data_on_click=success_toast('Success!', 'Operation completed successfully'),
+                variant="outline"
+            ),
+            Button(
+                "Error Toast",
+                data_on_click=error_toast('Error!', 'Something went wrong'),
+                variant="outline"
+            ),
+            Button(
+                "Warning Toast",
+                data_on_click=warning_toast('Warning!', 'Please be careful'),
+                variant="outline"
+            ),
+            Button(
+                "Info Toast",
+                data_on_click=info_toast('Info', 'Here is some information'),
+                variant="outline"
+            ),
+            cls="flex flex-wrap gap-2"
+        ),
+
+        H2("Custom Duration", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Control how long toasts stay visible:", cls="text-muted-foreground mb-4"),
+        Div(
+            Button(
+                "Quick Toast (1s)",
+                data_on_click=toast('Quick!', 'This disappears fast', duration=1000),
+                variant="secondary"
+            ),
+            Button(
+                "Long Toast (10s)",
+                data_on_click=toast('Long Toast', 'This stays for 10 seconds', duration=10000),
+                variant="secondary"
+            ),
+            Button(
+                "Persistent Toast",
+                data_on_click=toast('Persistent', 'Click X to dismiss', duration=0),
+                variant="secondary"
+            ),
+            cls="flex flex-wrap gap-2"
+        ),
+
+        H2("Multiple Toasts", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Trigger multiple toasts in sequence:", cls="text-muted-foreground mb-4"),
+        Div(
+            Button(
+                "Spam Toasts",
+                data_on_click=f"""
+                    {info_toast('First toast', 'This is the first one')}
+                    setTimeout(() => {{ {success_toast('Second toast', 'This is the second one')} }}, 500);
+                    setTimeout(() => {{ {warning_toast('Third toast', 'This is the third one')} }}, 1000);
+                """,
+                variant="destructive"
+            ),
+            cls="flex gap-2"
+        ),
+
+        H2("Promise Pattern", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Simulate loading states with sequential toasts:", cls="text-muted-foreground mb-4"),
+        Div(
+            Button(
+                "Promise Toast",
+                data_on_click=f"""
+                    {toast('Loading...', 'Please wait...')}
+                    setTimeout(() => {{ {success_toast('Success!', 'Promise resolved successfully')} }}, 2000);
+                """,
+                variant="outline"
+            ),
+            Button(
+                "Rich Colors Demo",
+                data_on_click=success_toast('Rich Colors', 'Notice the rich background gradients'),
+                variant="outline"
+            ),
+            cls="flex gap-2"
+        ),
+
+        title="Toast"
+    )
+
+
+def create_toast_via_signals(message: str, description: str = "", variant: str = "default", counter: int = 0, existing_toasts: list = None):
+    """Helper to create toast by updating signals directly via SSE."""
+    if existing_toasts is None:
+        existing_toasts = []
+
+    new_toast = {
+        "id": counter + 1,
+        "title": message,
+        "description": description,
+        "variant": variant,
+        "timestamp": int(time.time() * 1000)
+    }
+
+    # Update both signals: increment counter and prepend new toast
+    return sse_signals(
+        toasts_counter=counter + 1,
+        toasts=[new_toast] + existing_toasts[:2]  # Keep max 3 toasts
+    )
+
+
+@rt("/toast/sse-example")
+@sse_decorator
+async def toast_sse_example():
+    """Server-side SSE toast example - demonstrates hypermedia pattern."""
+    counter = 0
+    toasts = []
+
+    # Toast 1
+    counter += 1
+    toast_id = counter
+    new_toast = {"id": toast_id, "title": "Processing...", "description": "Starting server operation", "variant": "info", "timestamp": int(time.time() * 1000)}
+    toasts = [new_toast] + toasts
+    yield sse_signals(toasts_counter=counter, toasts=toasts[:3])
+    yield execute_script(f"setTimeout(()=>{{ctx.$signals.toasts=ctx.$signals.toasts.filter(t=>t.id!=={toast_id})}},4000)")
+    await asyncio.sleep(1)
+
+    # Toast 2
+    counter += 1
+    toast_id = counter
+    new_toast = {"id": toast_id, "title": "Step 1 Complete", "description": "Validating data...", "variant": "default", "timestamp": int(time.time() * 1000)}
+    toasts = [new_toast] + toasts
+    yield sse_signals(toasts_counter=counter, toasts=toasts[:3])
+    yield execute_script(f"setTimeout(()=>{{ctx.$signals.toasts=ctx.$signals.toasts.filter(t=>t.id!=={toast_id})}},4000)")
+    await asyncio.sleep(1)
+
+    # Toast 3
+    counter += 1
+    toast_id = counter
+    new_toast = {"id": toast_id, "title": "Step 2", "description": "Checking permissions...", "variant": "warning", "timestamp": int(time.time() * 1000)}
+    toasts = [new_toast] + toasts
+    yield sse_signals(toasts_counter=counter, toasts=toasts[:3])
+    yield execute_script(f"setTimeout(()=>{{ctx.$signals.toasts=ctx.$signals.toasts.filter(t=>t.id!=={toast_id})}},4000)")
+    await asyncio.sleep(1)
+
+    # Final toast - random outcome
+    import random
+    counter += 1
+    toast_id = counter
+    if random.choice([True, False]):
+        new_toast = {"id": toast_id, "title": "Success!", "description": "Operation completed successfully", "variant": "success", "timestamp": int(time.time() * 1000)}
+    else:
+        new_toast = {"id": toast_id, "title": "Failed", "description": "Operation encountered an error", "variant": "error", "timestamp": int(time.time() * 1000)}
+    toasts = [new_toast] + toasts
+    yield sse_signals(toasts_counter=counter, toasts=toasts[:3])
+    yield execute_script(f"setTimeout(()=>{{ctx.$signals.toasts=ctx.$signals.toasts.filter(t=>t.id!=={toast_id})}},4000)")
+
+
+@rt("/toast-server")
+def test_toast_server():
+    """Toast examples showing both client-side and server-side (SSE) patterns."""
+    return Page(
+        H2("Server-Side Toasts (Hypermedia Pattern)", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("These toasts are triggered by server-sent events (SSE), demonstrating the hypermedia approach:", cls="text-muted-foreground mb-4"),
+        Div(
+            Button(
+                "Server-Side Toast",
+                data_on_click=get("/toast/sse-example"),
+                variant="default"
+            ),
+            P("Click to trigger a server process that sends toast notifications via SSE.", cls="text-sm text-muted-foreground mt-2"),
+            cls="space-y-2"
+        ),
+
+        H2("Client-Side Toasts", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("These toasts are triggered directly in the browser:", cls="text-muted-foreground mb-4"),
+        Div(
+            Button(
+                "Client-Side Toast",
+                data_on_click=success_toast('Client-Side', 'This was triggered directly in the browser'),
+                variant="outline"
+            ),
+            P("Click to trigger a toast using client-side JavaScript.", cls="text-sm text-muted-foreground mt-2"),
+            cls="space-y-2"
+        ),
+
+        H2("Architecture Comparison", cls="text-2xl font-semibold mb-4 mt-8"),
+        Card(
+            CardHeader(
+                CardTitle("Client-Side Pattern"),
+                CardDescription("JavaScript executes directly in the browser")
+            ),
+            CardContent(
+                CodeBlock('''Button(
+    "Show Toast",
+    data_on_click=toast('Message', 'Description')
+)''', language="python"),
+                P("Best for: Immediate UI feedback, form validation", cls="text-sm text-muted-foreground mt-4")
+            ),
+            cls="mb-4"
+        ),
+
+        Card(
+            CardHeader(
+                CardTitle("Server-Side Pattern (SSE)"),
+                CardDescription("Server sends toast via Server-Sent Events")
+            ),
+            CardContent(
+                CodeBlock('''@rt("/process")
+@sse_decorator
+async def process():
+    yield execute_script(
+        toast('Message', 'Description')
+    )
+
+Button(
+    "Process",
+    data_on_click=get("/process")
+)''', language="python"),
+                P("Best for: Long-running operations, multi-step processes, server notifications", cls="text-sm text-muted-foreground mt-4")
+            )
+        ),
+
+        title="Toast - Server & Client Patterns"
+    )
+
+
+@rt("/test_window_modifier")
+def test_window_modifier():
+    """Test window=True modifier and Escape key filtering."""
+    test1_any = Signal("test1_any", 0)
+    test1_escape = Signal("test1_escape", 0)
+    test2_any = Signal("test2_any", 0)
+    test2_escape = Signal("test2_escape", 0)
+
+    return Page(
+        Div(
+            test1_any, test1_escape, test2_any, test2_escape,
+
+            H1("Escape Key & Window Modifier Test", cls="text-2xl font-bold mb-6"),
+
+            Div(
+                P("Instructions:", cls="font-bold text-gray-900"),
+                P("1. Type letters in the inputs - 'Any key' should go up", cls="text-gray-900"),
+                P("2. Press Escape - 'Escape only' should go up", cls="text-gray-900"),
+                P("3. Test 1 (window=True): works from anywhere on the page", cls="text-gray-900"),
+                P("4. Test 2 (no window): only works when div/input is focused", cls="text-gray-900"),
+                cls="bg-yellow-100 border border-yellow-400 p-4 mb-6 rounded",
+            ),
+
+            H2("Test 1: With window=True - Global handler with Escape filtering", cls="text-xl font-bold mb-2"),
+            Div(
+                P("Any key count: ", Span(data_text=test1_any, cls="font-bold text-orange-600"), cls="text-gray-900"),
+                P("Escape only count: ", Span(data_text=test1_escape, cls="font-bold text-green-600"), cls="text-gray-900"),
+                Input(placeholder="Type anywhere on page - test both counters", cls="border p-2 rounded w-full mb-2 text-gray-900 bg-white"),
+                P("✅ Expected: Any key increments on any keypress, Escape only on Escape", cls="text-sm text-gray-900"),
+                P("✅ Expected: Works from anywhere on the page (click outside, then type)", cls="text-sm text-gray-900"),
+                data_on_keydown=(js(f"$test1_any = $test1_any + 1; if(event.key==='Escape'){{$test1_escape = $test1_escape + 1}}"), dict(window=True)),
+                cls="border-4 border-blue-500 p-4 mb-6 rounded bg-blue-50",
+            ),
+
+            H2("Test 2: Without window modifier - Local handler with Escape filtering", cls="text-xl font-bold mb-2"),
+            Div(
+                P("Any key count: ", Span(data_text=test2_any, cls="font-bold text-orange-600"), cls="text-gray-900"),
+                P("Escape only count: ", Span(data_text=test2_escape, cls="font-bold text-green-600"), cls="text-gray-900"),
+                Input(placeholder="Focus this div/input first, then type", cls="border p-2 rounded w-full mb-2 text-gray-900 bg-white"),
+                P("✅ Expected: Any key increments on any keypress, Escape only on Escape", cls="text-sm text-gray-900"),
+                P("✅ Expected: ONLY works when this div/input is focused", cls="text-sm text-gray-900"),
+                data_on_keydown=js(f"$test2_any = $test2_any + 1; if(event.key==='Escape'){{$test2_escape = $test2_escape + 1}}"),
+                tabindex="0",
+                cls="border-4 border-green-500 p-4 mb-6 rounded bg-green-50",
+            ),
+
+            Div(
+                Button("Reset All Counters",
+                    data_on_click=[
+                        test1_any.set(0), test1_escape.set(0),
+                        test2_any.set(0), test2_escape.set(0),
+                    ],
+                    cls="mr-2",
+                ),
+                P("Test that Escape increments both counters, but other keys only increment 'Any key'", cls="text-sm text-muted-foreground inline-block"),
+                cls="mt-4",
+            ),
+        ),
+        title="Escape Key & Window Modifier Test",
+    )
+
+
+@rt("/typography")
+def test_typography():
+    return Page(
+        H1("Typography System"),
+        Subtitle("Beautiful, consistent text styling with pragmatic defaults for your Star UI applications."),
+        Lead("Explore our comprehensive typography components designed for accessibility, readability, and visual hierarchy."),
+
+        Hr(),
+
+        # Typography scale showcase
+        Section(
+            H2("Typography Scale", section=True),
+            Lead("A comprehensive hierarchy designed for optimal readability and visual balance."),
+
+            # Display Example
+            Div(
+                Caption("DISPLAY"),
+                Display("The quick brown fox jumps", cls="!mt-0 !mb-4"),
+                cls="py-6 border-b border-border last:border-0"
+            ),
+
+            # H1 Example
+            Div(
+                Caption("H1 - PRIMARY HEADING"),
+                H1("The quick brown fox jumps over the lazy dog", cls="!mt-0 !mb-4"),
+                cls="py-6 border-b border-border last:border-0"
+            ),
+
+            # H2 Example
+            Div(
+                Caption("H2 - SECONDARY HEADING"),
+                H2("The quick brown fox jumps over the lazy dog", cls="!mt-0 !mb-4"),
+                cls="py-6 border-b border-border last:border-0"
+            ),
+
+            # H3 Example
+            Div(
+                Caption("H3 - TERTIARY HEADING"),
+                H3("The quick brown fox jumps over the lazy dog", cls="!mt-0 !mb-4"),
+                cls="py-6 border-b border-border last:border-0"
+            ),
+
+            # H4-H6 Examples in grid
+            Div(
+                Div(
+                    Caption("H4 - QUATERNARY"),
+                    H4("The quick brown fox", cls="!mt-0 !mb-4"),
+                ),
+                Div(
+                    Caption("H5 - FIFTH LEVEL"),
+                    H5("The quick brown fox", cls="!mt-0 !mb-4"),
+                ),
+                Div(
+                    Caption("H6 - SIXTH LEVEL"),
+                    H6("The quick brown fox", cls="!mt-0 !mb-4"),
+                ),
+                cls="grid grid-cols-1 md:grid-cols-3 gap-6 py-6"
+            ),
+        ),
+
+        Hr(),
+
+        # Text variants
+        Section(
+            H2("Text Variants", section=True),
+            Lead("Semantic text components for different content types and emphasis levels."),
+
+            # Lead
+            Div(
+                Caption("LEAD - INTRODUCTORY TEXT"),
+                Lead("A modal dialog that interrupts the user with important content and expects a response.", cls="!mt-0 !mb-4"),
+                cls="py-6 border-b border-border last:border-0"
+            ),
+
+            # Subtitle
+            Div(
+                Caption("SUBTITLE - SECONDARY DESCRIPTION"),
+                Subtitle("Perfect for supporting information that accompanies main headings.", cls="!mt-0 !mb-4"),
+                cls="py-6 border-b border-border last:border-0"
+            ),
+
+            # Paragraph
+            Div(
+                Caption("PARAGRAPH - BODY TEXT"),
+                P("The king thought long and hard, and finally came up with a brilliant plan: he would tax the jokes in the kingdom. This is the standard body text with optimal line height for reading.", cls="!mt-0 !mb-4"),
+                cls="py-6 border-b border-border last:border-0"
+            ),
+
+            # Large
+            Div(
+                Caption("LARGE - EMPHASIZED TEXT"),
+                Large("Are you absolutely sure you want to proceed with this action?", cls="!mt-0 !mb-4"),
+                cls="py-6 border-b border-border last:border-0"
+            ),
+
+            # Small, Muted, Caption grid
+            Div(
+                Div(
+                    Caption("SMALL - FINE PRINT"),
+                    Small("Terms and conditions apply"),
+                ),
+                Div(
+                    Caption("MUTED - DE-EMPHASIZED"),
+                    Muted("Enter your email address to continue.", cls="!mt-0 !mb-4"),
+                ),
+                Div(
+                    Caption("CAPTION - METADATA"),
+                    Caption("Last updated: March 2024"),
+                ),
+                cls="grid grid-cols-1 md:grid-cols-3 gap-6 py-6 border-b border-border last:border-0"
+            ),
+
+            # Text component variants (removed invalid weight= and align= parameters)
+            Div(
+                Caption("TEXT COMPONENT - FLEXIBLE VARIANTS"),
+                Div(
+                    Text("Body variant with normal weight", variant="body"),
+                    Text("Lead variant for emphasis", variant="lead"),
+                    Text("Small variant for fine print", variant="small"),
+                    cls="space-y-4"
+                ),
+                cls="py-6 border-b border-border last:border-0"
+            ),
+
+            # Inline Code
+            Div(
+                Caption("INLINE CODE - CODE SNIPPETS"),
+                P("Use the ", InlineCode("H1"), " component for main headings and ", InlineCode("<Text variant='body'>"), " for flexible body text with variants.", cls="!mt-0 !mb-4"),
+                cls="py-6"
+            ),
+        ),
+
+        Hr(),
+
+        # Special elements
+        Section(
+            H2("Special Elements", section=True),
+            Lead("Specialized components for quotes, lists, and structured content."),
+
+            # Blockquote
+            Div(
+                Caption("BLOCKQUOTE - QUOTED CONTENT"),
+                Blockquote(
+                    "Design is not just what it looks like and feels like. Design is how it works. Great typography is the foundation of all great design.",
+                    cls="!mt-0 !mb-4"
+                ),
+                cls="py-6 border-b border-border last:border-0"
+            ),
+
+            # Lists
+            Div(
+                Div(
+                    Caption("UNORDERED LIST"),
+                    List(
+                        Li("Consistent vertical rhythm throughout all components"),
+                        Li("Semantic HTML elements for accessibility"),
+                        Li("Responsive typography that scales beautifully"),
+                        Li("Dark mode support with proper contrast ratios"),
+                        cls="!mt-0 !mb-4"
+                    ),
+                ),
+                Div(
+                    Caption("ORDERED LIST"),
+                    List(
+                        Li("Analyze your content hierarchy needs"),
+                        Li("Choose appropriate heading levels (H1-H6)"),
+                        Li("Select text variants based on semantic meaning"),
+                        Li("Apply consistent spacing using our scale"),
+                        ordered=True,
+                        cls="!mt-0 !mb-4"
+                    ),
+                ),
+                cls="grid grid-cols-1 lg:grid-cols-2 gap-8 py-6 border-b border-border last:border-0"
+            ),
+
+            # Figure and Figcaption
+            Div(
+                Caption("FIGURE - IMAGE WITH CAPTION"),
+                Figure(
+                    Div(
+                        "📊",
+                        cls="w-full h-48 bg-muted rounded-lg flex items-center justify-center text-6xl"
+                    ),
+                    Figcaption("Fig 1. Typography usage statistics across modern web applications showing consistent hierarchy patterns."),
+                    cls="!mt-0 !mb-4"
+                ),
+                cls="py-6"
+            ),
+        ),
+
+        Hr(),
+
+        # Prose component demo
+        Section(
+            H2("Prose Component", section=True),
+            Lead("The Prose component uses the Tailwind Typography plugin for beautiful, consistent styling of content-rich areas like articles, blog posts, and documentation."),
+            Subtitle("Powered by @tailwindcss/typography with design system integration. Compare different sizes and see how the typography scales consistently."),
+
+            # Size comparison
+            Div(
+                # Small prose example
+                Div(
+                    Caption("SIZE: SMALL - COMPACT CONTENT"),
+                    Div(
+                        Prose(
+                            H2("Typography Principles"),
+                            P("Good typography creates hierarchy, guides the eye, and enhances readability. It should be invisible to the reader while making content easy to consume."),
+                            Ul(
+                                Li("Consistent spacing and rhythm"),
+                                Li("Clear visual hierarchy"),
+                                Li("Optimal line lengths and heights")
+                            ),
+                            size="sm"
+                        ),
+                        cls="bg-card rounded-lg border p-6"
+                    ),
+                    cls="mb-8"
+                ),
+
+                # Base prose example
+                Div(
+                    Caption("SIZE: BASE - STANDARD CONTENT"),
+                    Div(
+                        Prose(
+                            H1("The Power of Typography"),
+                            P("Typography is the art and technique of arranging type to make written language legible, readable, and appealing when displayed. It's one of the most important aspects of design."),
+
+                            H2("Why Typography Matters"),
+                            P("Good typography can make the difference between content that engages and content that frustrates. It guides the reader's eye and creates a hierarchy that makes information easy to process."),
+
+                            Blockquote(
+                                "Typography is the craft of endowing human language with a durable visual form."
+                            ),
+
+                            H3("Key Principles"),
+                            P("When working with typography, consider these essential elements:"),
+
+                            Ul(
+                                Li("Hierarchy - Use size, weight, and spacing to create clear information levels"),
+                                Li("Contrast - Ensure sufficient contrast for accessibility and readability"),
+                                Li("Consistency - Maintain uniform spacing and styling throughout"),
+                                Li("Readability - Choose appropriate line heights and lengths")
+                            ),
+
+                            P("Modern web typography also needs to be ", InlineCode("responsive"), " and work across all devices and screen sizes."),
+
+                            size="base"
+                        ),
+                        cls="bg-card rounded-lg border p-8"
+                    ),
+                    cls="mb-8"
+                ),
+
+                # Large prose example
+                Div(
+                    Caption("SIZE: LARGE - FEATURE CONTENT"),
+                    Div(
+                        Prose(
+                            H1("Design at Scale"),
+                            P("Creating typography systems that work at scale requires careful consideration of every detail, from the smallest caption to the largest display text."),
+
+                            H2("Implementation"),
+                            P("Our typography system uses semantic tokens and consistent spacing to ensure harmony across all components."),
+
+                            size="lg"
+                        ),
+                        cls="bg-card rounded-lg border p-8"
+                    ),
+                ),
+
+                cls="space-y-8 mt-8"
+            ),
+        ),
+
+        Hr(),
+
+        # Usage examples
+        Section(
+            H2("Usage Examples", section=True),
+            Lead("See how typography components work together in real-world scenarios."),
+
+            Div(
+                # Card example
+                Div(
+                    Caption("CARD LAYOUT WITH TYPOGRAPHY"),
+                    Div(
+                        H3("Welcome to StarUI"),
+                        Subtitle("Build beautiful interfaces with our component library"),
+                        P("StarUI provides a comprehensive set of components designed for modern web applications. Each component follows accessibility best practices and supports dark mode out of the box."),
+                        Large("Key Features:"),
+                        List(
+                            Li("Accessible by default"),
+                            Li("Dark mode support"),
+                            Li("Responsive design"),
+                            Li("TypeScript ready")
+                        ),
+                        Muted("Get started today with our comprehensive documentation."),
+                        cls="bg-card rounded-lg border p-6"
+                    ),
+                ),
+
+                # Documentation example (removed invalid props table)
+                Div(
+                    Caption("DOCUMENTATION LAYOUT"),
+                    Div(
+                        H2("API Reference"),
+                        Lead("Complete guide to the Typography component API"),
+
+                        H3("Components"),
+                        P("The typography system provides semantic components for different text styles:"),
+
+                        List(
+                            Li(InlineCode("Display"), " - Extra large headings for hero sections"),
+                            Li(InlineCode("H1-H6"), " - Standard heading hierarchy"),
+                            Li(InlineCode("Lead"), " - Introductory paragraph text"),
+                            Li(InlineCode("Subtitle"), " - Secondary descriptive text"),
+                            Li(InlineCode("Text"), " - Flexible body text with variants"),
+                            Li(InlineCode("Muted"), " - De-emphasized text"),
+                            Li(InlineCode("Small"), " - Fine print and captions"),
+                        ),
+
+                        cls="bg-card rounded-lg border p-6"
+                    ),
+                ),
+
+                cls="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8"
+            ),
+        ),
+
+        title="Typography"
+    )
+
+
+@rt("/tooltip")
+def test_tooltip():
+    return Page(
+        H2("Basic Tooltip", cls="text-2xl font-semibold mb-4"),
+        P("Hover over the buttons to see tooltips with different positions.", cls="text-muted-foreground mb-4"),
+
+        Div(
+            Tooltip(
+                TooltipTrigger(
+                    Button("Hover me (top)", variant="outline")
+                ),
+                TooltipContent("This is a tooltip on top", side="top"),
+            ),
+            Tooltip(
+                TooltipTrigger(
+                    Button("Hover me (right)", variant="outline")
+                ),
+                TooltipContent("This is a tooltip on the right", side="right"),
+            ),
+            Tooltip(
+                TooltipTrigger(
+                    Button("Hover me (bottom)", variant="outline")
+                ),
+                TooltipContent("This is a tooltip on the bottom", side="bottom"),
+            ),
+            Tooltip(
+                TooltipTrigger(
+                    Button("Hover me (left)", variant="outline")
+                ),
+                TooltipContent("This is a tooltip on the left", side="left"),
+            ),
+            cls="flex gap-4 flex-wrap"
+        ),
+
+        H2("Tooltip Alignment", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Tooltips can be aligned to start, center, or end relative to the trigger.", cls="text-muted-foreground mb-4"),
+
+        Div(
+            Tooltip(
+                TooltipTrigger(
+                    Button("Top Start", variant="outline")
+                ),
+                TooltipContent("Aligned to start", side="top", align="start"),
+            ),
+            Tooltip(
+                TooltipTrigger(
+                    Button("Top Center", variant="outline")
+                ),
+                TooltipContent("Aligned to center", side="top", align="center"),
+            ),
+            Tooltip(
+                TooltipTrigger(
+                    Button("Top End", variant="outline")
+                ),
+                TooltipContent("Aligned to end", side="top", align="end"),
+            ),
+            cls="flex gap-4 flex-wrap"
+        ),
+
+        H2("Custom Delays", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Tooltips can have custom show and hide delays.", cls="text-muted-foreground mb-4"),
+
+        Div(
+            Tooltip(
+                TooltipTrigger(
+                    Button("Instant (0ms)", variant="outline"),
+                    delay_duration=0
+                ),
+                TooltipContent("Shows immediately on hover"),
+            ),
+            Tooltip(
+                TooltipTrigger(
+                    Button("Default (700ms)", variant="outline")
+                ),
+                TooltipContent("Shows after 700ms delay"),
+            ),
+            Tooltip(
+                TooltipTrigger(
+                    Button("Slow (1500ms)", variant="outline"),
+                    delay_duration=1500
+                ),
+                TooltipContent("Shows after 1500ms delay"),
+            ),
+            Tooltip(
+                TooltipTrigger(
+                    Button("With hide delay", variant="outline"),
+                    delay_duration=500,
+                    hide_delay=300
+                ),
+                TooltipContent("Hides with 300ms delay"),
+            ),
+            cls="flex gap-4 flex-wrap"
+        ),
+
+        H2("Tooltip on Icon Button", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Tooltips are commonly used on icon buttons to explain their purpose.", cls="text-muted-foreground mb-4"),
+
+        Div(
+            Tooltip(
+                TooltipTrigger(
+                    Button(
+                        Icon("lucide:settings", width=20, height=20),
+                        variant="outline",
+                        size="icon"
+                    )
+                ),
+                TooltipContent("Settings"),
+            ),
+            Tooltip(
+                TooltipTrigger(
+                    Button(
+                        Icon("lucide:bell", width=20, height=20),
+                        variant="outline",
+                        size="icon"
+                    )
+                ),
+                TooltipContent("Notifications"),
+            ),
+            Tooltip(
+                TooltipTrigger(
+                    Button(
+                        Icon("lucide:user", width=20, height=20),
+                        variant="outline",
+                        size="icon"
+                    )
+                ),
+                TooltipContent("Profile"),
+            ),
+            Tooltip(
+                TooltipTrigger(
+                    Button(
+                        Icon("lucide:help-circle", width=20, height=20),
+                        variant="outline",
+                        size="icon"
+                    )
+                ),
+                TooltipContent("Help and support", side="bottom"),
+            ),
+            cls="flex gap-4"
+        ),
+
+        H2("Tooltip with Rich Content", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Tooltips can contain multiple elements.", cls="text-muted-foreground mb-4"),
+
+        Tooltip(
+            TooltipTrigger(
+                Button("Rich tooltip", variant="outline")
+            ),
+            TooltipContent(
+                Div(
+                    P("This tooltip has multiple lines", cls="font-semibold mb-1"),
+                    P("And can contain additional content", cls="text-xs"),
+                ),
+                side="top",
+                cls="max-w-xs"
+            ),
+        ),
+
+        H2("Keyboard Accessible", cls="text-2xl font-semibold mb-4 mt-8"),
+        P("Tooltips can be triggered via focus for keyboard navigation. Tab through the buttons below.", cls="text-muted-foreground mb-4"),
+
+        Div(
+            Tooltip(
+                TooltipTrigger(
+                    Button("Focus me 1", variant="outline")
+                ),
+                TooltipContent("Shows on focus for accessibility"),
+            ),
+            Tooltip(
+                TooltipTrigger(
+                    Button("Focus me 2", variant="outline")
+                ),
+                TooltipContent("Press Escape to close"),
+            ),
+            Tooltip(
+                TooltipTrigger(
+                    Button("Focus me 3", variant="outline")
+                ),
+                TooltipContent("Fully keyboard accessible"),
+            ),
+            cls="flex gap-4"
+        ),
+
+        title="Tooltip"
     )
 
 

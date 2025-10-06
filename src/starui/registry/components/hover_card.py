@@ -34,18 +34,18 @@ def HoverCardTrigger(
     **kwargs: Any,
 ):
     def trigger(*, sig, open_state, **_):
-        trigger_id = f"{sig}_trigger"
+        trigger_ref = Signal(f"{sig}_trigger", _ref_only=True)
 
         return Div(
             *children,
-            data_ref=trigger_id,
+            data_ref=trigger_ref,
             data_on_mouseenter=open_state.set(True).with_(debounce=hover_delay),
             data_on_mouseleave=open_state.set(False).with_(debounce=hide_delay),
             data_attr_aria_expanded=open_state,
             aria_haspopup="dialog",
             aria_describedby=f"{sig}_content",
             data_slot="hover-card-trigger",
-            id=trigger_id,
+            id=trigger_ref.id,
             cls=cn("inline-block cursor-pointer", cls),
             **kwargs,
         )
@@ -62,16 +62,15 @@ def HoverCardContent(
     **kwargs: Any,
 ):
     def content(*, sig, open_state, **_):
-        trigger_id = f"{sig}_trigger"
-        content_id = f"{sig}_content"
+        content_ref = Signal(f"{sig}_content", _ref_only=True)
         placement = side if align == "center" else f"{side}-{align}"
 
         return Div(
             *children,
-            data_ref=content_id,
+            data_ref=content_ref,
             data_show=open_state,
             data_position=(
-                trigger_id,
+                f"{sig}_trigger",
                 {
                     "placement": placement,
                     "offset": 8,
@@ -83,9 +82,9 @@ def HoverCardContent(
             ),
             data_on_mouseenter=open_state.set(True),
             data_on_mouseleave=open_state.set(False).with_(debounce=hide_delay),
-            id=content_id,
+            id=content_ref.id,
             role="dialog",
-            aria_labelledby=trigger_id,
+            aria_labelledby=f"{sig}_trigger",
             tabindex="-1",
             data_slot="hover-card-content",
             cls=cn(

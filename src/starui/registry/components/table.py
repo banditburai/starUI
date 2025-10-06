@@ -23,9 +23,8 @@ def Table(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    classes = cn("w-full caption-bottom text-sm", cls)
     return Div(
-        HTMLTable(*children, data_slot="table", cls=classes, **kwargs),
+        HTMLTable(*children, data_slot="table", cls=cn("w-full caption-bottom text-sm", cls), **kwargs),
         data_slot="table-container",
         cls="relative w-full overflow-x-auto",
     )
@@ -36,8 +35,7 @@ def TableHeader(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    classes = cn("[&_tr]:border-b [&_tr]:border-input", cls)
-    return Thead(*children, data_slot="table-header", cls=classes, **kwargs)
+    return Thead(*children, data_slot="table-header", cls=cn("[&_tr]:border-b [&_tr]:border-input", cls), **kwargs)
 
 
 def TableBody(
@@ -45,8 +43,7 @@ def TableBody(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    classes = cn("[&_tr:last-child]:border-0", cls)
-    return Tbody(*children, data_slot="table-body", cls=classes, **kwargs)
+    return Tbody(*children, data_slot="table-body", cls=cn("[&_tr:last-child]:border-0", cls), **kwargs)
 
 
 def TableFooter(
@@ -54,11 +51,12 @@ def TableFooter(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    classes = cn(
-        "bg-muted/50 border-t border-input font-medium [&>tr]:last:border-b-0",
-        cls,
+    return Tfoot(
+        *children,
+        data_slot="table-footer",
+        cls=cn("bg-muted/50 border-t border-input font-medium [&>tr]:last:border-b-0", cls),
+        **kwargs
     )
-    return Tfoot(*children, data_slot="table-footer", cls=classes, **kwargs)
 
 
 def TableRow(
@@ -67,16 +65,13 @@ def TableRow(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    classes = cn(
-        "border-b border-input transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted",
-        cls,
+    return Tr(
+        *children,
+        data_slot="table-row",
+        data_state="selected" if selected else None,
+        cls=cn("border-b border-input transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted", cls),
+        **kwargs
     )
-
-    if selected:
-        kwargs["data_state"] = "selected"
-        kwargs["aria_selected"] = "true"
-
-    return Tr(*children, data_slot="table-row", cls=classes, **kwargs)
 
 
 def TableHead(
@@ -84,11 +79,12 @@ def TableHead(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    classes = cn(
-        "text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
-        cls,
+    return Th(
+        *children,
+        data_slot="table-head",
+        cls=cn("text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]", cls),
+        **kwargs
     )
-    return Th(*children, data_slot="table-head", cls=classes, **kwargs)
 
 
 def TableCell(
@@ -96,11 +92,12 @@ def TableCell(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    classes = cn(
-        "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
-        cls,
+    return Td(
+        *children,
+        data_slot="table-cell",
+        cls=cn("p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]", cls),
+        **kwargs
     )
-    return Td(*children, data_slot="table-cell", cls=classes, **kwargs)
 
 
 def TableCaption(
@@ -108,5 +105,9 @@ def TableCaption(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    classes = cn("mt-4 text-sm text-muted-foreground", cls)
-    return Caption(*children, data_slot="table-caption", cls=classes, **kwargs)
+    return Caption(
+        *children,
+        data_slot="table-caption",
+        cls=cn("mt-4 text-sm text-muted-foreground", cls),
+        **kwargs
+    )

@@ -52,14 +52,14 @@ def DropdownMenuTrigger(
     def trigger(*, sig, **_):
         from .button import Button
 
-        trigger_id = f"{sig}_trigger"
+        trigger_ref = Signal(f"{sig}_trigger", _ref_only=True)
 
         return Button(
             *children,
-            data_ref=trigger_id,
+            data_ref=trigger_ref,
             popovertarget=f"{sig}_content",
             popoveraction="toggle",
-            id=trigger_id,
+            id=trigger_ref.id,
             variant=variant,
             size=size,
             type="button",
@@ -80,6 +80,7 @@ def DropdownMenuContent(
 ) -> FT:
     def content(*, sig, **ctx):
         trigger_ref = Signal(f"{sig}_trigger", _ref_only=True)
+        content_ref = Signal(f"{sig}_content", _ref_only=True)
 
         position_mods = {
             "placement": f"{side}-{align}" if align != "center" else side,
@@ -91,13 +92,13 @@ def DropdownMenuContent(
 
         return Div(
             *[child(sig=sig, **ctx) if callable(child) else child for child in children],
-            data_ref=f"{sig}_content",
+            data_ref=content_ref,
             data_style_min_width=trigger_ref.if_(trigger_ref.offsetWidth + 'px', '8rem'),
-            data_position=(f"{sig}_trigger", position_mods),
+            data_position=(trigger_ref.id, position_mods),
             popover="auto",
-            id=f"{sig}_content",
+            id=content_ref.id,
             role="menu",
-            aria_labelledby=f"{sig}_trigger",
+            aria_labelledby=trigger_ref.id,
             tabindex="-1",
             cls=cn(
                 "z-50 min-w-[8rem] overflow-hidden rounded-md border border-input",
@@ -310,16 +311,16 @@ def DropdownMenuSubTrigger(
     **kwargs: Any,
 ) -> FT:
     def _(*, sub, **_):
-        sub_trigger_id = f"{sub}_trigger"
-        sub_content_id = f"{sub}_content"
+        sub_trigger_ref = Signal(f"{sub}_trigger", _ref_only=True)
+        sub_content_ref = Signal(f"{sub}_content", _ref_only=True)
         sub_open = Signal(f"{sub}_open", _ref_only=True)
 
         return HTMLButton(
             *children,
             Icon("lucide:chevron-right", cls="ml-auto size-4"),
-            data_ref=sub_trigger_id,
-            id=sub_trigger_id,
-            popovertarget=sub_content_id,
+            data_ref=sub_trigger_ref,
+            id=sub_trigger_ref.id,
+            popovertarget=sub_content_ref.id,
             popoveraction="toggle",
             data_on_click=sub_open.set(~sub_open),
             cls=cn(
@@ -345,8 +346,8 @@ def DropdownMenuSubContent(
     **kwargs: Any,
 ) -> FT:
     def _(*, sub, **ctx):
-        sub_trigger_id = f"{sub}_trigger"
-        sub_content_id = f"{sub}_content"
+        sub_trigger_ref = Signal(f"{sub}_trigger", _ref_only=True)
+        sub_content_ref = Signal(f"{sub}_content", _ref_only=True)
 
         position_mods = {
             "placement": "right-start",
@@ -358,10 +359,10 @@ def DropdownMenuSubContent(
 
         return Div(
             *[child(sub=sub, **ctx) if callable(child) else child for child in children],
-            data_ref=sub_content_id,
-            data_position=(sub_trigger_id, position_mods),
+            data_ref=sub_content_ref,
+            data_position=(sub_trigger_ref.id, position_mods),
             popover="auto",
-            id=sub_content_id,
+            id=sub_content_ref.id,
             cls=cn(
                 "z-50 min-w-[8rem] overflow-hidden rounded-md border border-input",
                 "bg-popover text-popover-foreground shadow-lg p-1",

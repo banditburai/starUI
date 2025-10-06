@@ -1,46 +1,44 @@
 from itertools import count
-from typing import Literal
+from typing import Any, Literal
 
-from starhtml import FT, Div
+from starhtml import FT, Div, Signal
 from starhtml import Button as HTMLButton
-from starhtml.datastar import ds_on_click, ds_show, ds_signals, value
 
-from .utils import cn
+from .utils import cn, gen_id
 
 TabsVariant = Literal["default", "plain"]
 
-_tab_ids = count(1)
-
 
 def Tabs(
-    *children,
-    default_id: str,
+    *children: Any,
+    default_id: str | int = 0,
     variant: TabsVariant = "default",
+    signal: str | Signal = "",
     cls: str = "",
-    **kwargs,
+    **kwargs: Any,
 ) -> FT:
-    signal = kwargs.pop("signal", None)
-    if not signal:
-        signal = f"tabs_{next(_tab_ids)}"
-    processed_children = [
-        child(signal, default_id, variant) if callable(child) else child
-        for child in children
-    ]
+    sig = getattr(signal, 'id', signal) or gen_id("tabs")
+
+    ctx = dict(
+        tabs_state=(tabs_state := Signal(sig, default_id)),
+        variant=variant,
+        default_id=default_id,
+        _trigger_index=count(),
+        _content_index=count(),
+    )
+
     return Div(
-        *processed_children,
-        ds_signals({signal: value(default_id)}),
+        tabs_state,
+        *[child(**ctx) if callable(child) else child for child in children],
         data_slot="tabs",
         cls=cn("w-full", cls),
         **kwargs,
     )
 
 
-def TabsList(*children, cls: str = "", **kwargs) -> FT:
-    def create_list(signal, default_id=None, variant="default"):
-        processed_children = [
-            child(signal, default_id, variant) if callable(child) else child
-            for child in children
-        ]
+def TabsList(*children: Any, cls: str = "", **kwargs: Any) -> FT:
+    def _(**ctx):
+        variant = ctx.get("variant", "default")
 
         base_classes = {
             "plain": "text-muted-foreground inline-flex h-9 w-fit items-center p-[3px] justify-start gap-4 rounded-none bg-transparent px-2 md:px-0",
@@ -48,25 +46,26 @@ def TabsList(*children, cls: str = "", **kwargs) -> FT:
         }[variant]
 
         return Div(
-            *processed_children,
+            *[child(**ctx) if callable(child) else child for child in children],
             data_slot="tabs-list",
             cls=cn(base_classes, cls),
             role="tablist",
             **kwargs,
         )
 
-    return create_list
+    return _
 
 
 def TabsTrigger(
-    *children,
-    id: str,
+    *children: Any,
+    id: str | int | None = None,
     disabled: bool = False,
     cls: str = "",
-    **kwargs,
+    **kwargs: Any,
 ) -> FT:
-    def create_trigger(signal, default_id=None, variant="default"):
-        is_active = default_id == id
+    def _(*, tabs_state, variant="default", _trigger_index, **_):
+        tab_id = id if id is not None else next(_trigger_index)
+        is_active = tabs_state == tab_id
 
         base = (
             "inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center "
@@ -83,40 +82,43 @@ def TabsTrigger(
 
         return HTMLButton(
             *children,
-            ds_on_click(f"${signal} = '{id}'"),
+            data_on_click=tabs_state.set(tab_id),
             disabled=disabled,
             type="button",
             role="tab",
-            aria_selected="true" if is_active else f"${signal} === '{id}'",
-            aria_controls=f"panel-{id}",
-            id=id,
+            aria_controls=f"panel-{tab_id}",
+            id=str(tab_id),
+            data_slot="tabs-trigger",
+            data_attr_data_state=is_active.if_("active", "inactive"),
+            data_attr_aria_selected=is_active,
+            data_attr_tabindex=is_active.if_("0", "-1"),
             cls=cn(
                 base,
                 variant_styles[variant],
                 cls,
             ),
-            data_state="active" if is_active else "inactive",
-            data_slot="tabs-trigger",
-            data_attr_data_state=f"${signal} === '{id}' ? 'active' : 'inactive'",
-            data_attr_aria_selected=f"${signal} === '{id}'",            
-        )
-
-    return create_trigger
-
-
-def TabsContent(*children, id: str, cls: str = "", **kwargs) -> FT:
-    def create_content(signal, default_id=None, variant="default"):
-        return Div(
-            *children,
-            ds_show(f"${signal} === '{id}'"),
-            data_slot="tabs-content",
-            role="tabpanel",
-            id=f"panel-{id}",
-            aria_labelledby=id,
-            tabindex="0",
-            cls=cn("mt-2 outline-none overflow-x-auto", cls),
-            style=None if default_id == id else "display: none",
             **kwargs,
         )
 
-    return create_content
+    return _
+
+
+def TabsContent(*children: Any, id: str | int | None = None, cls: str = "", **kwargs: Any) -> FT:
+    def _(*, tabs_state, default_id, _content_index, **_):
+        tab_id = id if id is not None else next(_content_index)
+        is_active = tabs_state == tab_id
+
+        return Div(
+            *children,
+            data_show=is_active,
+            data_slot="tabs-content",
+            role="tabpanel",
+            id=f"panel-{tab_id}",
+            aria_labelledby=str(tab_id),
+            tabindex="0",
+            style="display: none" if tab_id != default_id else None,
+            cls=cn("mt-2 outline-none overflow-x-auto", cls),
+            **kwargs,
+        )
+
+    return _
