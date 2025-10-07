@@ -5,7 +5,7 @@ from starhtml import Button as HTMLButton
 from starhtml import Label as HTMLLabel
 from starhtml import P as HTMLP
 
-from .utils import cn, gen_id
+from .utils import cn, gen_id, inject_context
 
 
 def Select(
@@ -117,8 +117,10 @@ def SelectContent(
             "container": container,
         }
 
+        context = dict(sig=sig, **ctx)
+
         return Div(
-            Div(*[child(sig=sig, **ctx) if callable(child) else child for child in children], cls="p-1 max-h-[300px] overflow-auto"),
+            Div(*[inject_context(child, **context) for child in children], cls="p-1 max-h-[300px] overflow-auto"),
             data_ref=content_ref,
             data_style_min_width=trigger_ref.if_(trigger_ref.offsetWidth + 'px', '8rem'),
             data_position=(trigger_ref.id, position_mods),

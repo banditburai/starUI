@@ -1,16 +1,18 @@
-from typing import Any
+from typing import Any, TYPE_CHECKING
 from starhtml import *
 from starui.registry.components.theme_toggle import ThemeToggle
 from starui.registry.components.button import Button
 from starui.registry.components.popover import Popover, PopoverTrigger, PopoverContent
 
+if TYPE_CHECKING:
+    from layouts.base import HeaderConfig
+
 
 def MobileMenuButton(**attrs) -> FT:
-    from starui.registry.components.sheet import SheetTrigger
-    
-    return SheetTrigger(
+    mobile_menu_open = Signal("mobile_menu_open", _ref_only=True)
+    return Button(
         Icon("ph:list-bold", width="20", height="20"),
-        signal="mobile_menu",
+        data_on_click=mobile_menu_open.toggle(),
         variant="ghost",
         cls="xl:hidden h-9 px-4 py-2 flex-shrink-0",
         aria_label="Toggle mobile menu",
@@ -19,7 +21,6 @@ def MobileMenuButton(**attrs) -> FT:
 
 
 def _search_button() -> FT:
-    """Create the search button with keyboard shortcuts."""
     return Button(
         Icon("lucide:search", cls="w-4 h-4 shrink-0"),
         Span("Search...", cls="text-sm text-muted-foreground"),
@@ -34,7 +35,6 @@ def _search_button() -> FT:
 
 
 def _github_dropdown(github_stars: str) -> FT:
-    """Create a minimal GitHub dropdown matching docs style."""
     return Popover(
         PopoverTrigger(
             Icon("lucide:star", width="16", height="16"),
@@ -79,7 +79,6 @@ def _github_dropdown(github_stars: str) -> FT:
 
 
 def _navigation_menu(nav_items: list[dict[str, Any]]) -> FT:
-    """Create the desktop navigation menu."""
     return Nav(
         *[
             A(
@@ -93,27 +92,7 @@ def _navigation_menu(nav_items: list[dict[str, Any]]) -> FT:
     )
 
 
-def _header_actions(
-    show_search: bool,
-    show_github: bool,
-    show_theme_toggle: bool,
-    show_mobile_menu_button: bool,
-    github_stars: str
-) -> FT:
-    """Create the header action buttons section."""
-    return Div(
-        _search_button() if show_search else "",
-        _github_dropdown(github_stars) if show_github else "",
-        ThemeToggle() if show_theme_toggle else "",
-        MobileMenuButton() if show_mobile_menu_button else "",
-        cls="flex items-center gap-2 flex-shrink-0",
-    )
-
-
 def DocsHeader(config: "HeaderConfig", show_mobile_menu_button: bool = False, **attrs) -> FT:
-    """Create a documentation header with logo, navigation, and action buttons."""
-    from layouts.base import HeaderConfig
-    
     return Header(
         Div(
             Div(
@@ -121,9 +100,12 @@ def DocsHeader(config: "HeaderConfig", show_mobile_menu_button: bool = False, **
                 _navigation_menu(config.nav_items),
                 cls="flex items-center",
             ),
-            _header_actions(
-                config.show_search, config.show_github, config.show_theme_toggle, 
-                show_mobile_menu_button, config.github_stars
+            Div(
+                _search_button() if config.show_search else None,
+                _github_dropdown(config.github_stars) if config.show_github else None,
+                ThemeToggle() if config.show_theme_toggle else None,
+                MobileMenuButton() if show_mobile_menu_button else None,
+                cls="flex items-center gap-2 flex-shrink-0",
             ),
             cls="flex h-14 w-full items-center justify-between px-4 sm:px-6 md:px-8 lg:px-6 max-w-full mx-auto",
         ),

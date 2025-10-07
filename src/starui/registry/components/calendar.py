@@ -12,19 +12,10 @@ CalendarMode = Literal["single", "range", "multiple"]
 
 
 class CalendarElement(Protocol):
-    """
-    Calendar component with exposed signals for reactive state management.
-
-    Attributes:
-        selected: Signal containing the selected date(s) - string for single mode, list for range/multiple
-        month: Signal containing the current month (1-12)
-        year: Signal containing the current year
-        month_display: Signal containing the month name string (e.g., "January")
-    """
-    selected: Signal
-    month: Signal
+    selected: Signal  # str for single, list for range/multiple
+    month: Signal  # 1-12
     year: Signal
-    month_display: Signal
+    month_display: Signal  # "January", "February", etc.
 
 MONTHS = [
     "January", "February", "March", "April", "May", "June",

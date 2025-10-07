@@ -1,7 +1,6 @@
 from typing import Any, Literal
-from uuid import uuid4
 
-from starhtml import FT, Signal
+from starhtml import FT, Div, Signal
 from starhtml import Button as HTMLButton
 
 from .utils import cn, cva, gen_id
@@ -44,24 +43,24 @@ def Toggle(
     **kwargs: Any,
 ) -> FT:
     sig = getattr(signal, 'id', signal) or gen_id("toggle")
-    toggle_id = kwargs.pop("id", gen_id("toggle"))
-    toggle_signal = Signal(sig, pressed)
+    toggle_id = kwargs.pop("id", sig)
 
-    return HTMLButton(
-        toggle_signal,
-        *children,
-        data_on_click=toggle_signal.toggle() if not disabled else None,
-        type="button",
-        id=toggle_id,
-        disabled=disabled,
-        aria_label=aria_label,
-        aria_pressed=str(pressed).lower(),
-        data_slot="toggle",
-        data_attr_aria_pressed=toggle_signal.if_('true', 'false'),
-        data_attr_data_state=toggle_signal.if_('on', 'off'),
-        cls=cn(
-            toggle_variants(variant=variant, size=size),
-            cls,
+    return Div(
+        (pressed_state := Signal(sig, pressed)),
+        HTMLButton(
+            *children,
+            data_on_click=pressed_state.toggle() if not disabled else None,
+            type="button",
+            id=toggle_id,
+            disabled=disabled,
+            aria_label=aria_label,
+            data_attr_aria_pressed=pressed_state.if_('true', 'false'),
+            data_attr_data_state=pressed_state.if_('on', 'off'),
+            data_slot="toggle",
+            cls=cn(
+                toggle_variants(variant=variant, size=size),
+                cls,
+            ),
+            **kwargs,
         ),
-        **kwargs,
     )

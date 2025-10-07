@@ -1,6 +1,7 @@
 from typing import Any, Literal
 
 from starhtml import Div, FT, Signal
+from starhtml.datastar import evt
 
 from .utils import cn, gen_id
 
@@ -12,11 +13,8 @@ def Tooltip(
     **kwargs: Any,
 ) -> FT:
     sig = getattr(signal, 'id', signal) or gen_id("tooltip")
-
-    # Create both open state and timer state
     open_state = Signal(f"{sig}_open", False)
     timer_state = Signal(f"{sig}_timer", 0)
-
     ctx = dict(sig=sig, open_state=open_state, timer_state=timer_state)
 
     return Div(
@@ -78,6 +76,7 @@ def TooltipContent(
     side_offset: int = 8,
     allow_flip: bool = True,
     strategy: Literal["fixed", "absolute"] = "absolute",
+    container: Literal["auto", "none", "parent"] = "auto",
     cls: str = "",
     **kwargs: Any,
 ):
@@ -97,6 +96,7 @@ def TooltipContent(
             Div(cls=cn("absolute w-2 h-2 bg-primary rotate-45", arrow_classes[side])),
             data_ref=content_ref,
             data_show=open_state,
+            style="display: none",
             data_position=(
                 f"{sig}_trigger",
                 {
@@ -106,9 +106,10 @@ def TooltipContent(
                     "shift": True,
                     "hide": True,
                     "strategy": strategy,
+                    "container": container,
                 },
             ),
-            data_state=f"${open_state.id} ? 'open' : 'closed'",
+            data_attr_data_state=open_state.if_('open', 'closed'),
             id=content_ref.id,
             role="tooltip",
             data_side=side,

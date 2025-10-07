@@ -68,6 +68,7 @@ from src.starui.registry.components.textarea import Textarea, TextareaWithLabel
 from src.starui.registry.components.tabs import Tabs, TabsList, TabsTrigger, TabsContent
 from src.starui.registry.components.theme_toggle import ThemeToggle
 from src.starui.registry.components.toast import Toaster, toast, success_toast, error_toast, warning_toast, info_toast
+from src.starui.registry.components.toggle import Toggle
 from src.starui.registry.components.toggle_group import ToggleGroup
 from src.starui.registry.components.tooltip import Tooltip, TooltipTrigger, TooltipContent, TooltipProvider
 from src.starui.registry.components.typography import (
@@ -77,7 +78,7 @@ from src.starui.registry.components.typography import (
 
 import asyncio
 import time
-from starhtml import execute_script, sse as sse_decorator, signals as sse_signals
+from starhtml import execute_script, sse, signals
 
 styles = Link(rel="stylesheet", href="/static/css/starui.css", type="text/css")
 
@@ -157,6 +158,7 @@ def index():
             A("Tabs", href="/tabs", cls="text-primary hover:underline block"),
             A("Toast", href="/toast", cls="text-primary hover:underline block"),
             A("Toast - Server & Client Patterns", href="/toast-server", cls="text-primary hover:underline block ml-4 text-sm"),
+            A("Toggle", href="/toggle", cls="text-primary hover:underline block"),
             A("Toggle Group", href="/toggle_group", cls="text-primary hover:underline block"),
             A("Tooltip", href="/tooltip", cls="text-primary hover:underline block"),
             A("Typography", href="/typography", cls="text-primary hover:underline block"),
@@ -2138,11 +2140,6 @@ def test_separator():
 
 @rt("/sheet")
 def test_sheet():
-    right_sheet_open = Signal("right_sheet_open", _ref_only=True)
-    left_sheet_open = Signal("left_sheet_open", _ref_only=True)
-    bottom_sheet_open = Signal("bottom_sheet_open", _ref_only=True)
-    large_sheet_open = Signal("large_sheet_open", _ref_only=True)
-
     return Page(
         H2("Right Side Sheet", cls="text-2xl font-semibold mb-4"),
         P("Modal drawer that slides in from the right:", cls="text-muted-foreground mb-4"),
@@ -2164,7 +2161,7 @@ def test_sheet():
                     ),
                     SheetFooter(
                         SheetClose("Cancel", variant="outline"),
-                        Button("Save Changes", data_on_click=right_sheet_open.set(False)),
+                        SheetClose("Save Changes"),
                     ),
                     side="right",
                     size="md",
@@ -2184,11 +2181,11 @@ def test_sheet():
                         SheetDescription("Browse through the menu items."),
                     ),
                     Div(
-                        P("Menu Item 1", data_on_click=left_sheet_open.set(False), cls="p-2 hover:bg-accent rounded cursor-pointer"),
-                        P("Menu Item 2", data_on_click=left_sheet_open.set(False), cls="p-2 hover:bg-accent rounded cursor-pointer"),
-                        P("Menu Item 3", data_on_click=left_sheet_open.set(False), cls="p-2 hover:bg-accent rounded cursor-pointer"),
-                        P("Menu Item 4", data_on_click=left_sheet_open.set(False), cls="p-2 hover:bg-accent rounded cursor-pointer"),
-                        cls="p-6 space-y-2",
+                        SheetClose("Menu Item 1", variant="ghost", cls="w-full justify-start p-2 hover:bg-accent rounded"),
+                        SheetClose("Menu Item 2", variant="ghost", cls="w-full justify-start p-2 hover:bg-accent rounded"),
+                        SheetClose("Menu Item 3", variant="ghost", cls="w-full justify-start p-2 hover:bg-accent rounded"),
+                        SheetClose("Menu Item 4", variant="ghost", cls="w-full justify-start p-2 hover:bg-accent rounded"),
+                        cls="p-6 space-y-2 flex flex-col",
                     ),
                     side="left",
                     size="sm",
@@ -2235,7 +2232,7 @@ def test_sheet():
                     ),
                     SheetFooter(
                         SheetClose("Cancel", variant="outline"),
-                        Button("Confirm", data_on_click=bottom_sheet_open.set(False), variant="destructive"),
+                        SheetClose("Confirm", variant="destructive"),
                     ),
                     side="bottom",
                 ),
@@ -2264,8 +2261,8 @@ def test_sheet():
                         cls="p-6 space-y-4",
                     ),
                     SheetFooter(
-                        SheetClose("Close"),
-                        Button("Submit", data_on_click=large_sheet_open.set(False)),
+                        SheetClose("Close", variant="outline"),
+                        SheetClose("Submit"),
                     ),
                     side="right",
                     size="lg",
@@ -2771,6 +2768,78 @@ def test_tabs():
     )
 
 
+@rt("/toggle")
+def test_toggle():
+    return Page(
+        H2("Toggles", cls="text-2xl font-semibold mb-4"),
+
+        # Basic toggles
+        Div(
+            P("Basic toggles:", cls="text-sm font-medium mb-2"),
+            Div(
+                Toggle(Icon("lucide:bold")),
+                Toggle(Icon("lucide:italic"), pressed=True),
+                Toggle(Icon("lucide:underline")),
+                Toggle(Icon("lucide:strikethrough"), disabled=True),
+                cls="flex gap-1",
+            ),
+            cls="mb-4",
+        ),
+
+        # Outline variant toggles
+        Div(
+            P("Outline variant:", cls="text-sm font-medium mb-2"),
+            Div(
+                Toggle(Icon("lucide:align-left"), variant="outline"),
+                Toggle(Icon("lucide:align-center"), variant="outline", pressed=True),
+                Toggle(Icon("lucide:align-right"), variant="outline"),
+                Toggle(Icon("lucide:align-justify"), variant="outline"),
+                cls="flex gap-1",
+            ),
+            cls="mb-4",
+        ),
+
+        # Different sizes
+        Div(
+            P("Different sizes:", cls="text-sm font-medium mb-2"),
+            Div(
+                Toggle("Small", size="sm", variant="outline"),
+                Toggle("Default", size="default", variant="outline"),
+                Toggle("Large", size="lg", variant="outline"),
+                cls="flex gap-2 items-center",
+            ),
+            cls="mb-4",
+        ),
+
+        # Toggle with text
+        Div(
+            P("Toggle with text:", cls="text-sm font-medium mb-2"),
+            Div(
+                Toggle(
+                    Icon("lucide:wifi"),
+                    Span("WiFi", cls="ml-1"),
+                    variant="outline",
+                ),
+                Toggle(
+                    Icon("lucide:bluetooth"),
+                    Span("Bluetooth", cls="ml-1"),
+                    variant="outline",
+                    pressed=True,
+                ),
+                Toggle(
+                    Icon("lucide:plane"),
+                    Span("Airplane Mode", cls="ml-1"),
+                    variant="outline",
+                ),
+                cls="flex gap-2",
+            ),
+            cls="mb-4",
+        ),
+
+        title="Toggle"
+    )
+
+
 @rt("/toggle_group")
 def test_toggle_group():
     return Page(
@@ -2938,13 +3007,16 @@ def test_toast():
         ),
 
         H2("Promise Pattern", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Simulate loading states with sequential toasts:", cls="text-muted-foreground mb-4"),
+        P("Simulate loading states with sequential toasts (loading toast is replaced by result):", cls="text-muted-foreground mb-4"),
         Div(
             Button(
                 "Promise Toast",
                 data_on_click=f"""
-                    {toast('Loading...', 'Please wait...')}
-                    setTimeout(() => {{ {success_toast('Success!', 'Promise resolved successfully')} }}, 2000);
+                    {toast('Loading...', 'Please wait...', duration=0)}
+                    setTimeout(() => {{
+                        $toasts = $toasts.filter(t => t.title !== 'Loading...');
+                        {success_toast('Success!', 'Promise resolved successfully')}
+                    }}, 2000);
                 """,
                 variant="outline"
             ),
@@ -2960,71 +3032,42 @@ def test_toast():
     )
 
 
-def create_toast_via_signals(message: str, description: str = "", variant: str = "default", counter: int = 0, existing_toasts: list = None):
-    """Helper to create toast by updating signals directly via SSE."""
-    if existing_toasts is None:
-        existing_toasts = []
-
-    new_toast = {
-        "id": counter + 1,
-        "title": message,
-        "description": description,
-        "variant": variant,
-        "timestamp": int(time.time() * 1000)
-    }
-
-    # Update both signals: increment counter and prepend new toast
-    return sse_signals(
-        toasts_counter=counter + 1,
-        toasts=[new_toast] + existing_toasts[:2]  # Keep max 3 toasts
-    )
-
-
 @rt("/toast/sse-example")
-@sse_decorator
+@sse
 async def toast_sse_example():
     """Server-side SSE toast example - demonstrates hypermedia pattern."""
-    counter = 0
     toasts = []
 
     # Toast 1
-    counter += 1
-    toast_id = counter
-    new_toast = {"id": toast_id, "title": "Processing...", "description": "Starting server operation", "variant": "info", "timestamp": int(time.time() * 1000)}
-    toasts = [new_toast] + toasts
-    yield sse_signals(toasts_counter=counter, toasts=toasts[:3])
-    yield execute_script(f"setTimeout(()=>{{ctx.$signals.toasts=ctx.$signals.toasts.filter(t=>t.id!=={toast_id})}},4000)")
+    new_toast = {"id": int(time.time() * 1000), "title": "Processing...", "description": "Starting server operation", "variant": "info", "timestamp": int(time.time() * 1000)}
+    toasts = [new_toast] + toasts[:2]
+    yield signals(toasts=toasts)
     await asyncio.sleep(1)
 
     # Toast 2
-    counter += 1
-    toast_id = counter
-    new_toast = {"id": toast_id, "title": "Step 1 Complete", "description": "Validating data...", "variant": "default", "timestamp": int(time.time() * 1000)}
-    toasts = [new_toast] + toasts
-    yield sse_signals(toasts_counter=counter, toasts=toasts[:3])
-    yield execute_script(f"setTimeout(()=>{{ctx.$signals.toasts=ctx.$signals.toasts.filter(t=>t.id!=={toast_id})}},4000)")
+    new_toast = {"id": int(time.time() * 1000), "title": "Step 1 Complete", "description": "Validating data...", "variant": "default", "timestamp": int(time.time() * 1000)}
+    toasts = [new_toast] + toasts[:2]
+    yield signals(toasts=toasts)
     await asyncio.sleep(1)
 
     # Toast 3
-    counter += 1
-    toast_id = counter
-    new_toast = {"id": toast_id, "title": "Step 2", "description": "Checking permissions...", "variant": "warning", "timestamp": int(time.time() * 1000)}
-    toasts = [new_toast] + toasts
-    yield sse_signals(toasts_counter=counter, toasts=toasts[:3])
-    yield execute_script(f"setTimeout(()=>{{ctx.$signals.toasts=ctx.$signals.toasts.filter(t=>t.id!=={toast_id})}},4000)")
+    new_toast = {"id": int(time.time() * 1000), "title": "Step 2", "description": "Checking permissions...", "variant": "warning", "timestamp": int(time.time() * 1000)}
+    toasts = [new_toast] + toasts[:2]
+    yield signals(toasts=toasts)
     await asyncio.sleep(1)
 
     # Final toast - random outcome
     import random
-    counter += 1
-    toast_id = counter
     if random.choice([True, False]):
-        new_toast = {"id": toast_id, "title": "Success!", "description": "Operation completed successfully", "variant": "success", "timestamp": int(time.time() * 1000)}
+        new_toast = {"id": int(time.time() * 1000), "title": "Success!", "description": "Operation completed successfully", "variant": "success", "timestamp": int(time.time() * 1000)}
     else:
-        new_toast = {"id": toast_id, "title": "Failed", "description": "Operation encountered an error", "variant": "error", "timestamp": int(time.time() * 1000)}
-    toasts = [new_toast] + toasts
-    yield sse_signals(toasts_counter=counter, toasts=toasts[:3])
-    yield execute_script(f"setTimeout(()=>{{ctx.$signals.toasts=ctx.$signals.toasts.filter(t=>t.id!=={toast_id})}},4000)")
+        new_toast = {"id": int(time.time() * 1000), "title": "Failed", "description": "Operation encountered an error", "variant": "error", "timestamp": int(time.time() * 1000)}
+    toasts = [new_toast] + toasts[:2]
+    yield signals(toasts=toasts)
+
+    # Auto-dismiss all toasts after 4 seconds
+    await asyncio.sleep(4)
+    yield signals(toasts=[])
 
 
 @rt("/toast-server")
@@ -3078,7 +3121,7 @@ def test_toast_server():
             ),
             CardContent(
                 CodeBlock('''@rt("/process")
-@sse_decorator
+@sse
 async def process():
     yield execute_script(
         toast('Message', 'Description')
@@ -3093,68 +3136,6 @@ Button(
         ),
 
         title="Toast - Server & Client Patterns"
-    )
-
-
-@rt("/test_window_modifier")
-def test_window_modifier():
-    """Test window=True modifier and Escape key filtering."""
-    test1_any = Signal("test1_any", 0)
-    test1_escape = Signal("test1_escape", 0)
-    test2_any = Signal("test2_any", 0)
-    test2_escape = Signal("test2_escape", 0)
-
-    return Page(
-        Div(
-            test1_any, test1_escape, test2_any, test2_escape,
-
-            H1("Escape Key & Window Modifier Test", cls="text-2xl font-bold mb-6"),
-
-            Div(
-                P("Instructions:", cls="font-bold text-gray-900"),
-                P("1. Type letters in the inputs - 'Any key' should go up", cls="text-gray-900"),
-                P("2. Press Escape - 'Escape only' should go up", cls="text-gray-900"),
-                P("3. Test 1 (window=True): works from anywhere on the page", cls="text-gray-900"),
-                P("4. Test 2 (no window): only works when div/input is focused", cls="text-gray-900"),
-                cls="bg-yellow-100 border border-yellow-400 p-4 mb-6 rounded",
-            ),
-
-            H2("Test 1: With window=True - Global handler with Escape filtering", cls="text-xl font-bold mb-2"),
-            Div(
-                P("Any key count: ", Span(data_text=test1_any, cls="font-bold text-orange-600"), cls="text-gray-900"),
-                P("Escape only count: ", Span(data_text=test1_escape, cls="font-bold text-green-600"), cls="text-gray-900"),
-                Input(placeholder="Type anywhere on page - test both counters", cls="border p-2 rounded w-full mb-2 text-gray-900 bg-white"),
-                P("✅ Expected: Any key increments on any keypress, Escape only on Escape", cls="text-sm text-gray-900"),
-                P("✅ Expected: Works from anywhere on the page (click outside, then type)", cls="text-sm text-gray-900"),
-                data_on_keydown=(js(f"$test1_any = $test1_any + 1; if(event.key==='Escape'){{$test1_escape = $test1_escape + 1}}"), dict(window=True)),
-                cls="border-4 border-blue-500 p-4 mb-6 rounded bg-blue-50",
-            ),
-
-            H2("Test 2: Without window modifier - Local handler with Escape filtering", cls="text-xl font-bold mb-2"),
-            Div(
-                P("Any key count: ", Span(data_text=test2_any, cls="font-bold text-orange-600"), cls="text-gray-900"),
-                P("Escape only count: ", Span(data_text=test2_escape, cls="font-bold text-green-600"), cls="text-gray-900"),
-                Input(placeholder="Focus this div/input first, then type", cls="border p-2 rounded w-full mb-2 text-gray-900 bg-white"),
-                P("✅ Expected: Any key increments on any keypress, Escape only on Escape", cls="text-sm text-gray-900"),
-                P("✅ Expected: ONLY works when this div/input is focused", cls="text-sm text-gray-900"),
-                data_on_keydown=js(f"$test2_any = $test2_any + 1; if(event.key==='Escape'){{$test2_escape = $test2_escape + 1}}"),
-                tabindex="0",
-                cls="border-4 border-green-500 p-4 mb-6 rounded bg-green-50",
-            ),
-
-            Div(
-                Button("Reset All Counters",
-                    data_on_click=[
-                        test1_any.set(0), test1_escape.set(0),
-                        test2_any.set(0), test2_escape.set(0),
-                    ],
-                    cls="mr-2",
-                ),
-                P("Test that Escape increments both counters, but other keys only increment 'Any key'", cls="text-sm text-muted-foreground inline-block"),
-                cls="mt-4",
-            ),
-        ),
-        title="Escape Key & Window Modifier Test",
     )
 
 
@@ -3494,7 +3475,32 @@ def test_typography():
 @rt("/tooltip")
 def test_tooltip():
     return Page(
-        H2("Basic Tooltip", cls="text-2xl font-semibold mb-4"),
+        H2("Keyboard Accessible Tooltips", cls="text-2xl font-semibold mb-4"),
+        P("Tooltips support both hover and keyboard focus. Tab through the buttons below.", cls="text-muted-foreground mb-4"),
+
+        Div(
+            Tooltip(
+                TooltipTrigger(
+                    Button("Focus me 1", variant="outline")
+                ),
+                TooltipContent("Opens on focus or hover"),
+            ),
+            Tooltip(
+                TooltipTrigger(
+                    Button("Focus me 2", variant="outline")
+                ),
+                TooltipContent("Press Escape to close"),
+            ),
+            Tooltip(
+                TooltipTrigger(
+                    Button("Focus me 3", variant="outline")
+                ),
+                TooltipContent("Fully keyboard accessible"),
+            ),
+            cls="flex gap-4"
+        ),
+
+        H2("Position Variants", cls="text-2xl font-semibold mb-4 mt-8"),
         P("Hover over the buttons to see tooltips with different positions.", cls="text-muted-foreground mb-4"),
 
         Div(
@@ -3647,31 +3653,6 @@ def test_tooltip():
                 side="top",
                 cls="max-w-xs"
             ),
-        ),
-
-        H2("Keyboard Accessible", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Tooltips can be triggered via focus for keyboard navigation. Tab through the buttons below.", cls="text-muted-foreground mb-4"),
-
-        Div(
-            Tooltip(
-                TooltipTrigger(
-                    Button("Focus me 1", variant="outline")
-                ),
-                TooltipContent("Shows on focus for accessibility"),
-            ),
-            Tooltip(
-                TooltipTrigger(
-                    Button("Focus me 2", variant="outline")
-                ),
-                TooltipContent("Press Escape to close"),
-            ),
-            Tooltip(
-                TooltipTrigger(
-                    Button("Focus me 3", variant="outline")
-                ),
-                TooltipContent("Fully keyboard accessible"),
-            ),
-            cls="flex gap-4"
         ),
 
         title="Tooltip"

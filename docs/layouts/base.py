@@ -1,7 +1,7 @@
 from typing import Any
 from dataclasses import dataclass, field
 from starhtml import *
-from starhtml.datastar import ds_on_click, ds_signals, ds_text, ds_show, ds_effect, value
+from starhtml.datastar import clipboard
 from layouts.footer import DocsFooter
 from layouts.header import DocsHeader
 from layouts.sidebar import DocsSidebar, MobileSidebar
@@ -62,19 +62,19 @@ def _copy_page_button(component_name: str | None = None) -> FT:
         if component_name
         else "@clipboard(window.location.href, 'page_copied', 2000)"
     )
-    
+
     return Button(
+        (page_copied := Signal("page_copied", False)),
         Span(
             Icon("lucide:check", cls="h-4 w-4"),
-            ds_show("$page_copied")
+            data_show=page_copied
         ),
         Span(
             Icon("lucide:copy", cls="h-4 w-4"),
-            ds_show("!$page_copied")
+            data_show=~page_copied
         ),
         "Copy Page",
-        ds_on_click(copy_action),
-        ds_signals(page_copied=False),
+        data_on_click=copy_action,
         variant="outline",
         size="sm",
         cls="h-8 rounded-md gap-1.5 px-3"
@@ -116,13 +116,13 @@ def _mobile_sheet_section(sidebar: SidebarConfig) -> FT:
     return Sheet(
         SheetContent(
             MobileSidebar(sections=sidebar.sections),
-            signal="mobile_menu",
+            signal="mobile_menu_open",
             side="right",
             size="sm",
             cls="xl:hidden w-80 max-w-[80vw] p-0",
             show_close=True,
         ),
-        signal="mobile_menu",
+        signal="mobile_menu_open",
         modal=True,
         default_open=False,
     )
@@ -134,13 +134,12 @@ def _layout_with_sidebar(
     layout: LayoutConfig,
     **attrs
 ) -> FT:
+    Signal("sidebar_active", _ref_only=True)
     return Div(
-        # Initialize sidebar_active signal once at the root level
-        ds_signals(sidebar_active=value("")),
-        ds_effect("$sidebar_active = location.pathname;"),
         main_content,
         _mobile_sheet_section(sidebar),
         cls=f"flex min-h-screen flex-col {layout.class_name}",
+        data_effect="$sidebar_active = location.pathname",
         **attrs
     )
 

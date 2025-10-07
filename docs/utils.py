@@ -1,12 +1,18 @@
 import inspect
 import re
+from dataclasses import dataclass
 from functools import wraps
 from textwrap import dedent
 from typing import Any, Callable
+
 from starhtml import *
 from widgets.installation_section import InstallationSection
 from widgets.code_block import CodeBlock
 
+
+# ============================================================================
+# MAIN API
+# ============================================================================
 
 def auto_generate_page(
     component_name: str,
@@ -24,20 +30,19 @@ def auto_generate_page(
     component_slug: str | None = None,
     **layout_attrs
 ) -> FT:
-    """Auto-generate a component documentation page."""
     from layouts.base import DocsLayout, LayoutConfig, SidebarConfig
     from app import DOCS_SIDEBAR_SECTIONS
-    
-    sections = filter(None, [
+
+    sections = [
         hero_example,
         _installation(cli_command, manual_files, dependencies),
         _examples(examples),
         _usage(usage_code, usage_description),
         _api_reference(api_reference)
-    ])
-    
+    ]
+
     return DocsLayout(
-        Div(*sections),
+        Div(*filter(None, sections)),
         layout=LayoutConfig(
             title=component_name,
             description=description,
@@ -48,8 +53,11 @@ def auto_generate_page(
     )
 
 
+# ============================================================================
+# SECTIONS
+# ============================================================================
+
 def _installation(cli_command, manual_files, dependencies):
-    """Installation section."""
     if not any([cli_command, manual_files, dependencies]):
         return None
     return InstallationSection(
@@ -61,7 +69,6 @@ def _installation(cli_command, manual_files, dependencies):
 
 
 def _examples(examples: list[Any]) -> FT | None:
-    """Examples section."""
     if not examples:
         return None
     return Div(
@@ -71,7 +78,6 @@ def _examples(examples: list[Any]) -> FT | None:
 
 
 def _usage(code: str | None, description: str | None = None) -> FT | None:
-    """Usage section."""
     if not code:
         return None
     return Div(
@@ -85,28 +91,26 @@ def _usage(code: str | None, description: str | None = None) -> FT | None:
 def _api_reference(api_ref: dict[str, Any] | None) -> FT | None:
     """
     API reference section with intentional table selection.
-    
+
     Design philosophy:
     - Simple components (Button, Input): Show props table
-    - Composite components (AlertDialog, Accordion): Show components table OR props table  
+    - Composite components (AlertDialog, Accordion): Show components table OR props table
     - Decision is made per-component based on what users need most
     """
     if not api_ref:
         return None
-    
+
     props = api_ref.get("props", [])
     components = api_ref.get("api", api_ref.get("components", []))
-    
+
     if not (props or components):
         return None
-    
-    # Intentionally show either props OR components table, not both
-    # The choice depends on what's most valuable for that specific component
+
     tables = filter(None, [
         _props_table(props) if props else None,
         _api_items_table(components) if components else None
     ])
-    
+
     return Div(
         H2("API Reference", cls="text-2xl font-bold tracking-tight mb-6 mt-12"),
         *tables,
@@ -114,11 +118,14 @@ def _api_reference(api_ref: dict[str, Any] | None) -> FT | None:
     )
 
 
+# ============================================================================
+# TABLES
+# ============================================================================
+
 def _props_table(props: list[dict]) -> FT | None:
-    """Props table."""
     if not props:
         return None
-    
+
     return Div(
         H3("Props", cls="text-lg font-semibold mb-4"),
         _table(
@@ -135,30 +142,27 @@ def _props_table(props: list[dict]) -> FT | None:
 
 
 def _api_items_table(items: list[dict]) -> FT | None:
-    """API items/components table."""
     if not items:
         return None
-    
+
     has_type = any("type" in item for item in items)
     headers = ["Name", "Type", "Description"] if has_type else ["Component", "Description"]
-    
+
     rows = [[
         Code(item["name"], cls="text-sm font-mono font-medium"),
         Code(item.get("type", ""), cls="text-xs font-mono text-muted-foreground") if has_type else None,
         item.get("description", "")
     ] for item in items]
-    
-    # Filter out None values for tables without type column
+
     rows = [[cell for cell in row if cell is not None] for row in rows]
-    
+
     return _table(headers, rows)
 
 
 def _table(headers: list[str], rows: list[list]) -> FT:
-    """Create a styled table."""
     header_cls = "px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"
     cell_cls = "px-6 py-4"
-    
+
     return Div(
         Table(
             Thead(
@@ -166,7 +170,7 @@ def _table(headers: list[str], rows: list[list]) -> FT:
             ),
             Tbody(
                 *[Tr(
-                    *[Td(cell, cls=f"{cell_cls} {getattr(cell, 'attrs', {}).get('cls', '')}") 
+                    *[Td(cell, cls=f"{cell_cls} {getattr(cell, 'attrs', {}).get('cls', '')}")
                       for cell in row],
                     cls="border-t border-border"
                 ) for row in rows],
@@ -178,6 +182,10 @@ def _table(headers: list[str], rows: list[list]) -> FT:
     )
 
 
+# ============================================================================
+# MARKDOWN
+# ============================================================================
+
 def generate_component_markdown(
     component_name: str,
     description: str,
@@ -187,7 +195,6 @@ def generate_component_markdown(
     api_reference: dict[str, Any] | None = None,
     hero_example_code: str | None = None,
 ) -> str:
-    """Generate markdown documentation."""
     sections = filter(None, [
         f"# {component_name}\n\n{description}",
         f"## Preview\n\n```python\n{hero_example_code}\n```" if hero_example_code else None,
@@ -196,15 +203,14 @@ def generate_component_markdown(
         f"## Usage\n\n```python\n{usage_code}\n```" if usage_code else None,
         _markdown_props(api_reference)
     ])
-    
+
     return "\n\n".join(sections)
 
 
 def _markdown_examples(examples: list[dict[str, str]] | None) -> str | None:
-    """Format examples for markdown."""
     if not examples:
         return None
-    
+
     parts = ["## Examples"]
     for ex in examples:
         if title := ex.get("title"):
@@ -213,22 +219,21 @@ def _markdown_examples(examples: list[dict[str, str]] | None) -> str | None:
             parts.append(desc)
         if code := ex.get("code"):
             parts.append(f"```python\n{code}\n```")
-    
+
     return "\n\n".join(parts)
 
 
 def _markdown_props(api_ref: dict[str, Any] | None) -> str | None:
-    """Format props table for markdown."""
     if not api_ref or "props" not in api_ref:
         return None
-    
+
     lines = [
         "## API Reference",
         "",
         "| Prop | Type | Default | Description |",
         "|------|------|---------|-------------|"
     ]
-    
+
     for p in api_ref["props"]:
         lines.append(
             f"| `{p.get('name', '')}` | "
@@ -236,14 +241,18 @@ def _markdown_props(api_ref: dict[str, Any] | None) -> str | None:
             f"`{p.get('default', '')}` | "
             f"{p.get('description', '')} |"
         )
-    
+
     return "\n".join(lines)
 
+
+# ============================================================================
+# CODE EXTRACTION
+# ============================================================================
 
 def extract_code(func: Callable) -> str:
     """
     Extract code from function body.
-    
+
     Supports directives:
     - #: hide - Exclude line from output
     - #: include function_name() - Inline function body
@@ -251,40 +260,34 @@ def extract_code(func: Callable) -> str:
     try:
         source = dedent(inspect.getsource(func))
         lines = source.split('\n')
-        
-        # Find function body start
+
         body_start = next(
-            (i + 1 for i, line in enumerate(lines) 
+            (i + 1 for i, line in enumerate(lines)
              if line.strip().startswith('def ') and func.__name__ in line),
             0
         )
-        
+
         body_lines = lines[body_start:]
-        
-        # Skip leading empty lines
+
         while body_lines and not body_lines[0].strip():
             body_lines.pop(0)
-        
+
         if not body_lines:
             return "# Could not extract function body"
-        
-        # Normalize indentation
+
         base_indent = len(body_lines[0]) - len(body_lines[0].lstrip())
         normalized = [
-            line[base_indent:] if line.strip() and line.startswith(' ' * base_indent) 
-            else line.lstrip() if line.strip() 
+            line[base_indent:] if line.strip() and line.startswith(' ' * base_indent)
+            else line.lstrip() if line.strip()
             else ''
             for line in body_lines
         ]
-        
-        # Process directives
+
         processed = []
         for line in normalized:
-            # Skip #: hide lines
             if line.rstrip().endswith('#: hide'):
                 continue
-            
-            # Process #: include
+
             if match := re.search(r'#: include (\w+)\(\)', line):
                 func_name = match.group(1)
                 frame = inspect.currentframe()
@@ -300,17 +303,15 @@ def extract_code(func: Callable) -> str:
                                 else:
                                     processed.append('')
                             continue
-            
+
             processed.append(line)
-        
-        # Handle simple return-only functions vs complex functions
+
         has_inner_def = any('def ' in line for line in processed[1:])
         first_code = next((line for line in processed if line.strip()), '')
-        
+
         if first_code.strip().startswith('return ') and not has_inner_def:
-            # Simple pattern: extract return value
             return_idx = next(
-                (i for i, line in enumerate(processed) 
+                (i for i, line in enumerate(processed)
                  if line.strip().startswith('return ')),
                 -1
             )
@@ -322,7 +323,6 @@ def extract_code(func: Callable) -> str:
                     result[0] = ' ' * indent + first.lstrip()[7:]
                 return '\n'.join(line.rstrip() for line in result)
         else:
-            # Complex pattern: remove 'return' keywords
             result = [
                 ' ' * (len(line) - len(line.lstrip())) + line.lstrip()[7:]
                 if line.strip().startswith('return ')
@@ -330,27 +330,24 @@ def extract_code(func: Callable) -> str:
                 for line in processed
             ]
             return '\n'.join(line.rstrip() for line in result)
-        
+
     except Exception as e:
         return f"# Error: {e}"
 
 
 def _extract_function_body(func: Callable) -> str:
-    """Extract complete function body."""
     try:
         source = dedent(inspect.getsource(func))
         lines = source.split('\n')
-        
-        # Find function body
+
         body_start = next(
             (i + 1 for i, line in enumerate(lines)
              if 'def ' in line and func.__name__ in line and ':' in line),
             0
         )
-        
+
         body_lines = lines[body_start:]
-        
-        # Skip docstrings
+
         clean_lines = []
         in_docstring = False
         for line in body_lines:
@@ -363,17 +360,15 @@ def _extract_function_body(func: Callable) -> str:
                 in_docstring = True
             elif not in_docstring:
                 clean_lines.append(line)
-        
+
         body_lines = clean_lines
-        
-        # Skip leading empty lines
+
         while body_lines and not body_lines[0].strip():
             body_lines.pop(0)
-        
+
         if not body_lines:
             return ""
-        
-        # Normalize indentation
+
         base_indent = len(body_lines[0]) - len(body_lines[0].lstrip())
         normalized = [
             line[base_indent:] if line.strip() and len(line) >= base_indent and line[:base_indent].isspace()
@@ -381,19 +376,18 @@ def _extract_function_body(func: Callable) -> str:
             else ''
             for line in body_lines
         ]
-        
+
         return '\n'.join(line.rstrip() for line in normalized)
-        
+
     except Exception:
         return ""
 
 
 def with_code(func: Callable) -> Callable:
-    """Decorator to attach extracted code to function."""
     @wraps(func)
     def wrapper(*args, **kwargs):
         return func(*args, **kwargs)
-    
+
     wrapper.code = extract_code(func)
     return wrapper
 
@@ -402,24 +396,19 @@ def with_code(func: Callable) -> Callable:
 # API REFERENCE BUILDERS
 # ============================================================================
 
-from dataclasses import dataclass
-from typing import Optional
-
 @dataclass
 class Prop:
-    """Component prop for API documentation."""
     name: str
     type: str
     description: str
-    default: Optional[str] = None
+    default: str | None = None
 
-@dataclass 
+@dataclass
 class Component:
-    """Component for API documentation."""
     name: str
     description: str
     props: list[Prop] = None
-    
+
     def __post_init__(self):
         if self.props is None:
             self.props = []
@@ -427,13 +416,13 @@ class Component:
 def build_api_reference(main_props: list[Prop] = None, components: list[Component] = None) -> dict:
     """
     Build API reference from typed objects.
-    
+
     Design: Choose either main_props OR components based on what's most useful:
-    - main_props: For simple components (Button, Input)  
+    - main_props: For simple components (Button, Input)
     - components: For composite components (AlertDialog, Accordion)
     """
     result = {}
-    
+
     if main_props:
         result["props"] = [
             {
@@ -444,7 +433,7 @@ def build_api_reference(main_props: list[Prop] = None, components: list[Componen
             }
             for p in main_props
         ]
-    
+
     if components:
         result["components"] = [
             {
@@ -462,5 +451,5 @@ def build_api_reference(main_props: list[Prop] = None, components: list[Componen
             }
             for comp in components
         ]
-    
+
     return result

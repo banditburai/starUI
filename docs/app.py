@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-"""StarUI Documentation Server."""
 
 import sys
 from pathlib import Path
@@ -9,57 +8,49 @@ from contextlib import asynccontextmanager
 sys.path.insert(0, str(Path(__file__).parent))
 
 from starhtml import *
-from starhtml.datastar import get_starhtml_action_plugins, ds_on_click, ds_text, ds_signals, ds_show
 from starhtml import position_handler
 
 from component_registry import get_registry
 from layouts.base import DocsLayout, LayoutConfig, FooterConfig, SidebarConfig
 from pages.components_index import create_components_index
 
-# Global sidebar sections - initialized once at startup
 DOCS_SIDEBAR_SECTIONS = []
 
 
 @asynccontextmanager
 async def lifespan(app):
-    """Lifespan context manager for proper startup/shutdown."""
     print("[STARTUP] Initializing StarUI Documentation Server...")
-    
-    # Initialize components and sidebar on startup
     await initialize_docs_sidebar()
     print(f"[STARTUP] Sidebar initialized with {len(DOCS_SIDEBAR_SECTIONS)} sections")
-    
-    # Pre-build and cache the sidebar navigation
+
     from layouts.sidebar import build_sidebar_nav
     nav = build_sidebar_nav(DOCS_SIDEBAR_SECTIONS)
     print("[STARTUP] Sidebar navigation pre-built and cached")
-    
+
     yield
-    
     print("[SHUTDOWN] StarUI Documentation Server shutting down...")
 
 
 async def initialize_docs_sidebar():
-    """Initialize sidebar sections once at startup."""
     global DOCS_SIDEBAR_SECTIONS
-    
+
     print("[STARTUP] Discovering components...")
     components_dir = Path(__file__).parent / "pages" / "components"
     if not components_dir.exists():
         print("[STARTUP] No components directory found")
         return
-    
+
     registry = get_registry()
     component_count = 0
-    
+
     for component_file in sorted(components_dir.glob("*.py")):
         if component_file.stem in ["__init__", "__pycache__"]:
             continue
-        
+
         try:
             module_name = f"pages.components.{component_file.stem}"
             module = __import__(module_name, fromlist=["*"])
-            
+
             if hasattr(module, "TITLE"):
                 registry.register(
                     name=component_file.stem,
@@ -74,19 +65,18 @@ async def initialize_docs_sidebar():
                 component_count += 1
         except Exception as e:
             print(f"[STARTUP] Failed to load component {component_file.stem}: {e}")
-    
+
     print(f"[STARTUP] Loaded {component_count} components")
-    
-    # Build sidebar sections
+
     all_components = []
     for name, component in registry.components.items():
         all_components.append({
             "href": f"/components/{name}",
             "label": component["title"],
         })
-    
+
     all_components.sort(key=lambda x: x["label"])
-    
+
     DOCS_SIDEBAR_SECTIONS = [
         {
             "title": "Getting Started",
@@ -112,7 +102,8 @@ app, rt = star_app(
     ),
     htmlkw=dict(lang="en", dir="ltr"),
     bodykw=dict(cls="min-h-screen bg-background text-foreground"),
-    plugins=get_starhtml_action_plugins(),
+    iconify=True,
+    clipboard=True,
     lifespan=lifespan,
 )
 
@@ -125,7 +116,6 @@ DOCS_NAV_ITEMS = [
 
 @rt("/")
 def home():
-    """Documentation homepage."""
     return DocsLayout(
         Div(
             Div(
@@ -190,7 +180,6 @@ def home():
 
 
 def _feature_card(icon: str, title: str, description: str) -> FT:
-    """Create a feature card."""
     return Div(
         Div(
             Div(
@@ -206,7 +195,6 @@ def _feature_card(icon: str, title: str, description: str) -> FT:
 
 
 def _docs_feature_card(emoji: str, text: str) -> FT:
-    """Create a docs feature card with emoji."""
     return Div(
         Div(
             Span(emoji, cls="text-2xl mb-2 block"),
@@ -218,7 +206,6 @@ def _docs_feature_card(emoji: str, text: str) -> FT:
 
 
 def _professional_feature_card(title: str, description: str, icon: str) -> FT:
-    """Create a professional feature card without emojis."""
     return Div(
         Div(
             Div(
@@ -234,7 +221,6 @@ def _professional_feature_card(title: str, description: str, icon: str) -> FT:
 
 
 def _workflow_card(title: str, description: str, code: str, caption: str) -> FT:
-    """Create a workflow step card with code example."""
     from starui.registry.components.code_block import CodeBlock
     
     return Div(
@@ -253,7 +239,6 @@ def _workflow_card(title: str, description: str, code: str, caption: str) -> FT:
 
 
 def _feature_highlight_card(title: str, description: str, code: str, code_caption: str, icon: str) -> FT:
-    """Create a feature highlight card with code example."""
     from starui.registry.components.code_block import CodeBlock
     
     return Div(
@@ -279,7 +264,6 @@ def _feature_highlight_card(title: str, description: str, code: str, code_captio
 
 
 def _workflow_highlight_card(title: str, description: str, code: str, code_caption: str) -> FT:
-    """Create a workflow highlight card with code example."""
     from starui.registry.components.code_block import CodeBlock
     
     return Div(
@@ -298,7 +282,6 @@ def _workflow_highlight_card(title: str, description: str, code: str, code_capti
 
 
 def _performance_metric(value: str, label: str, description: str) -> FT:
-    """Create a performance metric display."""
     return Div(
         Div(
             Span(value, cls="text-2xl font-bold text-primary block mb-1"),
@@ -311,11 +294,9 @@ def _performance_metric(value: str, label: str, description: str) -> FT:
 
 @rt("/docs")
 def docs_index():
-    """Documentation index page."""
     
     return DocsLayout(
         Div(
-            # Hero section
             Div(
                 H1("StarUI Documentation", cls="text-4xl md:text-5xl font-bold tracking-tight mb-6"),
                 P(
@@ -329,29 +310,27 @@ def docs_index():
                 cls="text-center mb-20"
             ),
             
-            # Core philosophy section
             Div(
                 H2("The Python-Native Approach", cls="text-3xl font-bold mb-8"),
                 Div(
                     _feature_highlight_card(
                         "Server-First Architecture",
                         "Components render on the server and progressively enhance with interactivity. No client-side hydration, no bundle sizes, no waterfall loading.",
-                        "from starui import Button, Input, Card\n\n# Pure Python - no JSX, no build step\nCard(\n    Input(placeholder=\"Search...\"),\n    Button(\"Submit\", ds_on_click=\"$search()\")\n)",
+                        "from starui import Button, Input, Card\n\n# Pure Python - no JSX, no build step\nCard(\n    Input(placeholder=\"Search...\"),\n    Button(\"Submit\", data_on_click=\"search()\")\n)",
                         "Python syntax with type safety and IDE support",
                         "lucide:server"
                     ),
                     _feature_highlight_card(
                         "Reactive Without React",
                         "Datastar provides declarative state management and reactive updates while keeping all logic server-side. Get modern UX patterns without JavaScript frameworks.",
-                        "# Reactive counter - no useState, no hooks\nButton(\n    ds_text=\"'Count: ' + $count\",\n    ds_on_click=\"$count++\"\n)\n\n# State stays on the server",
+                        "# Reactive counter - no useState, no hooks\nButton(\n    (count := Signal(\"count\", 0)),\n    data_text=\"Count: \" + count,\n    data_on_click=count.add(1)\n)\n\n# State stays on the server",
                         "Reactive patterns with server-side state",
                         "lucide:zap"
                     ),
                     cls="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 mb-16"
                 ),
             ),
-            
-            # Developer experience section  
+
             Div(
                 H2("Built for Python Developers", cls="text-3xl font-bold mb-8"),
                 Div(
@@ -377,7 +356,6 @@ def docs_index():
                 ),
             ),
             
-            # Performance and production section
             Div(
                 H2("Production-Ready Performance", cls="text-3xl font-bold mb-8"),
                 Div(
@@ -427,14 +405,12 @@ def docs_index():
 
 @rt("/components")
 def components_index():
-    """Components index page."""
     registry = get_registry()
     return create_components_index(registry, DOCS_SIDEBAR_SECTIONS)
 
 
 @rt("/components/{component_name}")
 def component_page(component_name: str):
-    """Individual component documentation page."""
     registry = get_registry()
     component = registry.get(component_name)
 
@@ -458,29 +434,23 @@ def component_page(component_name: str):
 
 @rt("/api/markdown/{component_name}")
 def get_component_markdown(component_name: str):
-    """Generate markdown content for a component on-demand."""
     try:
-        # Import the component module dynamically
         module_name = f"pages.components.{component_name}"
         module = __import__(module_name, fromlist=["*"])
-        
+
         # Extract component data using the same pattern as discover_components
         component_data = {
             "title": getattr(module, "TITLE", component_name.title()),
             "description": getattr(module, "DESCRIPTION", ""),
             "cli_command": f"star add {component_name}",
         }
-        
-        # Try to get the component creation function to extract structured data
+
         create_docs_func = getattr(module, f"create_{component_name}_docs", None)
         if not create_docs_func:
             return {"error": f"No documentation function found for {component_name}"}
-        
-        # Get examples_data, hero_example_code, usage_code, and api_reference from the component
-        # We need to extract this from the function - let's call a helper to get the data
+
         markdown_data = _extract_component_data(module, component_name)
-        
-        # Generate markdown using our existing function
+
         from utils import generate_component_markdown
         markdown_content = generate_component_markdown(
             component_name=component_data["title"],
@@ -499,7 +469,6 @@ def get_component_markdown(component_name: str):
 
 
 def _extract_component_data(module, component_name: str) -> dict:
-    """Extract structured data from a component module for markdown generation."""
     import ast
     import inspect
     import re
@@ -544,11 +513,10 @@ def _extract_component_data(module, component_name: str) -> dict:
 
 
 def _parse_component_previews_from_source(source: str) -> list[dict]:
-    """Parse ComponentPreview calls from source code to extract titles, descriptions, and code."""
     import re
-    
+
     examples = []
-    blocks = re.split(r'yield\s+ComponentPreview\s*\(', source)[1:]  # Skip content before first yield
+    blocks = re.split(r'yield\s+ComponentPreview\s*\(', source)[1:]
     
     for block in blocks:
         paren_count = 1
@@ -583,46 +551,19 @@ def _parse_component_previews_from_source(source: str) -> list[dict]:
 
 @rt("/installation")
 def installation():
-    """Installation guide."""
-    from starui.registry.components.code_block import CodeBlock as SimpleCodeBlock
     from widgets.component_preview import ComponentPreview
+    from widgets.code_block import CodeBlock
     from starui.registry.components.button import Button
     from starui.registry.components.input import Input
-    from starui.registry.components.card import Card
-    from starhtml.datastar import ds_on_click, ds_show, ds_signals, ds_text
-    
-    def CodeBlockWithCopy(code: str, language: str = "bash") -> FT:
-        """CodeBlock with positioned copy button."""
-        code_id = f"copy_{abs(hash(code))}"
-        signal = f"copied_{code_id}"
-        
-        return Div(
-            SimpleCodeBlock(code, language=language, cls="overflow-x-auto", style="scrollbar-width: thin; scrollbar-color: transparent transparent;"),
-            Button(
-                Span(Icon("lucide:check", cls="h-3 w-3"), ds_show(f"${signal}")),
-                Span(Icon("lucide:copy", cls="h-3 w-3"), ds_show(f"!${signal}")),
-                Span(ds_text(f"${signal} ? 'Copied!' : 'Copy'"), cls="sr-only"),
-                ds_on_click(f'@clipboard(evt.target.closest(".relative").querySelector("code").textContent, "{signal}", 2000)'),
-                variant="ghost",
-                size="sm",
-                cls="absolute top-3 right-3 h-7 w-7 p-0 text-muted-foreground hover:text-foreground hover:bg-muted opacity-75 hover:opacity-100 transition-all duration-200",
-                type="button",
-                aria_label="Copy code"
-            ),
-            ds_signals({signal: False}),
-            cls="relative group"
-        )
     
     return DocsLayout(
         Div(
-            # Hero Section with Quick Start
             Div(
                 P(
                     "Get started with StarUI in minutes. Build beautiful, accessible components with Python and StarHTML.",
                     cls="text-xl text-muted-foreground mb-8 max-w-3xl",
                 ),
                 
-                # Quick Start Preview
                 ComponentPreview(
                     Div(
                         Button("Get Started", variant="default", cls="mr-3"),
@@ -640,11 +581,9 @@ Button("View Components", variant="outline")''',
                 cls="mb-12"
             ),
             
-            # Installation Steps
             Div(
                 H2("Installation", cls="text-3xl font-bold tracking-tight mb-8"),
                 
-                # Step 1: Install CLI
                 Div(
                     Div(
                         Div(
@@ -655,7 +594,7 @@ Button("View Components", variant="outline")''',
                             Div(
                                 H3("Install the StarUI CLI", cls="text-xl font-semibold mb-2"),
                                 P("Install StarUI globally using pip to access the CLI commands.", cls="text-muted-foreground mb-4"),
-                                CodeBlockWithCopy("pip install starui", "bash"),
+                                CodeBlock("pip install starui", language="bash"),
                                 cls="flex-1 min-w-0 overflow-hidden"
                             ),
                             cls="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start"
@@ -664,8 +603,7 @@ Button("View Components", variant="outline")''',
                     ),
                     cls="mb-8"
                 ),
-                
-                # Step 2: Initialize Project  
+
                 Div(
                     Div(
                         Div(
@@ -676,7 +614,7 @@ Button("View Components", variant="outline")''',
                             Div(
                                 H3("Initialize your project", cls="text-xl font-semibold mb-2"),
                                 P("Set up StarUI in your project directory. This creates the configuration and installs dependencies.", cls="text-muted-foreground mb-4"),
-                                CodeBlockWithCopy("star init", "bash"),
+                                CodeBlock("star init", language="bash"),
                                 Div(
                                     Div(
                                         Icon("lucide:file-text", cls="h-5 w-5 text-primary mr-3 flex-shrink-0"),
@@ -705,7 +643,6 @@ Button("View Components", variant="outline")''',
                     cls="mb-8"
                 ),
                 
-                # Step 3: Add Components
                 Div(
                     Div(
                         Div(
@@ -716,16 +653,16 @@ Button("View Components", variant="outline")''',
                             Div(
                                 H3("Add components to your project", cls="text-xl font-semibold mb-2"),
                                 P("Install individual components with their dependencies automatically resolved.", cls="text-muted-foreground mb-4"),
-                                CodeBlockWithCopy(
+                                CodeBlock(
                                     '''# Add a single component
 star add button
 
-# Add multiple components at once  
+# Add multiple components at once
 star add button input card tabs
 
 # List all available components
 star list''',
-                                    "bash"
+                                    language="bash"
                                 ),
                                 cls="flex-1 min-w-0 overflow-hidden"
                             ),
@@ -737,11 +674,9 @@ star list''',
                 ),
             ),
             
-            # Usage Examples
             Div(
                 H2("Usage Examples", cls="text-3xl font-bold tracking-tight mb-8"),
                 
-                # Basic Usage
                 ComponentPreview(
                     Div(
                         Input(placeholder="Enter your email", cls="mb-3"),
@@ -760,22 +695,21 @@ Div(
                     description="Import and use components directly in your StarHTML templates"
                 ),
                 
-                # Interactive Features
                 ComponentPreview(
                     Div(
-                        Button("Click me!", ds_on_click("$count++"), cls="mb-3"),
-                        P("Clicked: ", Span(ds_text("$count"), cls="font-bold text-primary")),
-                        ds_signals(count=0),
+                        (count := Signal("count", 0)),
+                        Button("Click me!", data_on_click=count.add(1), cls="mb-3"),
+                        P("Clicked: ", Span(data_text=count, cls="font-bold text-primary")),
                         cls="text-center space-y-3"
                     ),
                     '''from starui import Button
-from starhtml.datastar import ds_on_click, ds_text, ds_signals
+from starhtml import Signal
 
 # Add interactivity with Datastar
 Div(
-    Button("Click me!", ds_on_click("$count++")),
-    P("Clicked: ", Span(ds_text("$count"), cls="font-bold")),
-    ds_signals(count=0)
+    (count := Signal("count", 0)),
+    Button("Click me!", data_on_click=count.add(1)),
+    P("Clicked: ", Span(data_text=count, cls="font-bold"))
 )''',
                     title="Interactive Components",
                     description="Add reactivity using Datastar for dynamic user interfaces"
@@ -784,7 +718,6 @@ Div(
                 cls="space-y-8"
             ),
             
-            # Next Steps
             Div(
                 H2("What's Next?", cls="text-3xl font-bold tracking-tight mb-8 mt-16"),
                 Div(
@@ -822,14 +755,7 @@ Div(
     )
 
 
-def _code_block(code: str, language: str = "bash") -> FT:
-    """Create a code block."""
-    from starlighter import CodeBlock
-    return CodeBlock(code)
-
-
 def _next_step_card(icon: str, title: str, description: str, href: str, button_text: str) -> FT:
-    """Create a next step card with icon, title, description, and call-to-action."""
     return Div(
         Div(
             Div(
@@ -849,9 +775,6 @@ def _next_step_card(icon: str, title: str, description: str, href: str, button_t
     )
 
 
-# Component discovery moved to lifespan startup for proper initialization
-
-
 iframe_app, iframe_rt = star_app(
     title="Component Preview",
     live=True,
@@ -862,7 +785,8 @@ iframe_app, iframe_rt = star_app(
     ),
     htmlkw=dict(lang="en", dir="ltr"),
     bodykw=dict(cls="min-h-screen bg-background text-foreground"),
-    plugins=get_starhtml_action_plugins(),
+    iconify=True,
+    clipboard=True,
 )
 
 @iframe_rt("/{preview_id}")

@@ -44,7 +44,7 @@ def Switch(
             role="switch",
             id=switch_id,
             disabled=disabled,
-            aria_checked=checked_state.if_("true", "false"),
+            data_attr_aria_checked=checked_state.if_("true", "false"),
             aria_required="true" if required else None,
             data_slot="switch",
             **kwargs,

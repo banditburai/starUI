@@ -46,8 +46,8 @@ def examples():
             ),
             SheetContent(
                 SheetHeader(
-                    SheetTitle("Navigation", signal="nav_sheet"),
-                    SheetDescription("Browse through the app sections", signal="nav_sheet")
+                    SheetTitle("Navigation"),
+                    SheetDescription("Browse through the app sections")
                 ),
                 Div(
                     Div(
@@ -167,10 +167,9 @@ def examples():
             ),
             SheetContent(
                 SheetHeader(
-                    SheetTitle("Shopping Cart", signal="cart_sheet"),
+                    SheetTitle("Shopping Cart"),
                     SheetDescription(
-                        Span(ds_text("($qty_headphones + $qty_shoes) + ' items in your cart'")),
-                        signal="cart_sheet"
+                        Span(ds_text("($qty_headphones + $qty_shoes) + ' items in your cart'"))
                     )
                 ),
                 Div(
@@ -263,8 +262,8 @@ def examples():
             ),
             SheetContent(
                 SheetHeader(
-                    SheetTitle("Filter Products", signal="filter_sheet"),
-                    SheetDescription("Refine your search results", signal="filter_sheet")
+                    SheetTitle("Filter Products"),
+                    SheetDescription("Refine your search results")
                 ),
                 Div(
                     Div(
@@ -395,8 +394,8 @@ def examples():
             ),
             SheetContent(
                 SheetHeader(
-                    SheetTitle("Application Settings", signal="settings_sheet"),
-                    SheetDescription("Customize your experience", signal="settings_sheet")
+                    SheetTitle("Application Settings"),
+                    SheetDescription("Customize your experience")
                 ),
                 Div(
                     Div(
@@ -551,10 +550,9 @@ def examples():
                             """),
                             variant="destructive",
                             cls="ml-2 text-xs"
-                        ),
-                        signal="notifications_sheet"
+                        )
                     ),
-                    SheetDescription("Stay up to date with your latest activity", signal="notifications_sheet")
+                    SheetDescription("Stay up to date with your latest activity")
                 ),
                 Div(
                     create_notification(
@@ -607,7 +605,7 @@ def examples():
         return Sheet(
             SheetTrigger(Icon("lucide:more-horizontal", cls="h-4 w-4 mr-2"), "Actions", signal="actions_sheet", variant="outline"),
             SheetContent(
-                SheetHeader(SheetTitle("Quick Actions", signal="actions_sheet"), SheetDescription("Choose an action to perform", signal="actions_sheet")),
+                SheetHeader(SheetTitle("Quick Actions"), SheetDescription("Choose an action to perform")),
                 Div(
                     Button(Icon("lucide:share", cls="h-5 w-5 mr-3"), Div(P("Share", cls="font-medium"), P("Share this item with others", cls="text-sm text-muted-foreground"), cls="text-left"), variant="ghost", cls="w-full justify-start p-4 h-auto"),
                     Button(Icon("lucide:copy", cls="h-5 w-5 mr-3"), Div(P("Copy Link", cls="font-medium"), P("Copy the link to your clipboard", cls="text-sm text-muted-foreground"), cls="text-left"), variant="ghost", cls="w-full justify-start p-4 h-auto"),
@@ -618,7 +616,7 @@ def examples():
                     Button(Icon("lucide:trash-2", cls="h-5 w-5 mr-3"), Div(P("Delete", cls="font-medium text-red-600"), P("Permanently remove this item", cls="text-sm text-muted-foreground"), cls="text-left"), variant="ghost", cls="w/full justify-start p-4 h-auto"),
                     cls="px-6 space-y-1"
                 ),
-                SheetFooter(SheetClose("Cancel", signal="actions_sheet", variant="outline", cls="w/full")),
+                SheetFooter(SheetClose("Cancel", variant="outline", cls="w/full")),
                 signal="actions_sheet",
                 side="bottom",
                 size="md"
@@ -639,7 +637,7 @@ def examples():
         return Sheet(
             SheetTrigger(Icon("lucide:mail", cls="h-4 w-4 mr-2"), "Contact Us", signal="contact_sheet"),
             SheetContent(
-                SheetHeader(SheetTitle("Contact Us", signal="contact_sheet"), SheetDescription("Send us a message and we'll get back to you as soon as possible.", signal="contact_sheet")),
+                SheetHeader(SheetTitle("Contact Us"), SheetDescription("Send us a message and we'll get back to you as soon as possible.")),
                 Form(
                     Div(
                         InputWithLabel(label="Name", placeholder="Your full name", signal="contact_name", required=True),
@@ -651,7 +649,7 @@ def examples():
                         cls="space-y-4 px-6"
                     )
                 ),
-                SheetFooter(Div(SheetClose("Cancel", signal="contact_sheet", variant="outline", cls="flex-1 mr-2"), Button("Send Message", ds_disabled="!$contact_name || !$contact_email || !$contact_subject || !$contact_message", ds_on_click="""
+                SheetFooter(Div(SheetClose("Cancel", variant="outline", cls="flex-1 mr-2"), Button("Send Message", ds_disabled="!$contact_name || !$contact_email || !$contact_subject || !$contact_message", ds_on_click="""
                                 if ($contact_name && $contact_email && $contact_subject && $contact_message) {
                                     alert('Message sent! We\\'ll get back to you soon.');
                                     $contact_name = ''; $contact_email = ''; 
@@ -692,8 +690,8 @@ def examples():
                 SheetTrigger(button_label, signal=signal, variant="outline", size="sm"),
                 SheetContent(
                     SheetHeader(
-                        SheetTitle(title, signal=signal),
-                        SheetDescription(description, signal=signal)
+                        SheetTitle(title),
+                        SheetDescription(description)
                     ),
                     Div(P(content, cls="text-sm"), cls="px-6"),
                     signal=signal,
@@ -745,8 +743,8 @@ def create_sheet_docs():
             SheetTrigger("Open Sheet", signal="hero_sheet"),
             SheetContent(
                 SheetHeader(
-                    SheetTitle("Edit Profile", signal="hero_sheet"),
-                    SheetDescription("Make changes to your profile here. Click save when you're done.", signal="hero_sheet")
+                    SheetTitle("Edit Profile"),
+                    SheetDescription("Make changes to your profile here. Click save when you're done.")
         ),
         Div(
             InputWithLabel(label="Name", placeholder="Pedro Duarte", signal="profile_name"),
@@ -754,7 +752,7 @@ def create_sheet_docs():
                     ds_signals(profile_name=value(""), profile_username=value("")),
             cls="space-y-4 px-6 py-4"
         ),
-                SheetFooter(SheetClose("Cancel", signal="hero_sheet", variant="outline"), Button("Save changes")),
+                SheetFooter(SheetClose("Cancel", variant="outline"), Button("Save changes")),
         signal="hero_sheet"
     ),
     signal="hero_sheet"

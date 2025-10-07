@@ -13,41 +13,15 @@ from .utils import cn, gen_id, with_signals
 
 
 class DatePickerElement(Protocol):
-    """
-    DatePicker component with exposed signals.
-
-    Attributes:
-        selected: Signal containing the selected date(s) - string for single mode, list for range/multiple
-        calendar: CalendarElement with exposed calendar signals (month, year, etc.)
-    """
-    selected: Signal
+    selected: Signal  # str for single, list for range/multiple
     calendar: CalendarElement
 
 
 class DateTimePickerElement(Protocol):
-    """
-    DateTimePicker component with exposed signals.
-
-    Attributes:
-        datetime: Signal containing the combined datetime string
-        date: Signal containing just the date portion
-        time: Signal containing just the time portion
-        calendar: CalendarElement with exposed calendar signals
-    """
-    datetime: Signal
+    datetime: Signal  # combined datetime string
     date: Signal
     time: Signal
     calendar: CalendarElement
-
-
-class DatePickerWithInputElement(Protocol):
-    """
-    DatePickerWithInput component with exposed signals.
-
-    Attributes:
-        selected: Signal containing the selected date string
-    """
-    selected: Signal
 
 
 def DatePicker(
@@ -212,7 +186,7 @@ def DatePickerWithInput(
     cls: str = "",
     width: str = "w-[280px]",
     **kwargs: Any,
-) -> DatePickerWithInputElement:
+) -> FT:
     sig = getattr(signal, 'id', signal) or gen_id("date_input")
     cal = f"{sig}_calendar"
     initial_selected = selected or ""

@@ -1,11 +1,10 @@
 from typing import Any, Literal
-from uuid import uuid4
 
 from starhtml import FT, Div, Signal
 from starhtml import Button as HTMLButton
 
 from .toggle import toggle_variants
-from .utils import cn, gen_id
+from .utils import cn, gen_id, inject_context
 
 ToggleGroupType = Literal["single", "multiple"]
 ToggleGroupVariant = Literal["default", "outline"]
@@ -26,24 +25,16 @@ def ToggleGroup(
 ) -> FT:
     sig = getattr(signal, 'id', signal) or gen_id("toggle_group")
     initial = default_value if default_value is not None else ("" if type == "single" else [])
-    selected = Signal(sig, initial)
+    ctx = dict(type=type, variant=variant, size=size, disabled=disabled)
 
-    ctx = dict(selected=selected, type=type, variant=variant, size=size, disabled=disabled, initial=initial)
-
-    processed_children = []
-    for i, child in enumerate(children):
-        if isinstance(child, tuple) and len(child) == 2:
-            item_value, item_content = child
-            processed_children.append(
-                ToggleGroupItem(item_content, value=item_value)
-            )
-        else:
-            # If not a tuple, assume it's already a component
-            processed_children.append(child)
+    items = [
+        ToggleGroupItem(child[1], value=child[0]) if isinstance(child, tuple) and len(child) == 2 else child
+        for child in children
+    ]
 
     return Div(
-        selected,
-        *[c(**ctx) if callable(c) else c for c in processed_children],
+        (selected_state := Signal(sig, initial)),
+        *[inject_context(item, selected=selected_state, **ctx) for item in items],
         data_slot="toggle-group",
         data_variant=variant,
         data_size=size,
@@ -67,24 +58,10 @@ def ToggleGroupItem(
     cls: str = "",
     **kwargs: Any,
 ):
-    def _(*, selected, type, variant, size, disabled, initial, **_):
-        from starhtml.datastar import js
-
-        item_id = kwargs.pop("id", f"toggle_item_{str(uuid4())[:8]}")
-
-        if type == "single":
-            is_selected = selected.eq(value)
-            click_handler = selected.set(is_selected.if_('', value))
-        else:
-            is_selected = selected.contains(value)
-            # For arrays, we need to filter or append - requires raw JS for filter
-            click_handler = js(
-                f"{selected.to_js()} = {is_selected.to_js()} ? "
-                f"{selected.to_js()}.filter(v => v !== '{value}') : "
-                f"[...{selected.to_js()}, '{value}']"
-            )
-
-        is_initially_selected = initial == value if type == "single" else value in (initial or [])
+    def _(*, selected, type, variant, size, disabled, **_):
+        item_id = kwargs.pop("id", gen_id("toggle_item"))
+        is_selected = selected.eq(value) if type == "single" else selected.contains(value)
+        click_handler = selected.toggle(value, '') if type == "single" else selected.toggle_in(value)
 
         return HTMLButton(
             *children,
@@ -94,15 +71,12 @@ def ToggleGroupItem(
             id=item_id,
             disabled=disabled,
             aria_label=aria_label,
-            aria_checked="true" if is_initially_selected else "false",
+            data_attr_aria_checked=is_selected.if_('true', 'false'),
+            data_attr_data_state=is_selected.if_('on', 'off'),
             data_slot="toggle-group-item",
             data_variant=variant,
             data_size=size,
             data_value=value,
-            data_disabled="" if disabled else None,
-            data_attr_aria_checked=is_selected.if_('true', 'false'),
-            data_attr_data_state=is_selected.if_('on', 'off'),
-            data_state="on" if is_initially_selected else "off",
             cls=cn(
                 toggle_variants(variant=variant, size=size),
                 "shrink-0 rounded-none shadow-none",

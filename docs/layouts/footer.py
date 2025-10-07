@@ -3,22 +3,19 @@ from starhtml import *
 
 
 def _attribution_section(attribution: str, hosting_info: str) -> FT:
-    """Create the attribution text section."""
     return P(
-        attribution, ". ", hosting_info, ".", 
+        attribution, ". ", hosting_info, ".",
         cls="text-sm text-muted-foreground"
     )
 
 
 def _github_repositories_section() -> FT:
-    """Create the GitHub repositories section with both repos elegantly displayed."""
     return Div(
         P(
             "Find us on GitHub:",
             cls="text-sm font-medium text-foreground mb-3"
         ),
         Div(
-            # StarHTML Framework Repository
             A(
                 Div(
                     Icon("lucide:code", cls="h-4 w-4 flex-shrink-0"),
@@ -34,7 +31,6 @@ def _github_repositories_section() -> FT:
                 rel="noopener noreferrer",
                 cls="flex items-center p-2 rounded-md border border-border/50 hover:border-border hover:bg-accent/50 transition-colors group"
             ),
-            # StarUI Component Library Repository  
             A(
                 Div(
                     Icon("lucide:palette", cls="h-4 w-4 flex-shrink-0"),
@@ -46,7 +42,7 @@ def _github_repositories_section() -> FT:
                     cls="flex items-center gap-2"
                 ),
                 href="https://github.com/banditburai/starui",
-                target="_blank", 
+                target="_blank",
                 rel="noopener noreferrer",
                 cls="flex items-center p-2 rounded-md border border-border/50 hover:border-border hover:bg-accent/50 transition-colors group"
             ),
@@ -57,7 +53,6 @@ def _github_repositories_section() -> FT:
 
 
 def _additional_links_section(links: list[dict[str, Any]]) -> FT:
-    """Create the additional links section."""
     return Div(
         *[
             A(
@@ -73,27 +68,19 @@ def _additional_links_section(links: list[dict[str, Any]]) -> FT:
 
 def _footer_content(
     attribution: str,
-    hosting_info: str, 
-    source_text: str,
-    source_href: str,
+    hosting_info: str,
     links: list[dict[str, Any]] | None = None,
     show_github_repos: bool = True,
 ) -> FT:
-    """Create the main footer content area."""
-    sections = [
-        _attribution_section(attribution, hosting_info),
-    ]
-    
+    sections = [_attribution_section(attribution, hosting_info)]
+
     if show_github_repos:
         sections.append(_github_repositories_section())
-    
+
     if links:
         sections.append(_additional_links_section(links))
-    
-    return Div(
-        *sections,
-        cls="space-y-4",
-    )
+
+    return Div(*sections, cls="space-y-4")
 
 
 def DocsFooter(
@@ -106,14 +93,11 @@ def DocsFooter(
     class_name: str = "",
     **attrs,
 ) -> FT:
-    """Create a documentation footer with attribution, GitHub repositories, and optional additional links."""
     return Footer(
         Div(
             _footer_content(
                 attribution=attribution,
                 hosting_info=hosting_info,
-                source_text=source_text,
-                source_href=source_href,
                 links=links,
                 show_github_repos=show_github_repos,
             ),

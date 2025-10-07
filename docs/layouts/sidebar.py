@@ -1,14 +1,12 @@
 from typing import Any
-from functools import lru_cache
 from starhtml import *
-from starhtml.datastar import ds_effect, ds_computed, toggle_class, ds_class, ds_signals, value, ds_computed
+from starhtml.datastar import js
 
-# Global cache for sidebar rendering - built once at startup
+# Cache sidebar nav to avoid rebuilding on every request
 _SIDEBAR_NAV_CACHE = {}
 
 
 def build_sidebar_nav(sections: list[dict[str, Any]] | None = None) -> FT:
-    """Build the sidebar navigation content once and cache it."""
     sections = sections or []
     cache_key = str(sections)
     
@@ -21,15 +19,10 @@ def build_sidebar_nav(sections: list[dict[str, Any]] | None = None) -> FT:
     return _SIDEBAR_NAV_CACHE[cache_key]
 
 
-def DocsSidebar(
-    sections: list[dict[str, Any]] | None = None,
-    class_name: str = "",
-    **attrs
-) -> FT:
-    """Desktop sidebar - visible on xl screens."""
+def DocsSidebar(sections: list[dict[str, Any]] | None = None) -> FT:
     sections = sections or []
     nav_content = build_sidebar_nav(sections)
-    
+
     return Div(
         Aside(
             Div(
@@ -44,7 +37,6 @@ def DocsSidebar(
 
 
 def MobileSidebar(sections: list[dict[str, Any]] | None = None) -> FT:
-    """Mobile sidebar - reuses the same cached nav content."""
     sections = sections or []
     nav_content = build_sidebar_nav(sections)
     
@@ -56,28 +48,25 @@ def MobileSidebar(sections: list[dict[str, Any]] | None = None) -> FT:
 
 def _sidebar_section(section: dict[str, Any]) -> FT:
     section_title = section.get("title", "Unknown")
-    
-    # Create a simple cache key based on section content
     section_key = (section_title, tuple(str(item.get("href", "#")) for item in section.get("items", [])))
-    
-    # Use a simple cache check
+
     if not hasattr(_sidebar_section, '_cache'):
         _sidebar_section._cache = {}
-    
+
     if section_key in _sidebar_section._cache:
         return _sidebar_section._cache[section_key]
-    
+
     result = Div(
         H4(
             section.get("title", ""),
             cls="mb-4 px-2 text-sm font-semibold text-foreground"
-        ) if section.get("title") else "",
+        ) if section.get("title") else None,
         Div(
             *[_sidebar_item(item) for item in section.get("items", [])],
             cls="flex flex-col items-start text-sm mb-6 space-y-1"
         )
     )
-    
+
     _sidebar_section._cache[section_key] = result
     return result
 
@@ -85,24 +74,23 @@ def _sidebar_section(section: dict[str, Any]) -> FT:
 def _sidebar_item(item: dict[str, Any]) -> FT:
     is_disabled = item.get("disabled", False)
     href = item.get("href", "#")
-    
+
     if is_disabled:
         return Span(
             item.get("label", ""),
             cls="inline-flex items-center rounded-md px-2 py-1.5 text-sm text-muted-foreground cursor-not-allowed opacity-60"
         )
-    
+
     base_classes = "inline-flex items-center rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        
+    signal_name = f"is_active_{href.replace('/', '_').replace('-', '_')}"
+
     return A(
-        ds_computed("is_active_path", f"$sidebar_active === '{href}'"),        
-        toggle_class(
-            "is_active_path",
-            "bg-accent text-accent-foreground font-medium",
-            "text-muted-foreground",
-            base=base_classes
-        ),
+        (is_active := Signal(signal_name, js(f"$sidebar_active === '{href}'"))),
         item.get("label", ""),
         href=href,
         cls=base_classes,
+        data_attr_class=is_active.if_(
+            "bg-accent text-accent-foreground font-medium " + base_classes,
+            "text-muted-foreground " + base_classes
+        ),
     )

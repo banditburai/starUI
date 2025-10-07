@@ -110,3 +110,20 @@ def js_literal(value: str) -> str:
     """Return a JSON-encoded JS string literal for safe embedding in JS expressions."""
     return json.dumps(value)
 
+
+def inject_context(element, **context):
+    """Recursively inject context into callable children, preserving structure.
+
+    Allows arbitrary HTML wrappers while ensuring context flows to nested callables.
+    """
+    if callable(element):
+        result = element(**context)
+        if hasattr(result, 'children') and result.children:
+            result.children = tuple(inject_context(c, **context) for c in result.children)
+        return result
+
+    if hasattr(element, 'children') and element.children:
+        element.children = tuple(inject_context(c, **context) for c in element.children)
+
+    return element
+
