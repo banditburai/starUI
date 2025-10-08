@@ -67,7 +67,7 @@ from src.starui.registry.components.table import (
 from src.starui.registry.components.textarea import Textarea, TextareaWithLabel
 from src.starui.registry.components.tabs import Tabs, TabsList, TabsTrigger, TabsContent
 from src.starui.registry.components.theme_toggle import ThemeToggle
-from src.starui.registry.components.toast import Toaster, toast, success_toast, error_toast, warning_toast, info_toast
+from src.starui.registry.components.toast import Toaster, toast, ToastQueue
 from src.starui.registry.components.toggle import Toggle
 from src.starui.registry.components.toggle_group import ToggleGroup
 from src.starui.registry.components.tooltip import Tooltip, TooltipTrigger, TooltipContent, TooltipProvider
@@ -2760,7 +2760,7 @@ def test_tabs():
                 ),
                 id="settings_icon",
             ),
-            default_id="profile",
+            default_value="profile",
             variant="default",
         ),
 
@@ -2949,22 +2949,22 @@ def test_toast():
             ),
             Button(
                 "Success Toast",
-                data_on_click=success_toast('Success!', 'Operation completed successfully'),
+                data_on_click=toast.success('Success!', 'Operation completed successfully'),
                 variant="outline"
             ),
             Button(
                 "Error Toast",
-                data_on_click=error_toast('Error!', 'Something went wrong'),
+                data_on_click=toast.error('Error!', 'Something went wrong'),
                 variant="outline"
             ),
             Button(
                 "Warning Toast",
-                data_on_click=warning_toast('Warning!', 'Please be careful'),
+                data_on_click=toast.warning('Warning!', 'Please be careful'),
                 variant="outline"
             ),
             Button(
                 "Info Toast",
-                data_on_click=info_toast('Info', 'Here is some information'),
+                data_on_click=toast.info('Info', 'Here is some information'),
                 variant="outline"
             ),
             cls="flex flex-wrap gap-2"
@@ -2997,9 +2997,9 @@ def test_toast():
             Button(
                 "Spam Toasts",
                 data_on_click=f"""
-                    {info_toast('First toast', 'This is the first one')}
-                    setTimeout(() => {{ {success_toast('Second toast', 'This is the second one')} }}, 500);
-                    setTimeout(() => {{ {warning_toast('Third toast', 'This is the third one')} }}, 1000);
+                    {toast.info('First toast', 'This is the first one')}
+                    setTimeout(() => {{ {toast.success('Second toast', 'This is the second one')} }}, 500);
+                    setTimeout(() => {{ {toast.warning('Third toast', 'This is the third one')} }}, 1000);
                 """,
                 variant="destructive"
             ),
@@ -3015,14 +3015,14 @@ def test_toast():
                     {toast('Loading...', 'Please wait...', duration=0)}
                     setTimeout(() => {{
                         $toasts = $toasts.filter(t => t.title !== 'Loading...');
-                        {success_toast('Success!', 'Promise resolved successfully')}
+                        {toast.success('Success!', 'Promise resolved successfully')}
                     }}, 2000);
                 """,
                 variant="outline"
             ),
             Button(
                 "Rich Colors Demo",
-                data_on_click=success_toast('Rich Colors', 'Notice the rich background gradients'),
+                data_on_click=toast.success('Rich Colors', 'Notice the rich background gradients'),
                 variant="outline"
             ),
             cls="flex gap-2"
@@ -3036,38 +3036,26 @@ def test_toast():
 @sse
 async def toast_sse_example():
     """Server-side SSE toast example - demonstrates hypermedia pattern."""
-    toasts = []
-
-    # Toast 1
-    new_toast = {"id": int(time.time() * 1000), "title": "Processing...", "description": "Starting server operation", "variant": "info", "timestamp": int(time.time() * 1000)}
-    toasts = [new_toast] + toasts[:2]
-    yield signals(toasts=toasts)
-    await asyncio.sleep(1)
-
-    # Toast 2
-    new_toast = {"id": int(time.time() * 1000), "title": "Step 1 Complete", "description": "Validating data...", "variant": "default", "timestamp": int(time.time() * 1000)}
-    toasts = [new_toast] + toasts[:2]
-    yield signals(toasts=toasts)
-    await asyncio.sleep(1)
-
-    # Toast 3
-    new_toast = {"id": int(time.time() * 1000), "title": "Step 2", "description": "Checking permissions...", "variant": "warning", "timestamp": int(time.time() * 1000)}
-    toasts = [new_toast] + toasts[:2]
-    yield signals(toasts=toasts)
-    await asyncio.sleep(1)
-
-    # Final toast - random outcome
     import random
-    if random.choice([True, False]):
-        new_toast = {"id": int(time.time() * 1000), "title": "Success!", "description": "Operation completed successfully", "variant": "success", "timestamp": int(time.time() * 1000)}
-    else:
-        new_toast = {"id": int(time.time() * 1000), "title": "Failed", "description": "Operation encountered an error", "variant": "error", "timestamp": int(time.time() * 1000)}
-    toasts = [new_toast] + toasts[:2]
-    yield signals(toasts=toasts)
 
-    # Auto-dismiss all toasts after 4 seconds
+    t = ToastQueue()
+
+    yield t.info("Processing...", "Starting server operation")
+    await asyncio.sleep(1)
+
+    yield t.show("Step 1 Complete", "Validating data...")
+    await asyncio.sleep(1)
+
+    yield t.warning("Step 2", "Checking permissions...")
+    await asyncio.sleep(1)
+
+    if random.choice([True, False]):
+        yield t.success("Success!", "Operation completed successfully")
+    else:
+        yield t.error("Failed", "Operation encountered an error")
+
     await asyncio.sleep(4)
-    yield signals(toasts=[])
+    yield t.clear()
 
 
 @rt("/toast-server")
@@ -3091,7 +3079,7 @@ def test_toast_server():
         Div(
             Button(
                 "Client-Side Toast",
-                data_on_click=success_toast('Client-Side', 'This was triggered directly in the browser'),
+                data_on_click=toast.success('Client-Side', 'This was triggered directly in the browser'),
                 variant="outline"
             ),
             P("Click to trigger a toast using client-side JavaScript.", cls="text-sm text-muted-foreground mt-2"),
@@ -3123,9 +3111,8 @@ def test_toast_server():
                 CodeBlock('''@rt("/process")
 @sse
 async def process():
-    yield execute_script(
-        toast('Message', 'Description')
-    )
+    t = ToastQueue()
+    yield t.success('Message', 'Description')
 
 Button(
     "Process",
@@ -3537,21 +3524,21 @@ def test_tooltip():
         Div(
             Tooltip(
                 TooltipTrigger(
-                    Button("Top Start", variant="outline")
+                    Button("Top Start", variant="outline", cls="w-48")
                 ),
-                TooltipContent("Aligned to start", side="top", align="start"),
+                TooltipContent("⬅ Start", side="top", align="start", cls="w-28"),
             ),
             Tooltip(
                 TooltipTrigger(
-                    Button("Top Center", variant="outline")
+                    Button("Top Center", variant="outline", cls="w-48")
                 ),
-                TooltipContent("Aligned to center", side="top", align="center"),
+                TooltipContent("⬆ Center", side="top", align="center", cls="w-28"),
             ),
             Tooltip(
                 TooltipTrigger(
-                    Button("Top End", variant="outline")
+                    Button("Top End", variant="outline", cls="w-48")
                 ),
-                TooltipContent("Aligned to end", side="top", align="end"),
+                TooltipContent("End ➡", side="top", align="end", cls="w-28"),
             ),
             cls="flex gap-4 flex-wrap"
         ),

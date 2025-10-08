@@ -1,8 +1,10 @@
 from typing import Any, Literal
+import json
+import time
 
-from starhtml import FT, Button, Div, Icon, Span, Signal, js
+from starhtml import FT, Button, Div, Icon, Span, Signal, js, signals
 
-from .utils import cn, cva, gen_id, with_signals
+from .utils import cn, cva
 
 ToastVariant = Literal["default", "success", "error", "warning", "info", "destructive"]
 ToastPosition = Literal[
@@ -33,13 +35,11 @@ toast_variants = cva(
 
 def Toaster(
     position: ToastPosition = "bottom-right",
-    signal: str | Signal = "toasts",
     max_visible: int = 3,
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = getattr(signal, 'id', signal) or "toasts"
-    toasts = Signal(sig, [])
+    toasts = Signal("toasts", [])
 
     position_cls = {
         "top-left": "top-0 left-0",
@@ -50,20 +50,17 @@ def Toaster(
         "bottom-right": "bottom-0 right-0",
     }[position]
 
-    return with_signals(
+    return Div(
+        toasts,
         Div(
-            toasts,
-            Div(
-                *[_toast_slot(i)(toasts=toasts) for i in range(max_visible)],
-                cls=cn(
-                    "fixed z-[100] flex flex-col-reverse gap-2 p-4 w-[calc(100%-2rem)] sm:w-[420px] pointer-events-none",
-                    position_cls,
-                    cls,
-                ),
-                **kwargs,
+            *[_toast_slot(i)(toasts=toasts) for i in range(max_visible)],
+            cls=cn(
+                "fixed z-[100] flex flex-col-reverse gap-2 p-4 w-[calc(100%-2rem)] sm:w-[420px] pointer-events-none",
+                position_cls,
+                cls,
             ),
+            **kwargs,
         ),
-        toasts=toasts,
     )
 
 
@@ -136,46 +133,90 @@ def _toast_element(index: int, variant: str) -> FT:
     return _
 
 
-def toast(
-    message: str,
-    description: str = "",
-    variant: ToastVariant = "default",
-    duration: int = 4000,
-    signal: str = "toasts",
-    max_visible: int = 3,
-) -> str:
-    msg = message.replace("'", "\\'").replace('"', '\\"')
-    desc = description.replace("'", "\\'").replace('"', '\\"')
+class ToastHelper:
+    """shadcn/Sonner-style toast API for client-side usage."""
 
-    # IIFE provides scope isolation for SSE contexts
-    return f"""(()=>{{const t={{id:Date.now(),title:'{msg}',description:'{desc}',variant:'{variant}',timestamp:Date.now()}};${signal}=[t,...${signal}].slice(0,{max_visible});{f'setTimeout(()=>{{${signal}=${signal}.filter(x=>x.id!==t.id)}},{duration})' if duration > 0 else ''}}})()"""
+    def __call__(
+        self,
+        title: str,
+        description: str = "",
+        variant: ToastVariant = "default",
+        duration: int = 4000,
+    ) -> str:
+        data = json.dumps({"title": title, "description": description, "variant": variant})
 
+        # IIFE for scope isolation in SSE contexts
+        return f"""(()=>{{
+const t={{...{data},id:Date.now(),timestamp:Date.now()}};$toasts=[t,...$toasts].slice(0,3);{f'setTimeout(()=>$toasts=$toasts.filter(x=>x.id!==t.id),{duration});' if duration > 0 else ''}
+}})()"""
 
-def success_toast(
-    message: str, description: str = "", duration: int = 4000, signal: str = "toasts"
-) -> str:
-    return toast(
-        message, description, variant="success", duration=duration, signal=signal
-    )
+    def success(self, title: str, description: str = "", duration: int = 4000) -> str:
+        return self(title, description, "success", duration)
 
+    def error(self, title: str, description: str = "", duration: int = 4000) -> str:
+        return self(title, description, "error", duration)
 
-def error_toast(
-    message: str, description: str = "", duration: int = 4000, signal: str = "toasts"
-) -> str:
-    return toast(
-        message, description, variant="error", duration=duration, signal=signal
-    )
+    def warning(self, title: str, description: str = "", duration: int = 4000) -> str:
+        return self(title, description, "warning", duration)
 
+    def info(self, title: str, description: str = "", duration: int = 4000) -> str:
+        return self(title, description, "info", duration)
 
-def warning_toast(
-    message: str, description: str = "", duration: int = 4000, signal: str = "toasts"
-) -> str:
-    return toast(
-        message, description, variant="warning", duration=duration, signal=signal
-    )
+    def destructive(self, title: str, description: str = "", duration: int = 4000) -> str:
+        return self(title, description, "destructive", duration)
 
 
-def info_toast(
-    message: str, description: str = "", duration: int = 4000, signal: str = "toasts"
-) -> str:
-    return toast(message, description, variant="info", duration=duration, signal=signal)
+class ToastQueue:
+    """Toast state manager for SSE routes."""
+
+    def __init__(self, max_visible: int = 3):
+        self.toasts = []
+        self.max_visible = max_visible
+
+    def _make_toast(self, title: str, description: str, variant: ToastVariant) -> dict:
+        return {
+            "id": int(time.time() * 1000000),  # Microseconds for uniqueness
+            "title": title,
+            "description": description,
+            "variant": variant,
+            "timestamp": int(time.time() * 1000)
+        }
+
+    def __call__(self, title: str, description: str = "", variant: ToastVariant = "default"):
+        return self.show(title, description, variant)
+
+    def show(self, title: str, description: str = "", variant: ToastVariant = "default"):
+        new_toast = self._make_toast(title, description, variant)
+        self.toasts = [new_toast] + self.toasts[:self.max_visible - 1]
+        return signals(toasts=self.toasts)
+
+    def success(self, title: str, description: str = ""):
+        return self.show(title, description, "success")
+
+    def error(self, title: str, description: str = ""):
+        return self.show(title, description, "error")
+
+    def warning(self, title: str, description: str = ""):
+        return self.show(title, description, "warning")
+
+    def info(self, title: str, description: str = ""):
+        return self.show(title, description, "info")
+
+    def destructive(self, title: str, description: str = ""):
+        return self.show(title, description, "destructive")
+
+    def clear(self):
+        self.toasts = []
+        return signals(toasts=[])
+
+
+toast = ToastHelper()
+
+
+__all__ = [
+    "Toaster",
+    "toast",
+    "ToastQueue",
+    "ToastVariant",
+    "ToastPosition",
+]

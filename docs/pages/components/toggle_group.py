@@ -61,7 +61,7 @@ def examples():
                 ("card", Div(Icon("lucide:layout-grid", cls="w-4 h-4"), "Card", cls="flex items-center gap-2")),
                 type="single",
                 signal="view_mode",
-                initial_value="grid"
+                default_value="grid"
             ),
             
             # Content area that changes based on selection

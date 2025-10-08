@@ -121,7 +121,7 @@ def examples():
                             "For large teams and organizations",
                             ["Everything in Pro", "Dedicated support", "Unlimited storage", "Custom integrations", "SLA guarantee"]
                         ),
-                        initial_value="free",
+                        default_value="free",
                         signal="selected_plan",
                         hide_indicators=True,
                         cls="grid grid-cols-1 gap-3 w-full"
@@ -411,7 +411,7 @@ def create_radio_group_docs():
                 RadioGroupItem(value="push", label="Push notifications"),
                 RadioGroupItem(value="none", label="No notifications"),
                 signal="notification_pref",
-                initial_value="email"
+                default_value="email"
             ),
             cls="max-w-md mx-auto"
         )

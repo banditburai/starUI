@@ -3,7 +3,7 @@ from typing import Any, Literal
 from starhtml import Div, FT, Signal
 from starhtml.datastar import evt
 
-from .utils import cn, gen_id
+from .utils import cn, gen_id, reset_timeout, clear_timeout
 
 
 def Tooltip(
@@ -37,30 +37,20 @@ def TooltipTrigger(
     def trigger(*, sig, open_state, timer_state, **_):
         trigger_ref = Signal(f"{sig}_trigger", _ref_only=True)
 
-        # Manual timer logic with setTimeout/clearTimeout
-        mouseenter_expr = f"clearTimeout(${timer_state.id}); ${timer_state.id} = setTimeout(() => ${open_state.id} = true, {delay_duration})"
-
-        if hide_delay > 0:
-            mouseleave_expr = f"clearTimeout(${timer_state.id}); ${timer_state.id} = setTimeout(() => ${open_state.id} = false, {hide_delay})"
-        else:
-            mouseleave_expr = f"clearTimeout(${timer_state.id}); ${open_state.id} = false"
-
-        focus_expr = f"clearTimeout(${timer_state.id}); ${timer_state.id} = setTimeout(() => ${open_state.id} = true, {delay_duration})"
-        blur_expr = f"clearTimeout(${timer_state.id}); ${open_state.id} = false"
-        keydown_expr = f"event.key === 'Escape' && (clearTimeout(${timer_state.id}), ${open_state.id} = false)"
+        open_expr = reset_timeout(timer_state, delay_duration, open_state.set(True))
+        close_expr = clear_timeout(timer_state, open_state.set(False))
 
         return Div(
             *children,
             data_ref=trigger_ref,
-            data_on_mouseenter=mouseenter_expr,
-            data_on_mouseleave=mouseleave_expr,
-            data_on_focus=focus_expr,
-            data_on_blur=blur_expr,
-            data_on_keydown=keydown_expr,
+            data_on_mouseenter=open_expr,
+            data_on_mouseleave=reset_timeout(timer_state, hide_delay, open_state.set(False)) if hide_delay > 0 else close_expr,
+            data_on_focusin=open_expr,
+            data_on_focusout=close_expr,
+            data_on_keydown=(evt.key == 'Escape').then(close_expr),
             data_attr_aria_expanded=open_state,
             aria_describedby=f"{sig}_content",
             id=trigger_ref.id,
-            tabindex="0",
             data_slot="tooltip-trigger",
             cls=cn("inline-block outline-none", cls),
             **kwargs,
@@ -80,7 +70,7 @@ def TooltipContent(
     cls: str = "",
     **kwargs: Any,
 ):
-    def content(*, sig, open_state, timer_state, **_):
+    def content(*, sig, open_state, **_):
         content_ref = Signal(f"{sig}_content", _ref_only=True)
         placement = side if align == "center" else f"{side}-{align}"
 

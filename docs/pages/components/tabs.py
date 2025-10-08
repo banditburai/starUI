@@ -54,7 +54,7 @@ def examples():
                 ),
                 id="reports"
             ),
-            default_id="overview",
+            default_value="overview",
             cls="w-full"
         )
 
@@ -91,7 +91,7 @@ Button("Outline", variant="outline")'''),
                 ),
                 id="code"
             ),
-            default_id="preview",
+            default_value="preview",
             cls="w-full"
         )
 
@@ -141,7 +141,7 @@ Button("Outline", variant="outline")'''),
                 ),
                 id="notifications"
             ),
-            default_id="general",
+            default_value="general",
             cls="w-full"
         )
 
@@ -182,7 +182,7 @@ Button("Outline", variant="outline")'''),
                 ),
                 id="api"
             ),
-            default_id="docs",
+            default_value="docs",
             variant="plain",
             cls="w-full"
         )
@@ -242,7 +242,7 @@ Button("Outline", variant="outline")'''),
                 ),
                 id="contact"
             ),
-            default_id="home",
+            default_value="home",
             variant="plain",
             cls="w-full"
         )
@@ -279,7 +279,7 @@ def create_tabs_docs():
                 ),
                 id="password"
             ),
-            default_id="account",
+            default_value="account",
             cls="w-full max-w-md"
         )
 

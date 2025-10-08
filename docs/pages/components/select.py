@@ -58,7 +58,7 @@ def examples():
                     SelectItem("ist", "India Standard Time (IST)")
                 )
             ),
-            initial_value="pst"
+            default_value="pst"
         )
 
     yield ComponentPreview(
@@ -359,8 +359,8 @@ def examples():
                         SelectItem("admin", "Admin"),
                         SelectItem("owner", "Owner", disabled=True)
                     ),
-                    initial_value=initial_value,
-                    initial_label=initial_label,
+                    default_value=initial_value,
+                    default_label=initial_label,
                     signal=signal
                 ),
                 cls="flex items-center justify-between gap-6 px-4 py-3 first:pt-4 last:pb-4"

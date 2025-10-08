@@ -10,16 +10,16 @@ from .utils import cn, gen_id, inject_context
 
 def Select(
     *children,
-    initial_value: str | None = None,
-    initial_label: str | None = None,
+    default_value: str | None = None,
+    default_label: str | None = None,
     signal: str | Signal = "",
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
     sig = getattr(signal, 'id', signal) or gen_id("select")
 
-    selected = Signal(f"{sig}_value", initial_value or "")
-    selected_label = Signal(f"{sig}_label", initial_label or "")
+    selected = Signal(f"{sig}_value", default_value or "")
+    selected_label = Signal(f"{sig}_label", default_label or "")
     open_state = Signal(f"{sig}_open", False)
 
     ctx = dict(sig=sig, selected=selected, selected_label=selected_label, open_state=open_state)
@@ -300,8 +300,8 @@ def SelectWithLabel(
                 id=trigger_id,
             ),
             SelectContent(*_build_select_items(options)),
-            initial_value=value,
-            initial_label=_find_initial_label(options, value),
+            default_value=value,
+            default_label=_find_initial_label(options, value),
             signal=sig,
             cls="w-full",
             *attrs,

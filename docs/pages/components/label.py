@@ -164,7 +164,7 @@ def examples():
                     RadioGroupItem("email", "Email"),
                     RadioGroupItem("phone", "Phone"), 
                     RadioGroupItem("mail", "Mail"),
-                    initial_value="email"
+                    default_value="email"
                 ),
                 cls="p-4 border rounded-lg"
             ),

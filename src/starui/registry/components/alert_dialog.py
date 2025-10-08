@@ -21,8 +21,8 @@ def AlertDialog(
     open_state = Signal(f"{sig}_open", False)
     dialog_ref = Signal(sig, _ref_only=True)
 
-    trigger = next((c for c in children if callable(c) and c.__name__ == 'trigger'), None)
-    content = next((c for c in children if callable(c) and c.__name__ == 'content'), None)
+    trigger = next((c for c in children if callable(c) and getattr(c, '__name__', None) == 'trigger'), None)
+    content = next((c for c in children if callable(c) and getattr(c, '__name__', None) == 'content'), None)
 
     ctx = dict(open_state=open_state, dialog_ref=dialog_ref, sig=sig)
 
@@ -158,7 +158,9 @@ def AlertDialogAction(
     def _(*, open_state, dialog_ref, **_):
         from .button import Button
 
-        click_actions = ([action] if action else []) + [open_state.set(False), dialog_ref.close()]
+        # Handle action as either a single item or list
+        action_list = action if isinstance(action, list) else ([action] if action else [])
+        click_actions = action_list + [open_state.set(False), dialog_ref.close()]
 
         return Button(
             *children,

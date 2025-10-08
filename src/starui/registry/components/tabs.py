@@ -11,7 +11,7 @@ TabsVariant = Literal["default", "plain"]
 
 def Tabs(
     *children: Any,
-    default_id: str | int = 0,
+    default_value: str | int = 0,
     variant: TabsVariant = "default",
     signal: str | Signal = "",
     cls: str = "",
@@ -20,9 +20,9 @@ def Tabs(
     sig = getattr(signal, 'id', signal) or gen_id("tabs")
 
     ctx = dict(
-        tabs_state=(tabs_state := Signal(sig, default_id)),
+        tabs_state=(tabs_state := Signal(sig, default_value)),
         variant=variant,
-        default_id=default_id,
+        default_value=default_value,
         _trigger_index=count(),
         _content_index=count(),
     )
@@ -104,7 +104,7 @@ def TabsTrigger(
 
 
 def TabsContent(*children: Any, id: str | int | None = None, cls: str = "", **kwargs: Any) -> FT:
-    def _(*, tabs_state, default_id, _content_index, **_):
+    def _(*, tabs_state, default_value, _content_index, **_):
         tab_id = id if id is not None else next(_content_index)
         is_active = tabs_state == tab_id
 
@@ -116,7 +116,7 @@ def TabsContent(*children: Any, id: str | int | None = None, cls: str = "", **kw
             id=f"panel-{tab_id}",
             aria_labelledby=str(tab_id),
             tabindex="0",
-            style="display: none" if tab_id != default_id else None,
+            style="display: none" if tab_id != default_value else None,
             cls=cn("mt-2 outline-none overflow-x-auto", cls),
             **kwargs,
         )

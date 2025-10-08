@@ -11,7 +11,7 @@ from .utils import cn, gen_id
 
 def RadioGroup(
     *children: Any,
-    initial_value: str = "",
+    default_value: str = "",
     signal: str | Signal = "",
     name: str = "",
     required: bool = False,
@@ -22,7 +22,7 @@ def RadioGroup(
 ) -> FT:
     sig = getattr(signal, 'id', signal) or gen_id("radio")
     group_name = name or f"radio_group_{sig}"
-    selected = Signal(sig, initial_value)
+    selected = Signal(sig, default_value)
 
     ctx = dict(sig=sig, selected=selected, group_name=group_name, hide_indicators=hide_indicators)
 
@@ -157,7 +157,7 @@ def RadioGroupWithLabel(
                 )
                 for option in options
             ],
-            initial_value=value,
+            default_value=value,
             signal=sig,
             name=group_name,
             required=required,

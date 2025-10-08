@@ -428,8 +428,8 @@ def examples():
                                     SelectItem("system", "System", signal="theme_pref"),
                                     signal="theme_pref"
                                 ),
-                                initial_value="system",
-                                initial_label="System",
+                                default_value="system",
+                                default_label="System",
                                 signal="theme_pref"
                             ),
                             cls="mb-4"
@@ -449,8 +449,8 @@ def examples():
                                     SelectItem("de", "German", signal="language_pref"),
                                     signal="language_pref"
                                 ),
-                                initial_value="en",
-                                initial_label="English",
+                                default_value="en",
+                                default_label="English",
                                 signal="language_pref"
                             ),
                             cls="mb-4"
