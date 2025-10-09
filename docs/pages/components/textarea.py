@@ -10,12 +10,7 @@ CATEGORY = "form"
 ORDER = 25
 STATUS = "stable"
 
-from starhtml import Div, P, Input, Label, Icon, Span, H2, H3, Form, Code, Button as HTMLButton, Script
-from starhtml.datastar import (
-    ds_on_click, ds_show, ds_text, ds_signals, value,
-    ds_bind, ds_disabled, ds_on_input, ds_effect, ds_class, ds_style,
-    ds_on_mouseenter, ds_on_mouseleave
-)
+from starhtml import Div, P, Input, Label, Icon, Span, H2, H3, Form, Code, Button as HTMLButton, Script, Signal, js
 from starui.registry.components.textarea import Textarea, TextareaWithLabel
 from starui.registry.components.button import Button
 from starui.registry.components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
@@ -25,203 +20,186 @@ from utils import auto_generate_page, with_code, Prop, build_api_reference
 from widgets.component_preview import ComponentPreview
 
 
-def examples():
-    
-    # Basic usage
-    @with_code
-    def basic_textarea_example():
-        return Div(
-            Textarea(placeholder="Type your message here..."),
-            Textarea(
-                placeholder="With initial value",
-                value="This textarea starts with content that you can edit.",
-                cls="mt-4"
-            ),
-            Textarea(
-                placeholder="Disabled textarea",
-                disabled=True,
-                cls="mt-4"
-            ),
-            cls="space-y-4 w-full max-w-3xl mx-auto"
-        )
-
-    yield ComponentPreview(
-        basic_textarea_example(),
-        basic_textarea_example.code,
-        title="Basic Textarea",
-        description="Simple textarea with different states"
+# Module-level example functions
+@with_code
+def basic_textarea_example():
+    return Div(
+        Textarea(placeholder="Type your message here..."),
+        Textarea(
+            placeholder="With initial value",
+            value="This textarea starts with content that you can edit.",
+            cls="mt-4"
+        ),
+        Textarea(
+            placeholder="Disabled textarea",
+            disabled=True,
+            cls="mt-4"
+        ),
+        cls="space-y-4 w-full max-w-3xl mx-auto"
     )
-    
-    # Contextual usage examples
-    @with_code
-    def contextual_textarea_examples():
-        return Div(
-            Card(
-                CardHeader(
-                    CardTitle("Quick Note"),
-                    CardDescription("Brief message or reminder")
-                ),
-                CardContent(
-                    TextareaWithLabel(
-                        label="Note",
-                        placeholder="Jot down your thoughts...",
-                        rows=2,
-                        signal="quick_note",
-                        helper_text="Perfect for short messages"
-                    ),
-                    Button(
-                        Icon("lucide:save", cls="h-4 w-4 mr-2"),
-                        "Save Note",
-                        ds_on_click("alert('Note saved!')"),
-                        size="sm",
-                        ds_disabled="($quick_note || '').trim().length === 0",                        
-                        cls="mt-3"
-                    ),
-                    ds_signals(quick_note=value(""))
-                ),
-                cls="w-full"
-            ),
-            Card(
-                CardHeader(
-                    CardTitle("Article Summary"),
-                    CardDescription("Summarize the key points")
-                ),
-                CardContent(
-                    TextareaWithLabel(
-                        label="Summary",
-                        placeholder="Write a concise summary of the main ideas...",
-                        rows=4,
-                        signal="article_summary",
-                        helper_text="Aim for 2-3 sentences"
-                    ),
-                    Div(
-                        Badge(
-                            ds_text("($article_summary || '').split(' ').length + ' words'"),
-                            variant="secondary"
-                        ),
-                        ds_show="($article_summary || '').trim().length > 0",
-                        cls="mt-2"
-                    ),
-                    ds_signals(article_summary=value(""))
-                ),
-                cls="w-full"
-            ),
-            Card(
-                CardHeader(
-                    CardTitle("Essay Draft"),
-                    CardDescription("Long-form writing space")
-                ),
-                CardContent(
-                    TextareaWithLabel(
-                        label="Content",
-                        placeholder="Begin writing your essay or long-form content here...",
-                        rows=8,
-                        signal="essay_draft",
-                        helper_text="Take your time to develop your ideas"
-                    ),
-                    Div(
-                        P(
-                            "Words: ",
-                            Span(
-                                ds_text("($essay_draft || '').trim() ? ($essay_draft || '').trim().split(/\\s+/).length : 0"),
-                                cls="font-medium"
-                            ),
-                            " | Characters: ",
-                            Span(
-                                ds_text("($essay_draft || '').length"),
-                                cls="font-medium"
-                            ),
-                            cls="text-sm text-muted-foreground"
-                        ),
-                        ds_show="($essay_draft || '').trim().length > 0",
-                        cls="mt-2"
-                    ),
-                    ds_signals(essay_draft=value(""))
-                ),
-                cls="w-full"
-            ),
-            cls="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-6xl mx-auto"
-        )
 
-    yield ComponentPreview(
-        contextual_textarea_examples(),
-        contextual_textarea_examples.code,
-        title="Contextual Usage",
-        description="Textarea sizes matched to specific use cases"
-    )
-    
-    # Character counter
-    @with_code
-    def character_counter_example():
-        return Card(
+
+@with_code
+def contextual_textarea_examples():
+    quick_note = Signal("quick_note", "")
+    article_summary = Signal("article_summary", "")
+    essay_draft = Signal("essay_draft", "")
+
+    return Div(
+        quick_note,
+        article_summary,
+        essay_draft,
+        Card(
             CardHeader(
-                CardTitle("Bio"),
-                CardDescription("Tell us about yourself")
+                CardTitle("Quick Note"),
+                CardDescription("Brief message or reminder")
             ),
             CardContent(
                 TextareaWithLabel(
-                    label="Your Bio",
-                    placeholder="Share your background, interests, and expertise...",
-                    rows=4,
-                    maxlength=280,
-                    signal="bio",
-                    helper_text="Max 280 characters"
-                ),
-                Div(
-                    Div(
-                        Div(
-                            ds_style(width="`${Math.min(100, ($bio || '').length / 280 * 100)}%`"),
-                            cls="h-1 bg-primary rounded-full transition-all duration-300"
-                        ),
-                        cls="w-full bg-secondary rounded-full h-1"
-                    ),
-                    P(
-                        Span(ds_text("($bio || '').length"), cls="font-mono font-medium"),
-                        " / 280 characters",
-                        ds_class(**{
-                            "text-muted-foreground": "($bio || '').length < 250",
-                            "text-orange-500": "($bio || '').length >= 250 && ($bio || '').length < 280",
-                            "text-destructive": "($bio || '').length >= 280"
-                        }),
-                        cls="text-sm text-right"
-                    ),
-                    cls="space-y-2 mt-3"
+                    label="Note",
+                    placeholder="Jot down your thoughts...",
+                    rows=2,
+                    signal="quick_note",
+                    helper_text="Perfect for short messages"
                 ),
                 Button(
-                    "Save Bio",
-                    ds_disabled("($bio || '').length === 0"),
-                    ds_on_click("alert('Bio saved!')"),
-                    cls="w-full mt-4"
-                ),
-                ds_signals(bio=value(""))
+                    Icon("lucide:save", cls="h-4 w-4 mr-2"),
+                    "Save Note",
+                    size="sm",
+                    cls="mt-3",
+                    data_on_click=js("alert('Note saved!')"),
+                    data_attr_disabled=js("($quick_note || '').trim().length === 0")
+                )
             ),
-            cls="w-full max-w-3xl"
+            cls="w-full"
+        ),
+        Card(
+            CardHeader(
+                CardTitle("Article Summary"),
+                CardDescription("Summarize the key points")
+            ),
+            CardContent(
+                TextareaWithLabel(
+                    label="Summary",
+                    placeholder="Write a concise summary of the main ideas...",
+                    rows=4,
+                    signal="article_summary",
+                    helper_text="Aim for 2-3 sentences"
+                ),
+                Div(
+                    Badge(
+                        variant="secondary",
+                        data_text=js("($article_summary || '').split(' ').length + ' words'")
+                    ),
+                    cls="mt-2",
+                    data_show=js("($article_summary || '').trim().length > 0")
+                )
+            ),
+            cls="w-full"
+        ),
+        Card(
+            CardHeader(
+                CardTitle("Essay Draft"),
+                CardDescription("Long-form writing space")
+            ),
+            CardContent(
+                TextareaWithLabel(
+                    label="Content",
+                    placeholder="Begin writing your essay or long-form content here...",
+                    rows=8,
+                    signal="essay_draft",
+                    helper_text="Take your time to develop your ideas"
+                ),
+                Div(
+                    P(
+                        "Words: ",
+                        Span(
+                            cls="font-medium",
+                            data_text=js("($essay_draft || '').trim() ? ($essay_draft || '').trim().split(/\\s+/).length : 0")
+                        ),
+                        " | Characters: ",
+                        Span(
+                            cls="font-medium",
+                            data_text=js("($essay_draft || '').length")
+                        ),
+                        cls="text-sm text-muted-foreground"
+                    ),
+                    cls="mt-2",
+                    data_show=js("($essay_draft || '').trim().length > 0")
+                )
+            ),
+            cls="w-full"
+        ),
+        cls="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-6xl mx-auto"
+    )
+
+
+@with_code
+def character_counter_example():
+    bio = Signal("bio", "")
+
+    return Card(
+        bio,
+        CardHeader(
+            CardTitle("Bio"),
+            CardDescription("Tell us about yourself")
+        ),
+        CardContent(
+            TextareaWithLabel(
+                label="Your Bio",
+                placeholder="Share your background, interests, and expertise...",
+                rows=4,
+                maxlength=280,
+                signal="bio",
+                helper_text="Max 280 characters"
+            ),
+            Div(
+                Div(
+                    Div(
+                        cls="h-1 bg-primary rounded-full transition-all duration-300",
+                        data_style_width=js("`${Math.min(100, ($bio || '').length / 280 * 100)}%`")
+                    ),
+                    cls="w-full bg-secondary rounded-full h-1"
+                ),
+                P(
+                    Span(cls="font-mono font-medium", data_text=js("($bio || '').length")),
+                    " / 280 characters",
+                    cls="text-sm text-right",
+                    data_class=js("($bio || '').length < 250 ? 'text-muted-foreground' : (($bio || '').length >= 250 && ($bio || '').length < 280 ? 'text-orange-500' : 'text-destructive')")
+                ),
+                cls="space-y-2 mt-3"
+            ),
+            Button(
+                "Save Bio",
+                cls="w-full mt-4",
+                data_attr_disabled=js("($bio || '').length === 0"),
+                data_on_click=js("alert('Bio saved!')")
+            )
+        ),
+        cls="w-full max-w-3xl"
+    )
+
+
+@with_code
+def comment_box_live_preview_example():
+    comment_text = Signal("comment_text", "")
+
+    def create_format_button(icon, action, title):
+        return HTMLButton(
+            Icon(icon, cls="h-4 w-4"),
+            type="button",
+            title=title,
+            cls="p-2 rounded-md hover:bg-accent transition-colors border",
+            data_on_click=js(action)
         )
 
-    yield ComponentPreview(
-        character_counter_example(),
-        character_counter_example.code,
-        title="Character Counter",
-        description="Track character count with visual feedback"
-    )
-    
-    # Comment box with live markdown preview
-    @with_code
-    def comment_box_live_preview_example():
-        def create_format_button(icon, action, title):
-            return HTMLButton(
-                Icon(icon, cls="h-4 w-4"),
-                ds_on_click(action),
-                type="button",
-                title=title,
-                cls="p-2 rounded-md hover:bg-accent transition-colors border"
-            )
-        return Div(
-            Card(
-                CardHeader(
-                    CardTitle("Comment Box with Live Preview"),
-                    CardDescription("Rich text editor with real-time preview")
-                ),
+    return Div(
+        Card(
+            comment_text,
+            CardHeader(
+                CardTitle("Comment Box with Live Preview"),
+                CardDescription("Rich text editor with real-time preview")
+            ),
             CardContent(
                 # Markdown renderer and formatting functions
                 Script(r"""
@@ -238,26 +216,26 @@ def examples():
                         // Wrap list items
                         return html.replace(/(<li>.*<\/li>(<br>)?)+/g, m => '<ul class="list-disc pl-5">' + m.replace(/<br>/g, '') + '</ul>');
                     };
-                    
+
                     window.applyFormatting = function(prefix, suffix, defaultText, cursorPos) {
                         const textarea = document.querySelector('[data-bind="comment_text"]');
                         if (!textarea) return;
-                        
+
                         const start = textarea.selectionStart;
                         const end = textarea.selectionEnd;
                         const selectedText = textarea.value.substring(start, end);
-                        const replacement = selectedText ? 
-                            prefix + selectedText + suffix : 
+                        const replacement = selectedText ?
+                            prefix + selectedText + suffix :
                             prefix + defaultText + suffix;
                         const newValue = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
-                        
+
                         // Update the textarea value directly
                         textarea.value = newValue;
-                        
+
                         // Trigger input event for Datastar binding and preview update
                         const updateEvent = new Event('input', { bubbles: true });
                         textarea.dispatchEvent(updateEvent);
-                        
+
                         setTimeout(() => {
                             textarea.focus();
                             if (cursorPos === 'link') {
@@ -270,32 +248,32 @@ def examples():
                             }
                         }, 10);
                     };
-                    
+
                     window.applyListFormatting = function(linePrefix, defaultText) {
                         const textarea = document.querySelector('[data-bind="comment_text"]');
                         if (!textarea) return;
-                        
+
                         const start = textarea.selectionStart;
                         const end = textarea.selectionEnd;
                         const selectedText = textarea.value.substring(start, end);
                         const lines = selectedText ? selectedText.split('\\n') : [defaultText || ''];
                         const replacement = lines.map(line => linePrefix + line).join('\\n');
                         const newValue = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
-                        
+
                         // Update the textarea value directly
                         textarea.value = newValue;
-                        
+
                         // Trigger input event for Datastar binding and preview update
                         const updateEvent = new Event('input', { bubbles: true });
                         textarea.dispatchEvent(updateEvent);
-                        
+
                         setTimeout(() => {
                             textarea.focus();
                             const newPos = start + replacement.length;
                             textarea.setSelectionRange(newPos, newPos);
                         }, 10);
                     };
-                    
+
                     // Set up reactive markdown rendering after DOM loads
                     document.addEventListener('DOMContentLoaded', () => {
                         const updatePreview = () => {
@@ -306,7 +284,7 @@ def examples():
                                 preview.innerHTML = rendered || '<span class="text-muted-foreground">Start typing to see a preview...</span>';
                             }
                         };
-                        
+
                         // Listen for changes
                         const textarea = document.querySelector('[data-bind="comment_text"]');
                         if (textarea) {
@@ -333,17 +311,13 @@ def examples():
                                     cls="flex gap-1"
                                 ),
                                 P(
-                                    ds_class(**{
-                                        "text-muted-foreground": "($comment_text || '').length < 500",
-                                        "text-orange-500": "($comment_text || '').length >= 500 && ($comment_text || '').length < 1000",
-                                        "text-destructive": "($comment_text || '').length >= 1000"
-                                    }),
-                                    ds_text="($comment_text || '').length + ' characters'",                                    
-                                    cls="text-xs font-mono"
+                                    cls="text-xs font-mono",
+                                    data_class=js("($comment_text || '').length < 500 ? 'text-muted-foreground' : (($comment_text || '').length >= 500 && ($comment_text || '').length < 1000 ? 'text-orange-500' : 'text-destructive')"),
+                                    data_text=js("($comment_text || '').length + ' characters'")
                                 ),
                                 cls="flex items-center justify-between p-3 border rounded-t-md bg-muted/30 border-b-0"
                             ),
-                            
+
                             # Textarea with custom style override
                             Textarea(
                                 placeholder="What are your thoughts? Supports **bold**, *italic*, `code`, [links](url), lists, and > quotes",
@@ -354,8 +328,8 @@ def examples():
                             ),
                             cls="flex-1"
                         ),
-                        
-                        # Live preview section 
+
+                        # Live preview section
                         Div(
                             Div(
                                 P("Live Preview", cls="text-sm font-semibold mb-2"),
@@ -373,33 +347,32 @@ def examples():
                         ),
                         cls="flex flex-col gap-4"
                     ),
-                    
+
                     # Action buttons
                     Div(
                         Button(
                             Icon("lucide:x", cls="h-4 w-4 mr-2"),
                             "Cancel",
-                            ds_on_click="$comment_text = ''",
                             variant="outline",
                             type="button",
-                            ds_disabled="($comment_text || '').trim().length === 0"
+                            data_on_click=js("$comment_text = ''"),
+                            data_attr_disabled=js("($comment_text || '').trim().length === 0")
                         ),
                         Button(
                             Icon("lucide:send", cls="h-4 w-4 mr-2"),
                             "Post Comment",
                             type="submit",
-                            ds_disabled="($comment_text || '').trim().length === 0",
-                            ds_on_click="""
-                                evt.preventDefault(); 
+                            data_attr_disabled=js("($comment_text || '').trim().length === 0"),
+                            data_on_click=js("""
+                                evt.preventDefault();
                                 if (($comment_text || '').trim().length > 0) {
                                     alert('Comment posted successfully!');
                                     $comment_text = '';
                                 }
-                            """
+                            """)
                         ),
                         cls="flex gap-3 justify-end mt-6"
-                    ),
-                    ds_signals(comment_text=value(""))
+                    )
                 )
             ),
             cls="w-full max-w-6xl"
@@ -407,451 +380,444 @@ def examples():
         cls="w-full"
     )
 
-    yield ComponentPreview(
-        comment_box_live_preview_example(),
-        comment_box_live_preview_example.code,
-        title="Comment Box with Live Preview", 
-        description="Rich text editor with real-time preview and formatting toolbar"
-    )
-    
-    # Auto-expanding textarea
-    @with_code
-    def auto_expanding_textarea_example():
-        return Card(
-            CardHeader(
-                CardTitle("Auto-Expanding"),
-                CardDescription("Grows with your content")
-            ),
-            CardContent(
-                TextareaWithLabel(
-                    label="Message",
-                    placeholder="Start typing and watch it grow...",
-                    signal="auto_expand",
-                    helper_text="This textarea expands as you type",
-                    cls="[&_textarea]:field-sizing-content [&_textarea]:min-h-[60px] [&_textarea]:max-h-[300px]"
-                ),
-                P(
-                    "Lines: ",
-                    Span(
-                        ds_text("(($auto_expand || '').match(/\\n/g) || []).length + 1"),
-                        cls="font-mono font-medium"
-                    ),
-                    cls="text-sm text-muted-foreground mt-2"
-                ),
-                ds_signals(auto_expand=value(""))
-            ),
-            cls="w-full max-w-3xl"
-        )
 
-    yield ComponentPreview(
-        auto_expanding_textarea_example(),
-        auto_expanding_textarea_example.code,
-        title="Auto-Expanding",
-        description="Textarea that grows with content"
-    )
-    
-    # Enhanced feedback form with advanced validation
-    @with_code
-    def enhanced_feedback_form_example():
-        return Card(
-            CardHeader(
-                CardTitle("Customer Feedback"),
-                CardDescription("Help us improve our service")
+@with_code
+def auto_expanding_textarea_example():
+    auto_expand = Signal("auto_expand", "")
+
+    return Card(
+        auto_expand,
+        CardHeader(
+            CardTitle("Auto-Expanding"),
+            CardDescription("Grows with your content")
+        ),
+        CardContent(
+            TextareaWithLabel(
+                label="Message",
+                placeholder="Start typing and watch it grow...",
+                signal="auto_expand",
+                helper_text="This textarea expands as you type",
+                cls="[&_textarea]:field-sizing-content [&_textarea]:min-h-[60px] [&_textarea]:max-h-[300px]"
             ),
-            CardContent(
-                Form(
-                    TextareaWithLabel(
-                        label="How was your experience?",
-                        placeholder="Tell us what you think...",
-                        required=True,
-                        rows=4,
-                        signal="feedback",
-                        error_text=None,
-                        helper_text="Share your honest thoughts (10-1000 characters)"
+            P(
+                "Lines: ",
+                Span(
+                    cls="font-mono font-medium",
+                    data_text=js("(($auto_expand || '').match(/\\n/g) || []).length + 1")
+                ),
+                cls="text-sm text-muted-foreground mt-2"
+            )
+        ),
+        cls="w-full max-w-3xl"
+    )
+
+
+@with_code
+def enhanced_feedback_form_example():
+    feedback = Signal("feedback", "")
+    suggestions = Signal("suggestions", "")
+    feedback_rating = Signal("feedback_rating", None)
+    hover_rating = Signal("hover_rating", None)
+    feedback_submitted = Signal("feedback_submitted", False)
+
+    return Card(
+        feedback,
+        suggestions,
+        feedback_rating,
+        hover_rating,
+        feedback_submitted,
+        CardHeader(
+            CardTitle("Customer Feedback"),
+            CardDescription("Help us improve our service")
+        ),
+        CardContent(
+            Form(
+                TextareaWithLabel(
+                    label="How was your experience?",
+                    placeholder="Tell us what you think...",
+                    required=True,
+                    rows=4,
+                    signal="feedback",
+                    error_text=None,
+                    helper_text="Share your honest thoughts (10-1000 characters)"
+                ),
+                # Validation messages
+                Div(
+                    P(
+                        "Feedback is required",
+                        cls="text-sm text-destructive"
                     ),
-                    # Validation messages
-                    Div(
-                        P(
-                            "Feedback is required",
-                            cls="text-sm text-destructive"
-                        ),
-                        ds_show("$feedback_submitted && ($feedback || '').trim().length === 0")
+                    data_show=js("$feedback_submitted && ($feedback || '').trim().length === 0")
+                ),
+                Div(
+                    P(
+                        "Please provide at least 10 characters",
+                        cls="text-sm text-destructive"
                     ),
-                    Div(
-                        P(
-                            "Please provide at least 10 characters",
-                            cls="text-sm text-destructive"
-                        ),
-                        ds_show("$feedback_submitted && ($feedback || '').trim().length > 0 && ($feedback || '').length < 10")
+                    data_show=js("$feedback_submitted && ($feedback || '').trim().length > 0 && ($feedback || '').length < 10")
+                ),
+                Div(
+                    P(
+                        "Feedback cannot exceed 1000 characters",
+                        cls="text-sm text-destructive"
                     ),
-                    Div(
-                        P(
-                            "Feedback cannot exceed 1000 characters",
-                            cls="text-sm text-destructive"
-                        ),
-                        ds_show("($feedback || '').length > 1000")
-                    ),
-                    Div(
-                        P(
-                            "Rate your experience",
-                            cls="text-sm font-medium mb-3"
-                        ),
-                        Div(
-                            *[
-                                HTMLButton(
-                                    "★",
-                                    ds_class(**{
-                                        "text-yellow-500": f"($feedback_rating && $feedback_rating >= {i+1}) || ($hover_rating && $hover_rating >= {i+1})",
-                                        "text-gray-300": f"(!$feedback_rating || $feedback_rating < {i+1}) && (!$hover_rating || $hover_rating < {i+1})"
-                                    }),
-                                    ds_on_click(f"$feedback_rating = $feedback_rating === {i+1} ? null : {i+1}"),
-                                    ds_on_mouseenter(f"$hover_rating = {i+1}"),
-                                    ds_on_mouseleave("$hover_rating = null"),
-                                    type="button",
-                                    cls="text-3xl transition-colors"
-                                )
-                                for i in range(5)
-                            ],
-                            cls="flex gap-1 mb-2"
-                        ),
-                        P(
-                            "Rating: ",
-                            Span(
-                                ds_text("$feedback_rating || 'Not selected'"),
-                                cls="font-medium"
-                            ),
-                            cls="text-sm text-muted-foreground"
-                        ),
-                        cls="border rounded-lg p-4 bg-muted/30 my-6"
-                    ),
-                    TextareaWithLabel(
-                        label="Additional suggestions",
-                        placeholder="Any specific improvements you'd like to see? (optional)",
-                        rows=3,
-                        signal="suggestions",
-                        helper_text="This helps us prioritize improvements"
+                    data_show=js("($feedback || '').length > 1000")
+                ),
+                Div(
+                    P(
+                        "Rate your experience",
+                        cls="text-sm font-medium mb-3"
                     ),
                     Div(
-                        # Status indicators
-                        Badge(
-                            Icon("lucide:clock", cls="h-3 w-3 mr-1"),                            
-                            "Draft",
-                            ds_show("($feedback || '').trim().length > 0 && ($feedback || '').length < 10"),
-                            variant="secondary",                            
-                        ),
-                        Badge(
-                            Icon("lucide:check-circle", cls="h-3 w-3 mr-1"),
-                            "Ready to submit",
-                            ds_show("($feedback || '').length >= 10 && ($feedback || '').length <= 1000 && !$feedback_rating"),
-                            variant="default",                            
-                        ),
-                        Badge(
-                            Icon("lucide:star", cls="h-3 w-3 mr-1"),
-                            "Complete",
-                            ds_show("($feedback || '').length >= 10 && $feedback_rating"),
-                            variant="default",                            
-                        ),
-                        cls="flex flex-wrap gap-2 mb-4"
+                        *[
+                            HTMLButton(
+                                "★",
+                                type="button",
+                                cls="text-3xl transition-colors",
+                                data_class=js(f"($feedback_rating && $feedback_rating >= {i+1}) || ($hover_rating && $hover_rating >= {i+1}) ? 'text-yellow-500' : 'text-gray-300'"),
+                                data_on_click=js(f"$feedback_rating = $feedback_rating === {i+1} ? null : {i+1}"),
+                                data_on_mouseenter=js(f"$hover_rating = {i+1}"),
+                                data_on_mouseleave=js("$hover_rating = null")
+                            )
+                            for i in range(5)
+                        ],
+                        cls="flex gap-1 mb-2"
                     ),
-                    Div(
-                        Button(
-                            "Clear Form",
-                            variant="outline",
-                            type="button",
-                            ds_on_click="""
+                    P(
+                        "Rating: ",
+                        Span(
+                            cls="font-medium",
+                            data_text=js("$feedback_rating || 'Not selected'")
+                        ),
+                        cls="text-sm text-muted-foreground"
+                    ),
+                    cls="border rounded-lg p-4 bg-muted/30 my-6"
+                ),
+                TextareaWithLabel(
+                    label="Additional suggestions",
+                    placeholder="Any specific improvements you'd like to see? (optional)",
+                    rows=3,
+                    signal="suggestions",
+                    helper_text="This helps us prioritize improvements"
+                ),
+                Div(
+                    # Status indicators
+                    Badge(
+                        Icon("lucide:clock", cls="h-3 w-3 mr-1"),
+                        "Draft",
+                        variant="secondary",
+                        data_show=js("($feedback || '').trim().length > 0 && ($feedback || '').length < 10")
+                    ),
+                    Badge(
+                        Icon("lucide:check-circle", cls="h-3 w-3 mr-1"),
+                        "Ready to submit",
+                        variant="default",
+                        data_show=js("($feedback || '').length >= 10 && ($feedback || '').length <= 1000 && !$feedback_rating")
+                    ),
+                    Badge(
+                        Icon("lucide:star", cls="h-3 w-3 mr-1"),
+                        "Complete",
+                        variant="default",
+                        data_show=js("($feedback || '').length >= 10 && $feedback_rating")
+                    ),
+                    cls="flex flex-wrap gap-2 mb-4"
+                ),
+                Div(
+                    Button(
+                        "Clear Form",
+                        variant="outline",
+                        type="button",
+                        data_on_click=js("""
+                            $feedback = '';
+                            $suggestions = '';
+                            $feedback_rating = null;
+                            $hover_rating = null;
+                            $feedback_submitted = false;
+                        """),
+                        data_attr_disabled=js("($feedback || '').length === 0 && ($suggestions || '').length === 0 && !$feedback_rating")
+                    ),
+                    Button(
+                        Icon("lucide:send", cls="h-4 w-4 mr-2"),
+                        "Submit Feedback",
+                        type="submit",
+                        data_attr_disabled=js("($feedback || '').length < 10 || !$feedback_rating || ($feedback || '').length > 1000"),
+                        data_on_click=js("""
+                            evt.preventDefault();
+                            $feedback_submitted = true;
+                            if (($feedback || '').length >= 10 && $feedback_rating && ($feedback || '').length <= 1000) {
+                                alert(`Thank you for your ${$feedback_rating}-star feedback!`);
                                 $feedback = '';
                                 $suggestions = '';
                                 $feedback_rating = null;
-                                $hover_rating = null;
                                 $feedback_submitted = false;
-                            """,
-                            ds_disabled="($feedback || '').length === 0 && ($suggestions || '').length === 0 && !$feedback_rating"
-                        ),
-                        Button(
-                            Icon("lucide:send", cls="h-4 w-4 mr-2"),
-                            "Submit Feedback",
-                            type="submit",
-                            ds_disabled="($feedback || '').length < 10 || !$feedback_rating || ($feedback || '').length > 1000",
-                            ds_on_click="""
-                                evt.preventDefault();
-                                $feedback_submitted = true;
-                                if (($feedback || '').length >= 10 && $feedback_rating && ($feedback || '').length <= 1000) {
-                                    alert(`Thank you for your ${$feedback_rating}-star feedback!`);
-                                    $feedback = '';
-                                    $suggestions = '';
-                                    $feedback_rating = null;
-                                    $feedback_submitted = false;
-                                }
-                            """
-                        ),
-                        cls="flex gap-2 justify-end"
+                            }
+                        """)
                     ),
-                    ds_signals(
-                        feedback=value(""), 
-                        suggestions=value(""), 
-                        feedback_rating=value(None),
-                        hover_rating=value(None),
-                        feedback_submitted=False
-                    )
+                    cls="flex gap-2 justify-end"
                 )
-            ),
-            cls="w-full max-w-3xl"
-        )
-
-    yield ComponentPreview(
-        enhanced_feedback_form_example(),
-        enhanced_feedback_form_example.code,
-        title="Feedback Form",
-        description="Multi-field form with validation"
-    )
-    
-    # Code editor style
-    @with_code
-    def code_editor_textarea_example():
-        return Card(
-            CardHeader(
-                CardTitle("Code Editor"),
-                CardDescription("Write and format code")
-            ),
-            CardContent(
-                Div(
-                    Div(
-                        P("Language: ", cls="text-sm text-muted-foreground"),
-                        Badge("Python", variant="outline"),
-                        cls="flex items-center justify-between mb-2"
-                    ),
-                    Textarea(
-                        placeholder="# Enter your code here...",
-                        signal="code_editor",
-                        rows=8,
-                        cls="font-mono text-sm",
-                        resize="vertical"
-                    ),
-                    Div(
-                        P(
-                            "Lines: ",
-                            Span(
-                                ds_text("(($code_editor || '').match(/\\n/g) || []).length + 1"),
-                                cls="font-mono"
-                            ),
-                            " | Characters: ",
-                            Span(
-                                ds_text("($code_editor || '').length"),
-                                cls="font-mono"
-                            ),
-                            cls="text-xs text-muted-foreground"
-                        ),
-                        Button(
-                            Span(Icon("lucide:check", cls="h-4 w-4 mr-2"), ds_show("$code_copied")),
-                            Span(Icon("lucide:copy", cls="h-4 w-4 mr-2"), ds_show("!$code_copied")),
-                            Span("Copied!", ds_show("$code_copied")),
-                            Span("Copy", ds_show("!$code_copied")),
-                            ds_on_click("@clipboard($code_editor || '', 'code_copied', 2000)"),
-                            size="sm",
-                            variant="outline",                            
-                        ),
-                        cls="flex items-center justify-between mt-2"
-                    ),
-                    ds_signals(
-                        code_editor=value("def hello_world():\n    print('Hello, World!')\n    return True"),
-                        code_copied=False
-                    )
-                )
-            ),
-            cls="w-full max-w-3xl"
-        )
-
-    yield ComponentPreview(
-        code_editor_textarea_example(),
-        code_editor_textarea_example.code,
-        title="Code Editor",
-        description="Code input with monospace font and utilities"
-    )
-    
-    # Email template composer
-    @with_code
-    def email_template_composer_example():
-        def create_variable_button(var_name):
-            return HTMLButton(
-                f"{{{{{{var_name}}}}}}",
-                ds_on_click(f"insertVariable('{var_name}')"),
-                type="button",
-                cls="px-2 py-1 text-xs bg-muted hover:bg-accent rounded border"
             )
-        return Card(
-            CardHeader(
-                CardTitle("Email Template Composer"),
-                CardDescription("Create professional email templates with variables")
-            ),
-            CardContent(
-                Form(
-                    Div(
-                        TextareaWithLabel(
-                            label="Subject Line",
-                            placeholder="Welcome to {{company_name}}, {{first_name}}!",
-                            rows=1,
-                            signal="email_subject",
-                            helper_text="Use {{variable}} syntax for dynamic content"
+        ),
+        cls="w-full max-w-3xl"
+    )
+
+
+@with_code
+def code_editor_textarea_example():
+    code_editor = Signal("code_editor", "def hello_world():\n    print('Hello, World!')\n    return True")
+    code_copied = Signal("code_copied", False)
+
+    return Card(
+        code_editor,
+        code_copied,
+        CardHeader(
+            CardTitle("Code Editor"),
+            CardDescription("Write and format code")
+        ),
+        CardContent(
+            Div(
+                Div(
+                    P("Language: ", cls="text-sm text-muted-foreground"),
+                    Badge("Python", variant="outline"),
+                    cls="flex items-center justify-between mb-2"
+                ),
+                Textarea(
+                    placeholder="# Enter your code here...",
+                    signal="code_editor",
+                    rows=8,
+                    cls="font-mono text-sm",
+                    resize="vertical"
+                ),
+                Div(
+                    P(
+                        "Lines: ",
+                        Span(
+                            cls="font-mono",
+                            data_text=js("(($code_editor || '').match(/\\n/g) || []).length + 1")
                         ),
-                        cls="mb-4"
-                    ),
-                    TextareaWithLabel(
-                        label="Email Body",
-                        placeholder="Hi {{first_name}},\n\nWelcome to {{company_name}}! We're excited to have you on board.\n\nBest regards,\n{{sender_name}}",
-                        rows=8,
-                        signal="email_body",
-                        helper_text="Available variables: {{first_name}}, {{last_name}}, {{company_name}}, {{sender_name}}"
-                    ),
-                    
-                    # Variable insertion toolbar with script for cursor position
-                    Script(r"""
-                        // Track last focused textarea
-                        let lastFocusedTextarea = null;
-                        
-                        // Set up focus tracking after DOM loads
-                        document.addEventListener('DOMContentLoaded', () => {
-                            const bodyTextarea = document.querySelector('[data-bind="email_body"]');
-                            const subjectTextarea = document.querySelector('[data-bind="email_subject"]');
-                            
-                            if (bodyTextarea) {
-                                bodyTextarea.addEventListener('focus', () => {
-                                    lastFocusedTextarea = bodyTextarea;
-                                });
-                            }
-                            
-                            if (subjectTextarea) {
-                                subjectTextarea.addEventListener('focus', () => {
-                                    lastFocusedTextarea = subjectTextarea;
-                                });
-                            }
-                            
-                            // Default to body textarea
-                            lastFocusedTextarea = bodyTextarea;
-                        });
-                        
-                        window.insertVariable = function(varName) {
-                            // Use the last focused textarea, or fall back to body
-                            const bodyTextarea = document.querySelector('[data-bind="email_body"]');
-                            let targetTextarea = lastFocusedTextarea || bodyTextarea;
-                            
-                            if (!targetTextarea) return;
-                            
-                            const start = targetTextarea.selectionStart;
-                            const end = targetTextarea.selectionEnd;
-                            const text = targetTextarea.value;
-                            const variable = '{{' + varName + '}}';
-                            
-                            // Insert at cursor position
-                            const newValue = text.substring(0, start) + variable + text.substring(end);
-                            targetTextarea.value = newValue;
-                            
-                            // No need to manually update signal - the input event will handle it
-                            
-                            // Trigger input evt for reactivity
-                            targetTextarea.dispatchEvent(new Event('input', { bubbles: true }));
-                            
-                            // Set cursor after inserted variable
-                            setTimeout(() => {
-                                targetTextarea.focus();
-                                const newPos = start + variable.length;
-                                targetTextarea.setSelectionRange(newPos, newPos);
-                            }, 10);
-                        };
-                    """),
-                    Div(
-                        P("Quick Variables:", cls="text-sm font-medium mb-2"),
-                        Div(
-                            create_variable_button("first_name"),
-                            create_variable_button("last_name"),
-                            create_variable_button("company_name"),
-                            create_variable_button("sender_name"),
-                            cls="flex flex-wrap gap-2"
+                        " | Characters: ",
+                        Span(
+                            cls="font-mono",
+                            data_text=js("($code_editor || '').length")
                         ),
-                        cls="p-3 border rounded-md bg-muted/30 mb-4"
+                        cls="text-xs text-muted-foreground"
                     ),
-                    
-                    # Preview section
-                    Div(
-                        P("Preview", cls="text-sm font-medium mb-2"),
-                        Div(
-                            Div(
-                                P("Subject:", cls="text-xs text-muted-foreground"),
-                                P(
-                                    ds_text("($email_subject || 'No subject').replace(/{{([^}]+)}}/g, function(m,p1){return '[' + p1 + ']'})"),
-                                    cls="font-medium text-sm mb-2"
-                                ),
-                                Separator(cls="my-2"),
-                                P(
-                                    ds_text("($email_body || 'No content').replace(/{{([^}]+)}}/g, function(m,p1){return '[' + p1 + ']'})"),
-                                    cls="text-sm whitespace-pre-wrap"
-                                )
-                            ),
-                            cls="p-3 bg-background border rounded-md min-h-[120px]"
-                        ),
-                        P("Variables will be replaced with actual values when sent", cls="text-xs text-muted-foreground mt-1"),
-                        ds_show="($email_subject || '').length > 0 || ($email_body || '').length > 0",
-                        cls="mb-4"
+                    Button(
+                        Span(Icon("lucide:check", cls="h-4 w-4 mr-2"), data_show=js("$code_copied")),
+                        Span(Icon("lucide:copy", cls="h-4 w-4 mr-2"), data_show=js("!$code_copied")),
+                        Span("Copied!", data_show=js("$code_copied")),
+                        Span("Copy", data_show=js("!$code_copied")),
+                        size="sm",
+                        variant="outline",
+                        data_on_click=js("@clipboard($code_editor || '', 'code_copied', 2000)")
                     ),
-                    
-                    # Actions
-                    Div(
-                        Button(
-                            Icon("lucide:eye", cls="h-4 w-4 mr-2"),
-                            "Test Send",
-                            ds_on_click("alert('Test email sent to your address!')"),
-                            variant="outline",
-                            type="button",
-                            ds_disabled="($email_subject || '').length === 0 || ($email_body || '').length === 0",                            
-                        ),
-                        Button(
-                            Icon("lucide:save", cls="h-4 w-4 mr-2"),
-                            "Save Template",
-                            type="submit",
-                            ds_disabled="($email_subject || '').length === 0 || ($email_body || '').length === 0",
-                            ds_on_click="""
-                                evt.preventDefault();
-                                if (($email_subject || '').length > 0 && ($email_body || '').length > 0) {
-                                    alert('Template saved successfully!');
-                                }
-                            """
-                        ),
-                        cls="flex gap-2 justify-end"
-                    ),
-                    
-                    ds_signals(
-                        email_subject=value("Welcome to {{company_name}}, {{first_name}}!"),
-                        email_body=value("Hi {{first_name}},\n\nWelcome to {{company_name}}! We're excited to have you on board.\n\nBest regards,\n{{sender_name}}")
-                    )
+                    cls="flex items-center justify-between mt-2"
                 )
-            ),
-            cls="max-w-3xl"
+            )
+        ),
+        cls="w-full max-w-3xl"
+    )
+
+
+@with_code
+def email_template_composer_example():
+    email_subject = Signal("email_subject", "Welcome to {{company_name}}, {{first_name}}!")
+    email_body = Signal("email_body", "Hi {{first_name}},\n\nWelcome to {{company_name}}! We're excited to have you on board.\n\nBest regards,\n{{sender_name}}")
+
+    def create_variable_button(var_name):
+        return HTMLButton(
+            f"{{{{{var_name}}}}}",
+            type="button",
+            cls="px-2 py-1 text-xs bg-muted hover:bg-accent rounded border",
+            data_on_click=js(f"insertVariable('{var_name}')")
         )
 
-    yield ComponentPreview(
-        email_template_composer_example(),
-        email_template_composer_example.code,
-        title="Email Template Composer",
-        description="Professional template system with variable substitution"
+    return Card(
+        email_subject,
+        email_body,
+        CardHeader(
+            CardTitle("Email Template Composer"),
+            CardDescription("Create professional email templates with variables")
+        ),
+        CardContent(
+            Form(
+                Div(
+                    TextareaWithLabel(
+                        label="Subject Line",
+                        placeholder="Welcome to {{company_name}}, {{first_name}}!",
+                        rows=1,
+                        signal="email_subject",
+                        helper_text="Use {{variable}} syntax for dynamic content"
+                    ),
+                    cls="mb-4"
+                ),
+                TextareaWithLabel(
+                    label="Email Body",
+                    placeholder="Hi {{first_name}},\n\nWelcome to {{company_name}}! We're excited to have you on board.\n\nBest regards,\n{{sender_name}}",
+                    rows=8,
+                    signal="email_body",
+                    helper_text="Available variables: {{first_name}}, {{last_name}}, {{company_name}}, {{sender_name}}"
+                ),
+
+                # Variable insertion toolbar with script for cursor position
+                Script(r"""
+                    // Track last focused textarea
+                    let lastFocusedTextarea = null;
+
+                    // Set up focus tracking after DOM loads
+                    document.addEventListener('DOMContentLoaded', () => {
+                        const bodyTextarea = document.querySelector('[data-bind="email_body"]');
+                        const subjectTextarea = document.querySelector('[data-bind="email_subject"]');
+
+                        if (bodyTextarea) {
+                            bodyTextarea.addEventListener('focus', () => {
+                                lastFocusedTextarea = bodyTextarea;
+                            });
+                        }
+
+                        if (subjectTextarea) {
+                            subjectTextarea.addEventListener('focus', () => {
+                                lastFocusedTextarea = subjectTextarea;
+                            });
+                        }
+
+                        // Default to body textarea
+                        lastFocusedTextarea = bodyTextarea;
+                    });
+
+                    window.insertVariable = function(varName) {
+                        // Use the last focused textarea, or fall back to body
+                        const bodyTextarea = document.querySelector('[data-bind="email_body"]');
+                        let targetTextarea = lastFocusedTextarea || bodyTextarea;
+
+                        if (!targetTextarea) return;
+
+                        const start = targetTextarea.selectionStart;
+                        const end = targetTextarea.selectionEnd;
+                        const text = targetTextarea.value;
+                        const variable = '{{' + varName + '}}';
+
+                        // Insert at cursor position
+                        const newValue = text.substring(0, start) + variable + text.substring(end);
+                        targetTextarea.value = newValue;
+
+                        // No need to manually update signal - the input event will handle it
+
+                        // Trigger input evt for reactivity
+                        targetTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+
+                        // Set cursor after inserted variable
+                        setTimeout(() => {
+                            targetTextarea.focus();
+                            const newPos = start + variable.length;
+                            targetTextarea.setSelectionRange(newPos, newPos);
+                        }, 10);
+                    };
+                """),
+                Div(
+                    P("Quick Variables:", cls="text-sm font-medium mb-2"),
+                    Div(
+                        create_variable_button("first_name"),
+                        create_variable_button("last_name"),
+                        create_variable_button("company_name"),
+                        create_variable_button("sender_name"),
+                        cls="flex flex-wrap gap-2"
+                    ),
+                    cls="p-3 border rounded-md bg-muted/30 mb-4"
+                ),
+
+                # Preview section
+                Div(
+                    P("Preview", cls="text-sm font-medium mb-2"),
+                    Div(
+                        Div(
+                            P("Subject:", cls="text-xs text-muted-foreground"),
+                            P(
+                                cls="font-medium text-sm mb-2",
+                                data_text=js("($email_subject || 'No subject').replace(/{{([^}]+)}}/g, function(m,p1){return '[' + p1 + ']'})")
+                            ),
+                            Separator(cls="my-2"),
+                            P(
+                                cls="text-sm whitespace-pre-wrap",
+                                data_text=js("($email_body || 'No content').replace(/{{([^}]+)}}/g, function(m,p1){return '[' + p1 + ']'})")
+                            )
+                        ),
+                        cls="p-3 bg-background border rounded-md min-h-[120px]"
+                    ),
+                    P("Variables will be replaced with actual values when sent", cls="text-xs text-muted-foreground mt-1"),
+                    cls="mb-4",
+                    data_show=js("($email_subject || '').length > 0 || ($email_body || '').length > 0")
+                ),
+
+                # Actions
+                Div(
+                    Button(
+                        Icon("lucide:eye", cls="h-4 w-4 mr-2"),
+                        "Test Send",
+                        variant="outline",
+                        type="button",
+                        data_on_click=js("alert('Test email sent to your address!')"),
+                        data_attr_disabled=js("($email_subject || '').length === 0 || ($email_body || '').length === 0")
+                    ),
+                    Button(
+                        Icon("lucide:save", cls="h-4 w-4 mr-2"),
+                        "Save Template",
+                        type="submit",
+                        data_attr_disabled=js("($email_subject || '').length === 0 || ($email_body || '').length === 0"),
+                        data_on_click=js("""
+                            evt.preventDefault();
+                            if (($email_subject || '').length > 0 && ($email_body || '').length > 0) {
+                                alert('Template saved successfully!');
+                            }
+                        """)
+                    ),
+                    cls="flex gap-2 justify-end"
+                )
+            )
+        ),
+        cls="max-w-3xl"
     )
+
+
+# Module-level data structures
+EXAMPLES_DATA = [
+    {"title": "Basic Textarea", "description": "Simple textarea with different states", "code": basic_textarea_example.code},
+    {"title": "Contextual Usage", "description": "Textarea sizes matched to specific use cases", "code": contextual_textarea_examples.code},
+    {"title": "Character Counter", "description": "Track character count with visual feedback", "code": character_counter_example.code},
+    {"title": "Comment Box with Live Preview", "description": "Rich text editor with real-time preview and formatting toolbar", "code": comment_box_live_preview_example.code},
+    {"title": "Auto-Expanding", "description": "Textarea that grows with content", "code": auto_expanding_textarea_example.code},
+    {"title": "Feedback Form", "description": "Multi-field form with validation", "code": enhanced_feedback_form_example.code},
+    {"title": "Code Editor", "description": "Code input with monospace font and utilities", "code": code_editor_textarea_example.code},
+    {"title": "Email Template Composer", "description": "Professional template system with variable substitution", "code": email_template_composer_example.code},
+]
+
+API_REFERENCE = build_api_reference(
+    main_props=[
+        Prop("placeholder", "str | None", "Placeholder text shown when empty", "None"),
+        Prop("value", "str | None", "Initial text value", "None"),
+        Prop("signal", "str | None", "Datastar signal for two-way binding", "None"),
+        Prop("rows", "int | None", "Number of visible text rows", "None"),
+        Prop("maxlength", "int | None", "Maximum number of characters", "None"),
+        Prop("resize", "Literal['none','both','horizontal','vertical'] | None", "Controls textarea resizing behavior", "None"),
+        Prop("disabled", "bool", "Whether the textarea is disabled", "False"),
+        Prop("required", "bool", "Whether the textarea is required", "False"),
+        Prop("cls", "str", "Additional CSS classes", "''"),
+    ]
+)
+
+
+def examples():
+    """Generate all textarea examples."""
+    yield ComponentPreview(basic_textarea_example(), basic_textarea_example.code, title="Basic Textarea", description="Simple textarea with different states")
+    yield ComponentPreview(contextual_textarea_examples(), contextual_textarea_examples.code, title="Contextual Usage", description="Textarea sizes matched to specific use cases")
+    yield ComponentPreview(character_counter_example(), character_counter_example.code, title="Character Counter", description="Track character count with visual feedback")
+    yield ComponentPreview(comment_box_live_preview_example(), comment_box_live_preview_example.code, title="Comment Box with Live Preview", description="Rich text editor with real-time preview and formatting toolbar")
+    yield ComponentPreview(auto_expanding_textarea_example(), auto_expanding_textarea_example.code, title="Auto-Expanding", description="Textarea that grows with content")
+    yield ComponentPreview(enhanced_feedback_form_example(), enhanced_feedback_form_example.code, title="Feedback Form", description="Multi-field form with validation")
+    yield ComponentPreview(code_editor_textarea_example(), code_editor_textarea_example.code, title="Code Editor", description="Code input with monospace font and utilities")
+    yield ComponentPreview(email_template_composer_example(), email_template_composer_example.code, title="Email Template Composer", description="Professional template system with variable substitution")
 
 
 def create_textarea_docs():
-    
-    # For Textarea, users need the key props they will set most often.
-    api_reference = build_api_reference(
-        main_props=[
-            Prop("placeholder", "str | None", "Placeholder text shown when empty", "None"),
-            Prop("value", "str | None", "Initial text value", "None"),
-            Prop("signal", "str | None", "Datastar signal for two-way binding", "None"),
-            Prop("rows", "int | None", "Number of visible text rows", "None"),
-            Prop("maxlength", "int | None", "Maximum number of characters", "None"),
-            Prop("resize", "Literal['none','both','horizontal','vertical'] | None", "Controls textarea resizing behavior", "None"),
-            Prop("disabled", "bool", "Whether the textarea is disabled", "False"),
-            Prop("required", "bool", "Whether the textarea is required", "False"),
-            Prop("cls", "str", "Additional CSS classes", "''"),
-        ]
-    )
-    
     # Hero example
     @with_code
     def hero_textarea_example():
@@ -871,13 +837,13 @@ def create_textarea_docs():
         hero_textarea_example.code,
         copy_button=True
     )
-    
+
     return auto_generate_page(
         TITLE,
         DESCRIPTION,
         list(examples()),
         cli_command="star add textarea",
-        api_reference=api_reference,
+        api_reference=API_REFERENCE,
         hero_example=hero_example,
         component_slug="textarea"
     )

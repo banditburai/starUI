@@ -2,7 +2,7 @@ from typing import Any, Literal
 
 from starhtml import Div, FT, Signal
 
-from .utils import cn, gen_id
+from .utils import cn, gen_id, reset_timeout, clear_timeout
 
 
 def HoverCard(
@@ -14,8 +14,9 @@ def HoverCard(
 ) -> FT:
     sig = getattr(signal, 'id', signal) or gen_id("hover_card")
     open_state = Signal(f"{sig}_open", default_open)
+    timer_state = Signal(f"{sig}_timer", _ref_only=True)
 
-    ctx = dict(sig=sig, open_state=open_state)
+    ctx = dict(sig=sig, open_state=open_state, timer_state=timer_state)
 
     return Div(
         open_state,
@@ -33,14 +34,14 @@ def HoverCardTrigger(
     cls: str = "",
     **kwargs: Any,
 ):
-    def trigger(*, sig, open_state, **_):
+    def trigger(*, sig, open_state, timer_state, **_):
         trigger_ref = Signal(f"{sig}_trigger", _ref_only=True)
 
         return Div(
             *children,
             data_ref=trigger_ref,
-            data_on_mouseenter=open_state.set(True).with_(debounce=hover_delay),
-            data_on_mouseleave=open_state.set(False).with_(debounce=hide_delay),
+            data_on_mouseenter=reset_timeout(timer_state, hover_delay, open_state.set(True)),
+            data_on_mouseleave=reset_timeout(timer_state, hide_delay, open_state.set(False)),
             data_attr_aria_expanded=open_state,
             aria_haspopup="dialog",
             aria_describedby=f"{sig}_content",
@@ -61,7 +62,7 @@ def HoverCardContent(
     cls: str = "",
     **kwargs: Any,
 ):
-    def content(*, sig, open_state, **_):
+    def content(*, sig, open_state, timer_state, **_):
         content_ref = Signal(f"{sig}_content", _ref_only=True)
         placement = side if align == "center" else f"{side}-{align}"
 
@@ -80,8 +81,8 @@ def HoverCardContent(
                     "strategy": "fixed",
                 },
             ),
-            data_on_mouseenter=open_state.set(True),
-            data_on_mouseleave=open_state.set(False).with_(debounce=hide_delay),
+            data_on_mouseenter=clear_timeout(timer_state, open_state.set(True)),
+            data_on_mouseleave=reset_timeout(timer_state, hide_delay, open_state.set(False)),
             id=content_ref.id,
             role="dialog",
             aria_labelledby=f"{sig}_trigger",

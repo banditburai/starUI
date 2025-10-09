@@ -85,7 +85,7 @@ def ComponentPreview(
                     id="code",
                     cls="mt-2 overflow-x-auto min-w-0 max-w-full"
                 ),
-                default_id=default_tab,
+                default_value=default_tab,
                 signal=f"{preview_id}_tab",
                 cls="w-full min-w-0"
             ),

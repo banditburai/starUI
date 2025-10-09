@@ -48,14 +48,14 @@ def CodePanel(
     )
 
 
-def CodeBlock(code: str, language: str = "bash", cls: str = "", **attrs) -> FT:
+def CodeBlock(code: str, language: str = "bash", cls: str = "", center_button: bool = False, **attrs) -> FT:
     code_id = f"code_{abs(hash(code))}"
     signal_name = f"copied_{code_id}"
 
     return Div(
         (copied := Signal(signal_name, False)),
         BaseCodeBlock(code, language=language, id=code_id, cls="overflow-x-auto", style=SCROLLBAR_STYLE),
-        CopyButton(code_id, copied, variant="positioned"),
+        CopyButton(code_id, copied, variant="positioned", center=center_button),
         cls=cn("relative group", cls),
         **attrs
     )

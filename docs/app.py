@@ -435,7 +435,9 @@ def component_page(component_name: str):
 @rt("/api/markdown/{component_name}")
 def get_component_markdown(component_name: str):
     try:
-        module_name = f"pages.components.{component_name}"
+        # Convert hyphenated slug to Python module name (e.g., "alert-dialog" -> "alert_dialog")
+        module_component_name = component_name.replace("-", "_")
+        module_name = f"pages.components.{module_component_name}"
         module = __import__(module_name, fromlist=["*"])
 
         # Extract component data using the same pattern as discover_components
@@ -445,11 +447,11 @@ def get_component_markdown(component_name: str):
             "cli_command": f"star add {component_name}",
         }
 
-        create_docs_func = getattr(module, f"create_{component_name}_docs", None)
+        create_docs_func = getattr(module, f"create_{module_component_name}_docs", None)
         if not create_docs_func:
             return {"error": f"No documentation function found for {component_name}"}
 
-        markdown_data = _extract_component_data(module, component_name)
+        markdown_data = _extract_component_data(module, module_component_name)
 
         from utils import generate_component_markdown
         markdown_content = generate_component_markdown(
@@ -469,47 +471,26 @@ def get_component_markdown(component_name: str):
 
 
 def _extract_component_data(module, component_name: str) -> dict:
-    import ast
-    import inspect
-    import re
-    
-    examples_func = getattr(module, "examples", None)
-    if not examples_func:
-        return {}
-    
-    try:
-        examples_data = _parse_component_previews_from_source(inspect.getsource(examples_func))
-        
-        create_docs_func = getattr(module, f"create_{component_name}_docs", None)
-        if not create_docs_func:
-            return {"examples_data": examples_data}
-        
-        source = inspect.getsource(create_docs_func)
-        
-        hero_match = re.search(r'hero_example\s*=\s*ComponentPreview\(.*?[\'\"]{3}(.*?)[\'\"]{3}', source, re.DOTALL)
-        hero_example_code = hero_match.group(1).strip() if hero_match else None
-        
-        api_reference = getattr(module, 'api_reference', None)
-        if not api_reference and 'api_reference=' in source:
-            try:
-                tree = ast.parse(source)
-                for node in ast.walk(tree):
-                    if isinstance(node, ast.Call):
-                        for kw in getattr(node, 'keywords', []):
-                            if kw.arg == 'api_reference':
-                                api_reference = ast.literal_eval(kw.value)
-                                break
-            except:
-                api_reference = None
-        
-        return {
-            "examples_data": examples_data,
-            "hero_example_code": hero_example_code,
-            "api_reference": api_reference
-        }
-    
-    except Exception:
-        return {"examples_data": []}
+    result = {}
+
+    # Get examples data from module-level variable (includes code)
+    examples_data = getattr(module, "EXAMPLES_DATA", None)
+    if examples_data:
+        result["examples_data"] = examples_data
+
+    # Get hero_example_code from module-level decorated function
+    # Convention: hero_{component_name}_example
+    hero_func_name = f"hero_{component_name}_example"
+    hero_func = getattr(module, hero_func_name, None)
+    if hero_func and hasattr(hero_func, 'code'):
+        result["hero_example_code"] = hero_func.code
+
+    # Get API reference from module-level variable
+    api_reference = getattr(module, "API_REFERENCE", None)
+    if api_reference:
+        result["api_reference"] = api_reference
+
+    return result
 
 
 def _parse_component_previews_from_source(source: str) -> list[dict]:

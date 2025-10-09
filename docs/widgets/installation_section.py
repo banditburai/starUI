@@ -9,7 +9,7 @@ def _cli_installation_section(cli_command: str) -> FT:
     return Div(
         H3("CLI", cls="text-lg font-semibold"),
         P("Install the component using the StarUI CLI:", cls="text-sm text-muted-foreground mb-3"),
-        CodeBlock(cli_command, language="bash", cls="mt-2"),
+        CodeBlock(cli_command, language="bash", cls="mt-2", center_button=True),
         cls="space-y-3"
     )
 

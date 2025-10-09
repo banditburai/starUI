@@ -3,8 +3,9 @@ import json
 import time
 
 from starhtml import FT, Button, Div, Icon, Span, Signal, js, signals
+from starhtml.datastar import _JSRaw
 
-from .utils import cn, cva
+from .utils import cn, cva, set_timeout
 
 ToastVariant = Literal["default", "success", "error", "warning", "info", "destructive"]
 ToastPosition = Literal[
@@ -144,11 +145,8 @@ class ToastHelper:
         duration: int = 4000,
     ) -> str:
         data = json.dumps({"title": title, "description": description, "variant": variant})
-
-        # IIFE for scope isolation in SSE contexts
-        return f"""(()=>{{
-const t={{...{data},id:Date.now(),timestamp:Date.now()}};$toasts=[t,...$toasts].slice(0,3);{f'setTimeout(()=>$toasts=$toasts.filter(x=>x.id!==t.id),{duration});' if duration > 0 else ''}
-}})()"""
+        auto_dismiss = set_timeout(js("$toasts=$toasts.filter(x=>x.id!==t.id)"), duration) if duration else ''
+        return f"""(()=>{{const t={{...{data},id:Date.now(),timestamp:Date.now()}};$toasts=[t,...$toasts].slice(0,3);{auto_dismiss}}})()"""
 
     def success(self, title: str, description: str = "", duration: int = 4000) -> str:
         return self(title, description, "success", duration)

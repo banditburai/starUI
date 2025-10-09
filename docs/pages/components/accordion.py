@@ -13,6 +13,7 @@ from starui.registry.components.badge import Badge
 from starui.registry.components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
 from starui.registry.components.input import InputWithLabel
 from starui.registry.components.checkbox import CheckboxWithLabel
+from starui.registry.components.utils import cn
 from utils import auto_generate_page, Prop, build_api_reference, with_code
 from widgets.component_preview import ComponentPreview
 
@@ -237,12 +238,12 @@ def multiple_selection_accordion_example():
 @with_code
 def settings_accordion_example():
     def settings_trigger(title, *, badge_text=None, badge_variant="secondary", icon=None):
-        elements = [
-            Badge(badge_text, variant=badge_variant, cls="mr-2") if badge_text else None,
-            Icon(icon, cls="h-4 w-4 mr-2") if icon else None,
-            Span(title)
-        ]
-        return Div(*filter(None, elements), cls="flex items-center")
+        return Div(
+            badge_text and Badge(badge_text, variant=badge_variant, cls="mr-2"),
+            icon and Icon(icon, cls="h-4 w-4 mr-2"),
+            Span(title),
+            cls="flex items-center"
+        )
 
     personal_form = Div(
         InputWithLabel(label="Full Name", value="John Doe"),
@@ -443,32 +444,31 @@ def file_explorer_accordion_example():
 @with_code
 def course_curriculum_accordion_example():
     def lesson_item(title, duration=None, type="video", completed=False, locked=False):
-        icons = {
+        icon = "lucide:lock" if locked else {
             "video": "lucide:play-circle",
             "exercise": "lucide:file-text",
             "quiz": "lucide:check-circle" if completed else "lucide:help-circle",
-        }
+        }.get(type, "lucide:file")
 
-        icon = "lucide:lock" if locked else icons.get(type, "lucide:file")
-        icon_cls = "h-4 w-4 mr-2" + (
-            " text-green-500" if completed else
-            " text-muted-foreground" if locked else ""
-        )
+        icon_cls = cn("h-4 w-4 mr-2", completed and "text-green-500", locked and "text-muted-foreground")
 
-        right_element = (
-            Span(duration, cls="ml-auto text-muted-foreground") if duration else
-            Badge("Exercise", variant="outline", cls="ml-auto") if type == "exercise" else
-            Badge("Completed", variant="secondary", cls="ml-auto") if completed else
-            Badge("Locked", variant="outline", cls="ml-auto") if locked else
-            None
-        )
+        if duration:
+            right_element = Span(duration, cls="ml-auto text-muted-foreground")
+        elif type == "exercise":
+            right_element = Badge("Exercise", variant="outline", cls="ml-auto")
+        elif completed:
+            right_element = Badge("Completed", variant="secondary", cls="ml-auto")
+        elif locked:
+            right_element = Badge("Locked", variant="outline", cls="ml-auto")
+        else:
+            right_element = None
 
         return Li(
             Div(
                 Icon(icon, cls=icon_cls),
                 title,
                 right_element,
-                cls=f"flex items-center{' opacity-50' if locked else ''}"
+                cls=cn("flex items-center", locked and "opacity-50")
             )
         )
 

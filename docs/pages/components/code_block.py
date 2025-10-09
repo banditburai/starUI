@@ -1,17 +1,10 @@
-"""
-Code Block component documentation - Syntax-highlighted code display.
-Beautiful code blocks with syntax highlighting and copy functionality.
-"""
-
-# Component metadata for auto-discovery
-TITLE = "Code Block" 
+TITLE = "Code Block"
 DESCRIPTION = "Display code with syntax highlighting, copy functionality, and various styling options."
 CATEGORY = "ui"
 ORDER = 50
 STATUS = "stable"
 
-from starhtml import Div, P, H3, H4, Pre, Code, Button as HTMLButton, Span, Icon
-from starhtml.datastar import ds_signals, ds_on_click, ds_text, ds_show, value, ds_bind
+from starhtml import Div, P, H3, Pre, Code, Span, Icon, Signal, js
 from starui.registry.components.button import Button
 from starui.registry.components.code_block import CodeBlock, CodeBlockStyles, InlineCode
 from starui.registry.components.badge import Badge
@@ -20,15 +13,15 @@ from widgets.component_preview import ComponentPreview
 from utils import with_code, Prop, Component, build_api_reference
 
 
-def examples():
-    """Generate code block examples using ComponentPreview with tabs."""
-    
-    # Basic syntax highlighting
-    @with_code
-    def python_syntax_highlighting_example():
-        return Div(
-            P("Python Code", cls="font-medium mb-3"),
-            CodeBlock('''def fibonacci(n):
+# ============================================================================
+# EXAMPLE FUNCTIONS (decorated with @with_code for markdown generation)
+# ============================================================================
+
+@with_code
+def python_syntax_highlighting_example():
+    return Div(
+        P("Python Code", cls="font-medium mb-3"),
+        CodeBlock('''def fibonacci(n):
     """Generate Fibonacci sequence up to n."""
     a, b = 0, 1
     sequence = []
@@ -40,50 +33,79 @@ def examples():
 # Usage example
 numbers = fibonacci(100)
 print(f"Fibonacci numbers up to 100: {numbers}")''', language="python"),
-            cls="w-full overflow-x-auto",
-            style="scrollbar-width: thin; scrollbar-color: transparent transparent;"
-        )
-    
-    yield ComponentPreview(
-        python_syntax_highlighting_example(),
-        python_syntax_highlighting_example.code,
-        title="Python Syntax Highlighting",
-        description="Beautiful syntax highlighting for Python code with proper indentation and colors"
+        cls="w-full overflow-x-auto",
+        style="scrollbar-width: thin; scrollbar-color: transparent transparent;"
     )
-    
-    # Code block with copy functionality (manual implementation)
-    @with_code
-    def interactive_copy_feature_example():
-        return Div(
-            P("Interactive Code Block", cls="font-medium mb-3"),
-            
-            # Code block with copy button - using relative positioning
+
+
+@with_code
+def interactive_copy_feature_example():
+    code_content = Signal("code_content", '''import asyncio
+from datetime import datetime
+
+async def process_data(data):
+    """Process data asynchronously with timestamp."""
+    timestamp = datetime.now().isoformat()
+    print(f"[{timestamp}] Processing: {data}")
+
+    # Simulate async work
+    await asyncio.sleep(1)
+
+    result = {
+        'processed_data': data.upper(),
+        'timestamp': timestamp,
+        'status': 'completed'
+    }
+
+    return result
+
+# Example usage
+async def main():
+    tasks = [
+        process_data("hello"),
+        process_data("world"),
+        process_data("async")
+    ]
+
+    results = await asyncio.gather(*tasks)
+    for result in results:
+        print(f"Result: {result}")
+
+if __name__ == "__main__":
+    asyncio.run(main())''')
+    copied = Signal("copied", False)
+
+    return Div(
+        P("Interactive Code Block", cls="font-medium mb-3"),
+
+        # Code block with copy button - using relative positioning
+        Div(
+            code_content, copied,
+            # Header that overlaps the CodeBlock
             Div(
-                # Header that overlaps the CodeBlock
+                Span("example.py", cls="text-sm font-mono text-muted-foreground"),
                 Div(
-                    Span("example.py", cls="text-sm font-mono text-muted-foreground"),
-                    Div(
-                        Button(
-                            Icon("lucide:copy", cls="w-4 h-4"),
-                            ds_on_click("navigator.clipboard.writeText($code_content); $copied = true; setTimeout(() => $copied = false, 2000)"),
-                            ds_show("!$copied"),
-                            variant="ghost",
-                            size="sm"
-                        ),
-                        Button(
-                            Icon("lucide:check", cls="w-4 h-4"),
-                            ds_show("$copied"),
-                            variant="ghost", 
-                            size="sm",
-                            cls="text-green-600"
-                        ),
-                        cls="flex"
+                    Button(
+                        Icon("lucide:copy", cls="w-4 h-4"),
+                        data_on_click="navigator.clipboard.writeText($code_content); $copied = true; setTimeout(() => $copied = false, 2000)",
+                        data_show=js("!$copied"),
+                        variant="ghost",
+                        size="sm"
                     ),
-                    cls="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4 py-3 bg-muted/95 backdrop-blur-sm border-b border-border rounded-t-lg"
+                    Button(
+                        Icon("lucide:check", cls="w-4 h-4"),
+                        data_show=copied,
+                        variant="ghost",
+                        size="sm",
+                        cls="text-green-600"
+                    ),
+                    cls="flex"
                 ),
-                
-                # Code content with blank lines to account for header overlay
-                CodeBlock('''
+                cls="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4 py-3 bg-muted/95 backdrop-blur-sm border-b border-border rounded-t-lg"
+            ),
+
+            # Code content with blank lines to account for header overlay
+            CodeBlock('''
 
 import asyncio
 from datetime import datetime
@@ -92,183 +114,146 @@ async def process_data(data):
     """Process data asynchronously with timestamp."""
     timestamp = datetime.now().isoformat()
     print(f"[{timestamp}] Processing: {data}")
-    
+
     # Simulate async work
     await asyncio.sleep(1)
-    
+
     result = {
         'processed_data': data.upper(),
         'timestamp': timestamp,
         'status': 'completed'
     }
-    
+
     return result
 
 # Example usage
 async def main():
     tasks = [
         process_data("hello"),
-        process_data("world"), 
+        process_data("world"),
         process_data("async")
     ]
-    
+
     results = await asyncio.gather(*tasks)
     for result in results:
         print(f"Result: {result}")
 
 if __name__ == "__main__":
     asyncio.run(main())''', language="python"),
-                
-                ds_signals(
-                    code_content=value('''import asyncio
-from datetime import datetime
 
-async def process_data(data):
-    """Process data asynchronously with timestamp."""
-    timestamp = datetime.now().isoformat()
-    print(f"[{timestamp}] Processing: {data}")
-    
-    # Simulate async work
-    await asyncio.sleep(1)
-    
-    result = {
-        'processed_data': data.upper(),
-        'timestamp': timestamp,
-        'status': 'completed'
+            cls="relative rounded-lg overflow-hidden"
+        ),
+
+        cls="w-full overflow-x-auto",
+        style="scrollbar-width: thin; scrollbar-color: transparent transparent;"
+    )
+
+
+@with_code
+def inline_code_snippets_example():
+    return Div(
+        P(
+            "Use the ",
+            InlineCode("useState"),
+            " hook to manage component state in React. You can import it like this: ",
+            InlineCode("import { useState } from 'react'"),
+            ". Then call it in your component: ",
+            InlineCode("const [count, setCount] = useState(0)"),
+            " to create a state variable.",
+            cls="text-sm leading-7 mb-4"
+        ),
+
+        P(
+            "For styling, you can use CSS classes like ",
+            InlineCode("bg-blue-500"),
+            " for background color, ",
+            InlineCode("text-white"),
+            " for text color, and ",
+            InlineCode("p-4"),
+            " for padding.",
+            cls="text-sm leading-7 mb-4"
+        ),
+
+        P(
+            "Configuration files often use formats like ",
+            InlineCode("config.json"),
+            " or ",
+            InlineCode("settings.yaml"),
+            ". Environment variables are accessed via ",
+            InlineCode("process.env.NODE_ENV"),
+            " in Node.js.",
+            cls="text-sm leading-7"
+        ),
+
+        cls="prose prose-sm w-full max-w-none px-3 sm:px-4 py-4 sm:py-6 border rounded-lg overflow-x-auto",
+        style="scrollbar-width: thin; scrollbar-color: transparent transparent;"
+    )
+
+
+@with_code
+def documentation_layout_example():
+    # Create signals for each package manager
+    npm_copied = Signal("npm_copied", False)
+    pnpm_copied = Signal("pnpm_copied", False)
+    yarn_copied = Signal("yarn_copied", False)
+
+    signals_map = {
+        "npm": npm_copied,
+        "pnpm": pnpm_copied,
+        "yarn": yarn_copied
     }
-    
-    return result
 
-# Example usage
-async def main():
-    tasks = [
-        process_data("hello"),
-        process_data("world"), 
-        process_data("async")
-    ]
-    
-    results = await asyncio.gather(*tasks)
-    for result in results:
-        print(f"Result: {result}")
+    def create_package_manager_block(manager, command, margin_cls):
+        signal = signals_map[manager]
+        signal_name = f"{manager}_copied"
+        return Div(
+            signal,
+            P(manager, cls="text-xs text-muted-foreground mb-1"),
+            Div(
+                CodeBlock(command, language="bash", cls="text-sm py-3"),
+                Button(
+                    Icon("lucide:copy", cls="w-4 h-4"),
+                    data_on_click=f"navigator.clipboard.writeText('{command}'); ${signal_name} = true; setTimeout(() => ${signal_name} = false, 2000)",
+                    data_show=js(f"!${signal_name}"),
+                    variant="ghost",
+                    size="icon",
+                    cls="absolute top-1/2 right-2 -translate-y-1/2 h-8 w-8"
+                ),
+                Button(
+                    Icon("lucide:check", cls="w-4 h-4"),
+                    data_show=signal,
+                    variant="ghost",
+                    size="icon",
+                    cls="absolute top-1/2 right-2 -translate-y-1/2 h-8 w-8 text-green-600"
+                ),
+                cls="relative"
+            ),
+            cls=margin_cls
+        )
 
-if __name__ == "__main__":
-    asyncio.run(main())'''),
-                    copied=False
-                ),
-                cls="relative rounded-lg overflow-hidden"
-            ),
-            
-            cls="w-full overflow-x-auto",
-            style="scrollbar-width: thin; scrollbar-color: transparent transparent;"
-        )
-    
-    yield ComponentPreview(
-        interactive_copy_feature_example(),
-        interactive_copy_feature_example.code,
-        title="Interactive Copy Feature",
-        description="Add copy functionality to code blocks with visual feedback"
-    )
-    
-    # Inline code usage
-    @with_code
-    def inline_code_snippets_example():
-        return Div(
-            P(
-                "Use the ",
-                InlineCode("useState"),
-                " hook to manage component state in React. You can import it like this: ",
-                InlineCode("import { useState } from 'react'"),
-                ". Then call it in your component: ",
-                InlineCode("const [count, setCount] = useState(0)"),
-                " to create a state variable.",
-                cls="text-sm leading-7 mb-4"
-            ),
-            
-            P(
-                "For styling, you can use CSS classes like ",
-                InlineCode("bg-blue-500"),
-                " for background color, ",
-                InlineCode("text-white"),
-                " for text color, and ",
-                InlineCode("p-4"),
-                " for padding.",
-                cls="text-sm leading-7 mb-4"
-            ),
-            
-            P(
-                "Configuration files often use formats like ",
-                InlineCode("config.json"),
-                " or ",
-                InlineCode("settings.yaml"),
-                ". Environment variables are accessed via ",
-                InlineCode("process.env.NODE_ENV"),
-                " in Node.js.",
-                cls="text-sm leading-7"
-            ),
-            
-            cls="prose prose-sm w-full max-w-none px-3 sm:px-4 py-4 sm:py-6 border rounded-lg overflow-x-auto",
-            style="scrollbar-width: thin; scrollbar-color: transparent transparent;"
-        )
-    
-    yield ComponentPreview(
-        inline_code_snippets_example(),
-        inline_code_snippets_example.code,
-        title="Inline Code Snippets",
-        description="Highlight code snippets within paragraphs and documentation"
-    )
-    
-    @with_code
-    def documentation_layout_example():
-        def create_package_manager_block(manager, command, margin_cls):
-            signal_name = f"{manager}_copied"
-            return Div(
-                P(manager, cls="text-xs text-muted-foreground mb-1"),
-                Div(
-                    CodeBlock(command, language="bash", cls="text-sm py-3"),
-                    Button(
-                        Icon("lucide:copy", cls="w-4 h-4"),
-                        ds_on_click(f"navigator.clipboard.writeText('{command}'); ${signal_name} = true; setTimeout(() => ${signal_name} = false, 2000)"),
-                        ds_show(f"!${signal_name}"),
-                        variant="ghost",
-                        size="icon",
-                        cls="absolute top-1/2 right-2 -translate-y-1/2 h-8 w-8"
-                    ),
-                    Button(
-                        Icon("lucide:check", cls="w-4 h-4"),
-                        ds_show(f"${signal_name}"),
-                        variant="ghost",
-                        size="icon",
-                        cls="absolute top-1/2 right-2 -translate-y-1/2 h-8 w-8 text-green-600"
-                    ),
-                    ds_signals(**{signal_name: False}),
-                    cls="relative"
-                ),
-                cls=margin_cls
-            )
-        
-        return Div(
-            # Installation section
-            Div(
-                H3("Installation", cls="text-lg font-semibold mb-3"),
-                P("Install StarUI using your preferred package manager:", cls="text-sm text-muted-foreground mb-3"),
-                
-                *[create_package_manager_block(*pm) for pm in [
-                    ("npm", "npm install starui", "mb-4"),
-                    ("pnpm", "pnpm add starui", "mb-4"), 
-                    ("yarn", "yarn add starui", "mb-6")
-                ]],
-                
-                cls="mb-8"
-            ),
-            
-            Separator(cls="mb-8"),
-            
-            # Usage section
-            Div(
-                H3("Quick Start", cls="text-lg font-semibold mb-3"),
-                P("Import and use components in your project:", cls="text-sm text-muted-foreground mb-3"),
-                
-                CodeBlock('''from starhtml import Div, H1, P
+    return Div(
+        # Installation section
+        Div(
+            H3("Installation", cls="text-lg font-semibold mb-3"),
+            P("Install StarUI using your preferred package manager:", cls="text-sm text-muted-foreground mb-3"),
+
+            *[create_package_manager_block(*pm) for pm in [
+                ("npm", "npm install starui", "mb-4"),
+                ("pnpm", "pnpm add starui", "mb-4"),
+                ("yarn", "yarn add starui", "mb-6")
+            ]],
+
+            cls="mb-8"
+        ),
+
+        Separator(cls="mb-8"),
+
+        # Usage section
+        Div(
+            H3("Quick Start", cls="text-lg font-semibold mb-3"),
+            P("Import and use components in your project:", cls="text-sm text-muted-foreground mb-3"),
+
+            CodeBlock('''from starhtml import Div, H1, P
 from starui import Button, Card, CardHeader, CardTitle, CardContent
 
 def my_app():
@@ -284,24 +269,17 @@ def my_app():
         ),
         cls="max-w-md mx-auto mt-8"
     )''', language="python"),
-                
-                cls=""
-            ),
-            
-            cls="w-full px-3 sm:px-4 py-4 sm:py-6 border rounded-lg overflow-x-auto",
-            style="scrollbar-width: thin; scrollbar-color: transparent transparent;"
-        )
-    
-    yield ComponentPreview(
-        documentation_layout_example(),
-        documentation_layout_example.code,
-        title="Documentation Layout",
-        description="Structure documentation with code blocks for installation and usage examples"
+
+            cls=""
+        ),
+
+        cls="w-full px-3 sm:px-4 py-4 sm:py-6 border rounded-lg overflow-x-auto",
+        style="scrollbar-width: thin; scrollbar-color: transparent transparent;"
     )
-    
-    # Terminal/command output
-    @with_code
-    def terminal_output_example():
+
+
+@with_code
+def terminal_output_example():
         return Div(
             P("Terminal Output", cls="font-medium mb-3"),
             
@@ -353,7 +331,59 @@ Run 'star dev' to see your changes.''',
             cls="w-full overflow-x-auto",
             style="scrollbar-width: thin; scrollbar-color: transparent transparent;"
         )
-    
+
+
+# ============================================================================
+# MODULE-LEVEL DATA (for markdown API)
+# ============================================================================
+
+EXAMPLES_DATA = [
+    {"title": "Python Syntax Highlighting", "description": "Display Python code with automatic syntax highlighting", "code": python_syntax_highlighting_example.code},
+    {"title": "Interactive Copy Feature", "description": "Add copy-to-clipboard functionality with visual feedback", "code": interactive_copy_feature_example.code},
+    {"title": "Inline Code Snippets", "description": "Highlight short code snippets within text and documentation", "code": inline_code_snippets_example.code},
+    {"title": "Documentation Layout", "description": "Structure documentation with code blocks for installation and usage examples", "code": documentation_layout_example.code},
+    {"title": "Terminal Output", "description": "Style code blocks to look like terminal output with custom colors", "code": terminal_output_example.code},
+]
+
+API_REFERENCE = build_api_reference(
+    components=[
+        Component("CodeBlock", "Display multi-line code with syntax highlighting"),
+        Component("CodeBlockStyles", "Generate theme-aware styles for code blocks (add once to app headers)"),
+        Component("InlineCode", "Highlight short code snippets within text and documentation"),
+    ]
+)
+
+
+def examples():
+    """Generate all code block examples."""
+    yield ComponentPreview(
+        python_syntax_highlighting_example(),
+        python_syntax_highlighting_example.code,
+        title="Python Syntax Highlighting",
+        description="Display Python code with automatic syntax highlighting"
+    )
+
+    yield ComponentPreview(
+        interactive_copy_feature_example(),
+        interactive_copy_feature_example.code,
+        title="Interactive Copy Feature",
+        description="Add copy-to-clipboard functionality with visual feedback"
+    )
+
+    yield ComponentPreview(
+        inline_code_snippets_example(),
+        inline_code_snippets_example.code,
+        title="Inline Code Snippets",
+        description="Highlight short code snippets within text and documentation"
+    )
+
+    yield ComponentPreview(
+        documentation_layout_example(),
+        documentation_layout_example.code,
+        title="Documentation Layout",
+        description="Structure documentation with code blocks for installation and usage examples"
+    )
+
     yield ComponentPreview(
         terminal_output_example(),
         terminal_output_example.code,
@@ -403,21 +433,13 @@ def welcome_component():
         hero_code_block_example.code,
         copy_button=True
     )
-    
-    api_reference = build_api_reference(
-        components=[
-            Component("CodeBlock", "Display multi-line code with syntax highlighting"),
-            Component("CodeBlockStyles", "Generate theme-aware styles for code blocks (add once to app headers)"),
-            Component("InlineCode", "Highlight short code snippets within text and documentation"),
-        ]
-    )
-    
+
     return auto_generate_page(
         TITLE,
         DESCRIPTION,
         list(examples()),
         cli_command="star add code-block",
-        api_reference=api_reference,
+        api_reference=API_REFERENCE,
         hero_example=hero_example,
-        component_slug="code_block"
+        component_slug="code-block"
     )

@@ -1,10 +1,12 @@
+from itertools import count
 from typing import Any, Literal
 
 from starhtml import FT, Div, Icon, Input, Span, Signal, js
 from starhtml import Dialog as HTMLDialog
-from starhtml.datastar import evt, document, seq
+from starhtml.datastar import evt, document
+from starhtml.datastar import value as js_value
 
-from .utils import cn, cva, gen_id
+from .utils import cn, cva, gen_id, reset_timeout, set_timeout, with_signals
 
 CommandSize = Literal["sm", "md", "lg"]
 
@@ -12,20 +14,25 @@ _SEARCH_DEBOUNCE_MS = 50
 _DIALOG_FOCUS_DELAY_MS = 50
 
 
-def _get_filter_effect(sig: str, search) -> str:
-    return f"const i=document.querySelectorAll('[data-command-item=\"{sig}\"]'),s={search}.toLowerCase();let v=0;i.forEach(e=>{{const m=!s||(e.dataset.value||'').toLowerCase().includes(s)||(e.dataset.keywords||'').toLowerCase().includes(s)||(e.textContent||'').toLowerCase().includes(s);e.style.display=m?'':'none';e.dataset.filtered=m?'false':'true';m&&e.dataset.disabled!=='true'&&v++}});document.querySelectorAll('[data-command-group=\"{sig}\"]').forEach(g=>{{g.style.display=[...g.querySelectorAll('[data-command-item=\"{sig}\"]')].some(i=>i.dataset.filtered==='false')?'':'none'}});document.querySelectorAll('[data-command-empty=\"{sig}\"]').forEach(e=>{{e.style.display=v>0?'none':''}})"
+def _get_search_handler(sig: str, selected, visible_items) -> str:
+    action = js(f"const v=${visible_items.id};if(v.length>0)${selected.id}=v[0].index")
+    return str(reset_timeout(f"st_{sig}", _SEARCH_DEBOUNCE_MS, action, window=True))
 
 
-def _get_search_handler(sig: str, selected) -> str:
-    return f"clearTimeout(window._st_{sig});window._st_{sig}=setTimeout(()=>{{const v=document.querySelectorAll('[data-command-item=\"{sig}\"]:not([style*=\"none\"]):not([data-disabled=\"true\"])');if(v.length>0){selected}=parseInt(v[0].dataset.index||'0')}},{_SEARCH_DEBOUNCE_MS})"
+def _get_nav_handler(sig: str, search, selected, visible_items) -> str:
+    return f"const i=${visible_items.id};let c=-1;i.forEach((item,x)=>{{if(item.index===${selected.id})c=x}});switch(event.key){{case'ArrowDown':event.preventDefault();if(i.length>0){{const n=c<i.length-1?c+1:0;${selected.id}=i[n].index;i[n].el.scrollIntoView({{block:'nearest'}})}}break;case'ArrowUp':event.preventDefault();if(i.length>0){{const p=c>0?c-1:i.length-1;${selected.id}=i[p].index;i[p].el.scrollIntoView({{block:'nearest'}})}}break;case'Enter':event.preventDefault();if(c>=0&&i[c])i[c].el.click();break;case'Escape':if(${search.id}){{event.preventDefault();${search.id}='';${selected.id}=0}}break}}"
 
 
-def _get_nav_handler(sig: str, search, selected) -> str:
-    return f"const i=[...document.querySelectorAll('[data-command-item=\"{sig}\"]:not([data-filtered=\"true\"]):not([data-disabled=\"true\"])')];let c=-1;i.forEach((e,x)=>{{if(parseInt(e.dataset.index)==={selected})c=x}});switch(event.key){{case'ArrowDown':event.preventDefault();if(i.length>0){{const n=c<i.length-1?c+1:0;{selected}=parseInt(i[n].dataset.index);i[n].scrollIntoView({{block:'nearest'}})}}break;case'ArrowUp':event.preventDefault();if(i.length>0){{const p=c>0?c-1:i.length-1;{selected}=parseInt(i[p].dataset.index);i[p].scrollIntoView({{block:'nearest'}})}}break;case'Enter':event.preventDefault();if(c>=0&&i[c])i[c].click();break;case'Escape':if({search}){{event.preventDefault();{search}='';{selected}=0}}break}}"
-
-
-def _get_dialog_open_effect(sig: str, search, selected, dialog_open, dialog_ref) -> str:
-    return f"{_get_filter_effect(sig, search)};if({dialog_open}&&!{search})setTimeout(()=>{{const f=document.querySelector('[data-command-item=\"{sig}\"]:not([data-disabled=\"true\"])');if(f){selected}=parseInt(f.dataset.index||'0')}},{_DIALOG_FOCUS_DELAY_MS})"
+def _get_dialog_open_effect(sig: str, search, selected, dialog_open, dialog_ref, visible_items) -> str:
+    # Focus input and select first visible item when dialog opens
+    action = js(f"""
+        const input=document.querySelector('[data-command-root=\"{sig}\"] [data-slot=\"command-input\"]');
+        if(input)input.focus();
+        const v=${visible_items.id};
+        if(v.length>0)${selected.id}=v[0].index;
+    """)
+    timeout_expr = set_timeout(action, _DIALOG_FOCUS_DELAY_MS)
+    return f"if(${dialog_open.id}&&!${search.id}){timeout_expr}"
 
 
 command_variants = cva(
@@ -52,26 +59,41 @@ def Command(
     size: CommandSize = "md",
     label: str = "Command Menu",
     cls: str = "",
+    dialog_ref = None,
     **kwargs: Any,
 ) -> FT:
     sig = getattr(signal, 'id', signal) or gen_id("command")
-    counter = {"value": 0}
-    search = Signal(f"{sig}_search", "")
-    selected = Signal(f"{sig}_selected", 0)
 
-    ctx = dict(sig=sig, search=search, selected=selected, counter=counter, dialog_ref=None)
+    ctx = dict(
+        sig=sig,
+        search=(search := Signal(f"{sig}_search", "")),
+        selected=(selected := Signal(f"{sig}_selected", 0)),
+        visible_count=(visible_count := Signal(f"{sig}_visible", 0)),
+        visible_items=(visible_items := Signal(f"{sig}_visible_items", [])),
+        _item_index=count(),
+        dialog_ref=dialog_ref,
+    )
 
-    return Div(
+    element = Div(
         search,
         selected,
+        visible_count,
+        visible_items,
         *[c(**ctx) if callable(c) else c for c in children],
-        data_effect=js(_get_filter_effect(sig, search)),
         data_command_root=sig,
         data_slot="command",
         aria_label=label,
         tabindex="-1",
         cls=cn(command_variants(size=size), cls),
         **kwargs,
+    )
+
+    return with_signals(
+        element,
+        search=search,
+        selected=selected,
+        visible_count=visible_count,
+        visible_items=visible_items,
     )
 
 
@@ -86,42 +108,48 @@ def CommandDialog(
 ) -> FT:
     sig = getattr(signal, 'id', signal) or gen_id("command")
     dialog_ref = Signal(f"{sig}_dialog", _ref_only=True)
-    counter = {"value": 0}
-
-    search = Signal(f"{sig}_search", "")
-    selected = Signal(f"{sig}_selected", 0)
     dialog_open = Signal(f"{dialog_ref.id}_open", False)
 
+    # Create Command with dialog_ref - Command exposes its signals via with_signals
+    command = Command(
+        *content,
+        signal=sig,
+        dialog_ref=dialog_ref,
+        label=label,
+        cls="border-0",
+    )
+
+    # Access Command's signals for reset and dialog effects
     reset_signals = [
         dialog_open.set(False),
-        search.set(""),
-        selected.set(0),
+        command.search.set(""),
+        command.selected.set(0),
     ]
 
-    ctx = dict(sig=sig, search=search, selected=selected, counter=counter, dialog_ref=dialog_ref)
+    dialog_effect = _get_dialog_open_effect(
+        sig,
+        command.search,
+        command.selected,
+        dialog_open,
+        dialog_ref,
+        command.visible_items
+    )
 
     command_dialog = HTMLDialog(
-        search,
-        selected,
         dialog_open,
-        *[c(**ctx) if callable(c) else c for c in content],
+        command,
         data_ref=dialog_ref,
         data_on_close=reset_signals,
         data_on_click=(evt.target == evt.currentTarget) & evt.currentTarget.close() if modal else None,
-        data_effect=js(_get_dialog_open_effect(sig, search, selected, dialog_open, dialog_ref)),
+        data_effect=js(dialog_effect),
         id=dialog_ref.id,
-        data_command_root=sig,
-        data_slot="command",
-        aria_label=label,
-        tabindex="-1",
         cls=cn(
             "fixed max-h-[85vh] w-full max-w-2xl m-auto p-0",
             "backdrop:bg-black/50 backdrop:backdrop-blur-sm",
             "open:animate-in open:fade-in-0 open:zoom-in-95 open:duration-200",
             "open:backdrop:animate-in open:backdrop:fade-in-0 open:backdrop:duration-200",
             "open:flex open:flex-col overflow-hidden rounded-lg",
-            "border border-input bg-popover text-popover-foreground shadow-lg",
-            "md:min-w-[450px]",
+            "bg-popover text-popover-foreground shadow-lg",
             cls,
         ),
         **kwargs,
@@ -147,13 +175,13 @@ def CommandInput(
     cls: str = "",
     **kwargs: Any,
 ):
-    def _(*, sig, search, selected, dialog_ref, **_):
+    def _(*, sig, search, selected, visible_items, **_):
         return Div(
             Icon("lucide:search", cls="size-4 shrink-0 opacity-50"),
             Input(
                 data_bind=search,
-                data_on_keydown=js(_get_nav_handler(sig, search, selected)),
-                data_on_input=js(_get_search_handler(sig, selected)),
+                data_on_keydown=js(_get_nav_handler(sig, search, selected, visible_items)),
+                data_on_input=js(_get_search_handler(sig, selected, visible_items)),
                 placeholder=placeholder,
                 data_slot="command-input",
                 cls="flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
@@ -178,9 +206,24 @@ def CommandList(
     cls: str = "",
     **kwargs: Any,
 ):
-    def _(*, sig, **ctx):
+    def _(*, sig, visible_count, visible_items, search, **ctx):
+        # RAF waits for data-show styles to apply before counting
+        scan_effect = js(f"""
+            ${search.id};
+            requestAnimationFrame(() => {{
+                const items = [...document.querySelectorAll('[data-command-item=\"{sig}\"]')];
+                const visible = items.filter(el => !el.style.display.includes('none') && el.dataset.disabled !== 'true');
+
+                ${visible_count.id} = visible.length;
+                ${visible_items.id} = visible.map(el => ({{
+                    index: parseInt(el.dataset.index || '0'),
+                    el: el
+                }}));
+            }});
+        """)
         return Div(
-            *[c(sig=sig, **ctx) if callable(c) else c for c in children],
+            *[c(sig=sig, visible_count=visible_count, visible_items=visible_items, search=search, **ctx) if callable(c) else c for c in children],
+            data_effect=scan_effect,
             role="listbox",
             aria_label="Commands",
             data_command_list=sig,
@@ -200,13 +243,18 @@ def CommandEmpty(
     cls: str = "",
     **kwargs: Any,
 ):
-    def _(*, sig, **_):
+    def _(*, sig, visible_count, **_):
+        # Inline style prevents flash of unstyled content (FOUC)
+        display_effect = js(f"""
+            el.style.display = ${visible_count.id} === 0 ? 'block' : 'none';
+        """)
         return Div(
             *(children or ["No results found."]),
+            data_effect=display_effect,
             data_command_empty=sig,
             data_slot="command-empty",
-            style="display: none;",
             cls=cn("py-6 text-center text-sm", cls),
+            style="display:none",
             **kwargs,
         )
 
@@ -234,6 +282,7 @@ def CommandGroup(
             cls=cn(
                 "overflow-hidden p-1 text-foreground",
                 "[&_[data-slot='command-group-heading']]:text-muted-foreground [&_[data-slot='command-group-heading']]:px-2 [&_[data-slot='command-group-heading']]:py-1.5 [&_[data-slot='command-group-heading']]:text-xs [&_[data-slot='command-group-heading']]:font-medium",
+                "[&:not(:has([data-command-item]:not([style*='none'])))]:hidden",
                 cls,
             ),
             **kwargs,
@@ -252,9 +301,12 @@ def CommandItem(
     cls: str = "",
     **kwargs: Any,
 ):
-    def _(*, sig, selected, counter, dialog_ref, **_):
-        index = counter["value"]
-        counter["value"] += 1
+    def _(*, sig, search, selected, _item_index, dialog_ref, **_):
+        index = next(_item_index)
+
+        item_show = show
+        if item_show is None and not disabled:
+            item_show = ~search | js_value(value).lower().contains(search.lower()) | js_value(keywords or "").lower().contains(search.lower())
 
         click_actions = ([js(onclick)] if onclick else []) + ([dialog_ref.close()] if dialog_ref else [])
 
@@ -262,7 +314,7 @@ def CommandItem(
             *children,
             data_on_click=click_actions if (click_actions and not disabled) else None,
             data_on_mouseenter=selected.set(index) if not disabled else None,
-            data_show=show if show else None,
+            data_show=item_show,
             data_attr_data_selected=selected.eq(index).if_("true", "false"),
             data_attr_aria_selected=selected.eq(index),
             role="option",
@@ -289,7 +341,12 @@ def CommandSeparator(cls: str = "", **kwargs: Any):
     return lambda **_: Div(
         role="separator",
         data_slot="command-separator",
-        cls=cn("-mx-1 h-px bg-border", cls),
+        cls=cn(
+            "-mx-1 h-px bg-border",
+            "[&:not(:has(+_[role=group]))]:hidden",
+            "[&:has(+_[role=group]:not(:has([data-command-item]:not([style*='none']))))]:hidden",
+            cls
+        ),
         **kwargs,
     )
 

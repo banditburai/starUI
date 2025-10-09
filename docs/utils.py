@@ -5,7 +5,11 @@ from functools import wraps
 from textwrap import dedent
 from typing import Any, Callable
 
-from starhtml import *
+# Explicit imports to preserve Python built-ins (any, all, match, etc.)
+# since utils.py contains Python logic alongside HTML generation
+from starhtml import (
+    Div, H2, H3, P, Table, Thead, Tbody, Tr, Th, Td, Code, FT
+)
 from widgets.installation_section import InstallationSection
 from widgets.code_block import CodeBlock
 
@@ -145,7 +149,9 @@ def _api_items_table(items: list[dict]) -> FT | None:
     if not items:
         return None
 
-    has_type = any("type" in item for item in items)
+    # Only show Type column if items actually have non-empty type information
+    # (not for component lists that just have name + description)
+    has_type = any(item.get("type") for item in items)
     headers = ["Name", "Type", "Description"] if has_type else ["Component", "Description"]
 
     rows = [[
@@ -154,6 +160,7 @@ def _api_items_table(items: list[dict]) -> FT | None:
         item.get("description", "")
     ] for item in items]
 
+    # Filter out None cells (when has_type is False)
     rows = [[cell for cell in row if cell is not None] for row in rows]
 
     return _table(headers, rows)
@@ -224,25 +231,46 @@ def _markdown_examples(examples: list[dict[str, str]] | None) -> str | None:
 
 
 def _markdown_props(api_ref: dict[str, Any] | None) -> str | None:
-    if not api_ref or "props" not in api_ref:
+    if not api_ref:
         return None
 
-    lines = [
-        "## API Reference",
-        "",
-        "| Prop | Type | Default | Description |",
-        "|------|------|---------|-------------|"
-    ]
+    # Handle components table
+    if "components" in api_ref:
+        lines = [
+            "## API Reference",
+            "",
+            "| Component | Description |",
+            "|-----------|-------------|"
+        ]
 
-    for p in api_ref["props"]:
-        lines.append(
-            f"| `{p.get('name', '')}` | "
-            f"`{p.get('type', '')}` | "
-            f"`{p.get('default', '')}` | "
-            f"{p.get('description', '')} |"
-        )
+        for comp in api_ref["components"]:
+            lines.append(
+                f"| `{comp.get('name', '')}` | "
+                f"{comp.get('description', '')} |"
+            )
 
-    return "\n".join(lines)
+        return "\n".join(lines)
+
+    # Handle props table
+    if "props" in api_ref:
+        lines = [
+            "## API Reference",
+            "",
+            "| Prop | Type | Default | Description |",
+            "|------|------|---------|-------------|"
+        ]
+
+        for p in api_ref["props"]:
+            lines.append(
+                f"| `{p.get('name', '')}` | "
+                f"`{p.get('type', '')}` | "
+                f"`{p.get('default', '')}` | "
+                f"{p.get('description', '')} |"
+            )
+
+        return "\n".join(lines)
+
+    return None
 
 
 # ============================================================================
@@ -323,9 +351,10 @@ def extract_code(func: Callable) -> str:
                     result[0] = ' ' * indent + first.lstrip()[7:]
                 return '\n'.join(line.rstrip() for line in result)
         else:
+            # Only strip 'return' from base-level returns (indent 0), not nested ones
             result = [
                 ' ' * (len(line) - len(line.lstrip())) + line.lstrip()[7:]
-                if line.strip().startswith('return ')
+                if line.strip().startswith('return ') and (len(line) - len(line.lstrip())) == 0
                 else line
                 for line in processed
             ]

@@ -133,13 +133,11 @@ def unsaved_changes_alert_dialog_example():
             Div(
                 InputWithLabel(
                     label="Document Title",
-                    value="My Document",
-                    signal=doc_title
+                    value="My Document",                    
                 ),
                 InputWithLabel(
                     label="Author",
-                    value="John Doe",
-                    signal=doc_author,
+                    value="John Doe",                    
                     cls="mt-4"
                 ),
                 P("Make changes to the document fields above and try to save.",
