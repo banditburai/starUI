@@ -10,7 +10,7 @@ from starui.registry.components.code_block import CodeBlock, CodeBlockStyles, In
 from starui.registry.components.badge import Badge
 from starui.registry.components.separator import Separator
 from widgets.component_preview import ComponentPreview
-from utils import with_code, Prop, Component, build_api_reference
+from utils import auto_generate_page, with_code, Prop, Component, build_api_reference
 
 
 # ============================================================================
@@ -338,11 +338,11 @@ Run 'star dev' to see your changes.''',
 # ============================================================================
 
 EXAMPLES_DATA = [
-    {"title": "Python Syntax Highlighting", "description": "Display Python code with automatic syntax highlighting", "code": python_syntax_highlighting_example.code},
-    {"title": "Interactive Copy Feature", "description": "Add copy-to-clipboard functionality with visual feedback", "code": interactive_copy_feature_example.code},
-    {"title": "Inline Code Snippets", "description": "Highlight short code snippets within text and documentation", "code": inline_code_snippets_example.code},
-    {"title": "Documentation Layout", "description": "Structure documentation with code blocks for installation and usage examples", "code": documentation_layout_example.code},
-    {"title": "Terminal Output", "description": "Style code blocks to look like terminal output with custom colors", "code": terminal_output_example.code},
+    {"title": "Python Syntax Highlighting", "description": "Display Python code with automatic syntax highlighting", "fn": python_syntax_highlighting_example},
+    {"title": "Interactive Copy Feature", "description": "Add copy-to-clipboard functionality with visual feedback", "fn": interactive_copy_feature_example},
+    {"title": "Inline Code Snippets", "description": "Highlight short code snippets within text and documentation", "fn": inline_code_snippets_example},
+    {"title": "Documentation Layout", "description": "Structure documentation with code blocks for installation and usage examples", "fn": documentation_layout_example},
+    {"title": "Terminal Output", "description": "Style code blocks to look like terminal output with custom colors", "fn": terminal_output_example},
 ]
 
 API_REFERENCE = build_api_reference(
@@ -393,53 +393,4 @@ def examples():
 
 
 def create_code_block_docs():
-    """Create code block documentation page using convention-based approach."""
-    from utils import auto_generate_page
-    
-    # Hero example showcasing basic functionality
-    @with_code
-    def hero_code_block_example():
-        return Div(
-            # Main code block
-            Div(
-                CodeBlock('''from starhtml import Div, H1, P
-from starui import Button
-
-def welcome_component():
-    """A simple welcome component with a button."""
-    return Div(
-        H1("Welcome to StarUI", cls="text-2xl font-bold mb-4"),
-        P("Build beautiful interfaces with Python components.", 
-          cls="text-muted-foreground mb-6"),
-        Button("Get Started", variant="primary")
-    )''', language="python"),
-                cls="mb-4"
-            ),
-            
-            # Inline code example
-            P(
-                "Import the component with ",
-                InlineCode("from starui import Button"),
-                " and use it to display syntax-highlighted code blocks.",
-                cls="text-sm text-muted-foreground max-w-2xl"
-            ),
-            
-            cls="w-full overflow-x-auto",
-            style="scrollbar-width: thin; scrollbar-color: transparent transparent;"
-        )
-    
-    hero_example = ComponentPreview(
-        hero_code_block_example(),
-        hero_code_block_example.code,
-        copy_button=True
-    )
-
-    return auto_generate_page(
-        TITLE,
-        DESCRIPTION,
-        list(examples()),
-        cli_command="star add code-block",
-        api_reference=API_REFERENCE,
-        hero_example=hero_example,
-        component_slug="code-block"
-    )
+    return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)

@@ -451,13 +451,13 @@ def course_progress_example():
 # ============================================================================
 
 EXAMPLES_DATA = [
-    {"title": "Interactive Controls", "description": "Progress bar with interactive controls for adjusting values", "code": interactive_controls_example.code},
-    {"title": "File Upload", "description": "Multiple file upload with individual and total progress", "code": file_upload_progress_example.code},
-    {"title": "Animated Loading", "description": "Multi-step loading with animated progress", "code": animated_loading_example.code},
-    {"title": "System Monitoring", "description": "Real-time system resource monitoring with progress indicators", "code": system_monitoring_example.code},
-    {"title": "Download Manager", "description": "Download progress with speed and time remaining", "code": download_manager_example.code},
-    {"title": "Storage Usage", "description": "Storage breakdown with categorized progress bars", "code": storage_usage_example.code},
-    {"title": "Course Progress", "description": "Educational progress tracking with module breakdown", "code": course_progress_example.code},
+    {"title": "Interactive Controls", "description": "Progress bar with interactive controls for adjusting values", "fn": interactive_controls_example},
+    {"title": "File Upload", "description": "Multiple file upload with individual and total progress", "fn": file_upload_progress_example},
+    {"title": "Animated Loading", "description": "Multi-step loading with animated progress", "fn": animated_loading_example},
+    {"title": "System Monitoring", "description": "Real-time system resource monitoring with progress indicators", "fn": system_monitoring_example},
+    {"title": "Download Manager", "description": "Download progress with speed and time remaining", "fn": download_manager_example},
+    {"title": "Storage Usage", "description": "Storage breakdown with categorized progress bars", "fn": storage_usage_example},
+    {"title": "Course Progress", "description": "Educational progress tracking with module breakdown", "fn": course_progress_example},
 ]
 
 API_REFERENCE = build_api_reference(
@@ -528,31 +528,4 @@ def examples():
 
 
 def create_progress_docs():
-    # Hero example
-    @with_code
-    def hero_progress_example():
-        return Div(
-            Progress(progress_value=60),
-            P(
-                "Processing... ",
-                Span("60%", cls="font-bold"),
-                cls="text-sm text-muted-foreground mt-2 text-center"
-            ),
-            cls="w-full max-w-md mx-auto"
-        )
-
-    hero_example = ComponentPreview(
-        hero_progress_example(),
-        hero_progress_example.code,
-        copy_button=True
-    )
-
-    return auto_generate_page(
-        TITLE,
-        DESCRIPTION,
-        list(examples()),
-        cli_command="star add progress",
-        hero_example=hero_example,
-        component_slug="progress",
-        api_reference=API_REFERENCE
-    )
+    return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)

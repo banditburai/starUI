@@ -231,11 +231,11 @@ def navigation_tabs_example():
 # ============================================================================
 
 EXAMPLES_DATA = [
-    {"title": "Dashboard Tabs", "description": "Multiple tabs for different content sections", "code": dashboard_tabs_example.code},
-    {"title": "Code Preview", "description": "Tabs for showing preview and code", "code": code_preview_tabs_example.code},
-    {"title": "Settings Tabs", "description": "Multi-section settings interface", "code": settings_tabs_example.code},
-    {"title": "Plain Variant", "description": "Clean minimal tabs without background styling", "code": plain_variant_tabs_example.code},
-    {"title": "Navigation Tabs", "description": "Website navigation-style tabs using plain variant", "code": navigation_tabs_example.code},
+    {"title": "Dashboard Tabs", "description": "Multiple tabs for different content sections", "fn": dashboard_tabs_example},
+    {"title": "Code Preview", "description": "Tabs for showing preview and code", "fn": code_preview_tabs_example},
+    {"title": "Settings Tabs", "description": "Multi-section settings interface", "fn": settings_tabs_example},
+    {"title": "Plain Variant", "description": "Clean minimal tabs without background styling", "fn": plain_variant_tabs_example},
+    {"title": "Navigation Tabs", "description": "Website navigation-style tabs using plain variant", "fn": navigation_tabs_example},
 ]
 
 API_REFERENCE = build_api_reference(
@@ -287,45 +287,4 @@ def examples():
 
 
 def create_tabs_docs():
-
-    # Hero example - simple account/password tabs
-    @with_code
-    def hero_tabs_example():
-        return Tabs(
-            TabsList(
-                TabsTrigger("Account", id="account"),
-                TabsTrigger("Password", id="password")
-            ),
-            TabsContent(
-                Div(
-                    H4("Account", cls="text-lg font-medium mb-2"),
-                    P("Make changes to your account here. Click save when you're done.", cls="text-muted-foreground")
-                ),
-                id="account"
-            ),
-            TabsContent(
-                Div(
-                    H4("Password", cls="text-lg font-medium mb-2"),
-                    P("Change your password here. After saving, you'll be logged out.", cls="text-muted-foreground")
-                ),
-                id="password"
-            ),
-            default_value="account",
-            cls="w-full max-w-md"
-        )
-
-    hero_example = ComponentPreview(
-        hero_tabs_example(),
-        hero_tabs_example.code,
-        copy_button=True
-    )
-
-    return auto_generate_page(
-        TITLE,
-        DESCRIPTION,
-        list(examples()),
-        cli_command="star add tabs",
-        hero_example=hero_example,
-        component_slug="tabs",
-        api_reference=API_REFERENCE
-    )
+    return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)

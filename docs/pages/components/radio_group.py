@@ -367,11 +367,11 @@ def settings_panel_example():
 # ============================================================================
 
 EXAMPLES_DATA = [
-    {"title": "Horizontal Layout", "description": "Radio buttons arranged horizontally", "code": horizontal_layout_example.code},
-    {"title": "Subscription Plans", "description": "Rich radio options with proper RadioGroup semantics and CSS peer selectors", "code": subscription_plans_example.code},
-    {"title": "Payment Method", "description": "Payment selection with contextual information", "code": payment_method_example.code},
-    {"title": "Interactive Survey", "description": "Multi-step survey with progress tracking and validation", "code": interactive_survey_example.code},
-    {"title": "Settings Panel", "description": "Multiple radio groups for configuration", "code": settings_panel_example.code},
+    {"title": "Horizontal Layout", "description": "Radio buttons arranged horizontally", "fn": horizontal_layout_example},
+    {"title": "Subscription Plans", "description": "Rich radio options with proper RadioGroup semantics and CSS peer selectors", "fn": subscription_plans_example},
+    {"title": "Payment Method", "description": "Payment selection with contextual information", "fn": payment_method_example},
+    {"title": "Interactive Survey", "description": "Multi-step survey with progress tracking and validation", "fn": interactive_survey_example},
+    {"title": "Settings Panel", "description": "Multiple radio groups for configuration", "fn": settings_panel_example},
 ]
 
 API_REFERENCE = build_api_reference(
@@ -427,32 +427,4 @@ def examples():
 
 
 def create_radio_group_docs():
-    @with_code
-    def hero_radio_group_example():
-        return Div(
-            RadioGroup(
-                RadioGroupItem(value="email", label="Email notifications"),
-                RadioGroupItem(value="sms", label="SMS notifications"),
-                RadioGroupItem(value="push", label="Push notifications"),
-                RadioGroupItem(value="none", label="No notifications"),
-                signal="notification_pref",
-                default_value="email"
-            ),
-            cls="max-w-md mx-auto"
-        )
-
-    hero_example = ComponentPreview(
-        hero_radio_group_example(),
-        hero_radio_group_example.code,
-        copy_button=True
-    )
-
-    return auto_generate_page(
-        TITLE,
-        DESCRIPTION,
-        list(examples()),
-        cli_command="star add radio-group",
-        hero_example=hero_example,
-        component_slug="radio-group",
-        api_reference=API_REFERENCE
-    )
+    return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)

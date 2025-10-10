@@ -448,12 +448,12 @@ def order_management_table_example():
 # ============================================================================
 
 EXAMPLES_DATA = [
-    {"title": "Basic Table", "description": "Simple data table with headers, content, and caption", "code": basic_table_example.code},
-    {"title": "Interactive Table", "description": "Table with selectable rows, actions, and live selection count", "code": interactive_table_example.code},
-    {"title": "Financial Data", "description": "Table with footer totals and formatted currency values", "code": financial_table_example.code},
-    {"title": "File Browser", "description": "File management table with icons, selection, and contextual actions", "code": file_browser_table_example.code},
-    {"title": "Analytics Dashboard", "description": "Data table with metrics, trends, and summary totals", "code": analytics_dashboard_table_example.code},
-    {"title": "Order Management", "description": "Customer order table with rich cell content and status badges", "code": order_management_table_example.code},
+    {"title": "Basic Table", "description": "Simple data table with headers, content, and caption", "fn": basic_table_example},
+    {"title": "Interactive Table", "description": "Table with selectable rows, actions, and live selection count", "fn": interactive_table_example},
+    {"title": "Financial Data", "description": "Table with footer totals and formatted currency values", "fn": financial_table_example},
+    {"title": "File Browser", "description": "File management table with icons, selection, and contextual actions", "fn": file_browser_table_example},
+    {"title": "Analytics Dashboard", "description": "Data table with metrics, trends, and summary totals", "fn": analytics_dashboard_table_example},
+    {"title": "Order Management", "description": "Customer order table with rich cell content and status badges", "fn": order_management_table_example},
 ]
 
 API_REFERENCE = build_api_reference(
@@ -516,48 +516,4 @@ def examples():
 
 
 def create_table_docs():
-    # Hero example
-    @with_code
-    def hero_table_example():
-        return Table(
-            TableHeader(
-                TableRow(
-                    TableHead("Name"),
-                    TableHead("Status"),
-                    TableHead("Role")
-                )
-            ),
-            TableBody(
-                TableRow(
-                    TableCell("Alice Cooper"),
-                    TableCell(Badge("Active")),
-                    TableCell("Admin")
-                ),
-                TableRow(
-                    TableCell("Bob Wilson"),
-                    TableCell(Badge("Active")),
-                    TableCell("User")
-                ),
-                TableRow(
-                    TableCell("Carol Martinez"),
-                    TableCell(Badge("Inactive", variant="secondary")),
-                    TableCell("User")
-                )
-            )
-        )
-
-    hero_example = ComponentPreview(
-        hero_table_example(),
-        hero_table_example.code,
-        copy_button=True
-    )
-    
-    return auto_generate_page(
-        TITLE,
-        DESCRIPTION,
-        list(examples()),
-        cli_command="star add table",
-        api_reference=API_REFERENCE,
-        hero_example=hero_example,
-        component_slug="table"
-    )
+    return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)

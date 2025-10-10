@@ -205,11 +205,11 @@ def email_subscriptions_example():
 # ============================================================================
 
 EXAMPLES_DATA = [
-    {"title": "Basic Switch", "description": "Different switch states", "code": basic_switch_example.code},
-    {"title": "Switch with Label", "description": "Switch with label, helper text, and reactive feedback", "code": switch_with_label_example.code},
-    {"title": "Dark Mode Toggle", "description": "Theme switcher with icon and description", "code": dark_mode_toggle_example.code},
-    {"title": "Auto-save Feature", "description": "Document setting with status feedback", "code": autosave_feature_example.code},
-    {"title": "Email Subscriptions", "description": "Dependent switches for email preferences", "code": email_subscriptions_example.code},
+    {"title": "Basic Switch", "description": "Different switch states", "fn": basic_switch_example},
+    {"title": "Switch with Label", "description": "Switch with label, helper text, and reactive feedback", "fn": switch_with_label_example},
+    {"title": "Dark Mode Toggle", "description": "Theme switcher with icon and description", "fn": dark_mode_toggle_example},
+    {"title": "Auto-save Feature", "description": "Document setting with status feedback", "fn": autosave_feature_example},
+    {"title": "Email Subscriptions", "description": "Dependent switches for email preferences", "fn": email_subscriptions_example},
 ]
 
 API_REFERENCE = build_api_reference(
@@ -262,30 +262,4 @@ def examples():
 
 
 def create_switch_docs():
-    # Hero example
-    @with_code
-    def hero_switch_example():
-        return Div(
-            SwitchWithLabel(
-                label="Enable notifications",
-                signal="notifications",
-                checked=True
-            ),
-            cls="flex justify-center"
-        )
-
-    hero_example = ComponentPreview(
-        hero_switch_example(),
-        hero_switch_example.code,
-        copy_button=True
-    )
-
-    return auto_generate_page(
-        TITLE,
-        DESCRIPTION,
-        list(examples()),
-        cli_command="star add switch",
-        api_reference=API_REFERENCE,
-        hero_example=hero_example,
-        component_slug="switch"
-    )
+    return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)

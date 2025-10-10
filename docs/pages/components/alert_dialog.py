@@ -508,77 +508,30 @@ def hero_alert_dialog_example():
 
 
 # ============================================================================
-# EXAMPLES GENERATOR (for rendering on the page)
-# ============================================================================
-
-def examples():
-    yield ComponentPreview(
-        basic_alert_dialog_example(),
-        basic_alert_dialog_example.code,
-        title="Basic Alert",
-        description="Simple informational alert with single action"
-    )
-
-    yield ComponentPreview(
-        destructive_alert_dialog_example(),
-        destructive_alert_dialog_example.code,
-        title="Destructive Action",
-        description="High-risk action with clear warnings and consequences"
-    )
-
-    yield ComponentPreview(
-        unsaved_changes_alert_dialog_example(),
-        unsaved_changes_alert_dialog_example.code,
-        title="Unsaved Changes",
-        description="Three-option dialog for handling unsaved work"
-    )
-
-    yield ComponentPreview(
-        session_timeout_alert_dialog_example(),
-        session_timeout_alert_dialog_example.code,
-        title="Session Timeout",
-        description="Auto-triggered alert with countdown timer"
-    )
-
-    yield ComponentPreview(
-        batch_operation_alert_dialog_example(),
-        batch_operation_alert_dialog_example.code,
-        title="Batch Operations",
-        description="Confirm actions on multiple selected items"
-    )
-
-    yield ComponentPreview(
-        payment_confirmation_alert_dialog_example(),
-        payment_confirmation_alert_dialog_example.code,
-        title="Payment Confirmation",
-        description="Secure payment confirmation with trust indicators"
-    )
-
-
-# ============================================================================
-# MODULE EXPORTS (for markdown generation)
+# MODULE-LEVEL DATA
 # ============================================================================
 
 EXAMPLES_DATA = [
-    {"title": "Basic Alert", "description": "Simple informational alert with single action", "code": basic_alert_dialog_example.code},
-    {"title": "Destructive Action", "description": "High-risk action with clear warnings and consequences", "code": destructive_alert_dialog_example.code},
-    {"title": "Unsaved Changes", "description": "Three-option dialog for handling unsaved work", "code": unsaved_changes_alert_dialog_example.code},
-    {"title": "Session Timeout", "description": "Auto-triggered alert with countdown timer", "code": session_timeout_alert_dialog_example.code},
-    {"title": "Batch Operations", "description": "Confirm actions on multiple selected items", "code": batch_operation_alert_dialog_example.code},
-    {"title": "Payment Confirmation", "description": "Secure payment confirmation with trust indicators", "code": payment_confirmation_alert_dialog_example.code},
+    {"fn": hero_alert_dialog_example, "title": "Hero Alert Dialog", "description": "Confirmation dialog with destructive action"},
+    {"fn": basic_alert_dialog_example, "title": "Basic Alert Dialog", "description": "Simple alert dialog with dismiss and confirm actions"},
+    {"fn": destructive_alert_dialog_example, "title": "Destructive Action", "description": "Delete confirmation with detailed information"},
+    {"fn": unsaved_changes_alert_dialog_example, "title": "Unsaved Changes", "description": "Prompt user about unsaved changes before exiting"},
+    {"fn": session_timeout_alert_dialog_example, "title": "Session Timeout", "description": "Auto-triggered alert with countdown timer"},
+    {"fn": batch_operation_alert_dialog_example, "title": "Batch Operations", "description": "Confirm actions on multiple selected items"},
+    {"fn": payment_confirmation_alert_dialog_example, "title": "Payment Confirmation", "description": "Secure payment confirmation with order details"},
 ]
 
 API_REFERENCE = build_api_reference(
     components=[
-        Component("AlertDialog", "Main container component that manages dialog state"),
-        Component("AlertDialogTrigger", "Button that opens the alert dialog"),
-        Component("AlertDialogContent", "Container for all dialog content"),
-        Component("AlertDialogHeader", "Container for title and description"),
-        Component("AlertDialogTitle", "Primary heading text for the alert"),
-        Component("AlertDialogDescription", "Supporting description text"),
-        Component("AlertDialogFooter", "Container for action buttons"),
-        Component("AlertDialogAction", "Primary action button (confirms/proceeds)"),
-        Component("AlertDialogCancel", "Secondary button (dismisses dialog)"),
+        Component("AlertDialog", "Container for alert dialog functionality"),
+        Component("AlertDialogTrigger", "Button or element that opens the dialog"),
+        Component("AlertDialogContent", "Main dialog content container"),
+        Component("AlertDialogHeader", "Header section with title and description"),
+        Component("AlertDialogTitle", "Dialog title text"),
+        Component("AlertDialogDescription", "Dialog description or message"),
+        Component("AlertDialogFooter", "Footer with action buttons"),
+        Component("AlertDialogAction", "Primary action button (e.g., Confirm, Delete)"),
+        Component("AlertDialogCancel", "Cancel/dismiss button"),
     ]
 )
 
@@ -588,19 +541,4 @@ API_REFERENCE = build_api_reference(
 # ============================================================================
 
 def create_alert_dialog_docs():
-    """Create alert dialog documentation page using convention-based approach."""
-    hero_example = ComponentPreview(
-        hero_alert_dialog_example(),
-        hero_alert_dialog_example.code,
-        copy_button=True
-    )
-
-    return auto_generate_page(
-        TITLE,
-        DESCRIPTION,
-        list(examples()),
-        cli_command="star add alert-dialog",
-        api_reference=API_REFERENCE,
-        hero_example=hero_example,
-        component_slug="alert-dialog"
-    )
+    return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)

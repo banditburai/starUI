@@ -547,9 +547,9 @@ def hero_command_example():
 # ============================================================================
 
 EXAMPLES_DATA = [
-    {"title": "Interactive Task Manager", "description": "Command component as a task manager with state transitions. Click tasks to move them: Pending → In Progress → Completed. Add new tasks with Enter (use ! prefix for urgent).", "code": interactive_task_manager_example.code},
-    {"title": "Command Palette with Actions", "description": "Interactive command dialog with real actions: navigation, clipboard operations, and system controls", "code": command_palette_with_actions_example.code},
-    {"title": "Compact Context Menu", "description": "Small command menu for context-specific actions, perfect for dropdowns and right-click menus", "code": compact_context_menu_example.code},
+    {"title": "Interactive Task Manager", "description": "Command component as a task manager with state transitions. Click tasks to move them: Pending → In Progress → Completed. Add new tasks with Enter (use ! prefix for urgent).", "fn": interactive_task_manager_example},
+    {"title": "Command Palette with Actions", "description": "Interactive command dialog with real actions: navigation, clipboard operations, and system controls", "fn": command_palette_with_actions_example},
+    {"title": "Compact Context Menu", "description": "Small command menu for context-specific actions, perfect for dropdowns and right-click menus", "fn": compact_context_menu_example},
 ]
 
 API_REFERENCE = build_api_reference(
@@ -568,19 +568,4 @@ API_REFERENCE = build_api_reference(
 
 
 def create_command_docs():
-    """Create command documentation page using convention-based approach."""
-    hero_example = ComponentPreview(
-        hero_command_example(),
-        hero_command_example.code,
-        copy_button=True
-    )
-
-    return auto_generate_page(
-        TITLE,
-        DESCRIPTION,
-        list(examples()),
-        cli_command="star add command",
-        hero_example=hero_example,
-        component_slug="command",
-        api_reference=API_REFERENCE
-    )
+    return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)

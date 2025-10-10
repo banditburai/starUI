@@ -491,18 +491,18 @@ def avatar_tooltips_example():
 # ============================================================================
 
 EXAMPLES_DATA = [
-    {"title": "Basic Tooltip", "description": "Simple tooltip on hover", "code": basic_tooltip_example.code},
-    {"title": "Tooltip Positions", "description": "Tooltips can be positioned on any side of the trigger element", "code": tooltip_positions_example.code},
-    {"title": "Tooltip Alignment", "description": "Control tooltip alignment relative to the trigger", "code": tooltip_alignment_example.code},
-    {"title": "Custom Delays", "description": "Configure show and hide delays for different UX patterns", "code": custom_delays_example.code},
-    {"title": "Icon Buttons", "description": "Tooltips provide context for icon-only buttons", "code": icon_buttons_example.code},
-    {"title": "Form Field Helper", "description": "Add helpful information to form inputs", "code": form_field_tooltip_example.code},
-    {"title": "Rich Content", "description": "Tooltips with formatted text, icons, and custom styling", "code": rich_content_tooltips_example.code},
-    {"title": "Keyboard Navigation", "description": "Tooltips are fully accessible via keyboard with focus triggers and Escape to close", "code": keyboard_navigation_example.code},
-    {"title": "Dynamic Content", "description": "Tooltip content that updates based on application state", "code": dynamic_content_example.code},
-    {"title": "Custom Styling", "description": "Apply custom themes and styles to tooltips", "code": custom_styling_example.code},
-    {"title": "Truncated Text", "description": "Show full content when text is truncated", "code": truncated_text_example.code},
-    {"title": "Avatar Group", "description": "Add member names to avatar groups", "code": avatar_tooltips_example.code},
+    {"fn": basic_tooltip_example, "title": "Basic Tooltip", "description": "Simple tooltip on hover"},
+    {"fn": tooltip_positions_example, "title": "Tooltip Positions", "description": "Tooltips can be positioned on any side of the trigger element"},
+    {"fn": tooltip_alignment_example, "title": "Tooltip Alignment", "description": "Control tooltip alignment relative to the trigger"},
+    {"fn": custom_delays_example, "title": "Custom Delays", "description": "Configure show and hide delays for different UX patterns"},
+    {"fn": icon_buttons_example, "title": "Icon Buttons", "description": "Tooltips provide context for icon-only buttons"},
+    {"fn": form_field_tooltip_example, "title": "Form Field Helper", "description": "Add helpful information to form inputs"},
+    {"fn": rich_content_tooltips_example, "title": "Rich Content", "description": "Tooltips with formatted text, icons, and custom styling"},
+    {"fn": keyboard_navigation_example, "title": "Keyboard Navigation", "description": "Tooltips are fully accessible via keyboard with focus triggers and Escape to close"},
+    {"fn": dynamic_content_example, "title": "Dynamic Content", "description": "Tooltip content that updates based on application state"},
+    {"fn": custom_styling_example, "title": "Custom Styling", "description": "Apply custom themes and styles to tooltips"},
+    {"fn": truncated_text_example, "title": "Truncated Text", "description": "Show full content when text is truncated"},
+    {"fn": avatar_tooltips_example, "title": "Avatar Group", "description": "Add member names to avatar groups"},
 ]
 
 API_REFERENCE = build_api_reference(
@@ -515,102 +515,6 @@ API_REFERENCE = build_api_reference(
 )
 
 
-def examples():
-    """Generate all tooltip examples."""
-    yield ComponentPreview(
-        basic_tooltip_example(),
-        basic_tooltip_example.code,
-        title="Basic Tooltip",
-        description="Simple tooltip on hover"
-    )
-
-    yield ComponentPreview(
-        tooltip_positions_example(),
-        tooltip_positions_example.code,
-        title="Tooltip Positions",
-        description="Tooltips can be positioned on any side of the trigger element"
-    )
-
-    yield ComponentPreview(
-        tooltip_alignment_example(),
-        tooltip_alignment_example.code,
-        title="Tooltip Alignment",
-        description="Control tooltip alignment relative to the trigger"
-    )
-
-    yield ComponentPreview(
-        custom_delays_example(),
-        custom_delays_example.code,
-        title="Custom Delays",
-        description="Configure show and hide delays for different UX patterns"
-    )
-
-    yield ComponentPreview(
-        icon_buttons_example(),
-        icon_buttons_example.code,
-        title="Icon Buttons",
-        description="Tooltips provide context for icon-only buttons"
-    )
-
-    yield ComponentPreview(
-        form_field_tooltip_example(),
-        form_field_tooltip_example.code,
-        title="Form Field Helper",
-        description="Add helpful information to form inputs"
-    )
-
-    yield ComponentPreview(
-        rich_content_tooltips_example(),
-        rich_content_tooltips_example.code,
-        title="Rich Content",
-        description="Tooltips with formatted text, icons, and custom styling"
-    )
-
-    yield ComponentPreview(
-        keyboard_navigation_example(),
-        keyboard_navigation_example.code,
-        title="Keyboard Navigation",
-        description="Tooltips are fully accessible via keyboard with focus triggers and Escape to close"
-    )
-
-    yield ComponentPreview(
-        dynamic_content_example(),
-        dynamic_content_example.code,
-        title="Dynamic Content",
-        description="Tooltip content that updates based on application state"
-    )
-
-    yield ComponentPreview(
-        custom_styling_example(),
-        custom_styling_example.code,
-        title="Custom Styling",
-        description="Apply custom themes and styles to tooltips"
-    )
-
-    yield ComponentPreview(
-        truncated_text_example(),
-        truncated_text_example.code,
-        title="Truncated Text",
-        description="Show full content when text is truncated"
-    )
-
-    yield ComponentPreview(
-        avatar_tooltips_example(),
-        avatar_tooltips_example.code,
-        title="Avatar Group",
-        description="Add member names to avatar groups"
-    )
-
-
 def create_tooltip_docs():
     """Create tooltip documentation page using convention-based approach."""
-    from utils import auto_generate_page
-
-    return auto_generate_page(
-        TITLE,
-        DESCRIPTION,
-        list(examples()),
-        cli_command="star add tooltip",
-        api_reference=API_REFERENCE,
-        component_slug="tooltip"
-    )
+    return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)

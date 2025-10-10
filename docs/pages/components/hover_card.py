@@ -421,13 +421,13 @@ def interactive_form_hover_card_example():
 # ============================================================================
 
 EXAMPLES_DATA = [
-    {"title": "Basic Hover Card", "description": "Simple hover card with text content that appears on hover", "code": basic_hover_card_example.code},
-    {"title": "User Profile Hover Card", "description": "Rich profile card with avatar, bio, stats, and action buttons", "code": user_profile_hover_card_example.code},
-    {"title": "Repository Hover Card", "description": "GitHub repository preview with stats and language info", "code": repository_hover_card_example.code},
-    {"title": "Product Preview Hover Card", "description": "E-commerce product preview with pricing, features, and call-to-action", "code": product_preview_hover_card_example.code},
-    {"title": "Positioning Options", "description": "Hover cards can be positioned on any side with flexible alignment", "code": positioning_hover_card_examples.code},
-    {"title": "Link Preview Hover Card", "description": "Rich documentation previews with features, links, and detailed content", "code": link_preview_hover_card_example.code},
-    {"title": "Interactive Form Hover Card", "description": "Hover card with interactive form fields and validation", "code": interactive_form_hover_card_example.code},
+    {"title": "Basic Hover Card", "description": "Simple hover card with text content that appears on hover", "fn": basic_hover_card_example},
+    {"title": "User Profile Hover Card", "description": "Rich profile card with avatar, bio, stats, and action buttons", "fn": user_profile_hover_card_example},
+    {"title": "Repository Hover Card", "description": "GitHub repository preview with stats and language info", "fn": repository_hover_card_example},
+    {"title": "Product Preview Hover Card", "description": "E-commerce product preview with pricing, features, and call-to-action", "fn": product_preview_hover_card_example},
+    {"title": "Positioning Options", "description": "Hover cards can be positioned on any side with flexible alignment", "fn": positioning_hover_card_examples},
+    {"title": "Link Preview Hover Card", "description": "Rich documentation previews with features, links, and detailed content", "fn": link_preview_hover_card_example},
+    {"title": "Interactive Form Hover Card", "description": "Hover card with interactive form fields and validation", "fn": interactive_form_hover_card_example},
 ]
 
 API_REFERENCE = build_api_reference(
@@ -496,46 +496,4 @@ def examples():
 # ============================================================================
 
 def create_hover_card_docs():
-    @with_code
-    def hero_hover_card_example():
-        return Div(
-            HoverCard(
-                HoverCardTrigger(
-                    A("@starui", href="#", cls="text-blue-600 hover:underline font-semibold"),
-                    signal="hero_hover"
-                ),
-                HoverCardContent(
-                    Div(
-                        H3("StarUI Components", cls="font-semibold text-sm mb-2"),
-                        P(
-                            "Beautiful, accessible components built with StarHTML. Perfect for displaying rich content on hover without disrupting the user experience.",
-                            cls="text-sm text-muted-foreground mb-4",
-                        ),
-                        Div(
-                            Button("Explore Components", size="sm", cls="w-full"),
-                            Button("Documentation", size="sm", variant="outline", cls="w-full"),
-                            cls="space-y-2",
-                        ),
-                    ),
-                    signal="hero_hover",
-                ),
-                signal="hero_hover",
-            ),
-            cls="flex justify-center py-8",
-        )
-
-    hero_example = ComponentPreview(
-        hero_hover_card_example(),
-        hero_hover_card_example.code,
-        copy_button=True,
-    )
-
-    return auto_generate_page(
-        TITLE,
-        DESCRIPTION,
-        list(examples()),
-        cli_command="star add hover-card",
-        api_reference=API_REFERENCE,
-        hero_example=hero_example,
-        component_slug="hover-card",
-    )
+    return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)

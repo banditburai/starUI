@@ -388,14 +388,14 @@ def disabled_states_example():
 # ============================================================================
 
 EXAMPLES_DATA = [
-    {"title": "Text Formatting Toolbar", "description": "Single-selection toggle group for text formatting options", "code": text_formatting_toolbar_example.code},
-    {"title": "View Mode Switcher", "description": "Toggle between different content layouts with dynamic content display", "code": view_mode_switcher_example.code},
-    {"title": "Multi-Select Filters", "description": "Multiple selection toggle group for filtering options", "code": multi_select_filters_example.code},
-    {"title": "Size Variations", "description": "Toggle groups in different sizes for various use cases", "code": size_variations_example.code},
-    {"title": "Editor Controls", "description": "Combine single and multiple selection groups for rich text editing", "code": editor_controls_example.code},
-    {"title": "Variant Styles", "description": "Different visual styles and combinations with icons", "code": variant_styles_example.code},
-    {"title": "Form Integration", "description": "Complex form scenarios with multiple toggle groups and live feedback", "code": form_integration_example.code},
-    {"title": "Disabled States", "description": "Toggle groups in disabled states for different scenarios", "code": disabled_states_example.code},
+    {"title": "Text Formatting Toolbar", "description": "Single-selection toggle group for text formatting options", "fn": text_formatting_toolbar_example},
+    {"title": "View Mode Switcher", "description": "Toggle between different content layouts with dynamic content display", "fn": view_mode_switcher_example},
+    {"title": "Multi-Select Filters", "description": "Multiple selection toggle group for filtering options", "fn": multi_select_filters_example},
+    {"title": "Size Variations", "description": "Toggle groups in different sizes for various use cases", "fn": size_variations_example},
+    {"title": "Editor Controls", "description": "Combine single and multiple selection groups for rich text editing", "fn": editor_controls_example},
+    {"title": "Variant Styles", "description": "Different visual styles and combinations with icons", "fn": variant_styles_example},
+    {"title": "Form Integration", "description": "Complex form scenarios with multiple toggle groups and live feedback", "fn": form_integration_example},
+    {"title": "Disabled States", "description": "Toggle groups in disabled states for different scenarios", "fn": disabled_states_example},
 ]
 
 API_REFERENCE = build_api_reference(
@@ -480,48 +480,4 @@ def examples():
 
 
 def create_toggle_group_docs():
-    
-    # Hero example showcasing both single and multiple selection
-    @with_code
-    def hero_toggle_group_example():
-        return Div(
-            Div(
-                P("Single Selection", cls="text-sm font-medium mb-2"),
-                ToggleGroup(                    
-                    ("left", Icon("lucide:align-left", cls="w-4 h-4")),
-                    ("center", Icon("lucide:align-center", cls="w-4 h-4")),
-                    ("right", Icon("lucide:align-right", cls="w-4 h-4")),
-                    type="single",
-                    variant="outline"
-                ),
-                cls="mb-6"
-            ),
-            Div(
-                P("Multiple Selection", cls="text-sm font-medium mb-2"),
-                ToggleGroup(                    
-                    ("bold", Icon("lucide:bold", cls="w-4 h-4")),
-                    ("italic", Icon("lucide:italic", cls="w-4 h-4")),
-                    ("underline", Icon("lucide:underline", cls="w-4 h-4")),
-                    type="multiple",
-                    variant="outline"
-                ),
-                cls=""
-            ),
-            cls="flex flex-col items-center"
-        )
-
-    hero_example = ComponentPreview(
-        hero_toggle_group_example(),
-        hero_toggle_group_example.code,
-        copy_button=True
-    )
-
-    return auto_generate_page(
-        TITLE,
-        DESCRIPTION,
-        list(examples()),
-        cli_command="star add toggle-group",
-        api_reference=API_REFERENCE,
-        hero_example=hero_example,
-        component_slug="toggle-group"
-    )
+    return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)

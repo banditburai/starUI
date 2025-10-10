@@ -198,95 +198,27 @@ def hero_badge_example():
 # EXAMPLES GENERATOR (for rendering on the page)
 # ============================================================================
 
-def examples():
-    yield ComponentPreview(
-        basic_variants_example(),
-        basic_variants_example.code,
-        title="Badge Variants",
-        description="Different visual styles for badges"
-    )
-
-    yield ComponentPreview(
-        badges_with_icons_example(),
-        badges_with_icons_example.code,
-        title="Badges with Icons",
-        description="Enhance badges with icons or status indicators"
-    )
-
-    yield ComponentPreview(
-        content_types_example(),
-        content_types_example.code,
-        title="Content Types",
-        description="Numbers, versions, and labels"
-    )
-
-    yield ComponentPreview(
-        link_badges_example(),
-        link_badges_example.code,
-        title="Link Badges",
-        description="Badges that act as links"
-    )
-
-    yield ComponentPreview(
-        status_indicators_example(),
-        status_indicators_example.code,
-        title="Status Indicators",
-        description="Use badges to show different states"
-    )
-
-    yield ComponentPreview(
-        category_tags_example(),
-        category_tags_example.code,
-        title="Category Tags",
-        description="Use badges as category or technology tags"
-    )
-
-    yield ComponentPreview(
-        notification_badges_example(),
-        notification_badges_example.code,
-        title="Notification Badges on Icons",
-        description="Show notification counts overlapping icons with professional positioning"
-    )
-
-    yield ComponentPreview(
-        avatar_badges_example(),
-        avatar_badges_example.code,
-        title="Avatar Status Indicators",
-        description="Avatar status indicators with clean background masking"
-    )
-
-    yield ComponentPreview(
-        size_variations_example(),
-        size_variations_example.code,
-        title="Size Variations",
-        description="Custom size variations for different use cases"
-    )
-
-
 # ============================================================================
-# MODULE EXPORTS (for markdown generation)
+# MODULE-LEVEL DATA
 # ============================================================================
 
 EXAMPLES_DATA = [
-    {"title": "Badge Variants", "description": "Different visual styles for badges", "code": basic_variants_example.code},
-    {"title": "Badges with Icons", "description": "Enhance badges with icons or status indicators", "code": badges_with_icons_example.code},
-    {"title": "Content Types", "description": "Numbers, versions, and labels", "code": content_types_example.code},
-    {"title": "Link Badges", "description": "Badges that act as links", "code": link_badges_example.code},
-    {"title": "Status Indicators", "description": "Use badges to show different states", "code": status_indicators_example.code},
-    {"title": "Category Tags", "description": "Use badges as category or technology tags", "code": category_tags_example.code},
-    {"title": "Notification Badges on Icons", "description": "Show notification counts overlapping icons with professional positioning", "code": notification_badges_example.code},
-    {"title": "Avatar Status Indicators", "description": "Avatar status indicators with clean background masking", "code": avatar_badges_example.code},
-    {"title": "Size Variations", "description": "Custom size variations for different use cases", "code": size_variations_example.code},
+    {"fn": hero_badge_example, "title": "Badge", "description": "Display small count and labeling"},
+    {"fn": basic_variants_example, "title": "Basic Variants", "description": "Default, secondary, outline, and destructive variants"},
+    {"fn": badges_with_icons_example, "title": "With Icons", "description": "Badges enhanced with icons"},
+    {"fn": content_types_example, "title": "Content Types", "description": "Numbers, text, and combined content"},
+    {"fn": link_badges_example, "title": "Link Badges", "description": "Interactive badges as links"},
+    {"fn": status_indicators_example, "title": "Status Indicators", "description": "Online, offline, and busy status"},
+    {"fn": category_tags_example, "title": "Category Tags", "description": "Tag items with categories"},
+    {"fn": notification_badges_example, "title": "Notification Badges", "description": "Alert counts on buttons and icons"},
+    {"fn": avatar_badges_example, "title": "Avatar Badges", "description": "Status badges on avatars"},
+    {"fn": size_variations_example, "title": "Size Variations", "description": "Small and large badge sizes"},
 ]
 
 API_REFERENCE = build_api_reference(
     main_props=[
-        Prop("variant", "Literal['default', 'secondary', 'destructive', 'outline']",
-             "Badge visual variant", "'default'"),
-        Prop("href", "str | None",
-             "Optional URL to make badge a link", "None"),
-        Prop("cls", "str",
-             "Additional CSS classes", "''"),
+        Prop("variant", "Literal['default','secondary','outline','destructive']", "Visual style variant", "'default'"),
+        Prop("cls", "str", "Additional CSS classes", "''"),
     ]
 )
 
@@ -296,19 +228,4 @@ API_REFERENCE = build_api_reference(
 # ============================================================================
 
 def create_badge_docs():
-    """Create badge documentation page using convention-based approach."""
-    hero_example = ComponentPreview(
-        hero_badge_example(),
-        hero_badge_example.code,
-        copy_button=True
-    )
-
-    return auto_generate_page(
-        TITLE,
-        DESCRIPTION,
-        list(examples()),
-        cli_command="star add badge",
-        api_reference=API_REFERENCE,
-        hero_example=hero_example,
-        component_slug="badge"
-    )
+    return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)

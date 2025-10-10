@@ -247,83 +247,29 @@ def hero_breadcrumb_example():
 
 
 # ============================================================================
-# EXAMPLES GENERATOR (for rendering on the page)
-# ============================================================================
-
-def examples():
-    yield ComponentPreview(
-        custom_separator_example(),
-        custom_separator_example.code,
-        title="Custom Separator",
-        description="Use custom icons as separators between items"
-    )
-
-    yield ComponentPreview(
-        collapsed_breadcrumb_example(),
-        collapsed_breadcrumb_example.code,
-        title="Collapsed",
-        description="Use ellipsis to indicate hidden intermediate steps"
-    )
-
-    yield ComponentPreview(
-        long_path_example(),
-        long_path_example.code,
-        title="Long Path",
-        description="Full breadcrumb trail with multiple levels"
-    )
-
-    yield ComponentPreview(
-        breadcrumb_with_icons_example(),
-        breadcrumb_with_icons_example.code,
-        title="With Icons",
-        description="Breadcrumb items with icons for better visual context"
-    )
-
-    yield ComponentPreview(
-        ecommerce_breadcrumb_example(),
-        ecommerce_breadcrumb_example.code,
-        title="E-commerce Product Path",
-        description="Product category hierarchy with chevron separators"
-    )
-
-    yield ComponentPreview(
-        separator_styles_example(),
-        separator_styles_example.code,
-        title="Separator Styles",
-        description="Different separator styles: dots, arrows, and pipes"
-    )
-
-    yield ComponentPreview(
-        responsive_breadcrumb_example(),
-        responsive_breadcrumb_example.code,
-        title="Responsive",
-        description="Shows ellipsis on mobile, full path on desktop"
-    )
-
-
-# ============================================================================
-# MODULE EXPORTS (for markdown generation)
+# MODULE-LEVEL DATA
 # ============================================================================
 
 EXAMPLES_DATA = [
-    {"title": "Custom Separator", "description": "Use custom icons as separators between items", "code": custom_separator_example.code},
-    {"title": "Collapsed", "description": "Use ellipsis to indicate hidden intermediate steps", "code": collapsed_breadcrumb_example.code},
-    {"title": "Long Path", "description": "Full breadcrumb trail with multiple levels", "code": long_path_example.code},
-    {"title": "With Icons", "description": "Breadcrumb items with icons for better visual context", "code": breadcrumb_with_icons_example.code},
-    {"title": "E-commerce Product Path", "description": "Product category hierarchy with chevron separators", "code": ecommerce_breadcrumb_example.code},
-    {"title": "Separator Styles", "description": "Different separator styles: dots, arrows, and pipes", "code": separator_styles_example.code},
-    {"title": "Responsive", "description": "Shows ellipsis on mobile, full path on desktop", "code": responsive_breadcrumb_example.code},
+    {"fn": hero_breadcrumb_example, "title": "Breadcrumb", "description": "Navigation breadcrumb trail"},
+    {"fn": custom_separator_example, "title": "Custom Separator", "description": "Use custom separator between items"},
+    {"fn": collapsed_breadcrumb_example, "title": "Collapsed", "description": "Collapse middle items for long paths"},
+    {"fn": long_path_example, "title": "Long Path", "description": "Handle deeply nested navigation paths"},
+    {"fn": breadcrumb_with_icons_example, "title": "With Icons", "description": "Add icons to breadcrumb items"},
+    {"fn": ecommerce_breadcrumb_example, "title": "E-commerce", "description": "Product category navigation"},
+    {"fn": separator_styles_example, "title": "Separator Styles", "description": "Different separator styles"},
+    {"fn": responsive_breadcrumb_example, "title": "Responsive", "description": "Breadcrumb that adapts to screen size"},
 ]
 
 API_REFERENCE = build_api_reference(
     components=[
-        Component("Breadcrumb", "The root breadcrumb container"),
-        Component("BreadcrumbList", "Contains the ordered list of breadcrumb items"),
-        Component("BreadcrumbItem", "Individual breadcrumb item container"),
-        Component("BreadcrumbLink", "Clickable breadcrumb link"),
-        Component("BreadcrumbPage", "Current page breadcrumb item (non-clickable)"),
-        Component("BreadcrumbSeparator", "Visual separator between breadcrumb items"),
-        Component("BreadcrumbEllipsis", "Collapsed breadcrumb indicator"),
+        Component("Breadcrumb", "Main breadcrumb container"),
+        Component("BreadcrumbList", "List wrapper for breadcrumb items"),
+        Component("BreadcrumbItem", "Individual breadcrumb item"),
+        Component("BreadcrumbLink", "Clickable link in breadcrumb"),
+        Component("BreadcrumbPage", "Current page indicator (non-clickable)"),
+        Component("BreadcrumbSeparator", "Separator between items"),
+        Component("BreadcrumbEllipsis", "Collapsed items indicator"),
     ]
 )
 
@@ -333,19 +279,4 @@ API_REFERENCE = build_api_reference(
 # ============================================================================
 
 def create_breadcrumb_docs():
-    """Create breadcrumb documentation page using convention-based approach."""
-    hero_example = ComponentPreview(
-        hero_breadcrumb_example(),
-        hero_breadcrumb_example.code,
-        copy_button=True
-    )
-
-    return auto_generate_page(
-        TITLE,
-        DESCRIPTION,
-        list(examples()),
-        cli_command="star add breadcrumb",
-        api_reference=API_REFERENCE,
-        hero_example=hero_example,
-        component_slug="breadcrumb"
-    )
+    return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)

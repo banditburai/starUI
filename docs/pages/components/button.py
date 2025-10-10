@@ -94,43 +94,6 @@ def form_integration_example():
 # EXAMPLES GENERATOR (for rendering on the page)
 # ============================================================================
 
-def examples():
-    yield ComponentPreview(
-        button_sizes_example(),
-        button_sizes_example.code,
-        title="Button Sizes",
-        description="Different sizes including icon-only buttons"
-    )
-
-    yield ComponentPreview(
-        buttons_with_icons_example(),
-        buttons_with_icons_example.code,
-        title="Buttons with Icons",
-        description="Buttons enhanced with icons for better UX"
-    )
-
-    yield ComponentPreview(
-        interactive_counter_example(),
-        interactive_counter_example.code,
-        title="Interactive Counter",
-        description="Button that updates state on click"
-    )
-
-    yield ComponentPreview(
-        toggle_visibility_example(),
-        toggle_visibility_example.code,
-        title="Toggle Visibility",
-        description="Show/hide content with smooth transitions and dynamic button text"
-    )
-
-    yield ComponentPreview(
-        form_integration_example(),
-        form_integration_example.code,
-        title="Form Integration",
-        description="Button state controlled by form input"
-    )
-
-
 # ============================================================================
 # API REFERENCE
 # ============================================================================
@@ -154,11 +117,11 @@ API_REFERENCE = build_api_reference(
 # ============================================================================
 
 EXAMPLES_DATA = [
-    {"title": "Button Sizes", "description": "Different sizes including icon-only buttons", "code": button_sizes_example.code},
-    {"title": "Buttons with Icons", "description": "Buttons enhanced with icons for better UX", "code": buttons_with_icons_example.code},
-    {"title": "Interactive Counter", "description": "Button that updates state on click", "code": interactive_counter_example.code},
-    {"title": "Toggle Visibility", "description": "Show/hide content with smooth transitions and dynamic button text", "code": toggle_visibility_example.code},
-    {"title": "Form Integration", "description": "Button state controlled by form input", "code": form_integration_example.code},
+    {"title": "Button Sizes", "description": "Different sizes including icon-only buttons", "fn": button_sizes_example},
+    {"title": "Buttons with Icons", "description": "Buttons enhanced with icons for better UX", "fn": buttons_with_icons_example},
+    {"title": "Interactive Counter", "description": "Button that updates state on click", "fn": interactive_counter_example},
+    {"title": "Toggle Visibility", "description": "Show/hide content with smooth transitions and dynamic button text", "fn": toggle_visibility_example},
+    {"title": "Form Integration", "description": "Button state controlled by form input", "fn": form_integration_example},
 ]
 
 
@@ -181,18 +144,4 @@ def hero_button_example():
 
 
 def create_button_docs():
-    hero_example = ComponentPreview(
-        hero_button_example(),
-        hero_button_example.code,
-        copy_button=True
-    )
-
-    return auto_generate_page(
-        TITLE,
-        DESCRIPTION,
-        list(examples()),
-        cli_command="star add button",
-        api_reference=API_REFERENCE,
-        hero_example=hero_example,
-        component_slug="button"
-    )
+    return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)

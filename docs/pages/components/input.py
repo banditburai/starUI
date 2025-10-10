@@ -250,13 +250,13 @@ def complete_form_example():
 # ============================================================================
 
 EXAMPLES_DATA = [
-    {"title": "Input Types", "description": "Different input types for various data", "code": input_types_example.code},
-    {"title": "Reactive Input with Validation", "description": "Real-time input validation using signals", "code": reactive_input_validation_example.code},
-    {"title": "Input with Buttons", "description": "Combine inputs with action buttons", "code": input_with_buttons_example.code},
-    {"title": "Input with Icons", "description": "Inputs with custom icons that adapt to dark mode", "code": inputs_with_icons_example.code},
-    {"title": "Input States", "description": "Disabled, read-only, and required inputs", "code": input_states_example.code},
-    {"title": "File Upload", "description": "File input fields with accept filters", "code": file_upload_inputs_example.code},
-    {"title": "Complete Form", "description": "Multiple inputs in a form layout", "code": complete_form_example.code},
+    {"title": "Input Types", "description": "Different input types for various data", "fn": input_types_example},
+    {"title": "Reactive Input with Validation", "description": "Real-time input validation using signals", "fn": reactive_input_validation_example},
+    {"title": "Input with Buttons", "description": "Combine inputs with action buttons", "fn": input_with_buttons_example},
+    {"title": "Input with Icons", "description": "Inputs with custom icons that adapt to dark mode", "fn": inputs_with_icons_example},
+    {"title": "Input States", "description": "Disabled, read-only, and required inputs", "fn": input_states_example},
+    {"title": "File Upload", "description": "File input fields with accept filters", "fn": file_upload_inputs_example},
+    {"title": "Complete Form", "description": "Multiple inputs in a form layout", "fn": complete_form_example},
 ]
 
 API_REFERENCE = build_api_reference(
@@ -332,28 +332,4 @@ def examples():
 
 
 def create_input_docs():
-    # Hero example - basic input showcase
-    @with_code
-    def hero_input_example():
-        return Div(
-            Input(placeholder="Enter text...", cls="mb-3 w-80"),
-            Input(type="email", placeholder="you@example.com", cls="mb-3 w-80"),
-            Input(type="password", placeholder="Enter your password", cls="w-80"),
-            cls="grid gap-3 max-w-sm"
-        )
-
-    hero_example = ComponentPreview(
-        hero_input_example(),
-        hero_input_example.code,
-        copy_button=True
-    )
-
-    return auto_generate_page(
-        TITLE,
-        DESCRIPTION,
-        list(examples()),
-        cli_command="star add input",
-        hero_example=hero_example,
-        component_slug="input",
-        api_reference=API_REFERENCE
-    )
+    return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)

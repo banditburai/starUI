@@ -3,7 +3,7 @@ from typing import Any, Literal
 
 from starhtml import FT, Div, Icon, Input, Span, Signal, js
 from starhtml import Dialog as HTMLDialog
-from datastar_proposed import evt, document, seq, expr
+from datastar_proposed import evt, document, seq, expr, with_locals
 
 from .utils import cn, cva, gen_id, reset_timeout, set_timeout, with_signals
 
@@ -163,7 +163,11 @@ def CommandInput(
 ):
     def _(*, sig, search, selected, visible_items, first_visible_index, input_ref, **_):
         return Div(
-            Icon("lucide:search", cls="size-4 shrink-0 opacity-50"),
+            # Wrapper with fixed width prevents layout shift during icon load
+            Div(
+                Icon("lucide:search", cls="size-4 shrink-0 opacity-50"),
+                cls="w-4 h-4 shrink-0",
+            ),
             Input(
                 data_ref=input_ref,
                 data_bind=search,
@@ -202,25 +206,27 @@ def CommandList(
 
         items_metadata = Signal(f"{sig}_items_metadata", _item_metadata)
 
-        compute_visible = js(f"""
-            const items = ${items_metadata.id};
-            if (!Array.isArray(items)) return;
+        filter_js = js(f"""${items_metadata.id}.filter(item => {{
+            if (item.disabled) return false;
+            if (!${search.id}) return true;
+            const searchLower = ${search.id}.toLowerCase();
+            return item.value.toLowerCase().includes(searchLower) ||
+                   (item.keywords || '').toLowerCase().includes(searchLower);
+        }})""")
 
-            const visible = items.filter(item => {{
-                if (item.disabled) return false;
-                if (!${search.id}) return true;
-                const searchLower = ${search.id}.toLowerCase();
-                return item.value.toLowerCase().includes(searchLower) ||
-                       (item.keywords || '').toLowerCase().includes(searchLower);
-            }});
-
-            ${visible_count.id} = visible.length;
-            ${visible_items.id} = visible;
-            ${first_visible_index.id} = visible.length > 0 ? visible[0].index : 0;
-            if (visible.length > 0) {{
-                ${selected.id} = ${first_visible_index.id};
-            }}
-        """)
+        # Use with_locals() to create a local variable and avoid reactive loops
+        # This prevents reading from signals we just wrote to
+        # items_metadata.then() guards against data-on-load running before signals init
+        # The filter reads $search, so data-effect will re-run when search changes
+        scope = with_locals(visible=filter_js)
+        compute_visible = items_metadata.then(
+            scope.then(
+                visible_items.set(scope.visible),
+                visible_count.set(scope.visible.length),
+                first_visible_index.set((scope.visible.length > 0).if_(js('visible[0].index'), 0)),
+                (scope.visible.length > 0).then(selected.set(js('visible[0].index')))
+            )
+        )
 
         return Div(
             items_metadata,
@@ -249,9 +255,10 @@ def CommandEmpty(
     def _(*, sig, visible_count, **_):
         return Div(
             *(children or ["No results found."]),
-            data_style_display=visible_count.eq(0).if_('block', 'none'),
+            data_show=visible_count.eq(0),
             data_command_empty=sig,
             data_slot="command-empty",
+            style="display:none",
             cls=cn("py-6 text-center text-sm", cls),
             **kwargs,
         )
@@ -309,9 +316,9 @@ def CommandItem(
             "disabled": disabled,
         })
 
-        item_show = show
-        if item_show is None and not disabled:
-            item_show = ~search | expr(value).lower().contains(search.lower()) | expr(keywords or "").lower().contains(search.lower())
+        item_show = show if show is not None or disabled else (
+            ~search | expr(value).lower().contains(search.lower()) | expr(keywords or "").lower().contains(search.lower())
+        )
 
         click_actions = ([js(onclick)] if onclick else []) + ([dialog_ref.close()] if dialog_ref else [])
 

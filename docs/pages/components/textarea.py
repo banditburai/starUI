@@ -780,14 +780,14 @@ def email_template_composer_example():
 
 # Module-level data structures
 EXAMPLES_DATA = [
-    {"title": "Basic Textarea", "description": "Simple textarea with different states", "code": basic_textarea_example.code},
-    {"title": "Contextual Usage", "description": "Textarea sizes matched to specific use cases", "code": contextual_textarea_examples.code},
-    {"title": "Character Counter", "description": "Track character count with visual feedback", "code": character_counter_example.code},
-    {"title": "Comment Box with Live Preview", "description": "Rich text editor with real-time preview and formatting toolbar", "code": comment_box_live_preview_example.code},
-    {"title": "Auto-Expanding", "description": "Textarea that grows with content", "code": auto_expanding_textarea_example.code},
-    {"title": "Feedback Form", "description": "Multi-field form with validation", "code": enhanced_feedback_form_example.code},
-    {"title": "Code Editor", "description": "Code input with monospace font and utilities", "code": code_editor_textarea_example.code},
-    {"title": "Email Template Composer", "description": "Professional template system with variable substitution", "code": email_template_composer_example.code},
+    {"title": "Basic Textarea", "description": "Simple textarea with different states", "fn": basic_textarea_example},
+    {"title": "Contextual Usage", "description": "Textarea sizes matched to specific use cases", "fn": contextual_textarea_examples},
+    {"title": "Character Counter", "description": "Track character count with visual feedback", "fn": character_counter_example},
+    {"title": "Comment Box with Live Preview", "description": "Rich text editor with real-time preview and formatting toolbar", "fn": comment_box_live_preview_example},
+    {"title": "Auto-Expanding", "description": "Textarea that grows with content", "fn": auto_expanding_textarea_example},
+    {"title": "Feedback Form", "description": "Multi-field form with validation", "fn": enhanced_feedback_form_example},
+    {"title": "Code Editor", "description": "Code input with monospace font and utilities", "fn": code_editor_textarea_example},
+    {"title": "Email Template Composer", "description": "Professional template system with variable substitution", "fn": email_template_composer_example},
 ]
 
 API_REFERENCE = build_api_reference(
@@ -818,32 +818,4 @@ def examples():
 
 
 def create_textarea_docs():
-    # Hero example
-    @with_code
-    def hero_textarea_example():
-        return Div(
-            TextareaWithLabel(
-                label="Description",
-                placeholder="Enter a detailed description...",
-                rows=4,
-                signal="hero_textarea",
-                helper_text="Provide as much detail as needed"
-            ),
-            cls="w-full max-w-4xl mx-auto"
-        )
-
-    hero_example = ComponentPreview(
-        hero_textarea_example(),
-        hero_textarea_example.code,
-        copy_button=True
-    )
-
-    return auto_generate_page(
-        TITLE,
-        DESCRIPTION,
-        list(examples()),
-        cli_command="star add textarea",
-        api_reference=API_REFERENCE,
-        hero_example=hero_example,
-        component_slug="textarea"
-    )
+    return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)

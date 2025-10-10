@@ -629,50 +629,6 @@ def product_ecommerce_cards_example():
 # EXAMPLES GENERATOR (for rendering on the page)
 # ============================================================================
 
-def examples():
-    yield ComponentPreview(
-        interactive_profile_cards_example(),
-        interactive_profile_cards_example.code,
-        title="Interactive Profile Cards",
-        description="Profile cards with follow/unfollow functionality and status badges"
-    )
-
-    yield ComponentPreview(
-        interactive_dashboard_stats_example(),
-        interactive_dashboard_stats_example.code,
-        title="Interactive Dashboard Stats",
-        description="Dynamic stats cards with period selection and real-time updates"
-    )
-
-    yield ComponentPreview(
-        interactive_form_card_example(),
-        interactive_form_card_example.code,
-        title="Interactive Form Card",
-        description="Form with real-time validation and dynamic button states"
-    )
-
-    yield ComponentPreview(
-        interactive_shopping_cart_example(),
-        interactive_shopping_cart_example.code,
-        title="Interactive Shopping Cart",
-        description="Dynamic cart with add/remove items, total calculation, and checkout flow"
-    )
-
-    yield ComponentPreview(
-        notification_cards_example(),
-        notification_cards_example.code,
-        title="Interactive Notifications",
-        description="Alert and notification cards with action handlers"
-    )
-
-    yield ComponentPreview(
-        product_ecommerce_cards_example(),
-        product_ecommerce_cards_example.code,
-        title="Product Cards",
-        description="E-commerce product cards with color selection, favorites, and cart functionality"
-    )
-
-
 # ============================================================================
 # API REFERENCE
 # ============================================================================
@@ -694,12 +650,12 @@ API_REFERENCE = build_api_reference(
 # ============================================================================
 
 EXAMPLES_DATA = [
-    {"title": "Interactive Profile Cards", "description": "Profile cards with follow/unfollow functionality and status badges", "code": interactive_profile_cards_example.code},
-    {"title": "Interactive Dashboard Stats", "description": "Dynamic stats cards with period selection and real-time updates", "code": interactive_dashboard_stats_example.code},
-    {"title": "Interactive Form Card", "description": "Form with real-time validation and dynamic button states", "code": interactive_form_card_example.code},
-    {"title": "Interactive Shopping Cart", "description": "Dynamic cart with add/remove items, total calculation, and checkout flow", "code": interactive_shopping_cart_example.code},
-    {"title": "Interactive Notifications", "description": "Alert and notification cards with action handlers", "code": notification_cards_example.code},
-    {"title": "Product Cards", "description": "E-commerce product cards with color selection, favorites, and cart functionality", "code": product_ecommerce_cards_example.code},
+    {"title": "Interactive Profile Cards", "description": "Profile cards with follow/unfollow functionality and status badges", "fn": interactive_profile_cards_example},
+    {"title": "Interactive Dashboard Stats", "description": "Dynamic stats cards with period selection and real-time updates", "fn": interactive_dashboard_stats_example},
+    {"title": "Interactive Form Card", "description": "Form with real-time validation and dynamic button states", "fn": interactive_form_card_example},
+    {"title": "Interactive Shopping Cart", "description": "Dynamic cart with add/remove items, total calculation, and checkout flow", "fn": interactive_shopping_cart_example},
+    {"title": "Interactive Notifications", "description": "Alert and notification cards with action handlers", "fn": notification_cards_example},
+    {"title": "Product Cards", "description": "E-commerce product cards with color selection, favorites, and cart functionality", "fn": product_ecommerce_cards_example},
 ]
 
 
@@ -726,18 +682,4 @@ def hero_card_example():
 
 
 def create_card_docs():
-    hero_example = ComponentPreview(
-        hero_card_example(),
-        hero_card_example.code,
-        copy_button=True
-    )
-
-    return auto_generate_page(
-        TITLE,
-        DESCRIPTION,
-        list(examples()),
-        cli_command="star add card",
-        api_reference=API_REFERENCE,
-        hero_example=hero_example,
-        component_slug="card"
-    )
+    return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)

@@ -223,13 +223,13 @@ def custom_styling_example():
 # ============================================================================
 
 EXAMPLES_DATA = [
-    {"title": "Card Content Separation", "description": "Use horizontal separators to divide sections within cards or panels", "code": card_content_separation_example.code},
-    {"title": "Content Section Dividers", "description": "Organize content areas with clear visual separation", "code": content_section_dividers_example.code},
-    {"title": "Toolbar Dividers", "description": "Use vertical separators to group related actions in toolbars", "code": toolbar_dividers_example.code},
-    {"title": "Breadcrumb Navigation", "description": "Create clean breadcrumb trails with vertical separators", "code": breadcrumb_navigation_example.code},
-    {"title": "Dashboard Stats", "description": "Separate key metrics with vertical dividers for clear visual hierarchy", "code": dashboard_stats_example.code},
-    {"title": "Article Layout", "description": "Complex content layouts using both horizontal and vertical separators", "code": article_layout_example.code},
-    {"title": "Custom Styling", "description": "Customize separators with different styles, colors, and effects", "code": custom_styling_example.code},
+    {"title": "Card Content Separation", "description": "Use horizontal separators to divide sections within cards or panels", "fn": card_content_separation_example},
+    {"title": "Content Section Dividers", "description": "Organize content areas with clear visual separation", "fn": content_section_dividers_example},
+    {"title": "Toolbar Dividers", "description": "Use vertical separators to group related actions in toolbars", "fn": toolbar_dividers_example},
+    {"title": "Breadcrumb Navigation", "description": "Create clean breadcrumb trails with vertical separators", "fn": breadcrumb_navigation_example},
+    {"title": "Dashboard Stats", "description": "Separate key metrics with vertical dividers for clear visual hierarchy", "fn": dashboard_stats_example},
+    {"title": "Article Layout", "description": "Complex content layouts using both horizontal and vertical separators", "fn": article_layout_example},
+    {"title": "Custom Styling", "description": "Customize separators with different styles, colors, and effects", "fn": custom_styling_example},
 ]
 
 API_REFERENCE = build_api_reference(
@@ -300,39 +300,4 @@ def examples():
 
 
 def create_separator_docs():
-    # Hero example showcasing both orientations
-    @with_code
-    def hero_separator_example():
-        return Div(
-            Div(
-                P("Content above", cls="text-center py-4"),
-                Separator(),
-                P("Content below", cls="text-center py-4"),
-                cls="border rounded-lg p-4 mr-4"
-            ),
-            Div(
-                P("Left", cls="px-4 text-center"),
-                Separator(orientation="vertical", cls="h-16"),
-                P("Center", cls="px-4 text-center"),
-                Separator(orientation="vertical", cls="h-16"),
-                P("Right", cls="px-4 text-center"),
-                cls="flex items-center border rounded-lg p-4"
-            ),
-            cls="flex flex-col sm:flex-row gap-4 items-center"
-        )
-
-    hero_example = ComponentPreview(
-        hero_separator_example(),
-        hero_separator_example.code,
-        copy_button=True
-    )
-
-    return auto_generate_page(
-        TITLE,
-        DESCRIPTION,
-        list(examples()),
-        cli_command="star add separator",
-        hero_example=hero_example,
-        component_slug="separator",
-        api_reference=API_REFERENCE
-    )
+    return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)

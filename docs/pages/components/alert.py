@@ -120,11 +120,12 @@ def hero_alert_example():
 # ============================================================================
 
 EXAMPLES_DATA = [
-    {"title": "Basic Alert", "description": "Default alert with icon and message", "code": basic_alert_example.code},
-    {"title": "Destructive", "description": "Error or destructive action alert", "code": destructive_alert_example.code},
-    {"title": "Message Types", "description": "Success, warning, and info styled alerts", "code": message_types_alert_example.code},
-    {"title": "Rich Content", "description": "Alerts with lists and formatted text", "code": rich_content_alert_example.code},
-    {"title": "Without Icon", "description": "Simple alert without an icon", "code": simple_alert_example.code},
+    {"fn": hero_alert_example, "title": "Hero Alert", "description": "Default alert with icon and message"},
+    {"fn": basic_alert_example, "title": "Basic Alert", "description": "Default alert with icon and message"},
+    {"fn": destructive_alert_example, "title": "Destructive", "description": "Error or destructive action alert"},
+    {"fn": message_types_alert_example, "title": "Message Types", "description": "Success, warning, and info styled alerts"},
+    {"fn": rich_content_alert_example, "title": "Rich Content", "description": "Alerts with lists and formatted text"},
+    {"fn": simple_alert_example, "title": "Without Icon", "description": "Simple alert without an icon"},
 ]
 
 API_REFERENCE = build_api_reference(
@@ -142,47 +143,4 @@ API_REFERENCE = build_api_reference(
 
 def create_alert_docs():
     """Create alert documentation page using convention-based approach."""
-
-    return auto_generate_page(
-        TITLE,
-        DESCRIPTION,
-        [
-            ComponentPreview(
-                basic_alert_example(),
-                basic_alert_example.code,
-                title="Basic Alert",
-                description="Default alert with icon and message"
-            ),
-            ComponentPreview(
-                destructive_alert_example(),
-                destructive_alert_example.code,
-                title="Destructive",
-                description="Error or destructive action alert"
-            ),
-            ComponentPreview(
-                message_types_alert_example(),
-                message_types_alert_example.code,
-                title="Message Types",
-                description="Success, warning, and info styled alerts"
-            ),
-            ComponentPreview(
-                rich_content_alert_example(),
-                rich_content_alert_example.code,
-                title="Rich Content",
-                description="Alerts with lists and formatted text"
-            ),
-            ComponentPreview(
-                simple_alert_example(),
-                simple_alert_example.code,
-                title="Without Icon",
-                description="Simple alert without an icon"
-            ),
-        ],
-        cli_command="star add alert",
-        hero_example=ComponentPreview(
-            hero_alert_example(),
-            hero_alert_example.code,
-        ),
-        component_slug="alert",
-        api_reference=API_REFERENCE
-    )
+    return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)

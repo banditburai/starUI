@@ -168,9 +168,9 @@ def hero_date_picker_example():
 # ============================================================================
 
 EXAMPLES_DATA = [
-    {"title": "Date Picker with Presets", "description": "Quick date selection with predefined options", "code": date_picker_with_presets_example.code},
-    {"title": "Date Range Picker", "description": "Select a start and end date for filtering or booking", "code": date_range_picker_example.code},
-    {"title": "Multiple Date Selection", "description": "Select multiple dates for scheduling or events", "code": multiple_date_selection_example.code},
+    {"title": "Date Picker with Presets", "description": "Quick date selection with predefined options", "fn": date_picker_with_presets_example},
+    {"title": "Date Range Picker", "description": "Select a start and end date for filtering or booking", "fn": date_range_picker_example},
+    {"title": "Multiple Date Selection", "description": "Select multiple dates for scheduling or events", "fn": multiple_date_selection_example},
 ]
 
 API_REFERENCE = build_api_reference(
@@ -187,18 +187,4 @@ API_REFERENCE = build_api_reference(
 
 
 def create_date_picker_docs():
-    hero_example = ComponentPreview(
-        hero_date_picker_example(),
-        hero_date_picker_example.code,
-        copy_button=True
-    )
-
-    return auto_generate_page(
-        TITLE,
-        DESCRIPTION,
-        list(examples()),
-        cli_command="star add date-picker",
-        component_slug="date-picker",
-        hero_example=hero_example,
-        api_reference=API_REFERENCE,
-    )
+    return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)

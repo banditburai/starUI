@@ -478,50 +478,6 @@ def settings_with_validation_example():
 # EXAMPLES GENERATOR (for rendering on the page)
 # ============================================================================
 
-def examples():
-    yield ComponentPreview(
-        terms_conditions_example(),
-        terms_conditions_example.code,
-        title="Terms & Conditions",
-        description="Registration form with required checkboxes"
-    )
-
-    yield ComponentPreview(
-        feature_permissions_example(),
-        feature_permissions_example.code,
-        title="Feature Permissions",
-        description="Grouped checkboxes with disabled states"
-    )
-
-    yield ComponentPreview(
-        interactive_todo_list_example(),
-        interactive_todo_list_example.code,
-        title="Interactive Todo List",
-        description="Task tracking with progress visualization"
-    )
-
-    yield ComponentPreview(
-        select_all_pattern_example(),
-        select_all_pattern_example.code,
-        title="Select All Pattern",
-        description="Bulk selection with parent-child checkbox relationship"
-    )
-
-    yield ComponentPreview(
-        filter_form_example(),
-        filter_form_example.code,
-        title="Filter Form",
-        description="Multi-category filtering interface"
-    )
-
-    yield ComponentPreview(
-        settings_with_validation_example(),
-        settings_with_validation_example.code,
-        title="Settings with Validation",
-        description="Form validation based on checkbox selections"
-    )
-
-
 # ============================================================================
 # API REFERENCE
 # ============================================================================
@@ -545,12 +501,12 @@ API_REFERENCE = build_api_reference(
 # ============================================================================
 
 EXAMPLES_DATA = [
-    {"title": "Terms & Conditions", "description": "Registration form with required checkboxes", "code": terms_conditions_example.code},
-    {"title": "Feature Permissions", "description": "Grouped checkboxes with disabled states", "code": feature_permissions_example.code},
-    {"title": "Interactive Todo List", "description": "Task tracking with progress visualization", "code": interactive_todo_list_example.code},
-    {"title": "Select All Pattern", "description": "Bulk selection with parent-child checkbox relationship", "code": select_all_pattern_example.code},
-    {"title": "Filter Form", "description": "Multi-category filtering interface", "code": filter_form_example.code},
-    {"title": "Settings with Validation", "description": "Form validation based on checkbox selections", "code": settings_with_validation_example.code},
+    {"title": "Terms & Conditions", "description": "Registration form with required checkboxes", "fn": terms_conditions_example},
+    {"title": "Feature Permissions", "description": "Grouped checkboxes with disabled states", "fn": feature_permissions_example},
+    {"title": "Interactive Todo List", "description": "Task tracking with progress visualization", "fn": interactive_todo_list_example},
+    {"title": "Select All Pattern", "description": "Bulk selection with parent-child checkbox relationship", "fn": select_all_pattern_example},
+    {"title": "Filter Form", "description": "Multi-category filtering interface", "fn": filter_form_example},
+    {"title": "Settings with Validation", "description": "Form validation based on checkbox selections", "fn": settings_with_validation_example},
 ]
 
 
@@ -611,18 +567,4 @@ def hero_checkbox_example():
 
 
 def create_checkbox_docs():
-    hero_example = ComponentPreview(
-        hero_checkbox_example(),
-        hero_checkbox_example.code,
-        copy_button=True
-    )
-
-    return auto_generate_page(
-        TITLE,
-        DESCRIPTION,
-        list(examples()),
-        cli_command="star add checkbox",
-        api_reference=API_REFERENCE,
-        hero_example=hero_example,
-        component_slug="checkbox"
-    )
+    return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)

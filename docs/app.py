@@ -473,17 +473,23 @@ def get_component_markdown(component_name: str):
 def _extract_component_data(module, component_name: str) -> dict:
     result = {}
 
-    # Get examples data from module-level variable (includes code)
+    # Get examples data from module-level variable and extract code from functions
     examples_data = getattr(module, "EXAMPLES_DATA", None)
     if examples_data:
-        result["examples_data"] = examples_data
+        result["examples_data"] = [
+            {
+                "title": ex.get("title", ""),
+                "description": ex.get("description", ""),
+                "code": ex["fn"].code if hasattr(ex["fn"], "code") else ""
+            }
+            for ex in examples_data
+        ]
 
-    # Get hero_example_code from module-level decorated function
-    # Convention: hero_{component_name}_example
-    hero_func_name = f"hero_{component_name}_example"
-    hero_func = getattr(module, hero_func_name, None)
-    if hero_func and hasattr(hero_func, 'code'):
-        result["hero_example_code"] = hero_func.code
+    # Hero example is the first example in EXAMPLES_DATA
+    if examples_data and len(examples_data) > 0:
+        first_fn = examples_data[0].get("fn")
+        if first_fn and hasattr(first_fn, 'code'):
+            result["hero_example_code"] = first_fn.code
 
     # Get API reference from module-level variable
     api_reference = getattr(module, "API_REFERENCE", None)
@@ -760,7 +766,27 @@ iframe_app, iframe_rt = star_app(
     title="Component Preview",
     live=True,
     hdrs=(
-        fouc_script(use_data_theme=True),
+        # Inherit parent theme with iframe-specific fallback support
+        Script("""
+            (function() {
+                const iframeId = window.location.pathname.split('/').pop();
+                const iframeKey = 'iframe-theme-' + iframeId;
+
+                // Try iframe-specific key first, then parent key, then system preference
+                const theme = localStorage.getItem(iframeKey) ||
+                              localStorage.getItem('theme') ||
+                              (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+                document.documentElement.setAttribute('data-theme', theme);
+            })();
+        """),
+        # Add CSS for theme toggle icon switching
+        Style("""
+            [data-theme="light"] .theme-icon-alt,
+            [data-theme="dark"] .theme-icon-default {
+                display: none;
+            }
+        """),
         Link(rel="stylesheet", href="/static/css/starui.css"),
         position_handler(),
     ),

@@ -386,12 +386,12 @@ def disabled_states_example():
 # ============================================================================
 
 EXAMPLES_DATA = [
-    {"title": "Basic Toggle", "description": "Simple toggle button with icon", "code": basic_toggle_example.code},
-    {"title": "Feature Toggles", "description": "Enable/disable features with descriptive toggles", "code": feature_toggles_example.code},
-    {"title": "Size Variations", "description": "Small, default, and large toggle sizes", "code": size_variations_example.code},
-    {"title": "Social Interactions", "description": "Like, comment, save, and share toggles", "code": social_interactions_example.code},
-    {"title": "Music Player Simulation", "description": "Simulated music player with realistic timer and toggle controls", "code": music_player_simulation_example.code},
-    {"title": "Disabled States", "description": "Disabled toggles in different states", "code": disabled_states_example.code},
+    {"fn": basic_toggle_example, "title": "Basic Toggle", "description": "Simple toggle button with icon"},
+    {"fn": feature_toggles_example, "title": "Feature Toggles", "description": "Enable/disable features with descriptive toggles"},
+    {"fn": size_variations_example, "title": "Size Variations", "description": "Small, default, and large toggle sizes"},
+    {"fn": social_interactions_example, "title": "Social Interactions", "description": "Like, comment, save, and share toggles"},
+    {"fn": music_player_simulation_example, "title": "Music Player Simulation", "description": "Simulated music player with realistic timer and toggle controls"},
+    {"fn": disabled_states_example, "title": "Disabled States", "description": "Disabled toggles in different states"},
 ]
 
 API_REFERENCE = build_api_reference(
@@ -407,83 +407,5 @@ API_REFERENCE = build_api_reference(
 )
 
 
-def examples():
-    """Generate all toggle examples."""
-    yield ComponentPreview(
-        basic_toggle_example(),
-        basic_toggle_example.code,
-        title="Basic Toggle",
-        description="Simple toggle button with icon"
-    )
-
-    yield ComponentPreview(
-        feature_toggles_example(),
-        feature_toggles_example.code,
-        title="Feature Toggles",
-        description="Enable/disable features with descriptive toggles"
-    )
-
-    yield ComponentPreview(
-        size_variations_example(),
-        size_variations_example.code,
-        title="Size Variations",
-        description="Small, default, and large toggle sizes"
-    )
-
-    yield ComponentPreview(
-        social_interactions_example(),
-        social_interactions_example.code,
-        title="Social Interactions",
-        description="Like, comment, save, and share toggles"
-    )
-
-    yield ComponentPreview(
-        music_player_simulation_example(),
-        music_player_simulation_example.code,
-        title="Music Player Simulation",
-        description="Simulated music player with realistic timer and toggle controls"
-    )
-
-    yield ComponentPreview(
-        disabled_states_example(),
-        disabled_states_example.code,
-        title="Disabled States",
-        description="Disabled toggles in different states"
-    )
-
-
 def create_toggle_docs():
-
-    # Hero example
-    @with_code
-    def hero_toggle_example():
-        return Div(
-            Toggle(
-                Icon("lucide:bold", cls="h-4 w-4"),
-                Span("Bold"),
-                variant="outline",
-                signal="hero_toggle"
-            ),
-            P(
-                "Toggle is ",
-                Span(data_text=js("$hero_toggle ? 'pressed' : 'not pressed'"), cls="font-mono"),
-                cls="text-sm text-muted-foreground mt-2"
-            ),
-            cls="flex flex-col items-center"
-        )
-
-    hero_example = ComponentPreview(
-        hero_toggle_example(),
-        hero_toggle_example.code,
-        copy_button=True
-    )
-
-    return auto_generate_page(
-        TITLE,
-        DESCRIPTION,
-        list(examples()),
-        cli_command="star add toggle",
-        api_reference=API_REFERENCE,
-        hero_example=hero_example,
-        component_slug="toggle"
-    )
+    return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)

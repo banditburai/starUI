@@ -3,7 +3,7 @@ import re
 from dataclasses import dataclass
 from functools import wraps
 from textwrap import dedent
-from typing import Any, Callable
+from typing import Any, Callable, Generator
 
 # Explicit imports to preserve Python built-ins (any, all, match, etc.)
 # since utils.py contains Python logic alongside HTML generation
@@ -18,29 +18,51 @@ from widgets.code_block import CodeBlock
 # MAIN API
 # ============================================================================
 
+def _create_component_preview(example_data: dict, **extra_kwargs) -> Any:
+    """Create ComponentPreview from example data, merging in extra kwargs."""
+    from widgets.component_preview import ComponentPreview
+
+    fn = example_data["fn"]
+    kwargs = {k: v for k, v in example_data.items() if k != "fn"}
+    return ComponentPreview(fn(), fn.code, **kwargs, **extra_kwargs)
+
+
+def generate_examples(examples_data: list[dict]) -> Generator[Any, None, None]:
+    """Generate ComponentPreview instances from examples data."""
+    for ex in examples_data:
+        yield _create_component_preview(ex)
+
+
 def auto_generate_page(
     component_name: str,
     description: str,
-    examples: list[Any],
+    examples_data: list[dict] | None = None,
+    api_reference: dict[str, Any] | None = None,
+    component_slug: str | None = None,
     cli_command: str | None = None,
     manual_files: list[dict[str, str]] | None = None,
     dependencies: list[str] | None = None,
     usage_code: str | None = None,
     usage_description: str | None = None,
-    api_reference: dict[str, Any] | None = None,
-    hero_example: Any | None = None,
-    hero_example_code: str | None = None,
-    examples_data: list[dict[str, str]] | None = None,
-    component_slug: str | None = None,
     **layout_attrs
 ) -> FT:
     from layouts.base import DocsLayout, LayoutConfig, SidebarConfig
     from app import DOCS_SIDEBAR_SECTIONS
 
+    slug = component_slug or component_name.lower().replace(' ', '-')
+    cli = cli_command or f"star add {slug}"
+
+    # Hero is always the first example; remaining examples shown in Examples section
+    hero_example = None
+    examples_list = []
+    if examples_data:
+        hero_example = _create_component_preview(examples_data[0], copy_button=True)
+        examples_list = list(generate_examples(examples_data[1:]))
+
     sections = [
         hero_example,
-        _installation(cli_command, manual_files, dependencies),
-        _examples(examples),
+        _installation(cli, manual_files, dependencies),
+        _examples(examples_list),
         _usage(usage_code, usage_description),
         _api_reference(api_reference)
     ]
@@ -50,7 +72,7 @@ def auto_generate_page(
         layout=LayoutConfig(
             title=component_name,
             description=description,
-            component_name=component_slug,
+            component_name=slug,
         ),
         sidebar=SidebarConfig(sections=DOCS_SIDEBAR_SECTIONS),
         **layout_attrs

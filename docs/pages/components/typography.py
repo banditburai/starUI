@@ -292,19 +292,31 @@ def complete_article_example():
     )
 
 
+# Hero example
+@with_code
+def hero_typography_example():
+    return Div(
+        H1("Beautiful Typography"),
+        Lead("Create stunning text layouts with our comprehensive typography system."),
+        P("From headings to paragraphs, ", Strong("bold text"), " to ", Em("italics"), ", and everything in between. Our typography components provide ", Mark("consistent styling"), " across your entire application."),
+        cls="space-y-4 max-w-prose"
+    )
+
+
 # ============================================================================
 # MODULE-LEVEL DATA (for markdown API)
 # ============================================================================
 
 EXAMPLES_DATA = [
-    {"title": "Headings", "description": "All heading levels from Display to H6", "code": headings_showcase_example.code},
-    {"title": "Text Variants", "description": "Different text styles for various content types", "code": text_variants_example.code},
-    {"title": "Blog Post", "description": "Complete blog post layout with typography", "code": blog_post_example.code},
-    {"title": "Code Documentation", "description": "API reference with inline code and keyboard shortcuts", "code": code_documentation_example.code},
-    {"title": "Text Emphasis", "description": "Using marks, emphasis, and strong text", "code": text_emphasis_example.code},
-    {"title": "Prose Component", "description": "Automatic typography styling for long-form content", "code": prose_component_example.code},
-    {"title": "Figures & Captions", "description": "Images and content with descriptive captions", "code": figures_captions_example.code},
-    {"title": "Complete Article", "description": "Full article layout with all typography elements", "code": complete_article_example.code},
+    {"fn": hero_typography_example, "title": "Beautiful Typography", "description": "Create stunning text layouts with our comprehensive typography system"},
+    {"fn": headings_showcase_example, "title": "Headings", "description": "All heading levels from Display to H6"},
+    {"fn": text_variants_example, "title": "Text Variants", "description": "Different text styles for various content types"},
+    {"fn": blog_post_example, "title": "Blog Post", "description": "Complete blog post layout with typography"},
+    {"fn": code_documentation_example, "title": "Code Documentation", "description": "API reference with inline code and keyboard shortcuts"},
+    {"fn": text_emphasis_example, "title": "Text Emphasis", "description": "Using marks, emphasis, and strong text"},
+    {"fn": prose_component_example, "title": "Prose Component", "description": "Automatic typography styling for long-form content"},
+    {"fn": figures_captions_example, "title": "Figures & Captions", "description": "Images and content with descriptive captions"},
+    {"fn": complete_article_example, "title": "Complete Article", "description": "Full article layout with all typography elements"},
 ]
 
 API_REFERENCE = build_api_reference(
@@ -319,90 +331,6 @@ API_REFERENCE = build_api_reference(
 )
 
 
-def examples():
-    """Generate all typography examples."""
-    yield ComponentPreview(
-        headings_showcase_example(),
-        headings_showcase_example.code,
-        title="Headings",
-        description="All heading levels from Display to H6"
-    )
-
-    yield ComponentPreview(
-        text_variants_example(),
-        text_variants_example.code,
-        title="Text Variants",
-        description="Different text styles for various content types"
-    )
-
-    yield ComponentPreview(
-        blog_post_example(),
-        blog_post_example.code,
-        title="Blog Post",
-        description="Complete blog post layout with typography"
-    )
-
-    yield ComponentPreview(
-        code_documentation_example(),
-        code_documentation_example.code,
-        title="Code Documentation",
-        description="API reference with inline code and keyboard shortcuts"
-    )
-
-    yield ComponentPreview(
-        text_emphasis_example(),
-        text_emphasis_example.code,
-        title="Text Emphasis",
-        description="Using marks, emphasis, and strong text"
-    )
-
-    yield ComponentPreview(
-        prose_component_example(),
-        prose_component_example.code,
-        title="Prose Component",
-        description="Automatic typography styling for long-form content"
-    )
-
-    yield ComponentPreview(
-        figures_captions_example(),
-        figures_captions_example.code,
-        title="Figures & Captions",
-        description="Images and content with descriptive captions"
-    )
-
-    yield ComponentPreview(
-        complete_article_example(),
-        complete_article_example.code,
-        title="Complete Article",
-        description="Full article layout with all typography elements"
-    )
-
-
 def create_typography_docs():
     """Create typography documentation page using convention-based approach."""
-
-    # Hero example
-    @with_code
-    def hero_typography_example():
-        return Div(
-            H1("Beautiful Typography"),
-            Lead("Create stunning text layouts with our comprehensive typography system."),
-            P("From headings to paragraphs, ", Strong("bold text"), " to ", Em("italics"), ", and everything in between. Our typography components provide ", Mark("consistent styling"), " across your entire application."),
-            cls="space-y-4 max-w-prose"
-        )
-
-    hero_example = ComponentPreview(
-        hero_typography_example(),
-        hero_typography_example.code,
-        copy_button=True
-    )
-
-    return auto_generate_page(
-        TITLE,
-        DESCRIPTION,
-        list(examples()),
-        cli_command="star add typography",
-        api_reference=API_REFERENCE,
-        hero_example=hero_example,
-        component_slug="typography"
-    )
+    return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)

@@ -60,22 +60,6 @@ def multiple_date_selection_example():
 # EXAMPLES GENERATOR (for rendering on the page)
 # ============================================================================
 
-def examples():
-    yield ComponentPreview(
-        date_range_selection_example(),
-        date_range_selection_example.code,
-        title="Date Range Selection",
-        description="Select a start and end date for booking or filtering"
-    )
-
-    yield ComponentPreview(
-        multiple_date_selection_example(),
-        multiple_date_selection_example.code,
-        title="Multiple Date Selection",
-        description="Select multiple individual dates for scheduling or events"
-    )
-
-
 # ============================================================================
 # API REFERENCE
 # ============================================================================
@@ -105,8 +89,8 @@ API_REFERENCE = build_api_reference(
 # ============================================================================
 
 EXAMPLES_DATA = [
-    {"title": "Date Range Selection", "description": "Select a start and end date for booking or filtering", "code": date_range_selection_example.code},
-    {"title": "Multiple Date Selection", "description": "Select multiple individual dates for scheduling or events", "code": multiple_date_selection_example.code},
+    {"title": "Date Range Selection", "description": "Select a start and end date for booking or filtering", "fn": date_range_selection_example},
+    {"title": "Multiple Date Selection", "description": "Select multiple individual dates for scheduling or events", "fn": multiple_date_selection_example},
 ]
 
 
@@ -154,18 +138,4 @@ def hero_calendar_example():
 
 
 def create_calendar_docs():
-    hero_example = ComponentPreview(
-        hero_calendar_example(),
-        hero_calendar_example.code,
-        copy_button=True
-    )
-
-    return auto_generate_page(
-        TITLE,
-        DESCRIPTION,
-        list(examples()),
-        cli_command="star add calendar",
-        api_reference=API_REFERENCE,
-        hero_example=hero_example,
-        component_slug="calendar"
-    )
+    return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)

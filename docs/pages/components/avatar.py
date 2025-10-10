@@ -199,77 +199,26 @@ def hero_avatar_example():
 # EXAMPLES GENERATOR (for rendering on the page)
 # ============================================================================
 
-def examples():
-    yield ComponentPreview(
-        basic_avatar_example(),
-        basic_avatar_example.code,
-        title="Basic Avatar",
-        description="Compose avatars with image and fallback components"
-    )
-
-    yield ComponentPreview(
-        avatar_sizes_example(),
-        avatar_sizes_example.code,
-        title="Avatar Sizes",
-        description="Use size classes to create different avatar sizes"
-    )
-
-    yield ComponentPreview(
-        avatar_fallback_example(),
-        avatar_fallback_example.code,
-        title="Avatar Fallback",
-        description="Display initials when no image is available"
-    )
-
-    yield ComponentPreview(
-        automatic_fallback_avatar_example(),
-        automatic_fallback_avatar_example.code,
-        title="Automatic Fallback",
-        description="Uses Datastar signals to automatically show fallback when image fails"
-    )
-
-    yield ComponentPreview(
-        avatar_group_example(),
-        avatar_group_example.code,
-        title="Avatar Group",
-        description="Create overlapping avatar groups with Tailwind utilities"
-    )
-
-    yield ComponentPreview(
-        avatar_with_badge_example(),
-        avatar_with_badge_example.code,
-        title="Avatar with Badge",
-        description="Add status indicators or notification badges using absolute positioning"
-    )
-
-    yield ComponentPreview(
-        colored_initials_avatar_example(),
-        colored_initials_avatar_example.code,
-        title="Colored Initials",
-        description="Create colorful initial avatars with theme-aware backgrounds"
-    )
-
-
 # ============================================================================
-# MODULE EXPORTS (for markdown generation)
+# MODULE-LEVEL DATA
 # ============================================================================
 
 EXAMPLES_DATA = [
-    {"title": "Basic Avatar", "description": "Compose avatars with image and fallback components", "code": basic_avatar_example.code},
-    {"title": "Avatar Sizes", "description": "Use size classes to create different avatar sizes", "code": avatar_sizes_example.code},
-    {"title": "Avatar Fallback", "description": "Display initials when no image is available", "code": avatar_fallback_example.code},
-    {"title": "Automatic Fallback", "description": "Uses Datastar signals to automatically show fallback when image fails", "code": automatic_fallback_avatar_example.code},
-    {"title": "Avatar Group", "description": "Create overlapping avatar groups with Tailwind utilities", "code": avatar_group_example.code},
-    {"title": "Avatar with Badge", "description": "Add status indicators or notification badges using absolute positioning", "code": avatar_with_badge_example.code},
-    {"title": "Colored Initials", "description": "Create colorful initial avatars with theme-aware backgrounds", "code": colored_initials_avatar_example.code},
+    {"fn": hero_avatar_example, "title": "Avatar", "description": "Display user avatar with image and fallback"},
+    {"fn": basic_avatar_example, "title": "Basic Avatar", "description": "Simple avatar with image"},
+    {"fn": avatar_sizes_example, "title": "Sizes", "description": "Avatars in different sizes"},
+    {"fn": avatar_fallback_example, "title": "Fallback", "description": "Avatar with initials fallback"},
+    {"fn": automatic_fallback_avatar_example, "title": "Automatic Fallback", "description": "Automatically extract initials from name"},
+    {"fn": avatar_group_example, "title": "Avatar Group", "description": "Display multiple avatars together"},
+    {"fn": avatar_with_badge_example, "title": "With Badge", "description": "Avatar with status badge"},
+    {"fn": colored_initials_avatar_example, "title": "Colored Initials", "description": "Avatars with colored backgrounds"},
 ]
 
 API_REFERENCE = build_api_reference(
     components=[
-        Component("Avatar", "Main container component for avatar content"),
-        Component("AvatarImage", "Image element with automatic loading and fallback support"),
-        Component("AvatarFallback", "Fallback content (usually initials) when image unavailable"),
-        Component("AvatarWithFallback", "Complete avatar with automatic Datastar-powered error handling"),
+        Component("Avatar", "Main avatar container"),
+        Component("AvatarImage", "Image displayed in avatar"),
+        Component("AvatarFallback", "Fallback content when image fails or loads"),
     ]
 )
 
@@ -279,19 +228,4 @@ API_REFERENCE = build_api_reference(
 # ============================================================================
 
 def create_avatar_docs():
-    """Create the Avatar component documentation page."""
-    hero_example = ComponentPreview(
-        hero_avatar_example(),
-        hero_avatar_example.code,
-        copy_button=True
-    )
-
-    return auto_generate_page(
-        TITLE,
-        DESCRIPTION,
-        list(examples()),
-        cli_command="star add avatar",
-        api_reference=API_REFERENCE,
-        hero_example=hero_example,
-        component_slug="avatar"
-    )
+    return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)

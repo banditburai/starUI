@@ -453,13 +453,13 @@ def complex_data_controls_example():
 # ============================================================================
 
 EXAMPLES_DATA = [
-    {"title": "Basic Menu", "description": "A simple dropdown menu with actions and a destructive item", "code": basic_menu_example.code},
-    {"title": "Checkbox Menu", "description": "Menu with toggleable options and live state display", "code": checkbox_menu_example.code},
-    {"title": "Radio Group Menu", "description": "Menu with mutually exclusive options", "code": radio_group_menu_example.code},
-    {"title": "Context Menu", "description": "Rich menu with keyboard shortcuts and grouped actions", "code": context_menu_example.code},
-    {"title": "User Profile Menu", "description": "Complete user menu with avatar, profile info, and account actions", "code": user_profile_menu_example.code},
-    {"title": "Creation Menu", "description": "Grouped menu for creating different types of content", "code": creation_menu_example.code},
-    {"title": "Complex Data Controls", "description": "Multiple coordinated menus for table/list management", "code": complex_data_controls_example.code},
+    {"title": "Basic Menu", "description": "A simple dropdown menu with actions and a destructive item", "fn": basic_menu_example},
+    {"title": "Checkbox Menu", "description": "Menu with toggleable options and live state display", "fn": checkbox_menu_example},
+    {"title": "Radio Group Menu", "description": "Menu with mutually exclusive options", "fn": radio_group_menu_example},
+    {"title": "Context Menu", "description": "Rich menu with keyboard shortcuts and grouped actions", "fn": context_menu_example},
+    {"title": "User Profile Menu", "description": "Complete user menu with avatar, profile info, and account actions", "fn": user_profile_menu_example},
+    {"title": "Creation Menu", "description": "Grouped menu for creating different types of content", "fn": creation_menu_example},
+    {"title": "Complex Data Controls", "description": "Multiple coordinated menus for table/list management", "fn": complex_data_controls_example},
 ]
 
 API_REFERENCE = build_api_reference(
@@ -533,49 +533,4 @@ def examples():
 
 
 def create_dropdown_menu_docs():
-    # Hero example
-    @with_code
-    def hero_dropdown_menu_example():
-        hero_signal_id = uuid4().hex[:8]
-        return Div(
-            DropdownMenu(
-                DropdownMenuTrigger(
-                    "Open Menu",
-                    Icon("lucide:chevron-down", cls="ml-2 h-4 w-4")
-                ),
-                DropdownMenuContent(
-                    DropdownMenuItem(
-                        Icon("lucide:plus", cls="mr-2 h-4 w-4"),
-                        "New File"
-                    ),
-                    DropdownMenuItem(
-                        Icon("lucide:download", cls="mr-2 h-4 w-4"),
-                        "Download"
-                    ),
-                    DropdownMenuSeparator(),
-                    DropdownMenuItem(
-                        Icon("lucide:trash", cls="mr-2 h-4 w-4"),
-                        "Delete",
-                        variant="destructive"
-                    )
-                ),
-                signal=f"hero_menu_{hero_signal_id}"
-            ),
-            cls="w-full max-w-xl flex justify-center"
-        )
-    
-    hero_example = ComponentPreview(
-        hero_dropdown_menu_example(),
-        hero_dropdown_menu_example.code,
-        copy_button=True
-    )
-    
-    return auto_generate_page(
-        TITLE,
-        DESCRIPTION,
-        list(examples()),
-        cli_command="star add dropdown-menu",
-        api_reference=API_REFERENCE,
-        hero_example=hero_example,
-        component_slug="dropdown-menu"
-    )
+    return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)

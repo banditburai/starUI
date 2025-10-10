@@ -474,14 +474,14 @@ def popover_with_close_button_example():
 # ============================================================================
 
 EXAMPLES_DATA = [
-    {"title": "Basic Popover", "description": "Simple popover with text content and automatic positioning", "code": basic_popover_example.code},
-    {"title": "Popover Placement", "description": "Control popover positioning relative to the trigger", "code": popover_placement_examples.code},
-    {"title": "Profile Card Popover", "description": "Rich profile card with avatar, stats, and action buttons", "code": profile_card_popover_example.code},
-    {"title": "Form Popover", "description": "Interactive form with validation inside a popover", "code": form_popover_example.code},
-    {"title": "Color Picker Popover", "description": "Interactive color picker with presets and custom color input", "code": color_picker_popover_example.code},
-    {"title": "Settings Panel", "description": "Clean settings panel with theme selector and preference toggles", "code": settings_panel_popover_example.code},
-    {"title": "Help Tooltip Popovers", "description": "Contextual help information for form fields and UI elements", "code": help_tooltip_popovers_example.code},
-    {"title": "Popover with Close Button", "description": "Popover with explicit close button and action buttons", "code": popover_with_close_button_example.code},
+    {"title": "Basic Popover", "description": "Simple popover with text content and automatic positioning", "fn": basic_popover_example},
+    {"title": "Popover Placement", "description": "Control popover positioning relative to the trigger", "fn": popover_placement_examples},
+    {"title": "Profile Card Popover", "description": "Rich profile card with avatar, stats, and action buttons", "fn": profile_card_popover_example},
+    {"title": "Form Popover", "description": "Interactive form with validation inside a popover", "fn": form_popover_example},
+    {"title": "Color Picker Popover", "description": "Interactive color picker with presets and custom color input", "fn": color_picker_popover_example},
+    {"title": "Settings Panel", "description": "Clean settings panel with theme selector and preference toggles", "fn": settings_panel_popover_example},
+    {"title": "Help Tooltip Popovers", "description": "Contextual help information for form fields and UI elements", "fn": help_tooltip_popovers_example},
+    {"title": "Popover with Close Button", "description": "Popover with explicit close button and action buttons", "fn": popover_with_close_button_example},
 ]
 
 API_REFERENCE = build_api_reference(
@@ -559,34 +559,4 @@ def examples():
 
 
 def create_popover_docs():
-    @with_code
-    def hero_popover_example():
-        return Div(
-            Popover(
-                PopoverTrigger("Open Popover"),
-                PopoverContent(
-                    Div(
-                        H3("Getting Started", cls="font-semibold text-sm mb-2"),
-                        P("Popovers are perfect for displaying rich content without navigating away from the current context.", cls="text-sm text-muted-foreground mb-3"),
-                        Div(Button("Learn More", size="sm", cls="mr-2"), Button("Got it", size="sm", variant="outline"))
-                    )
-                )
-            ),
-            cls="flex justify-center py-8"
-        )
-
-    hero_example = ComponentPreview(
-        hero_popover_example(),
-        hero_popover_example.code,
-        copy_button=True
-    )
-
-    return auto_generate_page(
-        TITLE,
-        DESCRIPTION,
-        list(examples()),
-        cli_command="star add popover",
-        api_reference=API_REFERENCE,
-        hero_example=hero_example,
-        component_slug="popover"
-    )
+    return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)

@@ -160,10 +160,10 @@ def loading_states_skeleton_example():
 # ============================================================================
 
 EXAMPLES_DATA = [
-    {"title": "Basic Shapes", "description": "Text lines, perfect circles, and common patterns", "code": basic_shapes_skeleton_example.code},
-    {"title": "Card Layout", "description": "Skeleton for a typical user card with avatar, content, and action", "code": card_layout_skeleton_example.code},
-    {"title": "Data Table", "description": "Skeleton for user data table with avatars and status indicators", "code": data_table_skeleton_example.code},
-    {"title": "Loading States", "description": "Interactive demo showing skeleton to content transition", "code": loading_states_skeleton_example.code},
+    {"title": "Basic Shapes", "description": "Text lines, perfect circles, and common patterns", "fn": basic_shapes_skeleton_example},
+    {"title": "Card Layout", "description": "Skeleton for a typical user card with avatar, content, and action", "fn": card_layout_skeleton_example},
+    {"title": "Data Table", "description": "Skeleton for user data table with avatars and status indicators", "fn": data_table_skeleton_example},
+    {"title": "Loading States", "description": "Interactive demo showing skeleton to content transition", "fn": loading_states_skeleton_example},
 ]
 
 API_REFERENCE = build_api_reference(
@@ -207,39 +207,4 @@ def examples():
 
 
 def create_skeleton_docs():
-    # Hero example
-    @with_code
-    def hero_skeleton_example():
-        return Div(
-            Div(
-                Skeleton(cls="h-4 w-full mb-2"),
-                Skeleton(cls="h-4 w-4/5 mb-2"),
-                Skeleton(cls="h-4 w-3/4"),
-                cls="mb-4"
-            ),
-            Div(
-                Skeleton(cls="h-12 w-12 rounded-full mr-4"),
-                Div(
-                    Skeleton(cls="h-4 w-32 mb-2"),
-                    Skeleton(cls="h-3 w-24")
-                ),
-                cls="flex items-center"
-            ),
-            cls="space-y-4 max-w-sm"
-        )
-
-    hero_example = ComponentPreview(
-        hero_skeleton_example(),
-        hero_skeleton_example.code,
-        copy_button=True
-    )
-
-    return auto_generate_page(
-        TITLE,
-        DESCRIPTION,
-        list(examples()),
-        cli_command="star add skeleton",
-        api_reference=API_REFERENCE,
-        hero_example=hero_example,
-        component_slug="skeleton"
-    )
+    return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)

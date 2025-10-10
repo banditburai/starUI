@@ -609,50 +609,6 @@ def hero_accordion_example():
 # EXAMPLES GENERATOR (for rendering on the page)
 # ============================================================================
 
-def examples():
-    yield ComponentPreview(
-        basic_accordion_example(),
-        basic_accordion_example.code,
-        title="Basic Accordion",
-        description="Single selection accordion with collapsible behavior"
-    )
-
-    yield ComponentPreview(
-        faq_accordion_example(),
-        faq_accordion_example.code,
-        title="FAQ Section",
-        description="Frequently asked questions with icons and rich content"
-    )
-
-    yield ComponentPreview(
-        multiple_selection_accordion_example(),
-        multiple_selection_accordion_example.code,
-        title="Multiple Selection",
-        description="API documentation with multiple sections open simultaneously"
-    )
-
-    yield ComponentPreview(
-        settings_accordion_example(),
-        settings_accordion_example.code,
-        title="Settings Panel",
-        description="Account settings organized in collapsible sections with forms"
-    )
-
-    yield ComponentPreview(
-        file_explorer_accordion_example(),
-        file_explorer_accordion_example.code,
-        title="File Explorer",
-        description="Nested accordions for file tree navigation"
-    )
-
-    yield ComponentPreview(
-        course_curriculum_accordion_example(),
-        course_curriculum_accordion_example.code,
-        title="Course Curriculum",
-        description="Educational content with progress tracking and lesson details"
-    )
-
-
 # ============================================================================
 # API REFERENCE
 # ============================================================================
@@ -673,12 +629,13 @@ API_REFERENCE = build_api_reference(
 # ============================================================================
 
 EXAMPLES_DATA = [
-    {"title": "Basic Accordion", "description": "Single selection accordion with collapsible behavior", "code": basic_accordion_example.code},
-    {"title": "FAQ Section", "description": "Frequently asked questions with icons and rich content", "code": faq_accordion_example.code},
-    {"title": "Multiple Selection", "description": "API documentation with multiple sections open simultaneously", "code": multiple_selection_accordion_example.code},
-    {"title": "Settings Panel", "description": "Account settings organized in collapsible sections with forms", "code": settings_accordion_example.code},
-    {"title": "File Explorer", "description": "Nested accordions for file tree navigation", "code": file_explorer_accordion_example.code},
-    {"title": "Course Curriculum", "description": "Educational content with progress tracking and lesson details", "code": course_curriculum_accordion_example.code},
+    {"fn": hero_accordion_example, "title": "Hero Accordion", "description": "Quick start guide with common questions"},
+    {"fn": basic_accordion_example, "title": "Basic Accordion", "description": "Single selection accordion with collapsible behavior"},
+    {"fn": faq_accordion_example, "title": "FAQ Section", "description": "Frequently asked questions with icons and rich content"},
+    {"fn": multiple_selection_accordion_example, "title": "Multiple Selection", "description": "API documentation with multiple sections open simultaneously"},
+    {"fn": settings_accordion_example, "title": "Settings Panel", "description": "Account settings organized in collapsible sections with forms"},
+    {"fn": file_explorer_accordion_example, "title": "File Explorer", "description": "Nested accordions for file tree navigation"},
+    {"fn": course_curriculum_accordion_example, "title": "Course Curriculum", "description": "Educational content with progress tracking and lesson details"},
 ]
 
 
@@ -687,18 +644,4 @@ EXAMPLES_DATA = [
 # ============================================================================
 
 def create_accordion_docs():
-    hero_example = ComponentPreview(
-        hero_accordion_example(),
-        hero_accordion_example.code,
-        copy_button=True
-    )
-
-    return auto_generate_page(
-        TITLE,
-        DESCRIPTION,
-        list(examples()),
-        cli_command="star add accordion",
-        api_reference=API_REFERENCE,
-        hero_example=hero_example,
-        component_slug="accordion"
-    )
+    return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)

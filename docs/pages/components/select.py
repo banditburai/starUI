@@ -366,11 +366,11 @@ def role_management_select_example():
 # ============================================================================
 
 EXAMPLES_DATA = [
-    {"title": "Grouped Options", "description": "Organize options into logical groups", "code": grouped_options_select_example.code},
-    {"title": "Form Integration", "description": "Select with labels, helper text, and form submission", "code": form_integration_select_example.code},
-    {"title": "Product Filtering", "description": "Multi-select filtering system with active filter display", "code": product_filtering_select_example.code},
-    {"title": "Dependent Selects", "description": "Cascading selects that update based on parent selection", "code": dependent_selects_example.code},
-    {"title": "Role Management", "description": "Manage multiple user roles with inline selects", "code": role_management_select_example.code},
+    {"title": "Grouped Options", "description": "Organize options into logical groups", "fn": grouped_options_select_example},
+    {"title": "Form Integration", "description": "Select with labels, helper text, and form submission", "fn": form_integration_select_example},
+    {"title": "Product Filtering", "description": "Multi-select filtering system with active filter display", "fn": product_filtering_select_example},
+    {"title": "Dependent Selects", "description": "Cascading selects that update based on parent selection", "fn": dependent_selects_example},
+    {"title": "Role Management", "description": "Manage multiple user roles with inline selects", "fn": role_management_select_example},
 ]
 
 API_REFERENCE = build_api_reference(
@@ -431,111 +431,4 @@ def examples():
 
 
 def create_select_docs():
-    # Hero example - Interactive preferences panel
-    @with_code
-    def hero_select_example():
-        theme_value = Signal("theme_value", "auto")
-        theme_label = Signal("theme_label", "System")
-        language_value = Signal("language_value", "en")
-        language_label = Signal("language_label", "English")
-        timezone_hero_value = Signal("timezone_hero_value", "pst")
-        timezone_hero_label = Signal("timezone_hero_label", "Pacific Time")
-
-        return Card(
-            CardHeader(
-                CardTitle("Quick Settings"),
-                CardDescription("Configure your preferences")
-            ),
-            CardContent(
-                Div(
-                    theme_value, theme_label, language_value, language_label, timezone_hero_value, timezone_hero_label,
-                    Div(
-                        SelectWithLabel(
-                            label="Theme",
-                            options=[
-                                ("light", "Light"),
-                                ("dark", "Dark"),
-                                ("auto", "System")
-                            ],
-                            value="auto",
-                            signal="theme",
-                            select_cls="w-full"
-                        ),
-                        SelectWithLabel(
-                            label="Language",
-                            options=[
-                                ("en", "English"),
-                                ("es", "Español"),
-                                ("fr", "Français"),
-                                ("de", "Deutsch"),
-                                ("zh", "中文"),
-                                ("ja", "日本語")
-                            ],
-                            value="en",
-                            signal="language",
-                            select_cls="w-full"
-                        ),
-                        SelectWithLabel(
-                            label="Timezone",
-                            options=[
-                                {"group": "Americas", "items": [
-                                    ("est", "Eastern Time"),
-                                    ("cst", "Central Time"),
-                                    ("pst", "Pacific Time")
-                                ]},
-                                {"group": "Europe", "items": [
-                                    ("gmt", "GMT"),
-                                    ("cet", "Central European")
-                                ]}
-                            ],
-                            value="pst",
-                            signal="timezone_hero",
-                            select_cls="w-full"
-                        ),
-                        cls="grid grid-cols-1 md:grid-cols-3 gap-4"
-                    ),
-                    Div(
-                        P(
-                            "Your settings: ",
-                            cls="text-sm text-muted-foreground mb-2"
-                        ),
-                        Div(
-                            Badge(
-                                Icon("lucide:palette", cls="h-3 w-3 mr-1"),
-                                data_text=js("$theme_label || 'System'"),
-                                variant="outline"
-                            ),
-                            Badge(
-                                Icon("lucide:globe", cls="h-3 w-3 mr-1"),
-                                data_text=js("$language_label || 'English'"),
-                                variant="outline"
-                            ),
-                            Badge(
-                                Icon("lucide:clock", cls="h-3 w-3 mr-1"),
-                                data_text=js("$timezone_hero_label || 'Pacific Time'"),
-                                variant="outline"
-                            ),
-                            cls="flex flex-wrap gap-2"
-                        ),
-                        cls="mt-6 pt-6 border-t"
-                    )
-                )
-            ),
-            cls="w-full max-w-2xl mx-auto"
-        )
-
-    hero_example = ComponentPreview(
-        hero_select_example(),
-        hero_select_example.code,
-        copy_button=True
-    )
-
-    return auto_generate_page(
-        TITLE,
-        DESCRIPTION,
-        list(examples()),
-        cli_command="star add select",
-        hero_example=hero_example,
-        component_slug="select",
-        api_reference=API_REFERENCE
-    )
+    return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)

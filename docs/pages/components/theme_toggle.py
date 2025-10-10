@@ -23,39 +23,39 @@ def IsolatedThemeToggle(alt_theme="dark", default_theme="light", **kwargs) -> FT
     return Div(
         is_alt,
         Button(
-            HTMLSpan(Icon("ph:moon-bold", width="20", height="20"), data_show=js("!$is_alt")),
-            HTMLSpan(Icon("ph:sun-bold", width="20", height="20"), data_show=js("$is_alt")),
+            Span(Icon("ph:moon-bold", width="20", height="20"), data_show=js("!$is_alt")),
+            Span(Icon("ph:sun-bold", width="20", height="20"), data_show=js("$is_alt")),
             variant="ghost",
             aria_label="Toggle theme",
             cls="h-9 px-4 py-2 flex-shrink-0",
             data_on_click=js("$is_alt = !$is_alt")
         ),
         data_on_load=js(f"""
-            // Check iframe-specific storage first
-            const iframeKey = 'iframe-theme-' + window.location.pathname.split('/').pop();
+            const iframeId = window.location.pathname.split('/').pop();
+            const iframeKey = 'iframe-theme-' + iframeId;
             const savedTheme = localStorage.getItem(iframeKey);
+
             if (savedTheme) {{
                 $is_alt = savedTheme === '{alt_theme}';
             }} else {{
-                // Fall back to system preference
-                $is_alt = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                const parentTheme = localStorage.getItem('theme') ||
+                    document.documentElement.getAttribute('data-theme');
+                $is_alt = parentTheme === '{alt_theme}';
             }}
         """),
         data_effect=js(f"""
             const theme = $is_alt ? '{alt_theme}' : '{default_theme}';
-            // Only affect the current document (iframe), not parent
-            document.documentElement.classList.toggle('{alt_theme}', $is_alt);
             document.documentElement.setAttribute('data-theme', theme);
 
-            // Store in iframe-specific key
-            const iframeKey = 'iframe-theme-' + window.location.pathname.split('/').pop();
+            const iframeId = window.location.pathname.split('/').pop();
+            const iframeKey = 'iframe-theme-' + iframeId;
             localStorage.setItem(iframeKey, theme);
         """),
         **kwargs,
     )
 
 
-# Alias for docs rendering: use isolated behavior while examples show ThemeToggle()
+# Alias pattern: examples show ThemeToggle() matching registry, but use isolated version
 ThemeToggle = IsolatedThemeToggle
 
 
@@ -67,88 +67,91 @@ ThemeToggle = IsolatedThemeToggle
 @with_code
 def size_variations_example():
     return Div(
+        P("Theme Toggle Sizes", cls="font-medium mb-4 text-center"),
+        P("Click any toggle below to change this preview's theme independently",
+          cls="text-sm text-muted-foreground mb-6 text-center"),
         Div(
-            P("Different Sizes", cls="font-medium mb-4"),
             Div(
-                Div(
-                    ThemeToggle(cls="scale-75"),
-                    P("Small", cls="text-xs text-muted-foreground mt-1"),
-                    cls="flex flex-col items-center"
-                ),
-                Div(
-                    ThemeToggle(),
-                    P("Default", cls="text-xs text-muted-foreground mt-1"),
-                    cls="flex flex-col items-center"
-                ),
-                Div(
-                    ThemeToggle(cls="scale-125"),
-                    P("Large", cls="text-xs text-muted-foreground mt-1"),
-                    cls="flex flex-col items-center"
-                ),
-                cls="flex items-start gap-8 justify-center"
+                ThemeToggle(cls="scale-75"),
+                P("Small", cls="text-xs text-muted-foreground mt-2"),
+                cls="flex flex-col items-center"
             ),
+            Div(
+                ThemeToggle(),
+                P("Default", cls="text-xs text-muted-foreground mt-2"),
+                cls="flex flex-col items-center"
+            ),
+            Div(
+                ThemeToggle(cls="scale-125"),
+                P("Large", cls="text-xs text-muted-foreground mt-2"),
+                cls="flex flex-col items-center"
+            ),
+            cls="flex items-center gap-8 justify-center"
         ),
-        cls="space-y-4"
+        cls="space-y-4 py-8"
     )
 
 
-# Custom icons example
+# Custom icons example - visual demonstration only
 @with_code
 def custom_icons_labels_example():
-    is_dark1 = Signal("is_dark1", False)
-    is_dark2 = Signal("is_dark2", False)
-
     return Div(
+        P("Custom Theme Toggle Styles", cls="font-medium mb-4 text-center"),
+        P("Different icon sets and label styles for theme switching",
+          cls="text-sm text-muted-foreground mb-6 text-center"),
         Div(
-            P("Custom Icons", cls="font-medium mb-4"),
             Div(
-                Div(
-                    ThemeToggle(),
-                    P("Sun/Moon", cls="text-xs text-muted-foreground mt-2"),
-                    cls="flex flex-col items-center"
-                ),
-                Div(
-                    is_dark1,
-                    Button(
-                        Span(Icon("lucide:sun-medium", width="20", height="20"), data_show=js("!$is_dark1")),
-                        Span(Icon("lucide:moon-star", width="20", height="20"), data_show=js("$is_dark1")),
-                        variant="ghost",
-                        aria_label="Toggle theme",
-                        cls="h-9 px-4 py-2",
-                        data_on_click=js("$is_dark1 = !$is_dark1")
+                ThemeToggle(),
+                P("Default (Sun/Moon)", cls="text-xs text-muted-foreground mt-2"),
+                cls="flex flex-col items-center"
+            ),
+            Div(
+                Button(
+                    Span(
+                        Icon("lucide:sun-medium", width="20", height="20"),
+                        cls="theme-icon-default"
                     ),
-                    P("Day/Night", cls="text-xs text-muted-foreground mt-2"),
-                    data_on_load=js("$is_dark1 = localStorage.getItem('theme') === 'dark'"),
-                    data_effect=js("""
-                        const theme = $is_dark1 ? 'dark' : 'light';
-                        document.documentElement.setAttribute('data-theme', theme);
-                        localStorage.setItem('theme', theme);
-                    """),
-                    cls="flex flex-col items-center"
-                ),
-                Div(
-                    is_dark2,
-                    Button(
-                        Span("Light", data_show=js("!$is_dark2")),
-                        Span("Dark", data_show=js("$is_dark2")),
-                        variant="outline",
-                        size="sm",
-                        aria_label="Toggle theme",
-                        data_on_click=js("$is_dark2 = !$is_dark2")
+                    Span(
+                        Icon("lucide:moon-star", width="20", height="20"),
+                        cls="theme-icon-alt"
                     ),
-                    P("Text Labels", cls="text-xs text-muted-foreground mt-2"),
-                    data_on_load=js("$is_dark2 = localStorage.getItem('theme') === 'dark'"),
-                    data_effect=js("""
-                        const theme = $is_dark2 ? 'dark' : 'light';
-                        document.documentElement.setAttribute('data-theme', theme);
-                        localStorage.setItem('theme', theme);
-                    """),
-                    cls="flex flex-col items-center"
+                    variant="ghost",
+                    aria_label="Toggle theme",
+                    cls="h-9 px-4 py-2",
+                    data_on_click=js("""
+                        const currentTheme = document.documentElement.getAttribute('data-theme');
+                        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                        document.documentElement.setAttribute('data-theme', newTheme);
+
+                        const iframeId = window.location.pathname.split('/').pop();
+                        localStorage.setItem('iframe-theme-' + iframeId, newTheme);
+                    """)
                 ),
-                cls="flex items-start gap-8 justify-center"
-            )
+                P("Custom (Day/Night)", cls="text-xs text-muted-foreground mt-2"),
+                cls="flex flex-col items-center"
+            ),
+            Div(
+                Button(
+                    Span("Light", cls="theme-icon-default text-sm"),
+                    Span("Dark", cls="theme-icon-alt text-sm"),
+                    variant="outline",
+                    size="sm",
+                    aria_label="Toggle theme",
+                    data_on_click=js("""
+                        const currentTheme = document.documentElement.getAttribute('data-theme');
+                        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                        document.documentElement.setAttribute('data-theme', newTheme);
+
+                        const iframeId = window.location.pathname.split('/').pop();
+                        localStorage.setItem('iframe-theme-' + iframeId, newTheme);
+                    """)
+                ),
+                P("Text Labels", cls="text-xs text-muted-foreground mt-2"),
+                cls="flex flex-col items-center"
+            ),
+            cls="flex items-center gap-8 justify-center"
         ),
-        cls="space-y-4"
+        cls="space-y-4 py-8"
     )
 
 
@@ -157,7 +160,7 @@ def custom_icons_labels_example():
 def settings_panel_integration_example():
     return Div(
         Div(
-            H3("Appearance Settings", cls="text-lg font-semibold"),
+            H3("Appearance Settings", cls="text-lg font-semibold mb-6"),
             Div(
                 Div(
                     P("Theme", cls="text-sm font-medium"),
@@ -165,23 +168,23 @@ def settings_panel_integration_example():
                     cls="flex-1"
                 ),
                 ThemeToggle(),
-                cls="flex items-center justify-between"
+                cls="flex items-center justify-between pb-4 border-b"
             ),
             Div(
                 Div(
-                    P("Auto-switch", cls="text-sm font-medium"),
-                    P("Follow system theme preference", cls="text-xs text-muted-foreground mt-1"),
-                    cls="flex-1 pr-4"
+                    P("Accent Color", cls="text-sm font-medium"),
+                    P("Customize your interface color", cls="text-xs text-muted-foreground mt-1"),
+                    cls="flex-1"
                 ),
-                Button(
-                    "Configure",
-                    variant="outline",
-                    size="sm",
-                    data_on_click=js("alert('System preference settings')")
+                Div(
+                    Div(cls="h-6 w-6 rounded-full bg-blue-500 border-2 border-primary cursor-pointer"),
+                    Div(cls="h-6 w-6 rounded-full bg-green-500 border-2 border-transparent cursor-pointer hover:border-border"),
+                    Div(cls="h-6 w-6 rounded-full bg-purple-500 border-2 border-transparent cursor-pointer hover:border-border"),
+                    cls="flex gap-2"
                 ),
-                cls="flex items-start justify-between border-t pt-4 gap-4"
+                cls="flex items-center justify-between pt-4"
             ),
-            cls="bg-muted/30 rounded-lg p-6 w-full max-w-lg mx-auto space-y-4"
+            cls="bg-muted/30 rounded-lg p-6 w-full max-w-lg space-y-4"
         ),
         cls="flex items-center justify-center min-h-[350px]"
     )
@@ -192,9 +195,9 @@ def settings_panel_integration_example():
 # ============================================================================
 
 EXAMPLES_DATA = [
-    {"title": "Size Variations", "description": "Theme toggle in different sizes for various UI contexts", "code": size_variations_example.code},
-    {"title": "Custom Icons & Labels", "description": "Different icon sets and text labels for theme switching", "code": custom_icons_labels_example.code},
-    {"title": "Settings Panel Integration", "description": "Theme toggle integrated into a settings interface", "code": settings_panel_integration_example.code},
+    {"title": "Size Variations", "description": "Theme toggle in different sizes for various UI contexts", "fn": size_variations_example, "use_iframe": True},
+    {"title": "Custom Icons & Labels", "description": "Different icon sets and text labels for theme switching", "fn": custom_icons_labels_example, "use_iframe": True},
+    {"title": "Settings Panel Integration", "description": "Theme toggle integrated into a settings interface", "fn": settings_panel_integration_example, "use_iframe": True},
 ]
 
 API_REFERENCE = build_api_reference(
@@ -213,7 +216,7 @@ def examples():
         size_variations_example.code,
         title="Size Variations",
         description="Theme toggle in different sizes for various UI contexts",
-        use_iframe=True
+        use_iframe=True  # Isolate to prevent affecting parent page
     )
 
     yield ComponentPreview(
@@ -229,34 +232,9 @@ def examples():
         settings_panel_integration_example.code,
         title="Settings Panel Integration",
         description="Theme toggle integrated into a settings interface",
-        use_iframe=True,
-        iframe_height="450px"
+        use_iframe=True
     )
 
 
 def create_theme_toggle_docs():
-    
-    # Hero example - basic theme toggle
-    @with_code
-    def hero_theme_toggle_example():
-        return Div(
-            ThemeToggle(),
-            P("Click to toggle between light and dark themes", cls="text-sm text-muted-foreground mt-2"),
-            cls="flex flex-col items-center"
-        )
-
-    hero_example = ComponentPreview(
-        hero_theme_toggle_example(),
-        hero_theme_toggle_example.code,
-        use_iframe=True
-    )
-    
-    return auto_generate_page(
-        TITLE,
-        DESCRIPTION,
-        list(examples()),
-        cli_command="star add theme-toggle",
-        hero_example=hero_example,
-        component_slug="theme_toggle",
-        api_reference=API_REFERENCE
-    )
+    return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)

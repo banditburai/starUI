@@ -840,14 +840,14 @@ def dialog_sizes_example():
 # ============================================================================
 
 EXAMPLES_DATA = [
-    {"title": "Basic Dialog", "description": "Simple dialog with title, description, and close button", "code": basic_dialog_example.code},
-    {"title": "Confirmation Dialog", "description": "Destructive action confirmation with warnings", "code": confirmation_dialog_example.code},
-    {"title": "Form Dialog", "description": "Complex form with multiple input types in a dialog", "code": form_dialog_example.code},
-    {"title": "Scrollable Content", "description": "Dialog with scrollable content and conditional actions", "code": scrollable_content_example.code},
-    {"title": "Loading/Async Dialog", "description": "Dialog with loading states, progress tracking, and async operations", "code": loading_async_dialog_example.code},
-    {"title": "Multi-Step Wizard", "description": "Complex wizard flow with step indicators and validation", "code": multi_step_wizard_example.code},
-    {"title": "Settings Dialog", "description": "Tabbed interface for managing different categories of settings", "code": settings_dialog_example.code},
-    {"title": "Dialog Sizes", "description": "Different dialog sizes for various content needs", "code": dialog_sizes_example.code},
+    {"title": "Basic Dialog", "description": "Simple dialog with title, description, and close button", "fn": basic_dialog_example},
+    {"title": "Confirmation Dialog", "description": "Destructive action confirmation with warnings", "fn": confirmation_dialog_example},
+    {"title": "Form Dialog", "description": "Complex form with multiple input types in a dialog", "fn": form_dialog_example},
+    {"title": "Scrollable Content", "description": "Dialog with scrollable content and conditional actions", "fn": scrollable_content_example},
+    {"title": "Loading/Async Dialog", "description": "Dialog with loading states, progress tracking, and async operations", "fn": loading_async_dialog_example},
+    {"title": "Multi-Step Wizard", "description": "Complex wizard flow with step indicators and validation", "fn": multi_step_wizard_example},
+    {"title": "Settings Dialog", "description": "Tabbed interface for managing different categories of settings", "fn": settings_dialog_example},
+    {"title": "Dialog Sizes", "description": "Different dialog sizes for various content needs", "fn": dialog_sizes_example},
 ]
 
 API_REFERENCE = build_api_reference(
@@ -933,59 +933,4 @@ def examples():
 
 
 def create_dialog_docs():
-    # Hero example
-    @with_code
-    def hero_dialog_example():
-        username = Signal("username", "")
-        email = Signal("email", "")
-
-        return Dialog(
-            DialogTrigger("Open Dialog", ref_id="hero_dialog"),
-            DialogContent(
-                username,
-                email,
-                DialogHeader(
-                    DialogTitle("Edit Profile"),
-                    DialogDescription("Make changes to your profile here. Click save when you're done.")
-                ),
-                Div(
-                    InputWithLabel(
-                        label="Username",
-                        placeholder="@username",
-                        signal="username"
-                    ),
-                    InputWithLabel(
-                        label="Email",
-                        type="email",
-                        placeholder="email@example.com",
-                        signal="email"
-                    ),
-                    cls="space-y-4 py-4"
-                ),
-                DialogFooter(
-                    DialogClose("Cancel", ref_id="hero_dialog", variant="outline"),
-                    DialogClose(
-                        "Save Changes",
-                        ref_id="hero_dialog",
-                        onclick="alert('Profile saved!')"
-                    )
-                )
-            ),
-            ref_id="hero_dialog"
-        )
-    
-    hero_example = ComponentPreview(
-        hero_dialog_example(),
-        hero_dialog_example.code,
-        copy_button=True
-    )
-    
-    return auto_generate_page(
-        TITLE,
-        DESCRIPTION,
-        list(examples()),
-        cli_command="star add dialog",
-        api_reference=API_REFERENCE,
-        hero_example=hero_example,
-        component_slug="dialog"
-    )
+    return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)

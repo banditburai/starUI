@@ -812,14 +812,14 @@ def sheet_sizes_example():
 # ============================================================================
 
 EXAMPLES_DATA = [
-    {"title": "Navigation Menu", "description": "Left-side navigation sheet with menu items and user profile", "code": navigation_menu_sheet_example.code},
-    {"title": "Shopping Cart", "description": "Right-side cart drawer with product items and checkout actions", "code": shopping_cart_sheet_example.code},
-    {"title": "Filter Panel", "description": "Left-side filter drawer for product search with multiple filter options", "code": filter_panel_sheet_example.code},
-    {"title": "Settings Drawer", "description": "Right-side settings panel with user preferences and toggles", "code": settings_drawer_sheet_example.code},
-    {"title": "Notification Panel", "description": "Top-sliding notification panel with action buttons and dismissible items", "code": notification_panel_sheet_example.code},
-    {"title": "Action Sheet", "description": "Bottom-sliding mobile-friendly action sheet with contextual options", "code": action_sheet_example.code},
-    {"title": "Contact Form", "description": "Complete contact form in a right-side sheet with validation", "code": contact_form_sheet_example.code},
-    {"title": "Sheet Sizes", "description": "Different sheet sizes for various content requirements", "code": sheet_sizes_example.code},
+    {"title": "Navigation Menu", "description": "Left-side navigation sheet with menu items and user profile", "fn": navigation_menu_sheet_example},
+    {"title": "Shopping Cart", "description": "Right-side cart drawer with product items and checkout actions", "fn": shopping_cart_sheet_example},
+    {"title": "Filter Panel", "description": "Left-side filter drawer for product search with multiple filter options", "fn": filter_panel_sheet_example},
+    {"title": "Settings Drawer", "description": "Right-side settings panel with user preferences and toggles", "fn": settings_drawer_sheet_example},
+    {"title": "Notification Panel", "description": "Top-sliding notification panel with action buttons and dismissible items", "fn": notification_panel_sheet_example},
+    {"title": "Action Sheet", "description": "Bottom-sliding mobile-friendly action sheet with contextual options", "fn": action_sheet_example},
+    {"title": "Contact Form", "description": "Complete contact form in a right-side sheet with validation", "fn": contact_form_sheet_example},
+    {"title": "Sheet Sizes", "description": "Different sheet sizes for various content requirements", "fn": sheet_sizes_example},
 ]
 
 
@@ -904,46 +904,4 @@ def examples():
 
 
 def create_sheet_docs():
-    # Hero example
-    @with_code
-    def hero_sheet_example():
-        profile_name = Signal("profile_name", "")
-        profile_username = Signal("profile_username", "")
-
-        return Sheet(
-            SheetTrigger("Open Sheet", signal="hero_sheet"),
-            SheetContent(
-                SheetHeader(
-                    SheetTitle("Edit Profile"),
-                    SheetDescription("Make changes to your profile here. Click save when you're done.")
-                ),
-                Div(
-                    profile_name, profile_username,
-                    InputWithLabel(label="Name", placeholder="Pedro Duarte", signal="profile_name"),
-                    InputWithLabel(label="Username", placeholder="@peduarte", signal="profile_username"),
-                    cls="space-y-4 px-6 py-4"
-                ),
-                SheetFooter(
-                    SheetClose("Cancel", variant="outline"),
-                    Button("Save changes")
-                ),
-                signal="hero_sheet"
-            ),
-            signal="hero_sheet"
-        )
-
-    hero_example = ComponentPreview(
-        hero_sheet_example(),
-        hero_sheet_example.code,
-        copy_button=True
-    )
-
-    return auto_generate_page(
-        TITLE,
-        DESCRIPTION,
-        list(examples()),
-        cli_command="star add sheet",
-        api_reference=API_REFERENCE,
-        hero_example=hero_example,
-        component_slug="sheet"
-    )
+    return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)

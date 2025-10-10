@@ -207,11 +207,11 @@ def complete_form_layout_example():
 # ============================================================================
 
 EXAMPLES_DATA = [
-    {"title": "Interactive Validation", "description": "Labels with real-time validation feedback", "code": interactive_validation_example.code},
-    {"title": "Interactive Label Controls", "description": "Labels with interactive elements like visibility toggles", "code": interactive_label_controls_example.code},
-    {"title": "Advanced Patterns", "description": "Labels with badges, annotations, and contextual information", "code": advanced_label_patterns_example.code},
-    {"title": "Radio & Checkbox Groups", "description": "Labels for grouped form controls", "code": radio_checkbox_groups_example.code},
-    {"title": "Complete Form Layout", "description": "Real-world form with various label patterns", "code": complete_form_layout_example.code},
+    {"title": "Interactive Validation", "description": "Labels with real-time validation feedback", "fn": interactive_validation_example},
+    {"title": "Interactive Label Controls", "description": "Labels with interactive elements like visibility toggles", "fn": interactive_label_controls_example},
+    {"title": "Advanced Patterns", "description": "Labels with badges, annotations, and contextual information", "fn": advanced_label_patterns_example},
+    {"title": "Radio & Checkbox Groups", "description": "Labels for grouped form controls", "fn": radio_checkbox_groups_example},
+    {"title": "Complete Form Layout", "description": "Real-world form with various label patterns", "fn": complete_form_layout_example},
 ]
 
 API_REFERENCE = build_api_reference(
@@ -266,49 +266,4 @@ def examples():
 
 
 def create_label_docs():
-    # Hero example - showcase different label patterns
-    @with_code
-    def hero_label_example():
-        return Div(
-            Div(
-                Label("Email", for_="email"),
-                Input(type="email", id="email", placeholder="Enter your email"),
-                cls="space-y-2"
-            ),
-            Div(
-                Label(
-                    "Password",
-                    Span(" *", cls="text-destructive"),
-                    for_="password"
-                ),
-                Input(type="password", id="password", placeholder="Enter your password"),
-                cls="space-y-2"
-            ),
-            Div(
-                Label(
-                    Icon("lucide:user", width="16", height="16"),
-                    "Username",
-                    for_="username",
-                    cls="flex items-center gap-2"
-                ),
-                Input(id="username", placeholder="Enter your username"),
-                cls="space-y-2"
-            ),
-            cls="grid gap-6 max-w-sm"
-        )
-
-    hero_example = ComponentPreview(
-        hero_label_example(),
-        hero_label_example.code,
-        copy_button=True
-    )
-
-    return auto_generate_page(
-        TITLE,
-        DESCRIPTION,
-        list(examples()),
-        cli_command="star add label",
-        hero_example=hero_example,
-        component_slug="label",
-        api_reference=API_REFERENCE
-    )
+    return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)
