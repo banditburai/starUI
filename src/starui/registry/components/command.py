@@ -3,8 +3,7 @@ from typing import Any, Literal
 
 from starhtml import FT, Div, Icon, Input, Span, Signal, js
 from starhtml import Dialog as HTMLDialog
-from starhtml.datastar import evt, document
-from starhtml.datastar import value as js_value
+from datastar_proposed import evt, document, seq, expr
 
 from .utils import cn, cva, gen_id, reset_timeout, set_timeout, with_signals
 
@@ -14,25 +13,8 @@ _SEARCH_DEBOUNCE_MS = 50
 _DIALOG_FOCUS_DELAY_MS = 50
 
 
-def _get_search_handler(sig: str, selected, visible_items) -> str:
-    action = js(f"const v=${visible_items.id};if(v.length>0)${selected.id}=v[0].index")
-    return str(reset_timeout(f"st_{sig}", _SEARCH_DEBOUNCE_MS, action, window=True))
-
-
-def _get_nav_handler(sig: str, search, selected, visible_items) -> str:
-    return f"const i=${visible_items.id};let c=-1;i.forEach((item,x)=>{{if(item.index===${selected.id})c=x}});switch(event.key){{case'ArrowDown':event.preventDefault();if(i.length>0){{const n=c<i.length-1?c+1:0;${selected.id}=i[n].index;i[n].el.scrollIntoView({{block:'nearest'}})}}break;case'ArrowUp':event.preventDefault();if(i.length>0){{const p=c>0?c-1:i.length-1;${selected.id}=i[p].index;i[p].el.scrollIntoView({{block:'nearest'}})}}break;case'Enter':event.preventDefault();if(c>=0&&i[c])i[c].el.click();break;case'Escape':if(${search.id}){{event.preventDefault();${search.id}='';${selected.id}=0}}break}}"
-
-
-def _get_dialog_open_effect(sig: str, search, selected, dialog_open, dialog_ref, visible_items) -> str:
-    # Focus input and select first visible item when dialog opens
-    action = js(f"""
-        const input=document.querySelector('[data-command-root=\"{sig}\"] [data-slot=\"command-input\"]');
-        if(input)input.focus();
-        const v=${visible_items.id};
-        if(v.length>0)${selected.id}=v[0].index;
-    """)
-    timeout_expr = set_timeout(action, _DIALOG_FOCUS_DELAY_MS)
-    return f"if(${dialog_open.id}&&!${search.id}){timeout_expr}"
+def _get_nav_handler(sig, search, selected, visible_items) -> str:
+    return f"""const i=${visible_items.id};let c=-1;i.forEach((m,x)=>{{if(m.index===${selected.id})c=x}});const sel=(idx)=>{{${selected.id}=idx;document.querySelector('[data-command-item="{sig}"][data-index="'+idx+'"]')?.scrollIntoView({{block:'nearest'}})}};switch(evt.key){{case'ArrowDown':evt.preventDefault();if(i.length>0)sel(i[c<i.length-1?c+1:0].index);break;case'ArrowUp':evt.preventDefault();if(i.length>0)sel(i[c>0?c-1:i.length-1].index);break;case'Enter':evt.preventDefault();if(c>=0&&i[c])document.querySelector('[data-command-item="{sig}"][data-index="'+i[c].index+'"]')?.click();break;case'Escape':if(${search.id}){{evt.preventDefault();${search.id}='';${selected.id}=0}}break}}"""
 
 
 command_variants = cva(
@@ -59,41 +41,47 @@ def Command(
     size: CommandSize = "md",
     label: str = "Command Menu",
     cls: str = "",
-    dialog_ref = None,
+    _dialog_ref=None,
     **kwargs: Any,
 ) -> FT:
     sig = getattr(signal, 'id', signal) or gen_id("command")
+    search = Signal(f"{sig}_search", "")
+    selected = Signal(f"{sig}_selected", 0)
+    visible_count = Signal(f"{sig}_visible", 0)
+    visible_items = Signal(f"{sig}_visible_items", [])
+    first_visible_index = Signal(f"{sig}_first_visible", 0)
+    input_ref = Signal(f"{sig}_input", _ref_only=True)
 
     ctx = dict(
         sig=sig,
-        search=(search := Signal(f"{sig}_search", "")),
-        selected=(selected := Signal(f"{sig}_selected", 0)),
-        visible_count=(visible_count := Signal(f"{sig}_visible", 0)),
-        visible_items=(visible_items := Signal(f"{sig}_visible_items", [])),
-        _item_index=count(),
-        dialog_ref=dialog_ref,
-    )
-
-    element = Div(
-        search,
-        selected,
-        visible_count,
-        visible_items,
-        *[c(**ctx) if callable(c) else c for c in children],
-        data_command_root=sig,
-        data_slot="command",
-        aria_label=label,
-        tabindex="-1",
-        cls=cn(command_variants(size=size), cls),
-        **kwargs,
-    )
-
-    return with_signals(
-        element,
         search=search,
         selected=selected,
         visible_count=visible_count,
         visible_items=visible_items,
+        first_visible_index=first_visible_index,
+        input_ref=input_ref,
+        _item_index=count(),
+        _item_metadata=[],
+        dialog_ref=_dialog_ref,
+    )
+
+    return with_signals(
+        Div(
+            search,
+            selected,
+            visible_count,
+            visible_items,
+            first_visible_index,
+            *[c(**ctx) if callable(c) else c for c in children],
+            data_command_root=sig,
+            data_slot="command",
+            aria_label=label,
+            tabindex="-1",
+            cls=cn(command_variants(size=size), cls),
+            **kwargs,
+        ),
+        search=search,
+        selected=selected,
     )
 
 
@@ -109,31 +97,29 @@ def CommandDialog(
     sig = getattr(signal, 'id', signal) or gen_id("command")
     dialog_ref = Signal(f"{sig}_dialog", _ref_only=True)
     dialog_open = Signal(f"{dialog_ref.id}_open", False)
-
-    # Create Command with dialog_ref - Command exposes its signals via with_signals
+    
     command = Command(
         *content,
         signal=sig,
-        dialog_ref=dialog_ref,
+        _dialog_ref=dialog_ref,
         label=label,
         cls="border-0",
     )
 
-    # Access Command's signals for reset and dialog effects
+    input_ref = Signal(f"{sig}_input", _ref_only=True)
+    visible_items = Signal(f"{sig}_visible_items", _ref_only=True)
+    first_visible_index = Signal(f"{sig}_first_visible", _ref_only=True)
+
     reset_signals = [
         dialog_open.set(False),
         command.search.set(""),
         command.selected.set(0),
     ]
 
-    dialog_effect = _get_dialog_open_effect(
-        sig,
-        command.search,
-        command.selected,
-        dialog_open,
-        dialog_ref,
-        command.visible_items
-    )
+    focus_action = [
+        input_ref.focus(),
+        (visible_items.length > 0).then(command.selected.set(first_visible_index))
+    ]
 
     command_dialog = HTMLDialog(
         dialog_open,
@@ -141,7 +127,7 @@ def CommandDialog(
         data_ref=dialog_ref,
         data_on_close=reset_signals,
         data_on_click=(evt.target == evt.currentTarget) & evt.currentTarget.close() if modal else None,
-        data_effect=js(dialog_effect),
+        data_effect=(dialog_open & ~command.search).then(set_timeout(focus_action, _DIALOG_FOCUS_DELAY_MS)),
         id=dialog_ref.id,
         cls=cn(
             "fixed max-h-[85vh] w-full max-w-2xl m-auto p-0",
@@ -175,13 +161,13 @@ def CommandInput(
     cls: str = "",
     **kwargs: Any,
 ):
-    def _(*, sig, search, selected, visible_items, **_):
+    def _(*, sig, search, selected, visible_items, first_visible_index, input_ref, **_):
         return Div(
             Icon("lucide:search", cls="size-4 shrink-0 opacity-50"),
             Input(
+                data_ref=input_ref,
                 data_bind=search,
                 data_on_keydown=js(_get_nav_handler(sig, search, selected, visible_items)),
-                data_on_input=js(_get_search_handler(sig, selected, visible_items)),
                 placeholder=placeholder,
                 data_slot="command-input",
                 cls="flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
@@ -206,24 +192,41 @@ def CommandList(
     cls: str = "",
     **kwargs: Any,
 ):
-    def _(*, sig, visible_count, visible_items, search, **ctx):
-        # RAF waits for data-show styles to apply before counting
-        scan_effect = js(f"""
-            ${search.id};
-            requestAnimationFrame(() => {{
-                const items = [...document.querySelectorAll('[data-command-item=\"{sig}\"]')];
-                const visible = items.filter(el => !el.style.display.includes('none') && el.dataset.disabled !== 'true');
+    def _(*, sig, visible_count, visible_items, first_visible_index, search, selected, _item_metadata, **ctx):
+        rendered_children = [
+            c(sig=sig, visible_count=visible_count, visible_items=visible_items,
+              first_visible_index=first_visible_index, search=search, selected=selected,
+              _item_metadata=_item_metadata, **ctx) if callable(c) else c
+            for c in children
+        ]
 
-                ${visible_count.id} = visible.length;
-                ${visible_items.id} = visible.map(el => ({{
-                    index: parseInt(el.dataset.index || '0'),
-                    el: el
-                }}));
+        items_metadata = Signal(f"{sig}_items_metadata", _item_metadata)
+
+        compute_visible = js(f"""
+            const items = ${items_metadata.id};
+            if (!Array.isArray(items)) return;
+
+            const visible = items.filter(item => {{
+                if (item.disabled) return false;
+                if (!${search.id}) return true;
+                const searchLower = ${search.id}.toLowerCase();
+                return item.value.toLowerCase().includes(searchLower) ||
+                       (item.keywords || '').toLowerCase().includes(searchLower);
             }});
+
+            ${visible_count.id} = visible.length;
+            ${visible_items.id} = visible;
+            ${first_visible_index.id} = visible.length > 0 ? visible[0].index : 0;
+            if (visible.length > 0) {{
+                ${selected.id} = ${first_visible_index.id};
+            }}
         """)
+
         return Div(
-            *[c(sig=sig, visible_count=visible_count, visible_items=visible_items, search=search, **ctx) if callable(c) else c for c in children],
-            data_effect=scan_effect,
+            items_metadata,
+            *rendered_children,
+            data_on_load=compute_visible,
+            data_effect=compute_visible,
             role="listbox",
             aria_label="Commands",
             data_command_list=sig,
@@ -244,17 +247,12 @@ def CommandEmpty(
     **kwargs: Any,
 ):
     def _(*, sig, visible_count, **_):
-        # Inline style prevents flash of unstyled content (FOUC)
-        display_effect = js(f"""
-            el.style.display = ${visible_count.id} === 0 ? 'block' : 'none';
-        """)
         return Div(
             *(children or ["No results found."]),
-            data_effect=display_effect,
+            data_style_display=visible_count.eq(0).if_('block', 'none'),
             data_command_empty=sig,
             data_slot="command-empty",
             cls=cn("py-6 text-center text-sm", cls),
-            style="display:none",
             **kwargs,
         )
 
@@ -301,12 +299,19 @@ def CommandItem(
     cls: str = "",
     **kwargs: Any,
 ):
-    def _(*, sig, search, selected, _item_index, dialog_ref, **_):
+    def _(*, sig, search, selected, _item_index, _item_metadata, dialog_ref, **_):
         index = next(_item_index)
+
+        _item_metadata.append({
+            "index": index,
+            "value": value,
+            "keywords": keywords or "",
+            "disabled": disabled,
+        })
 
         item_show = show
         if item_show is None and not disabled:
-            item_show = ~search | js_value(value).lower().contains(search.lower()) | js_value(keywords or "").lower().contains(search.lower())
+            item_show = ~search | expr(value).lower().contains(search.lower()) | expr(keywords or "").lower().contains(search.lower())
 
         click_actions = ([js(onclick)] if onclick else []) + ([dialog_ref.close()] if dialog_ref else [])
 
@@ -323,7 +328,6 @@ def CommandItem(
             data_slot="command-item",
             data_value=value,
             data_keywords=keywords or "",
-            data_disabled="true" if disabled else "false",
             data_index=str(index),
             cls=cn(
                 "relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none select-none transition-colors",
