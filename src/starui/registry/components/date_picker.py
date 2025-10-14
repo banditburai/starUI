@@ -3,7 +3,6 @@ from typing import Any, Protocol
 
 from starhtml import FT, Div, Icon, Span, Signal, js
 from starhtml import Button as HTMLButton
-from starhtml.datastar import f
 
 from .button import Button
 from .calendar import Calendar, CalendarElement, CalendarMode, MONTHS

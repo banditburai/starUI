@@ -1,9 +1,9 @@
 from typing import Any, Literal
 
-from starhtml import Div, FT, Signal
+from starhtml import Div, FT, Signal, reset_timeout, clear_timeout
 from starhtml.datastar import evt
 
-from .utils import cn, gen_id, reset_timeout, clear_timeout
+from .utils import cn, gen_id
 
 
 def Tooltip(

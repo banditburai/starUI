@@ -1,26 +1,25 @@
 from itertools import count
 from typing import Any, Literal
 
-from starhtml import FT, Div, Icon, Input, Span, Signal, js
+from starhtml import FT, Div, Icon, Input, Span, Signal, js, set_timeout, expr
 from starhtml import Dialog as HTMLDialog
-from datastar_proposed import evt, document, seq, expr, with_locals
+from starhtml.datastar import evt, document
 
-from .utils import cn, cva, gen_id, reset_timeout, set_timeout, with_signals
+from .utils import cn, cva, gen_id, with_signals
 
 CommandSize = Literal["sm", "md", "lg"]
 
-_SEARCH_DEBOUNCE_MS = 50
 _DIALOG_FOCUS_DELAY_MS = 50
 
 
 def _get_nav_handler(sig, search, selected, visible_items) -> str:
-    return f"""const i=${visible_items.id};let c=-1;i.forEach((m,x)=>{{if(m.index===${selected.id})c=x}});const sel=(idx)=>{{${selected.id}=idx;document.querySelector('[data-command-item="{sig}"][data-index="'+idx+'"]')?.scrollIntoView({{block:'nearest'}})}};switch(evt.key){{case'ArrowDown':evt.preventDefault();if(i.length>0)sel(i[c<i.length-1?c+1:0].index);break;case'ArrowUp':evt.preventDefault();if(i.length>0)sel(i[c>0?c-1:i.length-1].index);break;case'Enter':evt.preventDefault();if(c>=0&&i[c])document.querySelector('[data-command-item="{sig}"][data-index="'+i[c].index+'"]')?.click();break;case'Escape':if(${search.id}){{evt.preventDefault();${search.id}='';${selected.id}=0}}break}}"""
+    return f"const i=${visible_items.id}||[];let c=-1;for(let x=0;x<i.length;x++)if(i[x].index===${selected.id}){{c=x;break}}const sel=idx=>(${selected.id}=idx,document.querySelector('[data-command-item=\"{sig}\"][data-index=\"'+idx+'\"]')?.scrollIntoView({{block:'nearest'}}));switch(evt.key){{case'ArrowDown':evt.preventDefault();i.length>0&&sel(i[c<i.length-1?c+1:0].index);break;case'ArrowUp':evt.preventDefault();i.length>0&&sel(i[c>0?c-1:i.length-1].index);break;case'Enter':evt.preventDefault();c>=0&&i[c]&&document.querySelector('[data-command-item=\"{sig}\"][data-index=\"'+i[c].index+'\"]')?.click();break;case'Escape':${search.id}&&(evt.preventDefault(),${search.id}='',${selected.id}=0);break}}"
 
 
 command_variants = cva(
     base=(
         "flex w-full flex-col overflow-hidden rounded-lg border border-input "
-        "bg-popover text-popover-foreground shadow-md"
+        "bg-popover text-popover-foreground shadow-md outline-none"
     ),
     config={
         "variants": {
@@ -49,7 +48,6 @@ def Command(
     selected = Signal(f"{sig}_selected", 0)
     visible_count = Signal(f"{sig}_visible", 0)
     visible_items = Signal(f"{sig}_visible_items", [])
-    first_visible_index = Signal(f"{sig}_first_visible", 0)
     input_ref = Signal(f"{sig}_input", _ref_only=True)
 
     ctx = dict(
@@ -58,10 +56,8 @@ def Command(
         selected=selected,
         visible_count=visible_count,
         visible_items=visible_items,
-        first_visible_index=first_visible_index,
         input_ref=input_ref,
         _item_index=count(),
-        _item_metadata=[],
         dialog_ref=_dialog_ref,
     )
 
@@ -71,7 +67,6 @@ def Command(
             selected,
             visible_count,
             visible_items,
-            first_visible_index,
             *[c(**ctx) if callable(c) else c for c in children],
             data_command_root=sig,
             data_slot="command",
@@ -97,7 +92,7 @@ def CommandDialog(
     sig = getattr(signal, 'id', signal) or gen_id("command")
     dialog_ref = Signal(f"{sig}_dialog", _ref_only=True)
     dialog_open = Signal(f"{dialog_ref.id}_open", False)
-    
+
     command = Command(
         *content,
         signal=sig,
@@ -107,18 +102,11 @@ def CommandDialog(
     )
 
     input_ref = Signal(f"{sig}_input", _ref_only=True)
-    visible_items = Signal(f"{sig}_visible_items", _ref_only=True)
-    first_visible_index = Signal(f"{sig}_first_visible", _ref_only=True)
 
     reset_signals = [
         dialog_open.set(False),
         command.search.set(""),
         command.selected.set(0),
-    ]
-
-    focus_action = [
-        input_ref.focus(),
-        (visible_items.length > 0).then(command.selected.set(first_visible_index))
     ]
 
     command_dialog = HTMLDialog(
@@ -127,7 +115,7 @@ def CommandDialog(
         data_ref=dialog_ref,
         data_on_close=reset_signals,
         data_on_click=(evt.target == evt.currentTarget) & evt.currentTarget.close() if modal else None,
-        data_effect=(dialog_open & ~command.search).then(set_timeout(focus_action, _DIALOG_FOCUS_DELAY_MS)),
+        data_effect=(dialog_open & ~command.search).then(set_timeout(input_ref.focus(), _DIALOG_FOCUS_DELAY_MS)),
         id=dialog_ref.id,
         cls=cn(
             "fixed max-h-[85vh] w-full max-w-2xl m-auto p-0",
@@ -136,6 +124,7 @@ def CommandDialog(
             "open:backdrop:animate-in open:backdrop:fade-in-0 open:backdrop:duration-200",
             "open:flex open:flex-col overflow-hidden rounded-lg",
             "bg-popover text-popover-foreground shadow-lg",
+            "outline-none",
             cls,
         ),
         **kwargs,
@@ -161,12 +150,12 @@ def CommandInput(
     cls: str = "",
     **kwargs: Any,
 ):
-    def _(*, sig, search, selected, visible_items, first_visible_index, input_ref, **_):
+    def _(*, sig, search, selected, visible_items, input_ref, **_):
         return Div(
-            # Wrapper with fixed width prevents layout shift during icon load
             Div(
-                Icon("lucide:search", cls="size-4 shrink-0 opacity-50"),
-                cls="w-4 h-4 shrink-0",
+                Icon("lucide:search", width="16", height="16", style="display: block; width: 100%; height: 100%;"),
+                style="display: inline-block; width: 16px; height: 16px; flex-shrink: 0; overflow: hidden;",
+                cls="opacity-50"
             ),
             Input(
                 data_ref=input_ref,
@@ -174,7 +163,7 @@ def CommandInput(
                 data_on_keydown=js(_get_nav_handler(sig, search, selected, visible_items)),
                 placeholder=placeholder,
                 data_slot="command-input",
-                cls="flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
+                cls="flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 focus-visible:ring-0 focus-visible:border-transparent",
                 autocomplete="off",
                 autocorrect="off",
                 spellcheck="false",
@@ -182,10 +171,7 @@ def CommandInput(
                 **kwargs,
             ),
             data_slot="command-input-wrapper",
-            cls=cn(
-                "flex h-9 items-center gap-2 border-b border-border px-3",
-                cls,
-            ),
+            cls=cn("flex h-9 items-center gap-2 border-b border-border px-3", cls),
         )
 
     return _
@@ -196,51 +182,30 @@ def CommandList(
     cls: str = "",
     **kwargs: Any,
 ):
-    def _(*, sig, visible_count, visible_items, first_visible_index, search, selected, _item_metadata, **ctx):
-        rendered_children = [
-            c(sig=sig, visible_count=visible_count, visible_items=visible_items,
-              first_visible_index=first_visible_index, search=search, selected=selected,
-              _item_metadata=_item_metadata, **ctx) if callable(c) else c
-            for c in children
-        ]
-
-        items_metadata = Signal(f"{sig}_items_metadata", _item_metadata)
-
-        filter_js = js(f"""${items_metadata.id}.filter(item => {{
-            if (item.disabled) return false;
-            if (!${search.id}) return true;
-            const searchLower = ${search.id}.toLowerCase();
-            return item.value.toLowerCase().includes(searchLower) ||
-                   (item.keywords || '').toLowerCase().includes(searchLower);
-        }})""")
-
-        # Use with_locals() to create a local variable and avoid reactive loops
-        # This prevents reading from signals we just wrote to
-        # items_metadata.then() guards against data-on-load running before signals init
-        # The filter reads $search, so data-effect will re-run when search changes
-        scope = with_locals(visible=filter_js)
-        compute_visible = items_metadata.then(
-            scope.then(
-                visible_items.set(scope.visible),
-                visible_count.set(scope.visible.length),
-                first_visible_index.set((scope.visible.length > 0).if_(js('visible[0].index'), 0)),
-                (scope.visible.length > 0).then(selected.set(js('visible[0].index')))
-            )
-        )
+    def _(*, sig, visible_count, visible_items, search, selected, **ctx):
+        # RAF ensures DOM updates (data-show hiding) complete before scanning
+        scan_effect = js(f"""
+            ${search.id};
+            requestAnimationFrame(() => {{
+                const items = [...document.querySelectorAll('[data-command-item="{sig}"]')];
+                const visible = items.filter(el => !el.style.display.includes('none') && el.dataset.disabled !== 'true');
+                ${visible_count.id} = visible.length;
+                ${visible_items.id} = visible.map(el => ({{
+                    index: parseInt(el.dataset.index || '0'),
+                    el: el
+                }}));
+                if (visible.length > 0) ${selected.id} = parseInt(visible[0].dataset.index || '0');
+            }});
+        """)
 
         return Div(
-            items_metadata,
-            *rendered_children,
-            data_on_load=compute_visible,
-            data_effect=compute_visible,
+            *[c(sig=sig, visible_count=visible_count, visible_items=visible_items, search=search, selected=selected, **ctx) if callable(c) else c for c in children],
+            data_effect=scan_effect,
             role="listbox",
             aria_label="Commands",
             data_command_list=sig,
             data_slot="command-list",
-            cls=cn(
-                "max-h-[300px] scroll-py-1 overflow-x-hidden overflow-y-auto",
-                cls,
-            ),
+            cls=cn("max-h-[300px] scroll-py-1 overflow-x-hidden overflow-y-auto outline-none", cls),
             **kwargs,
         )
 
@@ -277,7 +242,7 @@ def CommandGroup(
             Div(
                 heading,
                 data_slot="command-group-heading",
-                cls="text-muted-foreground px-2 py-1.5 text-xs font-medium",
+                cls="text-muted-foreground px-2 py-1.5 text-xs font-medium select-none",
                 aria_hidden="true",
             ) if heading else None,
             *[c(sig=sig, **ctx) if callable(c) else c for c in children],
@@ -286,7 +251,7 @@ def CommandGroup(
             data_slot="command-group",
             cls=cn(
                 "overflow-hidden p-1 text-foreground",
-                "[&_[data-slot='command-group-heading']]:text-muted-foreground [&_[data-slot='command-group-heading']]:px-2 [&_[data-slot='command-group-heading']]:py-1.5 [&_[data-slot='command-group-heading']]:text-xs [&_[data-slot='command-group-heading']]:font-medium",
+                "[&_[data-slot='command-group-heading']]:text-muted-foreground [&_[data-slot='command-group-heading']]:px-2 [&_[data-slot='command-group-heading']]:py-1.5 [&_[data-slot='command-group-heading']]:text-xs [&_[data-slot='command-group-heading']]:font-medium [&_[data-slot='command-group-heading']]:select-none",
                 "[&:not(:has([data-command-item]:not([style*='none'])))]:hidden",
                 cls,
             ),
@@ -306,15 +271,8 @@ def CommandItem(
     cls: str = "",
     **kwargs: Any,
 ):
-    def _(*, sig, search, selected, _item_index, _item_metadata, dialog_ref, **_):
+    def _(*, sig, search, selected, _item_index, dialog_ref, **_):
         index = next(_item_index)
-
-        _item_metadata.append({
-            "index": index,
-            "value": value,
-            "keywords": keywords or "",
-            "disabled": disabled,
-        })
 
         item_show = show if show is not None or disabled else (
             ~search | expr(value).lower().contains(search.lower()) | expr(keywords or "").lower().contains(search.lower())
@@ -370,9 +328,6 @@ def CommandShortcut(
     return Span(
         *children,
         data_slot="command-shortcut",
-        cls=cn(
-            "ml-auto text-xs tracking-widest text-muted-foreground",
-            cls,
-        ),
+        cls=cn("ml-auto text-xs tracking-widest text-muted-foreground", cls),
         **kwargs,
     )

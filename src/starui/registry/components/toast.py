@@ -2,10 +2,10 @@ from typing import Any, Literal
 import json
 import time
 
-from starhtml import FT, Button, Div, Icon, Span, Signal, js, signals
+from starhtml import FT, Button, Div, Icon, Span, Signal, js, signals, set_timeout
 from starhtml.datastar import _JSRaw
 
-from .utils import cn, cva, set_timeout
+from .utils import cn, cva
 
 ToastVariant = Literal["default", "success", "error", "warning", "info", "destructive"]
 ToastPosition = Literal[

@@ -34,6 +34,15 @@ tasks = [
 ]
 
 
+# Helper for icons with layout shift prevention
+def CommandIcon(name: str, cls: str = ""):
+    return Div(
+        Icon(name, width="16", height="16", style="display: block; width: 100%; height: 100%;"),
+        style="display: inline-block; width: 16px; height: 16px; flex-shrink: 0; overflow: hidden;",
+        cls=cls
+    )
+
+
 # Generate CommandItems for each status group (including dynamic slots)
 def generate_task_items(tasks_list, status_filter):
     items = []
@@ -45,12 +54,19 @@ def generate_task_items(tasks_list, status_filter):
 
     def create_task_icon(task_id, icon_name, icon_class=None):
         if icon_class:
-            return Icon(icon_name, cls=f"mr-2 h-4 w-4 {icon_class}")
+            return Div(
+                Icon(icon_name, width="16", height="16", style="display: block; width: 100%; height: 100%;"),
+                style="display: inline-block; width: 16px; height: 16px; flex-shrink: 0; overflow: hidden;",
+                cls=f"mr-2 {icon_class}"
+            )
         else:
-            return Span(
-                Icon(icon_name, cls="mr-2 h-4 w-4"),
+            # Wrapper for dynamic classes
+            return Div(
+                Icon(icon_name, width="16", height="16", style="display: block; width: 100%; height: 100%;"),
+                style="display: inline-block; width: 16px; height: 16px; flex-shrink: 0; overflow: hidden;",
                 data_class_text_yellow_500=js(f"${task_id}_priority === 'urgent'"),
-                data_class_text_gray_400=js(f"${task_id}_priority === 'normal'")
+                data_class_text_gray_400=js(f"${task_id}_priority === 'normal'"),
+                cls="mr-2"
             )
 
     def create_task_badge(task, task_id, status_filter):
@@ -117,10 +133,12 @@ def generate_task_items(tasks_list, status_filter):
                 task_text = existing_task["name"]
                 task_badge = create_task_badge(existing_task, task_id, status_filter)
             else:
-                task_icon = Span(
-                    Icon("lucide:circle", cls="mr-2 h-4 w-4"),
+                task_icon = Div(
+                    Icon("lucide:circle", width="16", height="16", style="display: block; width: 100%; height: 100%;"),
+                    style="display: inline-block; width: 16px; height: 16px; flex-shrink: 0; overflow: hidden;",
                     data_class_text_yellow_500=js(f"${task_id}_priority === 'urgent'"),
-                    data_class_text_blue_500=js(f"${task_id}_priority === 'normal'")
+                    data_class_text_blue_500=js(f"${task_id}_priority === 'normal'"),
+                    cls="mr-2"
                 )
                 task_text = Span(data_text=f"${task_id}_name")
                 task_badge = create_task_badge(None, task_id, status_filter)
@@ -137,7 +155,7 @@ def generate_task_items(tasks_list, status_filter):
             )
 
         else:  # completed
-            task_icon = Icon("lucide:check-circle", cls="mr-2 h-4 w-4 text-green-500")
+            task_icon = CommandIcon("lucide:check-circle", cls="mr-2 text-green-500")
             task_badge = Badge("Done", variant="outline", cls="ml-auto opacity-60")
 
             if existing_task:
@@ -166,7 +184,11 @@ def generate_task_items(tasks_list, status_filter):
 
     items.append(
         CommandItem(
-            Icon(empty_icons[status_filter], cls="mr-2 h-4 w-4 opacity-50"),
+            Div(
+                Icon(empty_icons[status_filter], width="16", height="16", style="display: block; width: 100%; height: 100%;"),
+                style="display: inline-block; width: 16px; height: 16px; flex-shrink: 0; overflow: hidden;",
+                cls="mr-2 opacity-50"
+            ),
             Span(empty_messages[status_filter], cls="text-muted-foreground italic"),
             value=f"empty_{status_filter}",
             disabled=True,
@@ -201,7 +223,11 @@ task_signals.append(Signal("task_cmd_next_id", len(tasks) + 1))
 def TaskCommandInput(placeholder: str = "Add a new task...", **kwargs):
     def _(sig=None, **ctx):
         return Div(
-            Icon("lucide:plus", cls="size-4 shrink-0 opacity-50"),
+            Div(
+                Icon("lucide:plus", width="16", height="16", style="display: block; width: 100%; height: 100%;"),
+                style="display: inline-block; width: 16px; height: 16px; flex-shrink: 0; overflow: hidden;",
+                cls="opacity-50"
+            ),
             Input(
                 data_on_input="$task_cmd_new = evt.target.value",
                 data_on_keydown="""
@@ -304,7 +330,7 @@ def command_palette_with_actions_example():
     return Div(
         CommandDialog(
             Button(
-                Icon("lucide:terminal", cls="mr-2 h-4 w-4"),
+                CommandIcon("lucide:terminal", cls="mr-2"),
                 "Open command palette",
                 Kbd("⌘K", cls="ml-auto text-xs"),
                 variant="outline",
@@ -317,22 +343,30 @@ def command_palette_with_actions_example():
                     CommandGroup(
                         "Navigation",
                         CommandItem(
-                            Icon("lucide:home", cls="mr-2 h-4 w-4"),
+                            CommandIcon("lucide:home", cls="mr-2"),
                             "Go to Home",
                             value="home",
                             onclick="window.location.href='/'",
                             ),
                         CommandItem(
-                            Icon("lucide:book-open", cls="mr-2 h-4 w-4"),
+                            CommandIcon("lucide:book-open", cls="mr-2"),
                             "Documentation",
-                            Icon("lucide:external-link", cls="ml-auto h-3 w-3 opacity-50"),
+                            Div(
+                                Icon("lucide:external-link", width="12", height="12", style="display: block; width: 100%; height: 100%;"),
+                                style="display: inline-block; width: 12px; height: 12px; flex-shrink: 0; overflow: hidden;",
+                                cls="ml-auto opacity-50"
+                            ),
                             value="docs",
                             onclick="window.open('https://docs.example.com', '_blank')",
                             ),
                         CommandItem(
-                            Icon("lucide:github", cls="mr-2 h-4 w-4"),
+                            CommandIcon("lucide:github", cls="mr-2"),
                             "GitHub Repository",
-                            Icon("lucide:external-link", cls="ml-auto h-3 w-3 opacity-50"),
+                            Div(
+                                Icon("lucide:external-link", width="12", height="12", style="display: block; width: 100%; height: 100%;"),
+                                style="display: inline-block; width: 12px; height: 12px; flex-shrink: 0; overflow: hidden;",
+                                cls="ml-auto opacity-50"
+                            ),
                             value="github",
                             onclick="window.open('https://github.com', '_blank')",
                             ),
@@ -341,21 +375,21 @@ def command_palette_with_actions_example():
                     CommandGroup(
                         "Utilities",
                         CommandItem(
-                            Icon("lucide:copy", cls="mr-2 h-4 w-4"),
+                            CommandIcon("lucide:copy", cls="mr-2"),
                             "Copy Email",
                             CommandShortcut("⌘C"),
                             value="copy-email",
                             onclick="navigator.clipboard.writeText('user@example.com').then(() => alert('Email copied!'))",
                             ),
                         CommandItem(
-                            Icon("lucide:link", cls="mr-2 h-4 w-4"),
+                            CommandIcon("lucide:link", cls="mr-2"),
                             "Copy Share Link",
                             CommandShortcut("⌘L"),
                             value="copy-link",
                             onclick="navigator.clipboard.writeText(window.location.href).then(() => alert('Link copied!'))",
                             ),
                         CommandItem(
-                            Icon("lucide:download", cls="mr-2 h-4 w-4"),
+                            CommandIcon("lucide:download", cls="mr-2"),
                             "Export Data",
                             Badge("CSV", variant="secondary", cls="ml-auto"),
                             value="export",
@@ -366,14 +400,14 @@ def command_palette_with_actions_example():
                     CommandGroup(
                         "System",
                         CommandItem(
-                            Icon("lucide:moon", cls="mr-2 h-4 w-4"),
+                            CommandIcon("lucide:moon", cls="mr-2"),
                             "Toggle Dark Mode",
                             CommandShortcut("⌘D"),
                             value="dark-mode",
                             onclick="document.documentElement.classList.toggle('dark')",
                             ),
                         CommandItem(
-                            Icon("lucide:log-out", cls="mr-2 h-4 w-4 text-red-500"),
+                            CommandIcon("lucide:log-out", cls="mr-2 text-red-500"),
                             Span("Sign Out", cls="text-red-500"),
                             value="signout",
                             onclick="if(confirm('Sign out?')) window.location.href='/logout'",
@@ -397,21 +431,21 @@ def compact_context_menu_example():
                 CommandGroup(
                     "Item Actions",
                     CommandItem(
-                        Icon("lucide:edit", cls="mr-2 h-4 w-4"),
+                        CommandIcon("lucide:edit", cls="mr-2"),
                         "Edit",
                         CommandShortcut("⌘E"),
                         value="edit",
                         onclick="alert('Edit mode activated')",
                     ),
                     CommandItem(
-                        Icon("lucide:copy", cls="mr-2 h-4 w-4"),
+                        CommandIcon("lucide:copy", cls="mr-2"),
                         "Duplicate",
                         CommandShortcut("⌘D"),
                         value="duplicate",
                         onclick="alert('Item duplicated')",
                     ),
                     CommandItem(
-                        Icon("lucide:archive", cls="mr-2 h-4 w-4"),
+                        CommandIcon("lucide:archive", cls="mr-2"),
                         "Archive",
                         value="archive",
                         onclick="alert('Item archived')",
@@ -421,28 +455,32 @@ def compact_context_menu_example():
                 CommandGroup(
                     "Share",
                     CommandItem(
-                        Icon("lucide:link", cls="mr-2 h-4 w-4"),
+                        CommandIcon("lucide:link", cls="mr-2"),
                         "Copy Link",
                         value="copy-link",
                         onclick="navigator.clipboard.writeText('https://example.com/item/123')",
                     ),
                     CommandItem(
-                        Icon("lucide:mail", cls="mr-2 h-4 w-4"),
+                        CommandIcon("lucide:mail", cls="mr-2"),
                         "Email",
                         value="email",
                         onclick="window.location.href='mailto:?subject=Check this out'",
                     ),
                     CommandItem(
-                        Icon("lucide:message-circle", cls="mr-2 h-4 w-4"),
+                        CommandIcon("lucide:message-circle", cls="mr-2"),
                         "Send to Slack",
-                        Icon("lucide:external-link", cls="ml-auto h-3 w-3 opacity-50"),
+                        Div(
+                            Icon("lucide:external-link", width="12", height="12", style="display: block; width: 100%; height: 100%;"),
+                            style="display: inline-block; width: 12px; height: 12px; flex-shrink: 0; overflow: hidden;",
+                            cls="ml-auto opacity-50"
+                        ),
                         value="slack",
                         onclick="alert('Opening Slack...')",
                     ),
                 ),
                 CommandSeparator(),
                 CommandItem(
-                    Icon("lucide:trash", cls="mr-2 h-4 w-4 text-red-500"),
+                    CommandIcon("lucide:trash", cls="mr-2 text-red-500"),
                     Span("Delete", cls="text-red-500"),
                     CommandShortcut("Del"),
                     value="delete",
@@ -496,21 +534,21 @@ def hero_command_example():
                 CommandGroup(
                     "Suggestions",
                     CommandItem(
-                        Icon("lucide:rocket", cls="mr-2 h-4 w-4"),
+                        CommandIcon("lucide:rocket", cls="mr-2"),
                         "Launch",
                         CommandShortcut("⌘L"),
                         value="launch",
                         onclick="alert('Launching...')",
                     ),
                     CommandItem(
-                        Icon("lucide:search", cls="mr-2 h-4 w-4"),
+                        CommandIcon("lucide:search", cls="mr-2"),
                         "Search",
                         CommandShortcut("⌘K"),
                         value="search",
                         onclick="alert('Opening search...')",
                     ),
                     CommandItem(
-                        Icon("lucide:terminal", cls="mr-2 h-4 w-4"),
+                        CommandIcon("lucide:terminal", cls="mr-2"),
                         "Terminal",
                         CommandShortcut("⌘T"),
                         value="terminal",
@@ -521,14 +559,14 @@ def hero_command_example():
                 CommandGroup(
                     "Recent",
                     CommandItem(
-                        Icon("lucide:file", cls="mr-2 h-4 w-4"),
+                        CommandIcon("lucide:file", cls="mr-2"),
                         "Project Alpha",
                         Badge("Active", variant="default", cls="ml-auto"),
                         value="project-alpha",
                         onclick="alert('Opening Project Alpha')",
                     ),
                     CommandItem(
-                        Icon("lucide:file", cls="mr-2 h-4 w-4"),
+                        CommandIcon("lucide:file", cls="mr-2"),
                         "Project Beta",
                         value="project-beta",
                         onclick="alert('Opening Project Beta')",

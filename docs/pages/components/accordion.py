@@ -52,18 +52,12 @@ def basic_accordion_example():
 @with_code
 def faq_accordion_example():
     def faq_item(question, answer, icon="lucide:help-circle", *, items=None, badges=None):
-        content = [P(answer, cls="mb-2" if (items or badges) else "")]
-
-        if badges:
-            content.append(
-                Div(*[Badge(b, variant="secondary", cls="mr-2") for b in badges], cls="mb-3")
-            )
-
-        if items:
-            content.append(
-                Ul(*[Li(item) for item in items],
-                   cls="list-disc list-inside space-y-1 text-sm text-muted-foreground")
-            )
+        content = [
+            P(answer, cls="mb-2" if (items or badges) else ""),
+            badges and Div(*[Badge(b, variant="secondary", cls="mr-2") for b in badges], cls="mb-3"),
+            items and Ul(*[Li(item) for item in items],
+                         cls="list-disc list-inside space-y-1 text-sm text-muted-foreground")
+        ]
 
         return AccordionItem(
             AccordionTrigger(
@@ -114,36 +108,6 @@ def faq_accordion_example():
         ),
         CardContent(
             Accordion(
-                AccordionItem(
-                    AccordionTrigger(
-                        Div(Icon("lucide:credit-card", cls="h-4 w-4 mr-2"),
-                            Span("What payment methods do you accept?"),
-                            cls="flex items-center flex-1")
-                    ),
-                    AccordionContent(
-                        P("We accept all major credit cards, PayPal, and bank transfers.", cls="mb-2"),
-                        Ul(
-                            Li("Visa, Mastercard, American Express"),
-                            Li("PayPal and PayPal Credit"),
-                            cls="list-disc list-inside space-y-1 text-sm text-muted-foreground"
-                        )
-                    ),
-                    value="what_payment_method"
-                ),
-                AccordionItem(
-                    AccordionTrigger(
-                        Div(Icon("lucide:shield-check", cls="h-4 w-4 mr-2"),
-                            Span("How secure is my data?"),
-                            cls="flex items-center flex-1")
-                    ),
-                    AccordionContent(
-                        P("Your data security is our top priority...", cls="mb-2"),
-                        Div(Badge("256-bit SSL", variant="secondary", cls="mr-2"),
-                            Badge("GDPR Compliant", variant="secondary", cls="mr-2"),
-                            cls="mb-3")
-                    ),
-                    value="how_secure_is_my_"
-                ),
                 *faq_items,
                 type="single",
                 collapsible=True
@@ -208,24 +172,6 @@ def multiple_selection_accordion_example():
         ),
         CardContent(
             Accordion(
-                AccordionItem(
-                    AccordionTrigger("Authentication"),
-                    AccordionContent(
-                        Div(
-                            Code("POST /api/auth/login", cls="block p-2 bg-muted rounded mb-2"),
-                            P("Authenticate a user and receive a JWT token.")
-                        )
-                    ),
-                    value="auth"
-                ),
-                AccordionItem(
-                    AccordionTrigger("Users"),
-                    AccordionContent(
-                        Div(Code("GET /api/users", cls="block p-2 bg-muted rounded mb-2")),
-                        Div(Code("POST /api/users", cls="block p-2 bg-muted rounded mb-2"))
-                    ),
-                    value="users"
-                ),
                 *accordion_sections,
                 type="multiple",
                 default_value=["auth", "users"]
@@ -308,37 +254,6 @@ def settings_accordion_example():
         ),
         CardContent(
             Accordion(
-                AccordionItem(
-                    AccordionTrigger(
-                        Div(Badge("3 fields", variant="secondary", cls="mr-2"),
-                            Span("Personal Information"),
-                            cls="flex items-center")
-                    ),
-                    AccordionContent(
-                        Div(
-                            InputWithLabel(label="Full Name", value="John Doe"),
-                            InputWithLabel(label="Email", type="email"),
-                            Button("Save Changes", cls="mt-4"),
-                            cls="space-y-4 px-1"
-                        )
-                    ),
-                    value="personal"
-                ),
-                AccordionItem(
-                    AccordionTrigger(
-                        Div(Icon("lucide:bell", cls="h-4 w-4 mr-2"),
-                            Span("Notifications"),
-                            cls="flex items-center")
-                    ),
-                    AccordionContent(
-                        Div(
-                            CheckboxWithLabel(label="Email notifications", checked=True),
-                            CheckboxWithLabel(label="Push notifications"),
-                            cls="space-y-3 px-1"
-                        )
-                    ),
-                    value="notifications"
-                ),
                 *settings_sections,
                 type="single",
                 collapsible=True
@@ -403,36 +318,6 @@ def file_explorer_accordion_example():
         ),
         CardContent(
             Accordion(
-                AccordionItem(
-                    AccordionTrigger(
-                        Div(
-                            Icon("lucide:folder", cls="h-4 w-4 mr-2 text-blue-500"),
-                            Span("src/"),
-                            Badge("12 files", variant="outline", cls="ml-auto mr-2"),
-                            cls="flex items-center w-full"
-                        )
-                    ),
-                    AccordionContent(
-                        # Nested accordion
-                        Div(
-                            Accordion(
-                                AccordionItem(
-                                    AccordionTrigger(Div(Icon("lucide:folder", cls="h-4 w-4 mr-2"), Span("components/"))),
-                                    AccordionContent(Div("Button.tsx", "Card.tsx", cls="text-sm")),
-                                    value="components"
-                                ),
-                                type="multiple"
-                            ),
-                            cls="ml-2 pl-3 border-l-2 border-muted"
-                        )
-                    ),
-                    value="src"
-                ),
-                AccordionItem(
-                    AccordionTrigger(Div(Icon("lucide:folder", cls="h-4 w-4 mr-2"), Span("docs/"))),
-                    AccordionContent(Div("README.md", "API.md", cls="text-sm")),
-                    value="docs"
-                ),
                 *file_items,
                 type="multiple"
             )
@@ -533,38 +418,6 @@ def course_curriculum_accordion_example():
         ),
         CardContent(
             Accordion(
-                AccordionItem(
-                    AccordionTrigger(
-                        Div(
-                            Badge("5 lessons", variant="secondary", cls="mr-2"),
-                            Strong("Module 1: HTML & CSS Fundamentals"),
-                            Badge("2.5 hours", variant="outline", cls="ml-auto mr-2"),
-                            cls="flex items-center w-full"
-                        )
-                    ),
-                    AccordionContent(
-                        Ul(
-                            Li(Div(Icon("lucide:play-circle", cls="h-4 w-4 mr-2"), "Introduction to HTML", Span("15:30", cls="ml-auto text-muted-foreground"), cls="flex items-center")),
-                            Li(Div(Icon("lucide:check-circle", cls="h-4 w-4 mr-2 text-green-500"), "Quiz: HTML & CSS", Badge("Completed", variant="secondary", cls="ml-auto"), cls="flex items-center")),
-                            cls="space-y-3"
-                        )
-                    ),
-                    value="module1"
-                ),
-                AccordionItem(
-                    AccordionTrigger(
-                        Div(
-                            Badge("Coming Soon", variant="outline", cls="mr-2"),
-                            Strong("Module 3: React Framework"),
-                            Icon("lucide:lock", cls="h-4 w-4 ml-auto mr-2 text-muted-foreground"),
-                            cls="flex items-center w-full"
-                        )
-                    ),
-                    AccordionContent(
-                        P("This module will be available after completing previous modules.", cls="text-muted-foreground italic")
-                    ),
-                    value="module3"
-                ),
                 *course_modules,
                 type="single",
                 default_value="module1"
@@ -629,13 +482,13 @@ API_REFERENCE = build_api_reference(
 # ============================================================================
 
 EXAMPLES_DATA = [
-    {"fn": hero_accordion_example, "title": "Hero Accordion", "description": "Quick start guide with common questions"},
-    {"fn": basic_accordion_example, "title": "Basic Accordion", "description": "Single selection accordion with collapsible behavior"},
-    {"fn": faq_accordion_example, "title": "FAQ Section", "description": "Frequently asked questions with icons and rich content"},
-    {"fn": multiple_selection_accordion_example, "title": "Multiple Selection", "description": "API documentation with multiple sections open simultaneously"},
-    {"fn": settings_accordion_example, "title": "Settings Panel", "description": "Account settings organized in collapsible sections with forms"},
-    {"fn": file_explorer_accordion_example, "title": "File Explorer", "description": "Nested accordions for file tree navigation"},
-    {"fn": course_curriculum_accordion_example, "title": "Course Curriculum", "description": "Educational content with progress tracking and lesson details"},
+    {"fn": hero_accordion_example, "title": "Basic Usage", "description": "Single selection accordion with collapsible items"},
+    {"fn": basic_accordion_example, "title": "Collapsible Single", "description": "Single item open at a time, all items can be closed"},
+    {"fn": faq_accordion_example, "title": "Rich Content", "description": "Single selection with icons, badges, and formatted content"},
+    {"fn": multiple_selection_accordion_example, "title": "Multiple Selection", "description": "Multiple items can be open simultaneously"},
+    {"fn": settings_accordion_example, "title": "With Forms", "description": "Single selection accordion containing interactive form elements"},
+    {"fn": file_explorer_accordion_example, "title": "Nested Accordions", "description": "Accordions nested within accordion items for hierarchical content"},
+    {"fn": course_curriculum_accordion_example, "title": "Always One Open", "description": "Non-collapsible single selection - exactly one item must always be open"},
 ]
 
 
