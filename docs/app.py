@@ -523,109 +523,172 @@ def _performance_metric(value: str, label: str, description: str) -> FT:
 
 @rt("/docs")
 def docs_index():
-    
+    from starui.registry.components.button import Button
+
     return DocsLayout(
         Div(
+            # Hero
             Div(
-                H1("StarUI Documentation", cls="text-4xl md:text-5xl font-bold tracking-tight mb-6"),
-                P(
-                    "Server-side component library that brings modern UI to Python web applications without the JavaScript complexity.",
-                    cls="text-xl text-muted-foreground mb-4 max-w-3xl mx-auto",
+                H1(
+                    "Build modern UIs in pure Python",
+                    cls="text-5xl md:text-7xl font-black tracking-tight mb-6"
                 ),
                 P(
-                    "Write reactive interfaces entirely in Python using Datastar's declarative patterns.",
-                    cls="text-lg text-muted-foreground/80 mb-12 max-w-2xl mx-auto",
+                    "Server-rendered components with reactive UX. No JavaScript frameworks. No build complexity. Just Python and Tailwind CSS.",
+                    cls="text-xl text-muted-foreground mb-8 max-w-3xl"
                 ),
-                cls="text-center mb-20"
-            ),
-            
-            Div(
-                H2("The Python-Native Approach", cls="text-3xl font-bold mb-8"),
+                # Live demo embed
                 Div(
-                    _feature_highlight_card(
-                        "Server-First Architecture",
-                        "Components render on the server and progressively enhance with interactivity. No client-side hydration, no bundle sizes, no waterfall loading.",
-                        "from starui import Button, Input, Card\n\n# Pure Python - no JSX, no build step\nCard(\n    Input(placeholder=\"Search...\"),\n    Button(\"Submit\", data_on_click=\"search()\")\n)",
-                        "Python syntax with type safety and IDE support",
-                        "lucide:server"
+                    (count := Signal("count", 0)),
+                    Button(
+                        "Click me",
+                        data_on_click=count.add(1),
+                        cls="mb-3"
                     ),
-                    _feature_highlight_card(
-                        "Reactive Without React",
-                        "Datastar provides declarative state management and reactive updates while keeping all logic server-side. Get modern UX patterns without JavaScript frameworks.",
-                        "# Reactive counter - no useState, no hooks\nButton(\n    (count := Signal(\"count\", 0)),\n    data_text=\"Count: \" + count,\n    data_on_click=count.add(1)\n)\n\n# State stays on the server",
-                        "Reactive patterns with server-side state",
-                        "lucide:zap"
+                    P(
+                        "Clicked: ",
+                        Span(data_text=count, cls="font-bold gradient-text text-2xl"),
+                        cls="text-muted-foreground"
                     ),
-                    cls="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 mb-16"
+                    cls="inline-flex flex-col items-center p-8 border rounded-xl bg-gradient-to-br from-background to-muted/10"
                 ),
+                Pre(
+                    '''from starui import Button
+from starhtml import Signal
+
+count = Signal("count", 0)
+Button("Click me", data_on_click=count.add(1))''',
+                    cls="bg-gray-900 text-gray-100 p-4 rounded-md text-sm mt-4 max-w-2xl"
+                ),
+                cls="mb-20"
             ),
 
+            # Section: Python-First Approach
             Div(
-                H2("Built for Python Developers", cls="text-3xl font-bold mb-8"),
-                Div(
-                    _workflow_highlight_card(
-                        "Type-Safe Components",
-                        "Python-native components with IDE autocompletion and type hints",
-                        "from starui.registry.components.button import Button\n\n# IDE provides autocompletion for variants\nButton(\"Click me\", variant=\"outline\", size=\"lg\")\n# ✅ All properties properly typed",
-                        "Full Python type hints and IDE support"
-                    ),
-                    _workflow_highlight_card(
-                        "StarHTML Integration",
-                        "Designed specifically for StarHTML applications with seamless interop",
-                        "from starhtml import *\nfrom starui import Button, Card\n\n# Mix StarHTML and StarUI naturally\nDiv(\n    H1(\"Welcome\"),\n    Card(Button(\"Get Started\"))\n)",
-                        "Native integration with StarHTML ecosystem"
-                    ),
-                    _workflow_highlight_card(
-                        "Single Command Install",
-                        "Add components with dependencies automatically resolved",
-                        "star add button input card tabs\n\n# Components ready to import\nfrom starui import Button, Input, Card, Tabs",
-                        "CLI handles dependency management"
-                    ),
-                    cls="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-16"
-                ),
-            ),
-            
-            Div(
-                H2("Production-Ready Performance", cls="text-3xl font-bold mb-8"),
+                H2("Write UIs the way Python developers think", cls="text-4xl font-bold mb-8"),
                 Div(
                     Div(
-                        _performance_metric("Zero", "Runtime JavaScript", "Components work without any client-side JavaScript"),
-                        _performance_metric("Instant", "Server Rendering", "No hydration delays or layout shifts"),
-                        _performance_metric("100%", "SEO Friendly", "Fully rendered HTML for search engines"),
-                        cls="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8"
+                        H3("Server-rendered HTML first", cls="text-xl font-semibold mb-3"),
+                        P("Components render complete HTML on the server. Perfect SEO, instant time-to-interactive, no hydration delays.", cls="text-muted-foreground mb-4"),
+
+                        H3("Progressive enhancement", cls="text-xl font-semibold mb-3"),
+                        P("Add interactivity with Datastar. Components work without JavaScript, enhance with it when needed.", cls="text-muted-foreground mb-4"),
+
+                        H3("Type-safe Python syntax", cls="text-xl font-semibold mb-3"),
+                        P("Full IDE support, autocompletion, and type hints. Catch errors before runtime.", cls="text-muted-foreground"),
+                    ),
+                    cls="max-w-2xl"
+                ),
+                cls="mb-20"
+            ),
+
+            # Section: Flexibility
+            Div(
+                H2("Build with Python. Extend with anything.", cls="text-4xl font-bold mb-8"),
+                Div(
+                    Div(
+                        Icon("lucide:check", cls="h-5 w-5 text-green-600 mr-3"),
+                        "Write components in Python",
+                        cls="flex items-center mb-3"
                     ),
                     Div(
-                        H3("Enterprise Standards", cls="text-xl font-semibold mb-4"),
-                        Div(
-                            Div(
-                                Icon("lucide:shield-check", cls="h-5 w-5 text-green-600 mr-3"),
-                                "WCAG 2.1 AA accessibility compliance",
-                                cls="flex items-center mb-3"
-                            ),
-                            Div(
-                                Icon("lucide:palette", cls="h-5 w-5 text-blue-600 mr-3"),
-                                "Design tokens with light/dark theme support",
-                                cls="flex items-center mb-3"
-                            ),
-                            Div(
-                                Icon("lucide:code-2", cls="h-5 w-5 text-purple-600 mr-3"),
-                                "Composable components with consistent API patterns",
-                                cls="flex items-center mb-3"
-                            ),
-                            Div(
-                                Icon("lucide:zap", cls="h-5 w-5 text-orange-600 mr-3"),
-                                "Progressive enhancement for interactive features",
-                                cls="flex items-center"
-                            ),
-                            cls="space-y-2"
-                        ),
-                        cls="bg-gradient-to-br from-background to-muted/20 rounded-xl p-6 border"
+                        Icon("lucide:check", cls="h-5 w-5 text-green-600 mr-3"),
+                        "Add JavaScript when you need it",
+                        cls="flex items-center mb-3"
                     ),
-                    cls="space-y-8"
+                    Div(
+                        Icon("lucide:check", cls="h-5 w-5 text-green-600 mr-3"),
+                        "Use Tailwind, CSS, or custom styles",
+                        cls="flex items-center mb-3"
+                    ),
+                    Div(
+                        Icon("lucide:check", cls="h-5 w-5 text-green-600 mr-3"),
+                        "Escape hatches everywhere",
+                        cls="flex items-center mb-3"
+                    ),
+                    Div(
+                        Icon("lucide:check", cls="h-5 w-5 text-green-600 mr-3"),
+                        "No framework lock-in",
+                        cls="flex items-center"
+                    ),
+                    cls="space-y-2 max-w-2xl"
                 ),
+                cls="mb-20"
             ),
-            
-            cls="max-w-7xl mx-auto px-4"
+
+            # Section: How It Works
+            Div(
+                H2("Three layers. One beautiful result.", cls="text-4xl font-bold mb-12"),
+                Div(
+                    _professional_feature_card(
+                        "Python Components",
+                        "Type-safe components in your codebase. Modify them directly. Full control.",
+                        "lucide:code-2"
+                    ),
+                    _professional_feature_card(
+                        "Tailwind Styling",
+                        "Utility-first CSS. Theme tokens. Dark mode built-in.",
+                        "lucide:palette"
+                    ),
+                    _professional_feature_card(
+                        "Datastar Reactivity",
+                        "Add interactivity with Signals. Server-side state. No useState.",
+                        "lucide:zap"
+                    ),
+                    cls="grid grid-cols-1 md:grid-cols-3 gap-6"
+                ),
+                cls="mb-20"
+            ),
+
+            # Section: Production Ready
+            Div(
+                H2("Production-ready from day one", cls="text-4xl font-bold mb-12 text-center"),
+                Div(
+                    Div(
+                        Icon("lucide:shield-check", cls="h-8 w-8 gradient-text mb-2"),
+                        P("WCAG AA Accessible", cls="font-semibold"),
+                        cls="text-center"
+                    ),
+                    Div(
+                        Icon("lucide:moon", cls="h-8 w-8 gradient-text mb-2"),
+                        P("Dark Mode Built-in", cls="font-semibold"),
+                        cls="text-center"
+                    ),
+                    Div(
+                        Icon("lucide:check-check", cls="h-8 w-8 gradient-text mb-2"),
+                        P("Type Safe Python", cls="font-semibold"),
+                        cls="text-center"
+                    ),
+                    Div(
+                        Icon("lucide:flask-conical", cls="h-8 w-8 gradient-text mb-2"),
+                        P("Tested Components", cls="font-semibold"),
+                        cls="text-center"
+                    ),
+                    cls="grid grid-cols-2 md:grid-cols-4 gap-8"
+                ),
+                cls="mb-20"
+            ),
+
+            # CTA Section
+            Div(
+                H2("Ready to build?", cls="text-4xl font-bold mb-6 text-center"),
+                Div(
+                    A(
+                        "Get Started →",
+                        href="/installation",
+                        cls="inline-flex items-center justify-center rounded-md text-lg font-semibold bg-gradient-to-r from-amber-500 via-orange-500 to-pink-500 text-white hover:opacity-90 h-12 px-8 py-3 mr-4 transition-opacity"
+                    ),
+                    A(
+                        "View Components",
+                        href="/components",
+                        cls="inline-flex items-center justify-center rounded-md text-lg font-semibold border-2 gradient-border bg-background hover:bg-accent h-12 px-8 py-3 transition-colors"
+                    ),
+                    cls="flex gap-4 justify-center"
+                ),
+                cls="text-center py-16"
+            ),
+
+            cls="max-w-5xl mx-auto px-4"
         ),
         layout=LayoutConfig(show_copy=False),
         sidebar=SidebarConfig(sections=DOCS_SIDEBAR_SECTIONS),
