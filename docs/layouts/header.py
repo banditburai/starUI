@@ -8,8 +8,8 @@ if TYPE_CHECKING:
     from layouts.base import HeaderConfig
 
 
-def MobileMenuButton(**attrs) -> FT:
-    mobile_menu_open = Signal("mobile_menu_open", _ref_only=True)
+def MobileMenuButton(signal: Signal, **attrs) -> FT:
+    mobile_menu_open = Signal(f"{signal.id}_open", _ref_only=True)
     return Button(
         Icon("ph:list-bold", width="20", height="20"),
         data_on_click=mobile_menu_open.toggle(),
@@ -92,7 +92,7 @@ def _navigation_menu(nav_items: list[dict[str, Any]]) -> FT:
     )
 
 
-def DocsHeader(config: "HeaderConfig", show_mobile_menu_button: bool = False, **attrs) -> FT:
+def DocsHeader(config: "HeaderConfig", mobile_menu_signal: Signal | None = None, **attrs) -> FT:
     return Header(
         Div(
             Div(
@@ -104,7 +104,7 @@ def DocsHeader(config: "HeaderConfig", show_mobile_menu_button: bool = False, **
                 _search_button() if config.show_search else None,
                 _github_dropdown(config.github_stars) if config.show_github else None,
                 ThemeToggle() if config.show_theme_toggle else None,
-                MobileMenuButton() if show_mobile_menu_button else None,
+                MobileMenuButton(mobile_menu_signal) if mobile_menu_signal else None,
                 cls="flex items-center gap-2 flex-shrink-0",
             ),
             cls="flex h-14 w-full items-center justify-between px-4 sm:px-6 md:px-8 lg:px-6 max-w-full mx-auto",

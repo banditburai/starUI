@@ -7,7 +7,7 @@ from layouts.header import DocsHeader
 from layouts.sidebar import DocsSidebar, MobileSidebar
 from layouts.navigation import TopNavigation, BottomNavigation
 from starui.registry.components.button import Button
-from starui.registry.components.sheet import Sheet, SheetContent, SheetClose
+from starui.registry.components.sheet import Sheet, SheetContent
 
 
 @dataclass
@@ -57,22 +57,17 @@ class SidebarConfig:
 
 
 def _copy_page_button(component_name: str | None = None) -> FT:
-    copy_action = (
-        f"fetch('/api/markdown/{component_name}').then(r => r.json()).then(data => @clipboard(data.markdown, 'page_copied', 2000)).catch(() => @clipboard(window.location.href, 'page_copied', 2000))"
-        if component_name
-        else "@clipboard(window.location.href, 'page_copied', 2000)"
-    )
+    page_copied = Signal("page_copied", False)
+
+    if component_name:
+        copy_action = f"fetch('/api/markdown/{component_name}').then(r => r.json()).then(data => @clipboard(data.markdown, 'page_copied', 2000)).catch(() => @clipboard(window.location.href, 'page_copied', 2000))"
+    else:
+        copy_action = "@clipboard(window.location.href, 'page_copied', 2000)"
 
     return Button(
-        (page_copied := Signal("page_copied", False)),
-        Span(
-            Icon("lucide:check", cls="h-4 w-4"),
-            data_show=page_copied
-        ),
-        Span(
-            Icon("lucide:copy", cls="h-4 w-4"),
-            data_show=~page_copied
-        ),
+        page_copied,
+        Span(Icon("lucide:check", cls="h-4 w-4"), data_show=page_copied),
+        Span(Icon("lucide:copy", cls="h-4 w-4"), data_show=~page_copied),
         "Copy Page",
         data_on_click=copy_action,
         variant="outline",
@@ -112,17 +107,16 @@ def _main_content_area(content: tuple, layout: LayoutConfig) -> FT:
     )
 
 
-def _mobile_sheet_section(sidebar: SidebarConfig) -> FT:
+def _mobile_sheet_section(sidebar: SidebarConfig, mobile_menu: Signal) -> FT:
     return Sheet(
         SheetContent(
             MobileSidebar(sections=sidebar.sections),
-            signal="mobile_menu_open",
             side="right",
             size="sm",
             cls="xl:hidden w-80 max-w-[80vw] p-0",
             show_close=True,
         ),
-        signal="mobile_menu_open",
+        signal=mobile_menu,
         modal=True,
         default_open=False,
     )
@@ -132,14 +126,16 @@ def _layout_with_sidebar(
     main_content: FT,
     sidebar: SidebarConfig,
     layout: LayoutConfig,
+    mobile_menu: Signal,
     **attrs
 ) -> FT:
-    Signal("sidebar_active", _ref_only=True)
+    sidebar_active = Signal("sidebar_active", js("location.pathname"))
     return Div(
+        sidebar_active,
         main_content,
-        _mobile_sheet_section(sidebar),
+        _mobile_sheet_section(sidebar, mobile_menu),
+        data_effect=js("$sidebar_active = location.pathname"),
         cls=f"flex min-h-screen flex-col {layout.class_name}",
-        data_effect="$sidebar_active = location.pathname",
         **attrs
     )
 
@@ -151,10 +147,11 @@ def _main_layout_structure(
     footer: FooterConfig,
     sidebar: SidebarConfig,
     show_sidebar: bool,
+    mobile_menu: Signal | None = None,
     **attrs
 ) -> FT:
     return Div(
-        DocsHeader(header, show_mobile_menu_button=show_sidebar),
+        DocsHeader(header, mobile_menu_signal=mobile_menu if show_sidebar else None),
         Div(
             DocsSidebar(sections=sidebar.sections) if show_sidebar else None,
             Main(
@@ -187,14 +184,15 @@ def DocsLayout(
     header = header or HeaderConfig()
     footer = footer or FooterConfig()
     sidebar = sidebar or SidebarConfig()
-    
+
     show_sidebar = layout.show_sidebar and sidebar.sections is not None
+    mobile_menu = Signal("mobile_menu", _ref_only=True) if show_sidebar else None
 
     main_content = _main_layout_structure(
-        content, layout, header, footer, sidebar, show_sidebar, **attrs
+        content, layout, header, footer, sidebar, show_sidebar, mobile_menu, **attrs
     )
 
-    return _layout_with_sidebar(main_content, sidebar, layout, **attrs) if show_sidebar else main_content
+    return _layout_with_sidebar(main_content, sidebar, layout, mobile_menu, **attrs) if show_sidebar else main_content
 
 
 

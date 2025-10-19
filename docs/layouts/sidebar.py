@@ -72,25 +72,22 @@ def _sidebar_section(section: dict[str, Any]) -> FT:
 
 
 def _sidebar_item(item: dict[str, Any]) -> FT:
-    is_disabled = item.get("disabled", False)
     href = item.get("href", "#")
 
-    if is_disabled:
+    if item.get("disabled", False):
         return Span(
             item.get("label", ""),
             cls="inline-flex items-center rounded-md px-2 py-1.5 text-sm text-muted-foreground cursor-not-allowed opacity-60"
         )
 
-    base_classes = "inline-flex items-center rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-    signal_name = f"is_active_{href.replace('/', '_').replace('-', '_')}"
+    sidebar_active = Signal("sidebar_active", _ref_only=True)
 
     return A(
-        (is_active := Signal(signal_name, js(f"$sidebar_active === '{href}'"))),
         item.get("label", ""),
         href=href,
-        cls=base_classes,
-        data_attr_class=is_active.if_(
-            "bg-accent text-accent-foreground font-medium " + base_classes,
-            "text-muted-foreground " + base_classes
-        ),
+        cls="inline-flex items-center rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        data_attr_cls=sidebar_active.eq(href).if_(
+            "bg-accent text-accent-foreground font-medium",
+            "text-muted-foreground"
+        )
     )
