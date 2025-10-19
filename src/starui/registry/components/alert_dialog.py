@@ -59,9 +59,13 @@ def AlertDialogTrigger(
     def trigger(*, open_state, dialog_ref, **_):
         from .button import Button
 
+        user_on_click = kwargs.pop('data_on_click', None)
+        user_actions = user_on_click if isinstance(user_on_click, list) else ([user_on_click] if user_on_click else [])
+        click_actions = [dialog_ref.showModal(), open_state.set(True)] + user_actions
+
         return Button(
             *children,
-            data_on_click=[dialog_ref.showModal(), open_state.set(True)],
+            data_on_click=click_actions,
             aria_haspopup="dialog",
             variant=variant,
             cls=cls,
@@ -181,9 +185,13 @@ def AlertDialogCancel(
     def _(*, open_state, dialog_ref, **_):
         from .button import Button
 
+        user_on_click = kwargs.pop('data_on_click', None)
+        user_actions = user_on_click if isinstance(user_on_click, list) else ([user_on_click] if user_on_click else [])
+        click_actions = user_actions + [open_state.set(False), dialog_ref.close()]
+
         return Button(
             *children,
-            data_on_click=[open_state.set(False), dialog_ref.close()],
+            data_on_click=click_actions,
             variant="outline",
             cls=cls,
             **kwargs,

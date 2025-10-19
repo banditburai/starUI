@@ -1,30 +1,19 @@
-"""
-Tooltip component documentation - Popup text that appears on hover.
-Clean, accessible, and highly customizable.
-"""
-
-# Component metadata for auto-discovery
 TITLE = "Tooltip"
 DESCRIPTION = "A popup that displays information related to an element when the element receives keyboard focus or the mouse hovers over it."
 CATEGORY = "ui"
 ORDER = 65
 STATUS = "stable"
 
-from starhtml import Div, P, Span, Icon, Label, Code, Strong, H3, Signal, js
+from starhtml import Div, P, Span, Icon, Label, Code, Strong, H3, Signal, set_timeout
 from starui.registry.components.tooltip import Tooltip, TooltipTrigger, TooltipContent, TooltipProvider
 from starui.registry.components.button import Button
 from starui.registry.components.badge import Badge
 from starui.registry.components.input import Input as StarInput
 from starui.registry.components.avatar import Avatar, AvatarFallback, AvatarImage
 from utils import auto_generate_page, with_code, build_api_reference, Component
-from widgets.component_preview import ComponentPreview
 
 
-# ============================================================================
-# EXAMPLE FUNCTIONS (decorated with @with_code for markdown generation)
-# ============================================================================
 
-# Basic tooltip
 @with_code
 def basic_tooltip_example():
     return Tooltip(
@@ -37,7 +26,6 @@ def basic_tooltip_example():
     )
 
 
-# Tooltip positions
 @with_code
 def tooltip_positions_example():
     return Div(
@@ -85,48 +73,58 @@ def tooltip_positions_example():
     )
 
 
-# Tooltip alignment
 @with_code
 def tooltip_alignment_example():
     return Div(
         Tooltip(
             TooltipTrigger(
-                Button("Start", variant="outline", cls="w-24"),
+                Button("Top Start", variant="outline", cls="w-48"),
                 delay_duration=200
             ),
             TooltipContent(
-                "Aligned to start",
+                Div(
+                    Icon("lucide:arrow-left", cls="h-4 w-4 inline mr-1"),
+                    "Start"
+                ),
                 side="top",
-                align="start"
+                align="start",
+                cls="w-28"
             )
         ),
         Tooltip(
             TooltipTrigger(
-                Button("Center", variant="outline", cls="w-24"),
+                Button("Top Center", variant="outline", cls="w-48"),
                 delay_duration=200
             ),
             TooltipContent(
-                "Aligned to center",
+                Div(
+                    Icon("lucide:arrow-up", cls="h-4 w-4 inline mr-1"),
+                    "Center"
+                ),
                 side="top",
-                align="center"
+                align="center",
+                cls="w-28"
             )
         ),
         Tooltip(
             TooltipTrigger(
-                Button("End", variant="outline", cls="w-24"),
+                Button("Top End", variant="outline", cls="w-48"),
                 delay_duration=200
             ),
             TooltipContent(
-                "Aligned to end",
+                Div(
+                    "End ",
+                    Icon("lucide:arrow-right", cls="h-4 w-4 inline ml-1")
+                ),
                 side="top",
-                align="end"
+                align="end",
+                cls="w-28"
             )
         ),
-        cls="flex gap-4 justify-center"
+        cls="flex gap-4 justify-center flex-wrap"
     )
 
 
-# Custom delays
 @with_code
 def custom_delays_example():
     return Div(
@@ -163,7 +161,6 @@ def custom_delays_example():
     )
 
 
-# Icon buttons with tooltips
 @with_code
 def icon_buttons_example():
     return Div(
@@ -204,38 +201,41 @@ def icon_buttons_example():
     )
 
 
-# Form field with tooltip
 @with_code
 def form_field_tooltip_example():
     return Div(
-        Label("Email", cls="text-sm font-medium"),
         Div(
-            StarInput(
-                type="email",
-                placeholder="Enter your email",
-                cls="pr-8"
-            ),
-            Tooltip(
-                TooltipTrigger(
-                    Icon("lucide:info", cls="h-4 w-4 text-muted-foreground"),
-                    cls="absolute right-2 top-1/2 -translate-y-1/2",
-                    delay_duration=300
+            Label("Email", cls="text-sm font-medium"),
+            Div(
+                StarInput(
+                    type="email",
+                    placeholder="Enter your email",
+                    cls="pr-10"
                 ),
-                TooltipContent(
-                    "We'll never share your email with anyone else"
-                )
+                Div(
+                    Tooltip(
+                        TooltipTrigger(
+                            Icon("lucide:info", cls="h-4 w-4 text-muted-foreground"),
+                            delay_duration=300
+                        ),
+                        TooltipContent(
+                            "We'll never share your email with anyone else",
+                            cls="max-w-xs"
+                        )
+                    ),
+                    cls="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-auto"
+                ),
+                cls="relative"
             ),
-            cls="relative"
+            cls="space-y-2"
         ),
-        cls="space-y-1 max-w-xs"
+        cls="max-w-md mx-auto"
     )
 
 
-# Rich content tooltips
 @with_code
 def rich_content_tooltips_example():
     return Div(
-        # Multi-line tooltip
         Tooltip(
             TooltipTrigger(
                 Badge("Pro", variant="default"),
@@ -243,16 +243,13 @@ def rich_content_tooltips_example():
             ),
             TooltipContent(
                 Div(
-                    Strong("Pro Features"),
-                    P("• Unlimited projects", cls="text-xs mt-1"),
-                    P("• Priority support", cls="text-xs"),
-                    P("• Advanced analytics", cls="text-xs"),
-                    cls="space-y-0"
-                ),
-                cls="max-w-xs"
+                    P(Strong("Pro Features"), cls="font-semibold mb-1"),
+                    P("• Unlimited projects", cls="text-xs whitespace-nowrap"),
+                    P("• Priority support", cls="text-xs whitespace-nowrap"),
+                    P("• Advanced analytics", cls="text-xs whitespace-nowrap")
+                )
             )
         ),
-        # Tooltip with keyboard shortcut
         Tooltip(
             TooltipTrigger(
                 Button(
@@ -272,7 +269,6 @@ def rich_content_tooltips_example():
                 )
             )
         ),
-        # Warning tooltip
         Tooltip(
             TooltipTrigger(
                 Button(
@@ -287,14 +283,13 @@ def rich_content_tooltips_example():
                     Icon("lucide:alert-triangle", cls="h-4 w-4 inline mr-1"),
                     "This action cannot be undone!"
                 ),
-                cls="bg-destructive text-destructive-foreground"
+                cls="bg-destructive text-destructive-foreground [&>div:last-child]:bg-destructive"
             )
         ),
         cls="flex gap-4 items-center justify-center flex-wrap"
     )
 
 
-# Keyboard accessible tooltips
 @with_code
 def keyboard_navigation_example():
     return Div(
@@ -328,7 +323,6 @@ def keyboard_navigation_example():
     )
 
 
-# Dynamic tooltip content
 @with_code
 def dynamic_content_example():
     copied = Signal("copied", False)
@@ -337,42 +331,37 @@ def dynamic_content_example():
     return Div(
         copied,
         clicks,
-        # Copy button with feedback
         Tooltip(
             TooltipTrigger(
                 Button(
                     Icon("lucide:copy", cls="h-4 w-4"),
                     variant="outline",
                     size="icon",
-                    data_on_click=js("$copied = true; setTimeout(() => $copied = false, 2000)")
+                    data_on_click=[copied.set(True), set_timeout(copied.set(False), 2000)]
                 ),
                 delay_duration=300
             ),
             TooltipContent(
-                Span(data_text=js("$copied ? 'Copied!' : 'Click to copy'"))
-            ),
-            signal="tooltip_copy"
+                Span(data_text=copied.if_('Copied!', 'Click to copy'))
+            )
         ),
-        # Click counter
         Tooltip(
             TooltipTrigger(
                 Button(
                     "Click Counter",
                     variant="secondary",
-                    data_on_click=js("$clicks++")
+                    data_on_click=clicks.add(1)
                 ),
                 delay_duration=300
             ),
             TooltipContent(
-                Span("Clicked ", Span(data_text=js("$clicks"), cls="font-bold"), " times")
-            ),
-            signal="tooltip_counter"
+                Span("Clicked ", Span(data_text=clicks, cls="font-bold"), " times")
+            )
         ),
         cls="flex gap-4 justify-center"
     )
 
 
-# Custom styled tooltips
 @with_code
 def custom_styling_example():
     return Div(
@@ -383,7 +372,7 @@ def custom_styling_example():
             ),
             TooltipContent(
                 "Dark themed tooltip",
-                cls="bg-slate-900 text-white border border-slate-700"
+                cls="bg-slate-900 text-white border border-slate-700 [&>div:last-child]:bg-slate-900"
             )
         ),
         Tooltip(
@@ -396,7 +385,7 @@ def custom_styling_example():
                     Icon("lucide:check-circle", cls="h-4 w-4 inline mr-1"),
                     "Operation successful!"
                 ),
-                cls="bg-green-500 text-white"
+                cls="bg-green-500 text-white [&>div:last-child]:bg-green-500"
             )
         ),
         Tooltip(
@@ -409,24 +398,13 @@ def custom_styling_example():
                     Icon("lucide:alert-triangle", cls="h-4 w-4 inline mr-1"),
                     "Please review"
                 ),
-                cls="bg-yellow-500 text-white"
-            )
-        ),
-        Tooltip(
-            TooltipTrigger(
-                Button("Glass", variant="outline"),
-                delay_duration=200
-            ),
-            TooltipContent(
-                "Glassmorphism effect",
-                cls="bg-white/10 backdrop-blur-md border border-white/20 text-white"
+                cls="bg-yellow-500 text-white [&>div:last-child]:bg-yellow-500"
             )
         ),
         cls="flex gap-2 justify-center flex-wrap"
     )
 
 
-# Truncated text with tooltip
 @with_code
 def truncated_text_example():
     return Div(
@@ -447,7 +425,6 @@ def truncated_text_example():
     )
 
 
-# Avatar tooltips
 @with_code
 def avatar_tooltips_example():
     return Div(
@@ -486,9 +463,6 @@ def avatar_tooltips_example():
     )
 
 
-# ============================================================================
-# MODULE-LEVEL DATA (for markdown API)
-# ============================================================================
 
 EXAMPLES_DATA = [
     {"fn": basic_tooltip_example, "title": "Basic Tooltip", "description": "Simple tooltip on hover"},
@@ -516,5 +490,4 @@ API_REFERENCE = build_api_reference(
 
 
 def create_tooltip_docs():
-    """Create tooltip documentation page using convention-based approach."""
     return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)

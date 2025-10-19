@@ -25,9 +25,6 @@ from utils import auto_generate_page, with_code, Component, build_api_reference
 from widgets.component_preview import ComponentPreview
 
 
-# ============================================================================
-# EXAMPLE FUNCTIONS (decorated with @with_code for markdown generation)
-# ============================================================================
 
 @with_code
 def basic_hover_card_example():
@@ -39,13 +36,12 @@ def basic_hover_card_example():
                     Icon("lucide:external-link", cls="h-4 w-4 mr-2 text-blue-500"),
                     Span("StarUI Documentation", cls="text-blue-600 hover:underline font-medium"),
                     cls="inline-flex items-center cursor-pointer"
-                ),
-                signal="basic_hover"
+                )
             ),
             HoverCardContent(
                 Div(
                     Div(
-                        Icon("lucide:star", width="24", height="24", cls="mr-2 text-blue-600 text-xl"),
+                        Icon("lucide:star", cls="h-6 w-6 mr-2 text-blue-600"),
                         Div(
                             H4("StarUI Component Library", cls="font-semibold text-sm"),
                             P("Modern, accessible React components", cls="text-xs text-muted-foreground"),
@@ -63,10 +59,8 @@ def basic_hover_card_example():
                         cls="flex justify-between py-3 px-3 bg-muted/30 rounded-md"
                     ),
                     cls="space-y-2"
-                ),
-                signal="basic_hover"
-            ),
-            signal="basic_hover"
+                )
+            )
         ),
         cls="text-center"
     )
@@ -87,8 +81,7 @@ def user_profile_hover_card_example():
                         ),
                         Span("@shadcn", cls="text-sm font-medium"),
                         cls="flex items-center cursor-pointer hover:bg-muted/50 p-2 rounded-md transition-colors"
-                    ),
-                    signal="profile_hover"
+                    )
                 ),
                 HoverCardContent(
                     Div(
@@ -122,10 +115,8 @@ def user_profile_hover_card_example():
                         ),
                         cls="space-y-2"
                     ),
-                    signal="profile_hover",
                     cls="w-80"
-                ),
-                signal="profile_hover"
+                )
             ),
             cls="flex justify-center"
         )
@@ -139,16 +130,15 @@ def repository_hover_card_example():
         HoverCard(
             HoverCardTrigger(
                 Div(
-                    Icon("lucide:star", width="16", height="16", cls="mr-2 text-blue-500"),
+                    Icon("lucide:star", cls="h-4 w-4 mr-2 text-blue-500"),
                     A("starui/components", href="#", cls="text-blue-600 hover:underline font-medium"),
                     cls="inline-flex items-center cursor-pointer"
-                ),
-                signal="repo_hover"
+                )
             ),
             HoverCardContent(
                 Div(
                     Div(
-                        Icon("lucide:repo", width="16", height="16", cls="mr-2 text-muted-foreground"),
+                        Icon("lucide:folder-git-2", cls="h-4 w-4 mr-2 text-muted-foreground"),
                         H4("starui/components", cls="text-sm font-semibold text-blue-600"),
                         Badge("Public", variant="secondary", cls="ml-auto text-xs"),
                         cls="flex items-center mb-3"
@@ -156,9 +146,9 @@ def repository_hover_card_example():
                     P("Beautifully designed components that make building interfaces with StarHTML a breeze.", cls="text-sm text-muted-foreground mb-3"),
                     Div(
                         Div(
-                            Icon("lucide:star", width="14", height="14", cls="mr-1 text-yellow-500"),
+                            Icon("lucide:star", cls="h-3.5 w-3.5 mr-1 text-yellow-500"),
                             Span("2.1k", cls="text-sm font-medium mr-4"),
-                            Icon("lucide:git-fork", width="14", height="14", cls="mr-1 text-muted-foreground"),
+                            Icon("lucide:git-fork", cls="h-3.5 w-3.5 mr-1 text-muted-foreground"),
                             Span("184", cls="text-sm text-muted-foreground"),
                             cls="flex items-center mb-2"
                         ),
@@ -172,10 +162,8 @@ def repository_hover_card_example():
                     ),
                     cls="space-y-1"
                 ),
-                signal="repo_hover",
                 side="top"
-            ),
-            signal="repo_hover"
+            )
         ),
         cls="text-center"
     )
@@ -191,8 +179,7 @@ def product_preview_hover_card_example():
                     Div("📱", cls="text-xl mr-2"),
                     Span("iPhone 15 Pro", cls="text-sm font-medium text-blue-600"),
                     cls="flex items-center cursor-pointer hover:underline"
-                ),
-                signal="product_hover"
+                )
             ),
             HoverCardContent(
                 Div(
@@ -226,11 +213,9 @@ def product_preview_hover_card_example():
                     Button("Learn More", size="sm", cls="w-full"),
                     cls="space-y-3"
                 ),
-                signal="product_hover",
                 side="top",
                 cls="w-72"
-            ),
-            signal="product_hover"
+            )
         ),
         cls="text-center"
     )
@@ -246,20 +231,17 @@ def positioning_hover_card_examples():
     ]
 
     def create_positioned_hover_card(label, side, description, extra_props):
-        signal = f"{side}_hover"
         return HoverCard(
-            HoverCardTrigger(Button(label, variant="outline", size="sm"), signal=signal),
+            HoverCardTrigger(Button(label, variant="outline", size="sm")),
             HoverCardContent(
                 Div(
                     H4(f"{label} Position", cls="font-semibold mb-2"),
                     P(description, cls="text-sm text-muted-foreground"),
                     cls="text-center"
                 ),
-                signal=signal,
                 side=side,
                 **extra_props
-            ),
-            signal=signal
+            )
         )
 
     return Div(
@@ -273,7 +255,6 @@ def positioning_hover_card_examples():
     )
 
 
-# Link preview with rich content
 @with_code
 def link_preview_hover_card_example():
     return Div(
@@ -282,24 +263,20 @@ def link_preview_hover_card_example():
             P("Learn more about ",
               HoverCard(
                   HoverCardTrigger(
-                      A("StarHTML", href="#", cls="text-blue-600 hover:underline font-semibold"),
-                      signal="docs_hover"
+                      A("StarHTML", href="#", cls="text-blue-600 hover:underline font-semibold")
                   ),
                   HoverCardContent(
                       Div(
-                          # Header with icon and title
                           Div(
-                              Icon("lucide:book-open", width="20", height="20", cls="mr-3 text-blue-600"),
+                              Icon("lucide:book-open", cls="h-5 w-5 mr-3 text-blue-600"),
                               Div(
                                   H4("StarHTML Framework", cls="font-semibold text-sm mb-1"),
                                   P("Modern Python web framework", cls="text-xs text-muted-foreground"),
                               ),
                               cls="flex items-start mb-4"
                           ),
-                          # Description
                           P("A Python framework for building modern web applications with server-side rendering and reactive components.",
                             cls="text-sm text-muted-foreground mb-4"),
-                          # Features - simplified
                           Div(
                               H4("Key Features", cls="text-sm font-semibold mb-2"),
                               Div(
@@ -310,7 +287,6 @@ def link_preview_hover_card_example():
                               ),
                               cls="mb-4"
                           ),
-                          # Action links
                           Div(
                               A(
                                   "View Documentation →",
@@ -324,18 +300,15 @@ def link_preview_hover_card_example():
                               ),
                           ),
                       ),
-                      signal="docs_hover",
                       side="top",
                       cls="w-80"
-                  ),
-                  signal="docs_hover"
+                  )
               ),
               " and its component system.", cls="text-sm")
         )
     )
 
 
-# Interactive hover card with form
 @with_code
 def interactive_form_hover_card_example():
     contact_name = Signal("contact_name", "")
@@ -351,8 +324,7 @@ def interactive_form_hover_card_example():
                         Icon("lucide:mail", cls="h-4 w-4 mr-2"),
                         Span("Quick Contact", cls="text-sm font-medium"),
                         cls="flex items-center p-2 rounded-md border hover:bg-accent cursor-pointer"
-                    ),
-                    signal="contact_hover"
+                    )
                 ),
                 HoverCardContent(
                     Div(
@@ -366,7 +338,7 @@ def interactive_form_hover_card_example():
                                 UIInput(
                                     placeholder="Your name",
                                     cls="text-sm",
-                                    signal="contact_name"
+                                    signal=contact_name
                                 ),
                                 cls="mb-3"
                             ),
@@ -375,50 +347,45 @@ def interactive_form_hover_card_example():
                                 UIInput(
                                     type="email",
                                     placeholder="your@email.com",
-                                    signal="contact_email",
+                                    signal=contact_email,
                                     cls="text-sm"
                                 ),
                                 cls="mb-3"
                             ),
-                            TextareaWithLabel(
-                                label="Message",
-                                placeholder="Your message...",
-                                signal="contact_message",
-                                rows=3,
-                                cls="text-sm resize-none",
-                                class_name="mb-4"
+                            Div(
+                                TextareaWithLabel(
+                                    label="Message",
+                                    placeholder="Your message...",
+                                    signal=contact_message,
+                                    rows=3,
+                                    cls="text-sm resize-none"
+                                ),
+                                cls="mb-4"
                             ),
                             Button(
                                 "Send Message",
                                 size="sm",
                                 cls="w-full",
-                                data_attr_disabled=js("!$contact_name || !$contact_email || !$contact_message"),
-                                data_on_click=js("""
-                                    if ($contact_name && $contact_email && $contact_message) {
-                                        alert(`Thank you ${$contact_name}! Your message has been sent.`);
-                                        $contact_name = '';
-                                        $contact_email = '';
-                                        $contact_message = '';
-                                    }
-                                """)
+                                data_attr_disabled=~contact_name | ~contact_email | ~contact_message,
+                                data_on_click=[
+                                    f"alert('Thank you ' + {contact_name} + '! Your message has been sent.')",
+                                    contact_name.set(''),
+                                    contact_email.set(''),
+                                    contact_message.set('')
+                                ]
                             ),
                         ),
                         cls="space-y-2"
                     ),
-                    signal="contact_hover",
                     side="left",
                     cls="w-72"
-                ),
-                signal="contact_hover"
+                )
             ),
             cls="flex justify-center"
         )
     )
 
 
-# ============================================================================
-# MODULE-LEVEL DATA (for markdown API)
-# ============================================================================
 
 EXAMPLES_DATA = [
     {"title": "Basic Hover Card", "description": "Simple hover card with text content that appears on hover", "fn": basic_hover_card_example},
@@ -439,61 +406,7 @@ API_REFERENCE = build_api_reference(
 )
 
 
-def examples():
-    """Generate all hover card examples."""
-    yield ComponentPreview(
-        basic_hover_card_example(),
-        basic_hover_card_example.code,
-        title="Basic Hover Card",
-        description="Simple hover card with text content that appears on hover"
-    )
 
-    yield ComponentPreview(
-        user_profile_hover_card_example(),
-        user_profile_hover_card_example.code,
-        title="User Profile Hover Card",
-        description="Profile card with avatar, stats, and action buttons on hover"
-    )
-
-    yield ComponentPreview(
-        repository_hover_card_example(),
-        repository_hover_card_example.code,
-        title="Repository Hover Card",
-        description="GitHub-style repository preview with stats and metadata"
-    )
-
-    yield ComponentPreview(
-        product_preview_hover_card_example(),
-        product_preview_hover_card_example.code,
-        title="Product Preview Hover Card",
-        description="E-commerce product preview with image, features, and pricing"
-    )
-
-    yield ComponentPreview(
-        positioning_hover_card_examples(),
-        positioning_hover_card_examples.code,
-        title="Positioning Hover Cards",
-        description="Control hover card position relative to trigger (top, right, bottom, left)"
-    )
-
-    yield ComponentPreview(
-        link_preview_hover_card_example(),
-        link_preview_hover_card_example.code,
-        title="Link Preview Hover Card",
-        description="Inline link previews that provide context without navigation"
-    )
-
-    yield ComponentPreview(
-        interactive_form_hover_card_example(),
-        interactive_form_hover_card_example.code,
-        title="Interactive Form Hover Card",
-        description="Hover card with interactive form fields and validation"
-    )
-
-
-# ============================================================================
-# DOCUMENTATION PAGE GENERATION
-# ============================================================================
 
 def create_hover_card_docs():
     return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)

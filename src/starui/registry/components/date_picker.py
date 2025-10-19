@@ -91,7 +91,7 @@ def DatePicker(
 
     popover = Popover(
         _build_trigger(sig, selected, mode, placeholder, width, disabled, "lucide:calendar"),
-        PopoverContent(content, cls=popover_cls, align="start"),
+        PopoverContent(content, cls=popover_cls, align="start", container="none"),
         signal=f"{sig}_popover",
     )
 
@@ -151,7 +151,7 @@ def DateTimePicker(
 
     popover = Popover(
         _build_trigger(sig, selected, "single", placeholder, width, disabled, "lucide:calendar-clock", time=time),
-        PopoverContent(content, cls="w-fit p-0 max-h-[600px] overflow-y-auto", align="start", offset=8),
+        PopoverContent(content, cls="w-fit p-0 max-h-[600px] overflow-y-auto", align="start", offset=8, container="none"),
     )
 
     return with_signals(
@@ -247,7 +247,7 @@ def _build_input_popover_content(content_id: str, trigger_id: str, cal: str, ini
         "flip": True,
         "shift": True,
         "hide": True,
-        "container": "auto",
+        "container": "none",
     }
 
     return Div(

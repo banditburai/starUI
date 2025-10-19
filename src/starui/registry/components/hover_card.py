@@ -88,6 +88,7 @@ def HoverCardContent(
             aria_labelledby=f"{sig}_trigger",
             tabindex="-1",
             data_slot="hover-card-content",
+            style="display: none",
             cls=cn(
                 "fixed z-50 w-72 max-w-[90vw] pointer-events-auto",
                 "rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none overflow-hidden",

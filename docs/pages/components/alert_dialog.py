@@ -20,33 +20,48 @@ from starui.registry.components.card import Card, CardHeader, CardContent, CardT
 from starui.registry.components.badge import Badge
 from starui.registry.components.input import InputWithLabel
 from starui.registry.components.checkbox import CheckboxWithLabel
+from starui.registry.components.utils import cn
 from utils import auto_generate_page, with_code, Prop, Component, build_api_reference
 from widgets.component_preview import ComponentPreview
 
 
-# ============================================================================
-# EXAMPLE FUNCTIONS (decorated with @with_code for markdown generation)
-# ============================================================================
+
 
 @with_code
-def basic_alert_dialog_example():
-    dialog_content = AlertDialogContent(
-        AlertDialogHeader(
-            AlertDialogTitle("Heads up!"),
-            AlertDialogDescription(
-                "This is an important message that requires your attention."
+def hero_alert_dialog_example():
+    return AlertDialog(
+        AlertDialogTrigger("Delete Item", variant="destructive"),
+        AlertDialogContent(
+            AlertDialogHeader(
+                AlertDialogTitle("Are you absolutely sure?"),
+                AlertDialogDescription(
+                    "This action cannot be undone. This will permanently delete your item and remove it from our servers."
+                )
+            ),
+            AlertDialogFooter(
+                AlertDialogCancel("Cancel"),
+                AlertDialogAction("Delete", variant="destructive")
             )
-        ),
-        AlertDialogFooter(
-            AlertDialogCancel("Dismiss"),
-            AlertDialogAction("Understood")
         )
     )
 
+
+@with_code
+def basic_alert_dialog_example():
     return AlertDialog(
         AlertDialogTrigger("Show Alert"),
-        dialog_content,
-        signal="basic_alert"
+        AlertDialogContent(
+            AlertDialogHeader(
+                AlertDialogTitle("Heads up!"),
+                AlertDialogDescription(
+                    "This is an important message that requires your attention."
+                )
+            ),
+            AlertDialogFooter(
+                AlertDialogCancel("Dismiss"),
+                AlertDialogAction("Understood")
+            )
+        )
     )
 
 
@@ -61,16 +76,15 @@ def destructive_alert_dialog_example():
         
         danger_info = Div(
             P("Delete Repository", cls="font-medium"),
-            P("Once deleted, it will be gone forever", 
+            P("Once deleted, it will be gone forever",
               cls="text-sm text-muted-foreground mt-1"),
             cls="flex-1"
         )
-        
+
         dialog_content = AlertDialogContent(
             AlertDialogHeader(
                 AlertDialogTitle(
-                    Icon("lucide:alert-triangle", width="24", height="24", 
-                         cls="mr-2 text-destructive"),
+                    Icon("lucide:alert-triangle", cls="h-6 w-6 mr-2 text-destructive"),
                     "Delete Repository"
                 ),
                 AlertDialogDescription(
@@ -87,10 +101,7 @@ def destructive_alert_dialog_example():
             ),
             AlertDialogFooter(
                 AlertDialogCancel("Cancel"),
-                AlertDialogAction(
-                    "Delete Repository",
-                    variant="destructive"
-                )
+                AlertDialogAction("Delete Repository", variant="destructive")
             )
         )
 
@@ -109,8 +120,7 @@ def destructive_alert_dialog_example():
                             variant="destructive",
                             size="sm"
                         ),
-                        dialog_content,
-                        signal="delete_repo"
+                        dialog_content
                     ),
                     cls="flex items-end justify-between gap-6 p-6 border rounded-lg"
                 )
@@ -121,9 +131,9 @@ def destructive_alert_dialog_example():
 
 @with_code
 def unsaved_changes_alert_dialog_example():
-    return Card(            
-        (doc_title := Signal("doc_title", "My Document", _ref_only=True)),
-        (doc_author := Signal("doc_author", "John Doe", _ref_only=True)),
+    return Card(
+        (doc_title := Signal("doc_title", "My Document")),
+        (doc_author := Signal("doc_author", "John Doe")),
 
         CardHeader(
             CardTitle("Document Editor"),
@@ -133,11 +143,13 @@ def unsaved_changes_alert_dialog_example():
             Div(
                 InputWithLabel(
                     label="Document Title",
-                    value="My Document",                    
+                    value="My Document",
+                    signal=doc_title
                 ),
                 InputWithLabel(
                     label="Author",
-                    value="John Doe",                    
+                    value="John Doe",
+                    signal=doc_author,
                     cls="mt-4"
                 ),
                 P("Make changes to the document fields above and try to save.",
@@ -187,120 +199,103 @@ def unsaved_changes_alert_dialog_example():
 
 @with_code
 def session_timeout_alert_dialog_example():
+    session_time = Signal("session_time", 15)
+    logged_in = Signal("logged_in", False)
+    timer_active = Signal("timer_active", False)
+
+    reset_actions = [
+        logged_in.set(False),
+        timer_active.set(False),
+        session_time.set(15)
+    ]
+
+    start_session_actions = [
+        logged_in.set(True),
+        session_time.set(15),
+        timer_active.set(True)
+    ]
+
+    progress_bar = Div(
+        Div(
+            data_attr_style="width: " + (session_time / 15) * 100 + "%",
+            cls="h-2 bg-orange-500 rounded-full transition-all duration-1000"
+        ),
+        cls="w-full bg-secondary rounded-full h-2 mt-2"
+    )
+
+    session_display = Div(
+        P("Logged in as: user@example.com", cls="text-sm font-medium mb-2"),
+        P(
+            "Session expires in: ",
+            Span(data_text=session_time, cls="font-mono font-bold text-lg"),
+            " seconds",
+            cls="text-sm"
+        ),
+        progress_bar,
+        Button("Logout", data_on_click=reset_actions, variant="outline", size="sm", cls="mt-4"),
+        data_show=logged_in,
+        cls="space-y-2"
+    )
+
+    timer_effect = Div(
+        data_effect=js("""
+            if ($timer_active && $logged_in) {
+                const timer = setInterval(() => {
+                    if (!$timer_active || !$logged_in) {
+                        clearInterval(timer);
+                        return;
+                    }
+                    $session_time--;
+                    if ($session_time === 5) $timeout_dialog?.showModal();
+                    if ($session_time <= 0) {
+                        clearInterval(timer);
+                        $timeout_dialog?.close();
+                        $logged_in = false;
+                        $timer_active = false;
+                        $session_time = 15;
+                    }
+                }, 1000);
+                return () => clearInterval(timer);
+            }
+        """)
+    )
+
+    timeout_dialog = AlertDialog(
+        AlertDialogContent(
+            Icon("lucide:clock", cls="h-12 w-12 text-orange-500 mx-auto mb-4"),
+            AlertDialogHeader(
+                AlertDialogTitle("Session Expiring Soon"),
+                AlertDialogDescription(
+                    "Your session will expire in ",
+                    Span(data_text=session_time, cls="font-bold text-orange-500"),
+                    " seconds. Do you want to continue?"
+                )
+            ),
+            AlertDialogFooter(
+                AlertDialogAction("Logout Now", variant="destructive", action=reset_actions),
+                AlertDialogAction("Continue Session", action=session_time.set(15))
+            )
+        ),
+        signal="timeout_dialog"
+    )
+
     return Div(
         Card(
-            (session_time := Signal("session_time", 15)),
-            (logged_in := Signal("logged_in", False)),
-            (timer_active := Signal("timer_active", False)),
-
+            session_time,
+            logged_in,
+            timer_active,
             CardHeader(
                 CardTitle("Session Management"),
                 CardDescription("Auto-logout demonstration with warning")
             ),
             CardContent(
                 Div(
-                    Button(
-                        "Login",
-                        data_on_click=[
-                            logged_in.set(True),
-                            session_time.set(15),
-                            timer_active.set(True)
-                        ],
-                        variant="default"
-                    ),
+                    Button("Login", data_on_click=start_session_actions, variant="default"),
                     data_show=~logged_in
                 ),
-
-                Div(
-                    P("Logged in as: user@example.com", cls="text-sm font-medium mb-2"),
-                    P(
-                        "Session expires in: ",
-                        Span(data_text=session_time, cls="font-mono font-bold text-lg"),
-                        " seconds",
-                        cls="text-sm"
-                    ),
-
-                    Div(
-                        Div(
-                            data_attr_style="width: " + (session_time / 15) * 100 + "%",
-                            cls="h-2 bg-orange-500 rounded-full transition-all duration-1000"
-                        ),
-                        cls="w-full bg-secondary rounded-full h-2 mt-2"
-                    ),
-
-                    Button(
-                        "Logout",
-                        data_on_click=[
-                            logged_in.set(False),
-                            timer_active.set(False),
-                            session_time.set(15)
-                        ],
-                        variant="outline",
-                        size="sm",
-                        cls="mt-4"
-                    ),
-                    data_show=logged_in,
-                    cls="space-y-2"
-                ),
-
-                Div(
-                    data_effect=js("""
-                        if ($timer_active && $logged_in) {
-                            const timer = setInterval(() => {
-                                if (!$timer_active || !$logged_in) {
-                                    clearInterval(timer);
-                                    return;
-                                }
-
-                                $session_time = Math.max(0, $session_time - 1);
-
-                                if ($session_time === 5) {
-                                    document.getElementById('timeout_dialog')?.showModal();
-                                }
-
-                                if ($session_time === 0) {
-                                    clearInterval(timer);
-                                    document.getElementById('timeout_dialog')?.close();
-                                    $logged_in = false;
-                                    $timer_active = false;
-                                    $session_time = 15;
-                                }
-                            }, 1000);
-
-                            return () => clearInterval(timer);
-                        }
-                    """)
-                ),
-
-                AlertDialog(
-                    AlertDialogContent(
-                        Icon("lucide:clock", cls="h-12 w-12 text-orange-500 mx-auto mb-4"),
-                        AlertDialogHeader(
-                            AlertDialogTitle("Session Expiring Soon"),
-                            AlertDialogDescription(
-                                "Your session will expire in ",
-                                Span(data_text=session_time, cls="font-bold text-orange-500"),
-                                " seconds. Do you want to continue?"
-                            )
-                        ),
-                        AlertDialogFooter(
-                            AlertDialogAction(
-                                "Logout Now",
-                                variant="destructive",
-                                action=[
-                                    logged_in.set(False),
-                                    timer_active.set(False),
-                                    session_time.set(15)
-                                ]
-                            ),
-                            AlertDialogAction(
-                                "Continue Session",
-                                action=session_time.set(15)
-                            )
-                        )
-                    ),
-                    signal="timeout_dialog"  # Needed for programmatic opening via JS
-                )
+                session_display,
+                timer_effect,
+                timeout_dialog
             ),
             cls="w-full max-w-lg"
         ),
@@ -310,98 +305,83 @@ def session_timeout_alert_dialog_example():
 
 @with_code
 def batch_operation_alert_dialog_example():
-    return Card(
-        # Define all signals inline where they're collected
-        (file1 := Signal("file1", True, _ref_only=True)),
-        (file2 := Signal("file2", True, _ref_only=True)),
-        (file3 := Signal("file3", False, _ref_only=True)),
-        (file4 := Signal("file4", True, _ref_only=True)),
-        (file1_exists := Signal("file1_exists", True)),
-        (file2_exists := Signal("file2_exists", True)),
-        (file3_exists := Signal("file3_exists", True)),
-        (file4_exists := Signal("file4_exists", True)),
+    files = [
+        {"name": "file1.txt", "checked": True},
+        {"name": "file2.pdf", "checked": True},
+        {"name": "file3.jpg", "checked": False},
+        {"name": "file4.doc", "checked": True},
+    ]
 
+    selected = Signal("batch_selected", [i for i, f in enumerate(files) if f["checked"]])
+    visible = Signal("batch_visible", list(range(len(files))))
+
+    file_checkboxes = [
+        Div(
+            CheckboxWithLabel(
+                label=f["name"],
+                checked=f["checked"],
+                data_on_change=selected.toggle_in(i)
+            ),
+            data_show=visible.contains(i)
+        )
+        for i, f in enumerate(files)
+    ]
+
+    dialog_items = [
+        Li(f["name"], data_show=selected.contains(i), cls="text-sm text-muted-foreground")
+        for i, f in enumerate(files)
+    ]
+
+    delete_action = js("$batch_visible = $batch_visible.filter(v => !$batch_selected.includes(v)); $batch_selected = []")
+
+    selection_count = P(
+        Span(data_text=selected.length, cls="font-bold"),
+        " items selected",
+        cls="text-sm text-muted-foreground"
+    )
+
+    delete_dialog = AlertDialog(
+        AlertDialogTrigger(
+            Icon("lucide:trash-2", cls="h-4 w-4 mr-2"),
+            "Delete Selected",
+            variant="destructive",
+            data_attr_disabled=selected.length.eq(0)
+        ),
+        AlertDialogContent(
+            AlertDialogHeader(
+                AlertDialogTitle("Delete Multiple Items"),
+                AlertDialogDescription(
+                    "You are about to delete ",
+                    Span(data_text=selected.length, cls="font-bold text-destructive"),
+                    " items. This action cannot be undone."
+                )
+            ),
+            Div(
+                P("The following items will be deleted:", cls="text-sm font-medium mb-2"),
+                Ul(*dialog_items, cls="list-disc list-inside space-y-1"),
+                cls="py-4"
+            ),
+            AlertDialogFooter(
+                AlertDialogCancel("Cancel"),
+                AlertDialogAction(
+                    data_text="Delete " + selected.length + " Items",
+                    variant="destructive",
+                    action=delete_action
+                )
+            )
+        )
+    )
+
+    return Card(
+        selected,
+        visible,
         CardHeader(
             CardTitle("Batch Operations"),
             CardDescription("Confirm actions on multiple items")
         ),
         CardContent(
-            Div(
-                Div(
-                    Div(
-                        CheckboxWithLabel(label="file1.txt", signal=file1, checked=True),
-                        data_show=file1_exists
-                    ),
-                    Div(
-                        CheckboxWithLabel(label="file2.pdf", signal=file2, checked=True),
-                        data_show=file2_exists
-                    ),
-                    Div(
-                        CheckboxWithLabel(label="file3.jpg", signal=file3, checked=False),
-                        data_show=file3_exists
-                    ),
-                    Div(
-                        CheckboxWithLabel(label="file4.doc", signal=file4, checked=True),
-                        data_show=file4_exists
-                    ),
-                    cls="space-y-2"
-                ),
-
-                Div(
-                    P(
-                        Span(data_text=js("[$file1, $file2, $file3, $file4].filter(Boolean).length"), cls="font-bold"),
-                        " items selected",
-                        cls="text-sm text-muted-foreground"
-                    ),
-                    AlertDialog(
-                        AlertDialogTrigger(
-                            Icon("lucide:trash-2", cls="h-4 w-4 mr-2"),
-                            "Delete Selected",
-                            variant="destructive",
-                            data_attr_disabled=~(file1 | file2 | file3 | file4)
-                        ),
-                        AlertDialogContent(
-                            AlertDialogHeader(
-                                AlertDialogTitle("Delete Multiple Items"),
-                                AlertDialogDescription(
-                                    "You are about to delete ",
-                                    Span(
-                                        data_text=js("[$file1, $file2, $file3, $file4].filter(Boolean).length"),
-                                        cls="font-bold text-destructive"
-                                    ),
-                                    " items. This action cannot be undone."
-                                )
-                            ),
-                            Div(
-                                P("The following items will be deleted:", cls="text-sm font-medium mb-2"),
-                                Ul(
-                                    Li("file1.txt", data_show=file1, cls="text-sm text-muted-foreground"),
-                                    Li("file2.pdf", data_show=file2, cls="text-sm text-muted-foreground"),
-                                    Li("file3.jpg", data_show=file3, cls="text-sm text-muted-foreground"),
-                                    Li("file4.doc", data_show=file4, cls="text-sm text-muted-foreground"),
-                                    cls="list-disc list-inside space-y-1"
-                                ),
-                                cls="py-4"
-                            ),
-                            AlertDialogFooter(
-                                AlertDialogCancel("Cancel"),
-                                AlertDialogAction(
-                                    data_text=js("'Delete ' + [$file1, $file2, $file3, $file4].filter(Boolean).length + ' Items'"),
-                                    variant="destructive",
-                                    action=js("""
-                                        if($file1) { $file1_exists=false; $file1=false; }
-                                        if($file2) { $file2_exists=false; $file2=false; }
-                                        if($file3) { $file3_exists=false; $file3=false; }
-                                        if($file4) { $file4_exists=false; $file4=false; }
-                                    """)
-                                )
-                            )
-                        )
-                    ),
-                    cls="flex items-center gap-4 mt-4"
-                ),
-                cls="space-y-2"
-            )
+            Div(*file_checkboxes, cls="space-y-2"),
+            Div(selection_count, delete_dialog, cls="flex items-center gap-4 mt-4")
         ),
         cls="max-w-md"
     )
@@ -413,7 +393,7 @@ def payment_confirmation_alert_dialog_example():
         return Div(
             P(label, cls="text-sm text-muted-foreground"),
             P(value, cls="font-medium"),
-            cls=f"flex justify-between py-2 {extra_cls}".strip()
+            cls=cn("flex justify-between py-2", extra_cls)
         )
     
     order_summary = Div(
@@ -444,22 +424,6 @@ def payment_confirmation_alert_dialog_example():
         cls="space-y-2"
     )
     
-    dialog_content = AlertDialogContent(
-        AlertDialogHeader(
-            AlertDialogTitle(
-                Icon("lucide:shield-check", width="24", height="24", 
-                     cls="mr-2 text-green-500"),
-                "Confirm Payment"
-            ),
-            AlertDialogDescription("Please review and confirm your purchase")
-        ),
-        Div(security_badge, payment_details, cls="py-4"),
-        AlertDialogFooter(
-            AlertDialogCancel("Cancel"),
-            AlertDialogAction("Confirm Payment")
-        )
-    )
-
     return Card(
         CardHeader(
             CardTitle("Complete Purchase"),
@@ -473,43 +437,26 @@ def payment_confirmation_alert_dialog_example():
                     "Complete Purchase",
                     cls="w-full"
                 ),
-                dialog_content
+                AlertDialogContent(
+                    AlertDialogHeader(
+                        AlertDialogTitle(
+                            Icon("lucide:shield-check", cls="h-6 w-6 mr-2 text-green-500"),
+                            "Confirm Payment"
+                        ),
+                        AlertDialogDescription("Please review and confirm your purchase")
+                    ),
+                    Div(security_badge, payment_details, cls="py-4"),
+                    AlertDialogFooter(
+                        AlertDialogCancel("Cancel"),
+                        AlertDialogAction("Confirm Payment")
+                    )
+                )
             )
         ),
         cls="max-w-sm"
     )
 
 
-@with_code
-def hero_alert_dialog_example():
-    dialog_content = AlertDialogContent(
-        AlertDialogHeader(
-            AlertDialogTitle("Are you absolutely sure?"),
-            AlertDialogDescription(
-                "This action cannot be undone. This will permanently delete your item and remove it from our servers."
-            )
-        ),
-        AlertDialogFooter(
-            AlertDialogCancel("Cancel"),
-            AlertDialogAction(
-                "Delete",
-                variant="destructive"
-            )
-        )
-    )
-
-    return AlertDialog(
-        AlertDialogTrigger(
-            "Delete Item",
-            variant="destructive"
-        ),
-        dialog_content
-    )
-
-
-# ============================================================================
-# MODULE-LEVEL DATA
-# ============================================================================
 
 EXAMPLES_DATA = [
     {"fn": hero_alert_dialog_example, "title": "Hero Alert Dialog", "description": "Confirmation dialog with destructive action"},
@@ -536,9 +483,6 @@ API_REFERENCE = build_api_reference(
 )
 
 
-# ============================================================================
-# DOCS PAGE
-# ============================================================================
 
 def create_alert_dialog_docs():
     return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)

@@ -11,7 +11,7 @@ TabsVariant = Literal["default", "plain"]
 
 def Tabs(
     *children: Any,
-    default_value: str | int = 0,
+    value: str | int = 0,
     variant: TabsVariant = "default",
     signal: str | Signal = "",
     cls: str = "",
@@ -20,9 +20,9 @@ def Tabs(
     sig = getattr(signal, 'id', signal) or gen_id("tabs")
 
     ctx = dict(
-        tabs_state=(tabs_state := Signal(sig, default_value)),
+        tabs_state=(tabs_state := Signal(sig, value)),
         variant=variant,
-        default_value=default_value,
+        initial_value=value,
         _trigger_index=count(),
         _content_index=count(),
     )
@@ -67,6 +67,10 @@ def TabsTrigger(
         tab_id = id if id is not None else next(_trigger_index)
         is_active = tabs_state == tab_id
 
+        user_on_click = kwargs.pop('data_on_click', None)
+        user_actions = user_on_click if isinstance(user_on_click, list) else ([user_on_click] if user_on_click else [])
+        click_actions = [tabs_state.set(tab_id)] + user_actions
+
         base = (
             "inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center "
             "gap-1.5 rounded-md py-1 font-medium "
@@ -82,7 +86,7 @@ def TabsTrigger(
 
         return HTMLButton(
             *children,
-            data_on_click=tabs_state.set(tab_id),
+            data_on_click=click_actions,
             disabled=disabled,
             type="button",
             role="tab",
@@ -104,7 +108,7 @@ def TabsTrigger(
 
 
 def TabsContent(*children: Any, id: str | int | None = None, cls: str = "", **kwargs: Any) -> FT:
-    def _(*, tabs_state, default_value, _content_index, **_):
+    def _(*, tabs_state, initial_value, _content_index, **_):
         tab_id = id if id is not None else next(_content_index)
         is_active = tabs_state == tab_id
 
@@ -116,7 +120,7 @@ def TabsContent(*children: Any, id: str | int | None = None, cls: str = "", **kw
             id=f"panel-{tab_id}",
             aria_labelledby=str(tab_id),
             tabindex="0",
-            style="display: none" if tab_id != default_value else None,
+            style="display: none" if tab_id != initial_value else None,
             cls=cn("mt-2 outline-none overflow-x-auto", cls),
             **kwargs,
         )

@@ -4,7 +4,8 @@ CATEGORY = "ui"
 ORDER = 50
 STATUS = "stable"
 
-from starhtml import Div, P, H3, Pre, Code, Span, Icon, Signal, js
+from starhtml import Div, P, H3, Pre, Code, Span, Icon, Signal
+from starhtml.datastar import clipboard, set_timeout
 from starui.registry.components.button import Button
 from starui.registry.components.code_block import CodeBlock, CodeBlockStyles, InlineCode
 from starui.registry.components.badge import Badge
@@ -13,9 +14,29 @@ from widgets.component_preview import ComponentPreview
 from utils import auto_generate_page, with_code, Prop, Component, build_api_reference
 
 
-# ============================================================================
-# EXAMPLE FUNCTIONS (decorated with @with_code for markdown generation)
-# ============================================================================
+
+def copy_button_pair(signal, content, size="sm", button_cls=""):
+    """Reusable copy/check button pair with visual feedback."""
+    base_button_props = {"variant": "ghost", "size": size}
+    if button_cls:
+        base_button_props["cls"] = button_cls
+
+    return Div(
+        Button(
+            Icon("lucide:copy", cls="w-4 h-4"),
+            data_on_click=[clipboard(text=content), signal.set(True), set_timeout([signal.set(False)], 2000)],
+            data_show=~signal,
+            **base_button_props
+        ),
+        Button(
+            Icon("lucide:check", cls="w-4 h-4"),
+            data_show=signal,
+            **{**base_button_props, "cls": f"{button_cls} text-green-600".strip()}
+        ),
+        cls="flex"
+    )
+
+
 
 @with_code
 def python_syntax_highlighting_example():
@@ -40,7 +61,7 @@ print(f"Fibonacci numbers up to 100: {numbers}")''', language="python"),
 
 @with_code
 def interactive_copy_feature_example():
-    code_content = Signal("code_content", '''import asyncio
+    code = '''import asyncio
 from datetime import datetime
 
 async def process_data(data):
@@ -72,78 +93,24 @@ async def main():
         print(f"Result: {result}")
 
 if __name__ == "__main__":
-    asyncio.run(main())''')
+    asyncio.run(main())'''
+
+    code_content = Signal("code_content", code)
     copied = Signal("copied", False)
 
     return Div(
         P("Interactive Code Block", cls="font-medium mb-3"),
-
-        # Code block with copy button - using relative positioning
         Div(
             code_content, copied,
-            # Header that overlaps the CodeBlock
             Div(
                 Span("example.py", cls="text-sm font-mono text-muted-foreground"),
-                Div(
-                    Button(
-                        Icon("lucide:copy", cls="w-4 h-4"),
-                        data_on_click="navigator.clipboard.writeText($code_content); $copied = true; setTimeout(() => $copied = false, 2000)",
-                        data_show=js("!$copied"),
-                        variant="ghost",
-                        size="sm"
-                    ),
-                    Button(
-                        Icon("lucide:check", cls="w-4 h-4"),
-                        data_show=copied,
-                        variant="ghost",
-                        size="sm",
-                        cls="text-green-600"
-                    ),
-                    cls="flex"
-                ),
+                copy_button_pair(copied, code_content),
                 cls="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4 py-3 bg-muted/95 backdrop-blur-sm border-b border-border rounded-t-lg"
             ),
-
-            # Code content with blank lines to account for header overlay
-            CodeBlock('''
-
-import asyncio
-from datetime import datetime
-
-async def process_data(data):
-    """Process data asynchronously with timestamp."""
-    timestamp = datetime.now().isoformat()
-    print(f"[{timestamp}] Processing: {data}")
-
-    # Simulate async work
-    await asyncio.sleep(1)
-
-    result = {
-        'processed_data': data.upper(),
-        'timestamp': timestamp,
-        'status': 'completed'
-    }
-
-    return result
-
-# Example usage
-async def main():
-    tasks = [
-        process_data("hello"),
-        process_data("world"),
-        process_data("async")
-    ]
-
-    results = await asyncio.gather(*tasks)
-    for result in results:
-        print(f"Result: {result}")
-
-if __name__ == "__main__":
-    asyncio.run(main())''', language="python"),
-
+            # Blank lines at top provide space for overlay header
+            CodeBlock(f'\n\n{code}', language="python"),
             cls="relative rounded-lg overflow-hidden"
         ),
-
         cls="w-full overflow-x-auto",
         style="scrollbar-width: thin; scrollbar-color: transparent transparent;"
     )
@@ -192,67 +159,41 @@ def inline_code_snippets_example():
 
 @with_code
 def documentation_layout_example():
-    # Create signals for each package manager
-    npm_copied = Signal("npm_copied", False)
-    pnpm_copied = Signal("pnpm_copied", False)
-    yarn_copied = Signal("yarn_copied", False)
+    package_managers = [
+        ("npm", "npm install starui", "mb-4"),
+        ("pnpm", "pnpm add starui", "mb-4"),
+        ("yarn", "yarn add starui", "mb-6")
+    ]
 
-    signals_map = {
-        "npm": npm_copied,
-        "pnpm": pnpm_copied,
-        "yarn": yarn_copied
-    }
+    copied_signals = {name: Signal(f"{name}_copied", False) for name, _, _ in package_managers}
 
     def create_package_manager_block(manager, command, margin_cls):
-        signal = signals_map[manager]
-        signal_name = f"{manager}_copied"
+        signal = copied_signals[manager]
+        button_position_cls = "absolute top-1/2 right-2 -translate-y-1/2 h-8 w-8"
         return Div(
             signal,
             P(manager, cls="text-xs text-muted-foreground mb-1"),
             Div(
                 CodeBlock(command, language="bash", cls="text-sm py-3"),
-                Button(
-                    Icon("lucide:copy", cls="w-4 h-4"),
-                    data_on_click=f"navigator.clipboard.writeText('{command}'); ${signal_name} = true; setTimeout(() => ${signal_name} = false, 2000)",
-                    data_show=js(f"!${signal_name}"),
-                    variant="ghost",
-                    size="icon",
-                    cls="absolute top-1/2 right-2 -translate-y-1/2 h-8 w-8"
-                ),
-                Button(
-                    Icon("lucide:check", cls="w-4 h-4"),
-                    data_show=signal,
-                    variant="ghost",
-                    size="icon",
-                    cls="absolute top-1/2 right-2 -translate-y-1/2 h-8 w-8 text-green-600"
-                ),
+                copy_button_pair(signal, command, size="icon", button_cls=button_position_cls),
                 cls="relative"
             ),
             cls=margin_cls
         )
 
     return Div(
-        # Installation section
         Div(
             H3("Installation", cls="text-lg font-semibold mb-3"),
             P("Install StarUI using your preferred package manager:", cls="text-sm text-muted-foreground mb-3"),
-
-            *[create_package_manager_block(*pm) for pm in [
-                ("npm", "npm install starui", "mb-4"),
-                ("pnpm", "pnpm add starui", "mb-4"),
-                ("yarn", "yarn add starui", "mb-6")
-            ]],
-
+            *[create_package_manager_block(*pm) for pm in package_managers],
             cls="mb-8"
         ),
 
         Separator(cls="mb-8"),
 
-        # Usage section
         Div(
             H3("Quick Start", cls="text-lg font-semibold mb-3"),
             P("Import and use components in your project:", cls="text-sm text-muted-foreground mb-3"),
-
             CodeBlock('''from starhtml import Div, H1, P
 from starui import Button, Card, CardHeader, CardTitle, CardContent
 
@@ -268,9 +209,7 @@ def my_app():
             )
         ),
         cls="max-w-md mx-auto mt-8"
-    )''', language="python"),
-
-            cls=""
+    )''', language="python")
         ),
 
         cls="w-full px-3 sm:px-4 py-4 sm:py-6 border rounded-lg overflow-x-auto",
@@ -280,25 +219,20 @@ def my_app():
 
 @with_code
 def terminal_output_example():
-        return Div(
-            P("Terminal Output", cls="font-medium mb-3"),
-            
-            # Terminal-style code block with overlay header
+    return Div(
+        P("Terminal Output", cls="font-medium mb-3"),
+
+        Div(
             Div(
-                # Terminal header overlay
                 Div(
-                    Div(
-                        Div(cls="w-3 h-3 rounded-full bg-red-500"),
-                        Div(cls="w-3 h-3 rounded-full bg-yellow-500"),
-                        Div(cls="w-3 h-3 rounded-full bg-green-500"),
-                        cls="flex gap-2"
-                    ),
-                    Span("Terminal", cls="text-sm text-muted-foreground"),
-                    cls="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4 py-3 bg-gray-800 border-b border-gray-700 rounded-t-lg"
+                    *[Div(cls=f"w-3 h-3 rounded-full bg-{color}-500") for color in ["red", "yellow", "green"]],
+                    cls="flex gap-2"
                 ),
-                
-                # Terminal content with blank lines for header space
-                CodeBlock('''
+                Span("Terminal", cls="text-sm text-muted-foreground"),
+                cls="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4 py-3 bg-gray-800 border-b border-gray-700 rounded-t-lg"
+            ),
+            
+            CodeBlock('''
 
 $ star create my-project
 Creating new StarUI project...
@@ -321,21 +255,18 @@ Adding Button component...
 ✓ Documentation generated
 
 Component 'Button' added successfully!
-Run 'star dev' to see your changes.''', 
-                         language="bash",
-                         cls="bg-gray-900 text-green-400 font-mono"),
-                
-                cls="relative rounded-lg overflow-hidden"
-            ),
-            
-            cls="w-full overflow-x-auto",
-            style="scrollbar-width: thin; scrollbar-color: transparent transparent;"
-        )
+Run 'star dev' to see your changes.''',
+                       language="bash",
+                       cls="bg-gray-900 text-green-400 font-mono"),
+
+            cls="relative rounded-lg overflow-hidden"
+        ),
+
+        cls="w-full overflow-x-auto",
+        style="scrollbar-width: thin; scrollbar-color: transparent transparent;"
+    )
 
 
-# ============================================================================
-# MODULE-LEVEL DATA (for markdown API)
-# ============================================================================
 
 EXAMPLES_DATA = [
     {"title": "Python Syntax Highlighting", "description": "Display Python code with automatic syntax highlighting", "fn": python_syntax_highlighting_example},
@@ -352,44 +283,6 @@ API_REFERENCE = build_api_reference(
         Component("InlineCode", "Highlight short code snippets within text and documentation"),
     ]
 )
-
-
-def examples():
-    """Generate all code block examples."""
-    yield ComponentPreview(
-        python_syntax_highlighting_example(),
-        python_syntax_highlighting_example.code,
-        title="Python Syntax Highlighting",
-        description="Display Python code with automatic syntax highlighting"
-    )
-
-    yield ComponentPreview(
-        interactive_copy_feature_example(),
-        interactive_copy_feature_example.code,
-        title="Interactive Copy Feature",
-        description="Add copy-to-clipboard functionality with visual feedback"
-    )
-
-    yield ComponentPreview(
-        inline_code_snippets_example(),
-        inline_code_snippets_example.code,
-        title="Inline Code Snippets",
-        description="Highlight short code snippets within text and documentation"
-    )
-
-    yield ComponentPreview(
-        documentation_layout_example(),
-        documentation_layout_example.code,
-        title="Documentation Layout",
-        description="Structure documentation with code blocks for installation and usage examples"
-    )
-
-    yield ComponentPreview(
-        terminal_output_example(),
-        terminal_output_example.code,
-        title="Terminal Output",
-        description="Style code blocks to look like terminal output with custom colors"
-    )
 
 
 def create_code_block_docs():

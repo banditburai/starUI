@@ -24,15 +24,25 @@ def AvatarImage(
     src: str,
     alt: str = "",
     loading: str = "lazy",
+    signal: str | Signal = "",
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    return Img(
-        src=src,
-        alt=alt,
-        loading=loading,
-        cls=cn("aspect-square size-full object-cover", cls),
-        **kwargs,
+    sig = getattr(signal, 'id', signal) or gen_id("avatar_img_error")
+    error_state = Signal(sig, False)
+
+    return Div(
+        error_state,
+        Img(
+            src=src,
+            alt=alt,
+            loading=loading,
+            data_on_error=error_state.set(True),
+            data_show=~error_state,
+            cls=cn("aspect-square size-full object-cover", cls),
+            **kwargs,
+        ),
+        style="display: contents"
     )
 
 
@@ -47,43 +57,5 @@ def AvatarFallback(
             "flex size-full items-center justify-center rounded-full bg-muted",
             cls,
         ),
-        **kwargs,
-    )
-
-
-def AvatarWithFallback(
-    src: str | None = None,
-    alt: str = "",
-    fallback: str = "?",
-    loading: str = "lazy",
-    signal: str | Signal = "",
-    cls: str = "",
-    **kwargs: Any,
-) -> FT:
-    if not src:
-        return Avatar(
-            AvatarFallback(fallback),
-            cls=cls,
-            **kwargs,
-        )
-
-    sig = getattr(signal, 'id', signal) or gen_id("avatar_error")
-
-    return Avatar(
-        (error_state := Signal(sig, False)),
-        Img(
-            src=src,
-            alt=alt,
-            loading=loading,
-            data_show=~error_state,
-            data_on_error=error_state.set(True),
-            cls="aspect-square size-full object-cover",
-        ),
-        Div(
-            fallback,
-            data_show=error_state,
-            cls="flex size-full items-center justify-center rounded-full bg-muted",
-        ),
-        cls=cls,
         **kwargs,
     )

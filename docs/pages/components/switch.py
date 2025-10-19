@@ -10,21 +10,14 @@ CATEGORY = "form"
 ORDER = 35
 STATUS = "stable"
 
-from starhtml import Div, P, Input, Label, Icon, Span, H2, H3, Form, Code, Signal, js
+from starhtml import Div, P, Label, Icon, Form, Signal
 from starui.registry.components.switch import Switch, SwitchWithLabel
 from starui.registry.components.button import Button
 from starui.registry.components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
 from starui.registry.components.badge import Badge
-from starui.registry.components.separator import Separator
 from utils import auto_generate_page, with_code, Prop, build_api_reference
-from widgets.component_preview import ComponentPreview
 
 
-# ============================================================================
-# EXAMPLE FUNCTIONS (decorated with @with_code for markdown generation)
-# ============================================================================
-
-# Basic usage
 @with_code
 def basic_switch_example():
     return Div(
@@ -52,61 +45,26 @@ def basic_switch_example():
     )
 
 
-# With label
 @with_code
 def switch_with_label_example():
-    notifications = Signal("notifications", True)
-
     return Div(
-        notifications,
+        (notifications := Signal("notifications", True)),
         SwitchWithLabel(
             label="Enable notifications",
             helper_text="Receive email and push notifications",
-            signal="notifications",
+            signal=notifications,
             checked=True
         ),
         P(
-            data_text=js("$notifications ? 'Notifications are enabled' : 'Notifications are disabled'"),
+            data_text=notifications.if_("Notifications are enabled", "Notifications are disabled"),
             cls="text-sm text-muted-foreground mt-3"
         ),
         cls="max-w-sm"
     )
 
 
-# Dark mode toggle
-@with_code
-def dark_mode_toggle_example():
-    dark_mode = Signal("dark_mode", False)
-
-    return Card(
-        CardHeader(
-            CardTitle("Appearance"),
-            CardDescription("Customize how the interface looks")
-        ),
-        CardContent(
-            Div(
-                dark_mode,
-                Div(
-                    Icon("lucide:moon", cls="h-5 w-5 text-muted-foreground"),
-                    Div(
-                        P("Dark Mode", cls="font-medium"),
-                        P("Switch to dark theme", cls="text-sm text-muted-foreground"),
-                        cls="flex-1"
-                    ),
-                    Switch(signal="dark_mode", checked=False),
-                    cls="flex items-center gap-3"
-                )
-            )
-        ),
-        cls="max-w-md"
-    )
-
-
-# Auto-save feature
 @with_code
 def autosave_feature_example():
-    auto_save = Signal("auto_save", True)
-
     return Card(
         CardHeader(
             CardTitle("Document Settings"),
@@ -114,18 +72,18 @@ def autosave_feature_example():
         ),
         CardContent(
             Div(
-                auto_save,
+                (auto_save := Signal("auto_save", True)),
                 SwitchWithLabel(
                     label="Auto-save",
                     helper_text="Automatically save changes as you type",
-                    signal="auto_save",
+                    signal=auto_save,
                     checked=True
                 ),
                 Div(
                     Badge(
                         Icon("lucide:check-circle", cls="h-3 w-3 mr-1"),
-                        data_text=js("$auto_save ? 'Changes saved automatically' : 'Remember to save manually'"),
-                        data_attr_variant=js("$auto_save ? 'default' : 'secondary'"),
+                        data_text=auto_save.if_("Changes saved automatically", "Remember to save manually"),
+                        data_attr_variant=auto_save.if_("default", "secondary"),
                         cls="w-full justify-center"
                     ),
                     cls="mt-4"
@@ -136,12 +94,8 @@ def autosave_feature_example():
     )
 
 
-# Marketing emails
 @with_code
 def email_subscriptions_example():
-    marketing_emails = Signal("marketing_emails", False)
-    newsletter = Signal("newsletter", False)
-
     return Card(
         CardHeader(
             CardTitle("Email Preferences"),
@@ -149,25 +103,26 @@ def email_subscriptions_example():
         ),
         CardContent(
             Form(
-                marketing_emails, newsletter,
+                (marketing_emails := Signal("marketing_emails", False)),
+                (newsletter := Signal("newsletter", False)),
                 SwitchWithLabel(
                     label="Marketing emails",
                     helper_text="Product updates, feature announcements, and tips",
-                    signal="marketing_emails",
+                    signal=marketing_emails,
                     checked=False
                 ),
                 Div(
                     Div(
                         Label(
                             "Weekly newsletter",
-                            for_="newsletter_switch",
+                            fr="newsletter_switch",
                             cls="text-sm font-medium cursor-pointer"
                         ),
                         Switch(
-                            data_attr_disabled=js("!$marketing_emails"),
-                            signal="newsletter",
+                            data_attr_disabled=~marketing_emails,
+                            signal=newsletter,
                             checked=False,
-                            id="newsletter_switch",
+                            id="newsletter_switch"
                         ),
                         cls="flex items-center gap-3"
                     ),
@@ -176,38 +131,32 @@ def email_subscriptions_example():
                 ),
                 Div(
                     Div(
-                        Icon("lucide:info", cls="h-4 w-4 text-muted-foreground flex-shrink-0"),
+                        Icon("lucide:info", cls="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5"),
                         P(
                             "Newsletter requires marketing emails to be enabled",
-                            cls="text-sm text-muted-foreground"
+                            cls="text-sm text-muted-foreground break-words"
                         ),
                         cls="flex items-start gap-2"
                     ),
-                    data_show=js("!$marketing_emails"),
+                    data_show=~marketing_emails,
                     cls="mt-3"
                 ),
                 Button(
                     "Update Preferences",
                     type="submit",
-                    cls="w-full mt-4",
-                    data_on_click=js("evt.preventDefault(); alert('Email preferences updated!')")
+                    cls="w-full mt-4"
                 ),
-                data_effect=js("if (!$marketing_emails) $newsletter = false"),
+                data_effect=(~marketing_emails).then(newsletter.set(False)),
                 cls="space-y-4"
             )
         ),
-        cls="max-w-md"
+        cls="w-full max-w-md"
     )
 
-
-# ============================================================================
-# MODULE-LEVEL DATA (for markdown API)
-# ============================================================================
 
 EXAMPLES_DATA = [
     {"title": "Basic Switch", "description": "Different switch states", "fn": basic_switch_example},
     {"title": "Switch with Label", "description": "Switch with label, helper text, and reactive feedback", "fn": switch_with_label_example},
-    {"title": "Dark Mode Toggle", "description": "Theme switcher with icon and description", "fn": dark_mode_toggle_example},
     {"title": "Auto-save Feature", "description": "Document setting with status feedback", "fn": autosave_feature_example},
     {"title": "Email Subscriptions", "description": "Dependent switches for email preferences", "fn": email_subscriptions_example},
 ]
@@ -221,44 +170,6 @@ API_REFERENCE = build_api_reference(
         Prop("cls", "str", "Additional CSS classes", "''"),
     ]
 )
-
-
-def examples():
-    """Generate all switch examples."""
-    yield ComponentPreview(
-        basic_switch_example(),
-        basic_switch_example.code,
-        title="Basic Switch",
-        description="Different switch states"
-    )
-
-    yield ComponentPreview(
-        switch_with_label_example(),
-        switch_with_label_example.code,
-        title="Switch with Label",
-        description="Switch with label, helper text, and reactive feedback"
-    )
-
-    yield ComponentPreview(
-        dark_mode_toggle_example(),
-        dark_mode_toggle_example.code,
-        title="Dark Mode Toggle",
-        description="Theme switcher with icon and description"
-    )
-
-    yield ComponentPreview(
-        autosave_feature_example(),
-        autosave_feature_example.code,
-        title="Auto-save Feature",
-        description="Document setting with status feedback"
-    )
-
-    yield ComponentPreview(
-        email_subscriptions_example(),
-        email_subscriptions_example.code,
-        title="Email Subscriptions",
-        description="Dependent switches for email preferences"
-    )
 
 
 def create_switch_docs():

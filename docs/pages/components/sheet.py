@@ -1,5 +1,6 @@
 """
-Sheet component documentation - Side panels/drawers that slide in from screen edges.
+Sheet component documentation - Sliding side panels.
+Versatile overlay panels for navigation, filters, settings, and forms.
 """
 
 # Component metadata for auto-discovery
@@ -9,15 +10,16 @@ CATEGORY = "overlay"
 ORDER = 150
 STATUS = "stable"
 
-from starhtml import Div, P, H3, H4, Span, Icon, A, Img, Form, Label, Hr, Ul, Li, Strong, Signal, js
+import re
+
+from starhtml import Div, P, H3, H4, Span, Icon, Img, Form, Hr, Signal, js
 from starui.registry.components.sheet import (
     Sheet, SheetTrigger, SheetContent, SheetClose,
     SheetHeader, SheetFooter, SheetTitle, SheetDescription
 )
 from starui.registry.components.button import Button
-from starui.registry.components.input import Input as UIInput, InputWithLabel
+from starui.registry.components.input import InputWithLabel
 from starui.registry.components.textarea import TextareaWithLabel
-from starui.registry.components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
 from starui.registry.components.badge import Badge
 from starui.registry.components.separator import Separator
 from starui.registry.components.select import SelectWithLabel, Select, SelectTrigger, SelectValue, SelectContent, SelectItem
@@ -25,21 +27,25 @@ from starui.registry.components.checkbox import CheckboxWithLabel
 from starui.registry.components.avatar import Avatar
 from starui.registry.components.switch import Switch
 from utils import auto_generate_page, with_code, Component, build_api_reference
-from widgets.component_preview import ComponentPreview
 
 
-# ============================================================================
-# EXAMPLE FUNCTIONS (decorated with @with_code for markdown generation)
-# ============================================================================
-
-# Navigation menu sheet (left side)
 @with_code
 def navigation_menu_sheet_example():
+    def NavItem(icon, label, badge=None):
+        def item(*, sheet_open, **_):
+            return Div(
+                Icon(icon, cls="h-4 w-4 mr-3"),
+                Span(label),
+                Badge(badge, variant="secondary", cls="ml-auto") if badge else None,
+                data_on_click=sheet_open.set(False),
+                cls="flex items-center py-3 px-4 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
+            )
+        return item
+
     return Sheet(
         SheetTrigger(
             Icon("lucide:menu", cls="h-4 w-4 mr-2"),
             "Menu",
-            signal="nav_sheet",
             variant="outline"
         ),
         SheetContent(
@@ -48,38 +54,13 @@ def navigation_menu_sheet_example():
                 SheetDescription("Browse through the app sections")
             ),
             Div(
-                Div(
-                    Icon("lucide:home", cls="h-4 w-4 mr-3"),
-                    Span("Home"),
-                    cls="flex items-center py-3 px-4 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
-                ),
-                Div(
-                    Icon("lucide:bar-chart-3", cls="h-4 w-4 mr-3"),
-                    Span("Dashboard"),
-                    cls="flex items-center py-3 px-4 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
-                ),
-                Div(
-                    Icon("lucide:users", cls="h-4 w-4 mr-3"),
-                    Span("Team"),
-                    cls="flex items-center py-3 px-4 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
-                ),
-                Div(
-                    Icon("lucide:folder", cls="h-4 w-4 mr-3"),
-                    Span("Projects"),
-                    Badge("12", variant="secondary", cls="ml-auto"),
-                    cls="flex items-center py-3 px-4 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
-                ),
+                NavItem("lucide:home", "Home"),
+                NavItem("lucide:bar-chart-3", "Dashboard"),
+                NavItem("lucide:users", "Team"),
+                NavItem("lucide:folder", "Projects", badge="12"),
                 Separator(cls="my-4"),
-                Div(
-                    Icon("lucide:settings", cls="h-4 w-4 mr-3"),
-                    Span("Settings"),
-                    cls="flex items-center py-3 px-4 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
-                ),
-                Div(
-                    Icon("lucide:help-circle", cls="h-4 w-4 mr-3"),
-                    Span("Help & Support"),
-                    cls="flex items-center py-3 px-4 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
-                ),
+                NavItem("lucide:settings", "Settings"),
+                NavItem("lucide:help-circle", "Help & Support"),
                 cls="space-y-1 px-6 flex-1 overflow-hidden"
             ),
             SheetFooter(
@@ -94,7 +75,7 @@ def navigation_menu_sheet_example():
                         P("john@example.com", cls="text-xs text-muted-foreground"),
                         cls="flex-1"
                     ),
-                    Button(
+                    SheetClose(
                         Icon("lucide:log-out", cls="h-4 w-4"),
                         variant="ghost",
                         size="icon",
@@ -103,21 +84,27 @@ def navigation_menu_sheet_example():
                     cls="flex items-center w-full"
                 )
             ),
-            signal="nav_sheet",
             side="left",
             size="md"
-        ),
-        signal="nav_sheet"
+        ),        
     )
 
 
-# Shopping cart sheet (right side)
 @with_code
 def shopping_cart_sheet_example():
+    price_headphones = 99.99
+    price_shoes = 129.99
+    shipping = 9.99
+    tax_rate = 0.08
+
     qty_headphones = Signal("qty_headphones", 1)
     qty_shoes = Signal("qty_shoes", 2)
+    subtotal = Signal("subtotal", qty_headphones * price_headphones + qty_shoes * price_shoes)
+    tax = Signal("tax", subtotal * tax_rate)
+    total = Signal("total", subtotal + tax + shipping)
+    total_items = Signal("total_items", qty_headphones + qty_shoes)
 
-    def create_cart_item(image_url, name, description, price, qty_signal):
+    def create_cart_item(image_url, name, description, price_str, qty_signal):
         return Div(
             Img(
                 src=image_url,
@@ -128,19 +115,19 @@ def shopping_cart_sheet_example():
                 H4(name, cls="text-sm font-medium"),
                 P(description, cls="text-xs text-muted-foreground"),
                 Div(
-                    Span(price, cls="text-sm font-bold"),
+                    Span(price_str, cls="text-sm font-bold"),
                     Div(
                         Button(
                             "-",
-                            data_on_click=js(f"${qty_signal} = Math.max(0, ${qty_signal} - 1)"),
+                            data_on_click=(qty_signal > 0).then(qty_signal.add(-1)),
                             size="sm",
                             variant="outline",
                             cls="h-6 w-6 p-0"
                         ),
-                        Span(data_text=js(f"${qty_signal}"), cls="mx-2 text-sm"),
+                        Span(data_text=qty_signal, cls="mx-2 text-sm"),
                         Button(
                             "+",
-                            data_on_click=js(f"${qty_signal} = ${qty_signal} + 1"),
+                            data_on_click=qty_signal.add(1),
                             size="sm",
                             variant="outline",
                             cls="h-6 w-6 p-0"
@@ -157,70 +144,53 @@ def shopping_cart_sheet_example():
     return Sheet(
         SheetTrigger(
             Icon("lucide:shopping-cart", cls="h-4 w-4 mr-2"),
-            Span(
-                "Cart (",
-                Span(data_text=js("$qty_headphones + $qty_shoes")),
-                ")"
-            ),
-            signal="cart_sheet",
+            Span("Cart (", Span(data_text=total_items), ")"),
             variant="outline"
         ),
         SheetContent(
             SheetHeader(
                 SheetTitle("Shopping Cart"),
                 SheetDescription(
-                    Span(data_text=js("($qty_headphones + $qty_shoes) + ' items in your cart'"))
+                    Span(data_text=total_items + " items in your cart")
                 )
             ),
             Div(
-                qty_headphones, qty_shoes,
+                qty_headphones, qty_shoes, subtotal, tax, total, total_items,
                 create_cart_item(
                     "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=100&h=100&fit=crop",
                     "Wireless Headphones",
                     "Premium quality sound",
-                    "$99.99",
-                    "qty_headphones"
+                    f"${price_headphones}",
+                    qty_headphones
                 ),
                 create_cart_item(
                     "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=100&h=100&fit=crop",
                     "Running Shoes",
                     "Comfortable and durable",
-                    "$129.99",
-                    "qty_shoes"
+                    f"${price_shoes}",
+                    qty_shoes
                 ),
                 Div(
                     Div(
                         Div(
                             Span("Subtotal", cls="text-sm"),
-                            Span(
-                                "$",
-                                data_text=js("(($qty_headphones * 99.99 + $qty_shoes * 129.99).toFixed(2))"),
-                                cls="text-sm font-bold"
-                            ),
+                            Span("$", data_text=js("$subtotal.toFixed(2)"), cls="text-sm font-bold"),
                             cls="flex justify-between"
                         ),
                         Div(
                             Span("Shipping", cls="text-sm"),
-                            Span("$9.99", cls="text-sm"),
+                            Span(f"${shipping}", cls="text-sm"),
                             cls="flex justify-between"
                         ),
                         Div(
-                            Span("Tax (8%)", cls="text-sm"),
-                            Span(
-                                "$",
-                                data_text=js("((($qty_headphones * 99.99 + $qty_shoes * 129.99) * 0.08).toFixed(2))"),
-                                cls="text-sm"
-                            ),
+                            Span(f"Tax ({int(tax_rate * 100)}%)", cls="text-sm"),
+                            Span("$", data_text=js("$tax.toFixed(2)"), cls="text-sm"),
                             cls="flex justify-between"
                         ),
                         Hr(cls="my-3"),
                         Div(
                             Span("Total", cls="text-base font-bold"),
-                            Span(
-                                "$",
-                                data_text=js("(($qty_headphones * 99.99 + $qty_shoes * 129.99) * 1.08 + 9.99).toFixed(2)"),
-                                cls="text-base font-bold"
-                            ),
+                            Span("$", data_text=js("$total.toFixed(2)"), cls="text-base font-bold"),
                             cls="flex justify-between"
                         ),
                         cls="space-y-2"
@@ -231,37 +201,74 @@ def shopping_cart_sheet_example():
             ),
             SheetFooter(
                 Div(
-                    Button("Continue Shopping", variant="outline", size="sm", cls="flex-1 mr-2"),
-                    Button("Checkout", size="sm", cls="flex-1"),
+                    SheetClose("Continue Shopping", variant="outline", size="sm", cls="flex-1 mr-2"),
+                    SheetClose("Checkout", variant="default", size="sm", cls="flex-1"),
                     cls="flex gap-2 w-full"
                 )
             ),
-            signal="cart_sheet",
             side="right",
             size="lg"
-        ),
-        signal="cart_sheet"
+        ),        
     )
 
 
-# Filter panel sheet (left side)
 @with_code
 def filter_panel_sheet_example():
+    categories = ["Electronics", "Clothing", "Books", "Home & Garden", "Sports"]
+    brands = [("", "Any Brand"), ("apple", "Apple"), ("samsung", "Samsung"), ("nike", "Nike"), ("sony", "Sony")]
+
     min_price = Signal("min_price", "")
     max_price = Signal("max_price", "")
-    cat_electronics = Signal("cat_electronics", False)
-    cat_clothing = Signal("cat_clothing", False)
-    cat_books = Signal("cat_books", False)
-    cat_home = Signal("cat_home", False)
-    cat_sports = Signal("cat_sports", False)
+    category_signals = {cat: Signal(f"cat_{re.sub(r'[^a-z0-9]+', '_', cat.lower())}", False) for cat in categories}
     selected_brand = Signal("selected_brand", "")
     min_rating = Signal("min_rating", 1)
+
+    def PriceRangeSection():
+        return Div(
+            H3("Price Range", cls="text-sm font-semibold mb-3"),
+            Div(
+                InputWithLabel(label="Min Price", type="number", placeholder="$0", signal=min_price, cls="mb-3"),
+                InputWithLabel(label="Max Price", type="number", placeholder="$1000", signal=max_price),
+                cls="space-y-2"
+            ),
+            cls="mb-6"
+        )
+
+    def CategoriesSection():
+        return Div(
+            H3("Categories", cls="text-sm font-semibold mb-3"),
+            Div(
+                *[CheckboxWithLabel(label=cat, signal=category_signals[cat]) for cat in categories],
+                cls="space-y-3"
+            ),
+            cls="mb-6"
+        )
+
+    def BrandSection():
+        return Div(
+            H3("Brand", cls="text-sm font-semibold mb-3"),
+            SelectWithLabel(label="Select Brand", options=brands, signal=selected_brand, show_label=False),
+            cls="mb-6"
+        )
+
+    def RatingSection():
+        return Div(
+            H3("Minimum Rating", cls="text-sm font-semibold mb-3"),
+            Div(
+                Div(
+                    *[Span("★", data_on_click=min_rating.set(i+1), data_attr_cls=(min_rating >= i+1).if_("text-yellow-500", "text-gray-300"), cls="text-xl cursor-pointer transition-colors hover:text-yellow-400") for i in range(5)],
+                    cls="flex gap-1"
+                ),
+                Span(data_text=(min_rating > 0).if_(min_rating + "+ stars", "Any rating"), cls="text-sm text-muted-foreground mt-2"),
+                cls="space-y-2"
+            ),
+            cls="mb-6"
+        )
 
     return Sheet(
         SheetTrigger(
             Icon("lucide:sliders-horizontal", cls="h-4 w-4 mr-2"),
             "Filters",
-            signal="filter_sheet",
             variant="outline"
         ),
         SheetContent(
@@ -270,77 +277,11 @@ def filter_panel_sheet_example():
                 SheetDescription("Refine your search results")
             ),
             Div(
-                min_price, max_price,
-                cat_electronics, cat_clothing, cat_books, cat_home, cat_sports,
-                selected_brand, min_rating,
-                Div(
-                    H3("Price Range", cls="text-sm font-semibold mb-3"),
-                    Div(
-                        InputWithLabel(
-                            label="Min Price",
-                            type="number",
-                            placeholder="$0",
-                            signal="min_price",
-                            cls="mb-3"
-                        ),
-                        InputWithLabel(
-                            label="Max Price",
-                            type="number",
-                            placeholder="$1000",
-                            signal="max_price"
-                        ),
-                        cls="space-y-2"
-                    ),
-                    cls="mb-6"
-                ),
-                Div(
-                    H3("Categories", cls="text-sm font-semibold mb-3"),
-                    Div(
-                        CheckboxWithLabel(label="Electronics", signal="cat_electronics"),
-                        CheckboxWithLabel(label="Clothing", signal="cat_clothing"),
-                        CheckboxWithLabel(label="Books", signal="cat_books"),
-                        CheckboxWithLabel(label="Home & Garden", signal="cat_home"),
-                        CheckboxWithLabel(label="Sports", signal="cat_sports"),
-                        cls="space-y-3"
-                    ),
-                    cls="mb-6"
-                ),
-                Div(
-                    H3("Brand", cls="text-sm font-semibold mb-3"),
-                    SelectWithLabel(
-                        label="Select Brand",
-                        options=[
-                            ("", "Any Brand"),
-                            ("apple", "Apple"),
-                            ("samsung", "Samsung"),
-                            ("nike", "Nike"),
-                            ("sony", "Sony")
-                        ],
-                        signal="selected_brand",
-                        show_label=False
-                    ),
-                    cls="mb-6"
-                ),
-                Div(
-                    H3("Minimum Rating", cls="text-sm font-semibold mb-3"),
-                    Div(
-                        Div(
-                            *[
-                                Span(
-                                    "★",
-                                    data_on_click=js(f"$min_rating = {i+1}"),
-                                    data_class=js(f"$min_rating >= {i+1} ? 'text-yellow-500' : 'text-gray-300'"),
-                                    cls="text-xl cursor-pointer transition-colors hover:text-yellow-400"
-                                )
-                                for i in range(5)
-                            ],
-                            cls="flex gap-1"
-                        ),
-                        Span(data_text=js("$min_rating > 0 ? $min_rating + '+ stars' : 'Any rating'"), cls="text-sm text-muted-foreground mt-2"),
-                        cls="space-y-2"
-                    ),
-                    cls="mb-6"
-                ),
+                min_price, max_price, *category_signals.values(), selected_brand, min_rating,
+                PriceRangeSection(),
+                CategoriesSection(),
+                BrandSection(),
+                RatingSection(),
                 cls="px-6 flex-1 overflow-y-auto"
             ),
             SheetFooter(
@@ -350,26 +291,29 @@ def filter_panel_sheet_example():
                         variant="outline",
                         size="sm",
                         cls="flex-1 mr-2",
-                        data_on_click=js("""
-                            $min_price = ''; $max_price = '';
-                            $cat_electronics = false; $cat_clothing = false;
-                            $cat_books = false; $cat_home = false; $cat_sports = false;
-                            $selected_brand = ''; $min_rating = 1;
-                        """)
+                        data_on_click=[
+                            min_price.set(""),
+                            max_price.set(""),
+                            *[sig.set(False) for sig in category_signals.values()],
+                            selected_brand.set(""),
+                            min_rating.set(1)
+                        ]
                     ),
-                    Button("Apply Filters", size="sm", cls="flex-1", data_on_click=js("alert('Filters applied!')")),
+                    SheetClose(
+                        "Apply Filters",
+                        variant="default",
+                        size="sm",
+                        cls="flex-1"
+                    ),
                     cls="flex gap-2 w-full"
                 )
             ),
-            signal="filter_sheet",
             side="left",
             size="sm"
-        ),
-        signal="filter_sheet"
+        ),        
     )
 
 
-# Settings drawer (right side)
 @with_code
 def settings_drawer_sheet_example():
     theme_pref = Signal("theme_pref", "system")
@@ -381,7 +325,6 @@ def settings_drawer_sheet_example():
         SheetTrigger(
             Icon("lucide:settings", cls="h-4 w-4 mr-2"),
             "Settings",
-            signal="settings_sheet",
             variant="outline"
         ),
         SheetContent(
@@ -414,16 +357,15 @@ def settings_drawer_sheet_example():
                             cls="flex items-start mb-2"
                         ),
                         Select(
-                            SelectTrigger(SelectValue(signal="theme_pref"), signal="theme_pref", cls="w-full"),
+                            SelectTrigger(SelectValue(), cls="w-full"),
                             SelectContent(
-                                SelectItem("light", "Light", signal="theme_pref"),
-                                SelectItem("dark", "Dark", signal="theme_pref"),
-                                SelectItem("system", "System", signal="theme_pref"),
-                                signal="theme_pref"
+                                SelectItem("Light", value="light"),
+                                SelectItem("Dark", value="dark"),
+                                SelectItem("System", value="system")
                             ),
-                            default_value="system",
-                            default_label="System",
-                            signal="theme_pref"
+                            value="system",
+                            label="System",
+                            signal=theme_pref
                         ),
                         cls="mb-4"
                     ),
@@ -434,17 +376,16 @@ def settings_drawer_sheet_example():
                             cls="flex items-start mb-2"
                         ),
                         Select(
-                            SelectTrigger(SelectValue(signal="language_pref"), signal="language_pref", cls="w-full"),
+                            SelectTrigger(SelectValue(), cls="w-full"),
                             SelectContent(
-                                SelectItem("en", "English", signal="language_pref"),
-                                SelectItem("es", "Spanish", signal="language_pref"),
-                                SelectItem("fr", "French", signal="language_pref"),
-                                SelectItem("de", "German", signal="language_pref"),
-                                signal="language_pref"
+                                SelectItem("English", value="en"),
+                                SelectItem("Spanish", value="es"),
+                                SelectItem("French", value="fr"),
+                                SelectItem("German", value="de")
                             ),
-                            default_value="en",
-                            default_label="English",
-                            signal="language_pref"
+                            value="en",
+                            label="English",
+                            signal=language_pref
                         ),
                         cls="mb-4"
                     ),
@@ -455,13 +396,13 @@ def settings_drawer_sheet_example():
                     Div(
                         Icon("lucide:bell", cls="h-4 w-4 text-muted-foreground mt-0.5"),
                         Div(P("Push Notifications", cls="text-sm font-medium"), P("Receive notifications for important updates", cls="text-xs text-muted-foreground"), cls="ml-3 flex-1"),
-                        Switch(signal="push_notifications", checked=True, cls="ml-auto"),
+                        Switch(signal=push_notifications, checked=True, cls="ml-auto"),
                         cls="flex items-start mb-4"
                     ),
                     Div(
                         Icon("lucide:mail", cls="h-4 w-4 text-muted-foreground mt-0.5"),
                         Div(P("Email Notifications", cls="text-sm font-medium"), P("Get email updates for your account", cls="text-xs text-muted-foreground"), cls="ml-3 flex-1"),
-                        Switch(signal="email_notifications", checked=True, cls="ml-auto"),
+                        Switch(signal=email_notifications, checked=True, cls="ml-auto"),
                         cls="flex items-start"
                     )
                 ),
@@ -469,28 +410,31 @@ def settings_drawer_sheet_example():
             ),
             SheetFooter(
                 Div(
-                    Button("Reset to Defaults", variant="outline", size="sm", cls="flex-1 mr-2"),
-                    Button("Save Changes", size="sm", cls="flex-1"),
+                    SheetClose("Reset to Defaults", variant="outline", size="sm", cls="flex-1 mr-2"),
+                    SheetClose("Save Changes", variant="default", size="sm", cls="flex-1"),
                     cls="flex gap-2 w-full"
                 )
             ),
-            signal="settings_sheet",
             side="right",
             size="md"
-        ),
-        signal="settings_sheet"
+        ),        
     )
 
 
-# Notification panel (top side)
 @with_code
 def notification_panel_sheet_example():
-    notif_1 = Signal("notif_1", True)
-    notif_2 = Signal("notif_2", True)
-    notif_3 = Signal("notif_3", True)
-    notif_4 = Signal("notif_4", True)
+    notifications = [
+        {"icon": "lucide:check-circle", "color": "text-green-500", "title": "Payment successful", "message": "Your monthly subscription has been processed", "time": "2 minutes ago"},
+        {"icon": "lucide:user-plus", "color": "text-blue-500", "title": "New team member", "message": "Sarah Johnson joined your workspace", "time": "1 hour ago"},
+        {"icon": "lucide:alert-triangle", "color": "text-orange-500", "title": "Action required", "message": "Please update your billing information", "time": "3 hours ago"},
+        {"icon": "lucide:calendar", "color": "text-purple-500", "title": "Meeting reminder", "message": "Team standup in 15 minutes", "time": "5 hours ago"}
+    ]
 
-    def create_notification(icon, icon_color, title, message, time, signal_num):
+    notif_signals = [Signal(f"notif_{i+1}", True) for i in range(len(notifications))]
+    notif_count = Signal("notif_count", sum(notif_signals))
+    has_notifications = Signal("has_notifications", sum(notif_signals) > 0)
+
+    def create_notification(icon, icon_color, title, message, time, notif_signal):
         return Div(
             Icon(icon, cls=f"h-5 w-5 {icon_color} mt-1 mr-3"),
             Div(
@@ -501,12 +445,13 @@ def notification_panel_sheet_example():
             ),
             Button(
                 Icon("lucide:x", cls="h-4 w-4"),
-                data_on_click=js(f"$notif_{signal_num} = false"),
+                data_on_click=notif_signal.set(False),
                 variant="ghost",
                 size="sm",
                 cls="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-muted"
             ),
-            data_show=js(f"$notif_{signal_num}"),
+            style="display: none",
+            data_show=notif_signal,
             cls="flex items-start p-4 border-b hover:bg-muted/30 transition-colors"
         )
 
@@ -515,19 +460,12 @@ def notification_panel_sheet_example():
             Icon("lucide:bell", cls="h-4 w-4 mr-2"),
             "Notifications",
             Badge(
-                data_text=js("""
-                    let count = 0;
-                    if ($notif_1) count++;
-                    if ($notif_2) count++;
-                    if ($notif_3) count++;
-                    if ($notif_4) count++;
-                    count
-                """),
-                data_show=js("$notif_1 || $notif_2 || $notif_3 || $notif_4"),
+                data_text=notif_count,
+                style="display: none",
+                data_show=has_notifications,
                 variant="destructive",
                 cls="ml-2 text-xs"
             ),
-            signal="notifications_sheet",
             variant="outline"
         ),
         SheetContent(
@@ -535,15 +473,9 @@ def notification_panel_sheet_example():
                 SheetTitle(
                     "Recent Notifications",
                     Badge(
-                        data_text=js("""
-                            let count = 0;
-                            if ($notif_1) count++;
-                            if ($notif_2) count++;
-                            if ($notif_3) count++;
-                            if ($notif_4) count++;
-                            count > 0 ? count : ''
-                        """),
-                        data_show=js("$notif_1 || $notif_2 || $notif_3 || $notif_4"),
+                        data_text=notif_count.if_(notif_count, ""),
+                        style="display: none",
+                        data_show=has_notifications,
                         variant="destructive",
                         cls="ml-2 text-xs"
                     )
@@ -551,31 +483,13 @@ def notification_panel_sheet_example():
                 SheetDescription("Stay up to date with your latest activity")
             ),
             Div(
-                notif_1, notif_2, notif_3, notif_4,
-                create_notification(
-                    "lucide:check-circle", "text-green-500",
-                    "Payment successful", "Your monthly subscription has been processed",
-                    "2 minutes ago", 1
-                ),
-                create_notification(
-                    "lucide:user-plus", "text-blue-500",
-                    "New team member", "Sarah Johnson joined your workspace",
-                    "1 hour ago", 2
-                ),
-                create_notification(
-                    "lucide:alert-triangle", "text-orange-500",
-                    "Action required", "Please update your billing information",
-                    "3 hours ago", 3
-                ),
-                create_notification(
-                    "lucide:calendar", "text-purple-500",
-                    "Meeting reminder", "Team standup in 15 minutes",
-                    "5 hours ago", 4
-                ),
+                *notif_signals, notif_count, has_notifications,
+                *[create_notification(n["icon"], n["color"], n["title"], n["message"], n["time"], notif_signals[i]) for i, n in enumerate(notifications)],
                 Div(
                     Icon("lucide:inbox", cls="h-12 w-12 text-muted-foreground mb-2"),
                     P("No notifications", cls="text-sm text-muted-foreground"),
-                    data_show=js("!($notif_1 || $notif_2 || $notif_3 || $notif_4)"),
+                    style="display: none",
+                    data_show=~has_notifications,
                     cls="flex flex-col items-center justify-center py-12"
                 ),
                 cls="flex-1 overflow-y-auto min-h-[200px]"
@@ -584,36 +498,59 @@ def notification_panel_sheet_example():
                 Div(
                     Button(
                         "Mark All Read",
-                        data_on_click=js("$notif_1 = false; $notif_2 = false; $notif_3 = false; $notif_4 = false"),
+                        data_on_click=[sig.set(False) for sig in notif_signals],
                         variant="outline",
                         size="sm",
                         cls="flex-1 mr-2"
                     ),
-                    Button(
+                    SheetClose(
                         "View All",
-                        data_on_click=js("alert('Navigate to full notifications page')"),
+                        variant="default",
                         size="sm",
                         cls="flex-1"
                     ),
                     cls="flex gap-2 w-full"
                 )
             ),
-            signal="notifications_sheet",
             side="top",
             size="md"
-        ),
-        signal="notifications_sheet"
+        ),        
     )
 
 
-# Action sheet (bottom side) - Mobile-friendly
 @with_code
 def action_sheet_example():
+    standard_actions = [
+        {"icon": "lucide:share", "title": "Share", "description": "Share this item with others"},
+        {"icon": "lucide:copy", "title": "Copy Link", "description": "Copy the link to your clipboard"},
+        {"icon": "lucide:download", "title": "Download", "description": "Save to your device"},
+        {"icon": "lucide:bookmark", "title": "Add to Favorites", "description": "Save for quick access later"},
+    ]
+
+    destructive_actions = [
+        {"icon": "lucide:flag", "title": "Report", "description": "Report inappropriate content", "title_class": "font-medium text-orange-600"},
+        {"icon": "lucide:trash-2", "title": "Delete", "description": "Permanently remove this item", "title_class": "font-medium text-red-600"},
+    ]
+
+    def ActionItem(action):
+        def item(*, sheet_open, **_):
+            return Button(
+                Icon(action["icon"], cls="h-5 w-5 mr-3"),
+                Div(
+                    P(action["title"], cls=action.get("title_class", "font-medium")),
+                    P(action["description"], cls="text-sm text-muted-foreground"),
+                    cls="text-left"
+                ),
+                data_on_click=sheet_open.set(False),
+                variant="ghost",
+                cls="w-full justify-start p-4 h-auto"
+            )
+        return item
+
     return Sheet(
         SheetTrigger(
             Icon("lucide:more-horizontal", cls="h-4 w-4 mr-2"),
             "Actions",
-            signal="actions_sheet",
             variant="outline"
         ),
         SheetContent(
@@ -622,94 +559,26 @@ def action_sheet_example():
                 SheetDescription("Choose an action to perform")
             ),
             Div(
-                Button(
-                    Icon("lucide:share", cls="h-5 w-5 mr-3"),
-                    Div(
-                        P("Share", cls="font-medium"),
-                        P("Share this item with others", cls="text-sm text-muted-foreground"),
-                        cls="text-left"
-                    ),
-                    variant="ghost",
-                    cls="w-full justify-start p-4 h-auto"
-                ),
-                Button(
-                    Icon("lucide:copy", cls="h-5 w-5 mr-3"),
-                    Div(
-                        P("Copy Link", cls="font-medium"),
-                        P("Copy the link to your clipboard", cls="text-sm text-muted-foreground"),
-                        cls="text-left"
-                    ),
-                    variant="ghost",
-                    cls="w-full justify-start p-4 h-auto"
-                ),
-                Button(
-                    Icon("lucide:download", cls="h-5 w-5 mr-3"),
-                    Div(
-                        P("Download", cls="font-medium"),
-                        P("Save to your device", cls="text-sm text-muted-foreground"),
-                        cls="text-left"
-                    ),
-                    variant="ghost",
-                    cls="w-full justify-start p-4 h-auto"
-                ),
-                Button(
-                    Icon("lucide:bookmark", cls="h-5 w-5 mr-3"),
-                    Div(
-                        P("Add to Favorites", cls="font-medium"),
-                        P("Save for quick access later", cls="text-sm text-muted-foreground"),
-                        cls="text-left"
-                    ),
-                    variant="ghost",
-                    cls="w-full justify-start p-4 h-auto"
-                ),
+                *[ActionItem(action) for action in standard_actions],
                 Separator(cls="my-2"),
-                Button(
-                    Icon("lucide:flag", cls="h-5 w-5 mr-3"),
-                    Div(
-                        P("Report", cls="font-medium text-orange-600"),
-                        P("Report inappropriate content", cls="text-sm text-muted-foreground"),
-                        cls="text-left"
-                    ),
-                    variant="ghost",
-                    cls="w-full justify-start p-4 h-auto"
-                ),
-                Button(
-                    Icon("lucide:trash-2", cls="h-5 w-5 mr-3"),
-                    Div(
-                        P("Delete", cls="font-medium text-red-600"),
-                        P("Permanently remove this item", cls="text-sm text-muted-foreground"),
-                        cls="text-left"
-                    ),
-                    variant="ghost",
-                    cls="w-full justify-start p-4 h-auto"
-                ),
+                *[ActionItem(action) for action in destructive_actions],
                 cls="px-6 space-y-1"
             ),
             SheetFooter(
                 SheetClose("Cancel", variant="outline", cls="w-full")
             ),
-            signal="actions_sheet",
             side="bottom",
             size="md"
         ),
-        signal="actions_sheet"
     )
 
 
-# Contact form sheet
 @with_code
 def contact_form_sheet_example():
-    contact_name = Signal("contact_name", "")
-    contact_email = Signal("contact_email", "")
-    contact_subject = Signal("contact_subject", "")
-    contact_message = Signal("contact_message", "")
-    contact_updates = Signal("contact_updates", False)
-
     return Sheet(
         SheetTrigger(
             Icon("lucide:mail", cls="h-4 w-4 mr-2"),
-            "Contact Us",
-            signal="contact_sheet"
+            "Contact Us"
         ),
         SheetContent(
             SheetHeader(
@@ -718,9 +587,14 @@ def contact_form_sheet_example():
             ),
             Form(
                 Div(
-                    contact_name, contact_email, contact_subject, contact_message, contact_updates,
-                    InputWithLabel(label="Name", placeholder="Your full name", signal="contact_name", required=True),
-                    InputWithLabel(label="Email", type="email", placeholder="your.email@example.com", signal="contact_email", required=True),
+                    (contact_name := Signal("contact_name", "")),
+                    (contact_email := Signal("contact_email", "")),
+                    (contact_subject := Signal("contact_subject", _ref_only=True)),
+                    (contact_subject_value := Signal("contact_subject_value", _ref_only=True)),
+                    (contact_message := Signal("contact_message", "")),
+                    (contact_updates := Signal("contact_updates", False)),
+                    InputWithLabel(label="Name", placeholder="Your full name", signal=contact_name, required=True),
+                    InputWithLabel(label="Email", type="email", placeholder="your.email@example.com", signal=contact_email, required=True),
                     SelectWithLabel(
                         label="Subject",
                         options=[
@@ -730,11 +604,11 @@ def contact_form_sheet_example():
                             ("feedback", "Product Feedback"),
                             ("other", "Other")
                         ],
-                        signal="contact_subject",
+                        signal=contact_subject,
                         required=True
                     ),
-                    TextareaWithLabel(label="Message", placeholder="Tell us how we can help you...", rows=4, signal="contact_message", required=True),
-                    CheckboxWithLabel(label="I'd like to receive updates about new features and improvements", signal="contact_updates"),
+                    TextareaWithLabel(label="Message", placeholder="Tell us how we can help you...", rows=4, signal=contact_message, required=True),
+                    CheckboxWithLabel(label="I'd like to receive updates about new features and improvements", signal=contact_updates),
                     cls="space-y-4 px-6"
                 )
             ),
@@ -743,89 +617,76 @@ def contact_form_sheet_example():
                     SheetClose("Cancel", variant="outline", cls="flex-1 mr-2"),
                     Button(
                         "Send Message",
-                        data_attr_disabled=js("!$contact_name || !$contact_email || !$contact_subject || !$contact_message"),
-                        data_on_click=js("""
-                            if ($contact_name && $contact_email && $contact_subject && $contact_message) {
-                                alert('Message sent! We\\'ll get back to you soon.');
-                                $contact_name = ''; $contact_email = '';
-                                $contact_subject = ''; $contact_message = '';
-                                $contact_updates = false;
-                            }
-                        """),
+                        type="submit",
+                        data_attr_disabled=~(contact_name & contact_email & contact_subject_value & contact_message),
+                        data_on_click="evt.preventDefault()",
                         cls="flex-1"
                     ),
                     cls="flex gap-2 w-full"
                 )
             ),
-            signal="contact_sheet",
             side="right",
             size="lg"
-        ),
-        signal="contact_sheet"
+        ),        
     )
 
 
-# Different sizes demo
 @with_code
 def sheet_sizes_example():
     sheet_configs = [
-        ("Small", "small_size_sheet", "sm", "Small Sheet", "Compact size for simple content",
-         "This is a small sheet (max-w-sm) - perfect for simple forms, quick actions, or narrow content."),
-        ("Medium", "medium_size_sheet", "md", "Medium Sheet", "Standard size for most content",
-         "This is a medium sheet (max-w-md) - the default size for most use cases including forms, settings, and moderate content."),
-        ("Large", "large_size_sheet", "lg", "Large Sheet", "More space for complex content",
-         "This is a large sheet (max-w-lg) - great for detailed forms, complex interfaces, shopping carts, and content that needs more horizontal space."),
-        ("Extra Large", "xl_size_sheet", "xl", "Extra Large Sheet", "Maximum width for extensive content",
-         "This is an extra large sheet (max-w-xl) - ideal for comprehensive dashboards, data tables, detailed settings panels, or any content requiring maximum horizontal space.")
+        {
+            "button": "Small",
+            "size": "sm",
+            "title": "Small Sheet",
+            "description": "Compact size for simple content",
+            "content": "This is a small sheet (max-w-sm) - perfect for simple forms, quick actions, or narrow content."
+        },
+        {
+            "button": "Medium",
+            "size": "md",
+            "title": "Medium Sheet",
+            "description": "Standard size for most content",
+            "content": "This is a medium sheet (max-w-md) - the default size for most use cases including forms, settings, and moderate content."
+        },
+        {
+            "button": "Large",
+            "size": "lg",
+            "title": "Large Sheet",
+            "description": "More space for complex content",
+            "content": "This is a large sheet (max-w-lg) - great for detailed forms, complex interfaces, shopping carts, and content that needs more horizontal space."
+        },
+        {
+            "button": "Extra Large",
+            "size": "xl",
+            "title": "Extra Large Sheet",
+            "description": "Maximum width for extensive content",
+            "content": "This is an extra large sheet (max-w-xl) - ideal for comprehensive dashboards, data tables, detailed settings panels, or any content requiring maximum horizontal space."
+        }
     ]
 
-    def create_size_demo(button_label, signal, size, title, description, content):
+    def create_size_demo(config):
         return Sheet(
-            SheetTrigger(button_label, signal=signal, variant="outline", size="sm"),
+            SheetTrigger(config["button"], variant="outline", size="sm"),
             SheetContent(
                 SheetHeader(
-                    SheetTitle(title),
-                    SheetDescription(description)
+                    SheetTitle(config["title"]),
+                    SheetDescription(config["description"])
                 ),
-                Div(P(content, cls="text-sm"), cls="px-6"),
-                signal=signal,
+                Div(P(config["content"], cls="text-sm"), cls="px-6"),
                 side="right",
-                size=size
+                size=config["size"]
             ),
-            signal=signal,
-            cls="mr-2" if button_label != "Extra Large" else ""
         )
 
     return Div(
         P("Different sheet sizes for various content needs:", cls="text-sm text-muted-foreground mb-4"),
         Div(
-            *[create_size_demo(button_label, signal, size, title, description, content)
-              for button_label, signal, size, title, description, content in sheet_configs],
+            *[create_size_demo(config) for config in sheet_configs],
             cls="flex flex-wrap gap-2 justify-center"
         ),
         cls="text-center"
     )
 
-
-# ============================================================================
-# EXAMPLES DATA (for markdown generation with code)
-# ============================================================================
-
-EXAMPLES_DATA = [
-    {"title": "Navigation Menu", "description": "Left-side navigation sheet with menu items and user profile", "fn": navigation_menu_sheet_example},
-    {"title": "Shopping Cart", "description": "Right-side cart drawer with product items and checkout actions", "fn": shopping_cart_sheet_example},
-    {"title": "Filter Panel", "description": "Left-side filter drawer for product search with multiple filter options", "fn": filter_panel_sheet_example},
-    {"title": "Settings Drawer", "description": "Right-side settings panel with user preferences and toggles", "fn": settings_drawer_sheet_example},
-    {"title": "Notification Panel", "description": "Top-sliding notification panel with action buttons and dismissible items", "fn": notification_panel_sheet_example},
-    {"title": "Action Sheet", "description": "Bottom-sliding mobile-friendly action sheet with contextual options", "fn": action_sheet_example},
-    {"title": "Contact Form", "description": "Complete contact form in a right-side sheet with validation", "fn": contact_form_sheet_example},
-    {"title": "Sheet Sizes", "description": "Different sheet sizes for various content requirements", "fn": sheet_sizes_example},
-]
-
-
-# ============================================================================
-# API REFERENCE
-# ============================================================================
 
 API_REFERENCE = build_api_reference(
     components=[
@@ -841,66 +702,16 @@ API_REFERENCE = build_api_reference(
 )
 
 
-# ============================================================================
-# EXAMPLES GENERATOR (for rendering on the page)
-# ============================================================================
-
-def examples():
-    yield ComponentPreview(
-        navigation_menu_sheet_example(),
-        navigation_menu_sheet_example.code,
-        title="Navigation Menu",
-        description="Left-side navigation sheet with menu items and user profile"
-    )
-
-    yield ComponentPreview(
-        shopping_cart_sheet_example(),
-        shopping_cart_sheet_example.code,
-        title="Shopping Cart",
-        description="Right-side cart drawer with product items and checkout actions"
-    )
-
-    yield ComponentPreview(
-        filter_panel_sheet_example(),
-        filter_panel_sheet_example.code,
-        title="Filter Panel",
-        description="Left-side filter drawer for product search with multiple filter options"
-    )
-
-    yield ComponentPreview(
-        settings_drawer_sheet_example(),
-        settings_drawer_sheet_example.code,
-        title="Settings Drawer",
-        description="Right-side settings panel with user preferences and toggles"
-    )
-
-    yield ComponentPreview(
-        notification_panel_sheet_example(),
-        notification_panel_sheet_example.code,
-        title="Notification Panel",
-        description="Top-sliding notification panel with action buttons and dismissible items"
-    )
-
-    yield ComponentPreview(
-        action_sheet_example(),
-        action_sheet_example.code,
-        title="Action Sheet",
-        description="Bottom-sliding mobile-friendly action sheet with contextual options"
-    )
-
-    yield ComponentPreview(
-        contact_form_sheet_example(),
-        contact_form_sheet_example.code,
-        title="Contact Form",
-        description="Complete contact form in a right-side sheet with validation"
-    )
-
-    yield ComponentPreview(
-        sheet_sizes_example(),
-        sheet_sizes_example.code,
-        title="Sheet Sizes",
-        description="Different sheet sizes for various content requirements"
-    )
+EXAMPLES_DATA = [
+    {"fn": navigation_menu_sheet_example, "title": "Navigation Menu", "description": "Left-side navigation sheet with menu items and user profile"},
+    {"fn": shopping_cart_sheet_example, "title": "Shopping Cart", "description": "Right-side cart drawer with product items and checkout actions"},
+    {"fn": filter_panel_sheet_example, "title": "Filter Panel", "description": "Left-side filter drawer for product search with multiple filter options"},
+    {"fn": settings_drawer_sheet_example, "title": "Settings Drawer", "description": "Right-side settings panel with user preferences and toggles"},
+    {"fn": notification_panel_sheet_example, "title": "Notification Panel", "description": "Top-sliding notification panel with action buttons and dismissible items"},
+    {"fn": action_sheet_example, "title": "Action Sheet", "description": "Bottom-sliding mobile-friendly action sheet with contextual options"},
+    {"fn": contact_form_sheet_example, "title": "Contact Form", "description": "Complete contact form in a right-side sheet with validation"},
+    {"fn": sheet_sizes_example, "title": "Sheet Sizes", "description": "Different sheet sizes for various content requirements"},
+]
 
 
 def create_sheet_docs():

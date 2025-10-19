@@ -10,22 +10,19 @@ CATEGORY = "ui"
 ORDER = 40
 STATUS = "stable"
 
-from starhtml import Div, P, H3, H4, Span, Icon, Label, Input, Signal, js
+from starhtml import Div, P, H4, Span, Icon, Label, Signal, collect
 from starui.registry.components.toggle_group import ToggleGroup
 from starui.registry.components.button import Button
 from starui.registry.components.separator import Separator
-from widgets.component_preview import ComponentPreview
 from utils import auto_generate_page, with_code, Component, Prop, build_api_reference
 
 
-# ============================================================================
-# EXAMPLE FUNCTIONS (decorated with @with_code for markdown generation)
-# ============================================================================
-
-# Text formatting toolbar
 @with_code
 def text_formatting_toolbar_example():
+    formatting = Signal("formatting", _ref_only=True)
+
     return Div(
+        formatting,
         P("Text Formatting", cls="font-medium mb-4"),
         ToggleGroup(
             ("bold", Icon("lucide:bold", cls="w-4 h-4")),
@@ -34,54 +31,50 @@ def text_formatting_toolbar_example():
             ("strikethrough", Icon("lucide:strikethrough", cls="w-4 h-4")),
             type="single",
             variant="outline",
-            signal="formatting"
+            signal=formatting
         ),
         Div(
-            P("Selected format: ", cls="text-sm inline"),
-            Span(data_text=js("$formatting_value || 'None'"), cls="font-mono text-sm bg-muted px-2 py-1 rounded"),
+            P("Selected format:", cls="text-sm text-muted-foreground mb-2"),
+            Span(data_text=formatting.or_("None"), cls="font-mono text-sm bg-muted px-2 py-1 rounded inline-block"),
             cls="mt-4"
         ),
-        cls="p-4 border rounded-lg"
+        cls="p-4 border rounded-lg max-w-md"
     )
 
 
-# View switcher
 @with_code
 def view_mode_switcher_example():
+    view_mode = Signal("view_mode", _ref_only=True)
+
     return Div(
+        view_mode,
         P("View Mode", cls="font-medium mb-4"),
         ToggleGroup(
             ("grid", Div(Icon("lucide:grid-3x3", cls="w-4 h-4"), "Grid", cls="flex items-center gap-2")),
             ("list", Div(Icon("lucide:list", cls="w-4 h-4"), "List", cls="flex items-center gap-2")),
             ("card", Div(Icon("lucide:layout-grid", cls="w-4 h-4"), "Card", cls="flex items-center gap-2")),
             type="single",
-            signal="view_mode",
-            default_value="grid"
+            signal=view_mode,
+            value="grid"
         ),
-
-        # Content area that changes based on selection
         Div(
-            # Grid view
             Div(
                 Div("Item 1", cls="p-4 border rounded bg-muted"),
                 Div("Item 2", cls="p-4 border rounded bg-muted"),
                 Div("Item 3", cls="p-4 border rounded bg-muted"),
                 Div("Item 4", cls="p-4 border rounded bg-muted"),
                 cls="grid grid-cols-2 gap-2",
-                data_show=js("$view_mode_value === 'grid'")
+                style="display: none",
+                data_show=view_mode.eq("grid")
             ),
-
-            # List view
             Div(
                 Div("Item 1", cls="p-3 border rounded bg-muted mb-2"),
                 Div("Item 2", cls="p-3 border rounded bg-muted mb-2"),
                 Div("Item 3", cls="p-3 border rounded bg-muted mb-2"),
                 Div("Item 4", cls="p-3 border rounded bg-muted"),
-                cls="",
-                data_show=js("$view_mode_value === 'list'")
+                style="display: none",
+                data_show=view_mode.eq("list")
             ),
-
-            # Card view
             Div(
                 Div(
                     H4("Item 1", cls="font-medium"),
@@ -93,21 +86,28 @@ def view_mode_switcher_example():
                     P("Description for item 2", cls="text-sm text-muted-foreground"),
                     cls="p-4 border rounded bg-muted mb-3"
                 ),
-                cls="",
-                data_show=js("$view_mode_value === 'card'")
+                style="display: none",
+                data_show=view_mode.eq("card")
             ),
-
             cls="mt-6 min-h-[200px]"
         ),
-
         cls="p-4 border rounded-lg"
     )
 
 
-# Multi-select filter options
 @with_code
 def multi_select_filters_example():
+    filters = Signal("filters", _ref_only=True)
+
+    filters_text = collect([
+        (filters.contains("featured"), "Featured"),
+        (filters.contains("sale"), "On Sale"),
+        (filters.contains("new"), "New"),
+        (filters.contains("popular"), "Popular"),
+    ], join_with=", ")
+
     return Div(
+        filters,
         P("Filter Options", cls="font-medium mb-4"),
         ToggleGroup(
             ("featured", Div(Icon("lucide:star", cls="w-4 h-4"), "Featured", cls="flex items-center gap-2")),
@@ -116,14 +116,13 @@ def multi_select_filters_example():
             ("popular", Div(Icon("lucide:trending-up", cls="w-4 h-4"), "Popular", cls="flex items-center gap-2")),
             type="multiple",
             variant="outline",
-            signal="filters"
+            signal=filters
         ),
 
-        # Show selected filters
         Div(
             P("Active Filters:", cls="text-sm font-medium mb-2"),
             Div(
-                data_text=js("$filters_value.length > 0 ? $filters_value.join(', ') : 'None selected'"),
+                data_text=filters_text.or_("None selected"),
                 cls="text-sm bg-muted p-3 rounded font-mono"
             ),
             cls="mt-6"
@@ -133,11 +132,9 @@ def multi_select_filters_example():
     )
 
 
-# Size variations
 @with_code
 def size_variations_example():
     return Div(
-        # Small size
         Div(
             P("Small", cls="text-sm font-medium mb-3"),
             ToggleGroup(
@@ -146,12 +143,10 @@ def size_variations_example():
                 ("sm3", "Three"),
                 type="single",
                 size="sm",
-                signal="small_group"
+                value="sm2"
             ),
             cls="mb-6"
         ),
-
-        # Default size
         Div(
             P("Default", cls="text-sm font-medium mb-3"),
             ToggleGroup(
@@ -159,12 +154,10 @@ def size_variations_example():
                 ("def2", "Two"),
                 ("def3", "Three"),
                 type="single",
-                signal="default_group"
+                value="def1"
             ),
             cls="mb-6"
         ),
-
-        # Large size
         Div(
             P("Large", cls="text-sm font-medium mb-3"),
             ToggleGroup(
@@ -173,19 +166,20 @@ def size_variations_example():
                 ("lg3", "Three"),
                 type="single",
                 size="lg",
-                signal="large_group"
+                value="lg3"
             ),
-            cls=""
         ),
-
         cls="p-4 border rounded-lg"
     )
 
 
-# Alignment and justification controls
 @with_code
 def editor_controls_example():
+    alignment = Signal("alignment", _ref_only=True)
+    decoration = Signal("decoration", _ref_only=True)
+
     return Div(
+        alignment, decoration,
         P("Text Alignment", cls="font-medium mb-4"),
         ToggleGroup(
             ("left", Icon("lucide:align-left", cls="w-4 h-4")),
@@ -194,7 +188,7 @@ def editor_controls_example():
             ("justify", Icon("lucide:align-justify", cls="w-4 h-4")),
             type="single",
             variant="outline",
-            signal="alignment"
+            signal=alignment
         ),
 
         Separator(cls="my-6"),
@@ -205,25 +199,20 @@ def editor_controls_example():
             ("italic", Icon("lucide:italic", cls="w-4 h-4")),
             ("underline", Icon("lucide:underline", cls="w-4 h-4")),
             type="multiple",
-            signal="decoration"
+            signal=decoration
         ),
 
-        # Preview area
         Div(
             P(
                 "The quick brown fox jumps over the lazy dog. This sample text demonstrates the selected text alignment and decoration options.",
                 cls="p-4 bg-muted rounded transition-all",
-                data_class=js("""
-                    {
-                        'text-left': $alignment_value === 'left' || !$alignment_value,
-                        'text-center': $alignment_value === 'center',
-                        'text-right': $alignment_value === 'right',
-                        'text-justify': $alignment_value === 'justify',
-                        'font-bold': $decoration_value && $decoration_value.includes('bold'),
-                        'italic': $decoration_value && $decoration_value.includes('italic'),
-                        'underline': $decoration_value && $decoration_value.includes('underline')
-                    }
-                """)
+                data_class_text_left=alignment.eq("left") | ~alignment,
+                data_class_text_center=alignment.eq("center"),
+                data_class_text_right=alignment.eq("right"),
+                data_class_text_justify=alignment.eq("justify"),
+                data_class_font_bold=decoration.contains("bold"),
+                data_class_italic=decoration.contains("italic"),
+                data_class_underline=decoration.contains("underline")
             ),
             cls="mt-6"
         ),
@@ -232,11 +221,9 @@ def editor_controls_example():
     )
 
 
-# Theme and variant combinations
 @with_code
 def variant_styles_example():
     return Div(
-        # Default variant
         Div(
             P("Default Variant", cls="text-sm font-medium mb-3"),
             ToggleGroup(
@@ -244,13 +231,10 @@ def variant_styles_example():
                 ("option2", "Option 2"),
                 ("option3", "Option 3"),
                 type="single",
-                variant="default",
-                signal="default_variant"
+                variant="default"
             ),
             cls="mb-6"
         ),
-
-        # Outline variant
         Div(
             P("Outline Variant", cls="text-sm font-medium mb-3"),
             ToggleGroup(
@@ -258,13 +242,10 @@ def variant_styles_example():
                 ("option2", "Option 2"),
                 ("option3", "Option 3"),
                 type="single",
-                variant="outline",
-                signal="outline_variant"
+                variant="outline"
             ),
             cls="mb-6"
         ),
-
-        # Mixed with icons
         Div(
             P("With Icons", cls="text-sm font-medium mb-3"),
             ToggleGroup(
@@ -272,23 +253,27 @@ def variant_styles_example():
                 ("settings", Div(Icon("lucide:settings", cls="w-4 h-4"), "Settings", cls="flex items-center gap-2")),
                 ("profile", Div(Icon("lucide:user", cls="w-4 h-4"), "Profile", cls="flex items-center gap-2")),
                 type="single",
-                variant="outline",
-                signal="icon_variant"
+                variant="outline"
             ),
-            cls=""
         ),
-
         cls="p-4 border rounded-lg"
     )
 
 
-# Advanced form integration
 @with_code
 def form_integration_example():
-    return Div(
-        P("Notification Preferences", cls="font-medium mb-4"),
+    communication_methods = Signal("communication_methods", _ref_only=True)
+    frequency = Signal("frequency", _ref_only=True)
 
-        # Communication methods
+    methods_text = collect([
+        (communication_methods.contains("email"), "Email"),
+        (communication_methods.contains("sms"), "SMS"),
+        (communication_methods.contains("push"), "Push"),
+    ], join_with=", ")
+
+    return Div(
+        communication_methods, frequency,
+        P("Notification Preferences", cls="font-medium mb-4"),
         Div(
             Label("Communication Methods:", cls="text-sm font-medium mb-2 block"),
             ToggleGroup(
@@ -297,12 +282,10 @@ def form_integration_example():
                 ("push", Div(Icon("lucide:bell", cls="w-4 h-4"), "Push", cls="flex items-center gap-2")),
                 type="multiple",
                 variant="outline",
-                signal="communication_methods"
+                signal=communication_methods
             ),
             cls="mb-6"
         ),
-
-        # Frequency
         Div(
             Label("Notification Frequency:", cls="text-sm font-medium mb-2 block"),
             ToggleGroup(
@@ -311,37 +294,34 @@ def form_integration_example():
                 ("weekly", "Weekly Summary"),
                 ("never", "Never"),
                 type="single",
-                signal="frequency"
+                signal=frequency,
+                orientation="vertical",
+                cls="w-full"
             ),
-            cls="mb-6"
+            cls="mb-6",
+            style="display: none",
+            data_show=communication_methods.length > 0
         ),
-
-        # Summary
         Div(
             P("Summary:", cls="text-sm font-medium mb-2"),
             Div(
-                P("Methods: ", data_text=js("$communication_methods_value.length > 0 ? $communication_methods_value.join(', ') : 'None'"),
+                P("Methods: ", data_text=methods_text.or_("None"),
                   cls="text-sm mb-1"),
-                P("Frequency: ", data_text=js("$frequency_value || 'Not set'"),
+                P("Frequency: ", data_text=frequency.or_("Not set"),
                   cls="text-sm"),
                 cls="bg-muted p-3 rounded text-sm"
             ),
-            cls=""
         ),
-
-        cls="p-4 border rounded-lg max-w-lg"
+        cls="p-4 border rounded-lg w-full max-w-lg"
     )
 
 
-# Disabled states
 @with_code
 def disabled_states_example():
     disabled_partial = Signal("disabled_partial", False)
 
     return Div(
         P("Disabled States", cls="font-medium mb-4"),
-
-        # Dynamic disabling
         Div(
             P("Dynamic Disabling", cls="text-sm text-muted-foreground mb-2"),
             Div(
@@ -351,21 +331,19 @@ def disabled_states_example():
                     ("busy", "Busy"),
                     ("away", "Away"),
                     type="single",
-                    slot_attrs={"toggle_group_item": {"data-attr-disabled": "$disabled_partial"}}
+                    slot_toggle_group_item=dict(data_attr_disabled=disabled_partial)
                 ),
                 Button(
-                    data_text=js("$disabled_partial ? 'Enable' : 'Disable'"),
+                    data_text=disabled_partial.if_("Enable", "Disable"),
                     variant="outline",
                     size="sm",
                     cls="ml-4",
-                    data_on_click=js("$disabled_partial = !$disabled_partial")
+                    data_on_click=disabled_partial.toggle()
                 ),
                 cls="flex items-center"
             ),
             cls="mb-6"
         ),
-
-        # Fully disabled
         Div(
             P("Fully Disabled", cls="text-sm text-muted-foreground mb-2"),
             ToggleGroup(
@@ -376,16 +354,10 @@ def disabled_states_example():
                 disabled=True,
                 variant="outline"
             ),
-            cls=""
         ),
-
         cls="p-4 border rounded-lg"
     )
 
-
-# ============================================================================
-# MODULE-LEVEL DATA (for markdown API)
-# ============================================================================
 
 EXAMPLES_DATA = [
     {"title": "Text Formatting Toolbar", "description": "Single-selection toggle group for text formatting options", "fn": text_formatting_toolbar_example},
@@ -409,7 +381,7 @@ API_REFERENCE = build_api_reference(
             props=[
                 Prop("type", "Literal['single','multiple']", "Selection mode", "'single'"),
                 Prop("signal", "str | None", "Datastar signal prefix; autogenerated when None", "None"),
-                Prop("initial_value", "str | list[str] | None", "Initial selection value(s)", "None"),
+                Prop("value", "str | list[str] | None", "Initial selection value(s)", "None"),
                 Prop("variant", "Literal['default','outline']", "Visual style", "'default'"),
                 Prop("size", "Literal['default','sm','lg']", "Button size", "'default'"),
                 Prop("disabled", "bool", "Disable all items", "False"),
@@ -418,65 +390,6 @@ API_REFERENCE = build_api_reference(
         ),
     ]
 )
-
-
-def examples():
-    """Generate all toggle group examples."""
-    yield ComponentPreview(
-        text_formatting_toolbar_example(),
-        text_formatting_toolbar_example.code,
-        title="Text Formatting Toolbar",
-        description="Single-selection toggle group for text formatting options"
-    )
-
-    yield ComponentPreview(
-        view_mode_switcher_example(),
-        view_mode_switcher_example.code,
-        title="View Mode Switcher",
-        description="Toggle between different content layouts with dynamic content display"
-    )
-
-    yield ComponentPreview(
-        multi_select_filters_example(),
-        multi_select_filters_example.code,
-        title="Multi-Select Filters",
-        description="Multiple selection toggle group for filtering options"
-    )
-
-    yield ComponentPreview(
-        size_variations_example(),
-        size_variations_example.code,
-        title="Size Variations",
-        description="Toggle groups in different sizes for various use cases"
-    )
-
-    yield ComponentPreview(
-        editor_controls_example(),
-        editor_controls_example.code,
-        title="Editor Controls",
-        description="Combine single and multiple selection groups for rich text editing"
-    )
-
-    yield ComponentPreview(
-        variant_styles_example(),
-        variant_styles_example.code,
-        title="Variant Styles",
-        description="Different visual styles and combinations with icons"
-    )
-
-    yield ComponentPreview(
-        form_integration_example(),
-        form_integration_example.code,
-        title="Form Integration",
-        description="Complex form scenarios with multiple toggle groups and live feedback"
-    )
-
-    yield ComponentPreview(
-        disabled_states_example(),
-        disabled_states_example.code,
-        title="Disabled States",
-        description="Toggle groups in disabled states for different scenarios"
-    )
 
 
 def create_toggle_group_docs():

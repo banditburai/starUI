@@ -9,19 +9,14 @@ CATEGORY = "ui"
 ORDER = 25
 STATUS = "stable"
 
-from starhtml import Div, P, H3, H4, Span, Signal, js
+from starhtml import Div, P, H4, Signal
 from starui.registry.components.skeleton import Skeleton
 from starui.registry.components.button import Button
-from starui.registry.components.card import Card, CardContent, CardHeader, CardTitle
+from starui.registry.components.card import Card, CardContent, CardHeader
 from utils import auto_generate_page, with_code, Prop, build_api_reference
-from widgets.component_preview import ComponentPreview
 
 
-# ============================================================================
-# EXAMPLE FUNCTIONS (decorated with @with_code for markdown generation)
-# ============================================================================
 
-# Basic skeleton shapes with proper circles
 @with_code
 def basic_shapes_skeleton_example():
     return Div(
@@ -29,8 +24,7 @@ def basic_shapes_skeleton_example():
             H4("Text Lines", cls="mb-3 text-sm font-medium"),
             Skeleton(cls="h-4 w-3/4 mb-2"),
             Skeleton(cls="h-4 w-full mb-2"),
-            Skeleton(cls="h-4 w-5/6"),
-            cls="mb-6"
+            Skeleton(cls="h-4 w-5/6")
         ),
         Div(
             H4("Shapes", cls="mb-3 text-sm font-medium"),
@@ -41,8 +35,7 @@ def basic_shapes_skeleton_example():
                 Skeleton(cls="h-16 w-16 rounded-full mr-4"),
                 Skeleton(cls="h-10 w-24"),
                 cls="flex items-center"
-            ),
-            cls="mb-4"
+            )
         ),
         Div(
             H4("User Profile", cls="mb-3 text-sm font-medium"),
@@ -60,7 +53,6 @@ def basic_shapes_skeleton_example():
     )
 
 
-# Card skeleton layout
 @with_code
 def card_layout_skeleton_example():
     return Card(
@@ -85,7 +77,6 @@ def card_layout_skeleton_example():
     )
 
 
-# Data table skeleton
 @with_code
 def data_table_skeleton_example():
     return Div(
@@ -119,45 +110,40 @@ def data_table_skeleton_example():
     )
 
 
-# Interactive loading demo
 @with_code
 def loading_states_skeleton_example():
     loading = Signal("loading", True)
 
     return Div(
+        loading,
         H4("Loading State Toggle", cls="text-lg font-medium mb-2"),
         Div(
-            loading,
             Button(
-                data_text=js("$loading ? 'Stop Loading' : 'Start Loading'"),
-                data_on_click=js("$loading = !$loading"),
+                data_text=loading.if_("Stop Loading", "Start Loading"),
+                data_on_click=loading.toggle(),
                 variant="outline",
-                cls="mb-4",
+                cls="mb-4"
             ),
             Div(
                 Skeleton(cls="h-6 w-40 mb-2"),
                 Skeleton(cls="h-4 w-80 mb-4"),
                 Skeleton(cls="h-20 w-full rounded-lg"),
-                data_show=js("$loading"),
+                data_show=loading
             ),
             Div(
                 H4("Content Loaded!", cls="text-lg font-semibold mb-2"),
                 P("This content appears when loading is complete.", cls="mb-4"),
                 Div(
                     "This is the actual content that would load.",
-                    cls="p-4 bg-muted rounded-lg",
+                    cls="p-4 bg-muted rounded-lg"
                 ),
-                data_show=js("!$loading"),
+                data_show=~loading
             ),
-            cls="p-4 border rounded-lg",
-        ),
-        cls="mb-6",
+            cls="p-4 border rounded-lg"
+        )
     )
 
 
-# ============================================================================
-# MODULE-LEVEL DATA (for markdown API)
-# ============================================================================
 
 EXAMPLES_DATA = [
     {"title": "Basic Shapes", "description": "Text lines, perfect circles, and common patterns", "fn": basic_shapes_skeleton_example},
@@ -173,36 +159,6 @@ API_REFERENCE = build_api_reference(
     ]
 )
 
-
-def examples():
-    """Generate all skeleton examples."""
-    yield ComponentPreview(
-        basic_shapes_skeleton_example(),
-        basic_shapes_skeleton_example.code,
-        title="Basic Shapes",
-        description="Text lines, perfect circles, and common patterns"
-    )
-
-    yield ComponentPreview(
-        card_layout_skeleton_example(),
-        card_layout_skeleton_example.code,
-        title="Card Layout",
-        description="Skeleton for a typical user card with avatar, content, and action"
-    )
-
-    yield ComponentPreview(
-        data_table_skeleton_example(),
-        data_table_skeleton_example.code,
-        title="Data Table",
-        description="Skeleton for user data table with avatars and status indicators"
-    )
-
-    yield ComponentPreview(
-        loading_states_skeleton_example(),
-        loading_states_skeleton_example.code,
-        title="Loading States",
-        description="Interactive demo showing skeleton to content transition"
-    )
 
 
 

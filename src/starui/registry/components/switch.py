@@ -20,8 +20,14 @@ def Switch(
     sig = getattr(signal, 'id', signal) or gen_id("switch")
     switch_id = kwargs.pop("id", sig)
 
+    checked_state = Signal(sig, checked or False)
+
+    user_on_click = kwargs.pop('data_on_click', None)
+    user_actions = user_on_click if isinstance(user_on_click, list) else ([user_on_click] if user_on_click else [])
+    click_actions = [checked_state.toggle()] + user_actions
+
     return Div(
-        (checked_state := Signal(sig, checked or False)),
+        checked_state,
         HTMLButton(
             HTMLSpan(
                 cls="pointer-events-none block size-4 rounded-full bg-background ring-0 transition-transform",
@@ -31,7 +37,7 @@ def Switch(
                 ),
                 data_slot="switch-thumb",
             ),
-            data_on_click=checked_state.toggle(),
+            data_on_click=click_actions,
             cls=cn(
                 "peer inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-full",
                 "border border-transparent shadow-xs transition-all outline-none",

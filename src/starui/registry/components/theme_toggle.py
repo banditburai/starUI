@@ -1,4 +1,4 @@
-from starhtml import FT, Div, Icon, Style, js
+from starhtml import FT, Div, Icon, Span, Style, js
 
 from .button import Button
 from .utils import DEFAULT_THEME, ALT_THEME
@@ -15,8 +15,8 @@ def ThemeToggle(**kwargs) -> FT:
             }}
         """),
         Button(
-            Icon("ph:moon-bold", width="20", height="20", cls="theme-icon-default"),
-            Icon("ph:sun-bold", width="20", height="20", cls="theme-icon-alt"),
+            Span(Icon("ph:moon-bold", width="20", height="20"), cls="theme-icon-default"),
+            Span(Icon("ph:sun-bold", width="20", height="20"), cls="theme-icon-alt"),
             data_on_click=js(f"""
                 const currentTheme = document.documentElement.getAttribute('data-theme');
                 const newTheme = currentTheme === '{ALT_THEME}' ? '{DEFAULT_THEME}' : '{ALT_THEME}';

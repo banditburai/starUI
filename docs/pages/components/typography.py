@@ -10,7 +10,7 @@ CATEGORY = "ui"
 ORDER = 85
 STATUS = "stable"
 
-from starhtml import Div, Icon, Span, Img, Signal, js
+from starhtml import Div, Icon, Span
 from starui.registry.components.typography import (
     Display, H1, H2, H3, H4, H5, H6,
     P, Lead, Large, Small, Muted, Subtitle, Caption,
@@ -21,14 +21,8 @@ from starui.registry.components.card import Card, CardHeader, CardContent, CardT
 from starui.registry.components.badge import Badge
 from starui.registry.components.separator import Separator
 from utils import auto_generate_page, with_code, Component, Prop, build_api_reference
-from widgets.component_preview import ComponentPreview
 
 
-# ============================================================================
-# EXAMPLE FUNCTIONS (decorated with @with_code for markdown generation)
-# ============================================================================
-
-# Headings showcase
 @with_code
 def headings_showcase_example():
     return Div(
@@ -43,7 +37,6 @@ def headings_showcase_example():
     )
 
 
-# Text variants
 @with_code
 def text_variants_example():
     return Div(
@@ -57,7 +50,6 @@ def text_variants_example():
     )
 
 
-# Blog post example
 @with_code
 def blog_post_example():
     return Card(
@@ -91,7 +83,6 @@ def blog_post_example():
     )
 
 
-# Code documentation
 @with_code
 def code_documentation_example():
     return Card(
@@ -136,7 +127,6 @@ def code_documentation_example():
     )
 
 
-# Article with emphasis
 @with_code
 def text_emphasis_example():
     return Card(
@@ -172,7 +162,6 @@ def text_emphasis_example():
     )
 
 
-# Prose wrapper
 @with_code
 def prose_component_example():
     return Card(
@@ -204,7 +193,6 @@ def prose_component_example():
     )
 
 
-# Figure with caption
 @with_code
 def figures_captions_example():
     return Card(
@@ -229,7 +217,6 @@ def figures_captions_example():
     )
 
 
-# Complete article example
 @with_code
 def complete_article_example():
     return Card(
@@ -292,7 +279,6 @@ def complete_article_example():
     )
 
 
-# Hero example
 @with_code
 def hero_typography_example():
     return Div(
@@ -303,9 +289,6 @@ def hero_typography_example():
     )
 
 
-# ============================================================================
-# MODULE-LEVEL DATA (for markdown API)
-# ============================================================================
 
 EXAMPLES_DATA = [
     {"fn": hero_typography_example, "title": "Beautiful Typography", "description": "Create stunning text layouts with our comprehensive typography system"},

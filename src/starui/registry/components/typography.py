@@ -171,7 +171,7 @@ def InlineCode(*children, cls="", **kwargs) -> FT:
     return HTMLCode(
         *children,
         cls=cn(
-            "relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold",
+            "relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold text-foreground",
             cls,
         ),
         **kwargs,
@@ -207,7 +207,7 @@ def Kbd(*children, cls="", **kwargs) -> FT:
 def Mark(*children, cls="", **kwargs) -> FT:
     return HTMLMark(
         *children,
-        cls=cn("bg-yellow-200 dark:bg-yellow-800/30 px-1 py-0.5 rounded", cls),
+        cls=cn("bg-yellow-200 dark:bg-teal-500/40 px-1 py-0.5 rounded", cls),
         **kwargs,
     )
 

@@ -23,8 +23,8 @@ dependencies = [
     "requests>=2.31.0,<3.0.0",
     "pydantic>=2.5.0,<3.0.0",
     "rich>=13.7.0,<14.0.0",
-    "websockets>=12.0.0,<13.0.0",
-    "starhtml>=0.2.6",
+    "websockets>=12.0.0,<16.0.0",
+    "starhtml>=0.3.1",
     "starmerge>=0.1.0",
 ]
 

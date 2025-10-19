@@ -56,7 +56,9 @@ def auto_generate_page(
     hero_example = None
     examples_list = []
     if examples_data:
-        hero_example = _create_component_preview(examples_data[0], copy_button=True)
+        # Hero example should not show title/description - only the preview
+        hero_data = {k: v for k, v in examples_data[0].items() if k not in ('title', 'description')}
+        hero_example = _create_component_preview(hero_data, copy_button=True)
         examples_list = list(generate_examples(examples_data[1:]))
 
     sections = [

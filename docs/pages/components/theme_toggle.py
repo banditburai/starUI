@@ -9,11 +9,12 @@ CATEGORY = "ui"
 ORDER = 95
 STATUS = "stable"
 
-from starhtml import Div, H3, Icon, P, Span, FT, Signal, js
-from starhtml import Span as HTMLSpan
+from starhtml import Div, Icon, P, Span, FT, Signal, js
 from starui.registry.components.button import Button
-from widgets.component_preview import ComponentPreview
+from starui.registry.components.dropdown_menu import DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem
 from utils import auto_generate_page, with_code, Prop, build_api_reference
+
+THEME_STORAGE_KEY = "iframe-theme-theme_toggle"
 
 
 def IsolatedThemeToggle(alt_theme="dark", default_theme="light", **kwargs) -> FT:
@@ -23,17 +24,15 @@ def IsolatedThemeToggle(alt_theme="dark", default_theme="light", **kwargs) -> FT
     return Div(
         is_alt,
         Button(
-            Span(Icon("ph:moon-bold", width="20", height="20"), data_show=js("!$is_alt")),
-            Span(Icon("ph:sun-bold", width="20", height="20"), data_show=js("$is_alt")),
+            Span(Icon("ph:moon-bold", width="20", height="20"), data_show=~is_alt),
+            Span(Icon("ph:sun-bold", width="20", height="20"), data_show=is_alt),
             variant="ghost",
             aria_label="Toggle theme",
             cls="h-9 px-4 py-2 flex-shrink-0",
-            data_on_click=js("$is_alt = !$is_alt")
+            data_on_click=is_alt.toggle()
         ),
         data_on_load=js(f"""
-            const iframeId = window.location.pathname.split('/').pop();
-            const iframeKey = 'iframe-theme-' + iframeId;
-            const savedTheme = localStorage.getItem(iframeKey);
+            const savedTheme = localStorage.getItem('{THEME_STORAGE_KEY}');
 
             if (savedTheme) {{
                 $is_alt = savedTheme === '{alt_theme}';
@@ -46,10 +45,7 @@ def IsolatedThemeToggle(alt_theme="dark", default_theme="light", **kwargs) -> FT
         data_effect=js(f"""
             const theme = $is_alt ? '{alt_theme}' : '{default_theme}';
             document.documentElement.setAttribute('data-theme', theme);
-
-            const iframeId = window.location.pathname.split('/').pop();
-            const iframeKey = 'iframe-theme-' + iframeId;
-            localStorage.setItem(iframeKey, theme);
+            localStorage.setItem('{THEME_STORAGE_KEY}', theme);
         """),
         **kwargs,
     )
@@ -59,145 +55,111 @@ def IsolatedThemeToggle(alt_theme="dark", default_theme="light", **kwargs) -> FT
 ThemeToggle = IsolatedThemeToggle
 
 
-# ============================================================================
-# EXAMPLE FUNCTIONS (decorated with @with_code for markdown generation)
-# ============================================================================
 
-# Sizes example - showing different button sizes
 @with_code
 def size_variations_example():
+    sizes = [
+        {"scale": "scale-75", "label": "Small"},
+        {"scale": "", "label": "Default"},
+        {"scale": "scale-125", "label": "Large"},
+    ]
+
     return Div(
         P("Theme Toggle Sizes", cls="font-medium mb-4 text-center"),
         P("Click any toggle below to change this preview's theme independently",
           cls="text-sm text-muted-foreground mb-6 text-center"),
         Div(
-            Div(
-                ThemeToggle(cls="scale-75"),
-                P("Small", cls="text-xs text-muted-foreground mt-2"),
-                cls="flex flex-col items-center"
-            ),
-            Div(
-                ThemeToggle(),
-                P("Default", cls="text-xs text-muted-foreground mt-2"),
-                cls="flex flex-col items-center"
-            ),
-            Div(
-                ThemeToggle(cls="scale-125"),
-                P("Large", cls="text-xs text-muted-foreground mt-2"),
-                cls="flex flex-col items-center"
-            ),
+            *[
+                Div(
+                    ThemeToggle(cls=size["scale"]),
+                    P(size["label"], cls="text-xs text-muted-foreground mt-2"),
+                    cls="flex flex-col items-center"
+                )
+                for size in sizes
+            ],
             cls="flex items-center gap-8 justify-center"
         ),
         cls="space-y-4 py-8"
     )
 
 
-# Custom icons example - visual demonstration only
 @with_code
-def custom_icons_labels_example():
+def dropdown_theme_selector_example():
+    is_dark = Signal("is_dark", _ref_only=True)
+
+    theme_options = [
+        {"value": "light", "label": "Light", "icon": "lucide:sun"},
+        {"value": "dark", "label": "Dark", "icon": "lucide:moon"},
+        {"value": "system", "label": "System", "icon": "lucide:laptop"},
+    ]
+
+    def set_theme_js(theme_value):
+        return js(f"""
+            const newTheme = '{theme_value}';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('{THEME_STORAGE_KEY}', newTheme);
+            $is_dark = newTheme === 'dark';
+        """)
+
     return Div(
-        P("Custom Theme Toggle Styles", cls="font-medium mb-4 text-center"),
-        P("Different icon sets and label styles for theme switching",
+        is_dark,
+        P("Dropdown Theme Selector", cls="font-medium mb-4 text-center"),
+        P("Common pattern with Light, Dark, and System options",
           cls="text-sm text-muted-foreground mb-6 text-center"),
         Div(
-            Div(
-                ThemeToggle(),
-                P("Default (Sun/Moon)", cls="text-xs text-muted-foreground mt-2"),
-                cls="flex flex-col items-center"
-            ),
-            Div(
-                Button(
+            DropdownMenu(
+                DropdownMenuTrigger(
                     Span(
-                        Icon("lucide:sun-medium", width="20", height="20"),
-                        cls="theme-icon-default"
+                        Icon("lucide:sun", cls="h-[1.2rem] w-[1.2rem]"),
+                        style="display: none",
+                        data_show=is_dark
                     ),
                     Span(
-                        Icon("lucide:moon-star", width="20", height="20"),
-                        cls="theme-icon-alt"
+                        Icon("lucide:moon", cls="h-[1.2rem] w-[1.2rem]"),
+                        style="display: none",
+                        data_show=~is_dark
                     ),
-                    variant="ghost",
-                    aria_label="Toggle theme",
-                    cls="h-9 px-4 py-2",
-                    data_on_click=js("""
-                        const currentTheme = document.documentElement.getAttribute('data-theme');
-                        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-                        document.documentElement.setAttribute('data-theme', newTheme);
-
-                        const iframeId = window.location.pathname.split('/').pop();
-                        localStorage.setItem('iframe-theme-' + iframeId, newTheme);
-                    """)
-                ),
-                P("Custom (Day/Night)", cls="text-xs text-muted-foreground mt-2"),
-                cls="flex flex-col items-center"
-            ),
-            Div(
-                Button(
-                    Span("Light", cls="theme-icon-default text-sm"),
-                    Span("Dark", cls="theme-icon-alt text-sm"),
+                    Span("Theme", cls="sr-only"),
                     variant="outline",
-                    size="sm",
-                    aria_label="Toggle theme",
-                    data_on_click=js("""
-                        const currentTheme = document.documentElement.getAttribute('data-theme');
-                        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-                        document.documentElement.setAttribute('data-theme', newTheme);
-
-                        const iframeId = window.location.pathname.split('/').pop();
-                        localStorage.setItem('iframe-theme-' + iframeId, newTheme);
-                    """)
+                    size="icon"
                 ),
-                P("Text Labels", cls="text-xs text-muted-foreground mt-2"),
-                cls="flex flex-col items-center"
+                DropdownMenuContent(
+                    *[
+                        DropdownMenuItem(
+                            Icon(opt["icon"], cls="mr-2 h-4 w-4"),
+                            Span(opt["label"]),
+                            data_on_click=set_theme_js(opt["value"])
+                        )
+                        for opt in theme_options
+                    ],
+                    align="end"
+                )
             ),
-            cls="flex items-center gap-8 justify-center"
+            cls="flex justify-center"
         ),
+        data_on_load=js(f"""
+            const savedTheme = localStorage.getItem('{THEME_STORAGE_KEY}');
+
+            let theme;
+            if (savedTheme) {{
+                theme = savedTheme;
+            }} else {{
+                theme = localStorage.getItem('theme') ||
+                    document.documentElement.getAttribute('data-theme') ||
+                    'light';
+            }}
+
+            document.documentElement.setAttribute('data-theme', theme);
+            $is_dark = theme === 'dark';
+        """),
         cls="space-y-4 py-8"
     )
 
 
-# Integration example - in a settings panel
-@with_code
-def settings_panel_integration_example():
-    return Div(
-        Div(
-            H3("Appearance Settings", cls="text-lg font-semibold mb-6"),
-            Div(
-                Div(
-                    P("Theme", cls="text-sm font-medium"),
-                    P("Choose your preferred color scheme", cls="text-xs text-muted-foreground mt-1"),
-                    cls="flex-1"
-                ),
-                ThemeToggle(),
-                cls="flex items-center justify-between pb-4 border-b"
-            ),
-            Div(
-                Div(
-                    P("Accent Color", cls="text-sm font-medium"),
-                    P("Customize your interface color", cls="text-xs text-muted-foreground mt-1"),
-                    cls="flex-1"
-                ),
-                Div(
-                    Div(cls="h-6 w-6 rounded-full bg-blue-500 border-2 border-primary cursor-pointer"),
-                    Div(cls="h-6 w-6 rounded-full bg-green-500 border-2 border-transparent cursor-pointer hover:border-border"),
-                    Div(cls="h-6 w-6 rounded-full bg-purple-500 border-2 border-transparent cursor-pointer hover:border-border"),
-                    cls="flex gap-2"
-                ),
-                cls="flex items-center justify-between pt-4"
-            ),
-            cls="bg-muted/30 rounded-lg p-6 w-full max-w-lg space-y-4"
-        ),
-        cls="flex items-center justify-center min-h-[350px]"
-    )
-
-
-# ============================================================================
-# MODULE-LEVEL DATA (for markdown API)
-# ============================================================================
 
 EXAMPLES_DATA = [
     {"title": "Size Variations", "description": "Theme toggle in different sizes for various UI contexts", "fn": size_variations_example, "use_iframe": True},
-    {"title": "Custom Icons & Labels", "description": "Different icon sets and text labels for theme switching", "fn": custom_icons_labels_example, "use_iframe": True},
-    {"title": "Settings Panel Integration", "description": "Theme toggle integrated into a settings interface", "fn": settings_panel_integration_example, "use_iframe": True},
+    {"title": "Dropdown Theme Selector", "description": "Common shadcn-style dropdown with Light, Dark, and System options", "fn": dropdown_theme_selector_example, "use_iframe": True},
 ]
 
 API_REFERENCE = build_api_reference(
@@ -209,31 +171,6 @@ API_REFERENCE = build_api_reference(
 )
 
 
-def examples():
-    """Generate all theme toggle examples."""
-    yield ComponentPreview(
-        size_variations_example(),
-        size_variations_example.code,
-        title="Size Variations",
-        description="Theme toggle in different sizes for various UI contexts",
-        use_iframe=True  # Isolate to prevent affecting parent page
-    )
-
-    yield ComponentPreview(
-        custom_icons_labels_example(),
-        custom_icons_labels_example.code,
-        title="Custom Icons & Labels",
-        description="Different icon sets and text labels for theme switching",
-        use_iframe=True
-    )
-
-    yield ComponentPreview(
-        settings_panel_integration_example(),
-        settings_panel_integration_example.code,
-        title="Settings Panel Integration",
-        description="Theme toggle integrated into a settings interface",
-        use_iframe=True
-    )
 
 
 def create_theme_toggle_docs():

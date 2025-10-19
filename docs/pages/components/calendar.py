@@ -10,9 +10,44 @@ from utils import auto_generate_page, Prop, build_api_reference, with_code
 from widgets.component_preview import ComponentPreview
 
 
-# ============================================================================
-# EXAMPLE FUNCTIONS (decorated with @with_code for markdown generation)
-# ============================================================================
+
+@with_code
+def hero_calendar_example():
+    cal_single = Calendar(mode="single")
+    cal_range = Calendar(
+        mode="range",
+        selected=["2025-09-10", "2025-09-20"],
+        month=9,
+        year=2025
+    )
+    cal_multiple = Calendar(
+        mode="multiple",
+        selected=["2025-09-05", "2025-09-15", "2025-09-25"],
+        month=9,
+        year=2025
+    )
+    return Div(
+        Div(
+            Div(
+                P("Single", cls="text-sm font-medium mb-2"),
+                cal_single,
+                cls="flex flex-col items-center"
+            ),
+            Div(
+                P("Range", cls="text-sm font-medium mb-2"),
+                cal_range,
+                cls="flex flex-col items-center"
+            ),
+            Div(
+                P("Multiple", cls="text-sm font-medium mb-2"),
+                cal_multiple,
+                cls="flex flex-col items-center"
+            ),
+            cls="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl mx-auto"
+        ),
+        cls="w-full"
+    )
+
 
 @with_code
 def date_range_selection_example():
@@ -56,13 +91,6 @@ def multiple_date_selection_example():
     )
 
 
-# ============================================================================
-# EXAMPLES GENERATOR (for rendering on the page)
-# ============================================================================
-
-# ============================================================================
-# API REFERENCE
-# ============================================================================
 
 API_REFERENCE = build_api_reference(
     main_props=[
@@ -84,57 +112,13 @@ API_REFERENCE = build_api_reference(
 )
 
 
-# ============================================================================
-# EXAMPLES DATA (for markdown generation with code)
-# ============================================================================
 
 EXAMPLES_DATA = [
+    {"title": "Calendar", "description": "Single, range, and multiple date selection modes", "fn": hero_calendar_example},
     {"title": "Date Range Selection", "description": "Select a start and end date for booking or filtering", "fn": date_range_selection_example},
     {"title": "Multiple Date Selection", "description": "Select multiple individual dates for scheduling or events", "fn": multiple_date_selection_example},
 ]
 
-
-# ============================================================================
-# DOCS PAGE
-# ============================================================================
-
-
-@with_code
-def hero_calendar_example():
-    cal_single = Calendar(mode="single")
-    cal_range = Calendar(
-        mode="range",
-        selected=["2025-09-10", "2025-09-20"],
-        month=9,
-        year=2025
-    )
-    cal_multiple = Calendar(
-        mode="multiple",
-        selected=["2025-09-05", "2025-09-15", "2025-09-25"],
-        month=9,
-        year=2025
-    )
-    return Div(
-        Div(
-            Div(
-                P("Single", cls="text-sm font-medium mb-2"),
-                cal_single,
-                cls="flex flex-col items-center"
-            ),
-            Div(
-                P("Range", cls="text-sm font-medium mb-2"),
-                cal_range,
-                cls="flex flex-col items-center"
-            ),
-            Div(
-                P("Multiple", cls="text-sm font-medium mb-2"),
-                cal_multiple,
-                cls="flex flex-col items-center"
-            ),
-            cls="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl mx-auto"
-        ),
-        cls="w-full"
-    )
 
 
 def create_calendar_docs():

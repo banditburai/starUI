@@ -304,9 +304,9 @@ message = f"Count: {counter}"        # → "Count: $counter" (static string)
 message = "Count: " + counter        # → `Count: ${$counter}` (reactive template)
 # This updates live when counter changes!
 
-# ✅ Use f() helper for REACTIVE complex templates (3+ variables)
-from starhtml.datastar import f
-message = f("Hello {name}, you have {count} items", name=username, count=counter)
+# ✅ Use f_() helper for REACTIVE complex templates (3+ variables)
+from starhtml import f_
+message = f_("Hello {name}, you have {count} items", name=username, count=counter)
 # → `Hello ${$username}, you have ${$counter} items` (reactive template)
 
 # When to use each:

@@ -3,14 +3,13 @@ Popover component documentation - Convention-based functional approach.
 Clean, minimal, and easy to extend.
 """
 
-# Component metadata for auto-discovery
 TITLE = "Popover"
 DESCRIPTION = "Displays rich content in a portal, triggered by a button. Uses native HTML popover API for accessibility and performance."
 CATEGORY = "overlay"
 ORDER = 60
 STATUS = "stable"
 
-from starhtml import Div, P, Input, Label, Icon, Span, H2, H3, Form, Code, Ul, Li, A, Img, Strong, Hr, Signal, js
+from starhtml import Div, P, Input, Label, Icon, Span, H2, H3, Form, Code, Ul, Li, A, Img, Strong, Hr, Signal
 from starui.registry.components.popover import (
     Popover, PopoverTrigger, PopoverContent, PopoverClose
 )
@@ -26,14 +25,8 @@ from starui.registry.components.switch import Switch
 from starui.registry.components.date_picker import DateTimePicker
 from starui.registry.components.toggle_group import ToggleGroup
 from utils import auto_generate_page, with_code, Component, build_api_reference
-from widgets.component_preview import ComponentPreview
 
 
-# ============================================================================
-# EXAMPLE FUNCTIONS (decorated with @with_code for markdown generation)
-# ============================================================================
-
-# Basic popover
 @with_code
 def basic_popover_example():
     return Popover(
@@ -62,7 +55,8 @@ def popover_placement_examples():
             PopoverTrigger(label, variant="outline", cls="mr-2" if label != "Left" else ""),
             PopoverContent(
                 P(description, cls="text-sm"),
-                side=side
+                side=side,
+                cls="w-56"
             )
         )
 
@@ -73,7 +67,6 @@ def popover_placement_examples():
     )
 
 
-# Profile card popover
 @with_code
 def profile_card_popover_example():
     return Div(
@@ -85,9 +78,9 @@ def profile_card_popover_example():
                     size="sm",
                     cls="mr-2"
                 ),
-                Span("@shadcn", cls="text-sm font-medium"),
+                Span("@shadcn", cls="text-sm font-medium hover:underline"),
                 variant="ghost",
-                cls="flex items-center h-auto p-0 hover:bg-transparent"
+                cls="flex items-center h-auto px-3 py-2 rounded-md hover:bg-accent"
             ),
             PopoverContent(
                 Div(
@@ -126,32 +119,26 @@ def profile_card_popover_example():
     )
 
 
-# Interactive form popover
 @with_code
 def form_popover_example():
-    meeting_title = Signal("meeting_title", "")
-    meeting_duration = Signal("meeting_duration", "30")
-    meeting_datetime = Signal("meeting_datetime", "")
-    meeting_notes = Signal("meeting_notes", "")
-
-    return Popover(
-        PopoverTrigger(
-            Icon("lucide:calendar", cls="h-4 w-4 mr-2"),
-            "Schedule Meeting",
-            variant="outline"
-        ),
-        PopoverContent(
-            Form(
+    return Div(
+        (meeting_title := Signal("meeting_title", "")),
+        (meeting_duration := Signal("meeting_duration", "30")),
+        (meeting_notes := Signal("meeting_notes", "")),
+        (popover_content := Signal("meeting_content", _ref_only=True)),
+        Popover(
+            PopoverTrigger(
+                Icon("lucide:calendar", cls="h-4 w-4 mr-2"),
+                "Schedule Meeting",
+                variant="outline"
+            ),
+            PopoverContent(
                 Div(
-                    meeting_title,
-                    meeting_duration,
-                    meeting_datetime,
-                    meeting_notes,
                     H3("Schedule a Meeting", cls="font-semibold text-sm mb-4"),
                     InputWithLabel(
                         label="Meeting Title",
                         placeholder="Weekly Standup",
-                        signal="meeting_title",
+                        signal=meeting_title,
                         required=True
                     ),
                     SelectWithLabel(
@@ -163,18 +150,17 @@ def form_popover_example():
                             ("120", "2 hours")
                         ],
                         value="30",
-                        signal="meeting_duration"
+                        signal=meeting_duration
                     ),
                     Label("Date & Time", cls="text-sm font-medium mb-1 block"),
-                    DateTimePicker(
-                        signal="meeting_datetime",
+                    (datetime_picker := DateTimePicker(
                         placeholder="Select date and time"
-                    ),
+                    )),
                     TextareaWithLabel(
                         label="Notes (Optional)",
                         placeholder="Add meeting agenda or notes...",
                         rows=3,
-                        signal="meeting_notes"
+                        signal=meeting_notes
                     ),
                     Div(
                         Button(
@@ -182,49 +168,49 @@ def form_popover_example():
                             type="button",
                             variant="outline",
                             size="sm",
-                            data_on_click=js("$meeting_title = ''; $meeting_notes = ''")
+                            data_on_click=[
+                                meeting_title.set(""),
+                                datetime_picker.datetime.set(""),
+                                meeting_notes.set(""),
+                                popover_content.hidePopover()
+                            ]
                         ),
                         Button(
                             "Schedule",
                             type="button",
                             size="sm",
-                            data_attr_disabled=js("!$meeting_title || !$meeting_datetime"),
-                            data_on_click=js("""
-                                if ($meeting_title && $meeting_datetime) {
-                                    alert(`Meeting \"${$meeting_title}\" scheduled for ${new Date($meeting_datetime).toLocaleString()}`);
-                                    $meeting_title = '';
-                                    $meeting_notes = '';
-                                }
-                            """)
+                            data_attr_disabled=~meeting_title | ~datetime_picker.datetime,
+                            data_on_click=[
+                                meeting_title.set(""),
+                                datetime_picker.datetime.set(""),
+                                meeting_notes.set(""),
+                                popover_content.hidePopover()
+                            ]
                         ),
                         cls="flex justify-end gap-2 pt-4"
                     ),
                     cls="space-y-4"
-                )
+                ),
+                cls="w-80"
             ),
-            cls="w-80"
+            signal="meeting"
         )
     )
 
 
-# Color picker popover
 @with_code
 def color_picker_popover_example():
-    selected_color = Signal("selected_color", "#3b82f6")
-    custom_color = Signal("custom_color", "#3b82f6")
-
     return Div(
-        selected_color,
-        custom_color,
+        (selected_color := Signal("selected_color", "#3b82f6")),
         P("Choose a color:", cls="text-sm mb-4"),
         Popover(
             PopoverTrigger(
                 Div(
                     Div(
-                        data_style_background_color=js("$selected_color"),
+                        data_style_background_color=selected_color,
                         cls="w-6 h-6 rounded border border-border mr-2"
                     ),
-                    Span(data_text=js("$selected_color || '#3b82f6'"), cls="text-sm font-mono"),
+                    Span(data_text=selected_color, cls="text-sm font-mono"),
                     Icon("lucide:chevron-down", cls="h-4 w-4 ml-2"),
                     cls="flex items-center"
                 ),
@@ -237,7 +223,7 @@ def color_picker_popover_example():
                     Div(
                         *[
                             Button(
-                                data_on_click=js(f"$selected_color = '{color}'"),
+                                data_on_click=selected_color.set(color),
                                 style=f"background-color: {color}; width: 32px; height: 32px; border-radius: 6px;",
                                 variant="ghost",
                                 cls="p-0 hover:scale-110 transition-transform"
@@ -253,12 +239,10 @@ def color_picker_popover_example():
                     Div(
                         Label("Custom Color:", cls="text-xs font-medium mb-2 block"),
                         Input(
-                            data_on_input=js("$custom_color = evt.target.value; $selected_color = evt.target.value"),
                             type="color",
-                            cls="w-full h-10 rounded border cursor-pointer",
-                            value="#3b82f6",
-                        ),
-                        data_effect=js("if ($selected_color !== $custom_color) { $custom_color = $selected_color }")
+                            signal=selected_color,
+                            cls="w-full h-10 rounded border cursor-pointer"
+                        )
                     )
                 ),
                 cls="w-64"
@@ -267,8 +251,8 @@ def color_picker_popover_example():
         Div(
             P("Preview:", cls="text-sm font-medium mb-2"),
             Div(
-                P("This text uses your selected color", data_style_color=js("$selected_color"), cls="font-medium"),
-                Div(data_style_background_color=js("$selected_color"), cls="w-full h-16 rounded border mt-2")
+                P("This text uses your selected color", data_style_color=selected_color, cls="font-medium"),
+                Div(data_style_background_color=selected_color, cls="w-full h-16 rounded border mt-2")
             ),
             cls="mt-6 p-4 border rounded-lg"
         ),
@@ -276,78 +260,78 @@ def color_picker_popover_example():
     )
 
 
-# Settings panel popover
 @with_code
 def settings_panel_popover_example():
     return Div(
+        (theme_setting := Signal("theme_setting", "system")),
+        (notifications_enabled := Signal("notifications_enabled", True)),
+        (autosave_enabled := Signal("autosave_enabled", True)),
+        Div(
             Div(
+                Span("Dashboard", cls="text-lg font-semibold"),
                 Div(
-                    Span("Dashboard", cls="text-lg font-semibold"),
-                    Div(
-                        Span("Projects", cls="text-sm text-muted-foreground"),
-                        Span("Team", cls="text-sm text-muted-foreground"),
-                        Span("Analytics", cls="text-sm text-muted-foreground"),
-                        cls="flex gap-6"
-                    ),
-                    cls="flex items-center gap-8"
+                    Span("Projects", cls="text-sm text-muted-foreground"),
+                    Span("Team", cls="text-sm text-muted-foreground"),
+                    Span("Analytics", cls="text-sm text-muted-foreground"),
+                    cls="flex gap-6"
                 ),
-                Popover(
-                    PopoverTrigger(
-                        Icon("lucide:settings", cls="h-4 w-4"),
-                        variant="ghost",
-                        size="icon"
-                    ),
-                    PopoverContent(
-                        Div(
-                            Div(
-                                Icon("lucide:settings", cls="h-4 w-4 mr-2"),
-                                H3("Settings", cls="font-semibold text-base"),
-                                cls="flex items-center mb-4"
-                            ),
-                            Div(
-                                P("APPEARANCE", cls="text-xs font-medium text-muted-foreground mb-3"),
-                                Div(
-                                    Label("Theme", cls="text-sm font-medium mb-2 block"),
-                                    ToggleGroup(
-                                        ("light", Div(Icon("lucide:sun", cls="h-4 w-4"), Span("Light", cls="ml-2 text-sm"), cls="flex items-center")),
-                                        ("dark", Div(Icon("lucide:moon", cls="h-4 w-4"), Span("Dark", cls="ml-2 text-sm"), cls="flex items-center")),
-                                        ("system", Div(Icon("lucide:laptop", cls="h-4 w-4"), Span("System", cls="ml-2 text-sm"), cls="flex items-center")),
-                                        signal="theme_setting",
-                                        variant="outline",
-                                        cls="grid grid-cols-3 w-full"
-                                    ),
-                                    data_effect=js("$theme_setting_value = 'system'")
-                                )
-                            ),
-                            Separator(cls="my-4"),
-                            Div(
-                                P("PREFERENCES", cls="text-xs font-medium text-muted-foreground mb-3"),
-                                Div(
-                                    Label("Notifications", cls="text-sm font-medium"),
-                                    Switch(signal="notifications_enabled", checked=True),
-                                    cls="flex items-center justify-between mb-3"
-                                ),
-                                Div(
-                                    Label("Auto-save", cls="text-sm font-medium"),
-                                    Switch(signal="autosave_enabled", checked=True),
-                                    cls="flex items-center justify-between"
-                                )
-                            ),
-                            Separator(cls="my-4"),
-                            Button("Manage Account", variant="outline", size="sm", cls="w-full")
-                        ),
-                        cls="w-96",
-                        side="bottom",
-                        align="end"
-                    )
-                ),
-                cls="flex items-center justify-between p-4 border rounded-lg bg-card"
+                cls="flex items-center gap-8"
             ),
-            cls="w-full max-w-md mx-auto"
-        )
+            Popover(
+                PopoverTrigger(
+                    Icon("lucide:settings", cls="h-4 w-4"),
+                    variant="ghost",
+                    size="icon"
+                ),
+                PopoverContent(
+                    Div(
+                        Div(
+                            Icon("lucide:settings", cls="h-4 w-4 mr-2"),
+                            H3("Settings", cls="font-semibold text-base"),
+                            cls="flex items-center mb-4"
+                        ),
+                        Div(
+                            P("APPEARANCE", cls="text-xs font-medium text-muted-foreground mb-3"),
+                            Div(
+                                Label("Theme", cls="text-sm font-medium mb-2 block"),
+                                ToggleGroup(
+                                    ("light", Div(Icon("lucide:sun", cls="h-4 w-4"), Span("Light", cls="ml-2 text-sm"), cls="flex items-center")),
+                                    ("dark", Div(Icon("lucide:moon", cls="h-4 w-4"), Span("Dark", cls="ml-2 text-sm"), cls="flex items-center")),
+                                    ("system", Div(Icon("lucide:laptop", cls="h-4 w-4"), Span("System", cls="ml-2 text-sm"), cls="flex items-center")),
+                                    signal=theme_setting,
+                                    variant="outline",
+                                    cls="grid grid-cols-3 w-full"
+                                )
+                            )
+                        ),
+                        Separator(cls="my-4"),
+                        Div(
+                            P("PREFERENCES", cls="text-xs font-medium text-muted-foreground mb-3"),
+                            Div(
+                                Label("Notifications", cls="text-sm font-medium"),
+                                Switch(signal=notifications_enabled, checked=True),
+                                cls="flex items-center justify-between mb-3"
+                            ),
+                            Div(
+                                Label("Auto-save", cls="text-sm font-medium"),
+                                Switch(signal=autosave_enabled, checked=True),
+                                cls="flex items-center justify-between"
+                            )
+                        ),
+                        Separator(cls="my-4"),
+                        Button("Manage Account", variant="outline", size="sm", cls="w-full")
+                    ),
+                    cls="w-96",
+                    side="bottom",
+                    align="end"
+                )
+            ),
+            cls="flex items-center justify-between p-4 border rounded-lg bg-card"
+        ),
+        cls="w-full max-w-md mx-auto"
+    )
 
 
-# Help tooltip popover
 @with_code
 def help_tooltip_popovers_example():
     return Div(
@@ -431,7 +415,6 @@ def help_tooltip_popovers_example():
         )
 
 
-# Popover with close button
 @with_code
 def popover_with_close_button_example():
     return Popover(
@@ -469,10 +452,6 @@ def popover_with_close_button_example():
     )
 
 
-# ============================================================================
-# MODULE-LEVEL DATA (for markdown API)
-# ============================================================================
-
 EXAMPLES_DATA = [
     {"title": "Basic Popover", "description": "Simple popover with text content and automatic positioning", "fn": basic_popover_example},
     {"title": "Popover Placement", "description": "Control popover positioning relative to the trigger", "fn": popover_placement_examples},
@@ -492,70 +471,6 @@ API_REFERENCE = build_api_reference(
         Component("PopoverClose", "Helper button that hides the popover; can be placed inside content"),
     ]
 )
-
-
-def examples():
-    """Generate all popover examples."""
-    yield ComponentPreview(
-        basic_popover_example(),
-        basic_popover_example.code,
-        title="Basic Popover",
-        description="Simple popover with text content and automatic positioning"
-    )
-
-    yield ComponentPreview(
-        popover_placement_examples(),
-        popover_placement_examples.code,
-        title="Popover Placement",
-        description="Control popover positioning relative to the trigger"
-    )
-
-    yield ComponentPreview(
-        profile_card_popover_example(),
-        profile_card_popover_example.code,
-        title="Profile Card Popover",
-        description="Rich profile card with avatar, stats, and action buttons"
-    )
-
-    yield ComponentPreview(
-        form_popover_example(),
-        form_popover_example.code,
-        title="Form Popover",
-        description="Interactive form with validation inside a popover"
-    )
-
-    yield ComponentPreview(
-        color_picker_popover_example(),
-        color_picker_popover_example.code,
-        title="Color Picker Popover",
-        description="Interactive color picker with presets and custom color input"
-    )
-
-    yield ComponentPreview(
-        settings_panel_popover_example(),
-        settings_panel_popover_example.code,
-        title="Settings Panel",
-        description="Clean settings panel with theme selector and preference toggles"
-    )
-
-    yield ComponentPreview(
-        help_tooltip_popovers_example(),
-        help_tooltip_popovers_example.code,
-        title="Help Tooltip Popovers",
-        description="Contextual help information for form fields and UI elements"
-    )
-
-    yield ComponentPreview(
-        popover_with_close_button_example(),
-        popover_with_close_button_example.code,
-        title="Popover with Close Button",
-        description="Popover with explicit close button and action buttons"
-    )
-
-
-# ============================================================================
-# DOCUMENTATION PAGE GENERATION
-# ============================================================================
 
 
 def create_popover_docs():

@@ -278,7 +278,15 @@ def CommandItem(
             ~search | expr(value).lower().contains(search.lower()) | expr(keywords or "").lower().contains(search.lower())
         )
 
-        click_actions = ([js(onclick)] if onclick else []) + ([dialog_ref.close()] if dialog_ref else [])
+        user_click = kwargs.pop('data_on_click', None)
+        if user_click and not isinstance(user_click, list):
+            user_click = [user_click]
+
+        click_actions = (
+            ([js(onclick)] if onclick else []) +
+            (user_click or []) +
+            ([dialog_ref.close()] if dialog_ref else [])
+        )
 
         return Div(
             *children,

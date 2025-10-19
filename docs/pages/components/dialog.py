@@ -10,7 +10,8 @@ CATEGORY = "overlay"
 ORDER = 40
 STATUS = "stable"
 
-from starhtml import Div, P, Input, Label, Icon, Span, H2, H3, Form, Code, Ul, Li, Style, Signal, js
+from starhtml import Div, P, Input, Label, Icon, Span, H2, H3, Form, Code, Ul, Li, Style, Signal, switch
+from starhtml.datastar import js, set_timeout, seq
 from starui.registry.components.dialog import (
     Dialog, DialogTrigger, DialogContent, DialogHeader, DialogFooter,
     DialogTitle, DialogDescription, DialogClose
@@ -27,15 +28,11 @@ from utils import auto_generate_page, with_code, Prop, Component, build_api_refe
 from widgets.component_preview import ComponentPreview
 
 
-# ============================================================================
-# EXAMPLE FUNCTIONS (decorated with @with_code for markdown generation)
-# ============================================================================
 
-# Basic dialog
 @with_code
 def basic_dialog_example():
     return Dialog(
-        DialogTrigger("Open Dialog", ref_id="basic_dialog"),
+        DialogTrigger("Open Dialog"),
         DialogContent(
             DialogHeader(
                 DialogTitle("Welcome to StarUI"),
@@ -45,21 +42,37 @@ def basic_dialog_example():
             ),
             P("Dialog content goes here. You can include any content you need.", cls="py-4"),
             DialogFooter(
-                DialogClose("Got it", ref_id="basic_dialog")
+                DialogClose("Got it")
             )
-        ),
-        ref_id="basic_dialog"
+        )
     )
 
 
-# Confirmation dialog
 @with_code
 def confirmation_dialog_example():
+    def warning_section():
+        consequences = [
+            "All your projects will be deleted",
+            "Your subscription will be cancelled",
+            "You will lose access to all shared resources",
+        ]
+
+        return Div(
+            Icon("lucide:alert-triangle", cls="h-6 w-6 text-destructive flex-shrink-0 mt-0.5"),
+            Div(
+                P("Warning: ", Span("This action is irreversible", cls="font-semibold"), cls="text-sm"),
+                Ul(
+                    *[Li(text, cls="text-sm") for text in consequences],
+                    cls="list-disc list-inside mt-2 space-y-1 text-muted-foreground"
+                ),
+            ),
+            cls="flex gap-3"
+        )
+
     return Dialog(
         DialogTrigger(
             Icon("lucide:trash-2", cls="h-4 w-4 mr-2"),
             "Delete Account",
-            ref_id="confirm_dialog",
             variant="destructive"
         ),
         DialogContent(
@@ -70,45 +83,38 @@ def confirmation_dialog_example():
                     "account and remove your data from our servers."
                 )
             ),
-            Div(
-                Div(
-                    Icon("lucide:alert-triangle", cls="h-6 w-6 text-destructive flex-shrink-0 mt-0.5"),
-                    Div(
-                        P(
-                            "Warning: ",
-                            Span("This action is irreversible", cls="font-semibold"),
-                            cls="text-sm"
-                        ),
-                        Ul(
-                            Li("All your projects will be deleted", cls="text-sm"),
-                            Li("Your subscription will be cancelled", cls="text-sm"),
-                            Li("You will lose access to all shared resources", cls="text-sm"),
-                            cls="list-disc list-inside mt-2 space-y-1 text-muted-foreground"
-                        ),
-                    ),
-                    cls="flex gap-3"
-                ),
-                cls="py-4"
-            ),
+            Div(warning_section(), cls="py-4"),
             DialogFooter(
-                DialogClose("Cancel", ref_id="confirm_dialog", variant="outline"),
+                DialogClose("Cancel", variant="outline"),
                 DialogClose(
                     "Delete Account",
-                    ref_id="confirm_dialog",
                     variant="destructive",
                     value="delete",
-                    onclick="alert('Account deleted!')"
+                    data_on_click="alert('Account deleted!')"
                 )
             )
-        ),
-        ref_id="confirm_dialog"
+        )
     )
 
 
-# Form dialog
 @with_code
 def form_dialog_example():
-    def create_role_preview(role, icon, title, description, color):
+    form_dialog = Signal("form_dialog", _ref_only=True)
+    member_name = Signal("member_name", "")
+    member_email = Signal("member_email", "")
+    member_role = Signal("member_role", "viewer")
+    member_role_value = Signal("member_role_value", "viewer", _ref_only=True)  # Reference to SelectWithLabel's internal signal
+    send_invite = Signal("send_invite", True)
+    send_welcome = Signal("send_welcome", True)
+
+    def section_header(icon, title):
+        return P(
+            Icon(icon, cls="h-4 w-4 inline mr-2"),
+            title,
+            cls="text-sm font-semibold text-foreground mb-3 flex items-center"
+        )
+
+    def role_preview(role, icon, title, description, color):
         return Div(
             Icon(icon, cls=f"h-5 w-5 text-{color}-500"),
             Div(
@@ -116,32 +122,83 @@ def form_dialog_example():
                 P(description, cls="text-xs text-muted-foreground"),
                 cls="ml-3"
             ),
-            data_show=js(f"$member_role_value === '{role}'"),
+            data_show=member_role_value == role,
             cls=f"flex items-center p-3 bg-{color}-50 dark:bg-{color}-950/20 rounded-md border border-{color}-200 dark:border-{color}-800"
         )
 
-    def create_section_header(icon, title):
-        return P(
-            Icon(icon, cls="h-4 w-4 inline mr-2"),
-            title,
-            cls="text-sm font-semibold text-foreground mb-3 flex items-center"
+    def personal_info_section():
+        return Div(
+            section_header("lucide:user", "Personal Information"),
+            InputWithLabel(
+                label="Full Name",
+                placeholder="Enter full name",
+                signal=member_name,
+                required=True,
+                helper_text="This will be displayed in the team directory"
+            ),
+            InputWithLabel(
+                label="Email Address",
+                type="email",
+                placeholder="Enter email address",
+                signal=member_email,
+                required=True,
+                helper_text="Invitation will be sent to this email"
+            ),
+            cls="space-y-4"
         )
 
-    member_name = Signal("member_name", "")
-    member_email = Signal("member_email", "")
-    member_role_value = Signal("member_role_value", "viewer")
-    member_role_label = Signal("member_role_label", "Viewer - Can view projects and files")
-    member_role_open = Signal("member_role_open", False)
-    send_invite = Signal("send_invite", True)
-    send_welcome = Signal("send_welcome", True)
+    def role_section():
+        roles = [
+            ("viewer", "lucide:eye", "Viewer Access", "Can view and comment on projects", "blue"),
+            ("editor", "lucide:edit-3", "Editor Access", "Can edit, create, and manage projects", "green"),
+            ("admin", "lucide:crown", "Admin Access", "Full control including user and billing management", "amber"),
+        ]
+
+        return Div(
+            section_header("lucide:shield-check", "Access & Permissions"),
+            SelectWithLabel(
+                label="Role",
+                options=[
+                    ("viewer", "Viewer - Can view projects and files"),
+                    ("editor", "Editor - Can edit projects and collaborate"),
+                    ("admin", "Admin - Full administrative access")
+                ],
+                value="viewer",
+                signal=member_role,
+                helper_text="Choose the appropriate permission level for this user"
+            ),
+            Div(
+                *[role_preview(*role) for role in roles],
+                cls="mt-3"
+            ),
+            cls="space-y-4"
+        )
+
+    def notification_section():
+        return Div(
+            section_header("lucide:mail", "Notification Settings"),
+            CheckboxWithLabel(
+                label="Send invitation email immediately",
+                checked=True,
+                signal=send_invite,
+                helper_text="The team member will receive an email invitation to join"
+            ),
+            CheckboxWithLabel(
+                label="Send welcome email with getting started guide",
+                checked=True,
+                signal=send_welcome,
+                helper_text="Include helpful resources for new team members"
+            ),
+            cls="space-y-3"
+        )
 
     return Dialog(
         DialogTrigger(
             Icon("lucide:user-plus", cls="h-4 w-4 mr-2"),
-            "Add Team Member",
-            ref_id="form_dialog"
+            "Add Team Member"
         ),
         DialogContent(
+            member_role_value,
             DialogHeader(
                 DialogTitle("Invite Team Member"),
                 DialogDescription("Add a new member to your team and assign their role")
@@ -149,116 +206,45 @@ def form_dialog_example():
             Form(
                 member_name,
                 member_email,
-                member_role_value,
-                member_role_label,
-                member_role_open,
-                send_invite,
-                send_welcome,
-                Div(
-                    create_section_header("lucide:user", "Personal Information"),
-                    InputWithLabel(
-                        label="Full Name",
-                        placeholder="Enter full name",
-                        signal="member_name",
-                        required=True,
-                        helper_text="This will be displayed in the team directory"
-                    ),
-                    InputWithLabel(
-                        label="Email Address",
-                        type="email",
-                        placeholder="Enter email address",
-                        signal="member_email",
-                        required=True,
-                        helper_text="Invitation will be sent to this email"
-                    ),
-                    cls="space-y-4"
-                ),
-
+                personal_info_section(),
                 Separator(cls="my-6"),
-
-                Div(
-                    create_section_header("lucide:shield-check", "Access & Permissions"),
-                    SelectWithLabel(
-                        label="Role",
-                        options=[
-                            ("viewer", "Viewer - Can view projects and files"),
-                            ("editor", "Editor - Can edit projects and collaborate"),
-                            ("admin", "Admin - Full administrative access")
-                        ],
-                        value="viewer",
-                        signal="member_role",
-                        helper_text="Choose the appropriate permission level for this user"
-                    ),
-                    Div(
-                        create_role_preview("viewer", "lucide:eye", "Viewer Access", "Can view and comment on projects", "blue"),
-                        create_role_preview("editor", "lucide:edit-3", "Editor Access", "Can edit, create, and manage projects", "green"),
-                        create_role_preview("admin", "lucide:crown", "Admin Access", "Full control including user and billing management", "amber"),
-                        cls="mt-3"
-                    ),
-                    cls="space-y-4"
-                ),
-
+                role_section(),
                 Separator(cls="my-6"),
-
-                Div(
-                    create_section_header("lucide:mail", "Notification Settings"),
-                    CheckboxWithLabel(
-                        label="Send invitation email immediately",
-                        checked=True,
-                        signal="send_invite",
-                        helper_text="The team member will receive an email invitation to join"
-                    ),
-                    CheckboxWithLabel(
-                        label="Send welcome email with getting started guide",
-                        checked=True,
-                        signal="send_welcome",
-                        helper_text="Include helpful resources for new team members"
-                    ),
-                    cls="space-y-3"
-                ),
-
-                DialogFooter(
-                    DialogClose("Cancel", ref_id="form_dialog", variant="outline"),
-                    Button(
-                        Icon("lucide:send", cls="h-4 w-4 mr-2"),
-                        "Send Invitation",
-                        data_attr_disabled=member_name.not_().or_(member_email.not_()),
-                        data_on_click=js("""
-                            evt.preventDefault();
-                            if ($member_name && $member_email) {
-                                const roleLabel = $member_role_value === 'viewer' ? 'Viewer' :
-                                                 $member_role_value === 'editor' ? 'Editor' : 'Admin';
-                                alert(`✅ Invitation sent to ${$member_email} as ${roleLabel}`);
-                                $form_dialog.close();
-                                // Reset form
-                                $member_name = '';
-                                $member_email = '';
-                                $member_role_value = 'viewer';
-                                $send_invite = true;
-                                $send_welcome = true;
-                            }
-                        """),
-                        type="submit",
-                        cls="bg-primary hover:bg-primary/90"
-                    )
-                ),
+                notification_section(),
                 cls="space-y-6 py-4"
+            ),
+            DialogFooter(
+                DialogClose("Cancel", variant="outline"),
+                Button(
+                    Icon("lucide:send", cls="h-4 w-4 mr-2"),
+                    "Send Invitation",
+                    data_attr_disabled=~member_name | ~member_email,
+                    data_on_click=[
+                        "evt.preventDefault()",
+                        f"alert('✅ Invitation sent to ' + {member_email} + ' as ' + {member_role_value})",
+                        form_dialog.close(),
+                        member_name.set(''),
+                        member_email.set(''),
+                        member_role_value.set('viewer'),
+                        send_invite.set(True),
+                        send_welcome.set(True)
+                    ],
+                    type="submit",
+                    cls="bg-primary hover:bg-primary/90"
+                )
             )
         ),
-        ref_id="form_dialog",
+        signal=form_dialog,
         size="lg"
     )
 
 
-# Scrollable content dialog
 @with_code
 def scrollable_content_example():
-    terms_accepted = Signal("terms_accepted", False)
-
     return Dialog(
-        DialogTrigger("View Terms", ref_id="scroll_dialog"),
+        DialogTrigger("View Terms"),
         DialogContent(
-            terms_accepted,
+            terms_accepted := Signal("terms_accepted", False),
             DialogHeader(
                 DialogTitle("Terms of Service"),
                 DialogDescription("Please review our terms and conditions")
@@ -289,222 +275,232 @@ def scrollable_content_example():
             ),
             CheckboxWithLabel(
                 label="I have read and agree to the terms",
-                signal="terms_accepted"
+                signal=terms_accepted
             ),
             DialogFooter(
-                DialogClose("Decline", ref_id="scroll_dialog", variant="outline"),
+                DialogClose("Decline", variant="outline"),
                 DialogClose(
                     "Accept",
-                    data_attr_disabled=terms_accepted.not_(),
-                    ref_id="scroll_dialog",
-                    variant="default",
-                    onclick="alert('Terms accepted!')"
+                    data_attr_disabled=~terms_accepted,
+                    variant="default"
                 )
             )
         ),
-        ref_id="scroll_dialog",
         size="lg"
     )
 
 
-# Loading/async dialog
 @with_code
 def loading_async_dialog_example():
     uploading = Signal("uploading", False)
     upload_complete = Signal("upload_complete", False)
     upload_progress = Signal("upload_progress", 0)
     file_selected = Signal("file_selected", False)
-    selected_file_name = Signal("selected_file_name", "")
-    selected_file_size = Signal("selected_file_size", "")
     doc_title = Signal("doc_title", "")
 
+    def file_dropzone():
+        return Div(
+            P("Choose file to upload:", cls="text-sm font-medium mb-2"),
+            Div(
+                Span(Icon("lucide:file-text", cls="w-8 h-8 text-muted-foreground mb-2"), data_show=~file_selected),
+                Span(Icon("lucide:file-check", cls="w-8 h-8 text-green-500 mb-2"), data_show=file_selected),
+                P(
+                    data_text=file_selected.if_("project-proposal.pdf", "Click to select file or drag and drop"),
+                    data_style_color=file_selected.if_("hsl(var(--foreground))", "hsl(var(--muted-foreground))"),
+                    cls="text-sm font-medium mb-1",
+                ),
+                P(data_text=file_selected.if_("2.4 MB", "PDF, DOC, TXT up to 10MB"), cls="text-xs text-muted-foreground"),
+                data_on_click=file_selected.set(True),
+                data_style_border_color=file_selected.if_("hsl(var(--border))", "hsl(var(--muted))"),
+                data_style_background_color=file_selected.if_("hsl(var(--muted)/0.3)", "transparent"),
+                cls="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all duration-200",
+            ),
+            cls="mb-4"
+        )
+
+    def upload_form():
+        return Div(
+            InputWithLabel(
+                label="Document Title",
+                placeholder="Enter a title for your document",
+                signal=doc_title,
+                required=True,
+                helper_text="Required - give your document a descriptive name"
+            ),
+            file_dropzone(),
+            data_show=~uploading & ~upload_complete,
+            cls="py-4 space-y-4"
+        )
+
+    def uploading_state():
+        return Div(
+            Icon("lucide:loader", cls="w-8 h-8 text-primary animate-spin mx-auto mb-4"),
+            P("Uploading document...", cls="text-center font-medium mb-2"),
+            P(data_text=upload_progress + "% complete", cls="text-center text-sm text-muted-foreground mb-4"),
+            Div(
+                Div(data_style_width=upload_progress + "%", cls="h-2 bg-primary rounded-full transition-all duration-300"),
+                cls="w-full bg-muted rounded-full h-2"
+            ),
+            data_show=uploading & ~upload_complete,
+            cls="text-center py-8"
+        )
+
+    def complete_state():
+        return Div(
+            Icon("lucide:check-circle", cls="w-8 h-8 text-green-500 mx-auto mb-4"),
+            P("Upload Complete!", cls="text-center font-medium text-green-600 mb-2"),
+            P(data_text="Successfully uploaded: " + doc_title.or_("Document"), cls="text-center text-sm text-muted-foreground"),
+            data_show=upload_complete,
+            cls="text-center py-8"
+        )
+
+    def start_upload():
+        return [
+            upload_complete.set(False),
+            uploading.set(True),
+            upload_progress.set(0),
+            *[set_timeout(upload_progress.set(i * 20), i * 200) for i in range(1, 6)],
+            set_timeout(upload_complete.set(True), 1200)
+        ]
+
+    def reset_form():
+        return [
+            uploading.set(False),
+            upload_complete.set(False),
+            upload_progress.set(0),
+            file_selected.set(False),
+            doc_title.set('')
+        ]
+
     return Dialog(
-        DialogTrigger(
-            Icon("lucide:cloud-upload", cls="h-4 w-4 mr-2"),
-            "Upload File",
-            ref_id="upload_dialog"
-        ),
+        DialogTrigger(Icon("lucide:cloud-upload", cls="h-4 w-4 mr-2"), "Upload File"),
         DialogContent(
             uploading,
             upload_complete,
             upload_progress,
             file_selected,
-            selected_file_name,
-            selected_file_size,
             doc_title,
             DialogHeader(
                 DialogTitle("Upload Document"),
                 DialogDescription("Upload and process your document")
             ),
-            # Upload form (shown when not uploading)
-            Div(
-                InputWithLabel(
-                    label="Document Title",
-                    placeholder="Enter a title for your document",
-                    signal="doc_title",
-                    required=True,
-                    helper_text="Required - give your document a descriptive name"
-                ),
-                Div(
-                    P("Choose file to upload:", cls="text-sm font-medium mb-2"),
-                    Div(
-                        Span(
-                            Icon("lucide:file-text", cls="w-8 h-8 text-muted-foreground mb-2 [&>svg]:w-full [&>svg]:h-full", style="font-size: 32px;"),
-                            data_show=js("!$file_selected")
-                        ),
-                        Span(
-                            Icon("lucide:file-check", cls="w-8 h-8 text-green-500 mb-2 [&>svg]:w-full [&>svg]:h-full", style="font-size: 32px;"),
-                            data_show=file_selected
-                        ),
-                        P(
-                            data_text=js("$file_selected ? $selected_file_name : 'Click to select file or drag and drop'"),
-                            data_style_color=js("$file_selected ? 'hsl(var(--foreground))' : 'hsl(var(--muted-foreground))'"),
-                            cls="text-sm font-medium mb-1",
-                        ),
-                        P(
-                            data_text=js("$file_selected ? `${$selected_file_size} MB` : 'PDF, DOC, TXT up to 10MB'"),
-                            cls="text-xs text-muted-foreground"
-                        ),
-                        data_on_click=js("""
-                            if (!$file_selected) {
-                                $file_selected = true;
-                                $selected_file_name = 'project-proposal.pdf';
-                                $selected_file_size = '2.4';
-                            }
-                        """),
-                        data_style_border_color=js("$file_selected ? 'hsl(var(--border))' : 'hsl(var(--muted))'"),
-                        data_style_background_color=js("$file_selected ? 'hsl(var(--muted)/0.3)' : 'transparent'"),
-                        cls="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all duration-200",
-
-                    ),
-                    cls="mb-4"
-                ),
-                data_show=js("!$uploading && !$upload_complete"),
-                cls="py-4 space-y-4"
-            ),
-            # Loading state (shown during upload)
-            Div(
-                Div(
-                    Div(
-                        Icon(
-                            "lucide:loader",
-                            cls="text-primary [&>svg]:w-full [&>svg]:h-full",
-                            style="font-size: 32px;"
-                        ),
-                        cls="w-8 h-8 flex items-center justify-center animate-spin mx-auto mb-4"
-                    ),
-                    P("Uploading document...", cls="text-center font-medium mb-2"),
-                    P(data_text=js("`${$upload_progress}% complete`"), cls="text-center text-sm text-muted-foreground mb-4"),
-                    # Progress bar
-                    Div(
-                        Div(
-                            data_style_width=js("`${$upload_progress}%`"),
-                            cls="h-2 bg-primary rounded-full transition-all duration-300",
-                        ),
-                        cls="w-full bg-muted rounded-full h-2"
-                    ),
-                    cls="py-8"
-                ),
-                data_show=js("$uploading && !$upload_complete"),
-                cls="text-center"
-            ),
-            # Success state
-            Div(
-                Div(
-                    Icon("lucide:check-circle", cls="w-8 h-8 text-green-500 mx-auto mb-4 [&>svg]:w-full [&>svg]:h-full", style="font-size: 32px;"),
-                    P("Upload Complete!", cls="text-center font-medium text-green-600 mb-2"),
-                    P(data_text=js("`Successfully uploaded: ${$doc_title || 'Document'}`"), cls="text-center text-sm text-muted-foreground"),
-                    cls="py-8"
-                ),
-                data_show=upload_complete,
-                cls="text-center"
-            ),
+            upload_form(),
+            uploading_state(),
+            complete_state(),
             DialogFooter(
-                DialogClose("Cancel", data_show=js("!$uploading"), ref_id="upload_dialog", variant="outline"),
+                DialogClose("Cancel", data_show=~uploading, variant="outline"),
                 Button(
                     "Start Upload",
-                    data_attr_disabled=js("!$doc_title || !$file_selected"),
-                    data_show=js("!$uploading && !$upload_complete"),
-                    data_on_click=js("""
-                        if ($doc_title && $file_selected) {
-                            $uploading = true;
-                            $upload_progress = 0;
-                            const interval = setInterval(() => {
-                                $upload_progress += 10;
-                                if ($upload_progress >= 100) {
-                                    clearInterval(interval);
-                                    setTimeout(() => {
-                                        $upload_complete = true;
-                                    }, 500);
-                                }
-                            }, 200);
-                        }
-                    """)
+                    data_attr_disabled=~doc_title | ~file_selected,
+                    data_show=~uploading & ~upload_complete,
+                    data_on_click=start_upload()
                 ),
-                Button(
-                    "Done",
-                    data_show=upload_complete,
-                    data_on_click=js("""
-                        $upload_dialog.close();
-                        // Reset all state
-                        $uploading = false;
-                        $upload_complete = false;
-                        $upload_progress = 0;
-                        $file_selected = false;
-                        $selected_file_name = '';
-                        $selected_file_size = '';
-                        $doc_title = '';
-                    """)
-                )
+                DialogClose("Done", data_show=upload_complete, data_on_click=reset_form())
             )
-        ),
-        ref_id="upload_dialog"
+        )
     )
 
 
-# Multi-step wizard dialog
 @with_code
 def multi_step_wizard_example():
-    def create_step_indicator(number, label, step):
+    step = Signal("step", 1)
+    project_type = Signal("project_type", "")
+    project_name = Signal("project_name", "")
+    project_desc = Signal("project_desc", "")
+    wizard_ref = Signal("wizard_dialog", _ref_only=True)
+
+    def step_indicator(number, label):
         return Div(
             Div(
-                Span(
-                    Icon("lucide:check", cls="w-3 h-3 text-white"),
-                    data_show=js(f"$step > {number}")
-                ),
-                Span(str(number), data_show=js(f"$step <= {number}")),
-                data_style_background_color=js(f"$step >= {number} ? 'rgb(59, 130, 246)' : 'rgb(203, 213, 225)'"),
-                data_style_color=js(f"$step >= {number} ? 'white' : 'rgb(71, 85, 105)'"),
+                Span(Icon("lucide:check", cls="w-3 h-3 text-white"), data_show=step > number),
+                Span(str(number), data_show=step <= number),
+                data_style_background_color=(step >= number).if_('rgb(59, 130, 246)', 'rgb(203, 213, 225)'),
+                data_style_color=(step >= number).if_('white', 'rgb(71, 85, 105)'),
                 cls="w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold"
             ),
             P(label,
-                data_style_color=js(f"$step >= {number} ? 'hsl(var(--foreground))' : 'hsl(var(--muted-foreground))'"),
+                data_style_color=(step >= number).if_('hsl(var(--foreground))', 'hsl(var(--muted-foreground))'),
                 cls="text-xs font-medium mt-2 text-center"
             ),
             cls="flex flex-col items-center"
         )
 
-    def create_project_type_button(icon, title, description, type_value):
+    def project_type_button(icon, title, description, type_value):
         return Button(
             Icon(icon, cls="h-8 w-8 mb-2"),
             P(title, cls="font-semibold"),
             P(description, cls="text-xs text-muted-foreground"),
-            data_on_click=js(f"$project_type = '{type_value}'; $step = 2"),
+            data_on_click=[project_type.set(type_value), step.set(2)],
             variant="outline",
             cls="h-auto flex-col p-4 w-full"
         )
 
-    step = Signal("step", 1)
-    project_type = Signal("project_type", "")
-    project_name = Signal("project_name", "")
-    project_desc = Signal("project_desc", "")
+    def progress_bar():
+        return Div(
+            Div(cls="absolute top-3 left-0 w-full h-1 bg-muted rounded-full"),
+            Div(
+                data_style_width=(step == 1).if_('0%', (step == 2).if_('50%', '100%')),
+                cls="absolute top-3 left-0 h-1 bg-primary rounded-full transition-all duration-500"
+            ),
+            Div(
+                step_indicator(1, "Project Type"),
+                step_indicator(2, "Configuration"),
+                step_indicator(3, "Review"),
+                cls="flex justify-between items-start relative z-10"
+            ),
+            cls="relative w-full mb-8 px-8"
+        )
+
+    def step1_content():
+        return Div(
+            Div(
+                project_type_button("lucide:globe", "Web Application", "React, Vue, or vanilla JS", "web"),
+                project_type_button("lucide:smartphone", "Mobile App", "iOS or Android", "mobile"),
+                project_type_button("lucide:server", "API Service", "REST or GraphQL", "api"),
+                cls="grid grid-cols-3 gap-3"
+            ),
+            data_show=step == 1,
+            cls="py-4"
+        )
+
+    def step2_content():
+        return Div(
+            InputWithLabel(label="Project Name", placeholder="my-awesome-project", signal=project_name, required=True),
+            TextareaWithLabel(label="Description", placeholder="Describe your project...", rows=3, signal=project_desc),
+            data_show=step == 2,
+            cls="space-y-4 py-4"
+        )
+
+    def step3_content():
+        return Div(
+            Div(
+                P("Project Type: ", Span(data_text=project_type, cls="font-semibold")),
+                P("Name: ", Span(data_text=project_name.or_("Not specified"), cls="font-semibold")),
+                P("Description: ", Span(data_text=project_desc.or_("Not specified"), cls="font-semibold")),
+                cls="space-y-2 p-4 bg-muted rounded-md"
+            ),
+            data_show=step == 3,
+            cls="py-4"
+        )
+
+    def handle_next():
+        return switch([
+            ((step == 1) & project_type, step.set(2)),
+            ((step == 2) & project_name, step.set(3)),
+            (step == 3, seq(
+                set_timeout(js("alert(`Creating ${$project_type} project: ${$project_name}`)"), 100),
+                set_timeout(seq(
+                    step.set(1),
+                    project_type.set(''),
+                    project_name.set(''),
+                    project_desc.set(''),
+                    wizard_ref.close()
+                ), 200)
+            ))
+        ])
 
     return Dialog(
-        DialogTrigger(
-            Icon("lucide:rocket", cls="h-4 w-4 mr-2"),
-            "Start Setup",
-            ref_id="wizard_dialog"
-        ),
+        DialogTrigger(Icon("lucide:rocket", cls="h-4 w-4 mr-2"), "Start Setup"),
         DialogContent(
             step,
             project_type,
@@ -513,110 +509,34 @@ def multi_step_wizard_example():
             DialogHeader(
                 DialogTitle("Project Setup"),
                 DialogDescription(
-                    data_text=js("$step === 1 ? 'Choose your project type' : $step === 2 ? 'Configure settings' : 'Review and confirm'")
+                    data_text=(step == 1).if_('Choose your project type', (step == 2).if_('Configure settings', 'Review and confirm'))
                 )
             ),
-            Div(
-                Div(cls="absolute top-3 left-0 w-full h-1 bg-muted rounded-full"),
-                Div(
-                    data_style_width=js("$step === 1 ? '0%' : $step === 2 ? '50%' : '100%'"),
-                    cls="absolute top-3 left-0 h-1 bg-primary rounded-full transition-all duration-500"
-                ),
-                Div(
-                    create_step_indicator(1, "Project Type", step),
-                    create_step_indicator(2, "Configuration", step),
-                    create_step_indicator(3, "Review", step),
-                    cls="flex justify-between items-start relative z-10"
-                ),
-                cls="relative w-full mb-8 px-8"
-            ),
-            Div(
-                Div(
-                    create_project_type_button("lucide:globe", "Web Application", "React, Vue, or vanilla JS", "web"),
-                    create_project_type_button("lucide:smartphone", "Mobile App", "iOS or Android", "mobile"),
-                    create_project_type_button("lucide:server", "API Service", "REST or GraphQL", "api"),
-                    cls="grid grid-cols-3 gap-3"
-                ),
-                data_show=js("$step === 1"),
-                cls="py-4"
-            ),
-            # Step 2: Configuration
-            Div(
-                InputWithLabel(
-                    label="Project Name",
-                    placeholder="my-awesome-project",
-                    signal="project_name",
-                    required=True
-                ),
-                TextareaWithLabel(
-                    label="Description",
-                    placeholder="Describe your project...",
-                    rows=3,
-                    signal="project_desc"
-                ),
-                data_show=js("$step === 2"),
-                cls="space-y-4 py-4"
-            ),
-            # Step 3: Review
-            Div(
-                Div(
-                    P("Project Type: ", Span(data_text=project_type, cls="font-semibold")),
-                    P("Name: ", Span(data_text=js("$project_name || 'Not specified'"), cls="font-semibold")),
-                    P("Description: ", Span(data_text=js("$project_desc || 'Not specified'"), cls="font-semibold")),
-                    cls="space-y-2 p-4 bg-muted rounded-md"
-                ),
-                data_show=js("$step === 3"),
-                cls="py-4"
-            ),
+            progress_bar(),
+            step1_content(),
+            step2_content(),
+            step3_content(),
             DialogFooter(
                 Button(
                     "Previous",
-                    data_on_click=js("$step = Math.max(1, $step - 1)"),
-                    data_attr_disabled=js("$step === 1"),
-                    variant="outline",
+                    data_on_click=step.set((step - 1).max(1)),
+                    data_attr_disabled=step == 1,
+                    variant="outline"
                 ),
                 Button(
-                    data_text=js("$step === 3 ? 'Create Project' : 'Next'"),
-                    data_on_click=js("""
-                        if ($step === 1 && $project_type) $step = 2;
-                        else if ($step === 2 && $project_name) $step = 3;
-                        else if ($step === 3) {
-                            $step = 4; // Show checkmark on step 3
-                            setTimeout(() => {
-                                alert(`Creating ${$project_type} project: ${$project_name}`);
-                                $wizard_dialog.close();
-                                $step = 1;
-                                $project_type = '';
-                                $project_name = '';
-                                $project_desc = '';
-                            }, 100);
-                        }
-                    """),
-                    data_attr_disabled=js("($step === 1 && !$project_type) || ($step === 2 && !$project_name)")
+                    data_text=(step == 3).if_('Create Project', 'Next'),
+                    data_on_click=handle_next(),
+                    data_attr_disabled=((step == 1) & ~project_type) | ((step == 2) & ~project_name)
                 )
             )
         ),
-        ref_id="wizard_dialog",
+        signal="wizard_dialog",
         size="lg"
     )
 
 
-# Settings dialog with tabs
 @with_code
 def settings_dialog_example():
-    def create_tab_button(icon, label, tab_id):
-        return Button(
-            Icon(icon, cls="h-4 w-4 mr-2"),
-            label,
-            data_on_click=js(f"$settings_tab = '{tab_id}'; console.log('{label} clicked, settings_tab:', $settings_tab)"),
-            data_style_background_color=js(f"$settings_tab === '{tab_id}' ? '#f1f5f9' : 'transparent'"),
-            data_style_color=js(f"$settings_tab === '{tab_id}' ? '#0f172a' : '#71717a'"),
-            data_style_box_shadow=js(f"$settings_tab === '{tab_id}' ? '0 1px 2px rgba(0,0,0,0.1)' : 'none'"),
-            variant="ghost",
-            size="sm",
-            cls="flex-1"
-        )
-
     settings_tab = Signal("settings_tab", "profile")
     profile_name = Signal("profile_name", "John Doe")
     profile_email = Signal("profile_email", "john@example.com")
@@ -628,162 +548,140 @@ def settings_dialog_example():
     notify_frequency = Signal("notify_frequency", "weekly")
     security_2fa = Signal("security_2fa", False)
     security_login_notify = Signal("security_login_notify", True)
+    settings_ref = Signal("settings_dialog", _ref_only=True)
+
+    def tab_button(icon, label, tab_id):
+        return Button(
+            Icon(icon, cls="h-4 w-4 mr-2"),
+            label,
+            data_on_click=settings_tab.set(tab_id),
+            data_style_background_color=(settings_tab == tab_id).if_('#f1f5f9', 'transparent'),
+            data_style_color=(settings_tab == tab_id).if_('#0f172a', '#71717a'),
+            data_style_box_shadow=(settings_tab == tab_id).if_('0 1px 2px rgba(0,0,0,0.1)', 'none'),
+            variant="ghost",
+            size="sm",
+            cls="flex-1"
+        )
+
+    def profile_tab():
+        return Div(
+            InputWithLabel(label="Display Name", placeholder="John Doe", signal=profile_name),
+            InputWithLabel(label="Email", type="email", placeholder="john@example.com", signal=profile_email),
+            TextareaWithLabel(label="Bio", placeholder="Tell us about yourself...", rows=3, signal=profile_bio),
+            SelectWithLabel(
+                label="Time Zone",
+                options=[
+                    ("utc", "UTC"),
+                    ("pst", "Pacific Standard Time"),
+                    ("est", "Eastern Standard Time"),
+                    ("cet", "Central European Time")
+                ],
+                signal=profile_timezone
+            ),
+            data_show=settings_tab == "profile",
+            cls="space-y-4"
+        )
+
+    def notifications_tab():
+        return Div(
+            CheckboxWithLabel(
+                label="Email notifications",
+                helper_text="Receive updates and announcements via email",
+                signal=notify_email
+            ),
+            CheckboxWithLabel(
+                label="Push notifications",
+                helper_text="Get notified about important events",
+                signal=notify_push
+            ),
+            CheckboxWithLabel(
+                label="Marketing emails",
+                helper_text="Receive product updates and promotional content",
+                signal=notify_marketing
+            ),
+            Separator(cls="my-4"),
+            P("Notification Frequency", cls="text-sm font-medium mb-2"),
+            SelectWithLabel(
+                label="Email Digest",
+                options=[
+                    ("never", "Never"),
+                    ("daily", "Daily"),
+                    ("weekly", "Weekly"),
+                    ("monthly", "Monthly")
+                ],
+                signal=notify_frequency,
+                helper_text="How often you'd like to receive summary emails"
+            ),
+            data_show=settings_tab == "notifications",
+            cls="space-y-4"
+        )
+
+    def security_tab():
+        return Div(
+            P("Password", cls="text-sm font-medium mb-2"),
+            Div(
+                P("Last changed: 2 months ago", cls="text-sm text-muted-foreground mb-2"),
+                Button(
+                    "Change Password",
+                    data_on_click=js("alert('Password change dialog would open')"),
+                    variant="outline",
+                    size="sm"
+                ),
+                cls="mb-4"
+            ),
+            CheckboxWithLabel(
+                label="Two-factor authentication",
+                helper_text="Add an extra layer of security to your account",
+                signal=security_2fa
+            ),
+            CheckboxWithLabel(
+                label="Login notifications",
+                helper_text="Get notified when someone signs into your account",
+                signal=security_login_notify
+            ),
+            Separator(cls="my-4"),
+            P("Session Management", cls="text-sm font-medium mb-2"),
+            Div(
+                P("Active sessions: 3 devices", cls="text-sm text-muted-foreground mb-2"),
+                Button(
+                    "View All Sessions",
+                    data_on_click=js("alert('Sessions dialog would open')"),
+                    variant="outline",
+                    size="sm"
+                ),
+                cls="mb-4"
+            ),
+            data_show=settings_tab == "security",
+            cls="space-y-4"
+        )
 
     return Dialog(
-        DialogTrigger(
-            Icon("lucide:settings", cls="h-4 w-4 mr-2"),
-            "Settings",
-            ref_id="settings_dialog"
-        ),
+        DialogTrigger(Icon("lucide:settings", cls="h-4 w-4 mr-2"), "Settings"),
         DialogContent(
             settings_tab,
-            profile_name,
-            profile_email,
-            profile_bio,
-            profile_timezone,
-            notify_email,
-            notify_push,
-            notify_marketing,
-            notify_frequency,
-            security_2fa,
-            security_login_notify,
             DialogHeader(
                 DialogTitle("Settings"),
                 DialogDescription("Manage your account and application preferences")
             ),
             Div(
-                create_tab_button("lucide:user", "Profile", "profile"),
-                create_tab_button("lucide:bell", "Notifications", "notifications"),
-                create_tab_button("lucide:shield", "Security", "security"),
+                tab_button("lucide:user", "Profile", "profile"),
+                tab_button("lucide:bell", "Notifications", "notifications"),
+                tab_button("lucide:shield", "Security", "security"),
                 cls="flex gap-1 mb-6 p-1 bg-muted/30 rounded-lg"
             ),
-            # Profile tab
-            Div(
-                InputWithLabel(
-                    label="Display Name",
-                    placeholder="John Doe",
-                    value="John Doe",
-                    signal="profile_name"
-                ),
-                InputWithLabel(
-                    label="Email",
-                    type="email",
-                    placeholder="john@example.com",
-                    value="john@example.com",
-                    signal="profile_email"
-                ),
-                TextareaWithLabel(
-                    label="Bio",
-                    placeholder="Tell us about yourself...",
-                    rows=3,
-                    signal="profile_bio"
-                ),
-                SelectWithLabel(
-                    label="Time Zone",
-                    options=[
-                        ("utc", "UTC"),
-                        ("pst", "Pacific Standard Time"),
-                        ("est", "Eastern Standard Time"),
-                        ("cet", "Central European Time")
-                    ],
-                    value="utc",
-                    signal="profile_timezone"
-                ),
-                data_show=js("$settings_tab === 'profile'"),
-                cls="space-y-4"
-            ),
-            # Notifications tab
-            Div(
-                CheckboxWithLabel(
-                    label="Email notifications",
-                    helper_text="Receive updates and announcements via email",
-                    checked=True,
-                    signal="notify_email"
-                ),
-                CheckboxWithLabel(
-                    label="Push notifications",
-                    helper_text="Get notified about important events",
-                    checked=False,
-                    signal="notify_push"
-                ),
-                CheckboxWithLabel(
-                    label="Marketing emails",
-                    helper_text="Receive product updates and promotional content",
-                    checked=False,
-                    signal="notify_marketing"
-                ),
-                Separator(cls="my-4"),
-                P("Notification Frequency", cls="text-sm font-medium mb-2"),
-                SelectWithLabel(
-                    label="Email Digest",
-                    options=[
-                        ("never", "Never"),
-                        ("daily", "Daily"),
-                        ("weekly", "Weekly"),
-                        ("monthly", "Monthly")
-                    ],
-                    value="weekly",
-                    signal="notify_frequency",
-                    helper_text="How often you'd like to receive summary emails"
-                ),
-                data_show=js("$settings_tab === 'notifications'"),
-                cls="space-y-4"
-            ),
-            # Security tab
-            Div(
-                P("Password", cls="text-sm font-medium mb-2"),
-                Div(
-                    P("Last changed: 2 months ago", cls="text-sm text-muted-foreground mb-2"),
-                    Button(
-                        "Change Password",
-                        data_on_click=js("alert('Password change dialog would open')"),
-                        variant="outline",
-                        size="sm",
-
-                    ),
-                    cls="mb-4"
-                ),
-                CheckboxWithLabel(
-                    label="Two-factor authentication",
-                    helper_text="Add an extra layer of security to your account",
-                    checked=False,
-                    signal="security_2fa"
-                ),
-                CheckboxWithLabel(
-                    label="Login notifications",
-                    helper_text="Get notified when someone signs into your account",
-                    checked=True,
-                    signal="security_login_notify"
-                ),
-                Separator(cls="my-4"),
-                P("Session Management", cls="text-sm font-medium mb-2"),
-                Div(
-                    P("Active sessions: 3 devices", cls="text-sm text-muted-foreground mb-2"),
-                    Button(
-                        "View All Sessions",
-                        data_on_click=js("alert('Sessions dialog would open')"),
-                        variant="outline",
-                        size="sm",
-
-                    ),
-                    cls="mb-4"
-                ),
-                data_show=js("$settings_tab === 'security'"),
-                cls="space-y-4"
-            ),
+            profile_tab(),
+            notifications_tab(),
+            security_tab(),
             DialogFooter(
-                DialogClose("Cancel", ref_id="settings_dialog", variant="outline"),
+                DialogClose("Cancel", variant="outline"),
                 Button(
                     "Save Changes",
-                    data_on_click=js("""
-                        alert('Settings saved successfully!');
-                        $settings_dialog.close();
-                    """)
+                    data_on_click=settings_ref.close()
                 )
             ),
             cls="pb-2"
         ),
-        ref_id="settings_dialog",
+        signal="settings_dialog",
         size="lg"
     )
 
@@ -793,51 +691,45 @@ def settings_dialog_example():
 def dialog_sizes_example():
     return Div(
         Dialog(
-            DialogTrigger("Small", ref_id="small_dialog", variant="outline", cls="mr-2"),
+            DialogTrigger("Small", variant="outline", cls="mr-2"),
             DialogContent(
                 DialogHeader(
                     DialogTitle("Small Dialog"),
                     DialogDescription("This is a small dialog (max-width: sm)")
                 ),
                 P("Compact content area.", cls="py-4"),
-                DialogFooter(DialogClose("Close", ref_id="small_dialog"))
+                DialogFooter(DialogClose("Close"))
             ),
-            ref_id="small_dialog",
             size="sm"
         ),
         Dialog(
-            DialogTrigger("Medium", ref_id="medium_dialog", variant="outline", cls="mr-2"),
+            DialogTrigger("Medium", variant="outline", cls="mr-2"),
             DialogContent(
                 DialogHeader(
                     DialogTitle("Medium Dialog"),
                     DialogDescription("This is a medium dialog (max-width: lg)")
                 ),
                 P("Standard content area.", cls="py-4"),
-                DialogFooter(DialogClose("Close", ref_id="medium_dialog"))
+                DialogFooter(DialogClose("Close"))
             ),
-            ref_id="medium_dialog",
             size="md"
         ),
         Dialog(
-            DialogTrigger("Large", ref_id="large_dialog", variant="outline", cls="mr-2"),
+            DialogTrigger("Large", variant="outline", cls="mr-2"),
             DialogContent(
                 DialogHeader(
                     DialogTitle("Large Dialog"),
                     DialogDescription("This is a large dialog (max-width: 2xl)")
                 ),
                 P("Spacious content area for complex forms or content.", cls="py-4"),
-                DialogFooter(DialogClose("Close", ref_id="large_dialog"))
+                DialogFooter(DialogClose("Close"))
             ),
-            ref_id="large_dialog",
             size="lg"
         ),
         cls="flex flex-wrap"
     )
 
 
-# ============================================================================
-# MODULE-LEVEL DATA (for markdown API)
-# ============================================================================
 
 EXAMPLES_DATA = [
     {"title": "Basic Dialog", "description": "Simple dialog with title, description, and close button", "fn": basic_dialog_example},
@@ -862,74 +754,6 @@ API_REFERENCE = build_api_reference(
         Component("DialogClose", "Button that closes the dialog and optionally returns a value"),
     ]
 )
-
-
-def examples():
-    """Generate dialog examples."""
-
-    # Basic dialog
-    yield ComponentPreview(
-        basic_dialog_example(),
-        basic_dialog_example.code,
-        title="Basic Dialog",
-        description="Simple dialog with title, description, and close button"
-    )
-
-    # Confirmation dialog
-    yield ComponentPreview(
-        confirmation_dialog_example(),
-        confirmation_dialog_example.code,
-        title="Confirmation Dialog",
-        description="Destructive action confirmation with warnings"
-    )
-
-    # Form dialog
-    yield ComponentPreview(
-        form_dialog_example(),
-        form_dialog_example.code,
-        title="Form Dialog",
-        description="Complex form with multiple input types in a dialog"
-    )
-
-    # Scrollable content dialog
-    yield ComponentPreview(
-        scrollable_content_example(),
-        scrollable_content_example.code,
-        title="Scrollable Content",
-        description="Dialog with scrollable content and conditional actions"
-    )
-
-    # Loading/async dialog
-    yield ComponentPreview(
-        loading_async_dialog_example(),
-        loading_async_dialog_example.code,
-        title="Loading/Async Dialog",
-        description="Dialog with loading states, progress tracking, and async operations"
-    )
-
-    # Multi-step wizard
-    yield ComponentPreview(
-        multi_step_wizard_example(),
-        multi_step_wizard_example.code,
-        title="Multi-Step Wizard",
-        description="Complex wizard flow with step indicators and validation"
-    )
-
-    # Settings dialog
-    yield ComponentPreview(
-        settings_dialog_example(),
-        settings_dialog_example.code,
-        title="Settings Dialog",
-        description="Tabbed interface for managing different categories of settings"
-    )
-
-    # Dialog sizes
-    yield ComponentPreview(
-        dialog_sizes_example(),
-        dialog_sizes_example.code,
-        title="Dialog Sizes",
-        description="Different dialog sizes for various content needs"
-    )
 
 
 def create_dialog_docs():

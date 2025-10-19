@@ -109,8 +109,8 @@ app, rt = star_app(
 
 DOCS_NAV_ITEMS = [
     {"href": "/components", "label": "Components"},
-    {"href": "/blocks", "label": "Blocks"},
-    {"href": "/themes", "label": "Themes"},
+    # {"href": "/blocks", "label": "Blocks"},  # Coming soon
+    # {"href": "/themes", "label": "Themes"},  # Coming soon
 ]
 
 
@@ -144,7 +144,7 @@ def home():
                 Div(
                     _feature_card(
                         "lucide:server",
-                        "Python-First Architecture", 
+                        "Python-First Architecture",
                         "Write modern UI entirely in Python. No JSX, no build steps, no client-side frameworks. Pure server-side rendering with progressive enhancement."
                     ),
                     _feature_card(

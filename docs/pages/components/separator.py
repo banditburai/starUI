@@ -14,15 +14,10 @@ from starhtml import Div, P, H3, H4, Span, Article, Header, Icon
 from starui.registry.components.separator import Separator
 from starui.registry.components.button import Button
 from starui.registry.components.badge import Badge
-from utils import with_code, Component, Prop, build_api_reference, auto_generate_page
-from widgets.component_preview import ComponentPreview
+from utils import with_code, Prop, build_api_reference, auto_generate_page
 
 
-# ============================================================================
-# EXAMPLE FUNCTIONS (decorated with @with_code for markdown generation)
-# ============================================================================
 
-# Card content separation
 @with_code
 def card_content_separation_example():
     return Div(
@@ -45,8 +40,7 @@ def card_content_separation_example():
             Separator(cls="my-4"),
             Div(
                 P("Contact", cls="text-sm font-medium mb-2"),
-                P("john.doe@example.com", cls="text-sm text-muted-foreground"),
-                cls=""
+                P("john.doe@example.com", cls="text-sm text-muted-foreground")
             ),
             cls="p-6 border rounded-lg"
         ),
@@ -54,7 +48,6 @@ def card_content_separation_example():
     )
 
 
-# Content sections with clear divisions
 @with_code
 def content_section_dividers_example():
     return Div(
@@ -74,12 +67,10 @@ def content_section_dividers_example():
                 P("Find helpful documentation, tutorials, and community support.", cls="text-sm text-muted-foreground"),
             ),
             cls="max-w-2xl p-6 border rounded-lg"
-        ),
-        cls=""
+        )
     )
 
 
-# Vertical separators in toolbars
 @with_code
 def toolbar_dividers_example():
     return Div(
@@ -100,7 +91,6 @@ def toolbar_dividers_example():
     )
 
 
-# Breadcrumb separators
 @with_code
 def breadcrumb_navigation_example():
     return Div(
@@ -118,7 +108,6 @@ def breadcrumb_navigation_example():
     )
 
 
-# Stats dashboard with separators
 @with_code
 def dashboard_stats_example():
     return Div(
@@ -144,12 +133,10 @@ def dashboard_stats_example():
                 cls="text-center"
             ),
             cls="flex items-center justify-center p-6 border rounded-lg"
-        ),
-        cls=""
+        )
     )
 
 
-# Complex layout with mixed orientations
 @with_code
 def article_layout_example():
     return Div(
@@ -187,12 +174,10 @@ def article_layout_example():
                 cls="flex items-center mt-auto"
             ),
             cls="max-w-2xl p-6 border rounded-lg flex flex-col min-h-[300px]"
-        ),
-        cls=""
+        )
     )
 
 
-# Custom styled separators
 @with_code
 def custom_styling_example():
     separator_styles = [
@@ -203,24 +188,22 @@ def custom_styling_example():
         ("Gradient separator", "bg-gradient-to-r from-transparent via-muted-foreground to-transparent")
     ]
 
-    def create_separator_demo(label, separator_cls, is_last=False):
+    def create_separator_demo(label, separator_cls):
         return Div(
             P(label, cls="text-center text-sm text-muted-foreground mb-2"),
-            Separator(cls=separator_cls) if separator_cls else Separator(),
-            cls="" if is_last else "mb-6"
+            Separator(cls=separator_cls) if separator_cls else Separator()
         )
 
     return Div(
         H4("Custom Separator Styles", cls="text-center mb-6"),
-        *[create_separator_demo(label, cls_val, i == len(separator_styles) - 1)
-          for i, (label, cls_val) in enumerate(separator_styles)],
+        Div(
+            *[create_separator_demo(label, cls_val) for label, cls_val in separator_styles],
+            cls="space-y-6"
+        ),
         cls="max-w-md mx-auto p-6 border rounded-lg"
     )
 
 
-# ============================================================================
-# MODULE-LEVEL DATA (for markdown API)
-# ============================================================================
 
 EXAMPLES_DATA = [
     {"title": "Card Content Separation", "description": "Use horizontal separators to divide sections within cards or panels", "fn": card_content_separation_example},
@@ -242,61 +225,6 @@ API_REFERENCE = build_api_reference(
 )
 
 
-def examples():
-    """Generate all separator examples."""
-    yield ComponentPreview(
-        card_content_separation_example(),
-        card_content_separation_example.code,
-        title="Card Content Separation",
-        description="Use horizontal separators to divide sections within cards or panels"
-    )
-
-    yield ComponentPreview(
-        content_section_dividers_example(),
-        content_section_dividers_example.code,
-        title="Content Section Dividers",
-        description="Organize content areas with clear visual separation"
-    )
-
-    yield ComponentPreview(
-        toolbar_dividers_example(),
-        toolbar_dividers_example.code,
-        title="Toolbar Dividers",
-        description="Use vertical separators to group related actions in toolbars"
-    )
-
-    yield ComponentPreview(
-        breadcrumb_navigation_example(),
-        breadcrumb_navigation_example.code,
-        title="Breadcrumb Navigation",
-        description="Create clean breadcrumb trails with vertical separators"
-    )
-
-    yield ComponentPreview(
-        dashboard_stats_example(),
-        dashboard_stats_example.code,
-        title="Dashboard Stats",
-        description="Separate key metrics with vertical dividers for clear visual hierarchy"
-    )
-
-    yield ComponentPreview(
-        article_layout_example(),
-        article_layout_example.code,
-        title="Article Layout",
-        description="Complex content layouts using both horizontal and vertical separators"
-    )
-
-    yield ComponentPreview(
-        custom_styling_example(),
-        custom_styling_example.code,
-        title="Custom Styling",
-        description="Customize separators with different styles, colors, and effects"
-    )
-
-
-# ============================================================================
-# DOCUMENTATION PAGE GENERATION
-# ============================================================================
 
 
 def create_separator_docs():

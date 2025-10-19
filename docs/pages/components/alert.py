@@ -16,14 +16,28 @@ from utils import auto_generate_page, with_code, Component, build_api_reference
 from widgets.component_preview import ComponentPreview
 
 
-# ============================================================================
-# EXAMPLE FUNCTIONS (decorated with @with_code for markdown generation)
-# ============================================================================
+
+@with_code
+def hero_alert_example():
+    return Div(
+        Alert(
+            Icon("lucide:terminal", cls="h-4 w-4"),
+            AlertTitle("Heads up!"),
+            AlertDescription("You can add components and dependencies to your app using the CLI.")
+        ),
+        Alert(
+            Icon("lucide:alert-circle", cls="h-4 w-4"),
+            AlertTitle("Error occurred"),
+            AlertDescription("Your session has expired. Please log in again."),
+            variant="destructive"
+        ),
+        cls="space-y-4"
+    )
 
 @with_code
 def basic_alert_example():
     return Alert(
-        Icon("lucide:terminal", width="16", height="16"),
+        Icon("lucide:terminal", cls="h-4 w-4"),
         AlertTitle("Heads up!"),
         AlertDescription("You can add components and dependencies to your app using the CLI.")
     )
@@ -32,7 +46,7 @@ def basic_alert_example():
 @with_code
 def destructive_alert_example():
     return Alert(
-        Icon("lucide:alert-circle", width="16", height="16"),
+        Icon("lucide:alert-circle", cls="h-4 w-4"),
         AlertTitle("Error occurred"),
         AlertDescription("Your session has expired. Please log in again."),
         variant="destructive"
@@ -43,17 +57,17 @@ def destructive_alert_example():
 def message_types_alert_example():
     return Div(
         Alert(
-            Icon("lucide:check-circle", width="16", height="16", cls="text-green-600"),
+            Icon("lucide:check-circle", cls="h-4 w-4 text-green-600"),
             AlertTitle("Success"),
             AlertDescription("Your account has been created successfully!")
         ),
         Alert(
-            Icon("lucide:alert-triangle", width="16", height="16", cls="text-amber-600"),
+            Icon("lucide:alert-triangle", cls="h-4 w-4 text-amber-600"),
             AlertTitle("Warning"),
             AlertDescription("This action cannot be undone. Please review carefully.")
         ),
         Alert(
-            Icon("lucide:info", width="16", height="16", cls="text-blue-600"),
+            Icon("lucide:info", cls="h-4 w-4 text-blue-600"),
             AlertTitle("Information"),
             AlertDescription("New features are now available in your dashboard.")
         ),
@@ -75,7 +89,7 @@ def rich_content_alert_example():
     )
 
     return Alert(
-        Icon("lucide:alert-circle", width="16", height="16"),
+        Icon("lucide:alert-circle", cls="h-4 w-4"),
         AlertTitle("Unable to process payment"),
         AlertDescription(
             P("There was an issue processing your payment. Please check the following:"),
@@ -93,31 +107,6 @@ def simple_alert_example():
     )
 
 
-# ============================================================================
-# HERO EXAMPLE
-# ============================================================================
-
-@with_code
-def hero_alert_example():
-    return Div(
-        Alert(
-            Icon("lucide:terminal", width="16", height="16"),
-            AlertTitle("Heads up!"),
-            AlertDescription("You can add components and dependencies to your app using the CLI.")
-        ),
-        Alert(
-            Icon("lucide:alert-circle", width="16", height="16"),
-            AlertTitle("Error occurred"),
-            AlertDescription("Your session has expired. Please log in again."),
-            variant="destructive"
-        ),
-        cls="space-y-4"
-    )
-
-
-# ============================================================================
-# MODULE EXPORTS (for markdown generation)
-# ============================================================================
 
 EXAMPLES_DATA = [
     {"fn": hero_alert_example, "title": "Hero Alert", "description": "Default alert with icon and message"},
@@ -137,9 +126,6 @@ API_REFERENCE = build_api_reference(
 )
 
 
-# ============================================================================
-# PAGE GENERATION
-# ============================================================================
 
 def create_alert_docs():
     """Create alert documentation page using convention-based approach."""

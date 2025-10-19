@@ -18,9 +18,25 @@ from utils import auto_generate_page, Component, build_api_reference, with_code
 from widgets.component_preview import ComponentPreview
 
 
-# ============================================================================
-# EXAMPLE FUNCTIONS (decorated with @with_code for markdown generation)
-# ============================================================================
+
+@with_code
+def hero_breadcrumb_example():
+    return Breadcrumb(
+        BreadcrumbList(
+            BreadcrumbItem(
+                BreadcrumbLink("Home", href="/")
+            ),
+            BreadcrumbSeparator(),
+            BreadcrumbItem(
+                BreadcrumbLink("Components", href="/components")
+            ),
+            BreadcrumbSeparator(),
+            BreadcrumbItem(
+                BreadcrumbPage("Breadcrumb")
+            )
+        )
+    )
+
 
 @with_code
 def custom_separator_example():
@@ -30,13 +46,13 @@ def custom_separator_example():
                 BreadcrumbLink("Home", href="/")
             ),
             BreadcrumbSeparator(
-                Icon("lucide:slash", width="16", height="16", cls="align-middle")
+                Icon("lucide:slash", cls="h-4 w-4 align-middle")
             ),
             BreadcrumbItem(
                 BreadcrumbLink("Library", href="/library")
             ),
             BreadcrumbSeparator(
-                Icon("lucide:slash", width="16", height="16", cls="align-middle")
+                Icon("lucide:slash", cls="h-4 w-4 align-middle")
             ),
             BreadcrumbItem(
                 BreadcrumbPage("Data")
@@ -101,7 +117,7 @@ def breadcrumb_with_icons_example():
         BreadcrumbList(
             BreadcrumbItem(
                 BreadcrumbLink(
-                    Icon("lucide:home", width="16", height="16", cls="mr-1 inline-block align-text-bottom"),
+                    Icon("lucide:home", cls="h-4 w-4 mr-1 inline-block align-text-bottom"),
                     "Home",
                     href="/"
                 )
@@ -109,7 +125,7 @@ def breadcrumb_with_icons_example():
             BreadcrumbSeparator(),
             BreadcrumbItem(
                 BreadcrumbLink(
-                    Icon("lucide:folder", width="16", height="16", cls="mr-1 inline-block align-text-bottom"),
+                    Icon("lucide:folder", cls="h-4 w-4 mr-1 inline-block align-text-bottom"),
                     "Documents",
                     href="/documents"
                 )
@@ -117,7 +133,7 @@ def breadcrumb_with_icons_example():
             BreadcrumbSeparator(),
             BreadcrumbItem(
                 BreadcrumbLink(
-                    Icon("lucide:folder", width="16", height="16", cls="mr-1 inline-block align-text-bottom"),
+                    Icon("lucide:folder", cls="h-4 w-4 mr-1 inline-block align-text-bottom"),
                     "Projects",
                     href="/documents/projects"
                 )
@@ -125,7 +141,7 @@ def breadcrumb_with_icons_example():
             BreadcrumbSeparator(),
             BreadcrumbItem(
                 BreadcrumbPage(
-                    Icon("lucide:file-text", width="16", height="16", cls="mr-1 inline-block align-text-bottom"),
+                    Icon("lucide:file-text", cls="h-4 w-4 mr-1 inline-block align-text-bottom"),
                     "README.md"
                 )
             )
@@ -140,22 +156,18 @@ def ecommerce_breadcrumb_example():
         ("Electronics", "/shop/electronics"),
         ("Smartphones", "/shop/electronics/smartphones"),
         ("Apple", "/shop/electronics/smartphones/apple"),
-        ("iPhone 15 Pro", None)  # None for current page
+        ("iPhone 15 Pro", None)
     ]
 
-    def create_chevron_separator():
-        return BreadcrumbSeparator(Icon("lucide:chevron-right", width="16", height="16"))
+    separator = BreadcrumbSeparator(Icon("lucide:chevron-right", cls="h-4 w-4"))
 
     breadcrumb_items = []
     for i, (label, href) in enumerate(path_items):
-        if href:  # Link item
-            breadcrumb_items.append(BreadcrumbItem(BreadcrumbLink(label, href=href)))
-        else:  # Current page
-            breadcrumb_items.append(BreadcrumbItem(BreadcrumbPage(label)))
+        item = BreadcrumbItem(BreadcrumbLink(label, href=href) if href else BreadcrumbPage(label))
+        breadcrumb_items.append(item)
 
-        # Add separator except after last item
         if i < len(path_items) - 1:
-            breadcrumb_items.append(create_chevron_separator())
+            breadcrumb_items.append(separator)
 
     return Breadcrumb(BreadcrumbList(*breadcrumb_items))
 
@@ -203,13 +215,11 @@ def responsive_breadcrumb_example():
                 BreadcrumbLink("Home", href="/")
             ),
             BreadcrumbSeparator(),
-            # Show ellipsis on mobile, hide intermediate items
             BreadcrumbItem(
                 BreadcrumbEllipsis(),
                 cls="md:hidden"
             ),
             BreadcrumbSeparator(cls="md:hidden"),
-            # Show full path on desktop
             BreadcrumbItem(
                 BreadcrumbLink("Documentation", href="/docs"),
                 cls="hidden md:inline-flex"
@@ -226,29 +236,6 @@ def responsive_breadcrumb_example():
         )
     )
 
-
-@with_code
-def hero_breadcrumb_example():
-    return Breadcrumb(
-        BreadcrumbList(
-            BreadcrumbItem(
-                BreadcrumbLink("Home", href="/")
-            ),
-            BreadcrumbSeparator(),
-            BreadcrumbItem(
-                BreadcrumbLink("Components", href="/components")
-            ),
-            BreadcrumbSeparator(),
-            BreadcrumbItem(
-                BreadcrumbPage("Breadcrumb")
-            )
-        )
-    )
-
-
-# ============================================================================
-# MODULE-LEVEL DATA
-# ============================================================================
 
 EXAMPLES_DATA = [
     {"fn": hero_breadcrumb_example, "title": "Breadcrumb", "description": "Navigation breadcrumb trail"},
@@ -274,9 +261,6 @@ API_REFERENCE = build_api_reference(
 )
 
 
-# ============================================================================
-# DOCS PAGE
-# ============================================================================
 
 def create_breadcrumb_docs():
     return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)

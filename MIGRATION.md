@@ -627,9 +627,9 @@ def todo_item_new(todo):
 data_text=counter + " items"           # → `${$counter} items`
 data_text="Count: " + counter          # → `Count: ${$counter}`
 
-# REACTIVE - Use f() for complex templates
-from starhtml.datastar import f
-data_text=f("You have {n} {type}", n=count, type=item_type)
+# REACTIVE - Use f_() for complex templates
+from starhtml import f_
+data_text=f_("You have {n} {type}", n=count, type=item_type)
 # → `You have ${$count} ${$item_type}`
 
 # STATIC - Evaluated once, won't update!

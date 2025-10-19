@@ -113,7 +113,6 @@ def DropdownMenuContent(
 
 def DropdownMenuItem(
     *children,
-    onclick: str | None = None,
     variant: Literal["default", "destructive"] = "default",
     inset: bool = False,
     disabled: bool = False,
@@ -123,7 +122,9 @@ def DropdownMenuItem(
     def _(*, sig, **_):
         content_ref = Signal(f"{sig}_content", _ref_only=True)
 
-        click_actions = ([onclick] if onclick else []) + [content_ref.hidePopover()]
+        user_on_click = kwargs.pop('data_on_click', None)
+        user_actions = user_on_click if isinstance(user_on_click, list) else ([user_on_click] if user_on_click else [])
+        click_actions = user_actions + [content_ref.hidePopover()]
 
         return HTMLButton(
             *children,
@@ -145,14 +146,18 @@ def DropdownMenuItem(
 
 def DropdownMenuCheckboxItem(
     *children,
-    signal: str,
+    signal: str | Signal,
     disabled: bool = False,
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
     def _(*, sig, **_):
-        checked = Signal(signal, _ref_only=True)
+        checked = Signal(getattr(signal, 'id', signal), _ref_only=True)
         content_ref = Signal(f"{sig}_content", _ref_only=True)
+
+        user_on_click = kwargs.pop('data_on_click', None)
+        user_actions = user_on_click if isinstance(user_on_click, list) else ([user_on_click] if user_on_click else [])
+        click_actions = user_actions + [checked.set(~checked), content_ref.hidePopover()]
 
         return HTMLButton(
             Span(
@@ -161,7 +166,7 @@ def DropdownMenuCheckboxItem(
                 cls="absolute left-2 flex size-3.5 items-center justify-center",
             ),
             *children,
-            data_on_click=[checked.set(~checked), content_ref.hidePopover()] if not disabled else None,
+            data_on_click=click_actions if not disabled else None,
             cls=cn(
                 dropdown_item_variants(variant="default"),
                 "pl-8 pr-2",
@@ -180,13 +185,13 @@ def DropdownMenuCheckboxItem(
 
 def DropdownMenuRadioGroup(
     *children,
-    signal: str,
+    signal: str | Signal,
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
     def _(**ctx):
         return Div(
-            *[child(radio_signal=signal, **ctx) if callable(child) else child for child in children],
+            *[child(radio_signal=getattr(signal, 'id', signal), **ctx) if callable(child) else child for child in children],
             role="radiogroup",
             cls=cls,
             **kwargs,
@@ -206,6 +211,10 @@ def DropdownMenuRadioItem(
         content_ref = Signal(f"{sig}_content", _ref_only=True)
         is_checked = radio == value
 
+        user_on_click = kwargs.pop('data_on_click', None)
+        user_actions = user_on_click if isinstance(user_on_click, list) else ([user_on_click] if user_on_click else [])
+        click_actions = user_actions + [radio.set(value), content_ref.hidePopover()]
+
         return HTMLButton(
             Span(
                 Icon("lucide:circle", cls="size-2 fill-current"),
@@ -213,7 +222,7 @@ def DropdownMenuRadioItem(
                 cls="absolute left-2 flex size-3.5 items-center justify-center",
             ),
             *children,
-            data_on_click=[radio.set(value), content_ref.hidePopover()] if not disabled else None,
+            data_on_click=click_actions if not disabled else None,
             cls=cn(
                 dropdown_item_variants(variant="default"),
                 "pl-8 pr-2",
@@ -315,6 +324,10 @@ def DropdownMenuSubTrigger(
         sub_content_ref = Signal(f"{sub}_content", _ref_only=True)
         sub_open = Signal(f"{sub}_open", _ref_only=True)
 
+        user_on_click = kwargs.pop('data_on_click', None)
+        user_actions = user_on_click if isinstance(user_on_click, list) else ([user_on_click] if user_on_click else [])
+        click_actions = [sub_open.set(~sub_open)] + user_actions
+
         return HTMLButton(
             *children,
             Icon("lucide:chevron-right", cls="ml-auto size-4"),
@@ -322,7 +335,7 @@ def DropdownMenuSubTrigger(
             id=sub_trigger_ref.id,
             popovertarget=sub_content_ref.id,
             popoveraction="toggle",
-            data_on_click=sub_open.set(~sub_open),
+            data_on_click=click_actions,
             cls=cn(
                 dropdown_item_variants(variant="default"),
                 "data-[state=open]:bg-accent data-[state=open]:text-accent-foreground",

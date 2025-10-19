@@ -1,37 +1,23 @@
-"""
-RadioGroup component documentation - Convention-based functional approach.
-Clean, minimal, and easy to extend.
-"""
-
-# Component metadata for auto-discovery
 TITLE = "Radio Group"
 DESCRIPTION = "A set of checkable buttons—known as radio buttons—where no more than one of the buttons can be checked at a time."
 CATEGORY = "form"
 ORDER = 30
 STATUS = "stable"
 
-from starhtml import Div, P, Input, Label, Icon, Span, H2, H3, Form, Code, Signal, js
-from starhtml import Input as HTMLInput, Label as HTMLLabel
+from starhtml import Div, P, Icon, Span, H3, Form, Code, Signal, js
 from starui.registry.components.radio_group import RadioGroup, RadioGroupItem, RadioGroupWithLabel
 from starui.registry.components.button import Button
 from starui.registry.components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
 from starui.registry.components.badge import Badge
 from starui.registry.components.separator import Separator
 from utils import auto_generate_page, with_code, Component, build_api_reference
-from widgets.component_preview import ComponentPreview
 
 
-# ============================================================================
-# EXAMPLE FUNCTIONS (decorated with @with_code for markdown generation)
-# ============================================================================
 
-# Horizontal layout
 @with_code
 def horizontal_layout_example():
-    size_radio = Signal("size_radio", "md")
-
     return Div(
-        size_radio,
+        (size_radio := Signal("size_radio", "md")),
         RadioGroupWithLabel(
             label="Size",
             options=[
@@ -43,48 +29,43 @@ def horizontal_layout_example():
             ],
             orientation="horizontal",
             value="md",
-            signal="size_radio",
+            signal=size_radio,
             helper_text="Choose the appropriate size for your needs"
         ),
         cls="max-w-lg"
     )
 
 
-# Use RadioGroupItem with custom card styling
-def PlanCard(value, name, price, description, features, badge=None):
-    """Create a RadioGroupItem that displays as a card."""
-    # Create rich label content with card styling
-    label_content = Div(
-        Div(
-            Div(
-                P(name, cls="font-semibold text-base"),
-                badge and Badge(badge, variant="secondary", cls="ml-2") or None,
-                cls="flex items-center"
-            ),
-            P(price, cls="text-2xl font-bold mt-1"),
-            P(description, cls="text-sm text-muted-foreground mt-2"),
-            Div(
-                *[P(f"• {feature}", cls="text-sm") for feature in features],
-                cls="mt-3 space-y-1"
-            ),
-            cls="flex flex-col"
-        ),
-        # Use data_attr to properly set data-selected based on signal
-        data_attr_data_selected=js(f"$selected_plan === '{value}' ? 'true' : 'false'"),
-        cls="p-4 border-2 rounded-lg h-full min-h-[220px] w-full transition-all hover:bg-gray-50 dark:hover:bg-gray-800 border-gray-200 dark:border-gray-700 data-[selected=true]:border-blue-500 data-[selected=true]:ring-2 data-[selected=true]:ring-blue-500/20 data-[selected=true]:bg-blue-50 dark:data-[selected=true]:bg-blue-950/20",
-    )
-
-    # Return RadioGroupItem - RadioGroupItem handles the layout when hide_indicators=True
-    return RadioGroupItem(
-        value=value,
-        label=label_content,
-        class_name="w-full",
-    )
-
-
-# Subscription tier selector with card-styled RadioGroupItems
 @with_code
 def subscription_plans_example():
+    selected_plan = Signal("selected_plan", "free")
+
+    def PlanCard(value, name, price, description, features, badge=None):
+        is_initial = selected_plan.default == value
+        return RadioGroupItem(
+            value=value,
+            label=Div(
+                Div(
+                    Div(
+                        P(name, cls="font-semibold text-base"),
+                        Badge(badge, variant="secondary", cls="ml-2") if badge else None,
+                        cls="flex items-center"
+                    ),
+                    P(price, cls="text-2xl font-bold mt-1"),
+                    P(description, cls="text-sm text-muted-foreground mt-2"),
+                    Div(
+                        *[P(f"• {feature}", cls="text-sm") for feature in features],
+                        cls="mt-3 space-y-1"
+                    ),
+                    cls="flex flex-col"
+                ),
+                data_selected="true" if is_initial else "false",
+                data_attr_data_selected=selected_plan.eq(value).if_("true", "false"),
+                cls="p-4 border-2 rounded-lg h-full min-h-[220px] w-full transition-all hover:bg-gray-50 dark:hover:bg-gray-800 border-gray-200 dark:border-gray-700 data-[selected=true]:border-blue-500 data-[selected=true]:ring-2 data-[selected=true]:ring-blue-500/20 data-[selected=true]:bg-blue-50 dark:data-[selected=true]:bg-blue-950/20",
+            ),
+            cls="w-full"
+        )
+
     return Card(
         CardHeader(
             CardTitle("Choose Your Plan"),
@@ -92,6 +73,7 @@ def subscription_plans_example():
         ),
         CardContent(
             Form(
+                selected_plan,
                 P("Subscription Plans", cls="text-sm font-medium mb-4"),
                 RadioGroup(
                     PlanCard(
@@ -116,18 +98,18 @@ def subscription_plans_example():
                         "For large teams and organizations",
                         ["Everything in Pro", "Dedicated support", "Unlimited storage", "Custom integrations", "SLA guarantee"]
                     ),
-                    default_value="free",
-                    signal="selected_plan",
+                    value="free",
+                    signal=selected_plan,
                     hide_indicators=True,
                     cls="grid grid-cols-1 gap-3 w-full"
                 ),
                 P(
                     "Selected plan: ",
-                    Code(data_text=js("$selected_plan || 'none'"), cls="ml-2"),
+                    Code(data_text=selected_plan, cls="ml-2"),
                     cls="text-sm text-muted-foreground mt-4"
                 ),
                 Button(
-                    data_text=js("$selected_plan === 'enterprise' ? 'Contact Sales' : 'Get Started'"),
+                    data_text=selected_plan.eq("enterprise").if_("Contact Sales", "Get Started"),
                     data_on_click=js("alert(`Selected plan: ${$selected_plan}`)"),
                     cls="w-full mt-4"
                 )
@@ -141,18 +123,13 @@ def subscription_plans_example():
 def payment_method_example():
     payment_method = Signal("payment_method", "card")
 
-    payment_icons = {
-        "card": "lucide:credit-card",
-        "paypal": "lucide:wallet",
-        "bank": "lucide:building-2",
-        "crypto": "lucide:bitcoin"
-    }
-
-    def create_payment_info(method, icon):
+    def PaymentInfo(method, icon):
+        is_initial = payment_method.default == method
         return Div(
             Icon(icon, cls="h-5 w-5 mr-2"),
             P("Secure payment processing", cls="text-sm"),
-            data_show=js(f"$payment_method === '{method}'"),
+            style="" if is_initial else "display: none",
+            data_show=payment_method.eq(method),
             cls="flex items-center p-3 bg-muted rounded-md w-full"
         )
 
@@ -173,19 +150,21 @@ def payment_method_example():
                         {"value": "crypto", "label": "Cryptocurrency"}
                     ],
                     value="card",
-                    signal="payment_method",
+                    signal=payment_method,
                     required=True
                 ),
                 Div(
-                    *[create_payment_info(method, icon)
-                      for method, icon in payment_icons.items()],
+                    PaymentInfo("card", "lucide:credit-card"),
+                    PaymentInfo("paypal", "lucide:wallet"),
+                    PaymentInfo("bank", "lucide:building-2"),
+                    PaymentInfo("crypto", "lucide:bitcoin"),
                     cls="mt-4 h-16 flex items-center"
                 ),
                 Button(
                     "Continue to Payment",
                     data_on_click=js("evt.preventDefault(); alert(`Proceeding with ${$payment_method}`)"),
                     type="submit",
-                    cls="w-full mt-4",
+                    cls="w-full mt-4"
                 )
             )
         ),
@@ -193,32 +172,76 @@ def payment_method_example():
     )
 
 
-# Interactive 3-question survey
 @with_code
 def interactive_survey_example():
     step = Signal("step", 0)
-    survey_q1 = Signal("survey_q1", "")
-    survey_q2 = Signal("survey_q2", "")
-    survey_q3 = Signal("survey_q3", "")
+
+    # Data-driven: define questions once
+    questions = [
+        {
+            "signal_name": "survey_q1",
+            "label": "What is your primary programming language?",
+            "options": [
+                {"value": "javascript", "label": "JavaScript/TypeScript"},
+                {"value": "python", "label": "Python"},
+                {"value": "java", "label": "Java"},
+                {"value": "csharp", "label": "C#"},
+                {"value": "go", "label": "Go"},
+                {"value": "rust", "label": "Rust"},
+                {"value": "other", "label": "Other"}
+            ]
+        },
+        {
+            "signal_name": "survey_q2",
+            "label": "How many years of development experience do you have?",
+            "options": [
+                {"value": "0-1", "label": "Less than 1 year"},
+                {"value": "1-3", "label": "1-3 years"},
+                {"value": "3-5", "label": "3-5 years"},
+                {"value": "5-10", "label": "5-10 years"},
+                {"value": "10+", "label": "More than 10 years"}
+            ]
+        },
+        {
+            "signal_name": "survey_q3",
+            "label": "Which frontend framework do you prefer?",
+            "options": [
+                {"value": "react", "label": "React"},
+                {"value": "vue", "label": "Vue.js"},
+                {"value": "angular", "label": "Angular"},
+                {"value": "svelte", "label": "Svelte"},
+                {"value": "datastar", "label": "Datastar"},
+                {"value": "vanilla", "label": "Vanilla JS"},
+                {"value": "none", "label": "I'm a backend developer"}
+            ]
+        }
+    ]
+
+    # Create signals from questions data
+    signals = {q["signal_name"]: Signal(q["signal_name"], "") for q in questions}
+
+    # Compute answered count from signals
+    answered_count = Signal("answered_count", sum(signals[q["signal_name"]] != "" for q in questions))
+    total_questions = len(questions)
 
     return Card(
         CardHeader(
-            CardTitle(
-                data_text=js("'Question ' + ($step + 1) + ' of 3'")
-            ),
+            CardTitle(data_text="Question " + (step + 1) + " of " + total_questions),
             CardDescription("Web Development Survey")
         ),
         CardContent(
             Div(
-                step, survey_q1, survey_q2, survey_q3,
+                step,
+                *signals.values(),
+                answered_count,
                 Div(
                     P(
-                        data_text=js("`Question ${$step + 1} of 3`"),
+                        data_text="Question " + (step + 1) + " of " + total_questions,
                         cls="text-xs text-muted-foreground mb-2"
                     ),
                     Div(
                         Div(
-                            data_style_width=js("`${([$survey_q1, $survey_q2, $survey_q3].filter(q => q !== '').length / 3) * 100}%`"),
+                            data_style_width=(answered_count / total_questions * 100) + "%",
                             cls="h-2 bg-primary rounded-full transition-all duration-300"
                         ),
                         cls="w-full bg-secondary rounded-full h-2 mb-6"
@@ -226,87 +249,40 @@ def interactive_survey_example():
                     cls="mb-4"
                 ),
                 Div(
-                    RadioGroupWithLabel(
-                        label="What is your primary programming language?",
-                        options=[
-                            {"value": "javascript", "label": "JavaScript/TypeScript"},
-                            {"value": "python", "label": "Python"},
-                            {"value": "java", "label": "Java"},
-                            {"value": "csharp", "label": "C#"},
-                            {"value": "go", "label": "Go"},
-                            {"value": "rust", "label": "Rust"},
-                            {"value": "other", "label": "Other"}
-                        ],
-                        signal="survey_q1",
-                        required=True
-                    ),
-                    data_show=js("$step === 0")
-                ),
-                Div(
-                    RadioGroupWithLabel(
-                        label="How many years of development experience do you have?",
-                        options=[
-                            {"value": "0-1", "label": "Less than 1 year"},
-                            {"value": "1-3", "label": "1-3 years"},
-                            {"value": "3-5", "label": "3-5 years"},
-                            {"value": "5-10", "label": "5-10 years"},
-                            {"value": "10+", "label": "More than 10 years"}
-                        ],
-                        signal="survey_q2",
-                        required=True
-                    ),
-                    data_show=js("$step === 1")
-                ),
-                Div(
-                    RadioGroupWithLabel(
-                        label="Which frontend framework do you prefer?",
-                        options=[
-                            {"value": "react", "label": "React"},
-                            {"value": "vue", "label": "Vue.js"},
-                            {"value": "angular", "label": "Angular"},
-                            {"value": "svelte", "label": "Svelte"},
-                            {"value": "datastar", "label": "Datastar"},
-                            {"value": "vanilla", "label": "Vanilla JS"},
-                            {"value": "none", "label": "I'm a backend developer"}
-                        ],
-                        signal="survey_q3",
-                        required=True
-                    ),
-                    data_show=js("$step === 2")
-                ),
-                P(
-                    "Please select an answer to continue",
-                    data_show=js("$survey_error_visible"),
-                    cls="text-sm text-destructive mt-2",
+                    *[Div(
+                        RadioGroupWithLabel(
+                            label=q["label"],
+                            options=q["options"],
+                            signal=signals[q["signal_name"]],
+                            required=True
+                        ),
+                        style="display: none" if i > 0 else "",
+                        data_show=step.eq(i)
+                    ) for i, q in enumerate(questions)],
                 ),
                 Div(
                     Button(
                         "Previous",
-                        data_attr_disabled=js("$step === 0"),
-                        data_on_click=js("if ($step > 0) { $step = $step - 1 }"),                        
+                        data_attr_disabled=step.eq(0),
+                        data_on_click=step.add(-1),
                         variant="outline",
-                        disabled=True,
+                        disabled=True
                     ),
                     Button(
-                        "Next",
-                        data_text=js("$step === 2 ? 'Complete' : 'Next'"),
-                        data_on_click=js("if ($step < 2) { $step = $step + 1 } else { alert('Survey Complete!') }")
+                        data_text=step.eq(total_questions - 1).if_("Complete", "Next"),
+                        data_on_click=js(f"if ($step === {total_questions - 1}) {{ $step = 0; {'; '.join(f'${q["signal_name"]} = \"\"' for q in questions)}; }} else {{ $step++; }}"),
+                        variant="default"
                     ),
                     cls="flex justify-between mt-6"
                 )
             )
         ),
-        cls="max-w-lg"
+        cls="w-full max-w-lg"
     )
 
 
-# Settings panel
 @with_code
 def settings_panel_example():
-    theme_setting = Signal("theme_setting", "system")
-    font_setting = Signal("font_setting", "medium")
-    language_setting = Signal("language_setting", "en")
-
     return Card(
         CardHeader(
             CardTitle("Display Settings"),
@@ -314,7 +290,9 @@ def settings_panel_example():
         ),
         CardContent(
             Div(
-                theme_setting, font_setting, language_setting,
+                (theme_setting := Signal("theme_setting", "system")),
+                (font_setting := Signal("font_setting", "medium")),
+                (language_setting := Signal("language_setting", "en")),
                 RadioGroupWithLabel(
                     label="Theme",
                     options=[
@@ -323,7 +301,7 @@ def settings_panel_example():
                         {"value": "system", "label": "System"}
                     ],
                     value="system",
-                    signal="theme_setting",
+                    signal=theme_setting,
                     helper_text="Choose your preferred color scheme"
                 ),
                 Separator(cls="my-4"),
@@ -335,7 +313,7 @@ def settings_panel_example():
                         {"value": "large", "label": "Large (18px)"}
                     ],
                     value="medium",
-                    signal="font_setting",
+                    signal=font_setting,
                     helper_text="Adjust text size for better readability"
                 ),
                 Separator(cls="my-4"),
@@ -349,12 +327,12 @@ def settings_panel_example():
                         {"value": "ja", "label": "日本語"}
                     ],
                     value="en",
-                    signal="language_setting"
+                    signal=language_setting
                 ),
                 Button(
                     "Apply Settings",
-                    cls="w-full mt-6",
-                    data_on_click=js("alert(`Settings applied:\\nTheme: ${$theme_setting}\\nFont: ${$font_setting}\\nLanguage: ${$language_setting}`)")
+                    data_on_click=js("alert('Settings applied!\\nTheme: ' + $theme_setting + '\\nFont: ' + $font_setting + '\\nLanguage: ' + $language_setting)"),
+                    cls="w-full mt-6"
                 )
             )
         ),
@@ -362,17 +340,6 @@ def settings_panel_example():
     )
 
 
-# ============================================================================
-# MODULE-LEVEL DATA (for markdown API)
-# ============================================================================
-
-EXAMPLES_DATA = [
-    {"title": "Horizontal Layout", "description": "Radio buttons arranged horizontally", "fn": horizontal_layout_example},
-    {"title": "Subscription Plans", "description": "Rich radio options with proper RadioGroup semantics and CSS peer selectors", "fn": subscription_plans_example},
-    {"title": "Payment Method", "description": "Payment selection with contextual information", "fn": payment_method_example},
-    {"title": "Interactive Survey", "description": "Multi-step survey with progress tracking and validation", "fn": interactive_survey_example},
-    {"title": "Settings Panel", "description": "Multiple radio groups for configuration", "fn": settings_panel_example},
-]
 
 API_REFERENCE = build_api_reference(
     components=[
@@ -383,47 +350,15 @@ API_REFERENCE = build_api_reference(
 )
 
 
-def examples():
-    """Generate all radio group examples."""
-    yield ComponentPreview(
-        horizontal_layout_example(),
-        horizontal_layout_example.code,
-        title="Horizontal Layout",
-        description="Radio buttons arranged horizontally"
-    )
 
-    yield ComponentPreview(
-        subscription_plans_example(),
-        subscription_plans_example.code,
-        title="Subscription Plans",
-        description="Rich radio options with proper RadioGroup semantics and CSS peer selectors"
-    )
+EXAMPLES_DATA = [
+    {"fn": horizontal_layout_example, "title": "Horizontal Layout", "description": "Radio buttons arranged horizontally"},
+    {"fn": subscription_plans_example, "title": "Subscription Plans", "description": "Rich radio options with proper RadioGroup semantics and CSS peer selectors"},
+    {"fn": payment_method_example, "title": "Payment Method", "description": "Payment selection with contextual information"},
+    {"fn": interactive_survey_example, "title": "Interactive Survey", "description": "Multi-step survey with progress tracking and validation"},
+    {"fn": settings_panel_example, "title": "Settings Panel", "description": "Multiple radio groups for configuration"},
+]
 
-    yield ComponentPreview(
-        payment_method_example(),
-        payment_method_example.code,
-        title="Payment Method",
-        description="Payment selection with contextual information"
-    )
-
-    yield ComponentPreview(
-        interactive_survey_example(),
-        interactive_survey_example.code,
-        title="Interactive Survey",
-        description="Multi-step survey with progress tracking and validation"
-    )
-
-    yield ComponentPreview(
-        settings_panel_example(),
-        settings_panel_example.code,
-        title="Settings Panel",
-        description="Multiple radio groups for configuration"
-    )
-
-
-# ============================================================================
-# DOCUMENTATION PAGE GENERATION
-# ============================================================================
 
 
 def create_radio_group_docs():

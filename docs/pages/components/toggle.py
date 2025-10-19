@@ -10,7 +10,7 @@ CATEGORY = "ui"
 ORDER = 80
 STATUS = "stable"
 
-from starhtml import Div, P, Icon, Span, H3, Code, Audio, Signal, js
+from starhtml import Div, P, Icon, Span, H3, Signal, js, collect
 from starui.registry.components.toggle import Toggle
 from starui.registry.components.button import Button
 from starui.registry.components.badge import Badge
@@ -18,45 +18,45 @@ from starui.registry.components.card import Card, CardHeader, CardContent, CardT
 from starui.registry.components.separator import Separator
 from starui.registry.components.progress import Progress
 from utils import auto_generate_page, with_code, Prop, build_api_reference
-from widgets.component_preview import ComponentPreview
 
 
-# ============================================================================
-# EXAMPLE FUNCTIONS (decorated with @with_code for markdown generation)
-# ============================================================================
-
-# Basic toggle
 @with_code
 def basic_toggle_example():
     return Div(
+        (bold_toggle := Signal("bold_toggle", False)),
         Toggle(
             Icon("lucide:bold", cls="h-4 w-4"),
             variant="outline",
-            signal="bold_toggle"
+            signal=bold_toggle
         ),
         P(
             "Bold is ",
-            Span(data_text=js("$bold_toggle ? 'ON' : 'OFF'"), cls="font-mono"),
+            Span(data_text=bold_toggle.if_("ON", "OFF"), cls="font-mono"),
             cls="text-sm text-muted-foreground mt-2"
         ),
         cls="flex flex-col items-center"
     )
 
 
-# Feature toggles
 @with_code
 def feature_toggles_example():
     experimental = Signal("experimental", False)
     debug = Signal("debug", False)
     performance = Signal("performance", True)
 
-    def create_feature_toggle(icon, color_class, title, description, signal, pressed=False):
+    active_features = collect([
+        (experimental, "Experimental"),
+        (debug, "Debug"),
+        (performance, "Performance")
+    ], join_with=" • ")
+
+    def create_feature_toggle(icon, color_class, title, description, sig, pressed=False):
         return Div(
             Toggle(
-                Icon(icon, cls=f"h-4 w-4 mr-2", data_class=js(f"{{'{color_class}': ${signal}}}")),
+                Icon(icon, cls="h-4 w-4 mr-2", data_class=sig.if_(color_class)),
                 Span(title),
                 variant="outline",
-                signal=signal,
+                signal=sig,
                 pressed=pressed
             ),
             P(description, cls="text-sm text-muted-foreground mt-1"),
@@ -70,13 +70,13 @@ def feature_toggles_example():
         CardContent(
             Div(
                 experimental, debug, performance,
-                create_feature_toggle("lucide:flask-conical", "text-orange-500", "Experimental Mode", "Enable beta features", "experimental"),
-                create_feature_toggle("lucide:bug", "text-red-500", "Debug Mode", "Show debug information", "debug"),
-                create_feature_toggle("lucide:zap", "text-yellow-500", "Performance Mode", "Optimize for speed", "performance", pressed=True),
+                create_feature_toggle("lucide:flask-conical", "text-orange-500", "Experimental Mode", "Enable beta features", experimental),
+                create_feature_toggle("lucide:bug", "text-red-500", "Debug Mode", "Show debug information", debug),
+                create_feature_toggle("lucide:zap", "text-yellow-500", "Performance Mode", "Optimize for speed", performance, pressed=True),
                 Separator(cls="my-4"),
                 Div(
                     Badge(
-                        data_text=js("[$experimental && 'Experimental', $debug && 'Debug', $performance && 'Performance'].filter(Boolean).join(' • ') || 'Standard Mode'"),
+                        data_text=active_features.if_(active_features, "Standard Mode"),
                         variant="secondary",
                         cls="w-full justify-center min-w-[200px]"
                     ),
@@ -89,7 +89,6 @@ def feature_toggles_example():
     )
 
 
-# Size variations
 @with_code
 def size_variations_example():
     return Div(
@@ -98,15 +97,13 @@ def size_variations_example():
             Toggle(
                 Icon("lucide:star", cls="h-3 w-3"),
                 variant="outline",
-                size="sm",
-                signal="star_sm"
+                size="sm"
             ),
             Toggle(
                 Icon("lucide:heart", cls="h-3 w-3"),
                 Span("Like", cls="text-xs"),
                 variant="outline",
-                size="sm",
-                signal="heart_sm"
+                size="sm"
             ),
             cls="space-y-2"
         ),
@@ -114,14 +111,12 @@ def size_variations_example():
             H3("Default", cls="text-sm font-medium mb-2"),
             Toggle(
                 Icon("lucide:star", cls="h-4 w-4"),
-                variant="outline",
-                signal="star_default"
+                variant="outline"
             ),
             Toggle(
                 Icon("lucide:heart", cls="h-4 w-4"),
                 Span("Like"),
-                variant="outline",
-                signal="heart_default"
+                variant="outline"
             ),
             cls="space-y-2"
         ),
@@ -130,15 +125,13 @@ def size_variations_example():
             Toggle(
                 Icon("lucide:star", cls="h-5 w-5"),
                 variant="outline",
-                size="lg",
-                signal="star_lg"
+                size="lg"
             ),
             Toggle(
                 Icon("lucide:heart", cls="h-5 w-5"),
                 Span("Like", cls="text-lg"),
                 variant="outline",
-                size="lg",
-                signal="heart_lg"
+                size="lg"
             ),
             cls="space-y-2"
         ),
@@ -146,7 +139,6 @@ def size_variations_example():
     )
 
 
-# Social interaction toggles
 @with_code
 def social_interactions_example():
     liked = Signal("liked", False)
@@ -154,12 +146,12 @@ def social_interactions_example():
     saved = Signal("saved", False)
     share = Signal("share", False)
 
-    def create_social_toggle(icon, count_signal, signal, label):
+    def create_social_toggle(icon, count_signal, sig, label):
         return Toggle(
             Icon(icon, cls="h-4 w-4 mr-1"),
-            Span(data_text=js(count_signal), cls="text-sm"),
+            Span(data_text=count_signal, cls="text-sm"),
             variant="outline",
-            signal=signal,
+            signal=sig,
             aria_label=label
         )
     return Card(
@@ -173,18 +165,18 @@ def social_interactions_example():
                 P("Beautiful sunset over the mountains", cls="font-medium mb-2"),
                 P("Posted 2 hours ago", cls="text-sm text-muted-foreground mb-4"),
                 Div(
-                    create_social_toggle("lucide:heart", "$liked ? '124' : '123'", "liked", "Like post"),
-                    create_social_toggle("lucide:message-circle", "$comment ? '9' : '8'", "comment", "Comment"),
+                    create_social_toggle("lucide:heart", liked.if_('124', '123'), liked, "Like post"),
+                    create_social_toggle("lucide:message-circle", comment.if_('9', '8'), comment, "Comment"),
                     Toggle(
                         Icon("lucide:bookmark", cls="h-4 w-4"),
                         variant="outline",
-                        signal="saved",
+                        signal=saved,
                         aria_label="Save post"
                     ),
                     Toggle(
                         Icon("lucide:share-2", cls="h-4 w-4"),
                         variant="outline",
-                        signal="share",
+                        signal=share,
                         aria_label="Share post"
                     ),
                     cls="flex gap-2"
@@ -194,13 +186,13 @@ def social_interactions_example():
                         Icon("lucide:heart", cls="h-4 w-4 mr-2 text-red-500"),
                         "You liked this",
                         cls="text-xs text-muted-foreground flex items-center",
-                        data_show=js("$liked")
+                        data_show=liked
                     ),
                     P(
                         Icon("lucide:bookmark", cls="h-4 w-4 mr-2"),
                         "Saved to collection",
                         cls="text-xs text-muted-foreground flex items-center",
-                        data_show=js("$saved")
+                        data_show=saved
                     ),
                     cls="mt-2 space-y-1 min-h-[32px]"
                 )
@@ -210,15 +202,14 @@ def social_interactions_example():
     )
 
 
-# Music player controls with HTML5 Audio
 @with_code
 def music_player_simulation_example():
     shuffle = Signal("shuffle", False)
-    playing = Signal("playing", True)  # Start playing for demo
+    playing = Signal("playing", True)
     repeat = Signal("repeat", True)
-    current_time = Signal("current_time", 83)  # Start at 1:23 (83 seconds)
-    total_time = Signal("total_time", 296)  # 4:56 total (296 seconds)
-    song_progress = Signal("song_progress", 28)  # 83/296 = ~28%
+    current_time = Signal("current_time", 83)
+    total_time = Signal("total_time", 296)
+    song_progress = Signal("song_progress", 28)
 
     return Card(
         CardHeader(
@@ -229,25 +220,22 @@ def music_player_simulation_example():
             Div(
                 shuffle, playing, repeat, current_time, total_time, song_progress,
 
-                # Progress bar
                 Progress(
-                    signal="song_progress",
+                    signal=song_progress,
                     cls="h-2"
                 ),
 
-                # Time display
                 P(
                     data_text=js("Math.floor($current_time / 60) + ':' + String($current_time % 60).padStart(2, '0') + ' / ' + Math.floor($total_time / 60) + ':' + String($total_time % 60).padStart(2, '0')"),
                     cls="text-xs text-muted-foreground mt-2 text-center"
                 ),
 
-                # Control buttons
                 Div(
                     Toggle(
                         Icon("lucide:shuffle", cls="h-4 w-4"),
                         variant="outline",
                         size="sm",
-                        signal="shuffle",
+                        signal=shuffle,
                         aria_label="Shuffle"
                     ),
                     Button(
@@ -255,14 +243,14 @@ def music_player_simulation_example():
                         variant="outline",
                         size="sm",
                         aria_label="Previous Song",
-                        data_on_click=js("$current_time = 0; $song_progress = 0; $playing = false")
+                        data_on_click=[current_time.set(0), song_progress.set(0), playing.set(False)]
                     ),
                     Toggle(
-                        Span(Icon("lucide:play", cls="h-5 w-5"), data_show=js("!$playing")),
-                        Span(Icon("lucide:pause", cls="h-5 w-5"), data_show=js("$playing")),
+                        Span(Icon("lucide:play", cls="h-5 w-5"), data_show=~playing),
+                        Span(Icon("lucide:pause", cls="h-5 w-5"), data_show=playing),
                         variant="outline",
-                        signal="playing",
-                        pressed=True,  # Start playing
+                        signal=playing,
+                        pressed=True,
                         aria_label="Play/Pause"
                     ),
                     Button(
@@ -270,43 +258,39 @@ def music_player_simulation_example():
                         variant="outline",
                         size="sm",
                         aria_label="Next Song",
-                        data_on_click=js("$current_time = 0; $song_progress = 0; $playing = false")
+                        data_on_click=[current_time.set(0), song_progress.set(0), playing.set(False)]
                     ),
                     Toggle(
                         Icon("lucide:repeat", cls="h-4 w-4"),
                         variant="outline",
                         size="sm",
-                        signal="repeat",
+                        signal=repeat,
                         pressed=True,
                         aria_label="Repeat"
                     ),
                     cls="flex items-center justify-center gap-2 mt-4"
                 ),
 
-                # Status badges
                 Div(
                     Badge(
-                        data_text=js("$shuffle ? 'Shuffle ON' : 'Shuffle OFF'"),
+                        data_text=shuffle.if_("Shuffle ON", "Shuffle OFF"),
                         variant="outline",
                         cls="text-xs"
                     ),
                     Badge(
-                        data_text=js("$repeat ? 'Repeat ON' : 'Repeat OFF'"),
+                        data_text=repeat.if_("Repeat ON", "Repeat OFF"),
                         variant="outline",
                         cls="text-xs"
                     ),
                     cls="flex justify-center gap-2 mt-3"
                 ),
 
-                # Realistic timer system for demo purposes
                 data_effect=js("""
-                    // Clean up any existing timer
                     if (window.musicTimer) {
                         clearInterval(window.musicTimer);
                         window.musicTimer = null;
                     }
 
-                    // Start timer when playing
                     if ($playing && $current_time < $total_time) {
                         window.musicTimer = setInterval(() => {
                             if (!$playing) {
@@ -318,10 +302,9 @@ def music_player_simulation_example():
                                 $current_time = $current_time + 1;
                                 $song_progress = Math.round(($current_time / $total_time) * 100);
                             } else {
-                                // Song completed
                                 clearInterval(window.musicTimer);
                                 if ($repeat) {
-                                    $current_time = 0;  // Reset to beginning
+                                    $current_time = 0;
                                     $song_progress = 0;
                                 } else {
                                     $playing = false;
@@ -336,7 +319,6 @@ def music_player_simulation_example():
     )
 
 
-# Disabled states
 @with_code
 def disabled_states_example():
     return Div(
@@ -345,14 +327,12 @@ def disabled_states_example():
             Div(
                 Toggle(
                     Icon("lucide:wifi", cls="h-4 w-4"),
-                    variant="outline",
-                    signal="wifi_enabled"
+                    variant="outline"
                 ),
                 Toggle(
                     Icon("lucide:bluetooth", cls="h-4 w-4"),
                     "Bluetooth",
-                    variant="outline",
-                    signal="bluetooth_enabled"
+                    variant="outline"
                 ),
                 cls="flex gap-2"
             )
@@ -363,16 +343,14 @@ def disabled_states_example():
                 Toggle(
                     Icon("lucide:wifi", cls="h-4 w-4"),
                     variant="outline",
-                    disabled=True,
-                    signal="wifi_disabled"
+                    disabled=True
                 ),
                 Toggle(
                     Icon("lucide:bluetooth", cls="h-4 w-4"),
                     "Bluetooth",
                     variant="outline",
                     disabled=True,
-                    pressed=True,
-                    signal="bluetooth_disabled"
+                    pressed=True
                 ),
                 cls="flex gap-2"
             )
@@ -380,10 +358,6 @@ def disabled_states_example():
         cls="space-y-4"
     )
 
-
-# ============================================================================
-# MODULE-LEVEL DATA (for markdown API)
-# ============================================================================
 
 EXAMPLES_DATA = [
     {"fn": basic_toggle_example, "title": "Basic Toggle", "description": "Simple toggle button with icon"},

@@ -15,7 +15,7 @@ toggle_variants = cva(
         "variants": {
             "variant": {
                 "default": "bg-transparent",
-                "outline": "border border-input bg-transparent shadow-xs hover:bg-accent hover:text-accent-foreground",
+                "outline": "border border-input bg-transparent shadow-xs",
             },
             "size": {
                 "default": "h-9 px-3 min-w-9",
@@ -45,11 +45,17 @@ def Toggle(
     sig = getattr(signal, 'id', signal) or gen_id("toggle")
     toggle_id = kwargs.pop("id", sig)
 
+    pressed_state = Signal(sig, pressed)
+
+    user_on_click = kwargs.pop('data_on_click', None)
+    user_actions = user_on_click if isinstance(user_on_click, list) else ([user_on_click] if user_on_click else [])
+    click_actions = [pressed_state.toggle()] + user_actions if not disabled else None
+
     return Div(
-        (pressed_state := Signal(sig, pressed)),
+        pressed_state,
         HTMLButton(
             *children,
-            data_on_click=pressed_state.toggle() if not disabled else None,
+            data_on_click=click_actions,
             type="button",
             id=toggle_id,
             disabled=disabled,

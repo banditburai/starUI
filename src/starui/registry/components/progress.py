@@ -13,8 +13,8 @@ def Progress(
     **kwargs: Any,
 ) -> FT:
     sig = getattr(signal, 'id', signal) or gen_id("progress")
-
-    pct = max(0, min(100, (value / max_value * 100) if value is not None and max_value > 0 else 0))
+    initial_value = getattr(signal, '_initial', value) if value is None else value
+    pct = max(0, min(100, (initial_value / max_value * 100) if initial_value is not None and max_value > 0 else 0))
     pct = int(pct) if pct == int(pct) else pct
 
     return Div(

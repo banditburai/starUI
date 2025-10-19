@@ -2,7 +2,7 @@
 Date Picker component documentation - Calendar date selection with popover.
 """
 
-from starhtml import Div, P, Span, js
+from starhtml import Div, P, Span
 from starui.registry.components.date_picker import DatePicker
 from utils import auto_generate_page, with_code, Prop, Component, build_api_reference
 from widgets.component_preview import ComponentPreview
@@ -15,9 +15,30 @@ ORDER = 26
 STATUS = "stable"
 
 
-# ============================================================================
-# EXAMPLE FUNCTIONS (decorated with @with_code for markdown generation)
-# ============================================================================
+
+@with_code
+def hero_date_picker_example():
+    pickers = [
+        ("Single Date", {"signal": "hero_single", "mode": "single", "placeholder": "Pick a date"}),
+        ("Date Range", {"signal": "hero_range", "mode": "range", "placeholder": "Pick a date range"}),
+        ("With Presets", {"signal": "hero_presets", "placeholder": "Pick a date", "with_presets": True}),
+    ]
+
+    return Div(
+        Div(
+            *[
+                Div(
+                    P(label, cls="text-sm font-medium mb-2"),
+                    DatePicker(**props),
+                    cls="flex flex-col items-center",
+                )
+                for label, props in pickers
+            ],
+            cls="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl mx-auto",
+        ),
+        cls="w-full",
+    )
+
 
 @with_code
 def date_picker_with_presets_example():
@@ -98,76 +119,9 @@ def multiple_date_selection_example():
     )
 
 
-def examples():
-    """Generate date picker examples."""
-    yield ComponentPreview(
-        date_picker_with_presets_example(),
-        date_picker_with_presets_example.code,
-        title="Date Picker with Presets",
-        description="Quick date selection with predefined options",
-    )
-
-    yield ComponentPreview(
-        date_range_picker_example(),
-        date_range_picker_example.code,
-        title="Date Range Picker",
-        description="Select a start and end date for filtering or booking",
-    )
-
-    yield ComponentPreview(
-        multiple_date_selection_example(),
-        multiple_date_selection_example.code,
-        title="Multiple Date Selection",
-        description="Select multiple dates for scheduling or events",
-    )
-
-
-# ============================================================================
-# HERO EXAMPLE (moved to module level)
-# ============================================================================
-
-@with_code
-def hero_date_picker_example():
-    return Div(
-        Div(
-            Div(
-                P("Single Date", cls="text-sm font-medium mb-2"),
-                DatePicker(
-                    signal="hero_single",
-                    mode="single",
-                    placeholder="Pick a date",
-                ),
-                cls="flex flex-col items-center",
-            ),
-            Div(
-                P("Date Range", cls="text-sm font-medium mb-2"),
-                DatePicker(
-                    signal="hero_range",
-                    mode="range",
-                    placeholder="Pick a date range",
-                ),
-                cls="flex flex-col items-center",
-            ),
-            Div(
-                P("With Presets", cls="text-sm font-medium mb-2"),
-                DatePicker(
-                    signal="hero_presets",
-                    placeholder="Pick a date",
-                    with_presets=True,
-                ),
-                cls="flex flex-col items-center",
-            ),
-            cls="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl mx-auto",
-        ),
-        cls="w-full",
-    )
-
-
-# ============================================================================
-# MODULE-LEVEL DATA (for markdown API)
-# ============================================================================
 
 EXAMPLES_DATA = [
+    {"title": "Date Picker", "description": "Single, range, and preset date selection modes", "fn": hero_date_picker_example},
     {"title": "Date Picker with Presets", "description": "Quick date selection with predefined options", "fn": date_picker_with_presets_example},
     {"title": "Date Range Picker", "description": "Select a start and end date for filtering or booking", "fn": date_range_picker_example},
     {"title": "Multiple Date Selection", "description": "Select multiple dates for scheduling or events", "fn": multiple_date_selection_example},

@@ -48,9 +48,13 @@ def SheetTrigger(
     def trigger(*, sig, sheet_open, **_):
         from .button import Button
 
+        user_on_click = kwargs.pop('data_on_click', None)
+        user_actions = user_on_click if isinstance(user_on_click, list) else ([user_on_click] if user_on_click else [])
+        click_actions = [sheet_open.set(True)] + user_actions
+
         return Button(
             *children,
-            data_on_click=sheet_open.set(True),
+            data_on_click=click_actions,
             id=f"{sig}_trigger",
             data_attr_aria_expanded=sheet_open,
             aria_haspopup="dialog",
@@ -140,9 +144,13 @@ def SheetClose(
     def close(*, sheet_open, **_):
         from .button import Button
 
+        user_on_click = kwargs.pop('data_on_click', None)
+        user_actions = user_on_click if isinstance(user_on_click, list) else ([user_on_click] if user_on_click else [])
+        click_actions = user_actions + [sheet_open.set(False)]
+
         return Button(
             *children,
-            data_on_click=sheet_open.set(False),
+            data_on_click=click_actions,
             data_slot="sheet-close",
             variant=variant,
             size=size,

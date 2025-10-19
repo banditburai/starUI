@@ -74,10 +74,14 @@ def DialogTrigger(
     def trigger(*, open_state, dialog_ref, modal, **_):
         from .button import Button
 
+        user_on_click = kwargs.pop('data_on_click', None)
+        user_actions = user_on_click if isinstance(user_on_click, list) else ([user_on_click] if user_on_click else [])
         show_method = dialog_ref.showModal() if modal else dialog_ref.show()
+        click_actions = [show_method, open_state.set(True)] + user_actions
+
         return Button(
             *children,
-            data_on_click=[show_method, open_state.set(True)],
+            data_on_click=click_actions,
             type="button",
             aria_haspopup="dialog",
             variant=variant,
@@ -125,9 +129,13 @@ def DialogClose(
     def _(*, open_state, dialog_ref, **_):
         from .button import Button
 
+        user_on_click = kwargs.pop('data_on_click', None)
+        user_actions = user_on_click if isinstance(user_on_click, list) else ([user_on_click] if user_on_click else [])
+        close_actions = user_actions + [open_state.set(False), dialog_ref.close(value) if value else dialog_ref.close()]
+
         return Button(
             *children,
-            data_on_click=[open_state.set(False), dialog_ref.close(value) if value else dialog_ref.close()],
+            data_on_click=close_actions,
             type="button",
             variant=variant,
             cls=cls,

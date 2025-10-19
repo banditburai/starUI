@@ -18,9 +18,34 @@ from utils import auto_generate_page, Prop, build_api_reference, with_code
 from widgets.component_preview import ComponentPreview
 
 
-# ============================================================================
-# EXAMPLE FUNCTIONS (decorated with @with_code for markdown generation)
-# ============================================================================
+
+@with_code
+def hero_accordion_example():
+    faqs = [
+        ("What is StarUI?",
+         "StarUI is a modern component library built with StarHTML and Datastar, providing beautiful, accessible, and interactive UI components."),
+        ("How do I get started?",
+         P("Install StarUI using the CLI command ", Code("star add [component]"),
+           " and start building your application with our pre-built components.")),
+        ("Is it production ready?",
+         "Yes! StarUI components are thoroughly tested, accessible, and used in production by many applications.")
+    ]
+
+    accordion_items = [
+        AccordionItem(
+            AccordionTrigger(q),
+            AccordionContent(P(a) if isinstance(a, str) else a)
+        ) for q, a in faqs
+    ]
+
+    return Div(
+        Accordion(
+            *accordion_items,
+            type="single",
+            collapsible=True
+        ),
+        cls="w-full max-w-2xl"
+    )
 
 @with_code
 def basic_accordion_example():
@@ -28,22 +53,19 @@ def basic_accordion_example():
         Accordion(
             AccordionItem(
                 AccordionTrigger("Is it accessible?"),
-                AccordionContent(P("Yes. It adheres to the WAI-ARIA design pattern...")),
-                value="item-1"
+                AccordionContent(P("Yes. It adheres to the WAI-ARIA design pattern..."))
             ),
             AccordionItem(
                 AccordionTrigger("Is it styled?"),
-                AccordionContent(P("Yes. It comes with default styles...")),
-                value="item-2"
+                AccordionContent(P("Yes. It comes with default styles..."))
             ),
             AccordionItem(
                 AccordionTrigger("Is it animated?"),
-                AccordionContent(P("Yes. It's animated by default...")),
-                value="item-3"
+                AccordionContent(P("Yes. It's animated by default..."))
             ),
             type="single",
             collapsible=True,
-            default_value="item-1"
+            value=1
         ),
         cls="w-full max-w-2xl"
     )
@@ -65,8 +87,7 @@ def faq_accordion_example():
                     Span(question),
                     cls="flex items-center flex-1")
             ),
-            AccordionContent(*content),
-            value=question.lower().replace(" ", "_")[:20]
+            AccordionContent(*content),            
         )
 
     faq_items = [
@@ -110,7 +131,8 @@ def faq_accordion_example():
             Accordion(
                 *faq_items,
                 type="single",
-                collapsible=True
+                collapsible=True,
+                value=0
             )
         ),
         cls="max-w-2xl"
@@ -174,7 +196,7 @@ def multiple_selection_accordion_example():
             Accordion(
                 *accordion_sections,
                 type="multiple",
-                default_value=["auth", "users"]
+                value=["auth", "users"]
             )
         ),
         cls="max-w-2xl"
@@ -232,18 +254,15 @@ def settings_accordion_example():
     settings_sections = [
         AccordionItem(
             AccordionTrigger(settings_trigger("Personal Information", badge_text="3 fields")),
-            AccordionContent(personal_form),
-            value="personal"
+            AccordionContent(personal_form),            
         ),
         AccordionItem(
             AccordionTrigger(settings_trigger("Password & Security", badge_text="Security", badge_variant="destructive")),
-            AccordionContent(security_form),
-            value="security"
+            AccordionContent(security_form),            
         ),
         AccordionItem(
             AccordionTrigger(settings_trigger("Notifications", icon="lucide:bell")),
-            AccordionContent(notification_form),
-            value="notifications"
+            AccordionContent(notification_form),            
         )
     ]
 
@@ -281,8 +300,7 @@ def file_explorer_accordion_example():
                       for f in files],
                     cls="text-sm text-muted-foreground"
                 )
-            ),
-            value=name.replace("/", "")
+            )            
         )
 
     src_content = Div(
@@ -304,8 +322,7 @@ def file_explorer_accordion_example():
     file_items = [
         AccordionItem(
             AccordionTrigger(src_trigger),
-            AccordionContent(src_content),
-            value="src"
+            AccordionContent(src_content),            
         ),
         folder_item("docs/", 3, ["README.md", "CONTRIBUTING.md", "API.md"]),
         folder_item("tests/", 2, ["Button.test.tsx", "utils.test.ts"])
@@ -329,57 +346,42 @@ def file_explorer_accordion_example():
 @with_code
 def course_curriculum_accordion_example():
     def lesson_item(title, duration=None, type="video", completed=False, locked=False):
-        icon = "lucide:lock" if locked else {
+        icons = {
             "video": "lucide:play-circle",
             "exercise": "lucide:file-text",
-            "quiz": "lucide:check-circle" if completed else "lucide:help-circle",
-        }.get(type, "lucide:file")
-
+            "quiz": "lucide:check-circle" if completed else "lucide:help-circle"
+        }
+        icon = "lucide:lock" if locked else icons.get(type, "lucide:file")
         icon_cls = cn("h-4 w-4 mr-2", completed and "text-green-500", locked and "text-muted-foreground")
 
-        if duration:
-            right_element = Span(duration, cls="ml-auto text-muted-foreground")
-        elif type == "exercise":
-            right_element = Badge("Exercise", variant="outline", cls="ml-auto")
-        elif completed:
-            right_element = Badge("Completed", variant="secondary", cls="ml-auto")
-        elif locked:
-            right_element = Badge("Locked", variant="outline", cls="ml-auto")
-        else:
-            right_element = None
-
-        return Li(
-            Div(
-                Icon(icon, cls=icon_cls),
-                title,
-                right_element,
-                cls=cn("flex items-center", locked and "opacity-50")
-            )
+        right_element = (
+            Span(duration, cls="ml-auto text-muted-foreground") if duration
+            else Badge("Exercise", variant="outline", cls="ml-auto") if type == "exercise"
+            else Badge("Completed", variant="secondary", cls="ml-auto") if completed
+            else Badge("Locked", variant="outline", cls="ml-auto") if locked
+            else None
         )
+
+        return Li(Div(Icon(icon, cls=icon_cls), title, right_element,
+                      cls=cn("flex items-center", locked and "opacity-50")))
 
     def course_module(title, lesson_count, duration, lessons, value, locked=False):
-        left_badge = Badge(
-            "Coming Soon" if locked else f"{lesson_count} lessons",
-            variant="outline" if locked else "secondary",
-            cls="mr-2"
-        )
-
-        right_element = (
-            Icon("lucide:lock", cls="h-4 w-4 ml-auto mr-2 text-muted-foreground") if locked else
-            Badge(duration, variant="outline", cls="ml-auto mr-2")
-        )
-
-        content = (
-            P("This module will be available after completing previous modules.",
-              cls="text-muted-foreground italic") if locked else
-            Ul(*lessons, cls="space-y-3")
-        )
-
         return AccordionItem(
             AccordionTrigger(
-                Div(left_badge, Strong(title), right_element, cls="flex items-center w-full")
+                Div(
+                    Badge("Coming Soon" if locked else f"{lesson_count} lessons",
+                          variant="outline" if locked else "secondary", cls="mr-2"),
+                    Strong(title),
+                    Icon("lucide:lock", cls="h-4 w-4 ml-auto mr-2 text-muted-foreground") if locked
+                    else Badge(duration, variant="outline", cls="ml-auto mr-2"),
+                    cls="flex items-center w-full"
+                )
             ),
-            AccordionContent(content),
+            AccordionContent(
+                P("This module will be available after completing previous modules.",
+                  cls="text-muted-foreground italic") if locked
+                else Ul(*lessons, cls="space-y-3")
+            ),
             value=value
         )
 
@@ -420,66 +422,26 @@ def course_curriculum_accordion_example():
             Accordion(
                 *course_modules,
                 type="single",
-                default_value="module1"
+                value="module1"
             )
         ),
         cls="max-w-3xl"
     )
 
 
-@with_code
-def hero_accordion_example():
-    faqs = [
-        ("What is StarUI?",
-         "StarUI is a modern component library built with StarHTML and Datastar, providing beautiful, accessible, and interactive UI components."),
-        ("How do I get started?",
-         P("Install StarUI using the CLI command ", Code("star add [component]"),
-           " and start building your application with our pre-built components.")),
-        ("Is it production ready?",
-         "Yes! StarUI components are thoroughly tested, accessible, and used in production by many applications.")
-    ]
 
-    accordion_items = [
-        AccordionItem(
-            AccordionTrigger(q),
-            AccordionContent(P(a) if isinstance(a, str) else a),
-            value=f"item-{i+1}"
-        ) for i, (q, a) in enumerate(faqs)
-    ]
-
-    return Div(
-        Accordion(
-            *accordion_items,
-            type="single",
-            collapsible=True,
-            default_value="item-1"
-        ),
-        cls="w-full max-w-2xl"
-    )
-
-
-# ============================================================================
-# EXAMPLES GENERATOR (for rendering on the page)
-# ============================================================================
-
-# ============================================================================
-# API REFERENCE
-# ============================================================================
 
 API_REFERENCE = build_api_reference(
     main_props=[
         Prop("type", "Literal['single', 'multiple']", "Whether one or multiple items can be open", "'single'"),
         Prop("collapsible", "bool", "When type='single', allows closing all items", "False"),
-        Prop("default_value", "str | list[str] | None", "Initially open item(s)", "None"),
+        Prop("value", "str | int | list[str | int] | None", "Initially open item(s). Can be index (int) or custom value (str)", "None"),
         Prop("signal", "str", "Datastar signal name for state management", "auto-generated"),
         Prop("cls", "str", "Additional CSS classes", "''"),
     ]
 )
 
 
-# ============================================================================
-# EXAMPLES DATA (for markdown generation with code)
-# ============================================================================
 
 EXAMPLES_DATA = [
     {"fn": hero_accordion_example, "title": "Basic Usage", "description": "Single selection accordion with collapsible items"},
@@ -492,9 +454,6 @@ EXAMPLES_DATA = [
 ]
 
 
-# ============================================================================
-# DOCS PAGE
-# ============================================================================
 
 def create_accordion_docs():
     return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)

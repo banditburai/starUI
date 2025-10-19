@@ -10,16 +10,16 @@ from .utils import cn, gen_id, inject_context
 
 def Select(
     *children,
-    default_value: str | None = None,
-    default_label: str | None = None,
+    value: str | None = None,
+    label: str | None = None,
     signal: str | Signal = "",
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
     sig = getattr(signal, 'id', signal) or gen_id("select")
 
-    selected = Signal(f"{sig}_value", default_value or "")
-    selected_label = Signal(f"{sig}_label", default_label or "")
+    selected = Signal(f"{sig}_value", value or "")
+    selected_label = Signal(f"{sig}_label", label or "")
     open_state = Signal(f"{sig}_open", False)
 
     ctx = dict(sig=sig, selected=selected, selected_label=selected_label, open_state=open_state)
@@ -84,8 +84,10 @@ def SelectValue(
         if children:
             return Span(*children, cls=cn("pointer-events-none truncate flex-1 text-left", cls), **kwargs)
 
+        text_expr = kwargs.pop('data_text') if 'data_text' in kwargs else selected_label.or_(placeholder)
+
         return Span(
-            data_text=selected_label.or_(placeholder),
+            data_text=text_expr,
             cls=cn("pointer-events-none truncate flex-1 text-left", cls),
             data_class_text_muted_foreground=~selected_label,
             **kwargs,
@@ -99,7 +101,7 @@ def SelectContent(
     side: str = "bottom",
     align: str = "start",
     side_offset: int = 4,
-    container: str = "auto",
+    container: str = "none",
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
@@ -154,6 +156,10 @@ def SelectItem(
         label_text = children[0] if (children and isinstance(children[0], str)) else item_value
         is_selected = selected.eq(item_value)
 
+        user_on_click = kwargs.pop('data_on_click', None)
+        user_actions = user_on_click if isinstance(user_on_click, list) else ([user_on_click] if user_on_click else [])
+        click_actions = user_actions + [selected.set(item_value), selected_label.set(label_text), content_ref.hidePopover()]
+
         return Div(
             *children,
             Span(
@@ -162,11 +168,7 @@ def SelectItem(
                 data_style_opacity=is_selected.if_("1", "0"),
                 cls="absolute right-2 flex h-3.5 w-3.5 items-center justify-center",
             ),
-            data_on_click=[
-                selected.set(item_value),
-                selected_label.set(label_text),
-                content_ref.hidePopover()
-            ] if not disabled else None,
+            data_on_click=click_actions if not disabled else None,
             role="option",
             data_value=item_value,
             data_selected=is_selected,
@@ -300,8 +302,8 @@ def SelectWithLabel(
                 id=trigger_id,
             ),
             SelectContent(*_build_select_items(options)),
-            default_value=value,
-            default_label=_find_initial_label(options, value),
+            value=value,
+            label=_find_initial_label(options, value),
             signal=sig,
             cls="w-full",
             *attrs,

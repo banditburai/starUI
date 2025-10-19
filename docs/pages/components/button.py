@@ -10,9 +10,19 @@ from utils import auto_generate_page, Prop, build_api_reference, with_code
 from widgets.component_preview import ComponentPreview
 
 
-# ============================================================================
-# EXAMPLE FUNCTIONS (decorated with @with_code for markdown generation)
-# ============================================================================
+
+@with_code
+def hero_button_example():
+    return Div(
+        Button("Default"),
+        Button("Secondary", variant="secondary"),
+        Button("Destructive", variant="destructive"),
+        Button("Outline", variant="outline"),
+        Button("Ghost", variant="ghost"),
+        Button("Link", variant="link"),
+        cls="flex flex-wrap gap-2 justify-center"
+    )
+
 
 @with_code
 def button_sizes_example():
@@ -83,20 +93,12 @@ def form_integration_example():
         Button(
             "Submit",
             data_attr_disabled=name.eq(""),
-            data_on_click="alert(`Hello ${$name}!`)"
+            data_on_click=f"alert('Hello ' + {name} + '!')"
         ),
         P("Button is disabled until you enter a name", cls="text-sm text-gray-600 mt-2"),
         cls="w-full max-w-sm mx-auto"
     )
 
-
-# ============================================================================
-# EXAMPLES GENERATOR (for rendering on the page)
-# ============================================================================
-
-# ============================================================================
-# API REFERENCE
-# ============================================================================
 
 API_REFERENCE = build_api_reference(
     main_props=[
@@ -112,11 +114,9 @@ API_REFERENCE = build_api_reference(
 )
 
 
-# ============================================================================
-# EXAMPLES DATA (for markdown generation with code)
-# ============================================================================
 
 EXAMPLES_DATA = [
+    {"title": "Button", "description": "Display buttons in different variants", "fn": hero_button_example},
     {"title": "Button Sizes", "description": "Different sizes including icon-only buttons", "fn": button_sizes_example},
     {"title": "Buttons with Icons", "description": "Buttons enhanced with icons for better UX", "fn": buttons_with_icons_example},
     {"title": "Interactive Counter", "description": "Button that updates state on click", "fn": interactive_counter_example},
@@ -124,23 +124,6 @@ EXAMPLES_DATA = [
     {"title": "Form Integration", "description": "Button state controlled by form input", "fn": form_integration_example},
 ]
 
-
-# ============================================================================
-# DOCS PAGE
-# ============================================================================
-
-
-@with_code
-def hero_button_example():
-    return Div(
-        Button("Default"),
-        Button("Secondary", variant="secondary"),
-        Button("Destructive", variant="destructive"),
-        Button("Outline", variant="outline"),
-        Button("Ghost", variant="ghost"),
-        Button("Link", variant="link"),
-        cls="flex flex-wrap gap-2 justify-center"
-    )
 
 
 def create_button_docs():

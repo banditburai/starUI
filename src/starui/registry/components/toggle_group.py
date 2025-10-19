@@ -15,7 +15,7 @@ def ToggleGroup(
     *children: Any,
     type: ToggleGroupType = "single",
     signal: str | Signal = "",
-    default_value: str | list[str] | None = None,
+    value: str | list[str] | None = None,
     variant: ToggleGroupVariant = "default",
     size: ToggleGroupSize = "default",
     disabled: bool = False,
@@ -24,7 +24,7 @@ def ToggleGroup(
     **kwargs: Any,
 ) -> FT:
     sig = getattr(signal, 'id', signal) or gen_id("toggle_group")
-    initial = default_value if default_value is not None else ("" if type == "single" else [])
+    initial = value if value is not None else ("" if type == "single" else [])
     ctx = dict(type=type, variant=variant, size=size, disabled=disabled)
 
     items = [

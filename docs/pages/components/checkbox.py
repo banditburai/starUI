@@ -4,8 +4,7 @@ CATEGORY = "form"
 ORDER = 15
 STATUS = "stable"
 
-from starhtml import Div, P, Input, Label, Icon, Span, H3, Form, Signal
-from starhtml.datastar import js
+from starhtml import Div, P, Input, Label, Icon, Span, H3, Form, Signal, all_, any_, collect
 from starui.registry.components.checkbox import Checkbox, CheckboxWithLabel
 from starui.registry.components.button import Button
 from starui.registry.components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
@@ -15,15 +14,62 @@ from utils import auto_generate_page, with_code, Prop, Component, build_api_refe
 from widgets.component_preview import ComponentPreview
 
 
-# ============================================================================
-# EXAMPLE FUNCTIONS (decorated with @with_code for markdown generation)
-# ============================================================================
+
+
+@with_code
+def hero_checkbox_example():
+    dark_mode = Signal("dark_mode", _ref_only=True)
+    notifications = Signal("notifications", _ref_only=True)
+    auto_save = Signal("auto_save", _ref_only=True)
+
+    preferences = [
+        (dark_mode, "Enable dark mode", "Reduce eye strain in low-light conditions", True),
+        (notifications, "Show notifications", "Stay updated with real-time alerts", False),
+        (auto_save, "Auto-save drafts", "Never lose your work", True),
+    ]
+
+    checkboxes = [
+        CheckboxWithLabel(label=label, helper_text=helper, signal=sig, checked=checked)
+        for sig, label, helper, checked in preferences
+    ]
+
+    selected_text = collect([
+        (dark_mode, "Dark Mode"),
+        (notifications, "Notifications"),
+        (auto_save, "Auto-save"),
+        ], join_with=" | ")
+
+    preference_summary = Div(
+        P("Your preferences: ", cls="text-sm text-muted-foreground mb-1"),
+        P(
+            Span(
+                data_text=selected_text.if_(selected_text, "None selected"),
+                cls="font-medium text-sm break-words"
+            ),
+            cls="min-h-[1.25rem]"
+        ),
+        cls="mt-4 pt-4 border-t"
+    )
+
+    return Card(
+        CardHeader(
+            CardTitle("Quick Setup"),
+            CardDescription("Configure your preferences in seconds")
+        ),
+        CardContent(
+            Div(
+                *checkboxes,
+                preference_summary,
+                cls="space-y-3"
+            )
+        ),
+        cls="max-w-md mx-auto"
+    )
 
 @with_code
 def terms_conditions_example():
-    terms_accepted = Signal("terms_accepted", False)
-    privacy_accepted = Signal("privacy_accepted", False)
-    marketing_emails = Signal("marketing_emails", True)
+    terms_accepted = Signal("terms_accepted", _ref_only=True)
+    privacy_accepted = Signal("privacy_accepted", _ref_only=True)
 
     return Card(
         CardHeader(
@@ -32,26 +78,22 @@ def terms_conditions_example():
         ),
         CardContent(
             Form(
-                terms_accepted,
-                privacy_accepted,
-                marketing_emails,
                 Div(
                     CheckboxWithLabel(
                         label="I accept the Terms of Service",
                         helper_text="You must accept to continue",
-                        signal="terms_accepted",
+                        signal=terms_accepted,
                         required=True
                     ),
                     CheckboxWithLabel(
                         label="I accept the Privacy Policy",
                         helper_text="Learn how we protect your data",
-                        signal="privacy_accepted",
+                        signal=privacy_accepted,
                         required=True
                     ),
                     CheckboxWithLabel(
                         label="Send me product updates and offers",
-                        helper_text="You can unsubscribe at any time",
-                        signal="marketing_emails"
+                        helper_text="You can unsubscribe at any time"
                     ),
                     cls="space-y-3"
                 ),
@@ -59,8 +101,8 @@ def terms_conditions_example():
                     "Create Account",
                     type="submit",
                     cls="w-full mt-4",
-                    data_attr_disabled=js("!$terms_accepted || !$privacy_accepted"),
-                    data_on_click="evt.preventDefault(); alert('Account created!')"
+                    data_attr_disabled=~all_(terms_accepted, privacy_accepted),
+                    data_on_click="evt.preventDefault()"
                 )
             )
         ),
@@ -70,12 +112,11 @@ def terms_conditions_example():
 
 @with_code
 def feature_permissions_example():
-    storage = Signal("storage", True)
-    network = Signal("network", True)
-    camera = Signal("camera", False)
-    location = Signal("location", True)
-    contacts = Signal("contacts", False)
-    notify = Signal("notify", True)
+    camera = Signal("camera", _ref_only=True)
+    location = Signal("location", _ref_only=True)
+    contacts = Signal("contacts", _ref_only=True)
+    notify = Signal("notify", _ref_only=True)
+    optional_count = Signal("optional_count", camera + location + contacts + notify)
 
     return Card(
         CardHeader(
@@ -84,20 +125,18 @@ def feature_permissions_example():
         ),
         CardContent(
             Div(
-                storage, network, camera, location, contacts, notify,
+                optional_count,
                 Div(
                     H3("Essential", cls="text-sm font-semibold mb-2 text-muted-foreground"),
                     CheckboxWithLabel(
                         label="Storage",
                         helper_text="Save files and preferences",
-                        signal="storage",
                         checked=True,
                         disabled=True
                     ),
                     CheckboxWithLabel(
                         label="Network",
                         helper_text="Connect to the internet",
-                        signal="network",
                         checked=True,
                         disabled=True
                     ),
@@ -108,30 +147,30 @@ def feature_permissions_example():
                     CheckboxWithLabel(
                         label="Camera",
                         helper_text="Take photos and videos",
-                        signal="camera"
+                        signal=camera
                     ),
                     CheckboxWithLabel(
                         label="Location",
                         helper_text="Access your location for maps",
-                        signal="location",
+                        signal=location,
                         checked=True
                     ),
                     CheckboxWithLabel(
                         label="Contacts",
                         helper_text="Find friends using this app",
-                        signal="contacts"
+                        signal=contacts
                     ),
                     CheckboxWithLabel(
                         label="Notifications",
                         helper_text="Show alerts and reminders",
-                        signal="notify",
+                        signal=notify,
                         checked=True
                     ),
                     cls="space-y-2"
                 ),
                 Div(
                     Badge(
-                        data_text=js("[$camera && 'Camera', $location && 'Location', $contacts && 'Contacts', $notify && 'Notifications'].filter(Boolean).length + ' optional permissions'"),
+                        data_text=optional_count + " optional permissions",
                         variant="secondary"
                     ),
                     cls="mt-4 flex justify-center"
@@ -144,11 +183,20 @@ def feature_permissions_example():
 
 @with_code
 def interactive_todo_list_example():
-    todo1 = Signal("todo1", True)
-    todo2 = Signal("todo2", True)
-    todo3 = Signal("todo3", False)
-    todo4 = Signal("todo4", False)
-    todo_progress = Signal("todo_progress", js("([$todo1, $todo2, $todo3, $todo4].filter(Boolean).length / 4) * 100"))
+    todo1 = Signal("todo1", _ref_only=True)
+    todo2 = Signal("todo2", _ref_only=True)
+    todo3 = Signal("todo3", _ref_only=True)
+    todo4 = Signal("todo4", _ref_only=True)
+    completed_count = Signal("completed_count", todo1 + todo2 + todo3 + todo4)
+    todo_progress = Signal("todo_progress", completed_count / 4 * 100)
+
+    def todo_item(label, signal, checked=False):
+        return CheckboxWithLabel(
+            label=label,
+            signal=signal,
+            checked=checked,
+            label_cls=signal.if_("line-through text-muted-foreground")
+        )
 
     return Card(
         CardHeader(
@@ -157,42 +205,23 @@ def interactive_todo_list_example():
         ),
         CardContent(
             Div(
-                todo1, todo2, todo3, todo4, todo_progress,
+                completed_count, todo_progress,
                 Div(
-                    CheckboxWithLabel(
-                        label="Write documentation",
-                        signal="todo1",
-                        label_cls=todo1.if_("line-through text-muted-foreground", "")
-                    ),
-                    CheckboxWithLabel(
-                        label="Review pull requests",
-                        signal="todo2",
-                        label_cls=todo2.if_("line-through text-muted-foreground", "")
-                    ),
-                    CheckboxWithLabel(
-                        label="Update dependencies",
-                        signal="todo3",
-                        label_cls=todo3.if_("line-through text-muted-foreground", "")
-                    ),
-                    CheckboxWithLabel(
-                        label="Deploy to production",
-                        signal="todo4",
-                        label_cls=todo4.if_("line-through text-muted-foreground", "")
-                    ),
+                    todo_item("Write documentation", todo1, checked=True),
+                    todo_item("Review pull requests", todo2, checked=True),
+                    todo_item("Update dependencies", todo3),
+                    todo_item("Deploy to production", todo4),
                     cls="space-y-3"
                 ),
                 Div(
                     P(
                         "Completed: ",
-                        Span(
-                            data_text=js("[$todo1, $todo2, $todo3, $todo4].filter(Boolean).length"),
-                            cls="font-bold"
-                        ),
+                        Span(data_text=completed_count, cls="font-bold"),
                         " of 4",
                         cls="text-sm text-muted-foreground"
                     ),
                     Progress(
-                        signal="todo_progress",
+                        signal=todo_progress,
                         cls="w-full h-2 mt-2"
                     ),
                     cls="mt-4"
@@ -205,7 +234,6 @@ def interactive_todo_list_example():
 
 @with_code
 def select_all_pattern_example():
-    # Define file data server-side (this could come from a database, API, etc.)
     files = [
         {"id": "file1", "name": "invoice-2024-001.pdf", "size": "2.4 MB"},
         {"id": "file2", "name": "report-q3.xlsx", "size": "1.8 MB"},
@@ -213,75 +241,50 @@ def select_all_pattern_example():
         {"id": "file4", "name": "contracts.zip", "size": "12.1 MB"}
     ]
 
-    # Create Signal objects dynamically
+    file_signals = {file["id"]: Signal(file["id"], _ref_only=True) for file in files}
+    deleted_signals = {file["id"]: Signal(file["id"] + "_deleted", False) for file in files}
     select_all = Signal("select_all", False)
-    file_signals = {}
-    exists_signals = {}
 
-    for file in files:
-        file_signals[file["id"]] = Signal(file["id"], False)
-        exists_signals[file["id"]] = Signal(f"{file['id']}_exists", True)
+    selected_count = Signal("selected_count",
+        sum([file_signals[file["id"]] & ~deleted_signals[file["id"]] for file in files])
+    )
 
-    # Generate selected count computation dynamically
-    selected_conditions = " + ".join([
-        f"(${file['id']} && ${file['id']}_exists ? 1 : 0)"
+    delete_actions = [
+        file_signals[file["id"]].then(deleted_signals[file["id"]].set(True))
         for file in files
-    ])
+    ] + [select_all.set(False)]
 
-    # Generate existing count computation dynamically
-    existing_conditions = " + ".join([
-        f"(${file['id']}_exists ? 1 : 0)"
+    select_actions = [
+        (~deleted_signals[file["id"]]).then(file_signals[file["id"]].set(select_all))
         for file in files
-    ])
-
-    # Create computed signals
-    selected_count = Signal("selected_count", js(selected_conditions))
-    existing_count = Signal("existing_count", js(existing_conditions))
-
-    # Generate select all change handler dynamically
-    select_all_logic = "; ".join([
-        f"if (${file['id']}_exists) ${file['id']} = $select_all"
-        for file in files
-    ])
-
-    # Generate delete logic dynamically
-    delete_logic = "; ".join([
-        f"if (${file['id']}) {{ ${file['id']}_exists = false; ${file['id']} = false; }}"
-        for file in files
-    ])
-
-    # Collect all signals for rendering
-    all_signals = [select_all, selected_count, existing_count]
-    for file in files:
-        all_signals.append(file_signals[file["id"]])
-        all_signals.append(exists_signals[file["id"]])
+    ]
 
     return Card(
         CardHeader(
-            CardTitle("Bulk Actions"),
-            CardDescription("Select items for batch operations")
+            CardTitle("Bulk Delete"),
+            CardDescription("Select-all pattern with bulk delete functionality")
         ),
         CardContent(
             Div(
-                *all_signals,
+                select_all, *deleted_signals.values(), selected_count,
                 Div(
                     CheckboxWithLabel(
                         label="Select All",
-                        signal="select_all",
-                        checkbox_cls="border-2"
+                        signal=select_all,
+                        checkbox_cls="border-2",
+                        data_on_change=select_actions
                     ),
                     cls="border-b pb-2 mb-3"
                 ),
                 Div(
-                    # Generate checkboxes dynamically server-side
                     *[
                         Div(
                             CheckboxWithLabel(
                                 label=file["name"],
-                                signal=file["id"],
+                                signal=file_signals[file["id"]],
                                 helper_text=file["size"]
                             ),
-                            data_show=js(f"${file['id']}_exists")
+                            data_show=~deleted_signals[file["id"]]
                         )
                         for file in files
                     ],
@@ -290,25 +293,14 @@ def select_all_pattern_example():
                 Div(
                     Button(
                         Icon("lucide:trash-2", cls="h-4 w-4 mr-2"),
-                        Span(data_text=js("$selected_count > 0 ? `Delete ${$selected_count} Selected` : 'Delete Selected'")),
-                        data_on_click=js(f"{delete_logic}; $select_all = false;"),
+                        Span(data_text=(selected_count > 0).if_("Delete " + selected_count + " Selected", "Delete Selected")),
+                        data_on_click=delete_actions,
                         variant="destructive",
                         size="sm",
-                        data_attr_disabled=js("$selected_count === 0")
+                        data_attr_disabled=selected_count == 0
                     ),
-                    cls="flex items-center justify-start mt-4 pt-4 border-t"
-                ),
-                P(
-                    "All files deleted!",
-                    data_show=js("$existing_count === 0"),
-                    cls="text-sm text-center text-muted-foreground mt-4"
-                ),
-                data_on_input=js(f"""
-                    $select_all = $existing_count > 0 && $selected_count === $existing_count;
-                    if (evt.target.matches('[data-bind="select_all"]')) {{
-                        {select_all_logic};
-                    }}
-                """)
+                    cls="mt-4 pt-4 border-t"
+                )
             )
         ),
         cls="max-w-md"
@@ -317,16 +309,50 @@ def select_all_pattern_example():
 
 @with_code
 def filter_form_example():
-    cat_electronics = Signal("cat_electronics", True)
-    cat_clothing = Signal("cat_clothing", False)
-    cat_books = Signal("cat_books", True)
-    cat_home = Signal("cat_home", False)
-    price_1 = Signal("price_1", False)
-    price_2 = Signal("price_2", True)
-    price_3 = Signal("price_3", True)
-    price_4 = Signal("price_4", False)
-    free_shipping = Signal("free_shipping", True)
-    express = Signal("express", False)
+    # (signal_name, label, collect_label, checked)
+    categories = [
+        ("cat_electronics", "Electronics", "Electronics", True),
+        ("cat_clothing", "Clothing", "Clothing", False),
+        ("cat_books", "Books", "Books", True),
+        ("cat_home", "Home & Garden", "Home & Garden", False),
+    ]
+
+    # Dollar signs in collect expressions are interpreted as signal references
+    prices = [
+        ("price_1", "Under $25", "Under 25", False),
+        ("price_2", "$25 - $50", "25-50", True),
+        ("price_3", "$50 - $100", "50-100", True),
+        ("price_4", "Over $100", "Over 100", False),
+    ]
+
+    shipping = [
+        ("free_shipping", "Free Shipping", "Free Shipping", True),
+        ("express", "Express Available", "Express", False),
+    ]
+
+    all_filters = categories + prices + shipping
+    filter_signals = {name: Signal(name, _ref_only=True) for name, _, _, _ in all_filters}
+    reset_actions = [filter_signals[name].set(False) for name, _, _, _ in all_filters]
+
+    active_filters = collect([
+        (filter_signals[name], collect_label)
+        for name, _, collect_label, _ in all_filters
+    ], join_with=", ")
+
+    filter_message = Signal("filter_message",
+        active_filters.if_("Filters: " + active_filters, "No filters selected")
+    )
+
+    def filter_group(title, options, mb_class="mb-6"):
+        return Div(
+            H3(title, cls="text-sm font-semibold mb-3"),
+            Div(
+                *[CheckboxWithLabel(label=label, signal=filter_signals[name], checked=checked)
+                  for name, label, _, checked in options],
+                cls="space-y-2"
+            ),
+            cls=mb_class
+        )
 
     return Card(
         CardHeader(
@@ -335,51 +361,22 @@ def filter_form_example():
         ),
         CardContent(
             Form(
-                cat_electronics, cat_clothing, cat_books, cat_home,
-                price_1, price_2, price_3, price_4,
-                free_shipping, express,
-                Div(
-                    H3("Categories", cls="text-sm font-semibold mb-3"),
-                    Div(
-                        CheckboxWithLabel(label="Electronics", signal="cat_electronics", checked=True),
-                        CheckboxWithLabel(label="Clothing", signal="cat_clothing"),
-                        CheckboxWithLabel(label="Books", signal="cat_books", checked=True),
-                        CheckboxWithLabel(label="Home & Garden", signal="cat_home"),
-                        cls="space-y-2"
-                    ),
-                    cls="mb-6"
-                ),
-                Div(
-                    H3("Price Range", cls="text-sm font-semibold mb-3"),
-                    Div(
-                        CheckboxWithLabel(label="Under $25", signal="price_1"),
-                        CheckboxWithLabel(label="$25 - $50", signal="price_2", checked=True),
-                        CheckboxWithLabel(label="$50 - $100", signal="price_3", checked=True),
-                        CheckboxWithLabel(label="Over $100", signal="price_4"),
-                        cls="space-y-2"
-                    ),
-                    cls="mb-6"
-                ),
-                Div(
-                    H3("Shipping", cls="text-sm font-semibold mb-3"),
-                    Div(
-                        CheckboxWithLabel(label="Free Shipping", signal="free_shipping", checked=True),
-                        CheckboxWithLabel(label="Express Available", signal="express"),
-                        cls="space-y-2"
-                    )
-                ),
+                filter_message,
+                filter_group("Categories", categories),
+                filter_group("Price Range", prices),
+                filter_group("Shipping", shipping, mb_class=""),
                 Div(
                     Button(
                         "Apply Filters",
                         type="submit",
                         cls="w-full",
-                        data_on_click="evt.preventDefault(); applyFilters()"
+                        data_on_click=f"evt.preventDefault(); alert({filter_message})"
                     ),
                     Button(
                         "Reset",
                         variant="outline",
                         cls="w-full mt-2",
-                        data_on_click=js("evt.preventDefault(); $cat_electronics=false; $cat_clothing=false; $cat_books=false; $cat_home=false; $price_1=false; $price_2=false; $price_3=false; $price_4=false; $free_shipping=false; $express=false;")
+                        data_on_click=(reset_actions, dict(prevent=True))
                     ),
                     cls="mt-6"
                 )
@@ -391,10 +388,23 @@ def filter_form_example():
 
 @with_code
 def settings_with_validation_example():
-    email_notif = Signal("email_notif", True)
-    push_notif = Signal("push_notif", False)
-    sms_notif = Signal("sms_notif", False)
-    marketing = Signal("marketing", False)
+    email_notif = Signal("email_notif", _ref_only=True)
+    push_notif = Signal("push_notif", _ref_only=True)
+    sms_notif = Signal("sms_notif", _ref_only=True)
+    marketing = Signal("marketing", _ref_only=True)
+
+    active_notifs_text = collect([
+        (email_notif, "Email"),
+        (push_notif, "Push"),
+        (sms_notif, "SMS")
+    ], join_with=" | ")
+
+    # (label, helper_text, signal, checked)
+    notifications = [
+        ("Email Notifications", "Receive important updates via email", email_notif, True),
+        ("Push Notifications", "Get instant updates on your device", push_notif, False),
+        ("SMS Alerts", "Critical alerts sent to your phone", sms_notif, False),
+    ]
 
     return Card(
         CardHeader(
@@ -403,24 +413,13 @@ def settings_with_validation_example():
         ),
         CardContent(
             Form(
-                email_notif, push_notif, sms_notif, marketing,
                 Div(
-                    CheckboxWithLabel(
-                        label="Email Notifications",
-                        helper_text="Receive important updates via email",
-                        signal="email_notif",
-                        checked=True
-                    ),
-                    CheckboxWithLabel(
-                        label="Push Notifications",
-                        helper_text="Get instant updates on your device",
-                        signal="push_notif"
-                    ),
-                    CheckboxWithLabel(
-                        label="SMS Alerts",
-                        helper_text="Critical alerts sent to your phone",
-                        signal="sms_notif"
-                    ),
+                    *[CheckboxWithLabel(
+                        label=label,
+                        helper_text=helper,
+                        signal=signal,
+                        checked=checked
+                    ) for label, helper, signal, checked in notifications],
                     cls="space-y-4"
                 ),
                 Div(
@@ -428,8 +427,7 @@ def settings_with_validation_example():
                     CheckboxWithLabel(
                         label="Marketing Communications",
                         helper_text="Product updates and special offers",
-                        signal="marketing",
-                        checkbox_cls=marketing.if_("border-blue-500", "")
+                        signal=marketing
                     ),
                     cls="mt-6 pt-6 border-t"
                 ),
@@ -437,7 +435,7 @@ def settings_with_validation_example():
                     P(
                         Icon("lucide:alert-circle", cls="h-4 w-4 mr-1 flex-shrink-0"),
                         "At least one notification method must be enabled",
-                        data_show=js("!$email_notif && !$push_notif && !$sms_notif"),
+                        data_show=~any_(email_notif, push_notif, sms_notif),
                         cls="text-sm text-destructive flex items-start"
                     ),
                     cls="mt-4 min-h-[1.5rem] w-full max-w-full overflow-hidden"
@@ -445,15 +443,15 @@ def settings_with_validation_example():
                 Button(
                     "Save Settings",
                     type="submit",
-                    data_attr_disabled=js("!$email_notif && !$push_notif && !$sms_notif"),
-                    data_on_click="evt.preventDefault(); alert('Settings saved!')",
+                    data_attr_disabled=~any_(email_notif, push_notif, sms_notif),
+                    data_on_click="evt.preventDefault()",
                     cls="w-full mt-4"
                 ),
                 Div(
                     Div(
                         Badge(
-                            data_text=js("'Active: ' + [$email_notif && 'Email', $push_notif && 'Push', $sms_notif && 'SMS'].filter(Boolean).join(', ')"),
-                            data_show=js("$email_notif || $push_notif || $sms_notif"),
+                            data_text="Active: " + active_notifs_text,
+                            data_show=any_(email_notif, push_notif, sms_notif),
                             variant="secondary"
                         ),
                         cls="flex justify-center"
@@ -474,13 +472,6 @@ def settings_with_validation_example():
     )
 
 
-# ============================================================================
-# EXAMPLES GENERATOR (for rendering on the page)
-# ============================================================================
-
-# ============================================================================
-# API REFERENCE
-# ============================================================================
 
 API_REFERENCE = build_api_reference(
     main_props=[
@@ -496,74 +487,15 @@ API_REFERENCE = build_api_reference(
 )
 
 
-# ============================================================================
-# EXAMPLES DATA (for markdown generation with code)
-# ============================================================================
-
 EXAMPLES_DATA = [
+    {"title": "Quick Setup", "description": "Basic checkbox usage with dynamic preference summary", "fn": hero_checkbox_example},
     {"title": "Terms & Conditions", "description": "Registration form with required checkboxes", "fn": terms_conditions_example},
     {"title": "Feature Permissions", "description": "Grouped checkboxes with disabled states", "fn": feature_permissions_example},
     {"title": "Interactive Todo List", "description": "Task tracking with progress visualization", "fn": interactive_todo_list_example},
-    {"title": "Select All Pattern", "description": "Bulk selection with parent-child checkbox relationship", "fn": select_all_pattern_example},
+    {"title": "Bulk Delete", "description": "Select-all pattern with bulk delete - selected items are removed from view", "fn": select_all_pattern_example},
     {"title": "Filter Form", "description": "Multi-category filtering interface", "fn": filter_form_example},
     {"title": "Settings with Validation", "description": "Form validation based on checkbox selections", "fn": settings_with_validation_example},
 ]
-
-
-# ============================================================================
-# DOCS PAGE
-# ============================================================================
-
-@with_code
-def hero_checkbox_example():
-    dark_mode = Signal("dark_mode", True)
-    notifications = Signal("notifications", False)
-    auto_save = Signal("auto_save", True)
-
-    return Card(
-        CardHeader(
-            CardTitle("Quick Setup"),
-            CardDescription("Configure your preferences in seconds")
-        ),
-        CardContent(
-            Div(
-                dark_mode, notifications, auto_save,
-                CheckboxWithLabel(
-                    label="Enable dark mode",
-                    helper_text="Reduce eye strain in low-light conditions",
-                    signal="dark_mode",
-                    checked=True
-                ),
-                CheckboxWithLabel(
-                    label="Show notifications",
-                    helper_text="Stay updated with real-time alerts",
-                    signal="notifications"
-                ),
-                CheckboxWithLabel(
-                    label="Auto-save drafts",
-                    helper_text="Never lose your work",
-                    signal="auto_save",
-                    checked=True
-                ),
-                Div(
-                    P(
-                        "Your preferences: ",
-                        cls="text-sm text-muted-foreground mb-1"
-                    ),
-                    P(
-                        Span(
-                            data_text=js("[$dark_mode && 'Dark Mode', $notifications && 'Notifications', $auto_save && 'Auto-save'].filter(Boolean).join(', ') || 'None selected'"),
-                            cls="font-medium text-sm break-words"
-                        ),
-                        cls="min-h-[1.25rem]"
-                    ),
-                    cls="mt-4 pt-4 border-t"
-                ),
-                cls="space-y-3"
-            )
-        ),
-        cls="max-w-md mx-auto"
-    )
 
 
 def create_checkbox_docs():
