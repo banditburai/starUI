@@ -119,59 +119,34 @@ DOCS_NAV_ITEMS = [
 def home():
     return DocsLayout(
         Div(
+            # Hero Section - Minimal, high impact
             Div(
-                H1("StarUI", cls="text-4xl font-bold tracking-tight mb-4"),
+                H1(
+                    "starUI",
+                    cls="text-7xl sm:text-8xl md:text-9xl font-black tracking-tight mb-6 hover:gradient-text transition-all duration-300"
+                ),
                 P(
-                    "Beautiful, accessible components built with StarHTML and Tailwind CSS.",
-                    cls="text-xl text-muted-foreground mb-8",
+                    "Python components. Zero compromise.",
+                    cls="text-4xl sm:text-5xl md:text-6xl text-gray-300 leading-tight mb-12"
                 ),
                 Div(
-                    A(
-                        "Get Started",
-                        href="/installation",
-                        cls="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 mr-4",
-                    ),
-                    A(
-                        "View Components",
-                        href="/components",
-                        cls="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2",
-                    ),
-                    cls="flex gap-4",
+                    "↓ Scroll to explore",
+                    cls="text-sm text-gray-400 animate-bounce"
                 ),
-                cls="text-center py-16",
+                cls="min-h-screen flex flex-col items-center justify-center text-center px-4"
             ),
+
+            # Placeholder for constellation section (Task 3)
             Div(
-                H2("Features", cls="text-3xl font-bold text-center mb-12"),
-                Div(
-                    _feature_card(
-                        "lucide:server",
-                        "Python-First Architecture",
-                        "Write modern UI entirely in Python. No JSX, no build steps, no client-side frameworks. Pure server-side rendering with progressive enhancement."
-                    ),
-                    _feature_card(
-                        "lucide:terminal",
-                        "CLI-Driven Workflow",
-                        "Install components instantly with `star add button`. Dependencies resolved automatically. Full type safety and IDE support out of the box."
-                    ),
-                    _feature_card(
-                        "lucide:zap",
-                        "Reactive Without React",
-                        "Datastar powers reactive patterns while keeping logic server-side. Get modern UX without JavaScript complexity or hydration delays."
-                    ),
-                    _feature_card(
-                        "lucide:shield-check",
-                        "Zero Runtime Overhead",
-                        "Components render complete HTML on the server. No bundle sizes, no waterfall loading, perfect SEO, and instant time-to-interactive."
-                    ),
-                    cls="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6",
-                ),
-                cls="py-16",
+                P("Constellation section coming next...", cls="text-center text-gray-400 py-20"),
+                cls="min-h-[200vh]"
             ),
-            cls="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8",
+
+            cls="max-w-7xl mx-auto"
         ),
         layout=LayoutConfig(
-            title="StarUI Documentation",
-            description="A comprehensive UI component library for StarHTML applications.",
+            title="StarUI - Python components. Zero compromise.",
+            description="Server-rendered UI components for Python. No frameworks required.",
         ),
         footer=FooterConfig(
             attribution="Built with StarHTML",
