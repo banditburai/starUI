@@ -834,199 +834,220 @@ def installation():
     from widgets.code_block import CodeBlock
     from starui.registry.components.button import Button
     from starui.registry.components.input import Input
-    
+
     return DocsLayout(
         Div(
+            # Hero
             Div(
+                H1("Get started in minutes", cls="text-5xl md:text-6xl font-black tracking-tight mb-6"),
                 P(
-                    "Get started with StarUI in minutes. Build beautiful, accessible components with Python and StarHTML.",
-                    cls="text-xl text-muted-foreground mb-8 max-w-3xl",
-                ),
-                
-                ComponentPreview(
-                    Div(
-                        Button("Get Started", variant="default", cls="mr-3"),
-                        Button("View Components", variant="outline"),
-                        cls="flex gap-3 items-center justify-center"
-                    ),
-                    '''from starui import Button
-
-Button("Get Started")
-Button("View Components", variant="outline")''',
-                    title="Quick Start",
-                    description="Import and use components immediately",
-                    default_tab="code"
+                    "Three simple steps to beautiful Python UIs.",
+                    cls="text-xl text-muted-foreground mb-8"
                 ),
                 cls="mb-12"
             ),
-            
-            Div(
-                H2("Installation", cls="text-3xl font-bold tracking-tight mb-8"),
-                
-                Div(
-                    Div(
-                        Div(
-                            Div(
-                                Span("1", cls="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold"),
-                                cls="flex-shrink-0"
-                            ),
-                            Div(
-                                H3("Install the StarUI CLI", cls="text-xl font-semibold mb-2"),
-                                P("Install StarUI globally using pip to access the CLI commands.", cls="text-muted-foreground mb-4"),
-                                CodeBlock("pip install starui", language="bash"),
-                                cls="flex-1 min-w-0 overflow-hidden"
-                            ),
-                            cls="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start"
-                        ),
-                        cls="p-4 sm:p-6 border rounded-lg bg-gradient-to-br from-background to-muted/20 overflow-hidden"
-                    ),
-                    cls="mb-8"
-                ),
 
+            # Step 1
+            Div(
                 Div(
                     Div(
-                        Div(
-                            Div(
-                                Span("2", cls="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold"),
-                                cls="flex-shrink-0"
-                            ),
-                            Div(
-                                H3("Initialize your project", cls="text-xl font-semibold mb-2"),
-                                P("Set up StarUI in your project directory. This creates the configuration and installs dependencies.", cls="text-muted-foreground mb-4"),
-                                CodeBlock("star init", language="bash"),
-                                Div(
-                                    Div(
-                                        Icon("lucide:file-text", cls="h-5 w-5 text-primary mr-3 flex-shrink-0"),
-                                        Div(
-                                            P("Creates starui.json configuration file", cls="font-medium text-sm"),
-                                            P("Configures component paths and settings", cls="text-xs text-muted-foreground"),
-                                        ),
-                                        cls="flex items-start"
-                                    ),
-                                    Div(
-                                        Icon("lucide:package", cls="h-5 w-5 text-primary mr-3 flex-shrink-0"),
-                                        Div(
-                                            P("Installs required dependencies", cls="font-medium text-sm"),
-                                            P("StarHTML, Tailwind CSS, and component utilities", cls="text-xs text-muted-foreground"),
-                                        ),
-                                        cls="flex items-start"
-                                    ),
-                                    cls="space-y-3 mt-4 bg-muted/30 rounded-md p-4"
-                                ),
-                                cls="flex-1 min-w-0 overflow-hidden"
-                            ),
-                            cls="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start"
+                        Span(
+                            "1",
+                            cls="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-orange-500 text-white font-bold text-xl"
                         ),
-                        cls="p-4 sm:p-6 border rounded-lg bg-gradient-to-br from-background to-muted/20 overflow-hidden"
+                        cls="flex-shrink-0"
                     ),
-                    cls="mb-8"
+                    Div(
+                        H2("Install the StarUI CLI", cls="text-3xl font-bold mb-3"),
+                        P(
+                            "Install StarUI globally using pip to access the CLI commands.",
+                            cls="text-muted-foreground mb-6"
+                        ),
+                        CodeBlock("pip install starui", language="bash"),
+
+                        # Expandable details
+                        Details(
+                            Summary("What this does", cls="cursor-pointer text-sm font-semibold text-primary mb-2"),
+                            Ul(
+                                Li("Installs star CLI command"),
+                                Li("Adds component registry access"),
+                                Li("Sets up project scaffolding tools"),
+                                cls="text-sm text-muted-foreground list-disc list-inside space-y-1"
+                            ),
+                            cls="mt-4 p-4 bg-muted/30 rounded-md"
+                        ),
+                        cls="flex-1"
+                    ),
+                    cls="flex flex-col sm:flex-row gap-6 items-start"
                 ),
-                
+                cls="p-6 sm:p-8 mb-8 border-l-4 border-amber-500 bg-gradient-to-br from-background to-muted/10 rounded-lg"
+            ),
+
+            # Step 2
+            Div(
                 Div(
                     Div(
+                        Span(
+                            "2",
+                            cls="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-pink-500 text-white font-bold text-xl"
+                        ),
+                        cls="flex-shrink-0"
+                    ),
+                    Div(
+                        H2("Initialize your project", cls="text-3xl font-bold mb-3"),
+                        P(
+                            "Set up StarUI in your project directory.",
+                            cls="text-muted-foreground mb-6"
+                        ),
+                        CodeBlock("star init", language="bash"),
+
+                        # Visual flow
                         Div(
                             Div(
-                                Span("3", cls="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold"),
-                                cls="flex-shrink-0"
+                                Div("Create config", cls="text-xs font-medium"),
+                                cls="flex-1 text-center p-3 bg-muted rounded-md"
+                            ),
+                            Icon("lucide:arrow-right", cls="h-5 w-5 text-muted-foreground"),
+                            Div(
+                                Div("Install deps", cls="text-xs font-medium"),
+                                cls="flex-1 text-center p-3 bg-muted rounded-md"
+                            ),
+                            Icon("lucide:arrow-right", cls="h-5 w-5 text-muted-foreground"),
+                            Div(
+                                Div("Setup paths", cls="text-xs font-medium"),
+                                cls="flex-1 text-center p-3 bg-muted rounded-md"
+                            ),
+                            cls="flex items-center gap-2 mt-6"
+                        ),
+
+                        Div(
+                            Div(
+                                Icon("lucide:check", cls="h-4 w-4 text-green-600 mr-2"),
+                                "Creates starui.json",
+                                cls="flex items-center text-sm"
                             ),
                             Div(
-                                H3("Add components to your project", cls="text-xl font-semibold mb-2"),
-                                P("Install individual components with their dependencies automatically resolved.", cls="text-muted-foreground mb-4"),
-                                CodeBlock(
-                                    '''# Add a single component
+                                Icon("lucide:check", cls="h-4 w-4 text-green-600 mr-2"),
+                                "Installs Tailwind & dependencies",
+                                cls="flex items-center text-sm"
+                            ),
+                            Div(
+                                Icon("lucide:check", cls="h-4 w-4 text-green-600 mr-2"),
+                                "Configures component paths",
+                                cls="flex items-center text-sm"
+                            ),
+                            cls="space-y-2 mt-4 p-4 bg-muted/30 rounded-md"
+                        ),
+                        cls="flex-1"
+                    ),
+                    cls="flex flex-col sm:flex-row gap-6 items-start"
+                ),
+                cls="p-6 sm:p-8 mb-8 border-l-4 border-orange-500 bg-gradient-to-br from-background to-muted/10 rounded-lg"
+            ),
+
+            # Step 3
+            Div(
+                Div(
+                    Div(
+                        Span(
+                            "3",
+                            cls="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-pink-500 to-purple-500 text-white font-bold text-xl"
+                        ),
+                        cls="flex-shrink-0"
+                    ),
+                    Div(
+                        H2("Add your first component", cls="text-3xl font-bold mb-3"),
+                        P(
+                            "Components are installed with their dependencies automatically resolved.",
+                            cls="text-muted-foreground mb-6"
+                        ),
+                        CodeBlock(
+                            '''# Add a single component
 star add button
 
-# Add multiple components at once
-star add button input card tabs
+# Add multiple at once
+star add button input card
 
-# List all available components
+# List available components
 star list''',
-                                    language="bash"
-                                ),
-                                cls="flex-1 min-w-0 overflow-hidden"
-                            ),
-                            cls="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start"
+                            language="bash"
                         ),
-                        cls="p-4 sm:p-6 border rounded-lg bg-gradient-to-br from-background to-muted/20 overflow-hidden"
+                        cls="flex-1"
                     ),
-                    cls="mb-12"
+                    cls="flex flex-col sm:flex-row gap-6 items-start"
                 ),
+                cls="p-6 sm:p-8 mb-12 border-l-4 border-pink-500 bg-gradient-to-br from-background to-muted/10 rounded-lg"
             ),
-            
-            Div(
-                H2("Usage Examples", cls="text-3xl font-bold tracking-tight mb-8"),
-                
-                ComponentPreview(
-                    Div(
-                        Input(placeholder="Enter your email", cls="mb-3"),
-                        Button("Subscribe", cls="w-full"),
-                        cls="max-w-sm mx-auto space-y-3"
-                    ),
-                    '''from starui import Button, Input
 
-# Use components in your StarHTML app
-Div(
-    Input(placeholder="Enter your email"),
-    Button("Subscribe"),
-    cls="space-y-3"
-)''',
-                    title="Basic Component Usage",
-                    description="Import and use components directly in your StarHTML templates"
-                ),
-                
+            # Try It Now
+            Div(
+                H2("Try your first component", cls="text-3xl font-bold text-white mb-8"),
                 ComponentPreview(
                     Div(
-                        (count := Signal("count", 0)),
-                        Button("Click me!", data_on_click=count.add(1), cls="mb-3"),
-                        P("Clicked: ", Span(data_text=count, cls="font-bold text-primary")),
-                        cls="text-center space-y-3"
+                        Button("Click me!", variant="default", cls="mb-3"),
+                        Button("Outline", variant="outline", cls="mb-3"),
+                        Button("Ghost", variant="ghost"),
+                        cls="flex flex-col items-center gap-3"
                     ),
                     '''from starui import Button
-from starhtml import Signal
 
-# Add interactivity with Datastar
-Div(
-    (count := Signal("count", 0)),
-    Button("Click me!", data_on_click=count.add(1)),
-    P("Clicked: ", Span(data_text=count, cls="font-bold"))
-)''',
-                    title="Interactive Components",
-                    description="Add reactivity using Datastar for dynamic user interfaces"
+Button("Click me!")
+Button("Outline", variant="outline")
+Button("Ghost", variant="ghost")''',
+                    title="Live Example",
+                    description="Try editing the code to see changes",
+                    default_tab="code"
                 ),
-                
-                cls="space-y-8"
+                P(
+                    "Change the text, try different variants, add more components!",
+                    cls="text-center text-gray-400 mt-4"
+                ),
+                cls="bg-gray-900 rounded-xl p-8 sm:p-12 mb-12"
             ),
-            
+
+            # What's Next
             Div(
-                H2("What's Next?", cls="text-3xl font-bold tracking-tight mb-8 mt-16"),
+                H2("You're ready to build", cls="text-4xl font-bold mb-12 text-center"),
                 Div(
-                    _next_step_card(
-                        "lucide:palette",
-                        "Explore Components", 
-                        "Browse our comprehensive component library with live examples and code samples.",
-                        "/components",
-                        "View Components"
+                    A(
+                        Div(
+                            Icon("lucide:palette", width="32", height="32", cls="gradient-text mb-4"),
+                            H3("Explore Components", cls="text-xl font-semibold mb-3"),
+                            P("Browse 40+ components with live examples", cls="text-muted-foreground mb-6"),
+                            Span("View All →", cls="text-primary font-semibold"),
+                            cls="p-8 text-center"
+                        ),
+                        href="/components",
+                        cls="block border rounded-xl bg-gradient-to-br from-background to-muted/10 hover:shadow-lg gradient-border transition-all duration-300"
                     ),
-                    _next_step_card(
-                        "lucide:book-open",
-                        "Read the Documentation",
-                        "Learn advanced patterns, theming, and best practices for building with StarUI.",
-                        "/docs", 
-                        "Read Docs"
+                    A(
+                        Div(
+                            Icon("lucide:book-open", width="32", height="32", cls="gradient-text mb-4"),
+                            H3("Learn Patterns", cls="text-xl font-semibold mb-3"),
+                            P("Composition, theming, and best practices", cls="text-muted-foreground mb-6"),
+                            Span("Read Docs →", cls="text-primary font-semibold"),
+                            cls="p-8 text-center"
+                        ),
+                        href="/docs",
+                        cls="block border rounded-xl bg-gradient-to-br from-background to-muted/10 hover:shadow-lg gradient-border transition-all duration-300"
                     ),
-                    _next_step_card(
-                        "lucide:github",
-                        "Join the Community",
-                        "Contribute to the project, report issues, or get help from other developers.",
-                        "https://github.com/banditburai/starui",
-                        "Visit GitHub"
+                    A(
+                        Div(
+                            Icon("lucide:github", width="32", height="32", cls="gradient-text mb-4"),
+                            H3("Join Community", cls="text-xl font-semibold mb-3"),
+                            P("GitHub, discussions, and support", cls="text-muted-foreground mb-6"),
+                            Span("Join Us →", cls="text-primary font-semibold"),
+                            cls="p-8 text-center"
+                        ),
+                        href="https://github.com/banditburai/starui",
+                        cls="block border rounded-xl bg-gradient-to-br from-background to-muted/10 hover:shadow-lg gradient-border transition-all duration-300"
                     ),
-                    cls="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6"
+                    cls="grid grid-cols-1 md:grid-cols-3 gap-6"
                 ),
             ),
         ),
         layout=LayoutConfig(
-            title="Installation", 
+            title="Installation",
             description="How to install and set up StarUI in your project.",
             show_sidebar=True
         ),
