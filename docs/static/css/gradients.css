@@ -54,3 +54,14 @@
 [data-constellation-item].loading {
   opacity: 0;
 }
+
+/* Focus indicators for accessibility */
+[data-constellation-item]:focus-visible {
+  outline: 2px solid var(--gradient-mid);
+  outline-offset: 4px;
+}
+
+.gradient-border:focus-visible {
+  outline: 2px solid var(--gradient-mid);
+  outline-offset: 2px;
+}

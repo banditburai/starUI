@@ -83,8 +83,8 @@ document.addEventListener('DOMContentLoaded', () => {
       targetEl.classList.remove('gradient-glow-intense');
     });
 
-    // Click to isolate and demonstrate
-    targetEl.addEventListener('click', () => {
+    // Function to toggle component isolation
+    const toggleIsolation = () => {
       const demoPanel = targetEl.querySelector('[data-demo-panel]');
       const allComponents = document.querySelectorAll('[data-constellation-item]');
 
@@ -96,6 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
         animate(targetEl, { scale: 1 }, { duration: 0.3 });
         if (demoPanel) demoPanel.style.display = 'none';
         targetEl.classList.remove('isolated');
+        targetEl.setAttribute('aria-expanded', 'false');
       } else {
         // Isolate this component
         allComponents.forEach(comp => {
@@ -106,6 +107,18 @@ document.addEventListener('DOMContentLoaded', () => {
         animate(targetEl, { scale: 1.3 }, { duration: 0.3 });
         if (demoPanel) demoPanel.style.display = 'block';
         targetEl.classList.add('isolated');
+        targetEl.setAttribute('aria-expanded', 'true');
+      }
+    };
+
+    // Click to isolate and demonstrate
+    targetEl.addEventListener('click', toggleIsolation);
+
+    // Keyboard support (Enter or Space)
+    targetEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleIsolation();
       }
     });
   });

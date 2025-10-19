@@ -156,7 +156,11 @@ def home():
                         data_constellation_item=True,
                         data_scroll_trigger=comp['scroll_trigger'],
                         style=f"position: absolute; {'; '.join(f'{k}: {v}' for k, v in comp['position'].items())}",
-                        cls="cursor-pointer transition-all gradient-glow"
+                        cls="cursor-pointer transition-all gradient-glow",
+                        aria_label=f"Interactive preview of {comp['name']} component. Click to view details.",
+                        aria_expanded="false",
+                        role="button",
+                        tabindex="0"
                     )
                     for comp in get_constellation_components()
                 ],
