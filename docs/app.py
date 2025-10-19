@@ -250,6 +250,58 @@ def home():
                 cls="bg-gray-900 py-20 px-8 text-center"
             ),
 
+            # Component Gallery Section
+            Div(
+                H2(
+                    "40+ production-ready components",
+                    cls="text-4xl sm:text-5xl font-bold text-center mb-4"
+                ),
+                P(
+                    "Forms, layouts, overlays, and everything in between",
+                    cls="text-xl text-gray-500 text-center mb-12"
+                ),
+                Div(
+                    *[
+                        A(
+                            Div(
+                                Div(
+                                    # Placeholder for component preview image/icon
+                                    Icon(f"lucide:{icon}", width="48", height="48", cls="text-primary mb-4"),
+                                    H3(name, cls="text-lg font-semibold mb-2"),
+                                    P(desc, cls="text-sm text-muted-foreground"),
+                                    cls="p-6 text-center"
+                                ),
+                                cls="border rounded-xl bg-gradient-to-br from-background to-muted/10 hover:shadow-lg hover:gradient-border transition-all duration-300 h-full"
+                            ),
+                            href=f"/components/{slug}",
+                            cls="block"
+                        )
+                        for name, desc, icon, slug in [
+                            ("Button", "Clickable button component", "hand-click", "button"),
+                            ("Input", "Text input field", "text-cursor-input", "input"),
+                            ("Card", "Container for content", "square", "card"),
+                            ("Dialog", "Modal dialog overlay", "app-window", "dialog"),
+                            ("Select", "Dropdown selection", "chevron-down", "select"),
+                            ("Tabs", "Tabbed interface", "layout-grid", "tabs"),
+                            ("Calendar", "Date picker calendar", "calendar", "calendar"),
+                            ("Sheet", "Sliding panel", "panel-left", "sheet"),
+                        ]
+                    ],
+                    # View all CTA card
+                    A(
+                        Div(
+                            Icon("lucide:arrow-right", width="48", height="48", cls="mb-4 mx-auto gradient-text"),
+                            H3("View all 40+ components →", cls="text-lg font-semibold"),
+                            cls="p-6 text-center flex flex-col items-center justify-center h-full"
+                        ),
+                        href="/components",
+                        cls="border rounded-xl bg-gradient-to-br from-amber-500/5 via-orange-500/5 to-pink-500/5 hover:shadow-lg gradient-border transition-all duration-300"
+                    ),
+                    cls="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto"
+                ),
+                cls="py-24 px-8"
+            ),
+
             cls="max-w-7xl mx-auto"
         ),
         Script("""
