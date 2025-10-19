@@ -162,6 +162,37 @@ def home():
                 cls="relative min-h-[300vh] py-20"
             ),
 
+            # Value Proposition Section
+            Div(
+                H2(
+                    "Components you own. Code you control.",
+                    cls="text-4xl sm:text-5xl font-bold text-center mb-16"
+                ),
+                Div(
+                    _value_card(
+                        "lucide:folder-open",
+                        "In Your Codebase",
+                        "Components live in your project. Edit directly. Own the code."
+                    ),
+                    _value_card(
+                        "lucide:code-2",
+                        "Fully Customizable",
+                        "Modify styles, behavior, or anything else. It's your code."
+                    ),
+                    _value_card(
+                        "lucide:eye",
+                        "Zero Abstraction",
+                        "Read the code. Debug easily. Pure Python. Clean & simple."
+                    ),
+                    cls="grid grid-cols-1 md:grid-cols-3 gap-8"
+                ),
+                P(
+                    "Built on Tailwind CSS and Datastar. No CSS framework conflicts. No abstraction layers. Just clean code.",
+                    cls="text-center text-sm text-muted-foreground mt-12 max-w-3xl mx-auto"
+                ),
+                cls="max-w-6xl mx-auto px-8 py-24"
+            ),
+
             cls="max-w-7xl mx-auto"
         ),
         Script("""
@@ -252,6 +283,19 @@ document.addEventListener('DOMContentLoaded', () => {
             attribution="Built with StarHTML",
             hosting_info="Component library for Python web apps",
         ),
+    )
+
+
+def _value_card(icon: str, title: str, description: str) -> FT:
+    """Value proposition card with gradient icon."""
+    return Div(
+        Div(
+            Icon(icon, width="32", height="32", cls="text-primary"),
+            cls="mb-6 w-16 h-16 rounded-xl bg-gradient-to-br from-amber-500/10 via-orange-500/10 to-pink-500/10 flex items-center justify-center border border-primary/20"
+        ),
+        H3(title, cls="text-2xl font-bold mb-4"),
+        P(description, cls="text-muted-foreground leading-relaxed"),
+        cls="p-8 text-left"
     )
 
 
