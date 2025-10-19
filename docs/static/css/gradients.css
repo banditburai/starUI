@@ -45,3 +45,12 @@
               0 0 50px rgba(249, 115, 22, 0.3),
               0 0 80px rgba(236, 72, 153, 0.2);
 }
+
+/* Loading states for constellation components */
+[data-constellation-item] {
+  transition: opacity 0.3s ease-out;
+}
+
+[data-constellation-item].loading {
+  opacity: 0;
+}

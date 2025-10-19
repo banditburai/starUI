@@ -3,10 +3,23 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  const { animate, scroll } = window.Motion;
+  // Respect prefers-reduced-motion
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // Get all constellation components
   const components = document.querySelectorAll('[data-constellation-item]');
+
+  if (prefersReducedMotion) {
+    // Skip animations, just show components
+    components.forEach(item => {
+      item.style.opacity = '1';
+      item.style.transform = 'translateY(0)';
+    });
+    return;
+  }
+
+  // Run normal animations if motion is allowed
+  const { animate, scroll } = window.Motion;
 
   components.forEach(component => {
     const triggerPoint = parseFloat(component.dataset.scrollTrigger);
