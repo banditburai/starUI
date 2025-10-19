@@ -119,6 +119,8 @@ DOCS_NAV_ITEMS = [
 
 @rt("/")
 def home():
+    from starui.registry.components.button import Button
+
     return DocsLayout(
         Div(
             # Hero Section - Minimal, high impact
@@ -191,6 +193,61 @@ def home():
                     cls="text-center text-sm text-muted-foreground mt-12 max-w-3xl mx-auto"
                 ),
                 cls="max-w-6xl mx-auto px-8 py-24"
+            ),
+
+            # Quick Start Section
+            Div(
+                H2(
+                    "From zero to components in 30 seconds",
+                    cls="text-3xl sm:text-4xl font-bold text-white text-center mb-12"
+                ),
+                Div(
+                    # Step 1
+                    Div(
+                        Div(
+                            Span("1", cls="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-orange-500 text-white font-bold text-lg mb-4"),
+                            H3("Install", cls="text-xl font-bold text-white mb-3"),
+                            Pre(
+                                "$ pip install starui",
+                                cls="bg-black/50 text-gray-100 p-4 rounded-md font-mono text-sm"
+                            ),
+                        ),
+                        cls="text-center"
+                    ),
+                    # Step 2
+                    Div(
+                        Div(
+                            Span("2", cls="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-pink-500 text-white font-bold text-lg mb-4"),
+                            H3("Add", cls="text-xl font-bold text-white mb-3"),
+                            Pre(
+                                "$ star add button",
+                                cls="bg-black/50 text-gray-100 p-4 rounded-md font-mono text-sm"
+                            ),
+                            P("✓ Installed button + deps", cls="text-green-400 text-sm mt-2"),
+                        ),
+                        cls="text-center"
+                    ),
+                    # Step 3
+                    Div(
+                        Div(
+                            Span("3", cls="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-pink-500 to-purple-500 text-white font-bold text-lg mb-4"),
+                            H3("Use", cls="text-xl font-bold text-white mb-3"),
+                            Pre(
+                                "from starui import Button\n\nButton(\"Click me!\")",
+                                cls="bg-black/50 text-gray-100 p-4 rounded-md font-mono text-sm mb-4"
+                            ),
+                            Button("Click me!", variant="default", cls="mx-auto"),
+                        ),
+                        cls="text-center"
+                    ),
+                    cls="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12"
+                ),
+                A(
+                    "Get Started →",
+                    href="/installation",
+                    cls="inline-flex items-center justify-center rounded-md text-lg font-semibold bg-gradient-to-r from-amber-500 via-orange-500 to-pink-500 text-white hover:opacity-90 h-12 px-8 py-3 transition-opacity"
+                ),
+                cls="bg-gray-900 py-20 px-8 text-center"
             ),
 
             cls="max-w-7xl mx-auto"
