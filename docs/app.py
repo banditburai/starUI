@@ -98,6 +98,7 @@ app, rt = star_app(
     hdrs=(
         fouc_script(use_data_theme=True),
         Link(rel="stylesheet", href="/static/css/starui.css"),
+        Link(rel="stylesheet", href="/static/css/gradients.css"),
         position_handler(),
     ),
     htmlkw=dict(lang="en", dir="ltr"),
