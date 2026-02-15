@@ -36,7 +36,7 @@ def Dialog(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = getattr(signal, 'id', signal) or gen_id("dialog")
+    sig = getattr(signal, '_id', signal) or gen_id("dialog")
     open_state = Signal(f"{sig}_open", False)
     dialog_ref = Signal(sig, _ref_only=True)
 

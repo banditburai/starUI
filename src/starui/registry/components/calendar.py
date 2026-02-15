@@ -35,7 +35,7 @@ def Calendar(
     cls: str = "",
     **kwargs: Any,
 ) -> CalendarElement:
-    sig = getattr(signal, 'id', signal) or gen_id("calendar")
+    sig = getattr(signal, '_id', signal) or gen_id("calendar")
     today = datetime.now()
     current_month = month or today.month
     current_year = year or today.year
@@ -116,8 +116,8 @@ def _build_dropdown(sig: str, month, year, month_display, type: str, current_dis
         ),
         Icon("lucide:chevron-down", cls="h-3 w-3 shrink-0 opacity-50 ml-1"),
         data_ref=trigger_ref,
-        id=trigger_ref.id,
-        popovertarget=content_ref.id,
+        id=trigger_ref._id,
+        popovertarget=content_ref._id,
         popoveraction="toggle",
         type="button",
         disabled=disabled,
@@ -158,9 +158,9 @@ def _build_dropdown(sig: str, month, year, month_display, type: str, current_dis
         data_on_click=js(_dropdown_handler(month, year, month_display, type, content_ref)) if not disabled else None,
         data_ref=content_ref,
         data_style_min_width=trigger_ref.if_(trigger_ref.offsetWidth + 'px', '8rem'),
-        data_position=(trigger_ref.id, position_mods),
+        data_position=(trigger_ref._id, position_mods),
         popover="auto",
-        id=content_ref.id,
+        id=content_ref._id,
         role="listbox",
         aria_label=type.capitalize() + " selection",
         cls="z-50 max-h-[200px] overflow-y-auto scrollbar-hide rounded-md border bg-popover text-popover-foreground shadow-md outline-none dark:border",

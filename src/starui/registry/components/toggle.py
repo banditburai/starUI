@@ -42,7 +42,7 @@ def Toggle(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = getattr(signal, 'id', signal) or gen_id("toggle")
+    sig = getattr(signal, '_id', signal) or gen_id("toggle")
     toggle_id = kwargs.pop("id", sig)
 
     pressed_state = Signal(sig, pressed)

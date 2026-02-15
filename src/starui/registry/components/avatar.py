@@ -28,7 +28,7 @@ def AvatarImage(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = getattr(signal, 'id', signal) or gen_id("avatar_img_error")
+    sig = getattr(signal, '_id', signal) or gen_id("avatar_img_error")
     error_state = Signal(sig, False)
 
     return Div(

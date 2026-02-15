@@ -23,7 +23,7 @@ def Accordion(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = getattr(signal, 'id', signal) or gen_id("accordion")
+    sig = getattr(signal, '_id', signal) or gen_id("accordion")
 
     if type == "single":
         initial = "" if value is None else value

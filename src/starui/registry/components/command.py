@@ -13,7 +13,7 @@ _DIALOG_FOCUS_DELAY_MS = 50
 
 
 def _get_nav_handler(sig, search, selected, visible_items) -> str:
-    return f"const i=${visible_items.id}||[];let c=-1;for(let x=0;x<i.length;x++)if(i[x].index===${selected.id}){{c=x;break}}const sel=idx=>(${selected.id}=idx,document.querySelector('[data-command-item=\"{sig}\"][data-index=\"'+idx+'\"]')?.scrollIntoView({{block:'nearest'}}));switch(evt.key){{case'ArrowDown':evt.preventDefault();i.length>0&&sel(i[c<i.length-1?c+1:0].index);break;case'ArrowUp':evt.preventDefault();i.length>0&&sel(i[c>0?c-1:i.length-1].index);break;case'Enter':evt.preventDefault();c>=0&&i[c]&&document.querySelector('[data-command-item=\"{sig}\"][data-index=\"'+i[c].index+'\"]')?.click();break;case'Escape':${search.id}&&(evt.preventDefault(),${search.id}='',${selected.id}=0);break}}"
+    return f"const i={visible_items}||[];let c=-1;for(let x=0;x<i.length;x++)if(i[x].index==={selected}){{c=x;break}}const sel=idx=>({selected}=idx,document.querySelector('[data-command-item=\"{sig}\"][data-index=\"'+idx+'\"]')?.scrollIntoView({{block:'nearest'}}));switch(evt.key){{case'ArrowDown':evt.preventDefault();i.length>0&&sel(i[c<i.length-1?c+1:0].index);break;case'ArrowUp':evt.preventDefault();i.length>0&&sel(i[c>0?c-1:i.length-1].index);break;case'Enter':evt.preventDefault();c>=0&&i[c]&&document.querySelector('[data-command-item=\"{sig}\"][data-index=\"'+i[c].index+'\"]')?.click();break;case'Escape':{search}&&(evt.preventDefault(),{search}='',{selected}=0);break}}"
 
 
 command_variants = cva(
@@ -43,7 +43,7 @@ def Command(
     _dialog_ref=None,
     **kwargs: Any,
 ) -> FT:
-    sig = getattr(signal, 'id', signal) or gen_id("command")
+    sig = getattr(signal, '_id', signal) or gen_id("command")
     search = Signal(f"{sig}_search", "")
     selected = Signal(f"{sig}_selected", 0)
     visible_count = Signal(f"{sig}_visible", 0)
@@ -89,9 +89,9 @@ def CommandDialog(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = getattr(signal, 'id', signal) or gen_id("command")
+    sig = getattr(signal, '_id', signal) or gen_id("command")
     dialog_ref = Signal(f"{sig}_dialog", _ref_only=True)
-    dialog_open = Signal(f"{dialog_ref.id}_open", False)
+    dialog_open = Signal(f"{dialog_ref._id}_open", False)
 
     command = Command(
         *content,
@@ -116,7 +116,7 @@ def CommandDialog(
         data_on_close=reset_signals,
         data_on_click=(evt.target == evt.currentTarget) & evt.currentTarget.close() if modal else None,
         data_effect=(dialog_open & ~command.search).then(set_timeout(input_ref.focus(), _DIALOG_FOCUS_DELAY_MS)),
-        id=dialog_ref.id,
+        id=dialog_ref._id,
         cls=cn(
             "fixed max-h-[85vh] w-full max-w-2xl m-auto p-0",
             "backdrop:bg-black/50 backdrop:backdrop-blur-sm",
@@ -185,16 +185,16 @@ def CommandList(
     def _(*, sig, visible_count, visible_items, search, selected, **ctx):
         # RAF ensures DOM updates (data-show hiding) complete before scanning
         scan_effect = js(f"""
-            ${search.id};
+            {search};
             requestAnimationFrame(() => {{
                 const items = [...document.querySelectorAll('[data-command-item="{sig}"]')];
                 const visible = items.filter(el => !el.style.display.includes('none') && el.dataset.disabled !== 'true');
-                ${visible_count.id} = visible.length;
-                ${visible_items.id} = visible.map(el => ({{
+                {visible_count} = visible.length;
+                {visible_items} = visible.map(el => ({{
                     index: parseInt(el.dataset.index || '0'),
                     el: el
                 }}));
-                if (visible.length > 0) ${selected.id} = parseInt(visible[0].dataset.index || '0');
+                if (visible.length > 0) {selected} = parseInt(visible[0].dataset.index || '0');
             }});
         """)
 

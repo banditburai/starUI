@@ -23,7 +23,7 @@ def ToggleGroup(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = getattr(signal, 'id', signal) or gen_id("toggle_group")
+    sig = getattr(signal, '_id', signal) or gen_id("toggle_group")
     initial = value if value is not None else ("" if type == "single" else [])
     ctx = dict(type=type, variant=variant, size=size, disabled=disabled)
 

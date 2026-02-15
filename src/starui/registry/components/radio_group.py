@@ -20,7 +20,7 @@ def RadioGroup(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = getattr(signal, 'id', signal) or gen_id("radio")
+    sig = getattr(signal, '_id', signal) or gen_id("radio")
     group_name = name or f"radio_group_{sig}"
     selected = Signal(sig, value)
 
@@ -137,7 +137,7 @@ def RadioGroupWithLabel(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = getattr(signal, 'id', signal) or gen_id("radio")
+    sig = getattr(signal, '_id', signal) or gen_id("radio")
     group_name = name or f"radio_group_{sig}"
     group_id = id or gen_id("radiogroup")
 

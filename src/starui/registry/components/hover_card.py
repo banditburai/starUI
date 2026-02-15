@@ -12,7 +12,7 @@ def HoverCard(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = getattr(signal, 'id', signal) or gen_id("hover_card")
+    sig = getattr(signal, '_id', signal) or gen_id("hover_card")
     open_state = Signal(f"{sig}_open", default_open)
     timer_state = Signal(f"{sig}_timer", _ref_only=True)
 
@@ -46,7 +46,7 @@ def HoverCardTrigger(
             aria_haspopup="dialog",
             aria_describedby=f"{sig}_content",
             data_slot="hover-card-trigger",
-            id=trigger_ref.id,
+            id=trigger_ref._id,
             cls=cn("inline-block cursor-pointer", cls),
             **kwargs,
         )
@@ -83,7 +83,7 @@ def HoverCardContent(
             ),
             data_on_mouseenter=clear_timeout(timer_state, open_state.set(True)),
             data_on_mouseleave=reset_timeout(timer_state, hide_delay, open_state.set(False)),
-            id=content_ref.id,
+            id=content_ref._id,
             role="dialog",
             aria_labelledby=f"{sig}_trigger",
             tabindex="-1",

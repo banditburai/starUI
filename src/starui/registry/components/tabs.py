@@ -17,7 +17,7 @@ def Tabs(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = getattr(signal, 'id', signal) or gen_id("tabs")
+    sig = getattr(signal, '_id', signal) or gen_id("tabs")
 
     ctx = dict(
         tabs_state=(tabs_state := Signal(sig, value)),

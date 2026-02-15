@@ -18,7 +18,7 @@ def Sheet(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = getattr(signal, 'id', signal) or gen_id("sheet")
+    sig = getattr(signal, '_id', signal) or gen_id("sheet")
     sheet_open = Signal(f"{sig}_open", default_open)
 
     escape_handler = (evt.key == "Escape").then(sheet_open.set(False))

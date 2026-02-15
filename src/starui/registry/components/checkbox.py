@@ -21,7 +21,7 @@ def Checkbox(
     indicator_cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = getattr(signal, 'id', signal) or gen_id("checkbox")
+    sig = getattr(signal, '_id', signal) or gen_id("checkbox")
     initial = "indeterminate" if indeterminate else (checked or False)
 
     return Div(
@@ -77,7 +77,7 @@ def CheckboxWithLabel(
     indicator_cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = getattr(signal, 'id', signal) or gen_id("checkbox")
+    sig = getattr(signal, '_id', signal) or gen_id("checkbox")
     checkbox_id = kwargs.pop("id", signal)
 
     return Div(

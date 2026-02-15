@@ -12,7 +12,7 @@ def Tooltip(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = getattr(signal, 'id', signal) or gen_id("tooltip")
+    sig = getattr(signal, '_id', signal) or gen_id("tooltip")
     open_state = Signal(f"{sig}_open", False)
     timer_state = Signal(f"{sig}_timer", 0)
     ctx = dict(sig=sig, open_state=open_state, timer_state=timer_state)
@@ -50,7 +50,7 @@ def TooltipTrigger(
             data_on_keydown=(evt.key == 'Escape').then(close_expr),
             data_attr_aria_expanded=open_state,
             aria_describedby=f"{sig}_content",
-            id=trigger_ref.id,
+            id=trigger_ref._id,
             data_slot="tooltip-trigger",
             cls=cn("inline-block outline-none", cls),
             **kwargs,
@@ -100,7 +100,7 @@ def TooltipContent(
                 },
             ),
             data_attr_data_state=open_state.if_('open', 'closed'),
-            id=content_ref.id,
+            id=content_ref._id,
             role="tooltip",
             data_side=side,
             data_slot="tooltip-content",

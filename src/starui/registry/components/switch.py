@@ -17,7 +17,7 @@ def Switch(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = getattr(signal, 'id', signal) or gen_id("switch")
+    sig = getattr(signal, '_id', signal) or gen_id("switch")
     switch_id = kwargs.pop("id", sig)
 
     checked_state = Signal(sig, checked or False)
@@ -72,7 +72,7 @@ def SwitchWithLabel(
     switch_cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = getattr(signal, 'id', signal) or gen_id("switch")
+    sig = getattr(signal, '_id', signal) or gen_id("switch")
     switch_id = kwargs.pop("id", sig)
 
     return Div(

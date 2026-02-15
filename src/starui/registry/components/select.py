@@ -16,7 +16,7 @@ def Select(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = getattr(signal, 'id', signal) or gen_id("select")
+    sig = getattr(signal, '_id', signal) or gen_id("select")
 
     selected = Signal(f"{sig}_value", value or "")
     selected_label = Signal(f"{sig}_label", label or "")
@@ -55,7 +55,7 @@ def SelectTrigger(
             role="combobox",
             aria_haspopup="listbox",
             aria_controls=f"{sig}_content",
-            id=trigger_ref.id,
+            id=trigger_ref._id,
             cls=cn(
                 "w-[180px] flex h-9 items-center justify-between gap-2 rounded-md border border-input",
                 "bg-transparent px-3 py-2 text-sm shadow-xs",
@@ -125,11 +125,11 @@ def SelectContent(
             Div(*[inject_context(child, **context) for child in children], cls="p-1 max-h-[300px] overflow-auto"),
             data_ref=content_ref,
             data_style_min_width=trigger_ref.if_(trigger_ref.offsetWidth + 'px', '8rem'),
-            data_position=(trigger_ref.id, position_mods),
+            data_position=(trigger_ref._id, position_mods),
             popover="auto",
-            id=content_ref.id,
+            id=content_ref._id,
             role="listbox",
-            aria_labelledby=trigger_ref.id,
+            aria_labelledby=trigger_ref._id,
             tabindex="-1",
             cls=cn(
                 "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md dark:border-input",
@@ -278,12 +278,13 @@ def SelectWithLabel(
     error_text: str = "",
     required: bool = False,
     disabled: bool = False,
+    side: str = "bottom",
     label_cls: str = "",
     select_cls: str = "",
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = getattr(signal, 'id', signal) or gen_id("select")
+    sig = getattr(signal, '_id', signal) or gen_id("select")
     trigger_id = id or f"{sig}_trigger"
 
     return Div(
@@ -301,7 +302,7 @@ def SelectWithLabel(
                 aria_invalid="true" if error_text else None,
                 id=trigger_id,
             ),
-            SelectContent(*_build_select_items(options)),
+            SelectContent(*_build_select_items(options), side=side),
             value=value,
             label=_find_initial_label(options, value),
             signal=sig,

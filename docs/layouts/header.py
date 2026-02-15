@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 
 def MobileMenuButton(signal: Signal, **attrs) -> FT:
-    mobile_menu_open = Signal(f"{signal.id}_open", _ref_only=True)
+    mobile_menu_open = Signal(f"{signal._id}_open", _ref_only=True)
     return Button(
         Icon("ph:list-bold", width="20", height="20"),
         data_on_click=mobile_menu_open.toggle(),

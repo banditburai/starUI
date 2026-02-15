@@ -30,7 +30,7 @@ def DropdownMenu(
     cls: str = "",
     **kwargs: Any
 ) -> FT:
-    sig = getattr(signal, 'id', signal) or gen_id("dropdown")
+    sig = getattr(signal, '_id', signal) or gen_id("dropdown")
 
     ctx = dict(sig=sig)
 
@@ -59,7 +59,7 @@ def DropdownMenuTrigger(
             data_ref=trigger_ref,
             popovertarget=f"{sig}_content",
             popoveraction="toggle",
-            id=trigger_ref.id,
+            id=trigger_ref._id,
             variant=variant,
             size=size,
             type="button",
@@ -94,11 +94,11 @@ def DropdownMenuContent(
             *[child(sig=sig, **ctx) if callable(child) else child for child in children],
             data_ref=content_ref,
             data_style_min_width=trigger_ref.if_(trigger_ref.offsetWidth + 'px', '8rem'),
-            data_position=(trigger_ref.id, position_mods),
+            data_position=(trigger_ref._id, position_mods),
             popover="auto",
-            id=content_ref.id,
+            id=content_ref._id,
             role="menu",
-            aria_labelledby=trigger_ref.id,
+            aria_labelledby=trigger_ref._id,
             tabindex="-1",
             cls=cn(
                 "z-50 min-w-[8rem] overflow-hidden rounded-md border border-input",
@@ -152,7 +152,7 @@ def DropdownMenuCheckboxItem(
     **kwargs: Any,
 ) -> FT:
     def _(*, sig, **_):
-        checked = Signal(getattr(signal, 'id', signal), _ref_only=True)
+        checked = Signal(getattr(signal, '_id', signal), _ref_only=True)
         content_ref = Signal(f"{sig}_content", _ref_only=True)
 
         user_on_click = kwargs.pop('data_on_click', None)
@@ -191,7 +191,7 @@ def DropdownMenuRadioGroup(
 ) -> FT:
     def _(**ctx):
         return Div(
-            *[child(radio_signal=getattr(signal, 'id', signal), **ctx) if callable(child) else child for child in children],
+            *[child(radio_signal=getattr(signal, '_id', signal), **ctx) if callable(child) else child for child in children],
             role="radiogroup",
             cls=cls,
             **kwargs,
@@ -301,7 +301,7 @@ def DropdownMenuSub(
     **kwargs: Any,
 ) -> FT:
     def _(**ctx):
-        sub = getattr(signal, 'id', signal) or gen_id("dropdown_sub")
+        sub = getattr(signal, '_id', signal) or gen_id("dropdown_sub")
         sub_ctx = dict(sub=sub, **ctx)
 
         return Div(
@@ -332,8 +332,8 @@ def DropdownMenuSubTrigger(
             *children,
             Icon("lucide:chevron-right", cls="ml-auto size-4"),
             data_ref=sub_trigger_ref,
-            id=sub_trigger_ref.id,
-            popovertarget=sub_content_ref.id,
+            id=sub_trigger_ref._id,
+            popovertarget=sub_content_ref._id,
             popoveraction="toggle",
             data_on_click=click_actions,
             cls=cn(
@@ -373,9 +373,9 @@ def DropdownMenuSubContent(
         return Div(
             *[child(sub=sub, **ctx) if callable(child) else child for child in children],
             data_ref=sub_content_ref,
-            data_position=(sub_trigger_ref.id, position_mods),
+            data_position=(sub_trigger_ref._id, position_mods),
             popover="auto",
-            id=sub_content_ref.id,
+            id=sub_content_ref._id,
             cls=cn(
                 "z-50 min-w-[8rem] overflow-hidden rounded-md border border-input",
                 "bg-popover text-popover-foreground shadow-lg p-1",

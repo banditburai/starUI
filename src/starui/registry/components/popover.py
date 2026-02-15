@@ -11,7 +11,7 @@ def Popover(
     cls: str = "",
     **kwargs,
 ) -> FT:
-    sig = getattr(signal, 'id', signal) or gen_id("popover")
+    sig = getattr(signal, '_id', signal) or gen_id("popover")
     ctx = dict(sig=sig)
 
     return Div(
@@ -36,7 +36,7 @@ def PopoverTrigger(
         return Button(
             *children,
             data_ref=trigger_ref,
-            id=trigger_ref.id,
+            id=trigger_ref._id,
             popovertarget=f"{sig}_content",
             popoveraction="toggle",
             variant=variant,
@@ -77,7 +77,7 @@ def PopoverContent(
             data_ref=content_ref,
             data_position=(f"{sig}_trigger", position_mods),
             popover="auto",
-            id=content_ref.id,
+            id=content_ref._id,
             role="dialog",
             aria_label=aria_label,
             tabindex="-1",
