@@ -27,11 +27,12 @@ def _landing_styles() -> FT:
 
         /* ── Hero headline — enormous with tight leading ── */
         .hero-headline {
+            font-size: clamp(2.5rem, 2rem + 5.5vw, 9rem);
             line-height: 0.85;
             letter-spacing: -0.03em;
         }
         .hero-subline {
-            font-size: 0.55em;
+            font-size: 0.618em;   /* 1/phi — golden ratio to headline */
             letter-spacing: 0.02em;
         }
 
@@ -44,31 +45,69 @@ def _landing_styles() -> FT:
             animation: star-breathe 4s ease-in-out infinite;
         }
 
-        /* ── Observatory arc — single dome shape behind hero ── */
+        /* ── Hero grid — two-column at 768px+, progressive widening ── */
+        @media (min-width: 768px) {
+            .hero-grid-phi {
+                grid-template-columns: 1.2fr 1fr;
+                gap: 12px;
+                align-items: end;
+            }
+        }
+        @media (min-width: 960px) {
+            .hero-grid-phi {
+                grid-template-columns: 1.2fr 1fr;
+                gap: 16px;
+                align-items: end;
+            }
+        }
+        @media (min-width: 1280px) {
+            .hero-grid-phi {
+                grid-template-columns: 1.3fr 1fr;
+                gap: 24px;
+            }
+        }
+
+        /* ── Observatory arc — phi-ratio bezier from headline to card ── */
         .hero-arc {
             position: absolute;
             left: 50%;
-            bottom: 35%;
+            top: 12%;
             transform: translateX(-50%);
-            width: 900px;
-            height: 450px;
-            border-radius: 450px 450px 0 0;
-            border-top: 1px solid rgba(251, 146, 60, 0.12);
-            border-left: 1px solid rgba(251, 146, 60, 0.12);
-            border-right: 1px solid rgba(251, 146, 60, 0.12);
-            border-bottom: none;
+            width: min(1100px, 92vw);
+            aspect-ratio: 55 / 34;
             pointer-events: none;
             z-index: 0;
+            overflow: visible;
         }
-        [data-theme="light"] .hero-arc {
-            border-color: rgba(212, 112, 10, 0.15);
+        .hero-arc .arc-line {
+            stroke-width: 1;
         }
-        @media (max-width: 768px) {
-            .hero-arc {
-                width: 500px;
-                height: 250px;
-                border-radius: 250px 250px 0 0;
-            }
+        .hero-arc .arc-star {
+            fill: #FB923C;
+            filter: drop-shadow(0 0 5px rgba(251, 146, 60, 0.6));
+        }
+        .hero-arc .arc-star-halo {
+            fill: #FB923C;
+            filter: drop-shadow(0 0 22px rgba(251, 146, 60, 1.0))
+                    drop-shadow(0 0 8px rgba(255, 200, 100, 0.8));
+        }
+        [data-theme="light"] .hero-arc .arc-line {
+            filter: brightness(0.85) saturate(1.3);
+        }
+        [data-theme="light"] .hero-arc .arc-star {
+            fill: #d4700a;
+            filter: drop-shadow(0 0 5px rgba(212, 112, 10, 0.5));
+        }
+        [data-theme="light"] .hero-arc .arc-star-halo {
+            fill: #d4700a;
+            filter: drop-shadow(0 0 18px rgba(212, 112, 10, 0.8))
+                    drop-shadow(0 0 6px rgba(240, 180, 80, 0.6));
+        }
+        @media (min-width: 960px) {
+            .hero-arc { top: 6%; width: min(1050px, 90vw); }
+        }
+        @media (max-width: 959px) {
+            .hero-arc { width: min(600px, 95vw); top: 8%; }
         }
 
         /* ── Fixed sky gradient ── */
@@ -84,7 +123,6 @@ def _landing_styles() -> FT:
                 #1e293b 40%,
                 #3e4c5f 70%,
                 #8c5e45 100%);
-            background-attachment: fixed;
         }
 
         /* Light = cool pre-dawn sky: blue-gray zenith → lavender → rose → warm gold horizon */
@@ -110,7 +148,6 @@ def _landing_styles() -> FT:
                 rgba(74, 32, 16, 0.35) 35%,
                 rgba(160, 80, 32, 0.45) 65%,
                 rgba(208, 104, 32, 0.5) 100%);
-            background-attachment: fixed;
         }
 
         /* Light: gentle sunrise warmth — top stays transparent to preserve cool zenith */
@@ -188,7 +225,7 @@ def _landing_styles() -> FT:
         .grain-overlay {
             position: fixed;
             inset: 0;
-            opacity: 0.05;
+            opacity: 0.02;
             pointer-events: none;
             z-index: 100;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
@@ -197,6 +234,53 @@ def _landing_styles() -> FT:
         [data-theme="light"] .grain-overlay {
             opacity: 0.06;
             mix-blend-mode: multiply;
+        }
+
+        /* ── Mobile layout (<768px — single column) ── */
+        @media (max-width: 767px) {
+            .hero-section-mobile {
+                min-height: auto !important;
+                align-items: flex-start !important;
+                padding-top: 5rem !important;
+                padding-bottom: 3rem !important;
+            }
+            /* Override grid → flex so negative margins collapse space */
+            .hero-grid-phi {
+                display: flex !important;
+                flex-direction: column;
+                gap: 0;
+            }
+            /* Pull right column up — flat value avoids drift from headline shrink.
+               max() eases to 0 below ~417px for very small screens. */
+            .hero-right-col {
+                margin-top: max(-6rem, calc(-20vw + 2rem));
+            }
+        }
+
+        /* ── Small device performance (<960px) ── */
+        @media (max-width: 959px) {
+            /* Grain: lighter touch */
+            .grain-overlay {
+                opacity: 0.015;
+            }
+            /* Parallax: disabled */
+            #starfield-fixed {
+                transform: none !important;
+            }
+            /* Mystic cards: opaque fallback (saves compositing) */
+            .mystic-card {
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
+                background: rgba(15, 23, 42, 0.92);
+            }
+        }
+        /* Light mode opaque fallbacks */
+        @media (max-width: 959px) {
+            [data-theme="light"] .mystic-card {
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
+                background: rgba(255, 255, 255, 0.92);
+            }
         }
 
         /* ── Glass morphism panels ── */
@@ -250,23 +334,436 @@ def _landing_styles() -> FT:
             box-shadow: 0 4px 20px rgba(120, 80, 30, 0.12);
         }
 
-        /* ── Corner brackets ── */
-        .corner-bracket {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            pointer-events: none;
-        }
-        .corner-bracket.tl { top: -3px; left: -3px; border-top: 2px solid #FB923C; border-left: 2px solid #FB923C; }
-        .corner-bracket.tr { top: -3px; right: -3px; border-top: 2px solid #FB923C; border-right: 2px solid #FB923C; }
-        .corner-bracket.bl { bottom: -3px; left: -3px; border-bottom: 2px solid #FB923C; border-left: 2px solid #FB923C; }
-        .corner-bracket.br { bottom: -3px; right: -3px; border-bottom: 2px solid #FB923C; border-right: 2px solid #FB923C; }
+        /* ── Showcase card — floating celestial artifact, activated by star arc ── */
+        .showcase-card {
+            --card-rotate: -8deg;
+            position: relative;
+            width: 260px;
+            border-radius: 6px;
+            transform: rotate(var(--card-rotate));
 
-        [data-theme="light"] .corner-bracket.tl,
-        [data-theme="light"] .corner-bracket.tr,
-        [data-theme="light"] .corner-bracket.bl,
-        [data-theme="light"] .corner-bracket.br {
-            border-color: #d4700a;
+            /* Glassmorphism: frosted dark glass */
+            background: rgba(8, 14, 32, 0.72);
+            backdrop-filter: blur(20px) saturate(0.7);
+            -webkit-backdrop-filter: blur(20px) saturate(0.7);
+
+            /* Orange ring — visible from entrance */
+            border: 1px solid rgba(251, 146, 60, 0.25);
+
+            /* Float shadow + warm glow */
+            box-shadow:
+                0 0 24px 2px rgba(251, 146, 60, 0.18),
+                0 0 48px 4px rgba(251, 146, 60, 0.06),
+                0 8px 32px -8px rgba(0, 0, 0, 0.5),
+                0 0 0 0.5px rgba(251, 146, 60, 0.15);
+
+            /* Powered-down state: desaturated, dimmed */
+            filter: saturate(0.5) brightness(0.85);
+
+            /* Activation ignite — star reaches card ~75% through arc
+               arc_begin(0.3) + arc_dur(1.4) * 0.75 ≈ 1.35s → 1.4s */
+            animation: card-ignite 1.4s cubic-bezier(0.22, 1, 0.36, 1) 1.4s both;
+
+            transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+            z-index: 20;
+        }
+
+        /* Localized grain texture on the card itself */
+        .showcase-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            opacity: 0.12;
+            pointer-events: none;
+            border-radius: inherit;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            mix-blend-mode: overlay;
+            z-index: 1;
+        }
+
+        /* Radial glow aura behind the card — blooms on activation */
+        .showcase-card::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 180%;
+            height: 180%;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(ellipse at center,
+                rgba(251, 146, 60, 0.0) 0%,
+                rgba(251, 146, 60, 0.0) 100%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: -1;
+            animation: aura-bloom 1.4s cubic-bezier(0.22, 1, 0.36, 1) 1.4s both;
+        }
+
+        /* ── Dark mode ignite: dormant → flash → warm glow ── */
+        /* Uses individual `scale` property so it doesn't conflict with
+           per-breakpoint `transform: rotate(var(--card-rotate))` */
+        @keyframes card-ignite {
+            0% {
+                filter: saturate(0.5) brightness(0.85);
+                border-color: rgba(251, 146, 60, 0.25);
+                box-shadow:
+                    0 0 24px 2px rgba(251, 146, 60, 0.18),
+                    0 0 48px 4px rgba(251, 146, 60, 0.06),
+                    0 8px 32px -8px rgba(0, 0, 0, 0.5),
+                    0 0 0 0.5px rgba(251, 146, 60, 0.15);
+                scale: 1;
+            }
+            25% {
+                /* Star impact — scale punch + bright glow */
+                filter: saturate(1.3) brightness(1.15);
+                border-color: rgba(251, 146, 60, 0.5);
+                box-shadow:
+                    0 0 40px 4px rgba(251, 146, 60, 0.35),
+                    0 0 80px 8px rgba(251, 146, 60, 0.15),
+                    0 8px 32px -8px rgba(0, 0, 0, 0.4),
+                    inset 0 0 20px rgba(251, 146, 60, 0.06);
+                scale: 1.03;
+            }
+            50% {
+                /* Overshoot warmth — settling */
+                filter: saturate(1.1) brightness(1.05);
+                border-color: rgba(251, 146, 60, 0.35);
+                box-shadow:
+                    0 0 24px 2px rgba(251, 146, 60, 0.2),
+                    0 0 48px 4px rgba(251, 146, 60, 0.08),
+                    0 8px 32px -8px rgba(0, 0, 0, 0.35);
+                scale: 1;
+            }
+            100% {
+                /* Settle — warm and alive, not screaming */
+                filter: saturate(1) brightness(1);
+                border-color: rgba(251, 146, 60, 0.25);
+                box-shadow:
+                    0 0 18px 1px rgba(251, 146, 60, 0.12),
+                    0 0 40px 2px rgba(251, 146, 60, 0.05),
+                    0 8px 32px -8px rgba(0, 0, 0, 0.35),
+                    0 0 0 0.5px rgba(251, 146, 60, 0.2);
+                scale: 1;
+            }
+        }
+
+        @keyframes aura-bloom {
+            0%   {
+                background: radial-gradient(ellipse at center,
+                    rgba(251, 146, 60, 0.0) 0%,
+                    rgba(251, 146, 60, 0.0) 100%);
+            }
+            30%  {
+                background: radial-gradient(ellipse at center,
+                    rgba(251, 146, 60, 0.12) 0%,
+                    rgba(251, 146, 60, 0.0) 70%);
+            }
+            100% {
+                background: radial-gradient(ellipse at center,
+                    rgba(251, 146, 60, 0.04) 0%,
+                    rgba(251, 146, 60, 0.0) 70%);
+            }
+        }
+
+        /* ── Pulse ring — emanates from card on star impact ── */
+        .showcase-pulse-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            border: 1.5px solid rgba(251, 146, 60, 0.6);
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            opacity: 0;
+            z-index: -1;
+            animation: pulse-expand 1s cubic-bezier(0.22, 1, 0.36, 1) 1.4s both;
+        }
+
+        @keyframes pulse-expand {
+            0%   { width: 0;     height: 0;     opacity: 0.8; border-color: rgba(251, 146, 60, 0.8); }
+            60%  { width: 120px; height: 120px; opacity: 0.3; border-color: rgba(251, 146, 60, 0.3); }
+            100% { width: 180px; height: 180px; opacity: 0;   border-color: rgba(251, 146, 60, 0); }
+        }
+
+        /* ── Energy flash — directional light burst inside card ── */
+        .showcase-flash {
+            position: absolute;
+            inset: 0;
+            border-radius: 6px;
+            pointer-events: none;
+            opacity: 0;
+            z-index: 10;
+            animation: energy-flash 0.6s ease-out 1.4s both;
+        }
+
+        @keyframes energy-flash {
+            0%  {
+                opacity: 0;
+                background: radial-gradient(
+                    ellipse at 80% 30%,
+                    rgba(255, 220, 180, 0.5) 0%,
+                    rgba(251, 146, 60, 0.2) 40%,
+                    transparent 70%
+                );
+            }
+            30% { opacity: 1; }
+            100% {
+                opacity: 0;
+                background: radial-gradient(
+                    ellipse at 50% 50%,
+                    rgba(251, 146, 60, 0.1) 0%,
+                    transparent 60%
+                );
+            }
+        }
+
+        /* ── Light mode showcase card — frosted warm dawn glass ── */
+        [data-theme="light"] .showcase-card {
+            background: rgba(255, 252, 248, 0.78);
+            backdrop-filter: blur(24px) saturate(1.2);
+            -webkit-backdrop-filter: blur(24px) saturate(1.2);
+            border-color: rgba(212, 168, 120, 0.2);
+            box-shadow:
+                0 8px 32px -8px rgba(160, 100, 40, 0.12),
+                0 0 0 0.5px rgba(212, 168, 120, 0.15);
+            filter: saturate(0.6) brightness(0.97);
+            animation-name: card-ignite-light;
+        }
+        [data-theme="light"] .showcase-card::before {
+            opacity: 0.08;
+            mix-blend-mode: multiply;
+        }
+        [data-theme="light"] .showcase-card .showcase-card-title {
+            color: #1e293b;
+        }
+        [data-theme="light"] .showcase-card p {
+            color: #334155;
+        }
+        [data-theme="light"] .showcase-card .text-\\[9px\\] {
+            color: #64584a;
+        }
+        /* ── Aperture slider — brass observatory dial ── */
+        .aperture-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 4px;
+            border-radius: 2px;
+            background: linear-gradient(90deg, #1e293b 0%, #334155 100%);
+            outline: none;
+            cursor: pointer;
+            position: relative;
+            z-index: 2;
+        }
+        .aperture-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #FB923C;
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(251, 146, 60, 0.5), 0 1px 3px rgba(0,0,0,0.4);
+        }
+        .aperture-slider::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #FB923C;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 8px rgba(251, 146, 60, 0.5), 0 1px 3px rgba(0,0,0,0.4);
+        }
+        [data-theme="light"] .aperture-slider {
+            background: linear-gradient(90deg, #d4c8b8 0%, #c0b4a0 100%);
+        }
+        [data-theme="light"] .aperture-slider::-webkit-slider-thumb {
+            background: #d4700a;
+            box-shadow: 0 0 8px rgba(212, 112, 10, 0.4), 0 1px 3px rgba(0,0,0,0.2);
+        }
+        [data-theme="light"] .aperture-slider::-moz-range-thumb {
+            background: #d4700a;
+            box-shadow: 0 0 8px rgba(212, 112, 10, 0.4), 0 1px 3px rgba(0,0,0,0.2);
+        }
+        [data-theme="light"] .showcase-pulse-ring {
+            border-color: rgba(212, 112, 10, 0.5);
+        }
+        [data-theme="light"] .showcase-flash {
+            animation-name: energy-flash-light;
+        }
+
+        @keyframes card-ignite-light {
+            0% {
+                filter: saturate(0.6) brightness(0.97);
+                border-color: rgba(212, 168, 120, 0.2);
+                box-shadow:
+                    0 8px 32px -8px rgba(160, 100, 40, 0.12),
+                    0 0 0 0.5px rgba(212, 168, 120, 0.15);
+            }
+            25% {
+                filter: saturate(1.2) brightness(1.05);
+                border-color: rgba(212, 112, 10, 0.4);
+                box-shadow:
+                    0 0 30px 2px rgba(212, 112, 10, 0.2),
+                    0 0 60px 4px rgba(212, 112, 10, 0.08),
+                    0 8px 32px -8px rgba(160, 100, 40, 0.15);
+            }
+            100% {
+                filter: saturate(1) brightness(1);
+                border-color: rgba(212, 112, 10, 0.25);
+                box-shadow:
+                    0 0 14px 1px rgba(212, 112, 10, 0.1),
+                    0 8px 32px -8px rgba(160, 100, 40, 0.12),
+                    0 0 0 0.5px rgba(212, 112, 10, 0.18);
+            }
+        }
+
+        @keyframes energy-flash-light {
+            0%  {
+                opacity: 0;
+                background: radial-gradient(
+                    ellipse at 80% 30%,
+                    rgba(245, 200, 140, 0.6) 0%,
+                    rgba(212, 112, 10, 0.2) 40%,
+                    transparent 70%
+                );
+            }
+            30% { opacity: 0.8; }
+            100% {
+                opacity: 0;
+                background: radial-gradient(
+                    ellipse at 50% 50%,
+                    rgba(212, 112, 10, 0.08) 0%,
+                    transparent 60%
+                );
+            }
+        }
+
+
+        /* ── Star ornament before QUICKSTART label ── */
+        .showcase-label {
+            position: relative;
+        }
+        .showcase-label::before {
+            content: '';
+            position: absolute;
+            left: -16px;
+            top: 2px;
+            width: 10px;
+            height: 10px;
+            background: #FB923C;
+            clip-path: polygon(50% 0%, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0% 50%, 40% 40%);
+            opacity: 0.7;
+            animation: star-breathe 4s ease-in-out infinite;
+        }
+
+        /* ── Card overlays terminal via terminal-group ── */
+        .showcase-terminal-group {
+            position: relative;
+        }
+
+        /* ── Two-column+ (768px+) — card overlaps terminal upper-right ── */
+        /* Rule: card may overlap terminal's right ~60%, never the left 40% where text lives */
+        /* Overlap at all two-column widths — terminal text is left-aligned, right side is empty */
+        @media (min-width: 768px) {
+            .showcase-card {
+                --card-rotate: 7deg;
+                position: absolute;
+                top: -50px;
+                left: 40%;
+                right: -4px;
+                width: auto;
+                max-width: 300px;
+                transform: rotate(var(--card-rotate));
+                transform-origin: bottom right;
+                animation: card-arc-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both,
+                           card-ignite 1.4s cubic-bezier(0.22, 1, 0.36, 1) 1.4s both;
+            }
+        }
+        /* ── Mid-range (960px+) — card can sit a bit lower, more room ── */
+        @media (min-width: 960px) {
+            .showcase-card {
+                top: -40px;
+            }
+        }
+        /* ── Large desktop (1280px+) — wider card, more tilt ── */
+        @media (min-width: 1280px) {
+            .showcase-card {
+                --card-rotate: 8deg;
+                top: -35px;
+                left: 35%;
+                right: 0;
+                max-width: 340px;
+                transform: rotate(var(--card-rotate));
+            }
+        }
+
+        /* ── Mobile (<768px): single-column, stacked, simplified celestial ── */
+        @media (max-width: 767px) {
+            .showcase-float-wrapper {
+                display: flex;
+                flex-direction: column;
+                align-items: stretch;
+                position: relative;
+                transform: rotate(-1.5deg);
+                max-width: min(440px, 90vw);
+                margin-left: auto;
+                margin-right: max(1.5rem, 8vw);
+                margin-top: 1rem;
+            }
+            .showcase-card {
+                --card-rotate: 8deg;
+                position: absolute;
+                bottom: calc(100% - 12px);
+                right: -2.5rem;
+                width: min(270px, 75%);
+                max-width: 300px;
+                transform: rotate(var(--card-rotate));
+                transform-origin: bottom right;
+                filter: saturate(0.5) brightness(0.85);
+                animation: card-arc-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both,
+                           card-ignite 1.4s cubic-bezier(0.22, 1, 0.36, 1) 1.4s both;
+            }
+            .showcase-card::after { animation: none; }
+            .showcase-pulse-ring { display: none; }
+            .showcase-flash { display: none; }
+            .showcase-float-wrapper .showcase-label {
+                margin-bottom: 0.5rem;
+            }
+            .showcase-float-wrapper .terminal-window {
+                font-size: 12px;
+                padding: 1rem;
+            }
+            /* Light mode mobile: same animations as desktop */
+            [data-theme="light"] .showcase-card {
+                animation: card-arc-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both,
+                           card-ignite-light 1.4s cubic-bezier(0.22, 1, 0.36, 1) 1.4s both;
+                filter: saturate(0.6) brightness(0.97);
+            }
+        }
+
+        /* ── Simplified mobile ignite — fade from desaturated to alive ── */
+        @keyframes card-ignite-mobile {
+            0% {
+                filter: saturate(0.5) brightness(0.85);
+            }
+            100% {
+                filter: saturate(1) brightness(1);
+            }
+        }
+
+        /* ── Card arc-in — sweeps card into position along arc ── */
+        /* Uses var(--card-rotate) so the final rotation matches each breakpoint */
+        @keyframes card-arc-in {
+            0%   { transform: rotate(calc(var(--card-rotate) - 16deg)) translate(50px, -40px) scale(0.85); opacity: 0; }
+            60%  { transform: rotate(calc(var(--card-rotate) - 2deg)) translate(5px, -4px) scale(1.01); opacity: 1; }
+            100% { transform: rotate(var(--card-rotate)) translate(0, 0) scale(1); opacity: 1; }
+        }
+        @keyframes card-arc-in-mobile {
+            0%   { transform: rotate(calc(var(--card-rotate) - 11deg)) translate(20px, -15px) scale(0.9); opacity: 0; }
+            60%  { transform: rotate(calc(var(--card-rotate) - 2deg)) translate(2px, -2px) scale(1.01); opacity: 1; }
+            100% { transform: rotate(var(--card-rotate)) translate(0, 0) scale(1); opacity: 1; }
         }
 
         /* ── Constellation SVG lines ── */
@@ -311,6 +808,11 @@ def _landing_styles() -> FT:
             .star { opacity: 0.5; }
             .cross-mark { opacity: 0; }
             .star-mark { opacity: 0.7; }
+            .hero-arc .arc-star-group { display: none; }
+            .showcase-card { animation: none !important; transform: rotate(var(--card-rotate)); filter: none; }
+            .showcase-card::before, .showcase-card::after { animation: none !important; }
+            .showcase-pulse-ring, .showcase-flash { animation: none !important; display: none; }
+
             .live-dot { animation: none !important; opacity: 1; }
             .constellation-line { animation: none !important; }
             [data-motion] { transition: none !important; }
@@ -318,7 +820,7 @@ def _landing_styles() -> FT:
             .mystic-card { transition: none !important; }
             .btn-star { transition: none !important; }
             svg[class*="animate-pulse"] { animation: none !important; }
-            #starfield-fixed, .geo-circles { transform: none !important; }
+            #starfield-fixed { transform: none !important; }
         }
 
         /* ── Landing text utilities ── */
@@ -364,44 +866,6 @@ def _landing_styles() -> FT:
             background: #1e293b;
             color: #f8fafc;
             box-shadow: 0 0 20px rgba(30, 41, 59, 0.15);
-        }
-
-        /* ── Decorative geometric circles ── */
-        .geo-circles {
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            z-index: 0;
-            opacity: 0.2;
-        }
-
-        .geo-circle {
-            position: absolute;
-            border-radius: 50%;
-            border: 1px solid rgba(203, 213, 225, 0.1);
-        }
-
-        .geo-arch {
-            position: absolute;
-            border-radius: 100% 100% 0 0;
-            border-top: 1px solid rgba(251, 146, 60, 0.1);
-            border-left: 1px solid rgba(251, 146, 60, 0.1);
-            border-right: 1px solid rgba(251, 146, 60, 0.1);
-            border-bottom: none;
-        }
-
-        [data-theme="light"] .geo-circles {
-            opacity: 0.25;
-        }
-
-        [data-theme="light"] .geo-circle {
-            border-color: rgba(130, 140, 170, 0.12);
-        }
-
-        [data-theme="light"] .geo-arch {
-            border-top-color: rgba(200, 130, 80, 0.12);
-            border-left-color: rgba(200, 130, 80, 0.12);
-            border-right-color: rgba(200, 130, 80, 0.12);
         }
 
         /* ── Landing header transparent variant ── */
@@ -510,16 +974,9 @@ def LandingLayout(
             cls="fixed inset-0 pointer-events-none z-[1]",
             aria_hidden="true",
             data_style_transform="translateY(" + scroll.y * -0.05 + "px)",
+            data_style_opacity="$aperture / 100",
         ),
-        # Decorative geometric circles (parallax)
-        Div(
-            Div(cls="geo-circle", style="top: 15%; left: 50%; transform: translateX(-50%); width: 800px; height: 800px;"),
-            Div(cls="geo-circle", style="top: 15%; left: 50%; transform: translateX(-50%); width: 600px; height: 600px;"),
-            Div(cls="geo-arch", style="bottom: 0; left: 50%; transform: translateX(-50%); width: 400px; height: 600px;"),
-            cls="geo-circles",
-            aria_hidden="true",
-            data_style_transform="translateY(" + scroll.y * -0.03 + "px)",
-        ),
+        # (geo-circles removed — the hero arc SVG is the sole decorative dome)
         # Film grain
         Div(cls="grain-overlay", aria_hidden="true"),
         # Header

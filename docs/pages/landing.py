@@ -14,7 +14,7 @@ def _star_mark(cls: str = "") -> FT:
     return Svg(
         Path(d="M12 2L14 10L22 12L14 14L12 22L10 14L2 12L10 10Z", fill="currentColor"),
         viewBox="0 0 24 24",
-        cls=f"star-mark w-4 h-4 text-sunset inline-block align-middle {cls}",
+        cls=f"star-mark w-5 h-5 text-sunset inline-block align-middle {cls}",
         aria_hidden="true",
     )
 
@@ -22,33 +22,200 @@ def _star_mark(cls: str = "") -> FT:
 # ── Hero section ────────────────────────────────────────────────────
 
 
+
+def _component_showcase() -> FT:
+    """Aperture brightness control — observatory instrument that controls starfield."""
+    aperture = Signal("aperture", 50)
+    active = aperture > 50
+
+    return Div(
+        aperture,
+        # Energy flash overlay (triggered by star arrival)
+        Div(cls="showcase-flash"),
+        # Instrument label
+        P("APERTURE", cls="text-[9px] font-mono font-medium tracking-[0.25em] uppercase text-[#94A3B8] showcase-card-title", style="font-family: 'Inter', sans-serif;"),
+        # Range slider
+        Div(
+            Input(
+                type="range",
+                min="0",
+                max="100",
+                cls="aperture-slider w-full",
+                data_bind=aperture,
+            ),
+            cls="mt-1.5",
+        ),
+        # Readout row
+        Div(
+            Span(
+                Span(
+                    cls="w-1 h-1 rounded-full inline-block transition-colors duration-300",
+                    data_style_background_color=active.if_("#FB923C", "#475569"),
+                ),
+                Span(data_text=active.if_("ACTIVE", "DIM")),
+                cls="inline-flex items-center gap-1.5 text-[9px] font-mono font-medium uppercase tracking-[0.08em] px-1.5 py-0.5 rounded-sm border transition-all duration-300",
+                data_style_color=active.if_("#FB923C", "#475569"),
+                data_style_border_color=active.if_("rgba(251,146,60,0.3)", "rgba(71,85,105,0.3)"),
+                data_style_background_color=active.if_("rgba(251,146,60,0.08)", "rgba(100,116,139,0.08)"),
+            ),
+            Span(
+                data_text="" + aperture + "%",
+                cls="text-[11px] font-mono tabular-nums transition-colors duration-300",
+                data_style_color=active.if_("#FB923C", "#475569"),
+            ),
+            cls="flex items-center justify-between mt-1",
+        ),
+        # Reactive glow overlay — scales continuously with aperture
+        Div(
+            cls="absolute inset-0 rounded-[inherit] pointer-events-none transition-opacity duration-300",
+            style="box-shadow: 0 0 50px 8px rgba(251,146,60,0.4), 0 0 100px 16px rgba(251,146,60,0.18), 0 0 150px 24px rgba(251,146,60,0.06);",
+            data_style_opacity="$aperture / 120",
+        ),
+        # Pulse ring (emanates outward on star impact)
+        Div(cls="showcase-pulse-ring"),
+        # Star activates — sweep aperture from 50 to 90
+        Div(data_init=(aperture.set(90), dict(delay="1400ms"))),
+        cls="showcase-card px-4 py-2",
+    )
+
+
 def hero_section() -> FT:
     """Asymmetric hero: headline left, terminal right, observatory arc behind."""
 
+    # ── Timing choreography ──────────────────────────────────────
+    # 100ms  "Components" + "you own."  slide up together
+    # 300ms  Star arc begins            traces dome (2.0s duration)
+    # 400ms  Right column (terminal) + card arc-in
+    # 500ms  "No JS required."          blooms in
+    # 800ms  Subtitle + CTA             fade in together
+    # ~1.4s  Card ignite + pulse + flash (star ~55% through arc)
+    # ~1.4s  Aperture sweeps 50→90
+    # ~2.3s  Star finishes arc
+    # ──────────────────────────────────────────────────────────────
+
+    arc_begin = "0.3s"
+    arc_dur = "2.0s"
+
+    # Arc path: cubic bezier with control points at phi divisions of 1100×680 viewBox
+    arc_path = "M 60 260 C 434 7 666 18 1040 520"
+
     return Section(
-        # Observatory arc — single confident geometric element
-        Div(cls="hero-arc", aria_hidden="true"),
-        # Content grid
+        # Observatory arc SVG — golden spiral line + star tracing the path
+        Svg(
+            NotStr(
+                '<defs>'
+                '<linearGradient id="arc-fade" gradientUnits="userSpaceOnUse" x1="60" y1="260" x2="1040" y2="520">'
+                '<stop offset="0%" stop-color="#FB923C" stop-opacity="0"/>'
+                '<stop offset="12%" stop-color="#FB923C" stop-opacity="0.12"/>'
+                '<stop offset="88%" stop-color="#FB923C" stop-opacity="0.12"/>'
+                '<stop offset="100%" stop-color="#FB923C" stop-opacity="0"/>'
+                '</linearGradient>'
+                '</defs>'
+            ),
+            SvgPath(
+                d=arc_path,
+                fill="none",
+                stroke="url(#arc-fade)",
+                cls="arc-line",
+            ),
+            G(
+                G(
+                    SvgPath(
+                        d="M0 -10 L3 -3 L10 0 L3 3 L0 10 L-3 3 L-10 0 L-3 -3 Z",
+                        cls="arc-star-halo",
+                        opacity="0",
+                    ),
+                    NotStr(
+                        '<animate attributeName="opacity" '
+                        'values="0;0;0.85;0;0" keyTimes="0;0.25;0.5;0.75;1" '
+                        f'dur="{arc_dur}" begin="{arc_begin}" fill="freeze" '
+                        'calcMode="spline" '
+                        'keySplines="0.42 0 0.58 1;0.42 0 0.58 1;0.42 0 0.58 1;0.42 0 0.58 1"/>'
+                    ),
+                ),
+                SvgPath(
+                    d="M0 -10 L3 -3 L10 0 L3 3 L0 10 L-3 3 L-10 0 L-3 -3 Z",
+                    cls="arc-star",
+                ),
+                NotStr(
+                    f'<animateMotion path="{arc_path}" '
+                    f'dur="{arc_dur}" begin="{arc_begin}" fill="freeze" '
+                    'calcMode="spline" keySplines="0.25 0.1 0.25 1" keyTimes="0;1"/>'
+                ),
+                NotStr(
+                    '<animate attributeName="opacity" '
+                    'values="0;1;1;0" keyTimes="0;0.05;0.92;1" '
+                    f'dur="{arc_dur}" begin="{arc_begin}" fill="freeze"/>'
+                ),
+                NotStr(
+                    '<animateTransform attributeName="transform" type="rotate" '
+                    'from="0 0 0" to="180 0 0" '
+                    f'dur="{arc_dur}" begin="{arc_begin}" fill="freeze" '
+                    'calcMode="spline" keySplines="0.42 0 0.58 1" keyTimes="0;1" '
+                    'additive="sum"/>'
+                ),
+                NotStr(
+                    '<animateTransform attributeName="transform" type="scale" '
+                    'values="0.4;1.3;0.4" keyTimes="0;0.5;1" '
+                    f'dur="{arc_dur}" begin="{arc_begin}" fill="freeze" '
+                    'calcMode="spline" '
+                    'keySplines="0.42 0 0.58 1;0.42 0 0.58 1" '
+                    'additive="sum"/>'
+                ),
+                cls="arc-star-group",
+                opacity="0",
+            ),
+            viewBox="0 0 1100 680",
+            cls="hero-arc",
+            aria_hidden="true",
+        ),
+        # Content grid — 3fr / 2fr ≈ 60/40 split
         Div(
             Div(
                 # ── Left column: headline + subtitle + CTA ──
                 Div(
-                    # Headline — enormous with internal scale contrast
                     H1(
-                        Span("Components", cls="block"),
-                        Span("you own.", cls="block italic"),
-                        Span("No JS required.", cls="block hero-subline text-sunset font-normal mt-6"),
-                        cls="hero-headline font-display text-5xl md:text-[7rem] lg:text-[9rem] font-light text-moon",
-                        data_motion=in_view(y=30, opacity=0, duration=500, spring="gentle"),
+                        # Lines 1+2 appear nearly together
+                        Span(
+                            "Components",
+                            cls="block",
+                            data_motion=in_view(
+                                y=30, x=-8, opacity=0,
+                                duration=600, delay=100,
+                                spring="gentle",
+                            ),
+                        ),
+                        Span(
+                            "you own.",
+                            cls="block italic",
+                            data_motion=in_view(
+                                y=30, opacity=0,
+                                duration=600, delay=200,
+                                spring="gentle",
+                            ),
+                        ),
+                        # Orange punchline — quick beat after headline
+                        Span(
+                            "No JS required.",
+                            cls="block hero-subline text-sunset font-normal mt-6",
+                            data_motion=in_view(
+                                y=-6, scale=0.96, opacity=0,
+                                duration=500, delay=500,
+                                spring="snappy",
+                            ),
+                        ),
+                        cls="hero-headline font-display font-light text-moon",
                     ),
-                    # Subtitle with star mark
+                    # Subtitle + CTA — Fibonacci vertical rhythm (34px, 55px)
                     P(
-                        _star_mark(cls="mr-2 -mt-0.5"),
                         "No npm. No React. Just Python.",
-                        cls="mt-8 md:mt-10 font-serif-body text-xl md:text-2xl text-moon-dim italic font-light",
-                        data_motion=in_view(y=20, opacity=0, duration=500, delay=100, spring="gentle"),
+                        cls="mt-5 md:mt-[55px] font-serif-body text-xl md:text-2xl text-moon-dim italic font-light",
+                        data_motion=in_view(
+                            y=12, opacity=0,
+                            duration=400, delay=800,
+                            spring="gentle",
+                        ),
                     ),
-                    # Single CTA
                     Div(
                         A(
                             "Get Started",
@@ -56,43 +223,52 @@ def hero_section() -> FT:
                             cls="btn-star rounded-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#FB923C]",
                             data_motion=press(scale=0.97, duration=100),
                         ),
-                        cls="mt-10 md:mt-12",
-                        data_motion=in_view(y=15, opacity=0, duration=400, delay=200, spring="gentle"),
+                        cls="mt-[34px] md:mt-[55px]",
+                        data_motion=in_view(
+                            y=8, opacity=0,
+                            duration=400, delay=900,
+                            spring="gentle",
+                        ),
                     ),
-                    cls="lg:col-span-3",
                 ),
-                # ── Right column: terminal quickstart ──
+                # ── Right column: label above, card overlaps terminal upper-right ──
                 Div(
-                    # Editorial label + rule
                     Div(
-                        Span("Quickstart", cls="text-[9px] font-mono tracking-[0.25em] uppercase text-sunset block mb-2"),
-                        Div(cls="w-3/5 h-px bg-current text-sunset opacity-40"),
-                        cls="mb-4",
+                        Div(
+                            Span("Quickstart", cls="text-[9px] font-mono tracking-[0.25em] uppercase text-sunset block mb-2"),
+                            Div(cls="w-full h-px bg-current text-sunset opacity-40"),
+                            cls="showcase-label mb-4",
+                        ),
+                        Div(
+                            Div(
+                                P(
+                                    Span("$", cls="text-[#FB923C]"), " pip install starui",
+                                    cls="text-[#94A3B8]",
+                                ),
+                                P(
+                                    Span("$", cls="text-[#FB923C]"), " star init",
+                                    cls="text-[#94A3B8]",
+                                ),
+                                P(
+                                    Span("$", cls="text-[#FB923C]"), " star add switch card dialog",
+                                    cls="text-[#94A3B8]",
+                                ),
+                                cls="terminal-window p-6 space-y-2 font-mono text-sm",
+                            ),
+                            _component_showcase(),
+                            cls="showcase-terminal-group",
+                        ),
+                        cls="showcase-float-wrapper relative",
                     ),
-                    # Terminal content — clean, no brackets, no dots
-                    Div(
-                        P(
-                            Span("$", cls="text-[#FB923C]"), " pip install starui",
-                            cls="text-[#94A3B8]",
-                        ),
-                        P(
-                            Span("$", cls="text-[#FB923C]"), " star init",
-                            cls="text-[#94A3B8]",
-                        ),
-                        P(
-                            Span("$", cls="text-[#FB923C]"), " star add button dialog card",
-                            cls="text-[#94A3B8]",
-                        ),
-                        cls="terminal-window p-6 space-y-2 font-mono text-sm",
-                    ),
-                    cls="lg:col-span-2 lg:pt-12 lg:self-end",
-                    data_motion=in_view(y=30, opacity=0, duration=600, delay=300, spring="gentle"),
+                    cls="hero-right-col flex flex-col",
+                    data_motion=in_view(y=20, opacity=0, duration=500, delay=400, spring="gentle"),
                 ),
-                cls="relative z-10 grid grid-cols-1 lg:grid-cols-5 gap-12 lg:gap-16 items-end",
+                cls="hero-grid-phi relative z-10 grid grid-cols-1 gap-5",
             ),
             cls="w-full max-w-7xl mx-auto px-6 lg:px-8",
         ),
-        cls="relative min-h-[90vh] flex items-end pb-24 pt-32",
+        # Fibonacci bottom padding: 89px (Fib 11); top padding stays at 128px (pt-32)
+        cls="hero-section-mobile relative min-h-[90vh] flex items-center pb-[89px] pt-16 md:pt-20 lg:pt-24 overflow-x-clip",
         aria_label="Welcome to StarUI",
     )
 
