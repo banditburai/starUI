@@ -292,12 +292,7 @@ def comment_box_live_preview_example():
                             "Post Comment",
                             type="submit",
                             data_attr_disabled=comment_text.length.eq(0),
-                            data_on_click=js("""
-                                evt.preventDefault();
-                                if ($comment_text.trim().length > 0) {
-                                    $comment_text = '';
-                                }
-                            """)
+                            data_on_click=((comment_text.strip().length > 0).then(comment_text.set('')), dict(prevent=True))
                         ),
                         cls="flex gap-3 justify-end mt-6"
                     )
@@ -530,8 +525,8 @@ def code_editor_textarea_example():
                         cls="text-xs text-muted-foreground"
                     ),
                     Button(
-                        Span(Icon("lucide:check", cls="h-4 w-4 mr-2"), data_show=code_copied),
-                        Span(Icon("lucide:copy", cls="h-4 w-4 mr-2"), data_show=code_copied.eq(False)),
+                        Icon("lucide:check", cls="h-4 w-4 mr-2", data_show=code_copied),
+                        Icon("lucide:copy", cls="h-4 w-4 mr-2", data_show=code_copied.eq(False)),
                         Span("Copied!", data_show=code_copied),
                         Span("Copy", data_show=code_copied.eq(False)),
                         size="sm",
@@ -668,10 +663,7 @@ def email_template_composer_example():
                         "Save Template",
                         type="submit",
                         data_attr_disabled=email_subject.length.eq(0) | email_body.length.eq(0),
-                        data_on_click=js("""
-                            evt.preventDefault();
-                            alert('Template saved successfully!');
-                        """)
+                        data_on_click=(js("alert('Template saved successfully!')"), dict(prevent=True))
                     ),
                     cls="flex gap-2 justify-end"
                 )

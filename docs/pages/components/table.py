@@ -235,10 +235,12 @@ def sortable_table_example():
                 cls="w-full"
             ),
             TableCell(f"{file['size']} MB", cls="text-right w-24"),
-            data_style_order=(
-                f"$file_sort_by === 'none' ? {orders['none']} : ("
-                f"$file_sort_by === 'name' ? ($file_sort_dir === 'asc' ? {orders['name_asc']} : {orders['name_desc']}) : "
-                f"($file_sort_dir === 'asc' ? {orders['size_asc']} : {orders['size_desc']}))"
+            data_style_order=(sort_by == "none").if_(
+                orders['none'],
+                (sort_by == "name").if_(
+                    (sort_dir == "asc").if_(orders['name_asc'], orders['name_desc']),
+                    (sort_dir == "asc").if_(orders['size_asc'], orders['size_desc'])
+                )
             )
         )
 

@@ -10,7 +10,7 @@ CATEGORY = "overlay"
 ORDER = 40
 STATUS = "stable"
 
-from starhtml import Div, P, Input, Label, Icon, Span, H2, H3, Form, Code, Ul, Li, Style, Signal, switch
+from starhtml import Div, P, Input, Label, Icon, Span, H2, H3, Form, Code, Ul, Li, Style, Signal, switch, evt
 from starhtml.datastar import js, set_timeout, seq
 from starui.registry.components.dialog import (
     Dialog, DialogTrigger, DialogContent, DialogHeader, DialogFooter,
@@ -220,8 +220,8 @@ def form_dialog_example():
                     "Send Invitation",
                     data_attr_disabled=~member_name | ~member_email,
                     data_on_click=[
-                        "evt.preventDefault()",
-                        f"alert('✅ Invitation sent to ' + {member_email} + ' as ' + {member_role_value})",
+                        evt.preventDefault(),
+                        js("alert('Invitation sent to ' + $member_email + ' as ' + $member_role_value)"),
                         form_dialog.close(),
                         member_name.set(''),
                         member_email.set(''),
@@ -302,8 +302,8 @@ def loading_async_dialog_example():
         return Div(
             P("Choose file to upload:", cls="text-sm font-medium mb-2"),
             Div(
-                Span(Icon("lucide:file-text", cls="w-8 h-8 text-muted-foreground mb-2"), data_show=~file_selected),
-                Span(Icon("lucide:file-check", cls="w-8 h-8 text-green-500 mb-2"), data_show=file_selected),
+                Icon("lucide:file-text", cls="w-8 h-8 text-muted-foreground mb-2", data_show=~file_selected),
+                Icon("lucide:file-check", cls="w-8 h-8 text-green-500 mb-2", data_show=file_selected),
                 P(
                     data_text=file_selected.if_("project-proposal.pdf", "Click to select file or drag and drop"),
                     data_style_color=file_selected.if_("hsl(var(--foreground))", "hsl(var(--muted-foreground))"),
@@ -412,7 +412,7 @@ def multi_step_wizard_example():
     def step_indicator(number, label):
         return Div(
             Div(
-                Span(Icon("lucide:check", cls="w-3 h-3 text-white"), data_show=step > number),
+                Icon("lucide:check", cls="w-3 h-3 text-white", data_show=step > number),
                 Span(str(number), data_show=step <= number),
                 data_style_background_color=(step >= number).if_('rgb(59, 130, 246)', 'rgb(203, 213, 225)'),
                 data_style_color=(step >= number).if_('white', 'rgb(71, 85, 105)'),

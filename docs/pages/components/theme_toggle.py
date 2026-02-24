@@ -9,44 +9,43 @@ CATEGORY = "ui"
 ORDER = 95
 STATUS = "stable"
 
-from starhtml import Div, Icon, P, Span, FT, Signal, js
+from starhtml import Div, Icon, P, Span, Style, FT, js
 from starui.registry.components.button import Button
 from starui.registry.components.dropdown_menu import DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem
 from utils import auto_generate_page, with_code, Prop, build_api_reference
 
-THEME_STORAGE_KEY = "iframe-theme-theme_toggle"
+ALT_THEME = "dark"
+DEFAULT_THEME = "light"
 
 
-def IsolatedThemeToggle(alt_theme="dark", default_theme="light", **kwargs) -> FT:
-    """Theme toggle that only affects its iframe container, not the parent document."""
-    is_alt = Signal("is_alt", False)
+def IsolatedThemeToggle(alt_theme=ALT_THEME, default_theme=DEFAULT_THEME, **kwargs) -> FT:
+    """Theme toggle for iframe previews — CSS approach with isolated localStorage key.
+
+    Derives the storage key from the iframe URL path, matching the iframe_app
+    init script so theme persists across reloads.
+    """
 
     return Div(
-        is_alt,
-        Button(
-            Span(Icon("ph:moon-bold", width="20", height="20"), data_show=~is_alt),
-            Span(Icon("ph:sun-bold", width="20", height="20"), data_show=is_alt),
-            variant="ghost",
-            aria_label="Toggle theme",
-            cls="h-9 px-4 py-2 flex-shrink-0",
-            data_on_click=is_alt.toggle()
-        ),
-        data_on_load=js(f"""
-            const savedTheme = localStorage.getItem('{THEME_STORAGE_KEY}');
-
-            if (savedTheme) {{
-                $is_alt = savedTheme === '{alt_theme}';
-            }} else {{
-                const parentTheme = localStorage.getItem('theme') ||
-                    document.documentElement.getAttribute('data-theme');
-                $is_alt = parentTheme === '{alt_theme}';
+        Style(f"""
+            [data-theme="{default_theme}"] .theme-icon-alt,
+            [data-theme="{alt_theme}"] .theme-icon-default {{
+                display: none;
             }}
         """),
-        data_effect=js(f"""
-            const theme = $is_alt ? '{alt_theme}' : '{default_theme}';
-            document.documentElement.setAttribute('data-theme', theme);
-            localStorage.setItem('{THEME_STORAGE_KEY}', theme);
-        """),
+        Button(
+            Icon("ph:moon-bold", width="20", height="20", cls="theme-icon-default"),
+            Icon("ph:sun-bold", width="20", height="20", cls="theme-icon-alt"),
+            data_on_click=js(f"""
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === '{alt_theme}' ? '{default_theme}' : '{alt_theme}';
+                document.documentElement.setAttribute('data-theme', newTheme);
+                const iframeKey = 'iframe-theme-' + window.location.pathname.split('/').pop();
+                localStorage.setItem(iframeKey, newTheme);
+            """),
+            variant="ghost",
+            size="icon",
+            aria_label="Toggle theme",
+        ),
         **kwargs,
     )
 
@@ -85,8 +84,6 @@ def size_variations_example():
 
 @with_code
 def dropdown_theme_selector_example():
-    is_dark = Signal("is_dark", _ref_only=True)
-
     theme_options = [
         {"value": "light", "label": "Light", "icon": "lucide:sun"},
         {"value": "dark", "label": "Dark", "icon": "lucide:moon"},
@@ -97,28 +94,25 @@ def dropdown_theme_selector_example():
         return js(f"""
             const newTheme = '{theme_value}';
             document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('{THEME_STORAGE_KEY}', newTheme);
-            $is_dark = newTheme === 'dark';
+            const iframeKey = 'iframe-theme-' + window.location.pathname.split('/').pop();
+            localStorage.setItem(iframeKey, newTheme);
         """)
 
     return Div(
-        is_dark,
+        Style(f"""
+            [data-theme="{DEFAULT_THEME}"] .dropdown-icon-alt,
+            [data-theme="{ALT_THEME}"] .dropdown-icon-default {{
+                display: none;
+            }}
+        """),
         P("Dropdown Theme Selector", cls="font-medium mb-4 text-center"),
         P("Common pattern with Light, Dark, and System options",
           cls="text-sm text-muted-foreground mb-6 text-center"),
         Div(
             DropdownMenu(
                 DropdownMenuTrigger(
-                    Span(
-                        Icon("lucide:sun", cls="h-[1.2rem] w-[1.2rem]"),
-                        style="display: none",
-                        data_show=is_dark
-                    ),
-                    Span(
-                        Icon("lucide:moon", cls="h-[1.2rem] w-[1.2rem]"),
-                        style="display: none",
-                        data_show=~is_dark
-                    ),
+                    Icon("lucide:sun", cls="h-[1.2rem] w-[1.2rem] dropdown-icon-default"),
+                    Icon("lucide:moon", cls="h-[1.2rem] w-[1.2rem] dropdown-icon-alt"),
                     Span("Theme", cls="sr-only"),
                     variant="outline",
                     size="icon"
@@ -137,21 +131,6 @@ def dropdown_theme_selector_example():
             ),
             cls="flex justify-center"
         ),
-        data_on_load=js(f"""
-            const savedTheme = localStorage.getItem('{THEME_STORAGE_KEY}');
-
-            let theme;
-            if (savedTheme) {{
-                theme = savedTheme;
-            }} else {{
-                theme = localStorage.getItem('theme') ||
-                    document.documentElement.getAttribute('data-theme') ||
-                    'light';
-            }}
-
-            document.documentElement.setAttribute('data-theme', theme);
-            $is_dark = theme === 'dark';
-        """),
         cls="space-y-4 py-8"
     )
 

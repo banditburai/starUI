@@ -18,9 +18,10 @@ dev = [
 ]
 
 [tool.uv.sources]
-# For local development, use editable install of parent starui
+# For local development, use editable installs
 # Comment out or remove this section for production deployment
 starui = { path = "../", editable = true }
+starhtml = { path = "/Users/firefly/Code/sandbox/starhtml-upstream", editable = true }
 
 
 

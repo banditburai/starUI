@@ -1,4 +1,4 @@
-from starhtml import FT, Icon, Span, Signal, clipboard
+from starhtml import FT, Icon, Signal, Span, clipboard
 from starhtml.datastar import js
 from starui.registry.components.button import Button
 
@@ -25,13 +25,13 @@ def CopyButton(
         "inline": "h-6 w-6 p-0 ml-3 text-muted-foreground hover:text-foreground transition-colors flex-shrink-0",
     }
 
-    click_handler = clipboard(element=f'#{code_id}', signal=copied.id)
+    click_handler = clipboard(element=f'#{code_id}', signal=copied)
     if stop_propagation:
         click_handler = (js("evt.stopPropagation()"), click_handler)
 
     return Button(
-        Span(Icon("lucide:check", cls="h-3 w-3"), data_show=copied),
-        Span(Icon("lucide:copy", cls="h-3 w-3"), data_show=~copied),
+        Icon("lucide:check", cls="h-3 w-3", data_show=copied),
+        Icon("lucide:copy", cls="h-3 w-3", data_show=~copied),
         Span(data_text=copied.if_("Copied!", "Copy"), cls="sr-only"),
         data_on_click=click_handler,
         variant="ghost",

@@ -246,8 +246,8 @@ def music_player_simulation_example():
                         data_on_click=[current_time.set(0), song_progress.set(0), playing.set(False)]
                     ),
                     Toggle(
-                        Span(Icon("lucide:play", cls="h-5 w-5"), data_show=~playing),
-                        Span(Icon("lucide:pause", cls="h-5 w-5"), data_show=playing),
+                        Icon("lucide:play", cls="h-5 w-5", data_show=~playing),
+                        Icon("lucide:pause", cls="h-5 w-5", data_show=playing),
                         variant="outline",
                         signal=playing,
                         pressed=True,

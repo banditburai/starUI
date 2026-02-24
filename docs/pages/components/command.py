@@ -2,7 +2,7 @@
 Command component documentation - Command palette for searching and executing actions.
 """
 
-from starhtml import Div, P, Span, Icon, Hr, Kbd, Input, Signal, js, clipboard
+from starhtml import Div, P, Span, Icon, Hr, Kbd, Input, Signal, js, any_, clipboard
 from starui.registry.components.command import (
     Command, CommandInput, CommandList, CommandEmpty,
     CommandGroup, CommandItem, CommandSeparator, CommandShortcut,
@@ -80,7 +80,10 @@ def generate_task_items(tasks_list, status_filter, signals_dict):
 
     for task_id in all_task_ids:
         existing_task = next((t for t in tasks_list if t["id"] == task_id), None)
-        show_condition = f"${task_id}_visible && ${task_id}_status === '{status_filter}'"
+        visible_sig = signals_dict[f"{task_id}_visible"]
+        status_sig = signals_dict[f"{task_id}_status"]
+        name_sig = signals_dict[f"{task_id}_name"]
+        show_condition = visible_sig & status_sig.eq(status_filter)
 
         if status_filter == "pending":
             if existing_task:
@@ -91,7 +94,7 @@ def generate_task_items(tasks_list, status_filter, signals_dict):
                 task_badge = create_task_badge(existing_task, task_id, status_filter)
             else:
                 task_icon = create_task_icon(task_id, "lucide:circle-dot")
-                task_text = Span(data_text=f"${task_id}_name")
+                task_text = Span(data_text=name_sig)
                 task_badge = create_task_badge(None, task_id, status_filter)
 
             items.append(
@@ -100,7 +103,7 @@ def generate_task_items(tasks_list, status_filter, signals_dict):
                     task_text,
                     task_badge,
                     value=f"{task_id}_pending",
-                    onclick=f"${task_id}_status = 'progress'",
+                    data_on_click=status_sig.set("progress"),
                     show=show_condition
                 )
             )
@@ -120,7 +123,7 @@ def generate_task_items(tasks_list, status_filter, signals_dict):
                     data_class_text_yellow_500=priority_sig.eq("urgent"),
                     data_class_text_blue_500=priority_sig.eq("normal")
                 )
-                task_text = Span(data_text=f"${task_id}_name")
+                task_text = Span(data_text=name_sig)
                 task_badge = create_task_badge(None, task_id, status_filter)
 
             items.append(
@@ -129,7 +132,7 @@ def generate_task_items(tasks_list, status_filter, signals_dict):
                     task_text,
                     task_badge,
                     value=f"{task_id}_progress",
-                    onclick=f"${task_id}_status = 'completed'",
+                    data_on_click=status_sig.set("completed"),
                     show=show_condition
                 )
             )
@@ -141,7 +144,7 @@ def generate_task_items(tasks_list, status_filter, signals_dict):
             if existing_task:
                 task_text = Span(existing_task["name"], cls="line-through opacity-60")
             else:
-                task_text = Span(data_text=f"${task_id}_name", cls="line-through opacity-60")
+                task_text = Span(data_text=name_sig, cls="line-through opacity-60")
 
             items.append(
                 CommandItem(
@@ -149,7 +152,7 @@ def generate_task_items(tasks_list, status_filter, signals_dict):
                     task_text,
                     task_badge,
                     value=f"{task_id}_completed",
-                    onclick=f"${task_id}_visible = false",
+                    data_on_click=visible_sig.set(False),
                     show=show_condition
                 )
             )
@@ -157,8 +160,8 @@ def generate_task_items(tasks_list, status_filter, signals_dict):
     empty_icons = {"pending": "lucide:inbox", "progress": "lucide:clock", "completed": "lucide:check"}
     empty_messages = {"pending": "No pending tasks", "progress": "No tasks in progress", "completed": "No completed tasks yet"}
 
-    show_conditions = [f"${task_id}_visible && ${task_id}_status === '{status_filter}'" for task_id in all_task_ids]
-    empty_show = " && ".join([f"!({cond})" for cond in show_conditions])
+    matching = [signals_dict[f"{tid}_visible"] & signals_dict[f"{tid}_status"].eq(status_filter) for tid in all_task_ids]
+    empty_show = ~any_(*matching)
 
     items.append(
         CommandItem(

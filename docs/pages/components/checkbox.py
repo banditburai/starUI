@@ -4,7 +4,7 @@ CATEGORY = "form"
 ORDER = 15
 STATUS = "stable"
 
-from starhtml import Div, P, Input, Label, Icon, Span, H3, Form, Signal, all_, any_, collect
+from starhtml import Div, P, Input, Label, Icon, Span, H3, Form, Signal, all_, any_, collect, js, evt
 from starui.registry.components.checkbox import Checkbox, CheckboxWithLabel
 from starui.registry.components.button import Button
 from starui.registry.components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
@@ -102,7 +102,7 @@ def terms_conditions_example():
                     type="submit",
                     cls="w-full mt-4",
                     data_attr_disabled=~all_(terms_accepted, privacy_accepted),
-                    data_on_click="evt.preventDefault()"
+                    data_on_click=evt.preventDefault()
                 )
             )
         ),
@@ -370,7 +370,7 @@ def filter_form_example():
                         "Apply Filters",
                         type="submit",
                         cls="w-full",
-                        data_on_click=f"evt.preventDefault(); alert({filter_message})"
+                        data_on_click=(js("alert($filter_message)"), dict(prevent=True))
                     ),
                     Button(
                         "Reset",
@@ -444,7 +444,7 @@ def settings_with_validation_example():
                     "Save Settings",
                     type="submit",
                     data_attr_disabled=~any_(email_notif, push_notif, sms_notif),
-                    data_on_click="evt.preventDefault()",
+                    data_on_click=evt.preventDefault(),
                     cls="w-full mt-4"
                 ),
                 Div(

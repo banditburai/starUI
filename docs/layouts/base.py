@@ -30,24 +30,14 @@ class HeaderConfig:
     logo_text: str = "starui"
     logo_href: str = "/"
     nav_items: list[dict[str, Any]] = field(default_factory=lambda: [
-        {"href": "/docs", "label": "Docs"},
         {"href": "/components", "label": "Components"},
-        {"href": "/blocks", "label": "Blocks"},
-        {"href": "/themes", "label": "Themes"},
     ])
-    github_stars: str = "star us"
-    show_search: bool = True
-    show_github: bool = True
     show_theme_toggle: bool = True
 
 
 @dataclass
 class FooterConfig:
-    attribution: str = "Built with StarHTML"
-    hosting_info: str = "Component library for Python web apps"
-    source_text: str = "The source code is available on GitHub"
-    source_href: str = "https://github.com/banditburai/starui"
-    links: list[dict[str, Any]] | None = None
+    attribution: str = "\u00a9 2026 StarUI \u00b7 Apache 2.0"
 
 
 @dataclass
@@ -65,8 +55,8 @@ def _copy_page_button(component_name: str | None = None) -> FT:
 
     return Button(
         page_copied,
-        Span(Icon("lucide:check", cls="h-4 w-4"), data_show=page_copied),
-        Span(Icon("lucide:copy", cls="h-4 w-4"), data_show=~page_copied),
+        Icon("lucide:check", cls="h-4 w-4", data_show=page_copied),
+        Icon("lucide:copy", cls="h-4 w-4", data_show=~page_copied),
         "Copy Page",
         data_on_click=copy_action,
         variant="outline",
@@ -143,7 +133,6 @@ def _main_layout_structure(
     content: tuple,
     layout: LayoutConfig,
     header: HeaderConfig,
-    footer: FooterConfig,
     sidebar: SidebarConfig,
     show_sidebar: bool,
     mobile_menu: Signal | None = None,
@@ -159,13 +148,7 @@ def _main_layout_structure(
             ),
             cls="flex min-h-[calc(100vh-3.5rem)]"
         ),
-        DocsFooter(
-            attribution=footer.attribution,
-            hosting_info=footer.hosting_info,
-            source_text=footer.source_text,
-            source_href=footer.source_href,
-            links=footer.links,
-        ) if layout.show_footer else None,
+        DocsFooter() if layout.show_footer else None,
         cls=f"flex min-h-screen flex-col {layout.class_name}",
         **attrs
     )
@@ -188,7 +171,7 @@ def DocsLayout(
     mobile_menu = Signal("mobile_menu", _ref_only=True) if show_sidebar else None
 
     main_content = _main_layout_structure(
-        content, layout, header, footer, sidebar, show_sidebar, mobile_menu, **attrs
+        content, layout, header, sidebar, show_sidebar, mobile_menu, **attrs
     )
 
     return _layout_with_sidebar(main_content, sidebar, layout, mobile_menu, **attrs) if show_sidebar else main_content

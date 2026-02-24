@@ -311,7 +311,7 @@ def interactive_form_card_example():
             Div(
                 Button(
                     data_text=form_valid.if_("Create Account ✓", "Create Account"),
-                    data_on_click=f"alert('Account created for ' + {email} + '!')",
+                    data_on_click=js("alert('Account created for ' + $email + '!')"),
                     data_attr_disabled=~form_valid,
                     cls="w-full mb-2"
                 ),

@@ -4,7 +4,7 @@ CATEGORY = "form"
 ORDER = 20
 STATUS = "stable"
 
-from starhtml import Div, P, Label, Icon, Span, Form, Signal
+from starhtml import Div, P, Label, Icon, Span, Form, Signal, js
 from starui.registry.components.select import (
     Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
     SelectGroup, SelectLabel, SelectWithLabel
@@ -81,7 +81,7 @@ def form_integration_select_example():
                     "Save Preferences",
                     type="submit",
                     cls="w-full mt-4",
-                    data_on_click="evt.preventDefault(); alert(`Country: ${$country_form_value}, Language: ${$language_form_value}`)"
+                    data_on_click=(js("alert(`Country: ${$country_form_value}, Language: ${$language_form_value}`)"), dict(prevent=True))
                 ),
                 cls="space-y-4"
             )
@@ -169,7 +169,7 @@ def product_filtering_select_example():
                     Icon("lucide:search", cls="h-4 w-4 mr-2"),
                     "Apply Filters",
                     cls="w-full mt-4",
-                    data_on_click="alert(`Searching: Category=${$category_filter_value || 'All'}, Price=${$price_filter_value || 'All'}, Sort=${$sort_filter_label || 'Relevance'}`)"
+                    data_on_click=js("alert(`Searching: Category=${$category_filter_value || 'All'}, Price=${$price_filter_value || 'All'}, Sort=${$sort_filter_label || 'Relevance'}`)")
                 ),
                 Div(
                     Div(
@@ -348,7 +348,7 @@ def role_management_select_example():
             Button(
                 "Save Changes",
                 cls="w-full mt-4",
-                data_on_click="alert(`Roles updated:\\nJohn: ${$user1_role_label}\\nJane: ${$user2_role_label}\\nBob: ${$user3_role_label}`)"
+                data_on_click=js("alert(`Roles updated:\\nJohn: ${$user1_role_label}\\nJane: ${$user2_role_label}\\nBob: ${$user3_role_label}`)")
             )
         ),
         cls="max-w-2xl"

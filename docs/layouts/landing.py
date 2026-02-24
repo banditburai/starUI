@@ -3,8 +3,7 @@ import random
 from starhtml import *
 from starhtml.plugins import scroll
 from layouts.header import DocsHeader
-from layouts.footer import DocsFooter
-from layouts.base import HeaderConfig, FooterConfig
+from layouts.base import HeaderConfig
 
 
 def _landing_styles() -> FT:
@@ -910,16 +909,6 @@ def _landing_styles() -> FT:
             }
         }
 
-        /* ── Simplified mobile ignite — fade from desaturated to alive ── */
-        @keyframes card-ignite-mobile {
-            0% {
-                filter: saturate(0.5) brightness(0.85);
-            }
-            100% {
-                filter: saturate(1) brightness(1);
-            }
-        }
-
         /* ── Card arc-in — sweeps card into position along arc ── */
         /* Uses var(--card-rotate) so the final rotation matches each breakpoint */
         @keyframes card-arc-in {
@@ -927,31 +916,6 @@ def _landing_styles() -> FT:
             60%  { transform: rotate(calc(var(--card-rotate) - 2deg)) translate(5px, -4px) scale(1.01); opacity: 1; }
             100% { transform: rotate(var(--card-rotate)) translate(0, 0) scale(1); opacity: 1; }
         }
-        @keyframes card-arc-in-mobile {
-            0%   { transform: rotate(calc(var(--card-rotate) - 11deg)) translate(20px, -15px) scale(0.9); opacity: 0; }
-            60%  { transform: rotate(calc(var(--card-rotate) - 2deg)) translate(2px, -2px) scale(1.01); opacity: 1; }
-            100% { transform: rotate(var(--card-rotate)) translate(0, 0) scale(1); opacity: 1; }
-        }
-
-        /* ── Text glow for headlines ── */
-        .text-glow {
-            text-shadow: 0 0 25px rgba(251, 146, 60, 0.4);
-        }
-
-        [data-theme="light"] .text-glow {
-            text-shadow: 0 0 40px rgba(212, 112, 10, 0.12);
-        }
-
-        /* ── Live render pulse ── */
-        .live-dot {
-            animation: live-pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes live-pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
-        }
-
         /* ── Reduced motion ── */
         @media (prefers-reduced-motion: reduce) {
             .star, .cross-mark, .star-mark { animation: none !important; }
@@ -967,7 +931,6 @@ def _landing_styles() -> FT:
             .showcase-card::before, .showcase-card::after { animation: none !important; }
             .showcase-pulse-ring, .showcase-flash { animation: none !important; display: none; }
 
-            .live-dot { animation: none !important; opacity: 1; }
             [data-motion] { transition: none !important; }
             .dawn-sky, .dawn-sky-warm { transition: none !important; }
             .mystic-card { transition: none !important; }
@@ -981,13 +944,11 @@ def _landing_styles() -> FT:
         .text-moon { color: #F8FAFC; }
         .text-moon-dim { color: #94A3B8; }
         .text-sunset { color: #FB923C; }
-        .text-sunset-dim { color: #9A3412; }
-        .border-sunset { border-color: #FB923C; }
 
         /* Light mode: dark text on cool dawn bg */
         [data-theme="light"] .text-moon { color: #1e293b; }
-        [data-theme="light"] .text-moon-dim { color: #5e6d82; }
-        [data-theme="light"] .text-sunset { color: #b85a08; }
+        [data-theme="light"] .text-moon-dim { color: #475569; }
+        [data-theme="light"] .text-sunset { color: #92400e; }
 
         /* ── CTA button ── */
         /* Dark mode: light border/text */
@@ -1041,7 +1002,7 @@ def _landing_styles() -> FT:
 
         [data-theme="light"] .btn-star-outline {
             border-color: rgba(30, 41, 59, 0.25);
-            color: #5e6d82;
+            color: #475569;
             background: transparent;
         }
 
@@ -1111,37 +1072,71 @@ def _landing_styles() -> FT:
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.08);
+
+            /* Override theme tokens so StarUI components blend with
+               the glass panel. BOTH bare and --color-* prefixed vars
+               are needed: @theme inline makes Tailwind utilities
+               resolve via bare vars (--popover), while the universal
+               * { border-color } rule uses --color-border. */
+            --card: rgba(255, 255, 255, 0.04);
+            --card-foreground: rgba(248, 250, 252, 0.9);
+            --popover: rgba(255, 255, 255, 0.04);
+            --popover-foreground: rgba(248, 250, 252, 0.9);
+            --foreground: rgba(248, 250, 252, 0.9);
+            --background: transparent;
+            --primary: oklch(0.97 0.002 250);
+            --primary-foreground: oklch(0.10 0.01 250);
+            --secondary: oklch(0.20 0.005 260);
+            --secondary-foreground: rgba(248, 250, 252, 0.9);
+            --muted: oklch(0.20 0.005 260);
+            --muted-foreground: rgba(148, 163, 184, 0.7);
+            --accent: oklch(0.20 0.005 260);
+            --accent-foreground: rgba(248, 250, 252, 0.9);
+            --border: rgba(255, 255, 255, 0.06);
+            --input: rgba(255, 255, 255, 0.10);
+            --ring: oklch(0.75 0.14 55);
+            --destructive: oklch(0.55 0.22 27);
+            --destructive-foreground: oklch(0.97 0 0);
+            /* Prefixed duplicates for universal border-color rule */
+            --color-border: rgba(255, 255, 255, 0.06);
+            --color-input: rgba(255, 255, 255, 0.10);
         }
         [data-theme="light"] .showcase-preview {
             background: rgba(255, 255, 255, 0.5);
             border: 1px solid rgba(140, 130, 150, 0.15);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
+
+            --card: white;
+            --card-foreground: rgba(30, 41, 59, 0.9);
+            --popover: white;
+            --popover-foreground: rgba(30, 41, 59, 0.9);
+            --foreground: rgba(30, 41, 59, 0.9);
+            --background: white;
+            --primary: oklch(0.22 0.01 255);
+            --primary-foreground: oklch(0.97 0 0);
+            --secondary: oklch(0.96 0 0);
+            --secondary-foreground: rgba(30, 41, 59, 0.9);
+            --muted: oklch(0.96 0 0);
+            --muted-foreground: rgba(100, 116, 139, 0.7);
+            --accent: oklch(0.96 0 0);
+            --accent-foreground: rgba(30, 41, 59, 0.9);
+            --border: rgba(0, 0, 0, 0.12);
+            --input: oklch(0.90 0 0);
+            --ring: oklch(0.55 0.14 55);
+            --destructive: oklch(0.55 0.22 27);
+            --destructive-foreground: oklch(0.97 0 0);
+            /* Prefixed duplicates for universal border-color rule */
+            --color-border: rgba(0, 0, 0, 0.12);
+            --color-input: oklch(0.90 0 0);
         }
 
-        .explorer-active-row {
-            background: rgba(251, 146, 60, 0.12);
-        }
-        [data-theme="light"] .explorer-active-row {
-            background: rgba(200, 122, 62, 0.1);
-        }
-
-        .mini-divider {
-            background: rgba(255, 255, 255, 0.1);
-        }
-        [data-theme="light"] .mini-divider {
-            background: rgba(0, 0, 0, 0.08);
-        }
-
-        /* Mini component primitives — theme-aware colors for preview cards */
+        /* Mini primitives — used by FIG. 01 preview + explorer sidebar */
         .mini-text { color: rgba(248, 250, 252, 0.9); }
         [data-theme="light"] .mini-text { color: rgba(30, 41, 59, 0.9); }
 
         .mini-text-dim { color: rgba(148, 163, 184, 0.7); }
         [data-theme="light"] .mini-text-dim { color: rgba(100, 116, 139, 0.7); }
-
-        .mini-bg-primary { background: #f8fafc; color: #0f172a; }
-        [data-theme="light"] .mini-bg-primary { background: #1e293b; color: #f8fafc; }
 
         .mini-bg-secondary { background: rgba(255, 255, 255, 0.08); }
         [data-theme="light"] .mini-bg-secondary { background: rgba(0, 0, 0, 0.05); }
@@ -1158,10 +1153,6 @@ def _landing_styles() -> FT:
             border: 1px solid rgba(0, 0, 0, 0.08);
         }
 
-        .mini-switch-on { background: #FB923C; }
-        .mini-switch-off { background: rgba(255, 255, 255, 0.15); }
-        [data-theme="light"] .mini-switch-off { background: rgba(0, 0, 0, 0.12); }
-
         /* ── Python watermark in Why StarUI ── */
         .python-watermark {
             opacity: 0.12;
@@ -1169,7 +1160,98 @@ def _landing_styles() -> FT:
             transition: opacity 0.5s ease;
         }
         [data-theme="light"] .python-watermark {
-            opacity: 0.06;
+            opacity: 0.09;
+            filter: hue-rotate(-15deg) saturate(0.6);
+        }
+
+        /* ── Why StarUI section — contrast + structure ── */
+
+        /* Background scrim — anchors text contrast over variable gradient */
+        .why-starui-section {
+            background: linear-gradient(180deg,
+                transparent 0%,
+                rgba(11, 18, 33, 0.15) 12%,
+                rgba(11, 18, 33, 0.18) 50%,
+                rgba(11, 18, 33, 0.15) 88%,
+                transparent 100%);
+        }
+        [data-theme="light"] .why-starui-section {
+            background: linear-gradient(180deg,
+                transparent 0%,
+                rgba(255, 255, 255, 0.12) 12%,
+                rgba(255, 255, 255, 0.15) 50%,
+                rgba(255, 255, 255, 0.12) 88%,
+                transparent 100%);
+        }
+
+        /* Vertical divider — gradient accent line (sunset→transparent) */
+        @media (min-width: 768px) {
+            .why-starui-left {
+                border-right: 1px solid;
+                border-image: linear-gradient(to bottom,
+                    rgba(251, 146, 60, 0.35) 0%,
+                    rgba(251, 146, 60, 0.10) 70%,
+                    transparent 100%) 1;
+            }
+            [data-theme="light"] .why-starui-left {
+                border-image: linear-gradient(to bottom,
+                    rgba(146, 64, 14, 0.30) 0%,
+                    rgba(146, 64, 14, 0.08) 70%,
+                    transparent 100%) 1;
+            }
+        }
+
+        /* Principle description left accent — themed */
+        .principle-accent {
+            border-left: 1px solid rgba(251, 146, 60, 0.12);
+        }
+        [data-theme="light"] .principle-accent {
+            border-left: 1px solid rgba(120, 100, 80, 0.22);
+        }
+
+        /* Principle row hairline separators */
+        .principle-row + .principle-row {
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 2.5rem;
+        }
+        [data-theme="light"] .principle-row + .principle-row {
+            border-top: 1px solid rgba(120, 100, 80, 0.10);
+        }
+
+        /* ── Constellation section (FIG. 03) — contrast scrim ── */
+        .constellation-section {
+            background: linear-gradient(180deg,
+                transparent 0%,
+                rgba(11, 18, 33, 0.12) 12%,
+                rgba(11, 18, 33, 0.15) 50%,
+                rgba(11, 18, 33, 0.12) 88%,
+                transparent 100%);
+        }
+        [data-theme="light"] .constellation-section {
+            background: linear-gradient(180deg,
+                transparent 0%,
+                rgba(255, 255, 255, 0.10) 12%,
+                rgba(255, 255, 255, 0.12) 50%,
+                rgba(255, 255, 255, 0.10) 88%,
+                transparent 100%);
+        }
+
+        /* ── CTA section — contrast scrim (warmest gradient zone) ── */
+        .cta-section {
+            background: linear-gradient(180deg,
+                transparent 0%,
+                rgba(11, 18, 33, 0.20) 15%,
+                rgba(11, 18, 33, 0.25) 50%,
+                rgba(11, 18, 33, 0.20) 85%,
+                transparent 100%);
+        }
+        [data-theme="light"] .cta-section {
+            background: linear-gradient(180deg,
+                transparent 0%,
+                rgba(255, 255, 255, 0.15) 15%,
+                rgba(255, 255, 255, 0.20) 50%,
+                rgba(255, 255, 255, 0.15) 85%,
+                transparent 100%);
         }
 
         /* ── Section border ── */
@@ -1178,7 +1260,39 @@ def _landing_styles() -> FT:
         }
 
         [data-theme="light"] .section-border-top {
-            border-top-color: rgba(120, 100, 80, 0.12);
+            border-top-color: rgba(120, 100, 80, 0.18);
+        }
+
+        /* ── Header star mark hover rotation ── */
+        .star-mark-header {
+            transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .star-mark-header:hover,
+        a:hover .star-mark-header {
+            transform: rotate(90deg);
+        }
+
+        /* ── Footer: Observation Log ── */
+        .obs-log-repo {
+            display: flex;
+            align-items: baseline;
+            gap: 0.75rem;
+        }
+        .obs-log-repo-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+        }
+        .obs-log-repo-desc {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 0.95rem;
+        }
+        .obs-log-dash {
+            flex-shrink: 0;
+            width: 2rem;
+            height: 1px;
+            background: currentColor;
+            opacity: 0.2;
         }
     """)
 
@@ -1220,10 +1334,8 @@ def _generate_starfield() -> tuple:
 def LandingLayout(
     *content,
     header: HeaderConfig | None = None,
-    footer: FooterConfig | None = None,
 ) -> FT:
     header = header or HeaderConfig()
-    footer = footer or FooterConfig()
 
     return Div(
         _landing_styles(),
@@ -1252,13 +1364,5 @@ def LandingLayout(
         Div(DocsHeader(header), cls="landing-header relative z-50"),
         # Content
         Main(*content, cls="relative z-10"),
-        # Footer
-        Div(
-            DocsFooter(
-                attribution=footer.attribution,
-                hosting_info=footer.hosting_info,
-            ),
-            cls="relative z-10",
-        ),
         cls="landing-page flex min-h-screen flex-col relative",
     )

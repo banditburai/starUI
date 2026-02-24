@@ -4,7 +4,7 @@ CATEGORY = "ui"
 ORDER = 10
 STATUS = "stable"
 
-from starhtml import Div, P, Input, Label, Icon, Span, Signal
+from starhtml import Div, P, Input, Label, Icon, Span, Signal, js
 from starui.registry.components.button import Button
 from utils import auto_generate_page, Prop, build_api_reference, with_code
 from widgets.component_preview import ComponentPreview
@@ -93,7 +93,7 @@ def form_integration_example():
         Button(
             "Submit",
             data_attr_disabled=name.eq(""),
-            data_on_click=f"alert('Hello ' + {name} + '!')"
+            data_on_click=js("alert('Hello ' + $name + '!')")
         ),
         P("Button is disabled until you enter a name", cls="text-sm text-gray-600 mt-2"),
         cls="w-full max-w-sm mx-auto"

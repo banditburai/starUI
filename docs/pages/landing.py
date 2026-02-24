@@ -7,6 +7,18 @@ Dark mode: navy→warm horizon. Light mode: cool dawn gradient.
 from starhtml import *
 from starhtml.plugins import in_view, press
 from starui.registry.components.code_block import CodeBlock as StarlighterCode
+from starui.registry.components.button import Button as StarButton
+from starui.registry.components.card import (
+    Card as StarCard, CardHeader, CardTitle, CardDescription, CardContent,
+)
+from starui.registry.components.input import Input as StarInput
+from starui.registry.components.label import Label as StarLabel
+from starui.registry.components.switch import Switch as StarSwitch
+from starui.registry.components.tabs import Tabs, TabsList, TabsTrigger, TabsContent
+from starui.registry.components.command import (
+    Command, CommandInput, CommandList, CommandGroup,
+    CommandItem, CommandEmpty, CommandSeparator, CommandShortcut,
+)
 
 
 
@@ -14,7 +26,7 @@ from starui.registry.components.code_block import CodeBlock as StarlighterCode
 
 def _star_mark(cls: str = "") -> FT:
     return Svg(
-        Path(d="M12 2L14 10L22 12L14 14L12 22L10 14L2 12L10 10Z", fill="currentColor"),
+        SvgPath(d="M12 2L14 10L22 12L14 14L12 22L10 14L2 12L10 10Z", fill="currentColor"),
         viewBox="0 0 24 24",
         cls=f"star-mark w-5 h-5 text-sunset inline-block align-middle {cls}",
         aria_hidden="true",
@@ -375,188 +387,238 @@ def profile():
     )
 
 
-# ── Component explorer previews ───────────────────────────────────
+# ── Component explorer previews (real StarUI registry components) ──
 
 
 def _explorer_command() -> FT:
-    """Command palette — search input + categorized suggestion list."""
-    return Div(
-        Div(
-            Icon("lucide:search", width="16", height="16", cls="mini-text-dim"),
-            Span("Type a command or search...", cls="text-sm mini-text-dim font-light"),
-            cls="flex items-center gap-3 px-4 py-3.5 border-b mini-border",
+    """Command palette — real StarUI Command component."""
+    return Command(
+        CommandInput(placeholder="Type a command or search..."),
+        CommandList(
+            CommandGroup(
+                CommandItem(
+                    Icon("lucide:calendar", width="15", height="15"),
+                    "Calendar",
+                    value="calendar",
+                ),
+                CommandItem(
+                    Icon("lucide:smile", width="15", height="15"),
+                    "Search Emoji",
+                    value="search-emoji",
+                    keywords="emoji",
+                ),
+                CommandItem(
+                    Icon("lucide:calculator", width="15", height="15"),
+                    "Calculator",
+                    value="calculator",
+                ),
+                heading="Suggestions",
+            ),
+            CommandSeparator(),
+            CommandGroup(
+                CommandItem(
+                    Icon("lucide:user", width="15", height="15"),
+                    "Profile",
+                    CommandShortcut("\u2318P"),
+                    value="profile",
+                ),
+                CommandItem(
+                    Icon("lucide:credit-card", width="15", height="15"),
+                    "Billing",
+                    CommandShortcut("\u2318B"),
+                    value="billing",
+                ),
+                heading="Settings",
+            ),
+            CommandEmpty(),
         ),
-        Div(
-            Span("Suggestions", cls="text-[11px] mini-text-dim font-medium block px-2 py-2"),
-            Div(
-                Icon("lucide:calendar", width="15", height="15"),
-                Span("Calendar", cls="text-sm font-medium"),
-                cls="flex items-center gap-3 px-3 py-2.5 rounded-lg mini-text explorer-active-row",
-            ),
-            Div(
-                Icon("lucide:smile", width="15", height="15", cls="mini-text-dim"),
-                Span("Search Emoji", cls="text-sm"),
-                cls="flex items-center gap-3 px-3 py-2.5 rounded-lg mini-text-dim",
-            ),
-            Div(
-                Icon("lucide:calculator", width="15", height="15", cls="mini-text-dim"),
-                Span("Calculator", cls="text-sm"),
-                cls="flex items-center gap-3 px-3 py-2.5 rounded-lg mini-text-dim",
-            ),
-            Div(cls="h-px mini-divider mx-2 my-1"),
-            Span("Settings", cls="text-[11px] mini-text-dim font-medium block px-2 py-2"),
-            Div(
-                Div(Icon("lucide:user", width="15", height="15"), Span("Profile", cls="text-sm"), cls="flex items-center gap-3"),
-                Span("⌘P", cls="text-[10px] px-1.5 py-0.5 rounded mini-bg-secondary mini-text-dim"),
-                cls="flex items-center justify-between px-3 py-2.5 rounded-lg mini-text-dim",
-            ),
-            Div(
-                Div(Icon("lucide:credit-card", width="15", height="15"), Span("Billing", cls="text-sm"), cls="flex items-center gap-3"),
-                Span("⌘B", cls="text-[10px] px-1.5 py-0.5 rounded mini-bg-secondary mini-text-dim"),
-                cls="flex items-center justify-between px-3 py-2.5 rounded-lg mini-text-dim",
-            ),
-            cls="p-2",
-        ),
-        cls="mini-surface rounded-xl w-full max-w-md overflow-hidden shadow-xl",
+        signal="cmd_explorer",
+        cls="w-full max-w-md shadow-xl",
     )
 
 
 def _explorer_card() -> FT:
-    """Create account card with social login + form."""
+    """Create account card — real StarUI Card + Input + Button components."""
+    email = Signal("exp_email", "")
+
     return Div(
-        Div(
-            P("Create account", cls="text-base font-medium mini-text"),
-            P("Enter your email below to create your account", cls="text-xs mini-text-dim mt-1"),
-            cls="mb-5",
-        ),
-        Div(
-            Div(
-                Icon("simple-icons:github", width="14", height="14"),
-                Span("Github", cls="text-sm font-medium"),
-                cls="flex items-center justify-center gap-2 w-full py-2.5 rounded-md border mini-border mini-text",
+        email,
+        StarCard(
+            CardHeader(
+                CardTitle("Create account"),
+                CardDescription("Enter your email below to create your account"),
             ),
-            Div(
-                Icon("simple-icons:google", width="14", height="14"),
-                Span("Google", cls="text-sm font-medium"),
-                cls="flex items-center justify-center gap-2 w-full py-2.5 rounded-md border mini-border mini-text",
+            CardContent(
+                Div(
+                    StarButton(
+                        Icon("simple-icons:github", width="14", height="14"),
+                        "Github",
+                        variant="outline",
+                        cls="w-full",
+                    ),
+                    StarButton(
+                        Icon("simple-icons:google", width="14", height="14"),
+                        "Google",
+                        variant="outline",
+                        cls="w-full",
+                    ),
+                    cls="grid gap-2 mb-4",
+                ),
+                Div(
+                    Div(cls="flex-1 h-px bg-border"),
+                    Span("Or continue with", cls="text-[10px] text-muted-foreground uppercase px-2 whitespace-nowrap"),
+                    Div(cls="flex-1 h-px bg-border"),
+                    cls="flex items-center mb-4",
+                ),
+                Div(
+                    StarLabel("Email"),
+                    StarInput(type="email", placeholder="m@example.com", signal=email),
+                    cls="space-y-1.5 mb-3",
+                ),
+                Div(
+                    StarLabel("Password"),
+                    StarInput(type="password", placeholder="Enter password"),
+                    cls="space-y-1.5 mb-4",
+                ),
+                StarButton("Create Account", cls="w-full"),
             ),
-            cls="grid gap-2 mb-4",
+            cls="w-full max-w-sm shadow-xl",
         ),
-        Div(
-            Div(cls="flex-1 h-px mini-divider"),
-            Span("Or continue with", cls="text-[10px] mini-text-dim uppercase px-2 whitespace-nowrap"),
-            Div(cls="flex-1 h-px mini-divider"),
-            cls="flex items-center mb-4",
-        ),
-        Div(
-            P("Email", cls="text-xs mini-text font-medium mb-1"),
-            Div(Span("m@example.com", cls="text-sm mini-text-dim"), cls="py-2 px-3 rounded-md border mini-border w-full"),
-            cls="mb-3",
-        ),
-        Div(
-            P("Password", cls="text-xs mini-text font-medium mb-1"),
-            Div(cls="py-2 px-3 rounded-md border mini-border w-full h-[36px]"),
-            cls="mb-4",
-        ),
-        Span("Create Account", cls="block text-center py-2.5 rounded-md mini-bg-primary font-medium text-sm w-full"),
-        cls="mini-surface rounded-xl p-6 w-full max-w-sm shadow-xl",
     )
 
 
 def _explorer_switch() -> FT:
-    """Settings panel with toggles and badges."""
-    return Div(
-        Div(
-            Span("Airplane Mode", cls="text-sm mini-text"),
-            Div(
-                Div(cls="w-4 h-4 rounded-full bg-white absolute right-0.5 top-[2px] shadow-sm"),
-                cls="w-9 h-5 rounded-full mini-switch-on relative shrink-0",
-            ),
+    """Settings panel — real StarUI Switch components."""
+    def _toggle_row(label_text: str, sig: str, checked: bool = False) -> FT:
+        return Div(
+            StarLabel(label_text, cls="cursor-pointer"),
+            StarSwitch(signal=sig, checked=checked),
             cls="flex items-center justify-between",
-        ),
-        Div(
-            Span("Notifications", cls="text-sm mini-text-dim"),
+        )
+
+    return StarCard(
+        CardContent(
             Div(
-                Div(cls="w-4 h-4 rounded-full bg-white/70 absolute left-0.5 top-[2px]"),
-                cls="w-9 h-5 rounded-full mini-switch-off relative shrink-0",
+                _toggle_row("Airplane Mode", "sw_airplane", True),
+                _toggle_row("Notifications", "sw_notifs"),
+                _toggle_row("Dark Mode", "sw_dark", True),
+                cls="space-y-4",
             ),
-            cls="flex items-center justify-between",
-        ),
-        Div(
-            Span("Dark Mode", cls="text-sm mini-text"),
+            Div(cls="h-px bg-border my-3"),
             Div(
-                Div(cls="w-4 h-4 rounded-full bg-white absolute right-0.5 top-[2px] shadow-sm"),
-                cls="w-9 h-5 rounded-full mini-switch-on relative shrink-0",
+                Span("Active", cls="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#FB923C] text-white"),
+                Span("Beta", cls="px-2.5 py-0.5 rounded-full text-[11px] font-medium border text-muted-foreground"),
+                cls="flex gap-2",
             ),
-            cls="flex items-center justify-between",
         ),
-        Div(cls="h-px mini-divider my-2"),
-        Div(
-            Span("Active", cls="px-2.5 py-0.5 rounded-full text-[11px] font-medium mini-switch-on text-white"),
-            Span("Beta", cls="px-2.5 py-0.5 rounded-full text-[11px] font-medium border mini-border mini-text-dim"),
-            cls="flex gap-2",
-        ),
-        cls="mini-surface rounded-xl p-5 w-full max-w-xs space-y-4 shadow-xl",
+        cls="w-full max-w-xs shadow-xl",
     )
 
 
 def _explorer_dialog() -> FT:
-    """Alert dialog confirmation."""
+    """Alert dialog confirmation — real StarUI Button components, inline layout."""
+    confirmed = Signal("exp_confirmed", False)
+
     return Div(
-        P("Are you absolutely sure?", cls="text-base font-medium mini-text"),
-        P(
-            "This action cannot be undone. This will permanently delete your account and remove your data from our servers.",
-            cls="text-sm mini-text-dim mt-2 leading-relaxed",
+        confirmed,
+        StarCard(
+            CardContent(
+                # Default state — confirmation prompt
+                Div(
+                    H2("Are you absolutely sure?", cls="text-base font-medium"),
+                    P(
+                        "This action cannot be undone. This will permanently delete your account and remove your data from our servers.",
+                        cls="text-sm text-muted-foreground mt-2 leading-relaxed",
+                    ),
+                    Div(
+                        StarButton("Cancel", variant="outline"),
+                        StarButton("Continue", data_on_click=confirmed.set(True)),
+                        cls="flex justify-end gap-3 mt-6",
+                    ),
+                    data_show=~confirmed,
+                ),
+                # Confirmed state — success message
+                Div(
+                    Div(
+                        Icon("lucide:check-circle", width="24", height="24", cls="text-[#4ade80]"),
+                        cls="mb-3",
+                    ),
+                    H2("Account deleted.", cls="text-base font-medium"),
+                    P("Your data has been permanently removed.", cls="text-sm text-muted-foreground mt-1"),
+                    StarButton("Done", variant="outline", data_on_click=confirmed.set(False), cls="mt-4"),
+                    data_show=confirmed,
+                ),
+            ),
+            cls="w-full max-w-md shadow-xl",
         ),
-        Div(
-            Span("Cancel", cls="px-4 py-2 text-sm rounded-md border mini-border mini-text font-medium"),
-            Span("Continue", cls="px-4 py-2 text-sm rounded-md mini-bg-primary font-medium"),
-            cls="flex justify-end gap-3 mt-6",
-        ),
-        cls="mini-surface rounded-xl p-6 w-full max-w-md shadow-xl",
     )
 
 
 def _explorer_tabs() -> FT:
-    """Tab interface with account settings form."""
-    return Div(
-        Div(
-            Span("Account", cls="text-sm font-medium mini-text px-4 py-2 rounded-md mini-bg-secondary"),
-            Span("Password", cls="text-sm mini-text-dim px-4 py-2"),
-            cls="flex gap-1 p-1 rounded-lg mini-bg-secondary w-fit mb-5",
+    """Tab interface — real StarUI Tabs component."""
+    return StarCard(
+        CardContent(
+            Tabs(
+                TabsList(
+                    TabsTrigger("Account", id="account"),
+                    TabsTrigger("Password", id="password"),
+                ),
+                TabsContent(
+                    P("Make changes to your account here.", cls="text-sm text-muted-foreground mb-4"),
+                    Div(
+                        StarLabel("Name"),
+                        StarInput(value="Pedro Duarte"),
+                        cls="space-y-1.5 mb-3",
+                    ),
+                    Div(
+                        StarLabel("Username"),
+                        StarInput(value="@peduarte"),
+                        cls="space-y-1.5 mb-5",
+                    ),
+                    StarButton("Save changes"),
+                    id="account",
+                ),
+                TabsContent(
+                    P("Change your password here.", cls="text-sm text-muted-foreground mb-4"),
+                    Div(
+                        StarLabel("Current password"),
+                        StarInput(type="password"),
+                        cls="space-y-1.5 mb-3",
+                    ),
+                    Div(
+                        StarLabel("New password"),
+                        StarInput(type="password"),
+                        cls="space-y-1.5 mb-5",
+                    ),
+                    StarButton("Save password"),
+                    id="password",
+                ),
+                value="account",
+                signal="exp_tab",
+            ),
         ),
-        P("Make changes to your account here.", cls="text-sm mini-text-dim mb-4"),
-        Div(
-            P("Name", cls="text-xs mini-text font-medium mb-1.5"),
-            Div(Span("Pedro Duarte", cls="text-sm mini-text"), cls="py-2 px-3 rounded-md border mini-border w-full"),
-            cls="mb-3",
-        ),
-        Div(
-            P("Username", cls="text-xs mini-text font-medium mb-1.5"),
-            Div(Span("@peduarte", cls="text-sm mini-text"), cls="py-2 px-3 rounded-md border mini-border w-full"),
-            cls="mb-5",
-        ),
-        Span("Save changes", cls="inline-block px-4 py-2 rounded-md mini-bg-primary font-medium text-sm"),
-        cls="mini-surface rounded-xl p-6 w-full max-w-sm shadow-xl",
+        cls="w-full max-w-sm shadow-xl",
     )
 
 
 def _explorer_button() -> FT:
-    """Button variants showcase."""
-    return Div(
-        Div(
-            Span("Primary", cls="px-5 py-2.5 text-sm rounded-md mini-bg-primary font-medium"),
-            Span("Secondary", cls="px-5 py-2.5 text-sm rounded-md mini-bg-secondary mini-text font-medium"),
-            Span("Outline", cls="px-5 py-2.5 text-sm rounded-md border mini-border mini-text font-medium"),
-            cls="flex flex-wrap items-center gap-3 mb-5",
+    """Button variants — real StarUI Button component."""
+    return StarCard(
+        CardContent(
+            Div(
+                StarButton("Primary"),
+                StarButton("Secondary", variant="secondary"),
+                StarButton("Outline", variant="outline"),
+                cls="flex flex-wrap items-center gap-3 mb-5",
+            ),
+            Div(
+                StarButton("Destructive", variant="destructive"),
+                StarButton("Ghost", variant="ghost", cls="text-muted-foreground"),
+                StarButton("Link", variant="link"),
+                cls="flex flex-wrap items-center gap-3",
+            ),
         ),
-        Div(
-            Span("Destructive", cls="px-5 py-2.5 text-sm rounded-md bg-red-600 text-white font-medium"),
-            Span("Ghost", cls="px-5 py-2.5 text-sm mini-text-dim font-medium"),
-            Span("Link", cls="px-5 py-2.5 text-sm text-sunset font-medium underline underline-offset-4"),
-            cls="flex flex-wrap items-center gap-3",
-        ),
-        cls="mini-surface rounded-xl p-6 max-w-md shadow-xl",
+        cls="max-w-md shadow-xl",
     )
 
 
@@ -654,7 +716,7 @@ def component_grid_section() -> FT:
             ),
             cls="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
         ),
-        cls="relative z-10 py-24 section-border-top",
+        cls="relative z-10 py-24 section-border-top constellation-section",
     )
 
 
@@ -665,9 +727,9 @@ def why_starui_section() -> FT:
     """FIG. 02 — Editorial 1/3 + 2/3 split with value propositions."""
 
     principles = [
-        ("01", "Own The Code", "No npm packages. No black boxes. The CLI copies component source directly into your project. Customize every pixel."),
-        ("02", "Datastar Signals", "Full client-side reactivity without React. Toggle modals, update counters, and validate forms — all from Python-defined signals."),
-        ("03", "Tailwind v4", "Styled with the latest engine. Dark mode, animations, and full utility support out of the box."),
+        ("01", "Own The Code", "\u2068star add button\u2069 \u2014 that\u2019s it. The CLI copies the source into your project. Read it, modify it, make it yours."),
+        ("02", "Server-First", "The server is the source of truth. Signals handle the rest \u2014 a modal open state, a form validation, a toggle. Client-side state only where you actually need it."),
+        ("03", "Tailwind v4", "The star CLI downloads the Tailwind binary, runs watch mode, and handles minification. No Node. No npm. The entire CSS toolchain is one Python command."),
     ]
 
     return Section(
@@ -675,11 +737,11 @@ def why_starui_section() -> FT:
             Div(
                 Span("FIG. 02", cls="text-[10px] tracking-widest text-sunset font-mono block mb-4"),
                 H3(
-                    "Why StarUI?",
+                    "First Principles",
                     cls="font-display text-3xl mb-6 italic text-moon",
                 ),
                 P(
-                    "Stop fighting the frontend toolchain. StarUI brings the shadcn/ui architecture to Python.",
+                    "The shadcn/ui model, rebuilt for Python. A component library that stays out of your way \u2014 do it all without leaving Python.",
                     cls="font-serif-body text-xl text-moon-dim leading-relaxed",
                 ),
                 # Python logo — large watermark behind column content
@@ -690,7 +752,7 @@ def why_starui_section() -> FT:
                     cls="python-watermark absolute -bottom-8 -right-4 rotate-12 text-sunset pointer-events-none",
                     aria_hidden="true",
                 ),
-                cls="md:w-1/3 md:border-r md:border-white/[0.1] md:pr-8 relative overflow-visible",
+                cls="md:w-1/3 why-starui-left md:pr-8 relative overflow-visible",
                 data_motion=in_view(y=20, opacity=0, duration=500, spring="gentle"),
             ),
             Div(
@@ -706,9 +768,9 @@ def why_starui_section() -> FT:
                         ),
                         P(
                             desc,
-                            cls="pl-10 text-moon-dim font-light leading-relaxed border-l border-white/[0.1] py-2",
+                            cls="pl-10 text-moon-dim leading-relaxed principle-accent py-2",
                         ),
-                        cls="group cursor-default",
+                        cls="group cursor-default principle-row",
                         data_motion=in_view(y=20, opacity=0, duration=500, delay=i * 100, spring="gentle"),
                     )
                     for i, (num, title, desc) in enumerate(principles)
@@ -717,7 +779,7 @@ def why_starui_section() -> FT:
             ),
             cls="max-w-5xl mx-auto flex flex-col md:flex-row gap-16 px-4 sm:px-6 lg:px-8",
         ),
-        cls="relative z-10 py-24 section-border-top",
+        cls="relative z-10 py-24 section-border-top why-starui-section",
     )
 
 
@@ -728,16 +790,18 @@ def cta_section() -> FT:
     return Section(
         Div(
             Div(
+                # Star ornament — breathing, not pulsing
                 Svg(
-                    Path(
-                        d="M12 2L15 10L23 12L15 14L12 22L9 14L1 12L9 10L12 2Z",
+                    SvgPath(
+                        d="M12 2L14 10L22 12L14 14L12 22L10 14L2 12L10 10Z",
                         fill="currentColor",
                     ),
-                    cls="w-8 h-8 mx-auto text-sunset animate-pulse mb-8",
                     viewBox="0 0 24 24",
+                    cls="star-mark w-8 h-8 mx-auto text-sunset mb-8",
+                    aria_hidden="true",
                 ),
                 P(
-                    "Crafted for the Python Cosmos.",
+                    "The observatory is open.",
                     cls="font-display italic text-xl text-moon mb-6",
                 ),
                 # Inline install terminal
@@ -756,19 +820,19 @@ def cta_section() -> FT:
                     A(
                         "Get Started",
                         href="/installation",
-                        cls="btn-star rounded-none",
+                        cls="btn-star rounded-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#FB923C]",
                         data_motion=press(scale=0.97, duration=100),
                     ),
                     A(
                         "View Components",
                         href="/components",
-                        cls="btn-star-outline rounded-none",
+                        cls="btn-star-outline rounded-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#FB923C]",
                         data_motion=press(scale=0.97, duration=100),
                     ),
                     cls="flex flex-wrap items-center justify-center gap-4 mb-8",
                 ),
                 P(
-                    "© 2026 StarUI. Open Source Apache 2.0.",
+                    "\u00a9 2026 StarUI. Open Source Apache 2.0.",
                     cls="text-xs uppercase tracking-[0.2em] text-moon-dim",
                 ),
                 cls="text-center",
@@ -776,5 +840,5 @@ def cta_section() -> FT:
             ),
             cls="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20",
         ),
-        cls="relative z-10 section-border-top",
+        cls="relative z-10 section-border-top cta-section",
     )

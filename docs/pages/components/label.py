@@ -37,13 +37,11 @@ def interactive_validation_example():
             Div(
                 P(
                     "Project names can only contain letters, numbers, and hyphens",
-                    style="display: none",
                     data_show=~project_name_valid & (project_name.length > 0),
                     cls="text-xs text-destructive"
                 ),
                 P(
                     "✓ Valid project name",
-                    style="display: none",
                     data_show=project_name_valid & (project_name.length > 0),
                     cls="text-xs text-green-600"
                 ),
@@ -79,8 +77,8 @@ def interactive_label_controls_example():
                     cls="flex items-center gap-2"
                 ),
                 Button(
-                    Span(Icon("lucide:eye-off", cls="h-3 w-3"), style="display: none", data_show=~show_secret),
-                    Span(Icon("lucide:eye", cls="h-3 w-3"), style="display: none", data_show=show_secret),
+                    Icon("lucide:eye-off", cls="h-3 w-3", data_show=~show_secret),
+                    Icon("lucide:eye", cls="h-3 w-3", data_show=show_secret),
                     data_on_click=[
                         show_secret.set(~show_secret),
                         secret_input.setAttribute("type", show_secret.if_("text", "password"))

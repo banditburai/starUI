@@ -4,7 +4,7 @@ CATEGORY = "form"
 ORDER = 30
 STATUS = "stable"
 
-from starhtml import Div, P, Icon, Span, H3, Form, Code, Signal, js
+from starhtml import Div, P, Icon, Form, Code, Signal, js, seq
 from starui.registry.components.radio_group import RadioGroup, RadioGroupItem, RadioGroupWithLabel
 from starui.registry.components.button import Button
 from starui.registry.components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
@@ -124,11 +124,9 @@ def payment_method_example():
     payment_method = Signal("payment_method", "card")
 
     def PaymentInfo(method, icon):
-        is_initial = payment_method.default == method
         return Div(
             Icon(icon, cls="h-5 w-5 mr-2"),
             P("Secure payment processing", cls="text-sm"),
-            style="" if is_initial else "display: none",
             data_show=payment_method.eq(method),
             cls="flex items-center p-3 bg-muted rounded-md w-full"
         )
@@ -162,7 +160,7 @@ def payment_method_example():
                 ),
                 Button(
                     "Continue to Payment",
-                    data_on_click=js("evt.preventDefault(); alert(`Proceeding with ${$payment_method}`)"),
+                    data_on_click=(js("alert(`Proceeding with ${$payment_method}`)"), dict(prevent=True)),
                     type="submit",
                     cls="w-full mt-4"
                 )
@@ -223,6 +221,7 @@ def interactive_survey_example():
     # Compute answered count from signals
     answered_count = Signal("answered_count", sum(signals[q["signal_name"]] != "" for q in questions))
     total_questions = len(questions)
+    at_end = step == total_questions - 1
 
     return Card(
         CardHeader(
@@ -256,21 +255,25 @@ def interactive_survey_example():
                             signal=signals[q["signal_name"]],
                             required=True
                         ),
-                        style="display: none" if i > 0 else "",
                         data_show=step.eq(i)
                     ) for i, q in enumerate(questions)],
                 ),
                 Div(
                     Button(
                         "Previous",
-                        data_attr_disabled=step.eq(0),
-                        data_on_click=step.add(-1),
+                        data_on_click=(step > 0).then(step.sub(1)),
+                        data_show=step > 0,
                         variant="outline",
-                        disabled=True
                     ),
                     Button(
-                        data_text=step.eq(total_questions - 1).if_("Complete", "Next"),
-                        data_on_click=js(f"if ($step === {total_questions - 1}) {{ $step = 0; {'; '.join(f'${q["signal_name"]} = \"\"' for q in questions)}; }} else {{ $step++; }}"),
+                        data_text=at_end.if_("Complete", "Next"),
+                        data_on_click=[
+                            at_end.then(seq(
+                                step.set(0),
+                                *[signals[q["signal_name"]].set("") for q in questions]
+                            )),
+                            (~at_end).then(step.add(1)),
+                        ],
                         variant="default"
                     ),
                     cls="flex justify-between mt-6"

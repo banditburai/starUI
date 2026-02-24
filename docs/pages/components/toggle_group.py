@@ -64,7 +64,6 @@ def view_mode_switcher_example():
                 Div("Item 3", cls="p-4 border rounded bg-muted"),
                 Div("Item 4", cls="p-4 border rounded bg-muted"),
                 cls="grid grid-cols-2 gap-2",
-                style="display: none",
                 data_show=view_mode.eq("grid")
             ),
             Div(
@@ -72,7 +71,6 @@ def view_mode_switcher_example():
                 Div("Item 2", cls="p-3 border rounded bg-muted mb-2"),
                 Div("Item 3", cls="p-3 border rounded bg-muted mb-2"),
                 Div("Item 4", cls="p-3 border rounded bg-muted"),
-                style="display: none",
                 data_show=view_mode.eq("list")
             ),
             Div(
@@ -86,7 +84,6 @@ def view_mode_switcher_example():
                     P("Description for item 2", cls="text-sm text-muted-foreground"),
                     cls="p-4 border rounded bg-muted mb-3"
                 ),
-                style="display: none",
                 data_show=view_mode.eq("card")
             ),
             cls="mt-6 min-h-[200px]"
@@ -299,7 +296,6 @@ def form_integration_example():
                 cls="w-full"
             ),
             cls="mb-6",
-            style="display: none",
             data_show=communication_methods.length > 0
         ),
         Div(

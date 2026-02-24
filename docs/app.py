@@ -437,28 +437,28 @@ Div(
             ),
             
             Div(
-                H2("What's Next?", cls="text-3xl font-bold tracking-tight mb-8 mt-16"),
+                H2("Onwards", cls="text-2xl font-semibold tracking-tight mb-8 mt-16"),
                 Div(
                     _next_step_card(
-                        "lucide:palette",
-                        "Explore Components", 
-                        "Browse our comprehensive component library with live examples and code samples.",
+                        "01",
+                        "The Constellation",
+                        "34+ components. Every one interactive, every one yours to modify.",
                         "/components",
-                        "View Components"
+                        "Browse Components",
                     ),
                     _next_step_card(
-                        "lucide:book-open",
-                        "Read the Documentation",
-                        "Learn advanced patterns, theming, and best practices for building with StarUI.",
-                        "/docs", 
-                        "Read Docs"
+                        "02",
+                        "The Field Guide",
+                        "Signals, reactivity, the server-first model \u2014 learn the framework beneath the components.",
+                        "https://starhtml.com",
+                        "Visit StarHTML",
                     ),
                     _next_step_card(
-                        "lucide:github",
-                        "Join the Community",
-                        "Contribute to the project, report issues, or get help from other developers.",
+                        "03",
+                        "The Source",
+                        "Apache 2.0. Read the code, open an issue, send a patch.",
                         "https://github.com/banditburai/starui",
-                        "Visit GitHub"
+                        "View on GitHub",
                     ),
                     cls="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6"
                 ),
@@ -473,23 +473,17 @@ Div(
     )
 
 
-def _next_step_card(icon: str, title: str, description: str, href: str, button_text: str) -> FT:
-    return Div(
+def _next_step_card(num: str, title: str, description: str, href: str, button_text: str) -> FT:
+    return A(
         Div(
-            Div(
-                Icon(icon, width="28", height="28", cls="text-primary"),
-                cls="mb-6 w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20"
-            ),
-            H3(title, cls="text-xl font-semibold mb-3"),
-            P(description, cls="text-muted-foreground mb-6 leading-relaxed flex-1"),
-            A(
-                button_text,
-                href=href,
-                cls="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2"
-            ),
-            cls="p-6 h-full flex flex-col"
+            Span(num, cls="text-xs font-mono text-muted-foreground tracking-widest"),
+            H3(title, cls="text-base font-medium mt-2 mb-2 group-hover:text-primary transition-colors"),
+            P(description, cls="text-sm text-muted-foreground leading-relaxed flex-1"),
+            Span(button_text, " \u2192", cls="text-sm font-medium text-primary mt-4 inline-block"),
+            cls="p-5 h-full flex flex-col",
         ),
-        cls="border rounded-xl bg-gradient-to-br from-background to-muted/20 hover:shadow-lg hover:border-primary/30 transition-all duration-300 h-full"
+        href=href,
+        cls="group border rounded-lg hover:border-primary/30 transition-colors h-full block",
     )
 
 
@@ -511,7 +505,7 @@ iframe_app, iframe_rt = star_app(
                 document.documentElement.setAttribute('data-theme', theme);
             })();
         """),
-        # Add CSS for theme toggle icon switching
+        # CSS for theme toggle icon switching
         Style("""
             [data-theme="light"] .theme-icon-alt,
             [data-theme="dark"] .theme-icon-default {

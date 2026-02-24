@@ -212,8 +212,8 @@ def download_manager_example():
                             cls="flex-1 ml-3"
                         ),
                         Button(
-                            Span(Icon("lucide:play", cls="h-4 w-4"), data_show=download1_paused),
-                            Span(Icon("lucide:pause", cls="h-4 w-4"), data_show=~download1_paused),
+                            Icon("lucide:play", cls="h-4 w-4", data_show=download1_paused),
+                            Icon("lucide:pause", cls="h-4 w-4", data_show=~download1_paused),
                             data_on_click=download1_paused.toggle(),
                             variant="ghost",
                             size="sm",

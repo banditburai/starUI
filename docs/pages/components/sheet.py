@@ -12,7 +12,7 @@ STATUS = "stable"
 
 import re
 
-from starhtml import Div, P, H3, H4, Span, Icon, Img, Form, Hr, Signal, js
+from starhtml import Div, P, H3, H4, Span, Icon, Img, Form, Hr, Signal
 from starui.registry.components.sheet import (
     Sheet, SheetTrigger, SheetContent, SheetClose,
     SheetHeader, SheetFooter, SheetTitle, SheetDescription
@@ -174,7 +174,7 @@ def shopping_cart_sheet_example():
                     Div(
                         Div(
                             Span("Subtotal", cls="text-sm"),
-                            Span("$", data_text=js("$subtotal.toFixed(2)"), cls="text-sm font-bold"),
+                            Span(data_text="$" + subtotal.toFixed(2), cls="text-sm font-bold"),
                             cls="flex justify-between"
                         ),
                         Div(
@@ -184,13 +184,13 @@ def shopping_cart_sheet_example():
                         ),
                         Div(
                             Span(f"Tax ({int(tax_rate * 100)}%)", cls="text-sm"),
-                            Span("$", data_text=js("$tax.toFixed(2)"), cls="text-sm"),
+                            Span(data_text="$" + tax.toFixed(2), cls="text-sm"),
                             cls="flex justify-between"
                         ),
                         Hr(cls="my-3"),
                         Div(
                             Span("Total", cls="text-base font-bold"),
-                            Span("$", data_text=js("$total.toFixed(2)"), cls="text-base font-bold"),
+                            Span(data_text="$" + total.toFixed(2), cls="text-base font-bold"),
                             cls="flex justify-between"
                         ),
                         cls="space-y-2"
@@ -450,7 +450,6 @@ def notification_panel_sheet_example():
                 size="sm",
                 cls="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-muted"
             ),
-            style="display: none",
             data_show=notif_signal,
             cls="flex items-start p-4 border-b hover:bg-muted/30 transition-colors"
         )
@@ -461,7 +460,6 @@ def notification_panel_sheet_example():
             "Notifications",
             Badge(
                 data_text=notif_count,
-                style="display: none",
                 data_show=has_notifications,
                 variant="destructive",
                 cls="ml-2 text-xs"
@@ -474,7 +472,6 @@ def notification_panel_sheet_example():
                     "Recent Notifications",
                     Badge(
                         data_text=notif_count.if_(notif_count, ""),
-                        style="display: none",
                         data_show=has_notifications,
                         variant="destructive",
                         cls="ml-2 text-xs"
@@ -488,7 +485,6 @@ def notification_panel_sheet_example():
                 Div(
                     Icon("lucide:inbox", cls="h-12 w-12 text-muted-foreground mb-2"),
                     P("No notifications", cls="text-sm text-muted-foreground"),
-                    style="display: none",
                     data_show=~has_notifications,
                     cls="flex flex-col items-center justify-center py-12"
                 ),
@@ -617,9 +613,8 @@ def contact_form_sheet_example():
                     SheetClose("Cancel", variant="outline", cls="flex-1 mr-2"),
                     Button(
                         "Send Message",
-                        type="submit",
+                        type="button",
                         data_attr_disabled=~(contact_name & contact_email & contact_subject_value & contact_message),
-                        data_on_click="evt.preventDefault()",
                         cls="flex-1"
                     ),
                     cls="flex gap-2 w-full"

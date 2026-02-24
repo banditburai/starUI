@@ -76,13 +76,11 @@ def reactive_input_validation_example():
             Div(
                 P(
                     "Username must be at least 3 characters, letters/numbers/underscores only",
-                    style="display: none",
                     data_show=~username_valid & (username.length > 0),
                     cls="text-xs text-destructive break-words"
                 ),
                 P(
                     "✓ Username is available",
-                    style="display: none",
                     data_show=username_valid & (username.length > 0),
                     cls="text-xs text-green-600"
                 ),
@@ -103,13 +101,11 @@ def reactive_input_validation_example():
             Div(
                 P(
                     "Please enter a valid email address",
-                    style="display: none",
                     data_show=~user_email_valid & (user_email.length > 0),
                     cls="text-xs text-destructive break-words"
                 ),
                 P(
                     "✓ Valid email format",
-                    style="display: none",
                     data_show=user_email_valid & (user_email.length > 0),
                     cls="text-xs text-green-600"
                 ),
@@ -150,7 +146,6 @@ def input_with_buttons_example():
             ),
             P(
                 "✓ Successfully subscribed!",
-                style="display: none",
                 data_show=subscribed,
                 cls="text-sm text-green-600"
             ),
@@ -177,7 +172,6 @@ def input_with_buttons_example():
             P(
                 "Searching for: ",
                 Span(data_text=search_query, cls="font-medium"),
-                style="display: none",
                 data_show=search_query,
                 cls="text-sm text-muted-foreground"
             ),
@@ -294,10 +288,9 @@ def file_upload_inputs_example():
                 cls="flex items-center"
             ),
             P("PNG, JPG up to 2MB", data_show=~file_error & ~file_name, cls="text-xs text-muted-foreground mt-1.5"),
-            P(data_text=file_error, style="display: none", data_show=file_error, cls="text-xs text-destructive mt-1.5"),
+            P(data_text=file_error, data_show=file_error, cls="text-xs text-destructive mt-1.5"),
             P(
                 "✓ File ready to upload",
-                style="display: none",
                 data_show=file_name & ~file_error,
                 cls="text-xs text-green-600 mt-1.5"
             ),

@@ -368,7 +368,7 @@ def interactive_form_hover_card_example():
                                 cls="w-full",
                                 data_attr_disabled=~contact_name | ~contact_email | ~contact_message,
                                 data_on_click=[
-                                    f"alert('Thank you ' + {contact_name} + '! Your message has been sent.')",
+                                    js("alert('Thank you ' + $contact_name + '! Your message has been sent.')"),
                                     contact_name.set(''),
                                     contact_email.set(''),
                                     contact_message.set('')
