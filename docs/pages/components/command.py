@@ -2,8 +2,7 @@
 Command component documentation - Command palette for searching and executing actions.
 """
 
-from starhtml import Div, P, Span, Icon, Hr, Kbd, Input, Signal, js
-from starhtml.datastar import clipboard
+from starhtml import Div, P, Span, Icon, Hr, Kbd, Input, Signal, js, clipboard
 from starui.registry.components.command import (
     Command, CommandInput, CommandList, CommandEmpty,
     CommandGroup, CommandItem, CommandSeparator, CommandShortcut,

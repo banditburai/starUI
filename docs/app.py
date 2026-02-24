@@ -8,11 +8,19 @@ from contextlib import asynccontextmanager
 sys.path.insert(0, str(Path(__file__).parent))
 
 from starhtml import *
-from starhtml import position_handler
+from starhtml.plugins import motion, scroll
 
 from component_registry import get_registry
-from layouts.base import DocsLayout, LayoutConfig, FooterConfig, SidebarConfig
+from layouts.base import DocsLayout, LayoutConfig, SidebarConfig
+from layouts.landing import LandingLayout
 from pages.components_index import create_components_index
+from pages.landing import (
+    hero_section,
+    code_example_section,
+    component_grid_section,
+    why_starui_section,
+    cta_section,
+)
 
 DOCS_SIDEBAR_SECTIONS = []
 
@@ -81,7 +89,6 @@ async def initialize_docs_sidebar():
         {
             "title": "Getting Started",
             "items": [
-                {"href": "/docs", "label": "Introduction"},
                 {"href": "/installation", "label": "Installation"},
             ]
         },
@@ -96,16 +103,18 @@ app, rt = star_app(
     title="StarUI Documentation",
     live=True,
     hdrs=(
-        fouc_script(use_data_theme=True),
+        theme_script(use_data_theme=True),
         Link(rel="stylesheet", href="/static/css/starui.css"),
-        position_handler(),
+        Link(rel="preconnect", href="https://fonts.googleapis.com"),
+        Link(rel="preconnect", href="https://fonts.gstatic.com", crossorigin=""),
+        Link(rel="stylesheet", href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Inter:wght@200;300;400&family=Playfair+Display:ital,wght@0,400;0,500;1,400&display=swap"),
+        iconify_script(),
     ),
     htmlkw=dict(lang="en", dir="ltr"),
     bodykw=dict(cls="min-h-screen bg-background text-foreground"),
-    iconify=True,
-    clipboard=True,
     lifespan=lifespan,
 )
+app.register(position, clipboard, motion, scroll)
 
 DOCS_NAV_ITEMS = [
     {"href": "/components", "label": "Components"},
@@ -116,290 +125,12 @@ DOCS_NAV_ITEMS = [
 
 @rt("/")
 def home():
-    return DocsLayout(
-        Div(
-            Div(
-                H1("StarUI", cls="text-4xl font-bold tracking-tight mb-4"),
-                P(
-                    "Beautiful, accessible components built with StarHTML and Tailwind CSS.",
-                    cls="text-xl text-muted-foreground mb-8",
-                ),
-                Div(
-                    A(
-                        "Get Started",
-                        href="/installation",
-                        cls="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 mr-4",
-                    ),
-                    A(
-                        "View Components",
-                        href="/components",
-                        cls="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2",
-                    ),
-                    cls="flex gap-4",
-                ),
-                cls="text-center py-16",
-            ),
-            Div(
-                H2("Features", cls="text-3xl font-bold text-center mb-12"),
-                Div(
-                    _feature_card(
-                        "lucide:server",
-                        "Python-First Architecture",
-                        "Write modern UI entirely in Python. No JSX, no build steps, no client-side frameworks. Pure server-side rendering with progressive enhancement."
-                    ),
-                    _feature_card(
-                        "lucide:terminal",
-                        "CLI-Driven Workflow",
-                        "Install components instantly with `star add button`. Dependencies resolved automatically. Full type safety and IDE support out of the box."
-                    ),
-                    _feature_card(
-                        "lucide:zap",
-                        "Reactive Without React",
-                        "Datastar powers reactive patterns while keeping logic server-side. Get modern UX without JavaScript complexity or hydration delays."
-                    ),
-                    _feature_card(
-                        "lucide:shield-check",
-                        "Zero Runtime Overhead",
-                        "Components render complete HTML on the server. No bundle sizes, no waterfall loading, perfect SEO, and instant time-to-interactive."
-                    ),
-                    cls="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6",
-                ),
-                cls="py-16",
-            ),
-            cls="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8",
-        ),
-        layout=LayoutConfig(
-            title="StarUI Documentation",
-            description="A comprehensive UI component library for StarHTML applications.",
-        ),
-        footer=FooterConfig(
-            attribution="Built with StarHTML",
-            hosting_info="Component library for Python web apps",
-        ),
-    )
-
-
-def _feature_card(icon: str, title: str, description: str) -> FT:
-    return Div(
-        Div(
-            Div(
-                Icon(icon, width="32", height="32", cls="text-primary/60 dark:text-primary/70 relative z-10"),
-                cls="relative mb-6 w-12 h-12 rounded-xl bg-gradient-to-br from-primary/8 via-primary/4 to-primary/12 dark:from-primary/15 dark:via-primary/8 dark:to-primary/25 shadow-inner dark:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.3),inset_-1px_-1px_2px_rgba(255,255,255,0.1)] flex items-center justify-center backdrop-blur-sm border border-primary/10 dark:border-primary/20"
-            ),
-            H3(title, cls="text-xl font-semibold mb-2"),
-            P(description, cls="text-sm text-muted-foreground"),
-            cls="text-center p-6",
-        ),
-        cls="group hover:shadow-lg hover:border-primary/30 transition-all duration-300 cursor-pointer h-full bg-gradient-to-br from-background via-background/80 to-muted/50 backdrop-blur-sm relative overflow-hidden border rounded-lg",
-    )
-
-
-def _docs_feature_card(emoji: str, text: str) -> FT:
-    return Div(
-        Div(
-            Span(emoji, cls="text-2xl mb-2 block"),
-            P(text, cls="text-sm"),
-            cls="text-center p-4"
-        ),
-        cls="border rounded-lg bg-gradient-to-br from-background via-background/80 to-muted/50 hover:shadow-md transition-all duration-200"
-    )
-
-
-def _professional_feature_card(title: str, description: str, icon: str) -> FT:
-    return Div(
-        Div(
-            Div(
-                Icon(icon, width="24", height="24", cls="text-primary/70"),
-                cls="mb-6 w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center"
-            ),
-            H3(title, cls="text-xl font-semibold mb-4"),
-            P(description, cls="text-muted-foreground leading-relaxed"),
-            cls="p-4 sm:p-6"
-        ),
-        cls="border rounded-xl bg-gradient-to-br from-background to-muted/20 hover:shadow-lg hover:border-primary/30 transition-all duration-300 h-full"
-    )
-
-
-def _workflow_card(title: str, description: str, code: str, caption: str) -> FT:
-    from starui.registry.components.code_block import CodeBlock
-    
-    return Div(
-        Div(
-            H3(title, cls="text-lg font-semibold mb-3"),
-            P(description, cls="text-sm text-muted-foreground mb-4"),
-            Div(
-                CodeBlock(code, language="python", cls="text-sm border rounded-md overflow-x-auto", style="scrollbar-width: thin; scrollbar-color: transparent transparent;"),
-                P(caption, cls="text-xs text-muted-foreground mt-2"),
-                cls="mb-0"
-            ),
-            cls="p-4 sm:p-6"
-        ),
-        cls="border rounded-lg bg-gradient-to-br from-background to-muted/10 hover:shadow-md transition-all duration-200 h-full"
-    )
-
-
-def _feature_highlight_card(title: str, description: str, code: str, code_caption: str, icon: str) -> FT:
-    from starui.registry.components.code_block import CodeBlock
-    
-    return Div(
-        Div(
-            Div(
-                Div(
-                    Icon(icon, width="28", height="28", cls="text-primary"),
-                    cls="mb-6 w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20"
-                ),
-                H3(title, cls="text-xl font-semibold mb-4"),
-                P(description, cls="text-muted-foreground mb-6 leading-relaxed"),
-                cls="mb-6"
-            ),
-            Div(
-                CodeBlock(code, language="python", cls="text-sm border rounded-md overflow-x-auto", style="scrollbar-width: thin; scrollbar-color: transparent transparent;"),
-                P(code_caption, cls="text-xs text-muted-foreground mt-3"),
-                cls="space-y-2"
-            ),
-            cls="p-4 sm:p-6"
-        ),
-        cls="border rounded-xl bg-gradient-to-br from-background to-muted/20 hover:shadow-lg hover:border-primary/30 transition-all duration-300 h-full"
-    )
-
-
-def _workflow_highlight_card(title: str, description: str, code: str, code_caption: str) -> FT:
-    from starui.registry.components.code_block import CodeBlock
-    
-    return Div(
-        Div(
-            H3(title, cls="text-lg font-semibold mb-3"),
-            P(description, cls="text-sm text-muted-foreground mb-4 leading-relaxed"),
-            Div(
-                CodeBlock(code, language="python", cls="text-sm border rounded-md overflow-x-auto", style="scrollbar-width: thin; scrollbar-color: transparent transparent;"),
-                P(code_caption, cls="text-xs text-muted-foreground mt-2"),
-                cls="space-y-2"
-            ),
-            cls="p-5"
-        ),
-        cls="border rounded-lg bg-gradient-to-br from-background to-muted/10 hover:shadow-md hover:border-primary/20 transition-all duration-200 h-full"
-    )
-
-
-def _performance_metric(value: str, label: str, description: str) -> FT:
-    return Div(
-        Div(
-            Span(value, cls="text-2xl font-bold text-primary block mb-1"),
-            Span(label, cls="text-sm font-medium text-foreground block mb-2"),
-            P(description, cls="text-xs text-muted-foreground leading-relaxed"),
-            cls="text-center"
-        ),
-        cls="bg-gradient-to-br from-muted/30 to-muted/10 rounded-lg p-4 border hover:shadow-sm transition-shadow duration-200"
-    )
-
-@rt("/docs")
-def docs_index():
-    
-    return DocsLayout(
-        Div(
-            Div(
-                H1("StarUI Documentation", cls="text-4xl md:text-5xl font-bold tracking-tight mb-6"),
-                P(
-                    "Server-side component library that brings modern UI to Python web applications without the JavaScript complexity.",
-                    cls="text-xl text-muted-foreground mb-4 max-w-3xl mx-auto",
-                ),
-                P(
-                    "Write reactive interfaces entirely in Python using Datastar's declarative patterns.",
-                    cls="text-lg text-muted-foreground/80 mb-12 max-w-2xl mx-auto",
-                ),
-                cls="text-center mb-20"
-            ),
-            
-            Div(
-                H2("The Python-Native Approach", cls="text-3xl font-bold mb-8"),
-                Div(
-                    _feature_highlight_card(
-                        "Server-First Architecture",
-                        "Components render on the server and progressively enhance with interactivity. No client-side hydration, no bundle sizes, no waterfall loading.",
-                        "from starui import Button, Input, Card\n\n# Pure Python - no JSX, no build step\nCard(\n    Input(placeholder=\"Search...\"),\n    Button(\"Submit\", data_on_click=\"search()\")\n)",
-                        "Python syntax with type safety and IDE support",
-                        "lucide:server"
-                    ),
-                    _feature_highlight_card(
-                        "Reactive Without React",
-                        "Datastar provides declarative state management and reactive updates while keeping all logic server-side. Get modern UX patterns without JavaScript frameworks.",
-                        "# Reactive counter - no useState, no hooks\nButton(\n    (count := Signal(\"count\", 0)),\n    data_text=\"Count: \" + count,\n    data_on_click=count.add(1)\n)\n\n# State stays on the server",
-                        "Reactive patterns with server-side state",
-                        "lucide:zap"
-                    ),
-                    cls="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 mb-16"
-                ),
-            ),
-
-            Div(
-                H2("Built for Python Developers", cls="text-3xl font-bold mb-8"),
-                Div(
-                    _workflow_highlight_card(
-                        "Type-Safe Components",
-                        "Python-native components with IDE autocompletion and type hints",
-                        "from starui.registry.components.button import Button\n\n# IDE provides autocompletion for variants\nButton(\"Click me\", variant=\"outline\", size=\"lg\")\n# ✅ All properties properly typed",
-                        "Full Python type hints and IDE support"
-                    ),
-                    _workflow_highlight_card(
-                        "StarHTML Integration",
-                        "Designed specifically for StarHTML applications with seamless interop",
-                        "from starhtml import *\nfrom starui import Button, Card\n\n# Mix StarHTML and StarUI naturally\nDiv(\n    H1(\"Welcome\"),\n    Card(Button(\"Get Started\"))\n)",
-                        "Native integration with StarHTML ecosystem"
-                    ),
-                    _workflow_highlight_card(
-                        "Single Command Install",
-                        "Add components with dependencies automatically resolved",
-                        "star add button input card tabs\n\n# Components ready to import\nfrom starui import Button, Input, Card, Tabs",
-                        "CLI handles dependency management"
-                    ),
-                    cls="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-16"
-                ),
-            ),
-            
-            Div(
-                H2("Production-Ready Performance", cls="text-3xl font-bold mb-8"),
-                Div(
-                    Div(
-                        _performance_metric("Zero", "Runtime JavaScript", "Components work without any client-side JavaScript"),
-                        _performance_metric("Instant", "Server Rendering", "No hydration delays or layout shifts"),
-                        _performance_metric("100%", "SEO Friendly", "Fully rendered HTML for search engines"),
-                        cls="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8"
-                    ),
-                    Div(
-                        H3("Enterprise Standards", cls="text-xl font-semibold mb-4"),
-                        Div(
-                            Div(
-                                Icon("lucide:shield-check", cls="h-5 w-5 text-green-600 mr-3"),
-                                "WCAG 2.1 AA accessibility compliance",
-                                cls="flex items-center mb-3"
-                            ),
-                            Div(
-                                Icon("lucide:palette", cls="h-5 w-5 text-blue-600 mr-3"),
-                                "Design tokens with light/dark theme support",
-                                cls="flex items-center mb-3"
-                            ),
-                            Div(
-                                Icon("lucide:code-2", cls="h-5 w-5 text-purple-600 mr-3"),
-                                "Composable components with consistent API patterns",
-                                cls="flex items-center mb-3"
-                            ),
-                            Div(
-                                Icon("lucide:zap", cls="h-5 w-5 text-orange-600 mr-3"),
-                                "Progressive enhancement for interactive features",
-                                cls="flex items-center"
-                            ),
-                            cls="space-y-2"
-                        ),
-                        cls="bg-gradient-to-br from-background to-muted/20 rounded-xl p-6 border"
-                    ),
-                    cls="space-y-8"
-                ),
-            ),
-            
-            cls="max-w-7xl mx-auto px-4"
-        ),
-        layout=LayoutConfig(show_copy=False),
-        sidebar=SidebarConfig(sections=DOCS_SIDEBAR_SECTIONS),
+    return LandingLayout(
+        hero_section(),
+        code_example_section(),
+        why_starui_section(),
+        component_grid_section(),
+        cta_section(),
     )
 
 
@@ -788,13 +519,12 @@ iframe_app, iframe_rt = star_app(
             }
         """),
         Link(rel="stylesheet", href="/static/css/starui.css"),
-        position_handler(),
+        iconify_script(),
     ),
     htmlkw=dict(lang="en", dir="ltr"),
     bodykw=dict(cls="min-h-screen bg-background text-foreground"),
-    iconify=True,
-    clipboard=True,
 )
+iframe_app.register(position, clipboard)
 
 @iframe_rt("/{preview_id}")
 def component_preview_iframe(preview_id: str):

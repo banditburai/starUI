@@ -4,8 +4,8 @@ CATEGORY = "ui"
 ORDER = 50
 STATUS = "stable"
 
-from starhtml import Div, P, H3, Pre, Code, Span, Icon, Signal
-from starhtml.datastar import clipboard, set_timeout
+from starhtml import Div, P, H3, Pre, Code, Span, Icon, Signal, clipboard
+from starhtml.datastar import set_timeout
 from starui.registry.components.button import Button
 from starui.registry.components.code_block import CodeBlock, CodeBlockStyles, InlineCode
 from starui.registry.components.badge import Badge

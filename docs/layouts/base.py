@@ -1,7 +1,6 @@
 from typing import Any
 from dataclasses import dataclass, field
 from starhtml import *
-from starhtml.datastar import clipboard
 from layouts.footer import DocsFooter
 from layouts.header import DocsHeader
 from layouts.sidebar import DocsSidebar, MobileSidebar

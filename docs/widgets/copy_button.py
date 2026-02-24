@@ -1,5 +1,5 @@
-from starhtml import FT, Icon, Span, Signal
-from starhtml.datastar import clipboard, js
+from starhtml import FT, Icon, Span, Signal, clipboard
+from starhtml.datastar import js
 from starui.registry.components.button import Button
 
 

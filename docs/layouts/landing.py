@@ -933,23 +933,6 @@ def _landing_styles() -> FT:
             100% { transform: rotate(var(--card-rotate)) translate(0, 0) scale(1); opacity: 1; }
         }
 
-        /* ── Constellation SVG lines ── */
-        .constellation-line {
-            stroke: #475569;
-            stroke-width: 0.5;
-            stroke-dasharray: 4 4;
-            animation: dash 60s linear infinite;
-            opacity: 0.5;
-        }
-
-        [data-theme="light"] .constellation-line {
-            stroke: #a0aec0;
-        }
-
-        @keyframes dash {
-            to { stroke-dashoffset: 1000; }
-        }
-
         /* ── Text glow for headlines ── */
         .text-glow {
             text-shadow: 0 0 25px rgba(251, 146, 60, 0.4);
@@ -985,7 +968,6 @@ def _landing_styles() -> FT:
             .showcase-pulse-ring, .showcase-flash { animation: none !important; display: none; }
 
             .live-dot { animation: none !important; opacity: 1; }
-            .constellation-line { animation: none !important; }
             [data-motion] { transition: none !important; }
             .dawn-sky, .dawn-sky-warm { transition: none !important; }
             .mystic-card { transition: none !important; }
@@ -1039,6 +1021,36 @@ def _landing_styles() -> FT:
             box-shadow: 0 0 20px rgba(30, 41, 59, 0.15);
         }
 
+        /* ── CTA button outline variant ── */
+        .btn-star-outline {
+            border: 1px solid rgba(248, 250, 252, 0.3);
+            color: #94A3B8;
+            background: transparent;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            padding: 0.75rem 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-star-outline:hover {
+            border-color: #F8FAFC;
+            color: #F8FAFC;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        [data-theme="light"] .btn-star-outline {
+            border-color: rgba(30, 41, 59, 0.25);
+            color: #5e6d82;
+            background: transparent;
+        }
+
+        [data-theme="light"] .btn-star-outline:hover {
+            border-color: #1e293b;
+            color: #1e293b;
+            background: rgba(30, 41, 59, 0.05);
+        }
+
         /* ── Landing header transparent variant ── */
         .landing-header {
             background: transparent !important;
@@ -1072,6 +1084,92 @@ def _landing_styles() -> FT:
         [data-theme="light"] .landing-header a:hover,
         [data-theme="light"] .landing-header button:hover {
             color: #d4700a;
+        }
+
+        /* ── Editor panel (code block in mystic-card, no hover bounce) ── */
+        .editor-panel:hover {
+            transform: none;
+            box-shadow: none;
+        }
+        [data-theme="light"] .editor-panel:hover {
+            transform: none;
+        }
+
+        /* ── FIG. 01 input focus ── */
+        .fig01-input:focus {
+            border-color: rgba(251, 146, 60, 0.5);
+            box-shadow: 0 0 0 2px rgba(251, 146, 60, 0.1);
+        }
+        [data-theme="light"] .fig01-input:focus {
+            border-color: rgba(200, 122, 62, 0.5);
+            box-shadow: 0 0 0 2px rgba(200, 122, 62, 0.1);
+        }
+
+        /* ── Component explorer ── */
+        .showcase-preview {
+            background: rgba(15, 23, 42, 0.35);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        [data-theme="light"] .showcase-preview {
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(140, 130, 150, 0.15);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+
+        .explorer-active-row {
+            background: rgba(251, 146, 60, 0.12);
+        }
+        [data-theme="light"] .explorer-active-row {
+            background: rgba(200, 122, 62, 0.1);
+        }
+
+        .mini-divider {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        [data-theme="light"] .mini-divider {
+            background: rgba(0, 0, 0, 0.08);
+        }
+
+        /* Mini component primitives — theme-aware colors for preview cards */
+        .mini-text { color: rgba(248, 250, 252, 0.9); }
+        [data-theme="light"] .mini-text { color: rgba(30, 41, 59, 0.9); }
+
+        .mini-text-dim { color: rgba(148, 163, 184, 0.7); }
+        [data-theme="light"] .mini-text-dim { color: rgba(100, 116, 139, 0.7); }
+
+        .mini-bg-primary { background: #f8fafc; color: #0f172a; }
+        [data-theme="light"] .mini-bg-primary { background: #1e293b; color: #f8fafc; }
+
+        .mini-bg-secondary { background: rgba(255, 255, 255, 0.08); }
+        [data-theme="light"] .mini-bg-secondary { background: rgba(0, 0, 0, 0.05); }
+
+        .mini-border { border-color: rgba(255, 255, 255, 0.12) !important; }
+        [data-theme="light"] .mini-border { border-color: rgba(0, 0, 0, 0.12) !important; }
+
+        .mini-surface {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        [data-theme="light"] .mini-surface {
+            background: white;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        .mini-switch-on { background: #FB923C; }
+        .mini-switch-off { background: rgba(255, 255, 255, 0.15); }
+        [data-theme="light"] .mini-switch-off { background: rgba(0, 0, 0, 0.12); }
+
+        /* ── Python watermark in Why StarUI ── */
+        .python-watermark {
+            opacity: 0.12;
+            z-index: 0;
+            transition: opacity 0.5s ease;
+        }
+        [data-theme="light"] .python-watermark {
+            opacity: 0.06;
         }
 
         /* ── Section border ── */

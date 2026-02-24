@@ -6,6 +6,8 @@ Dark mode: navy→warm horizon. Light mode: cool dawn gradient.
 
 from starhtml import *
 from starhtml.plugins import in_view, press
+from starui.registry.components.code_block import CodeBlock as StarlighterCode
+
 
 
 # ── Star mark SVG (4-pointed, used as typographic ornament) ────────
@@ -277,133 +279,418 @@ def hero_section() -> FT:
     )
 
 
-# ── The Constellation section ───────────────────────────────────────
+# ── Code Example section ────────────────────────────────────────────
 
 
-def _constellation_card(
-    fig_num: str,
-    title: str,
-    subtitle: str,
-    preview_content: FT,
-    fig_align: str = "top-4 right-4",
-    label_align: str = "text-left",
-    extra_cls: str = "rounded-sm",
-) -> FT:
-    return Div(
-        Div(f"FIG. {fig_num}", cls=f"absolute {fig_align} text-[10px] tracking-widest text-sunset font-mono"),
-        Div(
-            preview_content,
-            cls="card-preview flex-grow flex items-center justify-center border border-white/[0.05] m-4 bg-[#0B1221] overflow-hidden relative",
+def code_example_section() -> FT:
+    """FIG. 01 — Code editor + live preview in constellation glass panels."""
+
+    example_code = '''from starhtml import *
+from starui import (
+    Card, CardHeader, CardTitle,
+    CardDescription, CardContent,
+    Input,
+)
+
+def profile():
+    name = Signal("name", "friend")
+
+    return Card(
+        name,
+        CardHeader(
+            CardTitle(data_text=name.if_(
+                "Hello, " + name,
+                "Hello, stranger")),
+            CardDescription(
+                "Update your profile"),
         ),
-        Div(
-            H3(title, cls="font-display text-xl italic mb-1 text-moon"),
-            P(subtitle, cls="text-xs text-moon-dim uppercase tracking-wider"),
-            cls=label_align,
+        CardContent(
+            Input(
+                placeholder="Your name",
+                data_bind=name),
         ),
-        cls=f"mystic-card p-8 h-[400px] flex flex-col justify-between relative group {extra_cls}",
-        data_motion=in_view(y=30, opacity=0, duration=600, spring="gentle"),
-    )
+    )'''
 
-
-def features_section() -> FT:
-    """The Constellation — 3 tall cards with component previews and SVG connectors."""
-
-    button_preview = Div(
-        Div(
-            "Summon",
-            cls="bg-[#F8FAFC] text-[#0f172a] px-6 py-2 font-display italic hover:bg-[#FB923C] transition-colors cursor-pointer",
-        ),
-    )
-
-    card_preview = Div(
-        Div(cls="h-2 w-1/3 bg-[#334155]"),
-        Div(cls="h-2 w-2/3 bg-[#1e293b]"),
-        Div(cls="h-2 w-1/2 bg-[#1e293b]"),
-        cls="w-full space-y-3 p-4 border border-white/[0.1]",
-    )
-
-    dialog_preview = Div(
-        Div(
-            Div(
-                Div(cls="w-16 h-1 bg-[#FB923C] mb-2"),
-                Div(cls="w-10 h-1 bg-[#475569]"),
-                cls="bg-[#1e293b] border border-[#FB923C] p-4 w-32 h-20 flex flex-col justify-center items-center",
-                style="box-shadow: 0 0 15px rgba(251, 146, 60, 0.2);",
-            ),
-            cls="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center",
-        ),
-    )
+    # Live demo — mini-* styled for landing aesthetic, with real Datastar bindings
+    name = Signal("hero_name", "friend")
+    greeting = name.if_("Hello, " + name, "Hello, stranger")
 
     return Section(
         Div(
-            # Section header
+            # Header
             Div(
-                Span("✦", cls="block text-sunset text-3xl mb-2"),
+                Span("FIG. 01", cls="text-[10px] tracking-widest text-sunset font-mono block mb-3"),
                 H2(
-                    "The Constellation",
-                    cls="font-display text-4xl italic text-moon",
+                    "Write Python. Get reactivity.",
+                    cls="font-display text-3xl md:text-4xl italic text-moon mt-2",
                 ),
-                P(
-                    "Zero JavaScript authoring. Pure Python reactivity.",
-                    cls="font-serif-body text-lg text-moon-dim mt-2 italic",
-                ),
-                cls="text-center mb-24",
+                cls="mb-12",
                 data_motion=in_view(y=20, opacity=0, duration=500, spring="gentle"),
             ),
-            # Cards grid with constellation SVG lines
+            # Editor + Preview — glass panels
             Div(
-                # SVG connectors (desktop only)
-                Svg(
-                    Line(x1="16%", y1="50%", x2="50%", y2="50%", cls="constellation-line"),
-                    Line(x1="50%", y1="50%", x2="83%", y2="50%", cls="constellation-line"),
-                    Circle(cx="50%", cy="50%", r="200", fill="none", stroke="rgba(203,213,225,0.1)", stroke_width="1"),
-                    cls="absolute inset-0 w-full h-full pointer-events-none hidden md:block",
-                    style="z-index: 0;",
-                    aria_hidden="true",
+                # Left: code editor in glass panel with filename header
+                Div(
+                    Div(
+                        Div(
+                            Span(cls="w-2.5 h-2.5 rounded-full bg-[#ff5f57]"),
+                            Span(cls="w-2.5 h-2.5 rounded-full bg-[#febc2e]"),
+                            Span(cls="w-2.5 h-2.5 rounded-full bg-[#28c840]"),
+                            cls="flex gap-1.5",
+                        ),
+                        Span("app.py", cls="text-[11px] font-mono mini-text-dim"),
+                        Div(cls="w-[52px]"),
+                        cls="flex items-center justify-between px-4 py-2.5 border-b mini-border",
+                    ),
+                    StarlighterCode(example_code, "python", cls="!rounded-none !border-none !shadow-none !bg-transparent"),
+                    cls="md:col-span-5 mystic-card rounded-xl overflow-hidden editor-panel",
+                    data_motion=in_view(y=20, opacity=0, duration=500, delay=100, spring="gentle"),
                 ),
-                _constellation_card("01", "Button", "Polymorphic & Interactive", button_preview),
-                _constellation_card(
-                    "02", "Card", "Container Logic", card_preview,
-                    fig_align="top-8 left-1/2 -translate-x-1/2",
-                    label_align="text-center z-10",
-                    extra_cls="rounded-t-[100px] border-t-0",
+                # Right: live preview — hand-styled to match landing aesthetic
+                Div(
+                    name,
+                    Div(
+                        # Card title — reactive, updates as you type
+                        P(data_text=greeting, cls="text-lg font-medium mini-text"),
+                        P("Update your profile", cls="text-xs mini-text-dim mt-1 mb-6"),
+                        # Input — two-way bound to name signal
+                        Div(
+                            P("Name", cls="text-xs mini-text font-medium mb-1.5"),
+                            Input(
+                                placeholder="Your name",
+                                data_bind=name,
+                                cls="w-full py-2 px-3 rounded-md text-sm bg-transparent border mini-border mini-text outline-none fig01-input transition-colors",
+                            ),
+                        ),
+                        cls="mini-surface rounded-xl p-6 w-full max-w-sm shadow-xl",
+                    ),
+                    cls="md:col-span-7 showcase-preview rounded-xl p-8 md:p-12 relative min-h-[400px] flex items-center justify-center",
+                    data_motion=in_view(y=20, opacity=0, duration=500, delay=200, spring="gentle"),
                 ),
-                _constellation_card(
-                    "03", "Dialog", "Overlay Physics", dialog_preview,
-                    fig_align="top-4 left-4",
-                    label_align="text-right",
-                ),
-                cls="grid grid-cols-1 md:grid-cols-3 gap-8 relative",
+                cls="grid grid-cols-1 md:grid-cols-12 gap-6",
             ),
             cls="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
         ),
-        cls="relative z-10 py-32 section-border-top",
+        cls="relative z-10 py-24 section-border-top",
     )
 
 
-# ── The Trinity section ─────────────────────────────────────────────
+# ── Component explorer previews ───────────────────────────────────
 
 
-def trinity_section() -> FT:
-    """Three core principles, reference-style layout."""
+def _explorer_command() -> FT:
+    """Command palette — search input + categorized suggestion list."""
+    return Div(
+        Div(
+            Icon("lucide:search", width="16", height="16", cls="mini-text-dim"),
+            Span("Type a command or search...", cls="text-sm mini-text-dim font-light"),
+            cls="flex items-center gap-3 px-4 py-3.5 border-b mini-border",
+        ),
+        Div(
+            Span("Suggestions", cls="text-[11px] mini-text-dim font-medium block px-2 py-2"),
+            Div(
+                Icon("lucide:calendar", width="15", height="15"),
+                Span("Calendar", cls="text-sm font-medium"),
+                cls="flex items-center gap-3 px-3 py-2.5 rounded-lg mini-text explorer-active-row",
+            ),
+            Div(
+                Icon("lucide:smile", width="15", height="15", cls="mini-text-dim"),
+                Span("Search Emoji", cls="text-sm"),
+                cls="flex items-center gap-3 px-3 py-2.5 rounded-lg mini-text-dim",
+            ),
+            Div(
+                Icon("lucide:calculator", width="15", height="15", cls="mini-text-dim"),
+                Span("Calculator", cls="text-sm"),
+                cls="flex items-center gap-3 px-3 py-2.5 rounded-lg mini-text-dim",
+            ),
+            Div(cls="h-px mini-divider mx-2 my-1"),
+            Span("Settings", cls="text-[11px] mini-text-dim font-medium block px-2 py-2"),
+            Div(
+                Div(Icon("lucide:user", width="15", height="15"), Span("Profile", cls="text-sm"), cls="flex items-center gap-3"),
+                Span("⌘P", cls="text-[10px] px-1.5 py-0.5 rounded mini-bg-secondary mini-text-dim"),
+                cls="flex items-center justify-between px-3 py-2.5 rounded-lg mini-text-dim",
+            ),
+            Div(
+                Div(Icon("lucide:credit-card", width="15", height="15"), Span("Billing", cls="text-sm"), cls="flex items-center gap-3"),
+                Span("⌘B", cls="text-[10px] px-1.5 py-0.5 rounded mini-bg-secondary mini-text-dim"),
+                cls="flex items-center justify-between px-3 py-2.5 rounded-lg mini-text-dim",
+            ),
+            cls="p-2",
+        ),
+        cls="mini-surface rounded-xl w-full max-w-md overflow-hidden shadow-xl",
+    )
+
+
+def _explorer_card() -> FT:
+    """Create account card with social login + form."""
+    return Div(
+        Div(
+            P("Create account", cls="text-base font-medium mini-text"),
+            P("Enter your email below to create your account", cls="text-xs mini-text-dim mt-1"),
+            cls="mb-5",
+        ),
+        Div(
+            Div(
+                Icon("simple-icons:github", width="14", height="14"),
+                Span("Github", cls="text-sm font-medium"),
+                cls="flex items-center justify-center gap-2 w-full py-2.5 rounded-md border mini-border mini-text",
+            ),
+            Div(
+                Icon("simple-icons:google", width="14", height="14"),
+                Span("Google", cls="text-sm font-medium"),
+                cls="flex items-center justify-center gap-2 w-full py-2.5 rounded-md border mini-border mini-text",
+            ),
+            cls="grid gap-2 mb-4",
+        ),
+        Div(
+            Div(cls="flex-1 h-px mini-divider"),
+            Span("Or continue with", cls="text-[10px] mini-text-dim uppercase px-2 whitespace-nowrap"),
+            Div(cls="flex-1 h-px mini-divider"),
+            cls="flex items-center mb-4",
+        ),
+        Div(
+            P("Email", cls="text-xs mini-text font-medium mb-1"),
+            Div(Span("m@example.com", cls="text-sm mini-text-dim"), cls="py-2 px-3 rounded-md border mini-border w-full"),
+            cls="mb-3",
+        ),
+        Div(
+            P("Password", cls="text-xs mini-text font-medium mb-1"),
+            Div(cls="py-2 px-3 rounded-md border mini-border w-full h-[36px]"),
+            cls="mb-4",
+        ),
+        Span("Create Account", cls="block text-center py-2.5 rounded-md mini-bg-primary font-medium text-sm w-full"),
+        cls="mini-surface rounded-xl p-6 w-full max-w-sm shadow-xl",
+    )
+
+
+def _explorer_switch() -> FT:
+    """Settings panel with toggles and badges."""
+    return Div(
+        Div(
+            Span("Airplane Mode", cls="text-sm mini-text"),
+            Div(
+                Div(cls="w-4 h-4 rounded-full bg-white absolute right-0.5 top-[2px] shadow-sm"),
+                cls="w-9 h-5 rounded-full mini-switch-on relative shrink-0",
+            ),
+            cls="flex items-center justify-between",
+        ),
+        Div(
+            Span("Notifications", cls="text-sm mini-text-dim"),
+            Div(
+                Div(cls="w-4 h-4 rounded-full bg-white/70 absolute left-0.5 top-[2px]"),
+                cls="w-9 h-5 rounded-full mini-switch-off relative shrink-0",
+            ),
+            cls="flex items-center justify-between",
+        ),
+        Div(
+            Span("Dark Mode", cls="text-sm mini-text"),
+            Div(
+                Div(cls="w-4 h-4 rounded-full bg-white absolute right-0.5 top-[2px] shadow-sm"),
+                cls="w-9 h-5 rounded-full mini-switch-on relative shrink-0",
+            ),
+            cls="flex items-center justify-between",
+        ),
+        Div(cls="h-px mini-divider my-2"),
+        Div(
+            Span("Active", cls="px-2.5 py-0.5 rounded-full text-[11px] font-medium mini-switch-on text-white"),
+            Span("Beta", cls="px-2.5 py-0.5 rounded-full text-[11px] font-medium border mini-border mini-text-dim"),
+            cls="flex gap-2",
+        ),
+        cls="mini-surface rounded-xl p-5 w-full max-w-xs space-y-4 shadow-xl",
+    )
+
+
+def _explorer_dialog() -> FT:
+    """Alert dialog confirmation."""
+    return Div(
+        P("Are you absolutely sure?", cls="text-base font-medium mini-text"),
+        P(
+            "This action cannot be undone. This will permanently delete your account and remove your data from our servers.",
+            cls="text-sm mini-text-dim mt-2 leading-relaxed",
+        ),
+        Div(
+            Span("Cancel", cls="px-4 py-2 text-sm rounded-md border mini-border mini-text font-medium"),
+            Span("Continue", cls="px-4 py-2 text-sm rounded-md mini-bg-primary font-medium"),
+            cls="flex justify-end gap-3 mt-6",
+        ),
+        cls="mini-surface rounded-xl p-6 w-full max-w-md shadow-xl",
+    )
+
+
+def _explorer_tabs() -> FT:
+    """Tab interface with account settings form."""
+    return Div(
+        Div(
+            Span("Account", cls="text-sm font-medium mini-text px-4 py-2 rounded-md mini-bg-secondary"),
+            Span("Password", cls="text-sm mini-text-dim px-4 py-2"),
+            cls="flex gap-1 p-1 rounded-lg mini-bg-secondary w-fit mb-5",
+        ),
+        P("Make changes to your account here.", cls="text-sm mini-text-dim mb-4"),
+        Div(
+            P("Name", cls="text-xs mini-text font-medium mb-1.5"),
+            Div(Span("Pedro Duarte", cls="text-sm mini-text"), cls="py-2 px-3 rounded-md border mini-border w-full"),
+            cls="mb-3",
+        ),
+        Div(
+            P("Username", cls="text-xs mini-text font-medium mb-1.5"),
+            Div(Span("@peduarte", cls="text-sm mini-text"), cls="py-2 px-3 rounded-md border mini-border w-full"),
+            cls="mb-5",
+        ),
+        Span("Save changes", cls="inline-block px-4 py-2 rounded-md mini-bg-primary font-medium text-sm"),
+        cls="mini-surface rounded-xl p-6 w-full max-w-sm shadow-xl",
+    )
+
+
+def _explorer_button() -> FT:
+    """Button variants showcase."""
+    return Div(
+        Div(
+            Span("Primary", cls="px-5 py-2.5 text-sm rounded-md mini-bg-primary font-medium"),
+            Span("Secondary", cls="px-5 py-2.5 text-sm rounded-md mini-bg-secondary mini-text font-medium"),
+            Span("Outline", cls="px-5 py-2.5 text-sm rounded-md border mini-border mini-text font-medium"),
+            cls="flex flex-wrap items-center gap-3 mb-5",
+        ),
+        Div(
+            Span("Destructive", cls="px-5 py-2.5 text-sm rounded-md bg-red-600 text-white font-medium"),
+            Span("Ghost", cls="px-5 py-2.5 text-sm mini-text-dim font-medium"),
+            Span("Link", cls="px-5 py-2.5 text-sm text-sunset font-medium underline underline-offset-4"),
+            cls="flex flex-wrap items-center gap-3",
+        ),
+        cls="mini-surface rounded-xl p-6 max-w-md shadow-xl",
+    )
+
+
+# ── Component Explorer section ────────────────────────────────────
+
+
+def component_grid_section() -> FT:
+    """FIG. 03 — Interactive component explorer with sidebar + preview panel."""
+
+    active = Signal("explorer_cmp", "command")
+
+    explorer_items = [
+        ("Command", "command", "lucide:terminal", _explorer_command),
+        ("Card", "card", "lucide:credit-card", _explorer_card),
+        ("Switch", "switch", "lucide:toggle-left", _explorer_switch),
+        ("Dialog", "dialog", "lucide:app-window", _explorer_dialog),
+        ("Tabs", "tabs", "lucide:layout-list", _explorer_tabs),
+        ("Button", "button", "lucide:mouse-pointer-click", _explorer_button),
+    ]
+
+    return Section(
+        Div(
+            # Header
+            Div(
+                Span("FIG. 03", cls="text-[10px] tracking-widest text-sunset font-mono block mb-3"),
+                Div(
+                    Div(
+                        H2("The Constellation", cls="font-display text-4xl italic text-moon"),
+                        P("34+ components built with Tailwind v4.", cls="font-serif-body text-lg text-moon-dim mt-2 italic"),
+                    ),
+                    A(
+                        "View All Components →",
+                        href="/components",
+                        cls="text-sunset hover:text-[#FB923C] text-sm font-mono tracking-wide uppercase transition-colors hidden md:block shrink-0",
+                    ),
+                    cls="flex flex-col md:flex-row md:items-end md:justify-between gap-4",
+                ),
+                cls="mb-12",
+                data_motion=in_view(y=20, opacity=0, duration=500, spring="gentle"),
+            ),
+            # Explorer: sidebar + preview
+            Div(
+                active,
+                # Sidebar — component list
+                Div(
+                    Span("COMPONENTS", cls="text-[10px] font-mono tracking-widest text-sunset px-3 py-2 block"),
+                    *[
+                        Div(
+                            Icon(icon, width="15", height="15", cls="shrink-0"),
+                            Span(name, cls="text-sm"),
+                            data_on_click=active.set(slug),
+                            data_attr_cls=(active == slug).if_(
+                                "mini-bg-secondary mini-text font-medium",
+                                "mini-text-dim",
+                            ),
+                            cls="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-colors",
+                        )
+                        for name, slug, icon, _ in explorer_items
+                    ],
+                    cls="md:col-span-3 mystic-card rounded-xl p-3 flex flex-row md:flex-col gap-1 overflow-x-auto md:overflow-visible",
+                    data_motion=in_view(y=20, opacity=0, duration=500, delay=100, spring="gentle"),
+                ),
+                # Preview area — shows active component
+                Div(
+                    *[
+                        Div(
+                            fn(),
+                            data_show=active == slug,
+                            cls="flex items-center justify-center w-full",
+                        )
+                        for _, slug, _, fn in explorer_items
+                    ],
+                    # star add command in corner
+                    Div(
+                        Code(
+                            "star add command",
+                            data_text="star add " + active,
+                            cls="text-[10px] font-mono text-moon-dim",
+                        ),
+                        cls="absolute bottom-4 right-6",
+                    ),
+                    cls="md:col-span-9 showcase-preview rounded-xl p-8 md:p-12 relative min-h-[450px] flex items-center justify-center",
+                    data_motion=in_view(y=20, opacity=0, duration=500, delay=200, spring="gentle"),
+                ),
+                cls="grid grid-cols-1 md:grid-cols-12 gap-6",
+            ),
+            # Mobile "view all" link
+            Div(
+                A(
+                    "View All Components →",
+                    href="/components",
+                    cls="text-sunset hover:text-[#FB923C] text-sm font-mono tracking-wide uppercase transition-colors",
+                ),
+                cls="text-center mt-8 md:hidden",
+            ),
+            cls="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
+        ),
+        cls="relative z-10 py-24 section-border-top",
+    )
+
+
+# ── Why StarUI section ─────────────────────────────────────────────
+
+
+def why_starui_section() -> FT:
+    """FIG. 02 — Editorial 1/3 + 2/3 split with value propositions."""
+
     principles = [
-        ("01", "Zero JavaScript", "Leverage the power of Datastar to drive reactive interfaces purely from your backend. No hydration gaps. No build steps."),
-        ("02", "Type Safety", "Fully typed Python components. Catch errors in your IDE, not in the browser. Full autocompletion and IDE support out of the box."),
-        ("03", "Vendor Ownership", "The code lives in your project. Customize every pixel, every border radius, and every animation timing to fit your brand."),
+        ("01", "Own The Code", "No npm packages. No black boxes. The CLI copies component source directly into your project. Customize every pixel."),
+        ("02", "Datastar Signals", "Full client-side reactivity without React. Toggle modals, update counters, and validate forms — all from Python-defined signals."),
+        ("03", "Tailwind v4", "Styled with the latest engine. Dark mode, animations, and full utility support out of the box."),
     ]
 
     return Section(
         Div(
             Div(
+                Span("FIG. 02", cls="text-[10px] tracking-widest text-sunset font-mono block mb-4"),
                 H3(
-                    "The Trinity",
+                    "Why StarUI?",
                     cls="font-display text-3xl mb-6 italic text-moon",
                 ),
                 P(
-                    "Three core principles guide the StarUI framework, ensuring your Python applications remain maintainable, scalable, and beautiful.",
+                    "Stop fighting the frontend toolchain. StarUI brings the shadcn/ui architecture to Python.",
                     cls="font-serif-body text-xl text-moon-dim leading-relaxed",
                 ),
-                cls="md:w-1/3 md:border-r md:border-white/[0.1] md:pr-8",
+                # Python logo — large watermark behind column content
+                Icon(
+                    "simple-icons:python",
+                    width="220",
+                    height="220",
+                    cls="python-watermark absolute -bottom-8 -right-4 rotate-12 text-sunset pointer-events-none",
+                    aria_hidden="true",
+                ),
+                cls="md:w-1/3 md:border-r md:border-white/[0.1] md:pr-8 relative overflow-visible",
                 data_motion=in_view(y=20, opacity=0, duration=500, spring="gentle"),
             ),
             Div(
@@ -451,10 +738,37 @@ def cta_section() -> FT:
                 ),
                 P(
                     "Crafted for the Python Cosmos.",
-                    cls="font-display italic text-xl text-moon mb-4",
+                    cls="font-display italic text-xl text-moon mb-6",
+                ),
+                # Inline install terminal
+                Div(
+                    Pre(
+                        NotStr(
+                            '<span style="color:#FB923C">$</span> '
+                            '<span style="color:#94A3B8">pip install starui</span>'
+                        ),
+                        cls="terminal-window px-6 py-3 font-mono text-sm inline-block",
+                    ),
+                    cls="mb-8",
+                ),
+                # Dual CTA
+                Div(
+                    A(
+                        "Get Started",
+                        href="/installation",
+                        cls="btn-star rounded-none",
+                        data_motion=press(scale=0.97, duration=100),
+                    ),
+                    A(
+                        "View Components",
+                        href="/components",
+                        cls="btn-star-outline rounded-none",
+                        data_motion=press(scale=0.97, duration=100),
+                    ),
+                    cls="flex flex-wrap items-center justify-center gap-4 mb-8",
                 ),
                 P(
-                    "© 2025 StarUI. Open Source MIT.",
+                    "© 2026 StarUI. Open Source Apache 2.0.",
                     cls="text-xs uppercase tracking-[0.2em] text-moon-dim",
                 ),
                 cls="text-center",
