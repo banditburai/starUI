@@ -45,37 +45,41 @@ def _component_showcase() -> FT:
             ),
             cls="mt-1.5",
         ),
-        # Readout row
+        # Readout row — uses CSS custom properties for theme-aware colors
         Div(
             Span(
                 Span(
                     cls="w-1 h-1 rounded-full inline-block transition-colors duration-300",
-                    data_style_background_color=active.if_("#FB923C", "#475569"),
+                    data_style_background_color=active.if_("var(--indicator-active)", "var(--indicator-dim)"),
                 ),
                 Span(data_text=active.if_("ACTIVE", "DIM")),
                 cls="inline-flex items-center gap-1.5 text-[9px] font-mono font-medium uppercase tracking-[0.08em] px-1.5 py-0.5 rounded-sm border transition-all duration-300",
-                data_style_color=active.if_("#FB923C", "#475569"),
-                data_style_border_color=active.if_("rgba(251,146,60,0.3)", "rgba(71,85,105,0.3)"),
-                data_style_background_color=active.if_("rgba(251,146,60,0.08)", "rgba(100,116,139,0.08)"),
+                data_style_color=active.if_("var(--indicator-active)", "var(--indicator-dim)"),
+                data_style_border_color=active.if_("var(--indicator-active-border)", "var(--indicator-dim-border)"),
+                data_style_background_color=active.if_("var(--indicator-active-bg)", "var(--indicator-dim-bg)"),
             ),
             Span(
                 data_text="" + aperture + "%",
                 cls="text-[11px] font-mono tabular-nums transition-colors duration-300",
-                data_style_color=active.if_("#FB923C", "#475569"),
+                data_style_color=active.if_("var(--indicator-active)", "var(--indicator-dim)"),
             ),
             cls="flex items-center justify-between mt-1",
         ),
-        # Reactive glow overlay — scales continuously with aperture
+        # Reactive glow overlay — warms card as aperture rises
         Div(
-            cls="absolute inset-0 rounded-[inherit] pointer-events-none transition-opacity duration-300",
-            style="box-shadow: 0 0 50px 8px rgba(251,146,60,0.4), 0 0 100px 16px rgba(251,146,60,0.18), 0 0 150px 24px rgba(251,146,60,0.06);",
-            data_style_opacity="$aperture / 120",
+            cls="aperture-glow absolute inset-0 rounded-[inherit] pointer-events-none transition-opacity duration-300",
+            data_style_opacity="$aperture / 100",
+        ),
+        # Cool overlay — desaturates card at low aperture (light mode only, hidden in dark)
+        Div(
+            cls="aperture-cool absolute inset-0 rounded-[inherit] pointer-events-none transition-opacity duration-500",
+            data_style_opacity="1 - $aperture / 100",
         ),
         # Pulse ring (emanates outward on star impact)
         Div(cls="showcase-pulse-ring"),
         # Star activates — sweep aperture from 50 to 90
         Div(data_init=(aperture.set(90), dict(delay="1400ms"))),
-        cls="showcase-card px-4 py-2",
+        cls="showcase-card px-4 py-2 select-none",
     )
 
 
@@ -235,8 +239,8 @@ def hero_section() -> FT:
                 Div(
                     Div(
                         Div(
-                            Span("Quickstart", cls="text-[9px] font-mono tracking-[0.25em] uppercase text-sunset block mb-2"),
-                            Div(cls="w-full h-px bg-current text-sunset opacity-40"),
+                            Span("Quickstart", cls="text-[11px] font-mono font-semibold tracking-[0.25em] uppercase text-sunset block mb-2"),
+                            Div(cls="showcase-divider-line w-full h-px bg-current text-sunset opacity-40"),
                             cls="showcase-label mb-4",
                         ),
                         Div(

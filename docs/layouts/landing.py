@@ -171,7 +171,7 @@ def _landing_styles() -> FT:
             animation-delay: var(--delay, 0s);
         }
 
-        /* Light: hide stars — they're a night phenomenon; let the gradient carry the atmosphere */
+        /* Light: hide star dots entirely — cross-marks carry the atmosphere */
         [data-theme="light"] .star {
             display: none;
         }
@@ -209,11 +209,33 @@ def _landing_styles() -> FT:
             transform: translateY(-50%);
         }
 
-        /* Light: telescope reticle marks in warm copper — bridging cool sky and warm horizon */
+        /* Light: cross-marks are the atmospheric effect — slowly rotating, breathing.
+           Two color temperatures: warm amber (default) and cool white (odd children).
+           White ones sparkle on the cool upper gradient, amber ones glow on the warm lower. */
+        [data-theme="light"] .cross-mark {
+            animation: reticle-breathe var(--dur, 8s) ease-in-out infinite;
+            animation-delay: var(--delay, 0s);
+            width: calc(var(--size, 10px) * 1.3);
+            height: calc(var(--size, 10px) * 1.3);
+        }
+        /* Default: warm amber arms */
         [data-theme="light"] .cross-mark::before,
         [data-theme="light"] .cross-mark::after {
-            background: #b87a5a;
-            opacity: 0.35;
+            background: rgba(180, 135, 70, 0.55);
+            opacity: 1;
+        }
+        /* Odd crosses: cool white — reads as glinting light on the blue-lavender sky */
+        [data-theme="light"] .cross-mark:nth-child(odd)::before,
+        [data-theme="light"] .cross-mark:nth-child(odd)::after {
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        @keyframes reticle-breathe {
+            0%   { opacity: 0.12; transform: rotate(0deg); }
+            30%  { opacity: 0.45; transform: rotate(5deg); }
+            50%  { opacity: 0.6;  transform: rotate(8deg); }
+            70%  { opacity: 0.4;  transform: rotate(11deg); }
+            100% { opacity: 0.12; transform: rotate(15deg); }
         }
 
         @keyframes cross-flash {
@@ -329,14 +351,23 @@ def _landing_styles() -> FT:
 
         [data-theme="light"] .terminal-window {
             background: #1e293b;
-            border: 1px solid rgba(160, 140, 110, 0.3);
+            border: 1px solid rgba(140, 120, 90, 0.45);
             border-radius: 4px;
-            box-shadow: 0 4px 20px rgba(120, 80, 30, 0.12);
+            box-shadow:
+                0 1px 2px 0 rgba(60, 40, 15, 0.08),
+                0 4px 20px rgba(80, 55, 20, 0.14);
         }
 
         /* ── Showcase card — floating celestial artifact, activated by star arc ── */
         .showcase-card {
             --card-rotate: -8deg;
+            /* Indicator color tokens (themed via custom properties) */
+            --indicator-active: #FB923C;
+            --indicator-dim: #475569;
+            --indicator-active-bg: rgba(251,146,60,0.08);
+            --indicator-active-border: rgba(251,146,60,0.3);
+            --indicator-dim-bg: rgba(100,116,139,0.08);
+            --indicator-dim-border: rgba(71,85,105,0.3);
             position: relative;
             width: 260px;
             border-radius: 6px;
@@ -350,10 +381,10 @@ def _landing_styles() -> FT:
             /* Orange ring — visible from entrance */
             border: 1px solid rgba(251, 146, 60, 0.25);
 
-            /* Float shadow + warm glow */
+            /* Float shadow + champagne glow (distinct from orange accent) */
             box-shadow:
-                0 0 24px 2px rgba(251, 146, 60, 0.18),
-                0 0 48px 4px rgba(251, 146, 60, 0.06),
+                0 0 24px 2px rgba(255, 225, 180, 0.2),
+                0 0 48px 4px rgba(255, 200, 140, 0.08),
                 0 8px 32px -8px rgba(0, 0, 0, 0.5),
                 0 0 0 0.5px rgba(251, 146, 60, 0.15);
 
@@ -391,8 +422,8 @@ def _landing_styles() -> FT:
             height: 180%;
             transform: translate(-50%, -50%);
             background: radial-gradient(ellipse at center,
-                rgba(251, 146, 60, 0.0) 0%,
-                rgba(251, 146, 60, 0.0) 100%);
+                rgba(255, 225, 180, 0.0) 0%,
+                rgba(255, 225, 180, 0.0) 100%);
             border-radius: 50%;
             pointer-events: none;
             z-index: -1;
@@ -407,21 +438,21 @@ def _landing_styles() -> FT:
                 filter: saturate(0.5) brightness(0.85);
                 border-color: rgba(251, 146, 60, 0.25);
                 box-shadow:
-                    0 0 24px 2px rgba(251, 146, 60, 0.18),
-                    0 0 48px 4px rgba(251, 146, 60, 0.06),
+                    0 0 24px 2px rgba(255, 225, 180, 0.2),
+                    0 0 48px 4px rgba(255, 200, 140, 0.08),
                     0 8px 32px -8px rgba(0, 0, 0, 0.5),
                     0 0 0 0.5px rgba(251, 146, 60, 0.15);
                 scale: 1;
             }
             25% {
-                /* Star impact — scale punch + bright glow */
+                /* Star impact — scale punch + white-hot glow */
                 filter: saturate(1.3) brightness(1.15);
                 border-color: rgba(251, 146, 60, 0.5);
                 box-shadow:
-                    0 0 40px 4px rgba(251, 146, 60, 0.35),
-                    0 0 80px 8px rgba(251, 146, 60, 0.15),
+                    0 0 40px 4px rgba(255, 235, 200, 0.4),
+                    0 0 80px 8px rgba(255, 210, 160, 0.18),
                     0 8px 32px -8px rgba(0, 0, 0, 0.4),
-                    inset 0 0 20px rgba(251, 146, 60, 0.06);
+                    inset 0 0 20px rgba(255, 230, 190, 0.08);
                 scale: 1.03;
             }
             50% {
@@ -429,8 +460,8 @@ def _landing_styles() -> FT:
                 filter: saturate(1.1) brightness(1.05);
                 border-color: rgba(251, 146, 60, 0.35);
                 box-shadow:
-                    0 0 24px 2px rgba(251, 146, 60, 0.2),
-                    0 0 48px 4px rgba(251, 146, 60, 0.08),
+                    0 0 24px 2px rgba(255, 225, 180, 0.22),
+                    0 0 48px 4px rgba(255, 200, 140, 0.1),
                     0 8px 32px -8px rgba(0, 0, 0, 0.35);
                 scale: 1;
             }
@@ -439,8 +470,8 @@ def _landing_styles() -> FT:
                 filter: saturate(1) brightness(1);
                 border-color: rgba(251, 146, 60, 0.25);
                 box-shadow:
-                    0 0 18px 1px rgba(251, 146, 60, 0.12),
-                    0 0 40px 2px rgba(251, 146, 60, 0.05),
+                    0 0 18px 1px rgba(255, 225, 180, 0.14),
+                    0 0 40px 2px rgba(255, 200, 140, 0.06),
                     0 8px 32px -8px rgba(0, 0, 0, 0.35),
                     0 0 0 0.5px rgba(251, 146, 60, 0.2);
                 scale: 1;
@@ -450,18 +481,18 @@ def _landing_styles() -> FT:
         @keyframes aura-bloom {
             0%   {
                 background: radial-gradient(ellipse at center,
-                    rgba(251, 146, 60, 0.0) 0%,
-                    rgba(251, 146, 60, 0.0) 100%);
+                    rgba(255, 225, 180, 0.0) 0%,
+                    rgba(255, 225, 180, 0.0) 100%);
             }
             30%  {
                 background: radial-gradient(ellipse at center,
-                    rgba(251, 146, 60, 0.12) 0%,
-                    rgba(251, 146, 60, 0.0) 70%);
+                    rgba(255, 225, 180, 0.14) 0%,
+                    rgba(255, 200, 140, 0.0) 70%);
             }
             100% {
                 background: radial-gradient(ellipse at center,
-                    rgba(251, 146, 60, 0.04) 0%,
-                    rgba(251, 146, 60, 0.0) 70%);
+                    rgba(255, 225, 180, 0.05) 0%,
+                    rgba(255, 200, 140, 0.0) 70%);
             }
         }
 
@@ -473,7 +504,7 @@ def _landing_styles() -> FT:
             width: 0;
             height: 0;
             border-radius: 50%;
-            border: 1.5px solid rgba(251, 146, 60, 0.6);
+            border: 1.5px solid rgba(255, 225, 180, 0.6);
             transform: translate(-50%, -50%);
             pointer-events: none;
             opacity: 0;
@@ -482,9 +513,9 @@ def _landing_styles() -> FT:
         }
 
         @keyframes pulse-expand {
-            0%   { width: 0;     height: 0;     opacity: 0.8; border-color: rgba(251, 146, 60, 0.8); }
-            60%  { width: 120px; height: 120px; opacity: 0.3; border-color: rgba(251, 146, 60, 0.3); }
-            100% { width: 180px; height: 180px; opacity: 0;   border-color: rgba(251, 146, 60, 0); }
+            0%   { width: 0;     height: 0;     opacity: 0.8; border-color: rgba(255, 225, 180, 0.8); }
+            60%  { width: 120px; height: 120px; opacity: 0.3; border-color: rgba(255, 210, 160, 0.3); }
+            100% { width: 180px; height: 180px; opacity: 0;   border-color: rgba(255, 210, 160, 0); }
         }
 
         /* ── Energy flash — directional light burst inside card ── */
@@ -503,8 +534,8 @@ def _landing_styles() -> FT:
                 opacity: 0;
                 background: radial-gradient(
                     ellipse at 80% 30%,
-                    rgba(255, 220, 180, 0.5) 0%,
-                    rgba(251, 146, 60, 0.2) 40%,
+                    rgba(255, 245, 220, 0.6) 0%,
+                    rgba(255, 210, 160, 0.2) 40%,
                     transparent 70%
                 );
             }
@@ -513,36 +544,53 @@ def _landing_styles() -> FT:
                 opacity: 0;
                 background: radial-gradient(
                     ellipse at 50% 50%,
-                    rgba(251, 146, 60, 0.1) 0%,
+                    rgba(255, 225, 180, 0.1) 0%,
                     transparent 60%
                 );
             }
         }
 
-        /* ── Light mode showcase card — frosted warm dawn glass ── */
+        /* ── Light mode showcase card — warm brass instrument on cool dawn ── */
+        /* Material warmth, not light emission. The card itself warms up. */
         [data-theme="light"] .showcase-card {
-            background: rgba(255, 252, 248, 0.78);
-            backdrop-filter: blur(24px) saturate(1.2);
-            -webkit-backdrop-filter: blur(24px) saturate(1.2);
-            border-color: rgba(212, 168, 120, 0.2);
+            /* Themed indicator tokens */
+            --indicator-active: #9A4E1C;
+            --indicator-dim: #a8a095;
+            --indicator-active-bg: rgba(154,78,28,0.10);
+            --indicator-active-border: rgba(154,78,28,0.30);
+            --indicator-dim-bg: rgba(148,137,122,0.08);
+            --indicator-dim-border: rgba(148,137,122,0.20);
+            /* Opaque, cool-ish white when dormant — warms up on ignite */
+            background: rgba(245, 243, 240, 1.0);
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            /* Muted border when off — warm-neutral, not orange */
+            border: 1px solid rgba(170, 160, 150, 0.25);
+            /* Tight lift shadow only — no outward emission */
             box-shadow:
-                0 8px 32px -8px rgba(160, 100, 40, 0.12),
-                0 0 0 0.5px rgba(212, 168, 120, 0.15);
-            filter: saturate(0.6) brightness(0.97);
+                0 1px 8px -2px rgba(80, 70, 60, 0.12),
+                0 0 0 1px rgba(170, 160, 150, 0.10);
+            /* Override dark mode's base filter — cool overlay handles desaturation */
+            filter: none;
             animation-name: card-ignite-light;
         }
         [data-theme="light"] .showcase-card::before {
-            opacity: 0.08;
+            opacity: 0.05;
             mix-blend-mode: multiply;
         }
+        /* Light mode: no aura halo — warmth lives IN the card, not around it */
+        [data-theme="light"] .showcase-card::after {
+            display: none;
+        }
+        /* Card text: warm brown tones like engraved brass */
         [data-theme="light"] .showcase-card .showcase-card-title {
-            color: #1e293b;
+            color: #5a4838;
         }
         [data-theme="light"] .showcase-card p {
-            color: #334155;
+            color: #5a4d3e;
         }
         [data-theme="light"] .showcase-card .text-\\[9px\\] {
-            color: #64584a;
+            color: #5a4838;
         }
         /* ── Aperture slider — brass observatory dial ── */
         .aperture-slider {
@@ -576,46 +624,89 @@ def _landing_styles() -> FT:
             box-shadow: 0 0 8px rgba(251, 146, 60, 0.5), 0 1px 3px rgba(0,0,0,0.4);
         }
         [data-theme="light"] .aperture-slider {
-            background: linear-gradient(90deg, #d4c8b8 0%, #c0b4a0 100%);
+            background: linear-gradient(90deg, #d8cfc0 0%, #c8b9a4 100%);
         }
         [data-theme="light"] .aperture-slider::-webkit-slider-thumb {
-            background: #d4700a;
-            box-shadow: 0 0 8px rgba(212, 112, 10, 0.4), 0 1px 3px rgba(0,0,0,0.2);
+            background: #8B6D4C;
+            box-shadow: 0 1px 4px rgba(80, 55, 20, 0.3), 0 0 0 2px rgba(139, 109, 76, 0.12);
         }
         [data-theme="light"] .aperture-slider::-moz-range-thumb {
-            background: #d4700a;
-            box-shadow: 0 0 8px rgba(212, 112, 10, 0.4), 0 1px 3px rgba(0,0,0,0.2);
+            background: #8B6D4C;
+            box-shadow: 0 1px 4px rgba(80, 55, 20, 0.3), 0 0 0 2px rgba(139, 109, 76, 0.12);
         }
+        /* Light: pulse ring — warm-neutral, not orange */
         [data-theme="light"] .showcase-pulse-ring {
-            border-color: rgba(212, 112, 10, 0.5);
+            border-color: rgba(165, 140, 100, 0.5);
+            border-width: 1.5px;
+            box-shadow: none;
+            animation-name: pulse-expand-light;
+        }
+
+        @keyframes pulse-expand-light {
+            0%   {
+                width: 0; height: 0;
+                opacity: 0.7;
+                border-color: rgba(165, 140, 100, 0.6);
+                box-shadow: none;
+            }
+            60%  {
+                width: 130px; height: 130px;
+                opacity: 0.25;
+                border-color: rgba(165, 140, 100, 0.25);
+                box-shadow: none;
+            }
+            100% {
+                width: 200px; height: 200px;
+                opacity: 0;
+                border-color: rgba(165, 140, 100, 0);
+                box-shadow: none;
+            }
         }
         [data-theme="light"] .showcase-flash {
             animation-name: energy-flash-light;
         }
 
         @keyframes card-ignite-light {
+            /* Filter is handled by the .aperture-cool overlay (reacts to slider).
+               This animation only handles bg, border, shadow, scale. */
             0% {
-                filter: saturate(0.6) brightness(0.97);
-                border-color: rgba(212, 168, 120, 0.2);
+                background: rgba(245, 243, 240, 1.0);
+                border-color: rgba(170, 160, 150, 0.25);
                 box-shadow:
-                    0 8px 32px -8px rgba(160, 100, 40, 0.12),
-                    0 0 0 0.5px rgba(212, 168, 120, 0.15);
+                    0 1px 8px -2px rgba(80, 70, 60, 0.12),
+                    0 0 0 1px rgba(170, 160, 150, 0.10);
+                scale: 1;
             }
             25% {
-                filter: saturate(1.2) brightness(1.05);
-                border-color: rgba(212, 112, 10, 0.4);
+                background: rgba(255, 248, 235, 1.0);
+                border-color: rgba(175, 140, 100, 0.45);
                 box-shadow:
-                    0 0 30px 2px rgba(212, 112, 10, 0.2),
-                    0 0 60px 4px rgba(212, 112, 10, 0.08),
-                    0 8px 32px -8px rgba(160, 100, 40, 0.15);
+                    inset 0 1px 6px 0 rgba(230, 180, 100, 0.30),
+                    inset 0 0 20px 0 rgba(220, 165, 80, 0.10),
+                    0 4px 16px -4px rgba(80, 55, 20, 0.22),
+                    0 1px 3px 0 rgba(80, 55, 20, 0.12);
+                scale: 1.03;
+            }
+            50% {
+                background: rgba(255, 250, 240, 1.0);
+                border-color: rgba(170, 145, 115, 0.38);
+                box-shadow:
+                    inset 0 1px 3px 0 rgba(225, 175, 95, 0.20),
+                    inset 0 0 12px 0 rgba(215, 160, 75, 0.06),
+                    0 3px 14px -4px rgba(80, 55, 20, 0.20),
+                    0 1px 3px 0 rgba(80, 55, 20, 0.10);
+                scale: 1;
             }
             100% {
-                filter: saturate(1) brightness(1);
-                border-color: rgba(212, 112, 10, 0.25);
+                background: rgba(255, 250, 240, 1.0);
+                border-color: rgba(165, 145, 120, 0.38);
                 box-shadow:
-                    0 0 14px 1px rgba(212, 112, 10, 0.1),
-                    0 8px 32px -8px rgba(160, 100, 40, 0.12),
-                    0 0 0 0.5px rgba(212, 112, 10, 0.18);
+                    inset 0 1px 0 0 rgba(255, 240, 210, 0.5),
+                    inset 0 -1px 0 0 rgba(170, 150, 120, 0.12),
+                    0 4px 16px -4px rgba(80, 55, 20, 0.22),
+                    0 1px 3px 0 rgba(80, 55, 20, 0.12),
+                    0 0 0 1px rgba(165, 145, 120, 0.12);
+                scale: 1;
             }
         }
 
@@ -623,23 +714,71 @@ def _landing_styles() -> FT:
             0%  {
                 opacity: 0;
                 background: radial-gradient(
-                    ellipse at 80% 30%,
-                    rgba(245, 200, 140, 0.6) 0%,
-                    rgba(212, 112, 10, 0.2) 40%,
+                    ellipse at 75% 30%,
+                    rgba(255, 235, 200, 0.85) 0%,
+                    rgba(200, 145, 60, 0.4) 35%,
+                    rgba(180, 120, 50, 0.15) 60%,
+                    transparent 75%
+                );
+            }
+            25% {
+                /* Peak flash — fully opaque, warm amber washes across the card */
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+                background: radial-gradient(
+                    ellipse at 55% 45%,
+                    rgba(220, 170, 90, 0.3) 0%,
+                    rgba(200, 145, 60, 0.1) 50%,
                     transparent 70%
                 );
             }
-            30% { opacity: 0.8; }
             100% {
                 opacity: 0;
                 background: radial-gradient(
                     ellipse at 50% 50%,
-                    rgba(212, 112, 10, 0.08) 0%,
+                    rgba(200, 145, 60, 0.05) 0%,
                     transparent 60%
                 );
             }
         }
 
+
+        /* ── Aperture reactive glow overlay ── */
+        /* Dark: champagne radiance emanates from card */
+        .aperture-glow {
+            box-shadow:
+                0 0 50px 8px rgba(255, 225, 180, 0.4),
+                0 0 100px 16px rgba(255, 200, 140, 0.18),
+                0 0 150px 24px rgba(255, 200, 140, 0.06);
+        }
+        /* Light: direct warmth — no blend mode tricks.
+           Warm border ring + warm atmospheric shadow + surface tint.
+           At aperture 0 (opacity 0): invisible. At 100 (opacity 1): clearly warm. */
+        [data-theme="light"] .aperture-glow {
+            background: rgba(210, 170, 110, 0.15);
+            border: 1.5px solid rgba(175, 130, 65, 0.45);
+            border-radius: inherit;
+            box-shadow:
+                0 0 20px 4px rgba(175, 130, 60, 0.16),
+                0 8px 28px -6px rgba(120, 80, 30, 0.24),
+                0 1px 4px 0 rgba(100, 65, 20, 0.10);
+        }
+
+        /* ── Aperture cool overlay — desaturates card at low aperture ── */
+        /* Fades OUT as aperture rises: opacity = 1 - (aperture/100).
+           At 0%: fully visible = card looks gray/dormant.
+           At 100%: invisible = card shows full warm color.
+           Dark mode: hidden (glow system handles everything). */
+        .aperture-cool {
+            display: none;
+        }
+        [data-theme="light"] .aperture-cool {
+            display: block;
+            backdrop-filter: grayscale(0.4) brightness(0.90) saturate(0.5);
+            -webkit-backdrop-filter: grayscale(0.4) brightness(0.90) saturate(0.5);
+        }
 
         /* ── Star ornament before QUICKSTART label ── */
         .showcase-label {
@@ -656,6 +795,31 @@ def _landing_styles() -> FT:
             clip-path: polygon(50% 0%, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0% 50%, 40% 40%);
             opacity: 0.7;
             animation: star-breathe 4s ease-in-out infinite;
+        }
+
+        /* ── Light mode: QUICKSTART label system ── */
+        /* Cool slate on warm bg = hue contrast (mirrors orange-on-navy in dark mode) */
+        [data-theme="light"] .showcase-label .text-sunset {
+            color: #3e4255;
+        }
+        [data-theme="light"] .showcase-label::before {
+            background: #3e4255;
+            opacity: 0.85;
+            animation: star-breathe-light 4s ease-in-out infinite;
+        }
+        @keyframes star-breathe-light {
+            0%, 100% { opacity: 0.55; }
+            50% { opacity: 0.9; }
+        }
+        [data-theme="light"] .showcase-label .showcase-divider-line {
+            background: linear-gradient(90deg,
+                rgba(62, 66, 85, 0.35) 0%,
+                rgba(62, 66, 85, 0.12) 60%,
+                transparent 100%) !important;
+            opacity: 1;
+        }
+        [data-theme="light"] .showcase-label {
+            margin-bottom: 1.25rem;
         }
 
         /* ── Card overlays terminal via terminal-group ── */
@@ -679,6 +843,10 @@ def _landing_styles() -> FT:
                 transform-origin: bottom right;
                 animation: card-arc-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both,
                            card-ignite 1.4s cubic-bezier(0.22, 1, 0.36, 1) 1.4s both;
+            }
+            [data-theme="light"] .showcase-card {
+                animation: card-arc-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both,
+                           card-ignite-light 1.4s cubic-bezier(0.22, 1, 0.36, 1) 1.4s both;
             }
         }
         /* ── Mid-range (960px+) — card can sit a bit lower, more room ── */
@@ -739,7 +907,6 @@ def _landing_styles() -> FT:
             [data-theme="light"] .showcase-card {
                 animation: card-arc-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both,
                            card-ignite-light 1.4s cubic-bezier(0.22, 1, 0.36, 1) 1.4s both;
-                filter: saturate(0.6) brightness(0.97);
             }
         }
 
@@ -806,6 +973,10 @@ def _landing_styles() -> FT:
         @media (prefers-reduced-motion: reduce) {
             .star, .cross-mark, .star-mark { animation: none !important; }
             .star { opacity: 0.5; }
+            [data-theme="light"] .cross-mark {
+                opacity: 0.2;
+                animation: none !important;
+            }
             .cross-mark { opacity: 0; }
             .star-mark { opacity: 0.7; }
             .hero-arc .arc-star-group { display: none; }
@@ -834,7 +1005,7 @@ def _landing_styles() -> FT:
         /* Light mode: dark text on cool dawn bg */
         [data-theme="light"] .text-moon { color: #1e293b; }
         [data-theme="light"] .text-moon-dim { color: #5e6d82; }
-        [data-theme="light"] .text-sunset { color: #d4700a; }
+        [data-theme="light"] .text-sunset { color: #b85a08; }
 
         /* ── CTA button ── */
         /* Dark mode: light border/text */
@@ -933,9 +1104,9 @@ def _generate_starfield() -> tuple:
             ),
         ))
 
-    for i in range(28):
-        # responsive: 0-11 always, 12-19 md+, 20-27 lg+
-        extra = " hidden lg:block" if i >= 20 else (" hidden md:block" if i >= 12 else "")
+    for i in range(50):
+        # responsive: 0-19 always, 20-34 md+, 35-49 lg+
+        extra = " hidden lg:block" if i >= 35 else (" hidden md:block" if i >= 20 else "")
         crosses.append(Div(
             cls=f"cross-mark{extra}",
             style=(

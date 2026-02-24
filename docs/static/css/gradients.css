@@ -46,22 +46,3 @@
               0 0 80px rgba(236, 72, 153, 0.2);
 }
 
-/* Loading states for constellation components */
-[data-constellation-item] {
-  transition: opacity 0.3s ease-out;
-}
-
-[data-constellation-item].loading {
-  opacity: 0;
-}
-
-/* Focus indicators for accessibility */
-[data-constellation-item]:focus-visible {
-  outline: 2px solid var(--gradient-mid);
-  outline-offset: 4px;
-}
-
-.gradient-border:focus-visible {
-  outline: 2px solid var(--gradient-mid);
-  outline-offset: 2px;
-}
