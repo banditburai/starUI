@@ -12,7 +12,7 @@ styles = Link(rel="stylesheet", href="{css_path}", type="text/css")
 
 app, rt = star_app(
     hdrs=(
-        fouc_script(use_data_theme=True),
+        theme_script(use_data_theme=True),
         styles,
     ),
     htmlkw=dict(lang="en", dir="ltr"),

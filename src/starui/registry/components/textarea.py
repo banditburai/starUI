@@ -54,7 +54,14 @@ def Textarea(
             "disabled:cursor-not-allowed disabled:opacity-50",
             "md:text-sm",
             "field-sizing-content" if rows is None else "",
-            {"none": "resize-none", "both": "resize", "horizontal": "resize-x", "vertical": "resize-y"}[resize] if resize else "",
+            {
+                "none": "resize-none",
+                "both": "resize",
+                "horizontal": "resize-x",
+                "vertical": "resize-y",
+            }[resize]
+            if resize
+            else "",
             cls,
         ),
         **kwargs,
@@ -103,7 +110,11 @@ def TextareaWithLabel(
             cls=textarea_cls,
             **kwargs,
         ),
-        HTMLP(error_text, cls="text-sm text-destructive mt-1.5") if error_text else None,
-        HTMLP(helper_text, cls="text-sm text-muted-foreground mt-1.5") if helper_text and not error_text else None,
+        HTMLP(error_text, cls="text-sm text-destructive mt-1.5")
+        if error_text
+        else None,
+        HTMLP(helper_text, cls="text-sm text-muted-foreground mt-1.5")
+        if helper_text and not error_text
+        else None,
         cls=cn("space-y-1.5", cls),
     )

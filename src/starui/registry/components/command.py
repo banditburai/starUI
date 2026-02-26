@@ -1,11 +1,11 @@
 from itertools import count
 from typing import Any, Literal
 
-from starhtml import FT, Div, Icon, Input, Span, Signal, js, set_timeout, expr
+from starhtml import FT, Div, Icon, Input, Signal, Span, expr, js, set_timeout
 from starhtml import Dialog as HTMLDialog
-from starhtml.datastar import evt, document
+from starhtml.datastar import document, evt
 
-from .utils import cn, cva, gen_id, with_signals
+from .utils import cn, cva, gen_id, merge_actions, with_signals
 
 CommandSize = Literal["sm", "md", "lg"]
 
@@ -43,23 +43,23 @@ def Command(
     _dialog_ref=None,
     **kwargs: Any,
 ) -> FT:
-    sig = getattr(signal, '_id', signal) or gen_id("command")
+    sig = getattr(signal, "_id", signal) or gen_id("command")
     search = Signal(f"{sig}_search", "")
     selected = Signal(f"{sig}_selected", 0)
     visible_count = Signal(f"{sig}_visible", 0)
     visible_items = Signal(f"{sig}_visible_items", [])
     input_ref = Signal(f"{sig}_input", _ref_only=True)
 
-    ctx = dict(
-        sig=sig,
-        search=search,
-        selected=selected,
-        visible_count=visible_count,
-        visible_items=visible_items,
-        input_ref=input_ref,
-        _item_index=count(),
-        dialog_ref=_dialog_ref,
-    )
+    ctx = {
+        "sig": sig,
+        "search": search,
+        "selected": selected,
+        "visible_count": visible_count,
+        "visible_items": visible_items,
+        "input_ref": input_ref,
+        "_item_index": count(),
+        "dialog_ref": _dialog_ref,
+    }
 
     return with_signals(
         Div(
@@ -89,7 +89,7 @@ def CommandDialog(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = getattr(signal, '_id', signal) or gen_id("command")
+    sig = getattr(signal, "_id", signal) or gen_id("command")
     dialog_ref = Signal(f"{sig}_dialog", _ref_only=True)
     dialog_open = Signal(f"{dialog_ref._id}_open", False)
 
@@ -114,8 +114,12 @@ def CommandDialog(
         command,
         data_ref=dialog_ref,
         data_on_close=reset_signals,
-        data_on_click=(evt.target == evt.currentTarget) & evt.currentTarget.close() if modal else None,
-        data_effect=(dialog_open & ~command.search).then(set_timeout(input_ref.focus(), _DIALOG_FOCUS_DELAY_MS)),
+        data_on_click=(evt.target == evt.currentTarget) & evt.currentTarget.close()
+        if modal
+        else None,
+        data_effect=(dialog_open & ~command.search).then(
+            set_timeout(input_ref.focus(), _DIALOG_FOCUS_DELAY_MS)
+        ),
         id=dialog_ref._id,
         cls=cn(
             "fixed max-h-[85vh] w-full max-w-2xl m-auto p-0",
@@ -138,7 +142,7 @@ def CommandDialog(
     )
 
     scroll_lock = Div(
-        data_effect=document.body.style.overflow.set(dialog_open.if_('hidden', '')),
+        data_effect=document.body.style.overflow.set(dialog_open.if_("hidden", "")),
         style="display:none",
     )
 
@@ -153,14 +157,21 @@ def CommandInput(
     def _(*, sig, search, selected, visible_items, input_ref, **_):
         return Div(
             Div(
-                Icon("lucide:search", width="16", height="16", style="display: block; width: 100%; height: 100%;"),
+                Icon(
+                    "lucide:search",
+                    width="16",
+                    height="16",
+                    style="display: block; width: 100%; height: 100%;",
+                ),
                 style="display: inline-block; width: 16px; height: 16px; flex-shrink: 0; overflow: hidden;",
-                cls="opacity-50"
+                cls="opacity-50",
             ),
             Input(
                 data_ref=input_ref,
                 data_bind=search,
-                data_on_keydown=js(_get_nav_handler(sig, search, selected, visible_items)),
+                data_on_keydown=js(
+                    _get_nav_handler(sig, search, selected, visible_items)
+                ),
                 placeholder=placeholder,
                 data_slot="command-input",
                 cls="flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 focus-visible:ring-0 focus-visible:border-transparent",
@@ -199,13 +210,28 @@ def CommandList(
         """)
 
         return Div(
-            *[c(sig=sig, visible_count=visible_count, visible_items=visible_items, search=search, selected=selected, **ctx) if callable(c) else c for c in children],
+            *[
+                c(
+                    sig=sig,
+                    visible_count=visible_count,
+                    visible_items=visible_items,
+                    search=search,
+                    selected=selected,
+                    **ctx,
+                )
+                if callable(c)
+                else c
+                for c in children
+            ],
             data_effect=scan_effect,
             role="listbox",
             aria_label="Commands",
             data_command_list=sig,
             data_slot="command-list",
-            cls=cn("max-h-[300px] scroll-py-1 overflow-x-hidden overflow-y-auto outline-none", cls),
+            cls=cn(
+                "max-h-[300px] scroll-py-1 overflow-x-hidden overflow-y-auto outline-none",
+                cls,
+            ),
             **kwargs,
         )
 
@@ -244,7 +270,9 @@ def CommandGroup(
                 data_slot="command-group-heading",
                 cls="text-muted-foreground px-2 py-1.5 text-xs font-medium select-none",
                 aria_hidden="true",
-            ) if heading else None,
+            )
+            if heading
+            else None,
             *[c(sig=sig, **ctx) if callable(c) else c for c in children],
             role="group",
             data_command_group=sig,
@@ -274,18 +302,20 @@ def CommandItem(
     def _(*, sig, search, selected, _item_index, dialog_ref, **_):
         index = next(_item_index)
 
-        item_show = show if show is not None or disabled else (
-            ~search | expr(value).lower().contains(search.lower()) | expr(keywords or "").lower().contains(search.lower())
+        item_show = (
+            show
+            if show is not None or disabled
+            else (
+                ~search
+                | expr(value).lower().contains(search.lower())
+                | expr(keywords or "").lower().contains(search.lower())
+            )
         )
 
-        user_click = kwargs.pop('data_on_click', None)
-        if user_click and not isinstance(user_click, list):
-            user_click = [user_click]
-
-        click_actions = (
-            ([js(onclick)] if onclick else []) +
-            (user_click or []) +
-            ([dialog_ref.close()] if dialog_ref else [])
+        click_actions = merge_actions(
+            js(onclick) if onclick else None,
+            kwargs=kwargs,
+            after=dialog_ref.close() if dialog_ref else None,
         )
 
         return Div(
@@ -304,8 +334,10 @@ def CommandItem(
             data_index=str(index),
             cls=cn(
                 "relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none select-none transition-colors",
-                "[&_svg:not([class*='text-'])]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
-                "hover:bg-accent/50 data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground" if not disabled else "opacity-50 cursor-not-allowed pointer-events-none",
+                "[&_[data-icon-sh]:not([class*='text-'])]:text-muted-foreground [&_[data-icon-sh]]:pointer-events-none [&_[data-icon-sh]]:shrink-0 [&_[data-icon-sh]:not([class*='size-'])]:size-4",
+                "hover:bg-accent/50 data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground"
+                if not disabled
+                else "opacity-50 cursor-not-allowed pointer-events-none",
                 cls,
             ),
             **kwargs,
@@ -322,7 +354,7 @@ def CommandSeparator(cls: str = "", **kwargs: Any):
             "-mx-1 h-px bg-border",
             "[&:not(:has(+_[role=group]))]:hidden",
             "[&:has(+_[role=group]:not(:has([data-command-item]:not([style*='none']))))]:hidden",
-            cls
+            cls,
         ),
         **kwargs,
     )

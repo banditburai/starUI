@@ -4,7 +4,7 @@ from typing import Any, Literal
 from starhtml import FT, Div, Signal
 from starhtml import Button as HTMLButton
 
-from .utils import cn, gen_id
+from .utils import cn, gen_id, merge_actions
 
 TabsVariant = Literal["default", "plain"]
 
@@ -17,15 +17,15 @@ def Tabs(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = getattr(signal, '_id', signal) or gen_id("tabs")
+    sig = getattr(signal, "_id", signal) or gen_id("tabs")
 
-    ctx = dict(
-        tabs_state=(tabs_state := Signal(sig, value)),
-        variant=variant,
-        initial_value=value,
-        _trigger_index=count(),
-        _content_index=count(),
-    )
+    ctx = {
+        "tabs_state": (tabs_state := Signal(sig, value)),
+        "variant": variant,
+        "initial_value": value,
+        "_trigger_index": count(),
+        "_content_index": count(),
+    }
 
     return Div(
         tabs_state,
@@ -67,16 +67,14 @@ def TabsTrigger(
         tab_id = id if id is not None else next(_trigger_index)
         is_active = tabs_state == tab_id
 
-        user_on_click = kwargs.pop('data_on_click', None)
-        user_actions = user_on_click if isinstance(user_on_click, list) else ([user_on_click] if user_on_click else [])
-        click_actions = [tabs_state.set(tab_id)] + user_actions
+        click_actions = merge_actions(tabs_state.set(tab_id), kwargs=kwargs)
 
         base = (
             "inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center "
             "gap-1.5 rounded-md py-1 font-medium "
             "whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] "
             "focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 "
-            "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+            "[&_[data-icon-sh]]:pointer-events-none [&_[data-icon-sh]]:shrink-0 [&_[data-icon-sh]:not([class*='size-'])]:size-4"
         )
 
         variant_styles = {
@@ -107,7 +105,9 @@ def TabsTrigger(
     return _
 
 
-def TabsContent(*children: Any, id: str | int | None = None, cls: str = "", **kwargs: Any) -> FT:
+def TabsContent(
+    *children: Any, id: str | int | None = None, cls: str = "", **kwargs: Any
+) -> FT:
     def _(*, tabs_state, initial_value, _content_index, **_):
         tab_id = id if id is not None else next(_content_index)
         is_active = tabs_state == tab_id

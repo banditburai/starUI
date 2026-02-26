@@ -3,8 +3,9 @@ from typing import Any
 from starhtml import FT, Code, Div, NotStr, Style
 
 try:
-    from starlighter import highlight, get_theme_css, THEMES
+    from starlighter import THEMES, get_theme_css, highlight
 except ImportError:
+
     def highlight(code: str, language: str = "python") -> str:
         return f'<pre><code class="language-{language}">{code}</code></pre>'
 
@@ -13,7 +14,7 @@ except ImportError:
 
     THEMES = {}
 
-from .utils import cn, DEFAULT_THEME, ALT_THEME
+from .utils import ALT_THEME, DEFAULT_THEME, cn
 
 
 def CodeBlockStyles(
@@ -51,9 +52,7 @@ def CodeBlock(
     **kwargs: Any,
 ) -> FT:
     return Div(
-        NotStr(highlight(code, language)),
-        cls=cn("code-container", cls),
-        **kwargs
+        NotStr(highlight(code, language)), cls=cn("code-container", cls), **kwargs
     )
 
 
@@ -65,7 +64,7 @@ def InlineCode(
     return Code(
         text,
         cls=cn("rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm", cls),
-        **kwargs
+        **kwargs,
     )
 
 

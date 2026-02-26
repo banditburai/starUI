@@ -1,6 +1,6 @@
 from typing import Any, Literal
 
-from starhtml import Div, FT, Signal, reset_timeout, clear_timeout
+from starhtml import FT, Div, Signal, clear_timeout, reset_timeout
 from starhtml.datastar import evt
 
 from .utils import cn, gen_id
@@ -12,10 +12,10 @@ def Tooltip(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = getattr(signal, '_id', signal) or gen_id("tooltip")
+    sig = getattr(signal, "_id", signal) or gen_id("tooltip")
     open_state = Signal(f"{sig}_open", False)
     timer_state = Signal(f"{sig}_timer", 0)
-    ctx = dict(sig=sig, open_state=open_state, timer_state=timer_state)
+    ctx = {"sig": sig, "open_state": open_state, "timer_state": timer_state}
 
     return Div(
         open_state,
@@ -44,10 +44,14 @@ def TooltipTrigger(
             *children,
             data_ref=trigger_ref,
             data_on_mouseenter=open_expr,
-            data_on_mouseleave=reset_timeout(timer_state, hide_delay, open_state.set(False)) if hide_delay > 0 else close_expr,
+            data_on_mouseleave=reset_timeout(
+                timer_state, hide_delay, open_state.set(False)
+            )
+            if hide_delay > 0
+            else close_expr,
             data_on_focusin=open_expr,
             data_on_focusout=close_expr,
-            data_on_keydown=(evt.key == 'Escape').then(close_expr),
+            data_on_keydown=(evt.key == "Escape").then(close_expr),
             data_attr_aria_expanded=open_state,
             aria_describedby=f"{sig}_content",
             id=trigger_ref._id,
@@ -99,7 +103,7 @@ def TooltipContent(
                     "container": container,
                 },
             ),
-            data_attr_data_state=open_state.if_('open', 'closed'),
+            data_attr_data_state=open_state.if_("open", "closed"),
             id=content_ref._id,
             role="tooltip",
             data_side=side,

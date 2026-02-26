@@ -1,16 +1,15 @@
 from typing import Any, Literal
 
-from starhtml import Div, FT, Hr, Icon, Signal, Span
+from starhtml import FT, Div, Hr, Icon, Signal, Span
 from starhtml import Button as HTMLButton
 
-from .utils import cn, cva, gen_id
+from .utils import cn, cva, gen_id, merge_actions
 
 dropdown_item_variants = cva(
     base=(
         "relative flex w-full cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 "
         "text-sm outline-none transition-colors "
-        "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg]:size-4 "
-        "[&_iconify-icon]:size-4 [&_iconify-icon]:shrink-0"
+        "[&_[data-icon-sh]]:pointer-events-none [&_[data-icon-sh]]:shrink-0 [&_[data-icon-sh]]:size-4"
     ),
     config={
         "variants": {
@@ -25,14 +24,11 @@ dropdown_item_variants = cva(
 
 
 def DropdownMenu(
-    *children,
-    signal: str | Signal = "",
-    cls: str = "",
-    **kwargs: Any
+    *children, signal: str | Signal = "", cls: str = "", **kwargs: Any
 ) -> FT:
-    sig = getattr(signal, '_id', signal) or gen_id("dropdown")
+    sig = getattr(signal, "_id", signal) or gen_id("dropdown")
 
-    ctx = dict(sig=sig)
+    ctx = {"sig": sig}
 
     return Div(
         Signal(f"{sig}_open", False),
@@ -44,7 +40,9 @@ def DropdownMenu(
 
 def DropdownMenuTrigger(
     *children,
-    variant: Literal["default", "destructive", "outline", "secondary", "ghost", "link"] = "outline",
+    variant: Literal[
+        "default", "destructive", "outline", "secondary", "ghost", "link"
+    ] = "outline",
     size: Literal["default", "sm", "lg", "icon"] = "default",
     cls: str = "",
     **kwargs: Any,
@@ -91,9 +89,14 @@ def DropdownMenuContent(
         }
 
         return Div(
-            *[child(sig=sig, **ctx) if callable(child) else child for child in children],
+            *[
+                child(sig=sig, **ctx) if callable(child) else child
+                for child in children
+            ],
             data_ref=content_ref,
-            data_style_min_width=trigger_ref.if_(trigger_ref.offsetWidth + 'px', '8rem'),
+            data_style_min_width=trigger_ref.if_(
+                trigger_ref.offsetWidth + "px", "8rem"
+            ),
             data_position=(trigger_ref._id, position_mods),
             popover="auto",
             id=content_ref._id,
@@ -122,9 +125,7 @@ def DropdownMenuItem(
     def _(*, sig, **_):
         content_ref = Signal(f"{sig}_content", _ref_only=True)
 
-        user_on_click = kwargs.pop('data_on_click', None)
-        user_actions = user_on_click if isinstance(user_on_click, list) else ([user_on_click] if user_on_click else [])
-        click_actions = user_actions + [content_ref.hidePopover()]
+        click_actions = merge_actions(kwargs=kwargs, after=content_ref.hidePopover())
 
         return HTMLButton(
             *children,
@@ -152,12 +153,12 @@ def DropdownMenuCheckboxItem(
     **kwargs: Any,
 ) -> FT:
     def _(*, sig, **_):
-        checked = Signal(getattr(signal, '_id', signal), _ref_only=True)
+        checked = Signal(getattr(signal, "_id", signal), _ref_only=True)
         content_ref = Signal(f"{sig}_content", _ref_only=True)
 
-        user_on_click = kwargs.pop('data_on_click', None)
-        user_actions = user_on_click if isinstance(user_on_click, list) else ([user_on_click] if user_on_click else [])
-        click_actions = user_actions + [checked.set(~checked), content_ref.hidePopover()]
+        click_actions = merge_actions(
+            kwargs=kwargs, after=[checked.set(~checked), content_ref.hidePopover()]
+        )
 
         return HTMLButton(
             Span(
@@ -175,7 +176,7 @@ def DropdownMenuCheckboxItem(
             ),
             type="button",
             role="menuitemcheckbox",
-            data_attr_aria_checked=checked.if_('true', 'false'),
+            data_attr_aria_checked=checked.if_("true", "false"),
             disabled=disabled,
             **kwargs,
         )
@@ -191,11 +192,17 @@ def DropdownMenuRadioGroup(
 ) -> FT:
     def _(**ctx):
         return Div(
-            *[child(radio_signal=getattr(signal, '_id', signal), **ctx) if callable(child) else child for child in children],
+            *[
+                child(radio_signal=getattr(signal, "_id", signal), **ctx)
+                if callable(child)
+                else child
+                for child in children
+            ],
             role="radiogroup",
             cls=cls,
             **kwargs,
         )
+
     return _
 
 
@@ -211,9 +218,9 @@ def DropdownMenuRadioItem(
         content_ref = Signal(f"{sig}_content", _ref_only=True)
         is_checked = radio == value
 
-        user_on_click = kwargs.pop('data_on_click', None)
-        user_actions = user_on_click if isinstance(user_on_click, list) else ([user_on_click] if user_on_click else [])
-        click_actions = user_actions + [radio.set(value), content_ref.hidePopover()]
+        click_actions = merge_actions(
+            kwargs=kwargs, after=[radio.set(value), content_ref.hidePopover()]
+        )
 
         return HTMLButton(
             Span(
@@ -231,7 +238,7 @@ def DropdownMenuRadioItem(
             ),
             type="button",
             role="menuitemradio",
-            data_attr_aria_checked=is_checked.if_('true', 'false'),
+            data_attr_aria_checked=is_checked.if_("true", "false"),
             disabled=disabled,
             **kwargs,
         )
@@ -241,18 +248,13 @@ def DropdownMenuRadioItem(
 
 def DropdownMenuSeparator(cls: str = "", **kwargs: Any) -> FT:
     def _(**_):
-        return Hr(
-            cls=cn("-mx-1 my-1 border-t border-input", cls),
-            **kwargs
-        )
+        return Hr(cls=cn("-mx-1 my-1 border-t border-input", cls), **kwargs)
+
     return _
 
 
 def DropdownMenuLabel(
-    *children,
-    inset: bool = False,
-    cls: str = "",
-    **kwargs: Any
+    *children, inset: bool = False, cls: str = "", **kwargs: Any
 ) -> FT:
     def _(**_):
         return Div(
@@ -264,6 +266,7 @@ def DropdownMenuLabel(
             ),
             **kwargs,
         )
+
     return _
 
 
@@ -291,6 +294,7 @@ def DropdownMenuGroup(
             cls=cls,
             **kwargs,
         )
+
     return _
 
 
@@ -301,7 +305,7 @@ def DropdownMenuSub(
     **kwargs: Any,
 ) -> FT:
     def _(**ctx):
-        sub = getattr(signal, '_id', signal) or gen_id("dropdown_sub")
+        sub = getattr(signal, "_id", signal) or gen_id("dropdown_sub")
         sub_ctx = dict(sub=sub, **ctx)
 
         return Div(
@@ -310,6 +314,7 @@ def DropdownMenuSub(
             cls=cn("relative", cls),
             **kwargs,
         )
+
     return _
 
 
@@ -324,9 +329,7 @@ def DropdownMenuSubTrigger(
         sub_content_ref = Signal(f"{sub}_content", _ref_only=True)
         sub_open = Signal(f"{sub}_open", _ref_only=True)
 
-        user_on_click = kwargs.pop('data_on_click', None)
-        user_actions = user_on_click if isinstance(user_on_click, list) else ([user_on_click] if user_on_click else [])
-        click_actions = [sub_open.set(~sub_open)] + user_actions
+        click_actions = merge_actions(sub_open.set(~sub_open), kwargs=kwargs)
 
         return HTMLButton(
             *children,
@@ -342,11 +345,11 @@ def DropdownMenuSubTrigger(
                 "pl-8" if inset else "",
                 cls,
             ),
-            data_attr_data_state=sub_open.if_('open', 'closed'),
+            data_attr_data_state=sub_open.if_("open", "closed"),
             type="button",
             role="menuitem",
             aria_haspopup="menu",
-            data_attr_aria_expanded=sub_open.if_('true', 'false'),
+            data_attr_aria_expanded=sub_open.if_("true", "false"),
             **kwargs,
         )
 
@@ -371,7 +374,10 @@ def DropdownMenuSubContent(
         }
 
         return Div(
-            *[child(sub=sub, **ctx) if callable(child) else child for child in children],
+            *[
+                child(sub=sub, **ctx) if callable(child) else child
+                for child in children
+            ],
             data_ref=sub_content_ref,
             data_position=(sub_trigger_ref._id, position_mods),
             popover="auto",

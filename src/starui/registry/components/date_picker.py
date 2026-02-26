@@ -1,11 +1,11 @@
 from datetime import datetime, timedelta
 from typing import Any, Protocol
 
-from starhtml import FT, Div, Icon, Span, Signal, js
+from starhtml import FT, Div, Icon, Signal, Span, js
 from starhtml import Button as HTMLButton
 
 from .button import Button
-from .calendar import Calendar, CalendarElement, CalendarMode, MONTHS
+from .calendar import MONTHS, Calendar, CalendarElement, CalendarMode
 from .input import Input
 from .popover import Popover, PopoverContent, PopoverTrigger
 from .utils import cn, gen_id, with_signals
@@ -35,7 +35,7 @@ def DatePicker(
     with_presets: bool = False,
     **kwargs: Any,
 ) -> DatePickerElement:
-    sig = getattr(signal, '_id', signal) or gen_id("date_picker")
+    sig = getattr(signal, "_id", signal) or gen_id("date_picker")
     cal = f"{sig}_calendar"
 
     if not placeholder:
@@ -51,7 +51,9 @@ def DatePicker(
     cal_selected = Signal(f"{cal}_selected", initial_selected, _ref_only=True)
     popover_content_ref = Signal(f"{sig}_popover_content", _ref_only=True)
 
-    on_select = [selected.set(cal_selected)] + ([popover_content_ref.hidePopover()] if mode in ("single", "range") else [])
+    on_select = [selected.set(cal_selected)] + (
+        [popover_content_ref.hidePopover()] if mode in ("single", "range") else []
+    )
 
     calendar = Calendar(
         signal=cal,
@@ -73,7 +75,11 @@ def DatePicker(
             *[
                 Button(
                     label,
-                    data_on_click=[selected.set(date), cal_selected.set(date), popover_content_ref.hidePopover()],
+                    data_on_click=[
+                        selected.set(date),
+                        cal_selected.set(date),
+                        popover_content_ref.hidePopover(),
+                    ],
                     variant="ghost",
                     size="sm",
                     cls="w-full justify-start",
@@ -90,7 +96,9 @@ def DatePicker(
         popover_cls = "w-fit p-0"
 
     popover = Popover(
-        _build_trigger(sig, selected, mode, placeholder, width, disabled, "lucide:calendar"),
+        _build_trigger(
+            sig, selected, mode, placeholder, width, disabled, "lucide:calendar"
+        ),
         PopoverContent(content, cls=popover_cls, align="start", container="none"),
         signal=f"{sig}_popover",
     )
@@ -118,11 +126,11 @@ def DateTimePicker(
     width: str = "w-[280px]",
     **kwargs: Any,
 ) -> DateTimePickerElement:
-    sig = getattr(signal, '_id', signal) or gen_id("datetime_picker")
+    sig = getattr(signal, "_id", signal) or gen_id("datetime_picker")
     cal = f"{sig}_calendar"
 
     initial_date, initial_time = _parse_datetime(selected)
-    hours, minutes = (initial_time.split(":") if initial_time else ("12", "00"))
+    hours, minutes = initial_time.split(":") if initial_time else ("12", "00")
     hour_24 = int(hours)
     is_pm = hour_24 >= 12
     hour_12 = hour_24 % 12 or 12
@@ -132,7 +140,10 @@ def DateTimePicker(
     hour_display = Signal(f"{sig}_hour_display", f"{hour_12:02d}")
     minute_display = Signal(f"{sig}_minute_display", minutes)
     pm = Signal(f"{sig}_pm", is_pm)
-    datetime = Signal(f"{sig}_datetime", f"{initial_date}T{initial_time}" if initial_date and initial_time else "")
+    datetime = Signal(
+        f"{sig}_datetime",
+        f"{initial_date}T{initial_time}" if initial_date and initial_time else "",
+    )
     cal_selected = Signal(f"{cal}_selected", initial_date, _ref_only=True)
 
     calendar = Calendar(
@@ -150,8 +161,23 @@ def DateTimePicker(
     )
 
     popover = Popover(
-        _build_trigger(sig, selected, "single", placeholder, width, disabled, "lucide:calendar-clock", time=time),
-        PopoverContent(content, cls="w-fit p-0 max-h-[600px] overflow-y-auto", align="start", offset=8, container="none"),
+        _build_trigger(
+            sig,
+            selected,
+            "single",
+            placeholder,
+            width,
+            disabled,
+            "lucide:calendar-clock",
+            time=time,
+        ),
+        PopoverContent(
+            content,
+            cls="w-fit p-0 max-h-[600px] overflow-y-auto",
+            align="start",
+            offset=8,
+            container="none",
+        ),
     )
 
     return with_signals(
@@ -164,7 +190,17 @@ def DateTimePicker(
             datetime,
             popover,
             *attrs,
-            data_effect=js(_datetime_sync_effect(selected, cal_selected, hour_display, minute_display, pm, time, datetime)),
+            data_effect=js(
+                _datetime_sync_effect(
+                    selected,
+                    cal_selected,
+                    hour_display,
+                    minute_display,
+                    pm,
+                    time,
+                    datetime,
+                )
+            ),
             cls=cn("inline-block", cls),
             **kwargs,
         ),
@@ -186,7 +222,7 @@ def DatePickerWithInput(
     width: str = "w-[280px]",
     **kwargs: Any,
 ) -> FT:
-    sig = getattr(signal, '_id', signal) or gen_id("date_input")
+    sig = getattr(signal, "_id", signal) or gen_id("date_input")
     cal = f"{sig}_calendar"
     initial_selected = selected or ""
 
@@ -224,7 +260,9 @@ def DatePickerWithInput(
             cls="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 px-0 hover:bg-transparent",
             disabled=disabled,
         ),
-        _build_input_popover_content(content_ref._id, trigger_ref._id, cal, initial_selected, disabled),
+        _build_input_popover_content(
+            content_ref._id, trigger_ref._id, cal, initial_selected, disabled
+        ),
         cls="relative inline-block",
     )
 
@@ -233,7 +271,9 @@ def DatePickerWithInput(
             selected_sig,
             input_with_popover,
             *attrs,
-            data_effect=js(f"{_input_sync_effect(selected_sig, cal_selected, cal_month, cal_year, cal_month_display, input_ref)};{_input_close_effect(selected_sig, content_ref)}"),
+            data_effect=js(
+                f"{_input_sync_effect(selected_sig, cal_selected, cal_month, cal_year, cal_month_display, input_ref)};{_input_close_effect(selected_sig, content_ref)}"
+            ),
             cls=cn("inline-block", cls),
             **kwargs,
         ),
@@ -241,7 +281,9 @@ def DatePickerWithInput(
     )
 
 
-def _build_input_popover_content(content_id: str, trigger_id: str, cal: str, initial_selected: str, disabled: bool) -> Div:
+def _build_input_popover_content(
+    content_id: str, trigger_id: str, cal: str, initial_selected: str, disabled: bool
+) -> Div:
     position_mods = {
         "placement": "bottom-end",
         "flip": True,
@@ -269,7 +311,16 @@ def _build_input_popover_content(content_id: str, trigger_id: str, cal: str, ini
     )
 
 
-def _build_trigger(sig: str, selected, mode: CalendarMode, placeholder: str, width: str, disabled: bool, icon: str, time=None) -> PopoverTrigger:
+def _build_trigger(
+    sig: str,
+    selected,
+    mode: CalendarMode,
+    placeholder: str,
+    width: str,
+    disabled: bool,
+    icon: str,
+    time=None,
+) -> PopoverTrigger:
     display_text = _get_display_text(selected, mode, placeholder, time=time)
     is_empty = ~selected if mode == "single" else ~selected.or_([]).length
 
@@ -277,7 +328,9 @@ def _build_trigger(sig: str, selected, mode: CalendarMode, placeholder: str, wid
         Span(
             Icon(icon, cls="mr-2 h-4 w-4"),
             Span(data_text=js(display_text), cls="text-left"),
-            data_attr_class=is_empty.if_("text-muted-foreground flex items-center", "flex items-center"),
+            data_attr_class=is_empty.if_(
+                "text-muted-foreground flex items-center", "flex items-center"
+            ),
         ),
         variant="outline",
         cls=cn(width, "justify-start text-left font-normal"),
@@ -286,13 +339,19 @@ def _build_trigger(sig: str, selected, mode: CalendarMode, placeholder: str, wid
     )
 
 
-def _build_time_section(sig: str, hour_display, minute_display, pm, time, disabled: bool) -> Div:
+def _build_time_section(
+    sig: str, hour_display, minute_display, pm, time, disabled: bool
+) -> Div:
     return Div(
         Span("Time", cls="text-sm font-medium text-muted-foreground mb-2 block"),
         Div(
-            _build_time_dropdown(sig, hour_display, minute_display, pm, time, "hour", disabled),
+            _build_time_dropdown(
+                sig, hour_display, minute_display, pm, time, "hour", disabled
+            ),
             Span(":", cls="text-xl font-semibold text-muted-foreground mx-0.5"),
-            _build_time_dropdown(sig, hour_display, minute_display, pm, time, "minute", disabled),
+            _build_time_dropdown(
+                sig, hour_display, minute_display, pm, time, "minute", disabled
+            ),
             _build_ampm_toggle(hour_display, minute_display, pm, time, disabled),
             cls="flex items-center justify-center gap-1",
         ),
@@ -300,7 +359,9 @@ def _build_time_section(sig: str, hour_display, minute_display, pm, time, disabl
     )
 
 
-def _build_time_dropdown(sig: str, hour_display, minute_display, pm, time, field: str, disabled: bool) -> Div:
+def _build_time_dropdown(
+    sig: str, hour_display, minute_display, pm, time, field: str, disabled: bool
+) -> Div:
     trigger_ref = Signal(f"{sig}_{field}_trigger", _ref_only=True)
     content_ref = Signal(f"{sig}_{field}_content", _ref_only=True)
     display = hour_display if field == "hour" else minute_display
@@ -341,19 +402,30 @@ def _build_time_dropdown(sig: str, hour_display, minute_display, pm, time, field
 
     dropdown = Div(
         *[make_item(val, idx) for idx, val in enumerate(items)],
-        data_on_click=js(_time_select_handler(display, hour_display, minute_display, pm, time, content_ref)) if not disabled else None,
-        data_on_scroll=js(_circular_scroll_handler(base_count)) if not disabled else None,
+        data_on_click=js(
+            _time_select_handler(
+                display, hour_display, minute_display, pm, time, content_ref
+            )
+        )
+        if not disabled
+        else None,
+        data_on_scroll=js(_circular_scroll_handler(base_count))
+        if not disabled
+        else None,
         data_effect=js(_init_scroll_position(content_ref, base_count, display)),
         data_ref=content_ref,
-        data_style_min_width=trigger_ref.if_(trigger_ref.offsetWidth + 'px', '4rem'),
-        data_position=(trigger_ref._id, {
-            "placement": "top",
-            "offset": 4,
-            "flip": True,
-            "shift": True,
-            "hide": True,
-            "container": "none",
-        }),
+        data_style_min_width=trigger_ref.if_(trigger_ref.offsetWidth + "px", "4rem"),
+        data_position=(
+            trigger_ref._id,
+            {
+                "placement": "top",
+                "offset": 4,
+                "flip": True,
+                "shift": True,
+                "hide": True,
+                "container": "none",
+            },
+        ),
         popover="auto",
         id=content_ref._id,
         role="listbox",
@@ -369,17 +441,30 @@ def _build_ampm_toggle(hour_display, minute_display, pm, time, disabled: bool) -
         is_selected = pm if is_pm else ~pm
         return HTMLButton(
             label,
-            data_on_click=[pm.set(is_pm), js(_update_time_signal(hour_display, minute_display, pm, time))] if not disabled else None,
-            data_attr_cls=is_selected.if_("bg-primary text-primary-foreground font-semibold", ""),
+            data_on_click=[
+                pm.set(is_pm),
+                js(_update_time_signal(hour_display, minute_display, pm, time)),
+            ]
+            if not disabled
+            else None,
+            data_attr_cls=is_selected.if_(
+                "bg-primary text-primary-foreground font-semibold", ""
+            ),
             type="button",
             disabled=disabled,
             cls=f"h-8 w-10 text-xs {rounding} transition-colors border hover:bg-accent hover:text-accent-foreground",
         )
 
-    return Div(make_button("AM", False, "rounded-l-md"), make_button("PM", True, "rounded-r-md"), cls="flex ml-2")
+    return Div(
+        make_button("AM", False, "rounded-l-md"),
+        make_button("PM", True, "rounded-r-md"),
+        cls="flex ml-2",
+    )
 
 
-def _time_select_handler(display, hour_display, minute_display, pm, time, content_ref) -> str:
+def _time_select_handler(
+    display, hour_display, minute_display, pm, time, content_ref
+) -> str:
     return f"const t=evt.target;const v=t.dataset.value;if(!v)return;{display}=v.padStart(2,'0');{_update_time_signal(hour_display, minute_display, pm, time)};{content_ref}.hidePopover()"
 
 
@@ -408,11 +493,15 @@ def _get_display_text(selected, mode: CalendarMode, placeholder: str, time=None)
             return f"(()=>{{const a={selected}||[];return a.length===2?(()=>{{const[y1,m1,d1]=a[0].split('-').map(Number);const[y2,m2,d2]=a[1].split('-').map(Number);return new Date(y1,m1-1,d1).{fmt}+' - '+new Date(y2,m2-1,d2).{fmt}}})():a.length===1?(()=>{{const[y,m,d]=a[0].split('-').map(Number);return new Date(y,m-1,d).{fmt}}})():'{placeholder}'}})()"
 
 
-def _datetime_sync_effect(selected, cal_selected, hour_display, minute_display, pm, time, datetime) -> str:
+def _datetime_sync_effect(
+    selected, cal_selected, hour_display, minute_display, pm, time, datetime
+) -> str:
     return f"const c={cal_selected}??'',p={selected}??'';if(c!==p){selected}=c;const h=parseInt({hour_display})||12,m=parseInt({minute_display})||0,pm={pm};const h24=pm?(h===12?12:h+12):(h===12?0:h);{time}=`${{h24.toString().padStart(2,'0')}}:${{m.toString().padStart(2,'0')}}`;const d={selected};if(d&&{time}){{{datetime}=`${{d}}T${{{time}}}:00`}}"
 
 
-def _input_sync_effect(selected, cal_selected, cal_month, cal_year, cal_month_display, input_ref) -> str:
+def _input_sync_effect(
+    selected, cal_selected, cal_month, cal_year, cal_month_display, input_ref
+) -> str:
     return f"const c={cal_selected}??'',i={input_ref},ps={selected}??'';if(i&&c&&c!==ps){{i.value=c;{selected}=c}}if(i){{const u=()=>{{const v=i.value;if(/^\\d{{4}}-\\d{{2}}-\\d{{2}}$/.test(v)){{{selected}=v;{cal_selected}=v;const[y,m,d]=v.split('-').map(Number);{cal_month}=m;{cal_year}=y;const M={str(MONTHS)};{cal_month_display}=M[m-1]}}}};i.removeEventListener('change',u);i.addEventListener('change',u)}}"
 
 

@@ -5,25 +5,18 @@ description = "Documentation for StarUI component library"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "starhtml>=0.5.9",
+    "starhtml>=0.5.10",
     "starlighter>=0.1.5",
     "starui>=0.1.8",
+    "star-og>=0.1.0",
     "uvicorn>=0.30.0",
 ]
 
-[project.optional-dependencies]
+
 dev = [
     "pytest>=8.0.0",
     "ruff>=0.5.0",
 ]
-
-[tool.uv.sources]
-# For local development, use editable installs
-# Comment out or remove this section for production deployment
-starui = { path = "../", editable = true }
-starhtml = { path = "/Users/firefly/Code/sandbox/starhtml-upstream", editable = true }
-
-
 
 [tool.ruff.format]
 quote-style = "double"

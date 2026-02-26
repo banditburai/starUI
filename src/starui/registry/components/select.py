@@ -1,11 +1,11 @@
 from typing import Any
 
-from starhtml import Div, FT, Icon, Signal, Span
+from starhtml import FT, Div, Icon, Signal, Span
 from starhtml import Button as HTMLButton
 from starhtml import Label as HTMLLabel
 from starhtml import P as HTMLP
 
-from .utils import cn, gen_id, inject_context
+from .utils import cn, gen_id, inject_context, merge_actions
 
 
 def Select(
@@ -16,13 +16,18 @@ def Select(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = getattr(signal, '_id', signal) or gen_id("select")
+    sig = getattr(signal, "_id", signal) or gen_id("select")
 
     selected = Signal(f"{sig}_value", value or "")
     selected_label = Signal(f"{sig}_label", label or "")
     open_state = Signal(f"{sig}_open", False)
 
-    ctx = dict(sig=sig, selected=selected, selected_label=selected_label, open_state=open_state)
+    ctx = {
+        "sig": sig,
+        "selected": selected,
+        "selected_label": selected_label,
+        "open_state": open_state,
+    }
 
     return Div(
         selected,
@@ -40,13 +45,18 @@ def SelectTrigger(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    def trigger(*, sig, selected_label, **ctx):        
+    def trigger(*, sig, selected_label, **ctx):
         custom_id = kwargs.pop("id", None)
         trigger_id = custom_id or f"{sig}_trigger"
         trigger_ref = Signal(trigger_id, _ref_only=True)
 
         return HTMLButton(
-            *[child(sig=sig, selected_label=selected_label, **ctx) if callable(child) else child for child in children],
+            *[
+                child(sig=sig, selected_label=selected_label, **ctx)
+                if callable(child)
+                else child
+                for child in children
+            ],
             Icon("lucide:chevron-down", cls="size-4 shrink-0 opacity-50"),
             data_ref=trigger_ref,
             popovertarget=f"{sig}_content",
@@ -82,9 +92,17 @@ def SelectValue(
 ) -> FT:
     def value_component(*, selected_label, **_):
         if children:
-            return Span(*children, cls=cn("pointer-events-none truncate flex-1 text-left", cls), **kwargs)
+            return Span(
+                *children,
+                cls=cn("pointer-events-none truncate flex-1 text-left", cls),
+                **kwargs,
+            )
 
-        text_expr = kwargs.pop('data_text') if 'data_text' in kwargs else selected_label.or_(placeholder)
+        text_expr = (
+            kwargs.pop("data_text")
+            if "data_text" in kwargs
+            else selected_label.or_(placeholder)
+        )
 
         return Span(
             data_text=text_expr,
@@ -122,9 +140,14 @@ def SelectContent(
         context = dict(sig=sig, **ctx)
 
         return Div(
-            Div(*[inject_context(child, **context) for child in children], cls="p-1 max-h-[300px] overflow-auto"),
+            Div(
+                *[inject_context(child, **context) for child in children],
+                cls="p-1 max-h-[300px] overflow-auto",
+            ),
             data_ref=content_ref,
-            data_style_min_width=trigger_ref.if_(trigger_ref.offsetWidth + 'px', '8rem'),
+            data_style_min_width=trigger_ref.if_(
+                trigger_ref.offsetWidth + "px", "8rem"
+            ),
             data_position=(trigger_ref._id, position_mods),
             popover="auto",
             id=content_ref._id,
@@ -152,13 +175,22 @@ def SelectItem(
     def item(*, sig, selected, selected_label, **_):
         content_ref = Signal(f"{sig}_content", _ref_only=True)
 
-        item_value = value or (children[0] if children and isinstance(children[0], str) else "")
-        label_text = children[0] if (children and isinstance(children[0], str)) else item_value
+        item_value = value or (
+            children[0] if children and isinstance(children[0], str) else ""
+        )
+        label_text = (
+            children[0] if (children and isinstance(children[0], str)) else item_value
+        )
         is_selected = selected.eq(item_value)
 
-        user_on_click = kwargs.pop('data_on_click', None)
-        user_actions = user_on_click if isinstance(user_on_click, list) else ([user_on_click] if user_on_click else [])
-        click_actions = user_actions + [selected.set(item_value), selected_label.set(label_text), content_ref.hidePopover()]
+        click_actions = merge_actions(
+            kwargs=kwargs,
+            after=[
+                selected.set(item_value),
+                selected_label.set(label_text),
+                content_ref.hidePopover(),
+            ],
+        )
 
         return Div(
             *children,
@@ -195,7 +227,10 @@ def SelectGroup(
     def group(*, sig, **ctx):
         return Div(
             SelectLabel(label)(sig=sig, **ctx) if label else None,
-            *[child(sig=sig, **ctx) if callable(child) else child for child in children],
+            *[
+                child(sig=sig, **ctx) if callable(child) else child
+                for child in children
+            ],
             cls=cls,
             **kwargs,
         )
@@ -257,9 +292,11 @@ def _build_select_items(options: list) -> list:
                 return SelectGroup(
                     *[
                         SelectItem(item_label, value=item_value)
-                        for item_value, item_label in [_get_value_label(item) for item in group_items]
+                        for item_value, item_label in [
+                            _get_value_label(item) for item in group_items
+                        ]
                     ],
-                    label=group_label
+                    label=group_label,
                 )
 
     return [_process_option(opt) for opt in options]
@@ -284,7 +321,7 @@ def SelectWithLabel(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = getattr(signal, '_id', signal) or gen_id("select")
+    sig = getattr(signal, "_id", signal) or gen_id("select")
     trigger_id = id or f"{sig}_trigger"
 
     return Div(
@@ -303,14 +340,18 @@ def SelectWithLabel(
                 id=trigger_id,
             ),
             SelectContent(*_build_select_items(options), side=side),
+            *attrs,
             value=value,
             label=_find_initial_label(options, value),
             signal=sig,
             cls="w-full",
-            *attrs,
             **kwargs,
         ),
-        HTMLP(error_text, cls="text-sm text-destructive mt-1.5") if error_text else None,
-        HTMLP(helper_text, cls="text-sm text-muted-foreground mt-1.5") if helper_text and not error_text else None,
+        HTMLP(error_text, cls="text-sm text-destructive mt-1.5")
+        if error_text
+        else None,
+        HTMLP(helper_text, cls="text-sm text-muted-foreground mt-1.5")
+        if helper_text and not error_text
+        else None,
         cls=cn("space-y-1.5", cls),
     )

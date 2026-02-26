@@ -23,12 +23,14 @@ def ToggleGroup(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = getattr(signal, '_id', signal) or gen_id("toggle_group")
+    sig = getattr(signal, "_id", signal) or gen_id("toggle_group")
     initial = value if value is not None else ("" if type == "single" else [])
-    ctx = dict(type=type, variant=variant, size=size, disabled=disabled)
+    ctx = {"type": type, "variant": variant, "size": size, "disabled": disabled}
 
     items = [
-        ToggleGroupItem(child[1], value=child[0]) if isinstance(child, tuple) and len(child) == 2 else child
+        ToggleGroupItem(child[1], value=child[0])
+        if isinstance(child, tuple) and len(child) == 2
+        else child
         for child in children
     ]
 
@@ -60,8 +62,14 @@ def ToggleGroupItem(
 ):
     def _(*, selected, type, variant, size, disabled, **_):
         item_id = kwargs.pop("id", gen_id("toggle_item"))
-        is_selected = selected.eq(value) if type == "single" else selected.contains(value)
-        click_handler = selected.toggle(value, '') if type == "single" else selected.toggle_in(value)
+        is_selected = (
+            selected.eq(value) if type == "single" else selected.contains(value)
+        )
+        click_handler = (
+            selected.toggle(value, "")
+            if type == "single"
+            else selected.toggle_in(value)
+        )
 
         return HTMLButton(
             *children,
@@ -71,8 +79,8 @@ def ToggleGroupItem(
             id=item_id,
             disabled=disabled,
             aria_label=aria_label,
-            data_attr_aria_checked=is_selected.if_('true', 'false'),
-            data_attr_data_state=is_selected.if_('on', 'off'),
+            data_attr_aria_checked=is_selected.if_("true", "false"),
+            data_attr_data_state=is_selected.if_("on", "off"),
             data_slot="toggle-group-item",
             data_variant=variant,
             data_size=size,

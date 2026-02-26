@@ -28,13 +28,13 @@ def Card(
     **kwargs,
 ) -> FT:
     return Div(
-        *children, 
+        *children,
         cls=cn(
             "bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm",
             cls,
-        ), 
-        data_slot="card", 
-        **kwargs
+        ),
+        data_slot="card",
+        **kwargs,
     )
 
 
@@ -44,13 +44,13 @@ def CardHeader(
     **kwargs,
 ) -> FT:
     return Div(
-        *children, 
+        *children,
         cls=cn(
             "@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6",
             cls,
-        ), 
-        data_slot="card-header", 
-        **kwargs
+        ),
+        data_slot="card-header",
+        **kwargs,
     )
 
 
@@ -62,10 +62,10 @@ def CardTitle(
 ) -> FT:
     Heading = _HEADING_COMPONENTS[level]
     return Heading(
-        *children, 
-        cls=cn("leading-none font-semibold", cls), 
-        data_slot="card-title", 
-        **kwargs
+        *children,
+        cls=cn("leading-none font-semibold", cls),
+        data_slot="card-title",
+        **kwargs,
     )
 
 
@@ -75,10 +75,10 @@ def CardDescription(
     **kwargs,
 ) -> FT:
     return P(
-        *children, 
-        cls=cn("text-muted-foreground text-sm", cls), 
-        data_slot="card-description", 
-        **kwargs
+        *children,
+        cls=cn("text-muted-foreground text-sm", cls),
+        data_slot="card-description",
+        **kwargs,
     )
 
 
@@ -88,13 +88,13 @@ def CardAction(
     **kwargs,
 ) -> FT:
     return Div(
-        *children, 
+        *children,
         cls=cn(
             "col-start-2 row-span-2 row-start-1 self-start justify-self-end",
             cls,
-        ), 
-        data_slot="card-action", 
-        **kwargs
+        ),
+        data_slot="card-action",
+        **kwargs,
     )
 
 
@@ -103,12 +103,7 @@ def CardContent(
     cls: str = "",
     **kwargs,
 ) -> FT:
-    return Div(
-        *children, 
-        cls=cn("px-6", cls), 
-        data_slot="card-content", 
-        **kwargs
-    )
+    return Div(*children, cls=cn("px-6", cls), data_slot="card-content", **kwargs)
 
 
 def CardFooter(
@@ -117,8 +112,8 @@ def CardFooter(
     **kwargs,
 ) -> FT:
     return Div(
-        *children, 
-        cls=cn("flex items-center px-6 [.border-t]:pt-6", cls), 
-        data_slot="card-footer", 
-        **kwargs
+        *children,
+        cls=cn("flex items-center px-6 [.border-t]:pt-6", cls),
+        data_slot="card-footer",
+        **kwargs,
     )

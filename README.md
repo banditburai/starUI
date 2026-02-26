@@ -1,57 +1,28 @@
-# StarUI
+<div align="center">
 
-**Python-first UI component library for StarHTML applications**
+<a href="https://starhtml.com"><img src="docs/static/images/og/starhtml.jpg" alt="StarHTML — Python Web Framework" width="100%"></a>
 
-Modern, type-safe components with shadcn/ui styling and zero-configuration setup.
+<a href="https://ui.starhtml.com"><img src="docs/static/images/og/starui.jpg" alt="StarUI — Python Component Library" width="100%"></a>
 
-[![PyPI version](https://badge.fury.io/py/starui.svg)](https://badge.fury.io/py/starui)
-[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
-[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
-[![Type checked: pyright](https://img.shields.io/badge/type%20checked-pyright-informational.svg)](https://github.com/microsoft/pyright)
+![PyPI version](https://badge.fury.io/py/starui.svg)
+![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)
 
-## ✨ Features
+**Python-first UI component library for [StarHTML](https://starhtml.com). shadcn/ui components with zero-configuration setup.**
 
-- 🎨 **shadcn/ui components** - Pixel-perfect implementations with modern design
-- ⚡ **Zero configuration** - Works out of the box with sensible defaults  
-- 🚯 **StarHTML native** - Built specifically for StarHTML applications
-- 📱 **Responsive design** - Mobile-first with Tailwind CSS v4
-- 🔒 **Type-safe APIs** - Excellent developer experience with pragmatic typing
-- 🚀 **Modern Python** - Python 3.12+ with latest language features
+[Documentation](https://ui.starhtml.com) · [StarHTML](https://starhtml.com) · [Quick Start](#quick-start) · [Issues](https://github.com/banditburai/starui/issues)
 
-## 🚀 Quick Start
+</div>
 
-### Installation
+## Quick Start
 
 ```bash
-# With pip
-pip install starui
-
-# With uv (recommended)
 uv add starui
 ```
 
-### Create Your First Project
-
-```bash
-# Initialize a new StarUI project
-star init my-app
-cd my-app
-
-# Add some components  
-star add button
-star add card
-
-# Run development server
-star dev app.py
-```
-
-### Basic Usage
-
 ```python
 from starhtml import *
-from starui import *  # Gets all components automatically
+from starui import *
 
-# Create a StarHTML app
 app, rt = star_app()
 
 @rt("/")
@@ -66,11 +37,10 @@ def home():
         )
     )
 
-if __name__ == "__main__":
-    serve()
+serve()
 ```
 
-## 📦 Available Components
+## Available Components
 
 | Component | Description | Variants |
 |-----------|-------------|----------|
@@ -81,47 +51,36 @@ if __name__ == "__main__":
 | **Input** | Form inputs | All HTML input types with validation |
 | **Label** | Form labels | Accessible form labeling |
 
-## 🛠 CLI Commands
+## CLI
 
 ```bash
-# Project initialization
-star init <project-name>          # Create new StarUI project
-
-# Component management  
+star init <project-name>          # Create new project
 star add <component>              # Add component to project
 star list                         # List available components
-
-# Development
-star dev <app.py>                 # Development server with hot reload
+star dev <app.py>                 # Dev server with hot reload
 star build                        # Build production CSS
 ```
 
-## 🎯 Component API
+## Component API
 
-### Button Example
+### Button
 
 ```python
-from starui import Button  # Or: from starui import *
-
-# Basic usage
 Button("Click me")
 
-# With variants and props
 Button(
     "Submit Form",
     variant="default",
-    size="lg", 
+    size="lg",
     disabled=False,
     type="submit",
     onclick="handleSubmit()"
 )
 ```
 
-### Card Example
+### Card
 
 ```python
-from starui import *  # Gets Card, CardHeader, CardTitle, CardContent, Button, etc.
-
 Card(
     CardHeader(
         CardTitle("Product Card")
@@ -134,7 +93,7 @@ Card(
 )
 ```
 
-## ⚙️ Configuration
+## Configuration
 
 StarUI works with zero configuration, but you can customize it:
 
@@ -150,82 +109,17 @@ config = ProjectConfig(
 )
 ```
 
-## 🔗 StarHTML Integration
-
-StarUI is built specifically for [StarHTML](https://github.com/banditburai/starhtml):
-
-```python
-from starhtml import *
-from starui import Button, Alert
-
-app, rt = star_app(
-    hdrs=(
-        Link(rel="stylesheet", href="/static/css/starui.css"),
-    )
-)
-
-@rt("/")
-def home():
-    return Div(
-        Alert(
-            "Welcome to your new StarUI app!",
-            variant="default"
-        ),
-        Button("Get Started", variant="default"),
-        cls="p-8 max-w-md mx-auto"
-    )
-```
-
-## 💻 Development
-
-### Setup
+## Development
 
 ```bash
-# Clone the repository
 git clone https://github.com/banditburai/starui.git
 cd starui
-
-# Install with uv (recommended)
 uv sync --all-extras
-
-# Or with pip  
-pip install -e ".[dev]"
+uv run ruff check && uv run pyright && uv run pytest tests/ -v
 ```
 
-### Quality Checks
+Contributions welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
 
-```bash
-# Run all quality checks
-uv run ruff check                 # Linting
-uv run ruff format --check        # Formatting  
-uv run pyright                    # Type checking
-uv run pytest tests/ -v           # Testing
-```
+## Acknowledgments
 
-### Building
-
-```bash
-uv build                          # Build package
-uv run star --version             # Test CLI
-```
-
-## 🤝 Contributing
-
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-component`)  
-3. Make your changes with tests
-4. Run quality checks (`uv run ruff check && uv run pyright && uv run pytest`)
-5. Submit a Pull Request
-
-## 🙏 Acknowledgments
-
-- [shadcn/ui](https://ui.shadcn.com/) - Design system and component inspiration
-- [StarHTML](https://github.com/banditburai/starhtml) - The amazing Python web framework
-- [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
-- [FastHTML](https://fastht.ml/) - Inspiration for Python-first web development
-
----
-
-**Made with ❤️ for the Python web development community**
+Built on [shadcn/ui](https://ui.shadcn.com/) design patterns, [StarHTML](https://starhtml.com), and [Tailwind CSS](https://tailwindcss.com/).

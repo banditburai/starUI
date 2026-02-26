@@ -12,7 +12,7 @@ import registry_loader
 app, rt = star_app(
     live=True,
     hdrs=(
-        fouc_script(use_data_theme=True),
+        theme_script(use_data_theme=True),
         Script(src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"),
         Style("""
 @theme {
@@ -24,7 +24,6 @@ app, rt = star_app(
     bodykw=dict(
         cls="min-h-screen bg-background text-foreground flex items-center justify-center",
     ),
-    iconify=False,
 )
 
 
@@ -55,7 +54,7 @@ def index():
   </svg>
 </button>
 
-<div class="mt-8" data-signals-x="100" data-on-load="const duration = 3000; const pauseDuration = 1000; let animationStart = Date.now(); const animate = () => { const elapsed = Date.now() - animationStart; if (elapsed < duration) { const progress = elapsed / duration; $x = Math.round(100 - (progress * 200)); requestAnimationFrame(animate); } else { $x = -100; setTimeout(() => { animationStart = Date.now(); animate(); }, pauseDuration); } }; setTimeout(animate, pauseDuration);">
+<div class="mt-8" data-signals-x="100" data-init="const duration = 3000; const pauseDuration = 1000; let animationStart = Date.now(); const animate = () => { const elapsed = Date.now() - animationStart; if (elapsed < duration) { const progress = elapsed / duration; $x = Math.round(100 - (progress * 200)); requestAnimationFrame(animate); } else { $x = -100; setTimeout(() => { animationStart = Date.now(); animate(); }, pauseDuration); } }; setTimeout(animate, pauseDuration);">
   <h2 class="text-2xl font-bold mb-4">Shiny Button</h2>
 
   <button

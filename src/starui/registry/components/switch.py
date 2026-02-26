@@ -6,7 +6,7 @@ from starhtml import Label as HTMLLabel
 from starhtml import P as HTMLP
 from starhtml import Span as HTMLSpan
 
-from .utils import cn, gen_id
+from .utils import cn, gen_id, merge_actions
 
 
 def Switch(
@@ -17,14 +17,12 @@ def Switch(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = getattr(signal, '_id', signal) or gen_id("switch")
+    sig = getattr(signal, "_id", signal) or gen_id("switch")
     switch_id = kwargs.pop("id", sig)
 
     checked_state = Signal(sig, checked or False)
 
-    user_on_click = kwargs.pop('data_on_click', None)
-    user_actions = user_on_click if isinstance(user_on_click, list) else ([user_on_click] if user_on_click else [])
-    click_actions = [checked_state.toggle()] + user_actions
+    click_actions = merge_actions(checked_state.toggle(), kwargs=kwargs)
 
     return Div(
         checked_state,
@@ -33,7 +31,7 @@ def Switch(
                 cls="pointer-events-none block size-4 rounded-full bg-background ring-0 transition-transform",
                 data_attr_cls=checked_state.if_(
                     "translate-x-3.5 dark:bg-primary-foreground",
-                    "translate-x-0 dark:bg-foreground"
+                    "translate-x-0 dark:bg-foreground",
                 ),
                 data_slot="switch-thumb",
             ),
@@ -72,7 +70,7 @@ def SwitchWithLabel(
     switch_cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = getattr(signal, '_id', signal) or gen_id("switch")
+    sig = getattr(signal, "_id", signal) or gen_id("switch")
     switch_id = kwargs.pop("id", sig)
 
     return Div(
@@ -83,7 +81,9 @@ def SwitchWithLabel(
                 fr=switch_id,
                 cls=cn(
                     "text-sm font-medium",
-                    "cursor-pointer" if not disabled else "cursor-not-allowed opacity-50",
+                    "cursor-pointer"
+                    if not disabled
+                    else "cursor-not-allowed opacity-50",
                     label_cls,
                 ),
             ),
@@ -98,9 +98,13 @@ def SwitchWithLabel(
             ),
             cls="flex items-center gap-3",
         ),
-        HTMLP(error_text, cls="text-sm text-destructive mt-1.5") if error_text else None,
-        HTMLP(helper_text, cls="text-sm text-muted-foreground mt-1.5") if helper_text and not error_text else None,
-        cls=cn("space-y-1.5", cls),
+        HTMLP(error_text, cls="text-sm text-destructive mt-1.5")
+        if error_text
+        else None,
+        HTMLP(helper_text, cls="text-sm text-muted-foreground mt-1.5")
+        if helper_text and not error_text
+        else None,
         *attrs,
+        cls=cn("space-y-1.5", cls),
         **kwargs,
     )

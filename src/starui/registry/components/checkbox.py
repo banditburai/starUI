@@ -21,7 +21,7 @@ def Checkbox(
     indicator_cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = getattr(signal, '_id', signal) or gen_id("checkbox")
+    sig = getattr(signal, "_id", signal) or gen_id("checkbox")
     initial = "indeterminate" if indeterminate else (checked or False)
 
     return Div(
@@ -34,7 +34,9 @@ def Checkbox(
             disabled=disabled,
             required=required,
             data_slot="checkbox",
-            data_state="indeterminate" if indeterminate else checked_state.if_("checked", "unchecked"),
+            data_state="indeterminate"
+            if indeterminate
+            else checked_state.if_("checked", "unchecked"),
             cls=cn(
                 "peer appearance-none size-4 shrink-0 rounded-[4px] border shadow-xs transition-all outline-none",
                 "border-input bg-background dark:bg-input/30",
@@ -48,7 +50,9 @@ def Checkbox(
         ),
         HTMLSpan(
             Icon("lucide:minus" if indeterminate else "lucide:check"),
-            data_attr_style="opacity: 1" if indeterminate else checked_state.if_("opacity: 1", "opacity: 0"),
+            data_attr_style="opacity: 1"
+            if indeterminate
+            else checked_state.if_("opacity: 1", "opacity: 0"),
             data_slot="checkbox-indicator",
             cls=cn(
                 "absolute inset-0 flex items-center justify-center text-background text-sm transition-opacity pointer-events-none",
@@ -77,7 +81,6 @@ def CheckboxWithLabel(
     indicator_cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = getattr(signal, '_id', signal) or gen_id("checkbox")
     checkbox_id = kwargs.pop("id", signal)
 
     return Div(
@@ -110,13 +113,17 @@ def CheckboxWithLabel(
                 HTMLP(
                     helper_text,
                     cls=cn("text-muted-foreground text-sm", disabled and "opacity-50"),
-                ) if helper_text else None,
+                )
+                if helper_text
+                else None,
                 cls="grid gap-1.5",
             ),
             cls="flex items-start gap-3",
         ),
-        HTMLP(error_text, cls="text-sm text-destructive mt-1.5") if error_text else None,
-        cls=cls,
+        HTMLP(error_text, cls="text-sm text-destructive mt-1.5")
+        if error_text
+        else None,
         *attrs,
+        cls=cls,
         **kwargs,
     )

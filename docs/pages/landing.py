@@ -1,9 +1,3 @@
-"""Landing page sections for StarUI documentation site.
-
-Asymmetric editorial hero with terminal sidebar.
-Dark mode: navy→warm horizon. Light mode: cool dawn gradient.
-"""
-
 from starhtml import *
 from starhtml.plugins import in_view, press
 from starui.registry.components.code_block import CodeBlock as StarlighterCode
@@ -21,34 +15,18 @@ from starui.registry.components.command import (
 )
 
 
-
-# ── Star mark SVG (4-pointed, used as typographic ornament) ────────
-
-def _star_mark(cls: str = "") -> FT:
-    return Svg(
-        SvgPath(d="M12 2L14 10L22 12L14 14L12 22L10 14L2 12L10 10Z", fill="currentColor"),
-        viewBox="0 0 24 24",
-        cls=f"star-mark w-5 h-5 text-sunset inline-block align-middle {cls}",
-        aria_hidden="true",
-    )
-
-
 # ── Hero section ────────────────────────────────────────────────────
 
 
 
 def _component_showcase() -> FT:
-    """Aperture brightness control — observatory instrument that controls starfield."""
     aperture = Signal("aperture", 50)
     active = aperture > 50
 
     return Div(
         aperture,
-        # Energy flash overlay (triggered by star arrival)
         Div(cls="showcase-flash"),
-        # Instrument label
         P("APERTURE", cls="text-[9px] font-mono font-medium tracking-[0.25em] uppercase text-[#94A3B8] showcase-card-title", style="font-family: 'Inter', sans-serif;"),
-        # Range slider
         Div(
             Input(
                 type="range",
@@ -59,7 +37,7 @@ def _component_showcase() -> FT:
             ),
             cls="mt-1.5",
         ),
-        # Readout row — uses CSS custom properties for theme-aware colors
+        # CSS custom properties for theme-aware colors
         Div(
             Span(
                 Span(
@@ -79,27 +57,24 @@ def _component_showcase() -> FT:
             ),
             cls="flex items-center justify-between mt-1",
         ),
-        # Reactive glow overlay — warms card as aperture rises
+        # Warms card as aperture rises
         Div(
             cls="aperture-glow absolute inset-0 rounded-[inherit] pointer-events-none transition-opacity duration-300",
-            data_style_opacity="$aperture / 100",
+            data_style_opacity=aperture / 100,
         ),
-        # Cool overlay — desaturates card at low aperture (light mode only, hidden in dark)
+        # Light mode only — desaturates at low aperture
         Div(
             cls="aperture-cool absolute inset-0 rounded-[inherit] pointer-events-none transition-opacity duration-500",
-            data_style_opacity="1 - $aperture / 100",
+            data_style_opacity=1 - aperture / 100,
         ),
-        # Pulse ring (emanates outward on star impact)
         Div(cls="showcase-pulse-ring"),
-        # Star activates — sweep aperture from 50 to 90
+        # Sweep aperture from 50 to 90
         Div(data_init=(aperture.set(90), dict(delay="1400ms"))),
         cls="showcase-card px-4 py-2 select-none",
     )
 
 
 def hero_section() -> FT:
-    """Asymmetric hero: headline left, terminal right, observatory arc behind."""
-
     # ── Timing choreography ──────────────────────────────────────
     # 100ms  "Components" + "you own."  slide up together
     # 300ms  Star arc begins            traces dome (2.0s duration)
@@ -118,79 +93,67 @@ def hero_section() -> FT:
     arc_path = "M 60 260 C 434 7 666 18 1040 520"
 
     return Section(
-        # Observatory arc SVG — golden spiral line + star tracing the path
         Svg(
-            NotStr(
-                '<defs>'
-                '<linearGradient id="arc-fade" gradientUnits="userSpaceOnUse" x1="60" y1="260" x2="1040" y2="520">'
-                '<stop offset="0%" stop-color="#FB923C" stop-opacity="0"/>'
-                '<stop offset="12%" stop-color="#FB923C" stop-opacity="0.12"/>'
-                '<stop offset="88%" stop-color="#FB923C" stop-opacity="0.12"/>'
-                '<stop offset="100%" stop-color="#FB923C" stop-opacity="0"/>'
-                '</linearGradient>'
-                '</defs>'
+            Defs(
+                LinearGradient(
+                    Stop(offset="0%", stop_color="#FB923C", stop_opacity="0"),
+                    Stop(offset="12%", stop_color="#FB923C", stop_opacity="0.12"),
+                    Stop(offset="88%", stop_color="#FB923C", stop_opacity="0.12"),
+                    Stop(offset="100%", stop_color="#FB923C", stop_opacity="0"),
+                    id="arc-fade", gradientUnits="userSpaceOnUse",
+                    x1="60", y1="260", x2="1040", y2="520",
+                ),
             ),
-            SvgPath(
-                d=arc_path,
-                fill="none",
-                stroke="url(#arc-fade)",
-                cls="arc-line",
-            ),
+            SvgPath(d=arc_path, fill="none", stroke="url(#arc-fade)", cls="arc-line"),
             G(
                 G(
                     SvgPath(
                         d="M0 -10 L3 -3 L10 0 L3 3 L0 10 L-3 3 L-10 0 L-3 -3 Z",
-                        cls="arc-star-halo",
-                        opacity="0",
+                        cls="arc-star-halo", opacity="0",
                     ),
-                    NotStr(
-                        '<animate attributeName="opacity" '
-                        'values="0;0;0.85;0;0" keyTimes="0;0.25;0.5;0.75;1" '
-                        f'dur="{arc_dur}" begin="{arc_begin}" fill="freeze" '
-                        'calcMode="spline" '
-                        'keySplines="0.42 0 0.58 1;0.42 0 0.58 1;0.42 0 0.58 1;0.42 0 0.58 1"/>'
+                    Animate(
+                        attributeName="opacity",
+                        values="0;0;0.85;0;0", keyTimes="0;0.25;0.5;0.75;1",
+                        dur=arc_dur, begin=arc_begin, fill="freeze",
+                        calcMode="spline",
+                        keySplines="0.42 0 0.58 1;0.42 0 0.58 1;0.42 0 0.58 1;0.42 0 0.58 1",
                     ),
                 ),
                 SvgPath(
                     d="M0 -10 L3 -3 L10 0 L3 3 L0 10 L-3 3 L-10 0 L-3 -3 Z",
                     cls="arc-star",
                 ),
-                NotStr(
-                    f'<animateMotion path="{arc_path}" '
-                    f'dur="{arc_dur}" begin="{arc_begin}" fill="freeze" '
-                    'calcMode="spline" keySplines="0.25 0.1 0.25 1" keyTimes="0;1"/>'
+                AnimateMotion(
+                    path=arc_path, dur=arc_dur, begin=arc_begin, fill="freeze",
+                    calcMode="spline", keySplines="0.25 0.1 0.25 1", keyTimes="0;1",
                 ),
-                NotStr(
-                    '<animate attributeName="opacity" '
-                    'values="0;1;1;0" keyTimes="0;0.05;0.92;1" '
-                    f'dur="{arc_dur}" begin="{arc_begin}" fill="freeze"/>'
+                Animate(
+                    attributeName="opacity",
+                    values="0;1;1;0", keyTimes="0;0.05;0.92;1",
+                    dur=arc_dur, begin=arc_begin, fill="freeze",
                 ),
-                NotStr(
-                    '<animateTransform attributeName="transform" type="rotate" '
-                    'from="0 0 0" to="180 0 0" '
-                    f'dur="{arc_dur}" begin="{arc_begin}" fill="freeze" '
-                    'calcMode="spline" keySplines="0.42 0 0.58 1" keyTimes="0;1" '
-                    'additive="sum"/>'
+                AnimateTransform(
+                    attributeName="transform", type="rotate",
+                    **{"from": "0 0 0"}, to="180 0 0",
+                    dur=arc_dur, begin=arc_begin, fill="freeze",
+                    calcMode="spline", keySplines="0.42 0 0.58 1", keyTimes="0;1",
+                    additive="sum",
                 ),
-                NotStr(
-                    '<animateTransform attributeName="transform" type="scale" '
-                    'values="0.4;1.3;0.4" keyTimes="0;0.5;1" '
-                    f'dur="{arc_dur}" begin="{arc_begin}" fill="freeze" '
-                    'calcMode="spline" '
-                    'keySplines="0.42 0 0.58 1;0.42 0 0.58 1" '
-                    'additive="sum"/>'
+                AnimateTransform(
+                    attributeName="transform", type="scale",
+                    values="0.4;1.3;0.4", keyTimes="0;0.5;1",
+                    dur=arc_dur, begin=arc_begin, fill="freeze",
+                    calcMode="spline", keySplines="0.42 0 0.58 1;0.42 0 0.58 1",
+                    additive="sum",
                 ),
-                cls="arc-star-group",
-                opacity="0",
+                cls="arc-star-group", opacity="0",
             ),
             viewBox="0 0 1100 680",
             cls="hero-arc",
             aria_hidden="true",
         ),
-        # Content grid — 3fr / 2fr ≈ 60/40 split
         Div(
             Div(
-                # ── Left column: headline + subtitle + CTA ──
                 Div(
                     H1(
                         # Lines 1+2 appear nearly together
@@ -228,6 +191,7 @@ def hero_section() -> FT:
                     P(
                         "No npm. No React. Just Python.",
                         cls="mt-5 md:mt-[55px] font-serif-body text-xl md:text-2xl text-moon-dim italic font-light",
+                        style="opacity: 0.85;",
                         data_motion=in_view(
                             y=12, opacity=0,
                             duration=400, delay=800,
@@ -249,7 +213,6 @@ def hero_section() -> FT:
                         ),
                     ),
                 ),
-                # ── Right column: label above, card overlaps terminal upper-right ──
                 Div(
                     Div(
                         Div(
@@ -259,18 +222,8 @@ def hero_section() -> FT:
                         ),
                         Div(
                             Div(
-                                P(
-                                    Span("$", cls="text-[#FB923C]"), " pip install starui",
-                                    cls="text-[#94A3B8]",
-                                ),
-                                P(
-                                    Span("$", cls="text-[#FB923C]"), " star init",
-                                    cls="text-[#94A3B8]",
-                                ),
-                                P(
-                                    Span("$", cls="text-[#FB923C]"), " star add switch card dialog",
-                                    cls="text-[#94A3B8]",
-                                ),
+                                *[P(Span("$", cls="text-[#FB923C]"), f" {cmd}", cls="text-[#94A3B8]")
+                              for cmd in ("pip install starui", "star init", "star add button")],
                                 cls="terminal-window p-6 space-y-2 font-mono text-sm",
                             ),
                             _component_showcase(),
@@ -285,7 +238,15 @@ def hero_section() -> FT:
             ),
             cls="w-full max-w-7xl mx-auto px-6 lg:px-8",
         ),
-        # Fibonacci bottom padding: 89px (Fib 11); top padding stays at 128px (pt-32)
+        Div(
+            Svg(
+                SvgPath(d="M6 9l6 6 6-6", fill="none", stroke="currentColor", stroke_width="1.5", stroke_linecap="round", stroke_linejoin="round"),
+                viewBox="0 0 24 24",
+                cls="w-5 h-5",
+            ),
+            cls="scroll-hint absolute bottom-8 left-1/2 -translate-x-1/2 text-moon-dim z-20",
+            aria_hidden="true",
+        ),
         cls="hero-section-mobile relative min-h-[90vh] flex items-center pb-[89px] pt-16 md:pt-20 lg:pt-24 overflow-x-clip",
         aria_label="Welcome to StarUI",
     )
@@ -295,8 +256,6 @@ def hero_section() -> FT:
 
 
 def code_example_section() -> FT:
-    """FIG. 01 — Code editor + live preview in constellation glass panels."""
-
     example_code = '''from starhtml import *
 from starui import (
     Card, CardHeader, CardTitle,
@@ -323,15 +282,13 @@ def profile():
         ),
     )'''
 
-    # Live demo — mini-* styled for landing aesthetic, with real Datastar bindings
     name = Signal("hero_name", "friend")
     greeting = name.if_("Hello, " + name, "Hello, stranger")
 
     return Section(
         Div(
-            # Header
             Div(
-                Span("FIG. 01", cls="text-[10px] tracking-widest text-sunset font-mono block mb-3"),
+                Span("FIG. 01", cls="text-[10px] tracking-widest text-sunset font-mono block mb-3", aria_hidden="true"),
                 H2(
                     "Write Python. Get reactivity.",
                     cls="font-display text-3xl md:text-4xl italic text-moon mt-2",
@@ -339,9 +296,7 @@ def profile():
                 cls="mb-12",
                 data_motion=in_view(y=20, opacity=0, duration=500, spring="gentle"),
             ),
-            # Editor + Preview — glass panels
             Div(
-                # Left: code editor in glass panel with filename header
                 Div(
                     Div(
                         Div(
@@ -358,14 +313,11 @@ def profile():
                     cls="md:col-span-5 mystic-card rounded-xl overflow-hidden editor-panel",
                     data_motion=in_view(y=20, opacity=0, duration=500, delay=100, spring="gentle"),
                 ),
-                # Right: live preview — hand-styled to match landing aesthetic
                 Div(
                     name,
                     Div(
-                        # Card title — reactive, updates as you type
                         P(data_text=greeting, cls="text-lg font-medium mini-text"),
                         P("Update your profile", cls="text-xs mini-text-dim mt-1 mb-6"),
-                        # Input — two-way bound to name signal
                         Div(
                             P("Name", cls="text-xs mini-text font-medium mb-1.5"),
                             Input(
@@ -384,6 +336,7 @@ def profile():
             cls="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
         ),
         cls="relative z-10 py-24 section-border-top",
+        aria_label="Code example",
     )
 
 
@@ -391,7 +344,6 @@ def profile():
 
 
 def _explorer_command() -> FT:
-    """Command palette — real StarUI Command component."""
     return Command(
         CommandInput(placeholder="Type a command or search..."),
         CommandList(
@@ -438,7 +390,6 @@ def _explorer_command() -> FT:
 
 
 def _explorer_card() -> FT:
-    """Create account card — real StarUI Card + Input + Button components."""
     email = Signal("exp_email", "")
 
     return Div(
@@ -488,7 +439,6 @@ def _explorer_card() -> FT:
 
 
 def _explorer_switch() -> FT:
-    """Settings panel — real StarUI Switch components."""
     def _toggle_row(label_text: str, sig: str, checked: bool = False) -> FT:
         return Div(
             StarLabel(label_text, cls="cursor-pointer"),
@@ -516,14 +466,12 @@ def _explorer_switch() -> FT:
 
 
 def _explorer_dialog() -> FT:
-    """Alert dialog confirmation — real StarUI Button components, inline layout."""
     confirmed = Signal("exp_confirmed", False)
 
     return Div(
         confirmed,
         StarCard(
             CardContent(
-                # Default state — confirmation prompt
                 Div(
                     H2("Are you absolutely sure?", cls="text-base font-medium"),
                     P(
@@ -537,7 +485,6 @@ def _explorer_dialog() -> FT:
                     ),
                     data_show=~confirmed,
                 ),
-                # Confirmed state — success message
                 Div(
                     Div(
                         Icon("lucide:check-circle", width="24", height="24", cls="text-[#4ade80]"),
@@ -555,7 +502,6 @@ def _explorer_dialog() -> FT:
 
 
 def _explorer_tabs() -> FT:
-    """Tab interface — real StarUI Tabs component."""
     return StarCard(
         CardContent(
             Tabs(
@@ -602,7 +548,6 @@ def _explorer_tabs() -> FT:
 
 
 def _explorer_button() -> FT:
-    """Button variants — real StarUI Button component."""
     return StarCard(
         CardContent(
             Div(
@@ -626,8 +571,6 @@ def _explorer_button() -> FT:
 
 
 def component_grid_section() -> FT:
-    """FIG. 03 — Interactive component explorer with sidebar + preview panel."""
-
     active = Signal("explorer_cmp", "command")
 
     explorer_items = [
@@ -641,9 +584,8 @@ def component_grid_section() -> FT:
 
     return Section(
         Div(
-            # Header
             Div(
-                Span("FIG. 03", cls="text-[10px] tracking-widest text-sunset font-mono block mb-3"),
+                Span("FIG. 03", cls="text-[10px] tracking-widest text-sunset font-mono block mb-3", aria_hidden="true"),
                 Div(
                     Div(
                         H2("The Constellation", cls="font-display text-4xl italic text-moon"),
@@ -659,10 +601,8 @@ def component_grid_section() -> FT:
                 cls="mb-12",
                 data_motion=in_view(y=20, opacity=0, duration=500, spring="gentle"),
             ),
-            # Explorer: sidebar + preview
             Div(
                 active,
-                # Sidebar — component list
                 Div(
                     Span("COMPONENTS", cls="text-[10px] font-mono tracking-widest text-sunset px-3 py-2 block"),
                     *[
@@ -674,14 +614,18 @@ def component_grid_section() -> FT:
                                 "mini-bg-secondary mini-text font-medium",
                                 "mini-text-dim",
                             ),
+                            role="tab",
+                            tabindex="0",
+                            data_attr_aria_selected=(active == slug).if_("true", "false"),
                             cls="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-colors",
                         )
                         for name, slug, icon, _ in explorer_items
                     ],
+                    role="tablist",
+                    aria_label="Component list",
                     cls="md:col-span-3 mystic-card rounded-xl p-3 flex flex-row md:flex-col gap-1 overflow-x-auto md:overflow-visible",
                     data_motion=in_view(y=20, opacity=0, duration=500, delay=100, spring="gentle"),
                 ),
-                # Preview area — shows active component
                 Div(
                     *[
                         Div(
@@ -691,7 +635,6 @@ def component_grid_section() -> FT:
                         )
                         for _, slug, _, fn in explorer_items
                     ],
-                    # star add command in corner
                     Div(
                         Code(
                             "star add command",
@@ -700,12 +643,13 @@ def component_grid_section() -> FT:
                         ),
                         cls="absolute bottom-4 right-6",
                     ),
+                    role="tabpanel",
+                    aria_label="Component preview",
                     cls="md:col-span-9 showcase-preview rounded-xl p-8 md:p-12 relative min-h-[450px] flex items-center justify-center",
                     data_motion=in_view(y=20, opacity=0, duration=500, delay=200, spring="gentle"),
                 ),
                 cls="grid grid-cols-1 md:grid-cols-12 gap-6",
             ),
-            # Mobile "view all" link
             Div(
                 A(
                     "View All Components →",
@@ -717,6 +661,7 @@ def component_grid_section() -> FT:
             cls="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
         ),
         cls="relative z-10 py-24 section-border-top constellation-section",
+        aria_label="Component explorer",
     )
 
 
@@ -724,10 +669,8 @@ def component_grid_section() -> FT:
 
 
 def why_starui_section() -> FT:
-    """FIG. 02 — Editorial 1/3 + 2/3 split with value propositions."""
-
     principles = [
-        ("01", "Own The Code", "\u2068star add button\u2069 \u2014 that\u2019s it. The CLI copies the source into your project. Read it, modify it, make it yours."),
+        ("01", "Own The Code", "star add button \u2014 that\u2019s it. The CLI copies the source into your project. Read it, modify it, make it yours."),
         ("02", "Server-First", "The server is the source of truth. Signals handle the rest \u2014 a modal open state, a form validation, a toggle. Client-side state only where you actually need it."),
         ("03", "Tailwind v4", "The star CLI downloads the Tailwind binary, runs watch mode, and handles minification. No Node. No npm. The entire CSS toolchain is one Python command."),
     ]
@@ -735,7 +678,7 @@ def why_starui_section() -> FT:
     return Section(
         Div(
             Div(
-                Span("FIG. 02", cls="text-[10px] tracking-widest text-sunset font-mono block mb-4"),
+                Span("FIG. 02", cls="text-[10px] tracking-widest text-sunset font-mono block mb-4", aria_hidden="true"),
                 H3(
                     "First Principles",
                     cls="font-display text-3xl mb-6 italic text-moon",
@@ -744,7 +687,6 @@ def why_starui_section() -> FT:
                     "The shadcn/ui model, rebuilt for Python. A component library that stays out of your way \u2014 do it all without leaving Python.",
                     cls="font-serif-body text-xl text-moon-dim leading-relaxed",
                 ),
-                # Python logo — large watermark behind column content
                 Icon(
                     "simple-icons:python",
                     width="220",
@@ -780,6 +722,7 @@ def why_starui_section() -> FT:
             cls="max-w-5xl mx-auto flex flex-col md:flex-row gap-16 px-4 sm:px-6 lg:px-8",
         ),
         cls="relative z-10 py-24 section-border-top why-starui-section",
+        aria_label="Why StarUI",
     )
 
 
@@ -790,32 +733,26 @@ def cta_section() -> FT:
     return Section(
         Div(
             Div(
-                # Star ornament — breathing, not pulsing
                 Svg(
                     SvgPath(
                         d="M12 2L14 10L22 12L14 14L12 22L10 14L2 12L10 10Z",
                         fill="currentColor",
                     ),
                     viewBox="0 0 24 24",
-                    cls="star-mark w-8 h-8 mx-auto text-sunset mb-8",
+                    cls="star-mark w-10 h-10 mx-auto text-sunset mb-10",
                     aria_hidden="true",
                 ),
+                H2(
+                    "The observatory",
+                    Br(),
+                    Span("is "),
+                    Span("open.", cls="italic text-sunset"),
+                    cls="font-display text-5xl md:text-6xl lg:text-7xl text-moon leading-[0.95] tracking-[-0.02em]",
+                ),
                 P(
-                    "The observatory is open.",
-                    cls="font-display italic text-xl text-moon mb-6",
+                    "Start building with components you actually own.",
+                    cls="font-serif-body text-xl md:text-2xl text-moon-dim italic font-light mt-8 max-w-xl mx-auto",
                 ),
-                # Inline install terminal
-                Div(
-                    Pre(
-                        NotStr(
-                            '<span style="color:#FB923C">$</span> '
-                            '<span style="color:#94A3B8">pip install starui</span>'
-                        ),
-                        cls="terminal-window px-6 py-3 font-mono text-sm inline-block",
-                    ),
-                    cls="mb-8",
-                ),
-                # Dual CTA
                 Div(
                     A(
                         "Get Started",
@@ -829,16 +766,26 @@ def cta_section() -> FT:
                         cls="btn-star-outline rounded-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#FB923C]",
                         data_motion=press(scale=0.97, duration=100),
                     ),
-                    cls="flex flex-wrap items-center justify-center gap-4 mb-8",
-                ),
-                P(
-                    "\u00a9 2026 StarUI. Open Source Apache 2.0.",
-                    cls="text-xs uppercase tracking-[0.2em] text-moon-dim",
+                    cls="flex flex-wrap items-center justify-center gap-4 mt-12",
                 ),
                 cls="text-center",
                 data_motion=in_view(y=20, opacity=0, duration=500, spring="gentle"),
             ),
-            cls="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20",
+            cls="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32",
         ),
         cls="relative z-10 section-border-top cta-section",
+        aria_label="Get started with StarUI",
+    )
+
+
+def footer_section() -> FT:
+    return Footer(
+        Div(
+            P(
+                "\u00a9 2026 StarUI. Open Source Apache 2.0.",
+                cls="text-xs uppercase tracking-[0.2em] text-moon-dim text-center",
+            ),
+            cls="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12",
+        ),
+        cls="relative z-10 section-border-top footer-section",
     )

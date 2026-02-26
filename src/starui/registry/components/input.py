@@ -1,6 +1,6 @@
 from typing import Literal
 
-from starhtml import FT, Div, Span, Signal, js
+from starhtml import FT, Div, Signal, Span
 from starhtml import Input as HTMLInput
 from starhtml import Label as HTMLLabel
 from starhtml import P as HTMLP
@@ -8,8 +8,20 @@ from starhtml import P as HTMLP
 from .utils import cn, gen_id
 
 InputType = Literal[
-    "text", "password", "email", "number", "tel", "url", "search",
-    "date", "datetime-local", "month", "time", "week", "color", "file",
+    "text",
+    "password",
+    "email",
+    "number",
+    "tel",
+    "url",
+    "search",
+    "date",
+    "datetime-local",
+    "month",
+    "time",
+    "week",
+    "color",
+    "file",
 ]
 
 
@@ -106,7 +118,11 @@ def InputWithLabel(
             cls=input_cls,
             **kwargs,
         ),
-        HTMLP(error_text, cls="text-sm text-destructive mt-1.5") if error_text else None,
-        HTMLP(helper_text, cls="text-sm text-muted-foreground mt-1.5") if helper_text and not error_text else None,
+        HTMLP(error_text, cls="text-sm text-destructive mt-1.5")
+        if error_text
+        else None,
+        HTMLP(helper_text, cls="text-sm text-muted-foreground mt-1.5")
+        if helper_text and not error_text
+        else None,
         cls=cn("space-y-1.5", cls),
     )

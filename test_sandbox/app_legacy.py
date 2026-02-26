@@ -19,16 +19,15 @@ styles = Link(rel="stylesheet", href="/static/css/starui.css", type="text/css")
 
 app, rt = star_app(
     live=True,
-    hdrs=(        
-        fouc_script(use_data_theme=True),
-        styles,        
-        position_handler(),
+    hdrs=(
+        theme_script(use_data_theme=True),
+        styles,
+        iconify_script(),
     ),
     htmlkw=dict(lang="en", dir="ltr"),
     bodykw=dict(cls="min-h-screen bg-background text-foreground"),
-    iconify=True,
-    clipboard=True
 )
+app.register(position, clipboard)
 
 
 @rt("/")

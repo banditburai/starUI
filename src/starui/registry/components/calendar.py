@@ -1,9 +1,8 @@
-import json
 from datetime import datetime
 from typing import Any, Literal, Protocol
 
 from starhtml import Button as HTMLButton
-from starhtml import Div, Icon, Span, Style, Signal, js
+from starhtml import Div, Icon, Signal, Span, Style, js
 
 from .button import Button
 from .utils import cn, gen_id, with_signals
@@ -17,9 +16,20 @@ class CalendarElement(Protocol):
     year: Signal
     month_display: Signal  # "January", "February", etc.
 
+
 MONTHS = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
 ]
 
 
@@ -35,7 +45,7 @@ def Calendar(
     cls: str = "",
     **kwargs: Any,
 ) -> CalendarElement:
-    sig = getattr(signal, '_id', signal) or gen_id("calendar")
+    sig = getattr(signal, "_id", signal) or gen_id("calendar")
     today = datetime.now()
     current_month = month or today.month
     current_year = year or today.year
@@ -51,13 +61,27 @@ def Calendar(
             Style(_CALENDAR_STYLES),
             (month_sig := Signal(sig + "_month", current_month)),
             (year_sig := Signal(sig + "_year", current_year)),
-            (month_display_sig := Signal(sig + "_month_display", MONTHS[current_month - 1])),
+            (
+                month_display_sig := Signal(
+                    sig + "_month_display", MONTHS[current_month - 1]
+                )
+            ),
             (selected_sig := Signal(sig + "_selected", initial_selected)),
-            _build_navigation(sig, month_sig, year_sig, month_display_sig, current_month, current_year, disabled),
+            _build_navigation(
+                sig,
+                month_sig,
+                year_sig,
+                month_display_sig,
+                current_month,
+                current_year,
+                disabled,
+            ),
             Div(
                 _build_weekdays(),
-                _build_calendar_grid(sig, selected_sig, mode, disabled, today_str, on_select),
-                cls="w-full"
+                _build_calendar_grid(
+                    sig, selected_sig, mode, disabled, today_str, on_select
+                ),
+                cls="w-full",
             ),
             *attrs,
             data_calendar=sig,
@@ -73,13 +97,23 @@ def Calendar(
     )
 
 
-def _build_navigation(sig: str, month, year, month_display, current_month: int, current_year: int, disabled: bool) -> Div:
+def _build_navigation(
+    sig: str,
+    month,
+    year,
+    month_display,
+    current_month: int,
+    current_year: int,
+    disabled: bool,
+) -> Div:
     def nav_button(is_next: bool):
         direction = "right" if is_next else "left"
         label = "Next month" if is_next else "Previous month"
         return Button(
             Icon(f"lucide:chevron-{direction}", cls="h-4 w-4"),
-            data_on_click=js(_nav_handler(month, year, month_display, is_next)) if not disabled else None,
+            data_on_click=js(_nav_handler(month, year, month_display, is_next))
+            if not disabled
+            else None,
             variant="outline",
             size="icon",
             disabled=disabled,
@@ -90,10 +124,26 @@ def _build_navigation(sig: str, month, year, month_display, current_month: int, 
     return Div(
         nav_button(False),
         Div(
-            _build_dropdown(sig, month, year, month_display, "month", MONTHS[current_month - 1],
-                          [(i+1, name) for i, name in enumerate(MONTHS)], disabled),
-            _build_dropdown(sig, month, year, month_display, "year", current_year,
-                          [(y, y) for y in range(current_year - 10, current_year + 11)], disabled),
+            _build_dropdown(
+                sig,
+                month,
+                year,
+                month_display,
+                "month",
+                MONTHS[current_month - 1],
+                [(i + 1, name) for i, name in enumerate(MONTHS)],
+                disabled,
+            ),
+            _build_dropdown(
+                sig,
+                month,
+                year,
+                month_display,
+                "year",
+                current_year,
+                [(y, y) for y in range(current_year - 10, current_year + 11)],
+                disabled,
+            ),
             cls="flex items-center gap-1",
         ),
         nav_button(True),
@@ -103,17 +153,23 @@ def _build_navigation(sig: str, month, year, month_display, current_month: int, 
     )
 
 
-def _build_dropdown(sig: str, month, year, month_display, type: str, current_display: str | int, items: list[tuple], disabled: bool) -> Div:
+def _build_dropdown(
+    sig: str,
+    month,
+    year,
+    month_display,
+    type: str,
+    current_display: str | int,
+    items: list[tuple],
+    disabled: bool,
+) -> Div:
     type_sig = month if type == "month" else year
     trigger_ref = Signal(f"{sig}_{type}_trigger", _ref_only=True)
     content_ref = Signal(f"{sig}_{type}_content", _ref_only=True)
     display_sig = month_display if type == "month" else type_sig
 
     trigger = HTMLButton(
-        Span(
-            data_text=display_sig,
-            cls="pointer-events-none"
-        ),
+        Span(data_text=display_sig, cls="pointer-events-none"),
         Icon("lucide:chevron-down", cls="h-3 w-3 shrink-0 opacity-50 ml-1"),
         data_ref=trigger_ref,
         id=trigger_ref._id,
@@ -132,11 +188,11 @@ def _build_dropdown(sig: str, month, year, month_display, type: str, current_dis
     )
 
     def make_item(value, display):
-        attrs = dict(
-            cls=item_cls,
-            data_selected=type_sig == value,
-            role="option",
-        )
+        attrs = {
+            "cls": item_cls,
+            "data_selected": type_sig == value,
+            "role": "option",
+        }
         if type == "month":
             attrs["data_month"] = value
             attrs["data_month_name"] = display
@@ -155,9 +211,13 @@ def _build_dropdown(sig: str, month, year, month_display, type: str, current_dis
 
     dropdown = Div(
         *[make_item(value, display) for value, display in items],
-        data_on_click=js(_dropdown_handler(month, year, month_display, type, content_ref)) if not disabled else None,
+        data_on_click=js(
+            _dropdown_handler(month, year, month_display, type, content_ref)
+        )
+        if not disabled
+        else None,
         data_ref=content_ref,
-        data_style_min_width=trigger_ref.if_(trigger_ref.offsetWidth + 'px', '8rem'),
+        data_style_min_width=trigger_ref.if_(trigger_ref.offsetWidth + "px", "8rem"),
         data_position=(trigger_ref._id, position_mods),
         popover="auto",
         id=content_ref._id,
@@ -171,14 +231,22 @@ def _build_dropdown(sig: str, month, year, month_display, type: str, current_dis
 
 def _build_weekdays() -> Div:
     weekdays = ("Su", "Mo", "Tu", "We", "Th", "Fr", "Sa")
-    full_weekdays = ("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")
+    full_weekdays = (
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+    )
     return Div(
         *[
             Div(
                 day,
                 cls="h-9 w-9 text-[0.8rem] font-normal text-muted-foreground text-center",
                 role="columnheader",
-                aria_label=full_weekdays[i]
+                aria_label=full_weekdays[i],
             )
             for i, day in enumerate(weekdays)
         ],
@@ -187,10 +255,19 @@ def _build_weekdays() -> Div:
     )
 
 
-def _build_calendar_grid(sig: str, selected, mode: CalendarMode, disabled: bool, today_str: str, on_select: str | None) -> Div:
+def _build_calendar_grid(
+    sig: str,
+    selected,
+    mode: CalendarMode,
+    disabled: bool,
+    today_str: str,
+    on_select: str | None,
+) -> Div:
     return Div(
         data_effect=js(_render_days_effect(sig, selected, mode, disabled, today_str)),
-        data_on_click=js(_day_select_handler(selected, mode, on_select)) if not disabled else None,
+        data_on_click=js(_day_select_handler(selected, mode, on_select))
+        if not disabled
+        else None,
         cls="cal-body grid grid-cols-7 gap-0",
         data_calendar_body=sig,
         role="grid",
@@ -211,8 +288,12 @@ def _dropdown_handler(month, year, month_display, type: str, content_ref) -> str
     return f"const t=evt.target;if(!t.dataset.year)return;const y=parseInt(t.dataset.year);{year}=y;{close}"
 
 
-def _day_select_handler(selected, mode: CalendarMode, on_select: str | list | None = None) -> str:
-    parts = ["const c=evt.target.closest('.cal-cell');if(!c||c.classList.contains('empty'))return;const d=c.dataset.date;if(!d)return"]
+def _day_select_handler(
+    selected, mode: CalendarMode, on_select: str | list | None = None
+) -> str:
+    parts = [
+        "const c=evt.target.closest('.cal-cell');if(!c||c.classList.contains('empty'))return;const d=c.dataset.date;if(!d)return"
+    ]
 
     if isinstance(on_select, list):
         on_select = ";".join(str(a) for a in on_select)
@@ -224,29 +305,39 @@ def _day_select_handler(selected, mode: CalendarMode, on_select: str | list | No
                 parts.append(f"if({selected}){{{on_select}}}")
         case "multiple":
             parts.append(f"let s={selected}||[]")
-            parts.append(f"const i=s.indexOf(d);{selected}=i>=0?s.filter((_,x)=>x!==i):[...s,d]")
+            parts.append(
+                f"const i=s.indexOf(d);{selected}=i>=0?s.filter((_,x)=>x!==i):[...s,d]"
+            )
             if on_select:
                 parts.append(on_select)
         case "range":
             parts.append(f"let s={selected}||[]")
-            parts.append(f"if(s.length===0){{{selected}=[d]}}else if(s.length===1){{if(s[0]===d){{{selected}=[]}}else{{{selected}=[s[0],d].sort()}}}}else{{{selected}=[d]}}")
+            parts.append(
+                f"if(s.length===0){{{selected}=[d]}}else if(s.length===1){{if(s[0]===d){{{selected}=[]}}else{{{selected}=[s[0],d].sort()}}}}else{{{selected}=[d]}}"
+            )
             if on_select:
                 parts.append(f"if({selected}.length===2){{{on_select}}}")
 
     return ";".join(parts)
 
 
-def _render_days_effect(sig: str, selected, mode: CalendarMode, disabled: bool, today_str: str) -> str:
+def _render_days_effect(
+    sig: str, selected, mode: CalendarMode, disabled: bool, today_str: str
+) -> str:
     gen_cal = "const f=new Date(y,mm-1,1),days=new Date(y,mm,0).getDate(),o=f.getDay(),a=[];for(let i=0;i<42;i++){const n=i-o+1,v=i>=o&&n<=days;a.push({day:v?n.toString():'',date:v?`${y}-${mm.toString().padStart(2,'0')}-${n.toString().padStart(2,'0')}`:'',empty:!v})}"
-    
+
     sel_check = {
         "single": "s===c.date",
         "multiple": "s.includes(c.date)",
         "range": "s.length===1?c.date===s[0]:s.length===2?c.date>=s[0]&&c.date<=s[1]:false",
     }[mode]
-    
-    range_logic = "if(m==='range'&&s.length===2&&!e){const[a,b]=s;if(c.date===a&&a!==b)l+=' range-start';else if(c.date===b&&a!==b)l+=' range-end';else if(c.date>a&&c.date<b){l+=' range-middle';if(y===0)l+=' range-week-start';if(y===6)l+=' range-week-end'}else if(a===b&&c.date===a)l+=' range-single'}" if mode == "range" else ""
-    
+
+    range_logic = (
+        "if(m==='range'&&s.length===2&&!e){const[a,b]=s;if(c.date===a&&a!==b)l+=' range-start';else if(c.date===b&&a!==b)l+=' range-end';else if(c.date>a&&c.date<b){l+=' range-middle';if(y===0)l+=' range-week-start';if(y===6)l+=' range-week-end'}else if(a===b&&c.date===a)l+=' range-single'}"
+        if mode == "range"
+        else ""
+    )
+
     selected_setup = f"s={selected}||''" if mode == "single" else f"s={selected}||[]"
 
     disabled_check = "if(!e)l+=' disabled';" if disabled else ""

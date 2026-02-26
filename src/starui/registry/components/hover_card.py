@@ -1,6 +1,6 @@
 from typing import Any, Literal
 
-from starhtml import Div, FT, Signal, reset_timeout, clear_timeout
+from starhtml import FT, Div, Signal, clear_timeout, reset_timeout
 
 from .utils import cn, gen_id
 
@@ -12,11 +12,11 @@ def HoverCard(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = getattr(signal, '_id', signal) or gen_id("hover_card")
+    sig = getattr(signal, "_id", signal) or gen_id("hover_card")
     open_state = Signal(f"{sig}_open", default_open)
     timer_state = Signal(f"{sig}_timer", _ref_only=True)
 
-    ctx = dict(sig=sig, open_state=open_state, timer_state=timer_state)
+    ctx = {"sig": sig, "open_state": open_state, "timer_state": timer_state}
 
     return Div(
         open_state,
@@ -40,8 +40,12 @@ def HoverCardTrigger(
         return Div(
             *children,
             data_ref=trigger_ref,
-            data_on_mouseenter=reset_timeout(timer_state, hover_delay, open_state.set(True)),
-            data_on_mouseleave=reset_timeout(timer_state, hide_delay, open_state.set(False)),
+            data_on_mouseenter=reset_timeout(
+                timer_state, hover_delay, open_state.set(True)
+            ),
+            data_on_mouseleave=reset_timeout(
+                timer_state, hide_delay, open_state.set(False)
+            ),
             data_attr_aria_expanded=open_state,
             aria_haspopup="dialog",
             aria_describedby=f"{sig}_content",
@@ -82,7 +86,9 @@ def HoverCardContent(
                 },
             ),
             data_on_mouseenter=clear_timeout(timer_state, open_state.set(True)),
-            data_on_mouseleave=reset_timeout(timer_state, hide_delay, open_state.set(False)),
+            data_on_mouseleave=reset_timeout(
+                timer_state, hide_delay, open_state.set(False)
+            ),
             id=content_ref._id,
             role="dialog",
             aria_labelledby=f"{sig}_trigger",

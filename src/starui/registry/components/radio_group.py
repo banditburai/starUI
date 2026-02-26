@@ -1,6 +1,6 @@
 from typing import Any, Literal
 
-from starhtml import Div, FT, Signal
+from starhtml import FT, Div, Signal
 from starhtml import Input as HTMLInput
 from starhtml import Label as HTMLLabel
 from starhtml import P as HTMLP
@@ -20,11 +20,16 @@ def RadioGroup(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = getattr(signal, '_id', signal) or gen_id("radio")
+    sig = getattr(signal, "_id", signal) or gen_id("radio")
     group_name = name or f"radio_group_{sig}"
     selected = Signal(sig, value)
 
-    ctx = dict(sig=sig, selected=selected, group_name=group_name, hide_indicators=hide_indicators)
+    ctx = {
+        "sig": sig,
+        "selected": selected,
+        "group_name": group_name,
+        "hide_indicators": hide_indicators,
+    }
 
     return Div(
         selected,
@@ -65,16 +70,20 @@ def RadioGroupItem(
         )
 
         if hide_indicators:
-            return Div(
-                radio_input,
-                cls="relative inline-flex items-center",
-                data_slot="radio-container",
-            ) if not label else HTMLLabel(
-                radio_input,
-                HTMLSpan(label, cls="block w-full"),
-                fr=radio_id,
-                cls="block w-full cursor-pointer",
-                data_slot="radio-container",
+            return (
+                Div(
+                    radio_input,
+                    cls="relative inline-flex items-center",
+                    data_slot="radio-container",
+                )
+                if not label
+                else HTMLLabel(
+                    radio_input,
+                    HTMLSpan(label, cls="block w-full"),
+                    fr=radio_id,
+                    cls="block w-full cursor-pointer",
+                    data_slot="radio-container",
+                )
             )
 
         visual_radio = Div(
@@ -137,7 +146,7 @@ def RadioGroupWithLabel(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = getattr(signal, '_id', signal) or gen_id("radio")
+    sig = getattr(signal, "_id", signal) or gen_id("radio")
     group_name = name or f"radio_group_{sig}"
     group_id = id or gen_id("radiogroup")
 
@@ -157,6 +166,7 @@ def RadioGroupWithLabel(
                 )
                 for option in options
             ],
+            *attrs,
             value=value,
             signal=sig,
             name=group_name,
@@ -168,10 +178,13 @@ def RadioGroupWithLabel(
             ),
             id=group_id,
             aria_invalid="true" if error_text else None,
-            *attrs,
             **kwargs,
         ),
-        HTMLP(error_text, cls="text-sm text-destructive mt-1.5") if error_text else None,
-        HTMLP(helper_text, cls="text-sm text-muted-foreground mt-1.5") if helper_text and not error_text else None,
+        HTMLP(error_text, cls="text-sm text-destructive mt-1.5")
+        if error_text
+        else None,
+        HTMLP(helper_text, cls="text-sm text-muted-foreground mt-1.5")
+        if helper_text and not error_text
+        else None,
         cls=cn("space-y-1.5", cls),
     )

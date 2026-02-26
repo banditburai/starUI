@@ -36,9 +36,7 @@ def BreadcrumbItem(*children, cls: str = "", **kwargs) -> FT:
     )
 
 
-def BreadcrumbLink(
-    *children, href: str = "#", cls: str = "", **kwargs
-) -> FT:
+def BreadcrumbLink(*children, href: str = "#", cls: str = "", **kwargs) -> FT:
     return HTMLA(
         *children,
         href=href,
@@ -63,7 +61,7 @@ def BreadcrumbSeparator(*children, cls: str = "", **kwargs) -> FT:
         *(children or (Icon("lucide:chevron-right"),)),
         role="presentation",
         aria_hidden="true",
-        cls=cn("[&_svg]:size-3.5 [&_iconify-icon]:size-3.5 [&>span]:size-3.5", cls),
+        cls=cn("[&_[data-icon-sh]]:size-3.5", cls),
         **kwargs,
     )
 

@@ -99,3 +99,8 @@ PRD.md
 toolbench/
 toolbench-changes.diff
 .mcp.json
+
+designs/
+
+# OG image build output (uncompressed — compress before copying to static/images/og/)
+docs/og_build/

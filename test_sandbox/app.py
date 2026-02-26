@@ -101,20 +101,19 @@ def Page(*children, title="Component Test", show_back_link=True):
 app, rt = star_app(
     live=True,
     hdrs=(
-        fouc_script(use_data_theme=True),
+        theme_script(use_data_theme=True),
         CodeBlockStyles(
             custom_css=".code-container pre { border-radius: 8px; }"
         ),
         styles,
-        position_handler(),
+        iconify_script(),
     ),
     htmlkw=dict(lang="en", dir="ltr"),
     bodykw=dict(
         cls="min-h-screen bg-background text-foreground px-8 pt-8 pb-96",
     ),
-    iconify=True,
-    clipboard=True
 )
+app.register(position, clipboard)
 
 
 @rt("/")

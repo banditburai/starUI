@@ -1,13 +1,13 @@
 from typing import Any, Literal
 
-from starhtml import Div, FT, Icon, Signal, Span
+from starhtml import FT, Div, Icon, Signal, Span
+from starhtml import H2 as HTMLH2
 from starhtml import Button as HTMLButton
 from starhtml import Dialog as HTMLDialog
-from starhtml import H2 as HTMLH2
 from starhtml import P as HTMLP
 from starhtml.datastar import document, evt, seq
 
-from .utils import cn, cva, gen_id
+from .utils import cn, cva, gen_id, merge_actions
 
 DialogSize = Literal["sm", "md", "lg", "xl", "full"]
 
@@ -36,14 +36,23 @@ def Dialog(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = getattr(signal, '_id', signal) or gen_id("dialog")
+    sig = getattr(signal, "_id", signal) or gen_id("dialog")
     open_state = Signal(f"{sig}_open", False)
     dialog_ref = Signal(sig, _ref_only=True)
 
-    trigger = next((c for c in children if callable(c) and c.__name__ == 'trigger'), None)
-    content = next((c for c in children if callable(c) and c.__name__ == 'content'), None)
+    trigger = next(
+        (c for c in children if callable(c) and c.__name__ == "trigger"), None
+    )
+    content = next(
+        (c for c in children if callable(c) and c.__name__ == "content"), None
+    )
 
-    ctx = dict(open_state=open_state, dialog_ref=dialog_ref, sig=sig, modal=modal)
+    ctx = {
+        "open_state": open_state,
+        "dialog_ref": dialog_ref,
+        "sig": sig,
+        "modal": modal,
+    }
 
     return Div(
         trigger(**ctx) if trigger else None,
@@ -51,7 +60,10 @@ def Dialog(
             content(**ctx) if content else None,
             data_ref=dialog_ref,
             data_on_close=open_state.set(False),
-            data_on_click=(evt.target == evt.currentTarget) & seq(dialog_ref.close(), open_state.set(False)) if modal else None,
+            data_on_click=(evt.target == evt.currentTarget)
+            & seq(dialog_ref.close(), open_state.set(False))
+            if modal
+            else None,
             id=sig,
             aria_labelledby=f"{sig}-title",
             aria_describedby=f"{sig}-description",
@@ -59,7 +71,7 @@ def Dialog(
             **kwargs,
         ),
         Div(
-            data_effect=document.body.style.overflow.set(open_state.if_('hidden', '')),
+            data_effect=document.body.style.overflow.set(open_state.if_("hidden", "")),
             style="display: none;",
         ),
     )
@@ -74,10 +86,8 @@ def DialogTrigger(
     def trigger(*, open_state, dialog_ref, modal, **_):
         from .button import Button
 
-        user_on_click = kwargs.pop('data_on_click', None)
-        user_actions = user_on_click if isinstance(user_on_click, list) else ([user_on_click] if user_on_click else [])
         show_method = dialog_ref.showModal() if modal else dialog_ref.show()
-        click_actions = [show_method, open_state.set(True)] + user_actions
+        click_actions = merge_actions(show_method, open_state.set(True), kwargs=kwargs)
 
         return Button(
             *children,
@@ -111,7 +121,9 @@ def DialogContent(
                 cls="absolute top-4 right-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none ring-offset-background focus:ring-ring",
                 type="button",
                 aria_label="Close",
-            ) if show_close_button else None,
+            )
+            if show_close_button
+            else None,
             cls=cn("relative p-6", cls),
             **kwargs,
         )
@@ -129,9 +141,13 @@ def DialogClose(
     def _(*, open_state, dialog_ref, **_):
         from .button import Button
 
-        user_on_click = kwargs.pop('data_on_click', None)
-        user_actions = user_on_click if isinstance(user_on_click, list) else ([user_on_click] if user_on_click else [])
-        close_actions = user_actions + [open_state.set(False), dialog_ref.close(value) if value else dialog_ref.close()]
+        close_actions = merge_actions(
+            kwargs=kwargs,
+            after=[
+                open_state.set(False),
+                dialog_ref.close(value) if value else dialog_ref.close(),
+            ],
+        )
 
         return Button(
             *children,

@@ -1,6 +1,7 @@
 from typing import Any
 
-from starhtml import Div, FT, Signal
+from starhtml import FT, Div, Signal
+from starhtml.datastar import Expr
 
 from .utils import cn, gen_id
 
@@ -12,15 +13,21 @@ def Progress(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = getattr(signal, '_id', signal) or gen_id("progress")
-    initial_value = getattr(signal, '_initial', value) if value is None else value
-    pct = max(0, min(100, (initial_value / max_value * 100) if initial_value is not None and max_value > 0 else 0))
-    pct = int(pct) if pct == int(pct) else pct
+    sig = getattr(signal, "_id", signal) or gen_id("progress")
+    initial = getattr(signal, "_initial", value) if value is None else value
+
+    if isinstance(initial, Expr):
+        pct = initial
+    elif initial is not None and max_value > 0:
+        pct = max(0, min(100, initial / max_value * 100))
+        pct = int(pct) if pct == int(pct) else pct
+    else:
+        pct = 0
 
     return Div(
         (progress := Signal(sig, pct)),
         Div(
-            data_style_width=progress + '%',
+            data_style_width=progress + "%",
             cls="bg-primary h-full transition-all duration-300 ease-out",
         ),
         role="progressbar",

@@ -1,12 +1,12 @@
 from typing import Any, Literal
 
-from starhtml import Div, FT, Signal, js
-from starhtml import Dialog as HTMLDialog
+from starhtml import FT, Div, Signal
 from starhtml import H2 as HTMLH2
+from starhtml import Dialog as HTMLDialog
 from starhtml import P as HTMLP
-from starhtml.datastar import evt, document, seq
+from starhtml.datastar import document, evt, seq
 
-from .utils import cn, gen_id
+from .utils import cn, gen_id, merge_actions
 
 AlertDialogVariant = Literal["default", "destructive"]
 
@@ -17,14 +17,28 @@ def AlertDialog(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = getattr(signal, '_id', signal) or gen_id("alert_dialog")
+    sig = getattr(signal, "_id", signal) or gen_id("alert_dialog")
     open_state = Signal(f"{sig}_open", False)
     dialog_ref = Signal(sig, _ref_only=True)
 
-    trigger = next((c for c in children if callable(c) and getattr(c, '__name__', None) == 'trigger'), None)
-    content = next((c for c in children if callable(c) and getattr(c, '__name__', None) == 'content'), None)
+    trigger = next(
+        (
+            c
+            for c in children
+            if callable(c) and getattr(c, "__name__", None) == "trigger"
+        ),
+        None,
+    )
+    content = next(
+        (
+            c
+            for c in children
+            if callable(c) and getattr(c, "__name__", None) == "content"
+        ),
+        None,
+    )
 
-    ctx = dict(open_state=open_state, dialog_ref=dialog_ref, sig=sig)
+    ctx = {"open_state": open_state, "dialog_ref": dialog_ref, "sig": sig}
 
     return Div(
         trigger(**ctx) if trigger else None,
@@ -32,7 +46,8 @@ def AlertDialog(
             content(**ctx) if content else None,
             data_ref=dialog_ref,
             data_on_close=open_state.set(False),
-            data_on_click=(evt.target == evt.currentTarget) & seq(dialog_ref.close(), open_state.set(False)),
+            data_on_click=(evt.target == evt.currentTarget)
+            & seq(dialog_ref.close(), open_state.set(False)),
             id=sig,
             role="alertdialog",
             aria_labelledby=f"{sig}-title",
@@ -44,7 +59,7 @@ def AlertDialog(
             **kwargs,
         ),
         Div(
-            data_effect=document.body.style.overflow.set(open_state.if_('hidden', '')),
+            data_effect=document.body.style.overflow.set(open_state.if_("hidden", "")),
             style="display: none;",
         ),
     )
@@ -59,9 +74,9 @@ def AlertDialogTrigger(
     def trigger(*, open_state, dialog_ref, **_):
         from .button import Button
 
-        user_on_click = kwargs.pop('data_on_click', None)
-        user_actions = user_on_click if isinstance(user_on_click, list) else ([user_on_click] if user_on_click else [])
-        click_actions = [dialog_ref.showModal(), open_state.set(True)] + user_actions
+        click_actions = merge_actions(
+            dialog_ref.showModal(), open_state.set(True), kwargs=kwargs
+        )
 
         return Button(
             *children,
@@ -162,14 +177,14 @@ def AlertDialogAction(
     def _(*, open_state, dialog_ref, **_):
         from .button import Button
 
-        # Handle action as either a single item or list
-        action_list = action if isinstance(action, list) else ([action] if action else [])
-        click_actions = action_list + [open_state.set(False), dialog_ref.close()]
+        click_actions = merge_actions(
+            action, after=[open_state.set(False), dialog_ref.close()]
+        )
 
         return Button(
             *children,
             data_on_click=click_actions,
-            variant="destructive" if variant == "destructive" else "default",
+            variant=variant,
             cls=cls,
             **kwargs,
         )
@@ -185,9 +200,9 @@ def AlertDialogCancel(
     def _(*, open_state, dialog_ref, **_):
         from .button import Button
 
-        user_on_click = kwargs.pop('data_on_click', None)
-        user_actions = user_on_click if isinstance(user_on_click, list) else ([user_on_click] if user_on_click else [])
-        click_actions = user_actions + [open_state.set(False), dialog_ref.close()]
+        click_actions = merge_actions(
+            kwargs=kwargs, after=[open_state.set(False), dialog_ref.close()]
+        )
 
         return Button(
             *children,

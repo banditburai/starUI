@@ -11,6 +11,7 @@ from starhtml import *
 from starhtml.plugins import motion, scroll
 
 from component_registry import get_registry
+from head import SITE_URL, hdrs
 from layouts.base import DocsLayout, LayoutConfig, SidebarConfig
 from layouts.landing import LandingLayout
 from pages.components_index import create_components_index
@@ -20,6 +21,7 @@ from pages.landing import (
     component_grid_section,
     why_starui_section,
     cta_section,
+    footer_section,
 )
 
 DOCS_SIDEBAR_SECTIONS = []
@@ -100,16 +102,9 @@ async def initialize_docs_sidebar():
 
 
 app, rt = star_app(
-    title="StarUI Documentation",
+    title="StarUI",
     live=True,
-    hdrs=(
-        theme_script(use_data_theme=True),
-        Link(rel="stylesheet", href="/static/css/starui.css"),
-        Link(rel="preconnect", href="https://fonts.googleapis.com"),
-        Link(rel="preconnect", href="https://fonts.gstatic.com", crossorigin=""),
-        Link(rel="stylesheet", href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Inter:wght@200;300;400&family=Playfair+Display:ital,wght@0,400;0,500;1,400&display=swap"),
-        iconify_script(),
-    ),
+    hdrs=hdrs,
     htmlkw=dict(lang="en", dir="ltr"),
     bodykw=dict(cls="min-h-screen bg-background text-foreground"),
     lifespan=lifespan,
@@ -125,19 +120,42 @@ DOCS_NAV_ITEMS = [
 
 @rt("/")
 def home():
-    return LandingLayout(
-        hero_section(),
-        code_example_section(),
-        why_starui_section(),
-        component_grid_section(),
-        cta_section(),
+    return (
+        Title("StarUI \u2014 Python-First UI Components"),
+        Socials(
+            title="StarUI \u2014 Python-First UI Components",
+            site_name="StarUI",
+            description="34+ accessible UI components for Python. The shadcn/ui model, rebuilt for StarHTML. No npm. No React. Just Python.",
+            image="/static/images/og/starui.jpg",
+            url=SITE_URL,
+            card="summary_large_image",
+        ),
+        LandingLayout(
+            hero_section(),
+            code_example_section(),
+            why_starui_section(),
+            component_grid_section(),
+            cta_section(),
+            footer_section(),
+        ),
     )
 
 
 @rt("/components")
 def components_index():
     registry = get_registry()
-    return create_components_index(registry, DOCS_SIDEBAR_SECTIONS)
+    return (
+        Title("Components \u2014 StarUI"),
+        Socials(
+            title="Components \u2014 StarUI",
+            site_name="StarUI",
+            description="Browse the constellation \u2014 34+ accessible, copy-paste UI components for Python and StarHTML.",
+            image="/static/images/og/starui.jpg",
+            url=f"{SITE_URL}/components",
+            card="summary_large_image",
+        ),
+        create_components_index(registry, DOCS_SIDEBAR_SECTIONS),
+    )
 
 
 @rt("/components/{component_name}")
@@ -159,8 +177,21 @@ def component_page(component_name: str):
             sidebar=SidebarConfig(sections=DOCS_SIDEBAR_SECTIONS),
         )
 
-    # The component's create_docs function should handle sidebar sections
-    return component.get("create_docs", lambda: None)()
+    comp_title = component.get("title", component_name.replace("_", " ").title())
+    comp_desc = component.get("description", f"{comp_title} component for StarUI.")
+
+    return (
+        Title(f"{comp_title} \u2014 StarUI"),
+        Socials(
+            title=f"{comp_title} \u2014 StarUI",
+            site_name="StarUI",
+            description=comp_desc,
+            image="/static/images/og/starui.jpg",
+            url=f"{SITE_URL}/components/{component_name}",
+            card="summary_large_image",
+        ),
+        component.get("create_docs", lambda: None)(),
+    )
 
 
 @rt("/api/markdown/{component_name}")
@@ -274,7 +305,17 @@ def installation():
     from starui.registry.components.button import Button
     from starui.registry.components.input import Input
     
-    return DocsLayout(
+    return (
+        Title("Installation \u2014 StarUI"),
+        Socials(
+            title="Installation \u2014 StarUI",
+            site_name="StarUI",
+            description="Get started with StarUI in minutes. Install the CLI, initialize your project, and add components.",
+            image="/static/images/og/starui.jpg",
+            url=f"{SITE_URL}/installation",
+            card="summary_large_image",
+        ),
+        DocsLayout(
         Div(
             Div(
                 P(
@@ -470,6 +511,7 @@ Div(
             show_sidebar=True
         ),
         sidebar=SidebarConfig(sections=DOCS_SIDEBAR_SECTIONS),
+    ),
     )
 
 
@@ -485,6 +527,27 @@ def _next_step_card(num: str, title: str, description: str, href: str, button_te
         href=href,
         cls="group border rounded-lg hover:border-primary/30 transition-colors h-full block",
     )
+
+
+@rt("/sitemap.xml")
+def sitemap():
+    from starlette.responses import Response
+
+    registry = get_registry()
+    paths = ["/", "/installation", "/components"]
+    paths += [f"/components/{name}" for name in registry.components]
+
+    urls = "\n".join(
+        f"  <url><loc>{SITE_URL}{p}</loc></url>"
+        for p in paths
+    )
+    xml = (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        f"{urls}\n"
+        "</urlset>"
+    )
+    return Response(content=xml, media_type="application/xml")
 
 
 iframe_app, iframe_rt = star_app(

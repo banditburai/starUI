@@ -13,8 +13,9 @@ styles = Link(rel="stylesheet", href="/static/css/starui.css", type="text/css")
 app, rt = star_app(
     live=True,
     hdrs=(
-        fouc_script(use_data_theme=True),
+        theme_script(use_data_theme=True),
         styles,
+        iconify_script(),
         Style("""
             @keyframes marquee {
                 0% { transform: translateX(0); }
@@ -39,7 +40,6 @@ app, rt = star_app(
     bodykw=dict(
         cls="min-h-screen bg-background text-foreground",
     ),
-    iconify=True,
 )
 
 
@@ -51,7 +51,7 @@ def index():
 
         # Marquee with NotStr wrapper using Datastar
         NotStr("""
-<div class="relative w-full bg-gray-900 container-block" data-on-load="document.getElementById('marquee-content').appendChild(document.getElementById('marquee-item').cloneNode(true))">
+<div class="relative w-full bg-gray-900 container-block" data-init="document.getElementById('marquee-content').appendChild(document.getElementById('marquee-item').cloneNode(true))">
     <div class="relative w-full py-3 mx-auto overflow-hidden text-lg italic tracking-wide text-white uppercase bg-gray-900 max-w-7xl sm:text-xs md:text-sm lg:text-base xl:text-xl 2xl:text-2xl">
         <div class="absolute left-0 z-20 w-40 h-full bg-gradient-to-r from-gray-900 to-transparent"></div>
         <div class="absolute right-0 z-20 w-40 h-full bg-gradient-to-l from-gray-900 to-transparent"></div>

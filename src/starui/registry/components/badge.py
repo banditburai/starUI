@@ -11,7 +11,7 @@ BadgeVariant = Literal["default", "secondary", "destructive", "outline"]
 badge_variants = cva(
     base=(
         "inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium "
-        "w-fit whitespace-nowrap shrink-0 [&_svg]:size-3 [&_iconify-icon]:size-3 [&>span]:size-3 gap-1 [&_svg]:pointer-events-none "
+        "w-fit whitespace-nowrap shrink-0 [&_[data-icon-sh]]:size-3 gap-1 [&_[data-icon-sh]]:pointer-events-none "
         "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] "
         "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 "
         "aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden"
@@ -39,14 +39,9 @@ def Badge(
     **kwargs,
 ) -> FT:
     base_classes = badge_variants(variant=variant)
-    
+
     if href:
-        return A(
-            *children,
-            href=href,
-            cls=cn(base_classes, cls),
-            **kwargs
-        )
+        return A(*children, href=href, cls=cn(base_classes, cls), **kwargs)
 
     if clickable:
         return HTMLButton(
@@ -56,8 +51,4 @@ def Badge(
             **kwargs,
         )
 
-    return Span(
-        *children,
-        cls=cn(base_classes, cls),
-        **kwargs
-    )
+    return Span(*children, cls=cn(base_classes, cls), **kwargs)

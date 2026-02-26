@@ -1,6 +1,6 @@
 from typing import Literal
 
-from starhtml import Div, FT, Signal
+from starhtml import FT, Div, Signal
 
 from .utils import cn, gen_id
 
@@ -11,8 +11,8 @@ def Popover(
     cls: str = "",
     **kwargs,
 ) -> FT:
-    sig = getattr(signal, '_id', signal) or gen_id("popover")
-    ctx = dict(sig=sig)
+    sig = getattr(signal, "_id", signal) or gen_id("popover")
+    ctx = {"sig": sig}
 
     return Div(
         *[child(**ctx) if callable(child) else child for child in children],
@@ -73,7 +73,10 @@ def PopoverContent(
             position_mods["offset"] = offset
 
         return Div(
-            *[child(sig=sig, **ctx) if callable(child) else child for child in children],
+            *[
+                child(sig=sig, **ctx) if callable(child) else child
+                for child in children
+            ],
             data_ref=content_ref,
             data_position=(f"{sig}_trigger", position_mods),
             popover="auto",

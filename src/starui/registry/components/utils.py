@@ -1,12 +1,11 @@
 from collections.abc import Callable
 from typing import Any
 from uuid import uuid4
-from starhtml import Div, Signal
-from starhtml.datastar import Expr, _JSRaw, _ensure_expr
 
 try:
     from starmerge import merge
 except ImportError:
+
     def merge(*classes: str) -> str:
         return " ".join(c for c in classes if c)
 
@@ -27,6 +26,7 @@ def with_signals(component, **signals):
     for name, signal in signals.items():
         setattr(component, name, signal)
     return component
+
 
 # Theme configuration
 DEFAULT_THEME = "light"
@@ -96,6 +96,7 @@ def cva(base: str = "", config: dict[str, Any] | None = None) -> Callable[..., s
 
     return variant_function
 
+
 def gen_id(prefix: str) -> str:
     """Generate a short, unique id with a given prefix."""
     return f"{prefix}_{uuid4().hex[:8]}"
@@ -106,6 +107,26 @@ def ensure_signal(signal: str | None, prefix: str) -> str:
     return signal or gen_id(prefix)
 
 
+def _extend(result: list, val: Any) -> None:
+    if isinstance(val, list):
+        result.extend(val)
+    elif val is not None:
+        result.append(val)
+
+
+def merge_actions(*before: Any, kwargs: dict | None = None, after: Any = None) -> list:
+    """Merge framework actions with user-supplied data_on_click from kwargs.
+
+    Open/trigger: merge_actions(open_action, kwargs=kwargs)
+    Close/dismiss: merge_actions(kwargs=kwargs, after=close_action)
+    """
+    result = [a for a in before if a is not None]
+    if kwargs is not None:
+        _extend(result, kwargs.pop("data_on_click", None))
+    _extend(result, after)
+    return result
+
+
 def inject_context(element, **context):
     """Recursively inject context into callable children, preserving structure.
 
@@ -113,11 +134,13 @@ def inject_context(element, **context):
     """
     if callable(element):
         result = element(**context)
-        if hasattr(result, 'children') and result.children:
-            result.children = tuple(inject_context(c, **context) for c in result.children)
+        if hasattr(result, "children") and result.children:
+            result.children = tuple(
+                inject_context(c, **context) for c in result.children
+            )
         return result
 
-    if hasattr(element, 'children') and element.children:
+    if hasattr(element, "children") and element.children:
         element.children = tuple(inject_context(c, **context) for c in element.children)
 
     return element

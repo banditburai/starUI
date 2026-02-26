@@ -14,8 +14,8 @@ ButtonSize = Literal["default", "sm", "lg", "icon"]
 button_variants = cva(
     base=(
         "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium "
-        "transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none "
-        "[&_svg]:shrink-0 [&_iconify-icon]:pointer-events-none [&_iconify-icon]:shrink-0 outline-none "
+        "transition-all disabled:pointer-events-none disabled:opacity-50 "
+        "[&_[data-icon-sh]]:pointer-events-none [&_[data-icon-sh]]:shrink-0 outline-none "
         "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] "
         "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 "
         "aria-invalid:border-destructive"
@@ -31,9 +31,9 @@ button_variants = cva(
                 "link": "text-primary underline-offset-4 hover:underline",
             },
             "size": {
-                "default": "h-9 px-4 py-2 has-[svg]:px-3 has-[iconify-icon]:px-3",
-                "sm": "h-8 rounded-md gap-1.5 px-3 has-[svg]:px-2.5 has-[iconify-icon]:px-2.5",
-                "lg": "h-10 rounded-md px-6 has-[svg]:px-4 has-[iconify-icon]:px-4",
+                "default": "h-9 px-4 py-2 has-[[data-icon-sh]]:px-3",
+                "sm": "h-8 rounded-md gap-1.5 px-3 has-[[data-icon-sh]]:px-2.5",
+                "lg": "h-10 rounded-md px-6 has-[[data-icon-sh]]:px-4",
                 "icon": "size-9 gap-0",
             },
         },
@@ -52,9 +52,9 @@ def Button(
     **kwargs: Any,
 ) -> FT:
     return HTMLButton(
-        *children, 
+        *children,
         cls=cn(button_variants(variant=variant, size=size), cls),
-        disabled=disabled, 
-        type=type, 
-        **kwargs
+        disabled=disabled,
+        type=type,
+        **kwargs,
     )

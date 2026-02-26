@@ -5,13 +5,13 @@ __version__ = "0.1.0"
 from .registry.components.button import Button
 from .registry.components.theme_toggle import ThemeToggle
 from .registry.components.utils import (
+    ALT_THEME,
+    DEFAULT_THEME,
     cn,
     cva,
     gen_id,
     inject_context,
     with_signals,
-    DEFAULT_THEME,
-    ALT_THEME,
 )
 from .registry.local import discover_components
 

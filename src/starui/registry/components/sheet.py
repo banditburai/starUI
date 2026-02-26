@@ -1,10 +1,10 @@
 from typing import Any, Literal
 
-from starhtml import FT, Div, P, Span, Signal
+from starhtml import FT, Div, P, Signal, Span
 from starhtml import H2 as HTMLH2
 from starhtml.datastar import document, evt
 
-from .utils import cn, gen_id, with_signals, inject_context
+from .utils import cn, gen_id, inject_context, merge_actions, with_signals
 
 SheetSide = Literal["top", "right", "bottom", "left"]
 SheetSize = Literal["sm", "md", "lg", "xl", "full"]
@@ -18,20 +18,25 @@ def Sheet(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    sig = getattr(signal, '_id', signal) or gen_id("sheet")
+    sig = getattr(signal, "_id", signal) or gen_id("sheet")
     sheet_open = Signal(f"{sig}_open", default_open)
 
     escape_handler = (evt.key == "Escape").then(sheet_open.set(False))
 
-    ctx = dict(sig=sig, sheet_open=sheet_open, modal=modal)
+    ctx = {"sig": sig, "sheet_open": sheet_open, "modal": modal}
 
     return with_signals(
         Div(
             sheet_open,
-            Div(data_effect=document.body.style.overflow.set(sheet_open.if_('hidden')), style="display: none;") if modal else None,
+            Div(
+                data_effect=document.body.style.overflow.set(sheet_open.if_("hidden")),
+                style="display: none;",
+            )
+            if modal
+            else None,
             *[child(**ctx) if callable(child) else child for child in children],
-            data_on_keydown=(escape_handler, dict(window=True)) if modal else None,
-            data_attr_state=sheet_open.if_("open", "closed"),
+            data_on_keydown=(escape_handler, {"window": True}) if modal else None,
+            data_attr_data_state=sheet_open.if_("open", "closed"),
             cls=cn("relative", cls),
             **kwargs,
         ),
@@ -48,15 +53,13 @@ def SheetTrigger(
     def trigger(*, sig, sheet_open, **_):
         from .button import Button
 
-        user_on_click = kwargs.pop('data_on_click', None)
-        user_actions = user_on_click if isinstance(user_on_click, list) else ([user_on_click] if user_on_click else [])
-        click_actions = [sheet_open.set(True)] + user_actions
+        click_actions = merge_actions(sheet_open.set(True), kwargs=kwargs)
 
         return Button(
             *children,
             data_on_click=click_actions,
             id=f"{sig}_trigger",
-            data_attr_aria_expanded=sheet_open,
+            data_attr_aria_expanded=sheet_open.if_("true", "false"),
             aria_haspopup="dialog",
             aria_controls=f"{sig}_content",
             data_slot="sheet-trigger",
@@ -84,38 +87,55 @@ def SheetContent(
             "bottom": "inset-x-0 bottom-0 w-full border-t data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
         }[side]
 
-        size_cls = "" if side in ("top", "bottom") else {
-            "sm": "max-w-sm",
-            "md": "max-w-md",
-            "lg": "max-w-lg",
-            "xl": "max-w-xl",
-            "full": "max-w-none w-full",
-        }[size]
+        size_cls = (
+            ""
+            if side in ("top", "bottom")
+            else {
+                "sm": "max-w-sm",
+                "md": "max-w-md",
+                "lg": "max-w-lg",
+                "xl": "max-w-xl",
+                "full": "max-w-none w-full",
+            }[size]
+        )
 
-        overlay = Div(
-            data_show=sheet_open,
-            data_on_click=sheet_open.set(False),
-            data_attr_state=sheet_open.if_("open", "closed"),
-            cls="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm animate-in fade-in-0",
-            style="display: none;",
-        ) if modal else None
+        overlay = (
+            Div(
+                data_show=sheet_open,
+                data_on_click=sheet_open.set(False),
+                data_attr_data_state=sheet_open.if_("open", "closed"),
+                cls="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm animate-in fade-in-0",
+                style="display: none;",
+            )
+            if modal
+            else None
+        )
 
         return Div(
             overlay,
             Div(
                 SheetClose(
-                    Span("×", aria_hidden="true", cls="text-2xl font-light leading-none -mt-0.5"),
+                    Span(
+                        "×",
+                        aria_hidden="true",
+                        cls="text-2xl font-light leading-none -mt-0.5",
+                    ),
                     size="icon",
                     cls="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary",
-                )(sig=sig, sheet_open=sheet_open, **ctx) if show_close else None,
-                *[inject_context(child, sig=sig, sheet_open=sheet_open, **ctx) for child in children],
+                )(sig=sig, sheet_open=sheet_open, **ctx)
+                if show_close
+                else None,
+                *[
+                    inject_context(child, sig=sig, sheet_open=sheet_open, **ctx)
+                    for child in children
+                ],
                 data_show=sheet_open,
                 id=f"{sig}_content",
                 role="dialog",
                 aria_modal=modal,
                 aria_labelledby=f"{sig}_content-title",
                 aria_describedby=f"{sig}_content-description",
-                data_attr_state=sheet_open.if_("open", "closed"),
+                data_attr_data_state=sheet_open.if_("open", "closed"),
                 cls=cn(
                     "fixed z-[110] bg-background shadow-lg border flex flex-col",
                     "transition-all duration-300 ease-in-out",
@@ -144,9 +164,7 @@ def SheetClose(
     def close(*, sheet_open, **_):
         from .button import Button
 
-        user_on_click = kwargs.pop('data_on_click', None)
-        user_actions = user_on_click if isinstance(user_on_click, list) else ([user_on_click] if user_on_click else [])
-        click_actions = user_actions + [sheet_open.set(False)]
+        click_actions = merge_actions(kwargs=kwargs, after=sheet_open.set(False))
 
         return Button(
             *children,

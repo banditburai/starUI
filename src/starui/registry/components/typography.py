@@ -85,43 +85,31 @@ def Display(*children, cls="", **kwargs) -> FT:
 
 
 def H1(*children, cls="", **kwargs) -> FT:
-    return HTMLH1(
-        *children, cls=cn(heading_variants(level="h1"), cls), **kwargs
-    )
+    return HTMLH1(*children, cls=cn(heading_variants(level="h1"), cls), **kwargs)
 
 
 def H2(*children, section=False, cls="", **kwargs) -> FT:
     return HTMLH2(
         *children,
-        cls=cn(
-            heading_variants(level="h2", section=str(section).lower()), cls
-        ),
+        cls=cn(heading_variants(level="h2", section=str(section).lower()), cls),
         **kwargs,
     )
 
 
 def H3(*children, cls="", **kwargs) -> FT:
-    return HTMLH3(
-        *children, cls=cn(heading_variants(level="h3"), cls), **kwargs
-    )
+    return HTMLH3(*children, cls=cn(heading_variants(level="h3"), cls), **kwargs)
 
 
 def H4(*children, cls="", **kwargs) -> FT:
-    return HTMLH4(
-        *children, cls=cn(heading_variants(level="h4"), cls), **kwargs
-    )
+    return HTMLH4(*children, cls=cn(heading_variants(level="h4"), cls), **kwargs)
 
 
 def H5(*children, cls="", **kwargs) -> FT:
-    return HTMLH5(
-        *children, cls=cn(heading_variants(level="h5"), cls), **kwargs
-    )
+    return HTMLH5(*children, cls=cn(heading_variants(level="h5"), cls), **kwargs)
 
 
 def H6(*children, cls="", **kwargs) -> FT:
-    return HTMLH6(
-        *children, cls=cn(heading_variants(level="h6"), cls), **kwargs
-    )
+    return HTMLH6(*children, cls=cn(heading_variants(level="h6"), cls), **kwargs)
 
 
 def P(*children, cls="", **kwargs) -> FT:
