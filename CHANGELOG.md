@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-02-26
+
 ### Added
 - `Toast` / `Toaster` — Sonner-inspired notifications with success, error, warning, info, and destructive variants
 - `DropdownMenu` — full dropdown menu system with items, checkboxes, radio groups, sub-menus, and keyboard navigation
@@ -284,3 +286,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [0.1.7]: https://github.com/banditburai/starUI/releases/tag/v0.1.7
 
 [0.1.8]: https://github.com/banditburai/starUI/releases/tag/v0.1.8
+
+[0.2.0]: https://github.com/banditburai/starUI/releases/tag/v0.2.0
