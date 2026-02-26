@@ -3,6 +3,7 @@
 @import './landing.css';
 
 @source "../../../src/starui/registry/components/";
+@source "../../.venv/lib/python3.12/site-packages/starui/registry/components/";
 
 @custom-variant dark (&:where(.dark, .dark *, [data-theme="dark"], [data-theme="dark"] *));
 
