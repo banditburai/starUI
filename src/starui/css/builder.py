@@ -5,7 +5,7 @@ import subprocess
 import tempfile
 import time
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 
 from ..config import ProjectConfig, get_content_patterns
@@ -13,7 +13,7 @@ from ..templates.css_input import generate_css_input
 from .binary import TailwindBinaryManager
 
 
-class BuildMode(str, Enum):
+class BuildMode(StrEnum):
     DEVELOPMENT = "development"
     PRODUCTION = "production"
 
