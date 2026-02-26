@@ -33,7 +33,6 @@ env/
 .DS_Store
 
 # Project specific
-uv.lock
 .ruff_cache/
 .pytest_cache/
 htmlcov/
