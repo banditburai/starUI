@@ -1,6 +1,6 @@
 [project]
 name = "starui"
-version = "0.1.8"
+version = "0.2.0"
 description = "Python-first UI component library for Datastar/StarHTML applications"
 readme = "README.md"
 requires-python = ">=3.12"
