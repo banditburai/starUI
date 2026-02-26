@@ -103,7 +103,8 @@ async def initialize_docs_sidebar():
 
 app, rt = star_app(
     title="StarUI",
-    live=True,
+    live=False,
+    middleware=[compression()],
     hdrs=hdrs,
     htmlkw=dict(lang="en", dir="ltr"),
     bodykw=dict(cls="min-h-screen bg-background text-foreground"),
@@ -552,9 +553,8 @@ def sitemap():
 
 iframe_app, iframe_rt = star_app(
     title="Component Preview",
-    live=True,
+    live=False,
     hdrs=(
-        # Inherit parent theme with iframe-specific fallback support
         Script("""
             (function() {
                 const iframeId = window.location.pathname.split('/').pop();
@@ -568,7 +568,6 @@ iframe_app, iframe_rt = star_app(
                 document.documentElement.setAttribute('data-theme', theme);
             })();
         """),
-        # CSS for theme toggle icon switching
         Style("""
             [data-theme="light"] .theme-icon-alt,
             [data-theme="dark"] .theme-icon-default {
@@ -576,7 +575,6 @@ iframe_app, iframe_rt = star_app(
             }
         """),
         Link(rel="stylesheet", href="/static/css/starui.css"),
-        iconify_script(),
     ),
     htmlkw=dict(lang="en", dir="ltr"),
     bodykw=dict(cls="min-h-screen bg-background text-foreground"),

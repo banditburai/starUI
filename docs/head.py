@@ -3,7 +3,7 @@
 Centralizes favicon, theme-color, structured data, fonts, and stylesheets.
 """
 
-from starhtml import JsonLd, Link, Meta, Script, iconify_script, theme_script
+from starhtml import JsonLd, Link, Meta, theme_script
 
 SITE_URL = "https://ui.starhtml.com"
 
@@ -60,8 +60,6 @@ def _build_hdrs() -> tuple:
                  "&family=Playfair+Display:ital,wght@0,400;0,500;1,400"
                  "&display=swap",
         ),
-
-        iconify_script(),
 
         JsonLd(_JSONLD_DICT),
     )
