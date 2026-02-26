@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import './starlighter.css';
+@import './landing.css';
 
 @source "../../../src/starui/registry/components/";
 
@@ -382,3 +383,24 @@ main {
   max-width: 100% !important;
   overflow-x: auto !important;
 }
+
+/* ── Shared typography / color tokens (header + footer) ── */
+.font-display { font-family: 'Playfair Display', serif; }
+.font-serif-body { font-family: 'Cormorant Garamond', serif; }
+.text-sunset { color: #FB923C; }
+[data-theme="light"] .text-sunset { color: #b85a08; }
+
+/* Star mark hover rotation */
+.star-mark-header {
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.star-mark-header:hover,
+a:hover .star-mark-header {
+  transform: rotate(90deg);
+}
+
+/* Footer repo entry typography */
+.obs-log-repo { display: flex; align-items: baseline; gap: 0.75rem; }
+.obs-log-repo-name { font-family: 'Playfair Display', serif; font-size: 1.1rem; }
+.obs-log-repo-desc { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 0.95rem; }
+.obs-log-dash { flex-shrink: 0; width: 2rem; height: 1px; background: currentColor; opacity: 0.2; }

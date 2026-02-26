@@ -9,317 +9,348 @@ CATEGORY = "form"
 ORDER = 10
 STATUS = "stable"
 
-from starhtml import Div, P, Label, Span, Icon
+from starhtml import Div, P, Label, Span, Icon, Signal, regex, set_timeout, js
 from starui.registry.components.input import Input
 from starui.registry.components.button import Button
 from starui.registry.components.label import Label as UILabel
-from widgets.component_preview import ComponentPreview
+from utils import auto_generate_page, with_code, Prop, build_api_reference
 
 
-def examples():
-    """Generate Input examples using ComponentPreview with tabs."""
-    
-    # Note: Basic input moved to hero example
-    # This will be the first example after the hero
-    
-    # Input types
-    yield ComponentPreview(
+
+@with_code
+def input_types_example():
+    return Div(
         Div(
-            Div(
-                UILabel("Email", for_="email"),
-                Input(type="email", id="email", placeholder="you@example.com"),
-                cls="space-y-2"
-            ),
-            Div(
-                UILabel("Password", for_="password"),
-                Input(type="password", id="password", placeholder="Enter your password"),
-                cls="space-y-2"
-            ),
-            Div(
-                UILabel("Phone Number", for_="phone"),
-                Input(type="tel", id="phone", placeholder="+1 (555) 123-4567"),
-                cls="space-y-2"
-            ),
-            cls="grid gap-4 max-w-md"
+            UILabel("First Name", fr="first"),
+            Input(id="first", placeholder="John", cls="w-80"),
+            cls="space-y-2"
         ),
-        '''Input(type="email", placeholder="you@example.com")
-Input(type="password", placeholder="Enter your password")
-Input(type="tel", placeholder="+1 (555) 123-4567")''',
-        title="Input Types",
-        description="Different input types for various data"
+        Div(
+            UILabel("Last Name", fr="last"),
+            Input(id="last", placeholder="Doe", cls="w-80"),
+            cls="space-y-2"
+        ),
+        Div(
+            UILabel("Email", fr="email"),
+            Input(type="email", id="email", placeholder="you@example.com", cls="w-80"),
+            cls="space-y-2"
+        ),
+        Div(
+            UILabel("Password", fr="password"),
+            Input(type="password", id="password", placeholder="Enter your password", cls="w-80"),
+            cls="space-y-2"
+        ),
+        Div(
+            UILabel("Phone Number", fr="phone"),
+            Input(type="tel", id="phone", placeholder="+1 (555) 123-4567", cls="w-80"),
+            cls="space-y-2"
+        ),
+        Div(
+            Button("Submit Form", cls="w-full"),
+            cls="pt-2"
+        ),
+        cls="space-y-4 max-w-md"
     )
-    
-    # Input with button
-    yield ComponentPreview(
+
+
+@with_code
+def reactive_input_validation_example():
+    return Div(
+        (username := Signal("username", "")),
+        (username_valid := Signal("username_valid", False)),
+        (user_email := Signal("user_email", "")),
+        (user_email_valid := Signal("user_email_valid", False)),
         Div(
-            Div(
-                UILabel("Subscribe to Newsletter", for_="newsletter"),
-                Div(
-                    Input(type="email", id="newsletter", placeholder="Enter your email", cls="flex-1"),
-                    Button("Subscribe"),
-                    cls="flex gap-2"
-                ),
-                cls="space-y-2"
+            UILabel(
+                "Username",
+                Span(" *", cls="text-destructive"),
+                fr="username-reactive"
+            ),
+            Input(
+                id="username-reactive",
+                placeholder="Enter username",
+                signal=username,
+                data_on_input=username_valid.set(username.match(regex(r"^[a-zA-Z0-9_]{3,}$"))),
+                cls="w-80"
             ),
             Div(
-                UILabel("Search", for_="search"),
-                Div(
-                    Input(type="search", id="search", placeholder="Search products...", cls="flex-1"),
-                    Button("Search", variant="outline"),
-                    cls="flex gap-2"
+                P(
+                    "Username must be at least 3 characters, letters/numbers/underscores only",
+                    data_show=~username_valid & (username.length > 0),
+                    cls="text-xs text-destructive break-words"
                 ),
-                cls="space-y-2"
+                P(
+                    "✓ Username is available",
+                    data_show=username_valid & (username.length > 0),
+                    cls="text-xs text-green-600"
+                ),
+                cls="mt-1 min-h-[1rem] w-80"
             ),
-            cls="grid gap-4 max-w-md"
+            cls="space-y-2"
         ),
-        '''Div(
-    Input(type="email", placeholder="Enter your email", cls="flex-1"),
-    Button("Subscribe"),
-    cls="flex gap-2"
+        Div(
+            UILabel("Email", fr="email-reactive"),
+            Input(
+                type="email",
+                id="email-reactive",
+                placeholder="you@example.com",
+                signal=user_email,
+                data_on_input=user_email_valid.set(user_email.match(regex(r"^[^\s@]+@[^\s@]+\.[^\s@]+$"))),
+                cls="w-80"
+            ),
+            Div(
+                P(
+                    "Please enter a valid email address",
+                    data_show=~user_email_valid & (user_email.length > 0),
+                    cls="text-xs text-destructive break-words"
+                ),
+                P(
+                    "✓ Valid email format",
+                    data_show=user_email_valid & (user_email.length > 0),
+                    cls="text-xs text-green-600"
+                ),
+                cls="mt-1 min-h-[1rem] w-80"
+            ),
+            cls="space-y-2"
+        ),
+        cls="grid gap-4 max-w-md"
+    )
+
+
+@with_code
+def input_with_buttons_example():
+    return Div(
+        (email := Signal("newsletter_email", "")),
+        (subscribed := Signal("subscribed", False)),
+        (search_query := Signal("search_query", "")),
+        Div(
+            UILabel("Subscribe to Newsletter", fr="newsletter"),
+            Div(
+                Input(
+                    type="email",
+                    id="newsletter",
+                    placeholder="Enter your email",
+                    signal=email,
+                    cls="w-80"
+                ),
+                Button(
+                    "Subscribe",
+                    data_attr_disabled=~email,
+                    data_on_click=[
+                        subscribed.set(True),
+                        email.set(""),
+                        set_timeout(subscribed.set(False), 3000)
+                    ]
+                ),
+                cls="flex gap-2 items-center"
+            ),
+            P(
+                "✓ Successfully subscribed!",
+                data_show=subscribed,
+                cls="text-sm text-green-600"
+            ),
+            cls="space-y-2"
+        ),
+        Div(
+            UILabel("Search Products", fr="search"),
+            Div(
+                Input(
+                    type="text",
+                    id="search",
+                    placeholder="Search products...",
+                    signal=search_query,
+                    cls="w-80"
+                ),
+                Button(
+                    "Clear",
+                    variant="outline",
+                    data_attr_disabled=~search_query,
+                    data_on_click=search_query.set("")
+                ),
+                cls="flex gap-2 items-center"
+            ),
+            P(
+                "Searching for: ",
+                Span(data_text=search_query, cls="font-medium"),
+                data_show=search_query,
+                cls="text-sm text-muted-foreground"
+            ),
+            cls="space-y-2"
+        ),
+        cls="grid gap-4 max-w-md"
+    )
+
+
+@with_code
+def inputs_with_icons_example():
+    return Div(
+        Div(
+            UILabel("Quantity", fr="quantity"),
+            Div(
+                Icon("lucide:hash", cls="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"),
+                Input(type="number", id="quantity", placeholder="Enter quantity", min=1, max=99, step=1, cls="pl-10 w-80"),
+                cls="relative"
+            ),
+            cls="space-y-2"
+        ),
+        Div(
+            UILabel("Email Address", fr="email-icon"),
+            Div(
+                Icon("lucide:mail", cls="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"),
+                Input(type="email", id="email-icon", placeholder="you@example.com", cls="pl-10 w-80"),
+                cls="relative"
+            ),
+            cls="space-y-2"
+        ),
+        Div(
+            UILabel("Phone Number", fr="phone-icon"),
+            Div(
+                Icon("lucide:phone", cls="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"),
+                Input(type="tel", id="phone-icon", placeholder="+1 (555) 123-4567", cls="pl-10 w-80"),
+                cls="relative"
+            ),
+            cls="space-y-2"
+        ),
+        Div(
+            UILabel("Website", fr="website"),
+            Div(
+                Icon("lucide:globe", cls="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"),
+                Input(type="url", id="website", placeholder="https://example.com", cls="pl-10 w-80"),
+                cls="relative"
+            ),
+            cls="space-y-2"
+        ),
+        cls="grid gap-4 max-w-md"
+    )
+
+
+@with_code
+def input_states_example():
+    return Div(
+        Div(
+            UILabel("Disabled Input", fr="disabled", cls="opacity-50"),
+            Input(id="disabled", placeholder="This field is disabled", disabled=True, cls="w-80"),
+            cls="space-y-2"
+        ),
+        Div(
+            UILabel("Read-only Input", fr="readonly"),
+            Input(id="readonly", value="This value cannot be changed", readonly=True, cls="w-80"),
+            cls="space-y-2"
+        ),
+        Div(
+            UILabel(
+                "Required Field",
+                Span(" *", cls="text-destructive"),
+                fr="required"
+            ),
+            Input(id="required", placeholder="This field is required", required=True, cls="w-80"),
+            P("This field is required", cls="text-xs text-muted-foreground"),
+            cls="space-y-2"
+        ),
+        cls="grid gap-4 max-w-md"
+    )
+
+
+@with_code
+def file_upload_inputs_example():
+    return Div(
+        (file_error := Signal("file_error", "")),
+        (file_name := Signal("file_name", "")),
+        (doc_count := Signal("doc_count", 0)),
+        (avatar_input := Signal("avatar_input", _ref_only=True)),
+        (docs_input := Signal("docs_input", _ref_only=True)),
+        Div(
+            UILabel("Profile Picture"),
+            Div(
+                Input(
+                    type="file",
+                    accept=".png,.jpg,.jpeg",
+                    data_ref=avatar_input,
+                    data_on_change=[
+                        file_name.set("evt.target.files[0]?.name || ''"),
+                        file_error.set(
+                            "(evt.target.files[0]?.size || 0) > 2097152 ? 'File size must be under 2MB' : ''"
+                        )
+                    ],
+                    cls="hidden"
+                ),
+                Button(
+                    Icon("lucide:upload", cls="h-4 w-4 mr-2"),
+                    "Choose File",
+                    variant="outline",
+                    data_on_click=avatar_input.click(),
+                    type="button"
+                ),
+                Span(
+                    data_text=file_name | "No file chosen",
+                    cls="ml-3 text-sm text-muted-foreground"
+                ),
+                cls="flex items-center"
+            ),
+            P("PNG, JPG up to 2MB", data_show=~file_error & ~file_name, cls="text-xs text-muted-foreground mt-1.5"),
+            P(data_text=file_error, data_show=file_error, cls="text-xs text-destructive mt-1.5"),
+            P(
+                "✓ File ready to upload",
+                data_show=file_name & ~file_error,
+                cls="text-xs text-green-600 mt-1.5"
+            ),
+            cls="space-y-2"
+        ),
+        Div(
+            UILabel("Document Upload"),
+            Div(
+                Input(
+                    type="file",
+                    accept=".pdf,.doc,.docx",
+                    multiple=True,
+                    data_ref=docs_input,
+                    data_on_change=doc_count.set("evt.target.files.length"),
+                    cls="hidden"
+                ),
+                Button(
+                    Icon("lucide:paperclip", cls="h-4 w-4 mr-2"),
+                    "Choose Files",
+                    variant="outline",
+                    data_on_click=docs_input.click(),
+                    type="button"
+                ),
+                Span(
+                    data_text=(doc_count > 0).if_(doc_count + " file(s) selected", "No files chosen"),
+                    cls="ml-3 text-sm text-muted-foreground"
+                ),
+                cls="flex items-center"
+            ),
+            P("PDF, DOC, DOCX files (multiple allowed)", cls="text-xs text-muted-foreground mt-1.5"),
+            cls="space-y-2"
+        ),
+        cls="grid gap-4 max-w-md"
+    )
+
+
+
+EXAMPLES_DATA = [
+    {"title": "Input Types", "description": "Complete form with different input types", "fn": input_types_example},
+    {"title": "Reactive Input with Validation", "description": "Real-time input validation using signals", "fn": reactive_input_validation_example},
+    {"title": "Input with Buttons", "description": "Combine inputs with action buttons", "fn": input_with_buttons_example},
+    {"title": "Input with Icons", "description": "Inputs with custom icons that adapt to dark mode", "fn": inputs_with_icons_example},
+    {"title": "Input States", "description": "Disabled, read-only, and required inputs", "fn": input_states_example},
+    {"title": "File Upload", "description": "File input fields with accept filters", "fn": file_upload_inputs_example},
+]
+
+API_REFERENCE = build_api_reference(
+    main_props=[
+        Prop("type", "InputType", "Input type (text, email, password, number, etc.)", "text"),
+        Prop("placeholder", "str | None", "Placeholder text shown when empty", "None"),
+        Prop("signal", "str | None", "Datastar signal for reactive binding", "None"),
+        Prop("validation", "str | None", "JS expression to set <signal>_valid on input", "None"),
+        Prop("value", "str | None", "Initial value for non-reactive usage", "None"),
+        Prop("disabled", "bool", "Disable the input and style accordingly", "False"),
+        Prop("readonly", "bool", "Make input read-only without disabling", "False"),
+        Prop("required", "bool", "Mark the input as required", "False"),
+        Prop("cls", "str", "Additional CSS classes for layout/styling", "''"),
+    ]
 )
-
-Div(
-    Input(type="search", placeholder="Search products...", cls="flex-1"),
-    Button("Search", variant="outline"),
-    cls="flex gap-2"
-)''',
-        title="Input with Buttons",
-        description="Combine inputs with action buttons"
-    )
-    
-    # Number and date inputs with icon styling
-    yield ComponentPreview(
-        Div(
-            Div(
-                UILabel("Quantity", for_="quantity"),
-                Div(
-                    Icon("lucide:hash", width="16", height="16", cls="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"),
-                    Input(type="number", id="quantity", placeholder="Enter quantity", min=1, max=99, step=1, cls="pl-10"),
-                    cls="relative"
-                ),
-                cls="space-y-2"
-            ),
-            Div(
-                UILabel("Date of Birth", for_="dob"),
-                Div(
-                    Icon("lucide:calendar", width="16", height="16", cls="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"),
-                    Input(type="text", id="dob", placeholder="MM/DD/YYYY", cls="pl-10"),
-                    cls="relative"
-                ),
-                cls="space-y-2"
-            ),
-            Div(
-                UILabel("Appointment Time", for_="time"),
-                Div(
-                    Icon("lucide:clock", width="16", height="16", cls="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"),
-                    Input(type="text", id="time", placeholder="HH:MM", cls="pl-10"),
-                    cls="relative"
-                ),
-                cls="space-y-2"
-            ),
-            Div(
-                UILabel("Website", for_="website"),
-                Div(
-                    Icon("lucide:globe", width="16", height="16", cls="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"),
-                    Input(type="url", id="website", placeholder="https://example.com", cls="pl-10"),
-                    cls="relative"
-                ),
-                cls="space-y-2"
-            ),
-            cls="grid gap-4 max-w-md"
-        ),
-        '''# Input with custom icons
-Div(
-    Icon("lucide:hash", width="16", height="16", cls="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"),
-    Input(type="number", placeholder="Enter quantity", cls="pl-10"),
-    cls="relative"
-)
-
-Div(
-    Icon("lucide:calendar", width="16", height="16", cls="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"),
-    Input(type="text", placeholder="MM/DD/YYYY", cls="pl-10"),
-    cls="relative"
-)
-
-Div(
-    Icon("lucide:clock", width="16", height="16", cls="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"),
-    Input(type="text", placeholder="HH:MM", cls="pl-10"),
-    cls="relative"
-)
-
-Div(
-    Icon("lucide:globe", width="16", height="16", cls="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"),
-    Input(type="url", placeholder="https://example.com", cls="pl-10"),
-    cls="relative"
-)''',
-        title="Input with Icons",
-        description="Inputs with custom icons that adapt to dark mode"
-    )
-    
-    # Input states
-    yield ComponentPreview(
-        Div(
-            Div(
-                UILabel("Disabled Input", for_="disabled", cls="opacity-50"),
-                Input(id="disabled", placeholder="This field is disabled", disabled=True),
-                cls="space-y-2"
-            ),
-            Div(
-                UILabel("Read-only Input", for_="readonly"),
-                Input(id="readonly", value="This value cannot be changed", readonly=True),
-                cls="space-y-2"
-            ),
-            Div(
-                UILabel(
-                    "Required Field",
-                    Span(" *", cls="text-destructive"),
-                    for_="required"
-                ),
-                Input(id="required", placeholder="This field is required", required=True),
-                P("This field is required", cls="text-xs text-muted-foreground"),
-                cls="space-y-2"
-            ),
-            cls="grid gap-4 max-w-md"
-        ),
-        '''Input(placeholder="This field is disabled", disabled=True)
-Input(value="This value cannot be changed", readonly=True)
-Input(placeholder="This field is required", required=True)''',
-        title="Input States",
-        description="Disabled, read-only, and required inputs"
-    )
-    
-    # File upload
-    yield ComponentPreview(
-        Div(
-            Div(
-                UILabel("Profile Picture", for_="avatar"),
-                Input(type="file", id="avatar", accept="image/*"),
-                P("PNG, JPG up to 2MB", cls="text-xs text-muted-foreground"),
-                cls="space-y-2"
-            ),
-            Div(
-                UILabel("Document Upload", for_="docs"),
-                Input(type="file", id="docs", accept=".pdf,.doc,.docx", multiple=True),
-                P("PDF, DOC, DOCX files", cls="text-xs text-muted-foreground"),
-                cls="space-y-2"
-            ),
-            cls="grid gap-4 max-w-md"
-        ),
-        '''Input(type="file", accept="image/*")
-Input(type="file", accept=".pdf,.doc,.docx", multiple=True)''',
-        title="File Upload",
-        description="File input fields with accept filters"
-    )
-    
-    # Form layout
-    yield ComponentPreview(
-        Div(
-            Div(
-                UILabel("First Name", for_="first"),
-                Input(id="first", placeholder="John"),
-                cls="space-y-2"
-            ),
-            Div(
-                UILabel("Last Name", for_="last"),
-                Input(id="last", placeholder="Doe"),
-                cls="space-y-2"
-            ),
-            Div(
-                UILabel("Email Address", for_="email-form"),
-                Input(type="email", id="email-form", placeholder="john.doe@example.com"),
-                cls="space-y-2"
-            ),
-            Div(
-                UILabel("Message", for_="message"),
-                Input(id="message", placeholder="Tell us about your project..."),
-                cls="space-y-2"
-            ),
-            Div(
-                Button("Submit Form", cls="w-full"),
-                cls="pt-2"
-            ),
-            cls="space-y-4 max-w-md"
-        ),
-        '''Div(
-    Div(
-        Label("First Name", for_="first"),
-        Input(id="first", placeholder="John"),
-        cls="space-y-2"
-    ),
-    Div(
-        Label("Last Name", for_="last"),
-        Input(id="last", placeholder="Doe"),
-        cls="space-y-2"
-    ),
-    Div(
-        Label("Email Address", for_="email"),
-        Input(type="email", id="email", placeholder="john.doe@example.com"),
-        cls="space-y-2"
-    ),
-    Button("Submit Form", cls="w-full"),
-    cls="space-y-4"
-)''',
-        title="Complete Form",
-        description="Multiple inputs in a form layout"
-    )
 
 
 def create_input_docs():
-    """Create input documentation page using convention-based approach."""
-    from utils import auto_generate_page
-    
-    # Hero example - basic input showcase
-    hero_example = ComponentPreview(
-        Div(
-            Input(placeholder="Enter text...", cls="mb-3"),
-            Input(type="email", placeholder="you@example.com", cls="mb-3"),
-            Input(type="password", placeholder="Enter your password"),
-            cls="grid gap-3 max-w-sm"
-        ),
-        '''Input(placeholder="Enter text...")
-Input(type="email", placeholder="you@example.com")
-Input(type="password", placeholder="Enter your password")'''
-    )
-    
-    return auto_generate_page(
-        TITLE,
-        DESCRIPTION,
-        list(examples()),
-        cli_command="star add input",
-        hero_example=hero_example,
-        component_slug="input",
-        api_reference={
-            "props": [
-                {
-                    "name": "type",
-                    "type": "InputType",
-                    "default": "text",
-                    "description": "The type of input (text, email, password, etc.)"
-                },
-                {
-                    "name": "placeholder",
-                    "type": "str | None",
-                    "default": "None",
-                    "description": "Placeholder text when input is empty"
-                },
-                {
-                    "name": "disabled",
-                    "type": "bool",
-                    "default": "False",
-                    "description": "Whether the input is disabled"
-                },
-                {
-                    "name": "required",
-                    "type": "bool",
-                    "default": "False",
-                    "description": "Whether the input is required"
-                },
-                {
-                    "name": "cls",
-                    "type": "str",
-                    "default": "''",
-                    "description": "Additional CSS classes"
-                }
-            ]
-        }
-    )
+    return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)

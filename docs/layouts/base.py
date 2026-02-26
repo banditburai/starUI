@@ -1,27 +1,18 @@
 from typing import Any
 from dataclasses import dataclass, field
 from starhtml import *
-from starhtml.datastar import ds_on_click, ds_signals, ds_text, ds_show
 from layouts.footer import DocsFooter
 from layouts.header import DocsHeader
 from layouts.sidebar import DocsSidebar, MobileSidebar
-from starui.registry.components.breadcrumb import (
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbPage,
-    BreadcrumbSeparator,
-)
+from layouts.navigation import TopNavigation, BottomNavigation
 from starui.registry.components.button import Button
-from starui.registry.components.sheet import Sheet, SheetContent, SheetClose
+from starui.registry.components.sheet import Sheet, SheetContent
 
 
 @dataclass
 class LayoutConfig:
     title: str = ""
     description: str = ""
-    breadcrumb_items: list[dict[str, Any]] | None = None
     prev_page: dict[str, str] | None = None
     next_page: dict[str, str] | None = None
     show_copy: bool = True
@@ -39,24 +30,14 @@ class HeaderConfig:
     logo_text: str = "starui"
     logo_href: str = "/"
     nav_items: list[dict[str, Any]] = field(default_factory=lambda: [
-        {"href": "/docs", "label": "Docs"},
         {"href": "/components", "label": "Components"},
-        {"href": "/blocks", "label": "Blocks"},
-        {"href": "/themes", "label": "Themes"},
     ])
-    github_stars: str = "star us"
-    show_search: bool = True
-    show_github: bool = True
     show_theme_toggle: bool = True
 
 
 @dataclass
 class FooterConfig:
-    attribution: str = "Built with StarHTML"
-    hosting_info: str = "Component library for Python web apps"
-    source_text: str = "The source code is available on GitHub"
-    source_href: str = "https://github.com/banditburai/starui"
-    links: list[dict[str, Any]] | None = None
+    attribution: str = "\u00a9 2026 StarUI \u00b7 Apache 2.0"
 
 
 @dataclass
@@ -65,25 +46,19 @@ class SidebarConfig:
 
 
 def _copy_page_button(component_name: str | None = None) -> FT:
-    """Create the copy page button with clipboard functionality for markdown content."""
-    # If we have a component name, fetch markdown from API; otherwise copy URL
+    page_copied = Signal("page_copied", False)
+
     if component_name:
         copy_action = f"fetch('/api/markdown/{component_name}').then(r => r.json()).then(data => @clipboard(data.markdown, 'page_copied', 2000)).catch(() => @clipboard(window.location.href, 'page_copied', 2000))"
     else:
         copy_action = "@clipboard(window.location.href, 'page_copied', 2000)"
-    
+
     return Button(
-        Span(
-            Icon("lucide:check", cls="h-4 w-4"),
-            ds_show("$page_copied")
-        ),
-        Span(
-            Icon("lucide:copy", cls="h-4 w-4"),
-            ds_show("!$page_copied")
-        ),
+        page_copied,
+        Icon("lucide:check", cls="h-4 w-4", data_show=page_copied),
+        Icon("lucide:copy", cls="h-4 w-4", data_show=~page_copied),
         "Copy Page",
-        ds_on_click(copy_action),
-        ds_signals(page_copied=False),
+        data_on_click=copy_action,
         variant="outline",
         size="sm",
         cls="h-8 rounded-md gap-1.5 px-3"
@@ -91,14 +66,17 @@ def _copy_page_button(component_name: str | None = None) -> FT:
 
 
 def _page_header_section(layout: LayoutConfig) -> FT:
-    """Create the page header section with title, description, and copy button."""
     if not layout.title:
         return None
     
     return Div(
         Div(
             H1(layout.title, cls="scroll-m-20 text-4xl font-semibold tracking-tight"),
-            _copy_page_button(layout.component_name) if layout.show_copy else None,
+            Div(
+                _copy_page_button(layout.component_name) if layout.show_copy else None,
+                TopNavigation(layout.component_name) if layout.component_name else None,
+                cls="flex items-center gap-3"
+            ),
             cls="flex items-center justify-between"
         ),
         P(layout.description, cls="text-muted-foreground mt-2") if layout.description else None,
@@ -107,32 +85,29 @@ def _page_header_section(layout: LayoutConfig) -> FT:
 
 
 def _main_content_area(content: tuple, layout: LayoutConfig) -> FT:
-    """Create the main content area with breadcrumbs, header, content, and navigation."""
     return Div(
-        _breadcrumb(layout.breadcrumb_items) if layout.breadcrumb_items else None,
         _page_header_section(layout),
         Div(
             *content,
             cls=f"max-w-full overflow-x-hidden {layout.content_class}"
         ),
-        _page_nav(layout.prev_page, layout.next_page) if (layout.prev_page or layout.next_page) else None,
+        BottomNavigation(layout.component_name) if layout.component_name else None,
         cls=f"w-full max-w-full mx-auto px-8 sm:px-12 md:px-16 lg:px-20 xl:px-24 py-6 lg:py-8 {layout.container_class}"
     )
 
 
-def _mobile_sheet_section(sidebar: SidebarConfig) -> FT:
-    """Create the mobile menu sheet for sidebar navigation."""
+def _mobile_sheet_section(sidebar: SidebarConfig, mobile_menu: Signal) -> FT:
     return Sheet(
         SheetContent(
             MobileSidebar(sections=sidebar.sections),
-            signal="mobile_menu",
             side="right",
             size="sm",
             cls="xl:hidden w-80 max-w-[80vw] p-0",
             show_close=True,
         ),
-        signal="mobile_menu",
+        signal=mobile_menu,
         modal=True,
+        default_open=False,
     )
 
 
@@ -140,12 +115,15 @@ def _layout_with_sidebar(
     main_content: FT,
     sidebar: SidebarConfig,
     layout: LayoutConfig,
+    mobile_menu: Signal,
     **attrs
 ) -> FT:
-    """Create layout wrapper with mobile sidebar sheet."""
+    sidebar_active = Signal("sidebar_active", js("location.pathname"))
     return Div(
+        sidebar_active,
         main_content,
-        _mobile_sheet_section(sidebar),
+        _mobile_sheet_section(sidebar, mobile_menu),
+        data_effect=js("$sidebar_active = location.pathname"),
         cls=f"flex min-h-screen flex-col {layout.class_name}",
         **attrs
     )
@@ -155,14 +133,13 @@ def _main_layout_structure(
     content: tuple,
     layout: LayoutConfig,
     header: HeaderConfig,
-    footer: FooterConfig,
     sidebar: SidebarConfig,
     show_sidebar: bool,
+    mobile_menu: Signal | None = None,
     **attrs
 ) -> FT:
-    """Create the main layout structure with header, content, and footer."""
     return Div(
-        DocsHeader(header, show_mobile_menu_button=show_sidebar),
+        DocsHeader(header, mobile_menu_signal=mobile_menu if show_sidebar else None),
         Div(
             DocsSidebar(sections=sidebar.sections) if show_sidebar else None,
             Main(
@@ -171,13 +148,7 @@ def _main_layout_structure(
             ),
             cls="flex min-h-[calc(100vh-3.5rem)]"
         ),
-        DocsFooter(
-            attribution=footer.attribution,
-            hosting_info=footer.hosting_info,
-            source_text=footer.source_text,
-            source_href=footer.source_href,
-            links=footer.links,
-        ) if layout.show_footer else None,
+        DocsFooter() if layout.show_footer else None,
         cls=f"flex min-h-screen flex-col {layout.class_name}",
         **attrs
     )
@@ -191,54 +162,20 @@ def DocsLayout(
     sidebar: SidebarConfig | None = None,
     **attrs,
 ) -> FT:
-    """Create a documentation layout with optional sidebar, header, and footer."""
     layout = layout or LayoutConfig()
     header = header or HeaderConfig()
     footer = footer or FooterConfig()
     sidebar = sidebar or SidebarConfig()
-    
+
     show_sidebar = layout.show_sidebar and sidebar.sections is not None
+    mobile_menu = Signal("mobile_menu", _ref_only=True) if show_sidebar else None
 
     main_content = _main_layout_structure(
-        content, layout, header, footer, sidebar, show_sidebar, **attrs
+        content, layout, header, sidebar, show_sidebar, mobile_menu, **attrs
     )
 
-    if show_sidebar:
-        return _layout_with_sidebar(main_content, sidebar, layout, **attrs)
-    else:
-        return main_content
+    return _layout_with_sidebar(main_content, sidebar, layout, mobile_menu, **attrs) if show_sidebar else main_content
 
 
-def _breadcrumb(items: list[dict[str, Any]]) -> FT:
-    breadcrumb_items = []
-    for i, item in enumerate(items):
-        breadcrumb_items.append(
-            BreadcrumbItem(
-                BreadcrumbLink(item["label"], href=item.get("href", "#"))
-                if not item.get("active")
-                else BreadcrumbPage(item["label"])
-            )
-        )
-        if i < len(items) - 1:
-            breadcrumb_items.append(BreadcrumbSeparator())
-    
-    return Breadcrumb(
-        BreadcrumbList(*breadcrumb_items),
-        cls="mb-4"
-    )
 
 
-def _page_nav(prev_page: dict[str, str] | None, next_page: dict[str, str] | None) -> FT:
-    return Div(
-        A(
-            "← " + prev_page["label"],
-            href=prev_page["href"],
-            cls="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground"
-        ) if prev_page else Span(),
-        A(
-            next_page["label"] + " →",
-            href=next_page["href"],
-            cls="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground"
-        ) if next_page else Span(),
-        cls="flex items-center justify-between mt-12 pt-6 border-t"
-    )

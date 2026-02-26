@@ -1,180 +1,215 @@
 from typing import Any, Literal
 
-from starhtml import FT, Div
+from starhtml import FT, Div, Signal
 from starhtml import H2 as HTMLH2
 from starhtml import Dialog as HTMLDialog
 from starhtml import P as HTMLP
-from starhtml.datastar import ds_effect, ds_on_click, ds_on_close, ds_ref, ds_signals
+from starhtml.datastar import document, evt, seq
 
-from .utils import cn
+from .utils import cn, gen_id, merge_actions
 
 AlertDialogVariant = Literal["default", "destructive"]
 
 
 def AlertDialog(
-    trigger: FT,
-    content: FT,
-    ref_id: str,
-    class_name: str = "",
+    *children: Any,
+    signal: str | Signal = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
-    signal_name = f"{ref_id}_open"
+    sig = getattr(signal, "_id", signal) or gen_id("alert_dialog")
+    open_state = Signal(f"{sig}_open", False)
+    dialog_ref = Signal(sig, _ref_only=True)
 
-    classes = cn(
-        "fixed max-h-[85vh] w-full max-w-lg overflow-auto m-auto bg-background text-foreground border border-input rounded-lg shadow-lg p-0 backdrop:bg-black/50 backdrop:backdrop-blur-sm open:animate-in open:fade-in-0 open:zoom-in-95 open:duration-200 open:backdrop:animate-in open:backdrop:fade-in-0 open:backdrop:duration-200",
-        class_name,
-        cls,
+    trigger = next(
+        (
+            c
+            for c in children
+            if callable(c) and getattr(c, "__name__", None) == "trigger"
+        ),
+        None,
+    )
+    content = next(
+        (
+            c
+            for c in children
+            if callable(c) and getattr(c, "__name__", None) == "content"
+        ),
+        None,
     )
 
-    dialog_element = HTMLDialog(
-        content,
-        ds_ref(ref_id),
-        ds_on_close(f"${signal_name} = false"),
-        ds_on_click(f"""
-            evt.target === evt.currentTarget &&
-            (${ref_id}.close(), ${signal_name} = false)
-        """),
-        id=ref_id,
-        cls=classes,
-        **attrs,
-    )
+    ctx = {"open_state": open_state, "dialog_ref": dialog_ref, "sig": sig}
 
-    scroll_lock = Div(
-        ds_signals(**{signal_name: False}),
-        ds_effect(f"document.body.style.overflow = ${signal_name} ? 'hidden' : ''"),
-        style="display: none;",
+    return Div(
+        trigger(**ctx) if trigger else None,
+        HTMLDialog(
+            content(**ctx) if content else None,
+            data_ref=dialog_ref,
+            data_on_close=open_state.set(False),
+            data_on_click=(evt.target == evt.currentTarget)
+            & seq(dialog_ref.close(), open_state.set(False)),
+            id=sig,
+            role="alertdialog",
+            aria_labelledby=f"{sig}-title",
+            aria_describedby=f"{sig}-description",
+            cls=cn(
+                "fixed max-h-[85vh] w-full max-w-lg overflow-auto m-auto bg-background text-foreground border rounded-lg shadow-lg p-0 backdrop:bg-black/50 backdrop:backdrop-blur-sm open:animate-in open:fade-in-0 open:zoom-in-95 open:duration-200 open:backdrop:animate-in open:backdrop:fade-in-0 open:backdrop:duration-200",
+                cls,
+            ),
+            **kwargs,
+        ),
+        Div(
+            data_effect=document.body.style.overflow.set(open_state.if_("hidden", "")),
+            style="display: none;",
+        ),
     )
-
-    return Div(trigger, dialog_element, scroll_lock)
 
 
 def AlertDialogTrigger(
     *children: Any,
-    ref_id: str,
-    variant: str = "default",
-    class_name: str = "",
+    variant: AlertDialogVariant = "default",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
-    from .button import Button
+    def trigger(*, open_state, dialog_ref, **_):
+        from .button import Button
 
-    return Button(
-        *children,
-        ds_on_click(f"${ref_id}.showModal(), ${ref_id}_open = true"),
-        aria_haspopup="dialog",
-        variant=variant,
-        cls=cn(class_name, cls),
-        **attrs,
-    )
+        click_actions = merge_actions(
+            dialog_ref.showModal(), open_state.set(True), kwargs=kwargs
+        )
+
+        return Button(
+            *children,
+            data_on_click=click_actions,
+            aria_haspopup="dialog",
+            variant=variant,
+            cls=cls,
+            **kwargs,
+        )
+
+    return trigger
 
 
 def AlertDialogContent(
     *children: Any,
-    class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
-    return Div(
-        *children,
-        cls=cn("relative p-6", class_name, cls),
-        **attrs,
-    )
+    def content(**ctx):
+        return Div(
+            *[child(**ctx) if callable(child) else child for child in children],
+            cls=cn("relative p-6", cls),
+            **kwargs,
+        )
+
+    return content
 
 
 def AlertDialogHeader(
     *children: Any,
-    class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
-    return Div(
-        *children,
-        cls=cn("flex flex-col gap-2 text-center sm:text-left", class_name, cls),
-        **attrs,
-    )
+    def _(**ctx):
+        return Div(
+            *[child(**ctx) if callable(child) else child for child in children],
+            cls=cn("flex flex-col gap-2 text-center sm:text-left", cls),
+            **kwargs,
+        )
+
+    return _
 
 
 def AlertDialogFooter(
     *children: Any,
-    class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
-    return Div(
-        *children,
-        cls=cn(
-            "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end mt-6",
-            class_name,
-            cls,
-        ),
-        **attrs,
-    )
+    def _(**ctx):
+        return Div(
+            *[child(**ctx) if callable(child) else child for child in children],
+            cls=cn("flex flex-col-reverse gap-2 sm:flex-row sm:justify-end mt-6", cls),
+            **kwargs,
+        )
+
+    return _
 
 
 def AlertDialogTitle(
     *children: Any,
-    class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
-    return HTMLH2(
-        *children,
-        cls=cn("text-lg leading-none font-semibold text-foreground", class_name, cls),
-        **attrs,
-    )
+    def _(*, sig, **_):
+        return HTMLH2(
+            *children,
+            id=f"{sig}-title",
+            cls=cn("text-lg leading-none font-semibold text-foreground", cls),
+            **kwargs,
+        )
+
+    return _
 
 
 def AlertDialogDescription(
     *children: Any,
-    class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
-    return HTMLP(
-        *children,
-        cls=cn("text-muted-foreground text-sm", class_name, cls),
-        **attrs,
-    )
+    def _(*, sig, **_):
+        return HTMLP(
+            *children,
+            id=f"{sig}-description",
+            cls=cn("text-muted-foreground text-sm", cls),
+            **kwargs,
+        )
+
+    return _
 
 
 def AlertDialogAction(
     *children: Any,
-    ref_id: str,
-    action: str = "",
+    action: Any = None,
     variant: AlertDialogVariant = "default",
-    class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
-    from .button import Button
+    def _(*, open_state, dialog_ref, **_):
+        from .button import Button
 
-    close_expr = f"${ref_id}_open = false, ${ref_id}.close()"
-    if action:
-        close_expr = f"{action}, {close_expr}"
+        click_actions = merge_actions(
+            action, after=[open_state.set(False), dialog_ref.close()]
+        )
 
-    return Button(
-        *children,
-        ds_on_click(close_expr),
-        variant="destructive" if variant == "destructive" else "default",
-        cls=cn(class_name, cls),
-        **attrs,
-    )
+        return Button(
+            *children,
+            data_on_click=click_actions,
+            variant=variant,
+            cls=cls,
+            **kwargs,
+        )
+
+    return _
 
 
 def AlertDialogCancel(
     *children: Any,
-    ref_id: str,
-    class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
-    from .button import Button
+    def _(*, open_state, dialog_ref, **_):
+        from .button import Button
 
-    return Button(
-        *children,
-        ds_on_click(f"${ref_id}_open = false, ${ref_id}.close()"),
-        variant="outline",
-        cls=cn(class_name, cls),
-        **attrs,
-    )
+        click_actions = merge_actions(
+            kwargs=kwargs, after=[open_state.set(False), dialog_ref.close()]
+        )
+
+        return Button(
+            *children,
+            data_on_click=click_actions,
+            variant="outline",
+            cls=cls,
+            **kwargs,
+        )
+
+    return _

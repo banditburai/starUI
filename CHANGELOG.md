@@ -8,16 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- **✨ New Components**
-  - Added `Toast` component with Sonner-inspired notifications for success, error, warning, and info variants
-  - Added `Toaster` container component for managing multiple toast notifications
-  - Added `DropdownMenu` component with convention-based signal injection (PR #27)
-  - Added `Table` component with ShadCN styling (PR #26)
-  - Added `Skeleton` component for loading states (PR #25)
-
-### Changed
-- **🔧 Component Improvements**
-  - Enhanced iframe isolation for component previews and fixed copy page functionality (PR #28)
+- `Toast` / `Toaster` — Sonner-inspired notifications with success, error, warning, info, and destructive variants
+- `DropdownMenu` — full dropdown menu system with items, checkboxes, radio groups, sub-menus, and keyboard navigation
+- `Table` — data table with header, body, footer, and caption support
+- `Skeleton` — loading state placeholders
 
 ## [0.1.8] - 2025-08-31
 

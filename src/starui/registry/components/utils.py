@@ -1,26 +1,58 @@
 from collections.abc import Callable
 from typing import Any
+from uuid import uuid4
+
+try:
+    from starmerge import merge
+except ImportError:
+
+    def merge(*classes: str) -> str:
+        return " ".join(c for c in classes if c)
+
+
+def with_signals(component, **signals):
+    """
+    Attach signals as attributes to a component for IDE autocomplete and type hints.
+
+    Usage:
+        return with_signals(
+            Div(...),
+            selected=selected_sig,
+            month=month_sig,
+        )
+
+    This allows users to access component.selected, component.month, etc.
+    """
+    for name, signal in signals.items():
+        setattr(component, name, signal)
+    return component
+
+
+# Theme configuration
+DEFAULT_THEME = "light"
+ALT_THEME = "dark"
 
 
 def cn(*classes: Any) -> str:
-    result_classes: list[str] = []
+    """Merge Tailwind classes intelligently, resolving conflicts."""
+    processed: list[str] = []
 
     for cls in classes:
         if not cls:
             continue
 
         if isinstance(cls, str):
-            result_classes.append(cls)
+            processed.append(cls)
         elif isinstance(cls, dict):
             for class_name, condition in cls.items():
                 if condition:
-                    result_classes.append(str(class_name))
+                    processed.append(str(class_name))
         elif isinstance(cls, list | tuple):
-            result_classes.append(cn(*cls))
+            processed.append(cn(*cls))
         else:
-            result_classes.append(str(cls))
+            processed.append(str(cls))
 
-    return " ".join(result_classes)
+    return merge(*processed) if processed else ""
 
 
 def cva(base: str = "", config: dict[str, Any] | None = None) -> Callable[..., str]:
@@ -63,3 +95,52 @@ def cva(base: str = "", config: dict[str, Any] | None = None) -> Callable[..., s
         return cn(*classes)
 
     return variant_function
+
+
+def gen_id(prefix: str) -> str:
+    """Generate a short, unique id with a given prefix."""
+    return f"{prefix}_{uuid4().hex[:8]}"
+
+
+def ensure_signal(signal: str | None, prefix: str) -> str:
+    """Return the provided signal or generate one with the prefix."""
+    return signal or gen_id(prefix)
+
+
+def _extend(result: list, val: Any) -> None:
+    if isinstance(val, list):
+        result.extend(val)
+    elif val is not None:
+        result.append(val)
+
+
+def merge_actions(*before: Any, kwargs: dict | None = None, after: Any = None) -> list:
+    """Merge framework actions with user-supplied data_on_click from kwargs.
+
+    Open/trigger: merge_actions(open_action, kwargs=kwargs)
+    Close/dismiss: merge_actions(kwargs=kwargs, after=close_action)
+    """
+    result = [a for a in before if a is not None]
+    if kwargs is not None:
+        _extend(result, kwargs.pop("data_on_click", None))
+    _extend(result, after)
+    return result
+
+
+def inject_context(element, **context):
+    """Recursively inject context into callable children, preserving structure.
+
+    Allows arbitrary HTML wrappers while ensuring context flows to nested callables.
+    """
+    if callable(element):
+        result = element(**context)
+        if hasattr(result, "children") and result.children:
+            result.children = tuple(
+                inject_context(c, **context) for c in result.children
+            )
+        return result
+
+    if hasattr(element, "children") and element.children:
+        element.children = tuple(inject_context(c, **context) for c in element.children)
+
+    return element

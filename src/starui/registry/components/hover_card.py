@@ -1,110 +1,106 @@
-from typing import Literal
-from uuid import uuid4
+from typing import Any, Literal
 
-from starhtml import Div
-from starhtml.datastar import (
-    ds_on_mouseenter,
-    ds_on_mouseleave,
-    ds_position,
-    ds_ref,
-    ds_show,
-    ds_signals,
-)
+from starhtml import FT, Div, Signal, clear_timeout, reset_timeout
 
-from .utils import cn
+from .utils import cn, gen_id
 
 
 def HoverCard(
     *children,
-    signal: str | None = None,
+    signal: str | Signal = "",
     default_open: bool = False,
     cls: str = "",
-    **attrs,
-):
-    signal = signal or f"hover_card_{uuid4().hex[:8]}"
+    **kwargs: Any,
+) -> FT:
+    sig = getattr(signal, "_id", signal) or gen_id("hover_card")
+    open_state = Signal(f"{sig}_open", default_open)
+    timer_state = Signal(f"{sig}_timer", _ref_only=True)
+
+    ctx = {"sig": sig, "open_state": open_state, "timer_state": timer_state}
+
     return Div(
-        *children,
-        ds_signals({f"{signal}_open": default_open}),
+        open_state,
+        *[child(**ctx) if callable(child) else child for child in children],
+        data_slot="hover-card",
         cls=cn("relative inline-block", cls),
-        **attrs,
+        **kwargs,
     )
 
 
 def HoverCardTrigger(
-    *children,
-    signal: str | None = None,
+    *children: Any,
     hover_delay: int = 700,
     hide_delay: int = 300,
     cls: str = "",
-    **attrs,
+    **kwargs: Any,
 ):
-    signal = signal or "hover_card"
+    def trigger(*, sig, open_state, timer_state, **_):
+        trigger_ref = Signal(f"{sig}_trigger", _ref_only=True)
 
-    return Div(
-        *children,
-        ds_ref(f"{signal}Trigger"),
-        ds_on_mouseenter(f"""
-            clearTimeout(window.hoverTimer_{signal});
-            window.hoverTimer_{signal} = setTimeout(() => {{
-                ${signal}_open = true;
-            }}, {hover_delay});
-        """),
-        ds_on_mouseleave(f"""
-            clearTimeout(window.hoverTimer_{signal});
-            window.hoverTimer_{signal} = setTimeout(() => {{
-                ${signal}_open = false;
-            }}, {hide_delay});
-        """),
-        aria_expanded=f"${signal}_open",
-        aria_haspopup="dialog",
-        aria_describedby=f"{signal}-content",
-        cls=cn("inline-block cursor-pointer", cls),
-        id=f"{signal}-trigger",
-        **attrs,
-    )
+        return Div(
+            *children,
+            data_ref=trigger_ref,
+            data_on_mouseenter=reset_timeout(
+                timer_state, hover_delay, open_state.set(True)
+            ),
+            data_on_mouseleave=reset_timeout(
+                timer_state, hide_delay, open_state.set(False)
+            ),
+            data_attr_aria_expanded=open_state,
+            aria_haspopup="dialog",
+            aria_describedby=f"{sig}_content",
+            data_slot="hover-card-trigger",
+            id=trigger_ref._id,
+            cls=cn("inline-block cursor-pointer", cls),
+            **kwargs,
+        )
+
+    return trigger
 
 
 def HoverCardContent(
-    *children,
-    signal: str | None = None,
+    *children: Any,
     side: Literal["top", "right", "bottom", "left"] = "bottom",
     align: Literal["start", "center", "end"] = "center",
     hide_delay: int = 300,
     cls: str = "",
-    **attrs,
+    **kwargs: Any,
 ):
-    signal = signal or "hover_card"
-    placement = f"{side}-{align}" if align != "center" else side
+    def content(*, sig, open_state, timer_state, **_):
+        content_ref = Signal(f"{sig}_content", _ref_only=True)
+        placement = side if align == "center" else f"{side}-{align}"
 
-    return Div(
-        *children,
-        ds_ref(f"{signal}Content"),
-        ds_show(f"${signal}_open"),
-        ds_position(
-            anchor=f"{signal}-trigger",
-            placement=placement,
-            offset=8,
-            flip=True,
-            shift=True,
-            hide=True,
-        ),
-        ds_on_mouseenter(
-            f"clearTimeout(window.hoverTimer_{signal}); ${signal}_open = true;"
-        ),
-        ds_on_mouseleave(f"""
-            clearTimeout(window.hoverTimer_{signal});
-            window.hoverTimer_{signal} = setTimeout(() => {{
-                ${signal}_open = false;
-            }}, {hide_delay});
-        """),
-        id=f"{signal}-content",
-        role="dialog",
-        aria_labelledby=f"{signal}-trigger",
-        tabindex="-1",
-        cls=cn(
-            "fixed z-50 w-72 max-w-[90vw] pointer-events-auto",
-            "rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none dark:border-input",
-            cls,
-        ),
-        **attrs,
-    )
+        return Div(
+            *children,
+            data_ref=content_ref,
+            data_show=open_state,
+            data_position=(
+                f"{sig}_trigger",
+                {
+                    "placement": placement,
+                    "offset": 8,
+                    "flip": True,
+                    "shift": True,
+                    "hide": True,
+                    "strategy": "fixed",
+                },
+            ),
+            data_on_mouseenter=clear_timeout(timer_state, open_state.set(True)),
+            data_on_mouseleave=reset_timeout(
+                timer_state, hide_delay, open_state.set(False)
+            ),
+            id=content_ref._id,
+            role="dialog",
+            aria_labelledby=f"{sig}_trigger",
+            tabindex="-1",
+            data_slot="hover-card-content",
+            style="display: none",
+            cls=cn(
+                "fixed z-50 w-72 max-w-[90vw] pointer-events-auto",
+                "rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none overflow-hidden",
+                cls,
+            ),
+            **kwargs,
+        )
+
+    return content

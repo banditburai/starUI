@@ -23,8 +23,9 @@ dependencies = [
     "requests>=2.31.0,<3.0.0",
     "pydantic>=2.5.0,<3.0.0",
     "rich>=13.7.0,<14.0.0",
-    "starhtml==0.1.17",
-    "websockets>=12.0.0,<13.0.0",
+    "websockets>=12.0.0,<16.0.0",
+    "starhtml>=0.5.10",
+    "starmerge>=0.2.0",
 ]
 
 # Optional dependencies for development - using dependency-groups below for UV compatibility

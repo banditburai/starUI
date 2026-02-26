@@ -1,10 +1,9 @@
+from itertools import count
 from typing import Any, Literal
-from uuid import uuid4
 
-from starhtml import FT, Button, Div, Icon
-from starhtml.datastar import ds_on_click, ds_show, ds_signals, value
+from starhtml import FT, Button, Div, Icon, Signal
 
-from .utils import cn
+from .utils import cn, gen_id, merge_actions
 
 AccordionType = Literal["single", "multiple"]
 
@@ -13,135 +12,170 @@ def Accordion(
     *children: Any,
     type: AccordionType = "single",
     collapsible: bool = False,
-    default_value: str | list[str] | None = None,
-    signal: str = "",
-    class_name: str = "",
+    value: str | int | list[str | int] | None = None,
+    signal: str | Signal = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
-    signal = signal or f"accordion_{uuid4().hex[:8]}"
+    sig = getattr(signal, "_id", signal) or gen_id("accordion")
 
-    match (type, default_value):
-        case ("single", _):
-            initial_value = value(default_value or "")
-        case ("multiple", None):
-            initial_value = value([])
-        case ("multiple", str() as val):
-            initial_value = value([val])
-        case ("multiple", val):
-            initial_value = value(val)
+    if type == "single":
+        initial = "" if value is None else value
+    else:
+        initial = (
+            []
+            if value is None
+            else list(value)
+            if isinstance(value, list | tuple)
+            else [value]
+        )
 
-    processed_children = [
-        child(signal, type, collapsible) if callable(child) else child
-        for child in children
-    ]
+    accordion_state = Signal(sig, initial)
+    ctx = {
+        "accordion_state": accordion_state,
+        "type": type,
+        "collapsible": collapsible,
+        "initial_value": value,
+        "_item_index": count(),
+    }
 
     return Div(
-        *processed_children,
-        ds_signals(**{signal: initial_value}),
-        data_type=type,
-        data_collapsible=str(collapsible).lower(),
-        cls=cn("w-full", class_name, cls),
-        **attrs,
+        accordion_state,
+        *[child(**ctx) if callable(child) else child for child in children],
+        cls=cn("w-full min-w-0", cls),
+        **kwargs,
     )
 
 
 def AccordionItem(
     *children: Any,
-    value: str,
-    class_name: str = "",
+    value: str | int | None = None,
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
-    def create_item(signal, type="single", collapsible=False):
-        processed_children = [
-            child(signal, type, collapsible, value) if callable(child) else child
-            for child in children
-        ]
-        return Div(
-            *processed_children,
-            data_value=value,
-            cls=cn("border-b", class_name, cls),
-            **attrs,
+    def _(*, accordion_state, type, collapsible, initial_value, _item_index, **_):
+        item_value = value if value is not None else next(_item_index)
+        is_open = (
+            (accordion_state == item_value)
+            if type == "single"
+            else accordion_state.contains(item_value)
+        )
+        is_default_open = (
+            (item_value == initial_value)
+            if type == "single"
+            else isinstance(initial_value, list) and item_value in initial_value
         )
 
-    return create_item
+        if type == "single":
+            click_action = (
+                accordion_state.toggle(item_value, "")
+                if collapsible
+                else accordion_state.set(item_value)
+            )
+        else:
+            click_action = accordion_state.toggle_in(item_value)
+
+        child_ctx = {
+            "item_value": item_value,
+            "is_open": is_open,
+            "is_default_open": is_default_open,
+            "click_action": click_action,
+        }
+
+        return Div(
+            *[child(**child_ctx) if callable(child) else child for child in children],
+            data_value=str(item_value),
+            # SSR initial + reactive binding (prevents FOUC before Datastar hydrates)
+            data_state="open" if is_default_open else "closed",
+            data_attr_data_state=is_open.if_("open", "closed"),
+            cls=cn("border-b", cls),
+            **kwargs,
+        )
+
+    return _
 
 
 def AccordionTrigger(
     *children: Any,
-    class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    icon: str | None = "lucide:chevron-down",
+    icon_cls: str = "h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 ease-out",
+    icon_rotation: int = 180,
+    **kwargs: Any,
 ) -> FT:
-    def create_trigger(signal, type="single", collapsible=False, item_value=None):
-        if not item_value:
-            raise ValueError("AccordionTrigger must be used inside AccordionItem")
+    def _(*, item_value, is_open, is_default_open, click_action, **_):
+        click_actions = merge_actions(click_action, kwargs=kwargs)
 
-        is_single = type == "single"
-
-        if is_single:
-            click_expr = (
-                f"${signal} = ${signal} === '{item_value}' ? '' : '{item_value}'"
-                if collapsible
-                else f"${signal} = '{item_value}'"
+        icon_el = (
+            (
+                Icon(
+                    icon,
+                    cls=icon_cls,
+                    style=f"transform: rotate({icon_rotation}deg)"
+                    if is_default_open
+                    else None,
+                    data_attr_style=is_open.if_(
+                        f"transform: rotate({icon_rotation}deg)",
+                        "transform: rotate(0deg)",
+                    ),
+                ),
             )
-            is_open_expr = f"${signal} === '{item_value}'"
-        else:
-            click_expr = (
-                f"${signal} = ${signal}.includes('{item_value}') "
-                f"? ${signal}.filter(v => v !== '{item_value}') "
-                f": [...${signal}, '{item_value}']"
-            )
-            is_open_expr = f"${signal}.includes('{item_value}')"
+            if icon
+            else ()
+        )
 
         return Div(
             Button(
                 *children,
-                Icon(
-                    "lucide:chevron-down",
-                    cls="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200",
-                    data_attr_style=f"({is_open_expr}) ? 'transform: rotate(180deg)' : 'transform: rotate(0deg)'",
-                ),
-                ds_on_click(click_expr),
+                *icon_el,
+                data_on_click=click_actions,
                 type="button",
+                id=f"{item_value}-trigger",
+                aria_controls=f"{item_value}-content",
+                aria_expanded="true" if is_default_open else "false",
+                data_attr_aria_expanded=is_open.if_("true", "false"),
+                data_state="open" if is_default_open else "closed",
+                data_attr_data_state=is_open.if_("open", "closed"),
                 cls=cn(
-                    "flex w-full flex-1 items-center justify-between py-4 text-sm font-medium transition-all hover:underline text-left",
-                    class_name,
+                    "flex w-full items-center justify-between py-4 text-sm font-medium transition-all hover:underline text-left",
                     cls,
                 ),
-                **attrs,
+                **kwargs,
             ),
-            cls="flex",
+            cls="flex w-full",
         )
 
-    return create_trigger
+    return _
 
 
 def AccordionContent(
     *children: Any,
-    class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    role: str = "region",
+    **kwargs: Any,
 ) -> FT:
-    def create_content(signal, type="single", collapsible=False, item_value=None):
-        if not item_value:
-            raise ValueError("AccordionContent must be used inside AccordionItem")
-
-        show_expr = (
-            f"${signal} === '{item_value}'"
-            if type == "single"
-            else f"${signal}.includes('{item_value}')"
-        )
-
+    def _(*, item_value, is_open, is_default_open, **_):
         return Div(
             Div(
-                *children,
-                cls=cn("pb-4 pt-0", class_name),
+                Div(*children, cls="pb-4 pt-0"),
+                cls="overflow-hidden min-h-0",
             ),
-            ds_show(show_expr),
-            cls=cn("overflow-hidden text-sm", cls),
-            **attrs,
+            role=role,
+            id=f"{item_value}-content",
+            aria_labelledby=f"{item_value}-trigger",
+            style="grid-template-rows: 1fr"
+            if is_default_open
+            else "grid-template-rows: 0fr",
+            data_state="open" if is_default_open else "closed",
+            cls=cn(
+                "text-sm grid transition-[grid-template-rows] duration-200 ease-out",
+                cls,
+            ),
+            data_attr_style=is_open.if_(
+                "grid-template-rows: 1fr", "grid-template-rows: 0fr"
+            ),
+            data_attr_data_state=is_open.if_("open", "closed"),
+            **kwargs,
         )
 
-    return create_content
+    return _

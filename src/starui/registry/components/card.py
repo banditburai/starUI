@@ -12,96 +12,108 @@ from .utils import cn
 
 HeadingLevel = Literal["h1", "h2", "h3", "h4", "h5", "h6"]
 
+_HEADING_COMPONENTS = {
+    "h1": HTMLH1,
+    "h2": HTMLH2,
+    "h3": HTMLH3,
+    "h4": HTMLH4,
+    "h5": HTMLH5,
+    "h6": HTMLH6,
+}
+
 
 def Card(
     *children,
-    class_name: str = "",
     cls: str = "",
-    **attrs,
+    **kwargs,
 ) -> FT:
-    classes = cn(
-        "bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm",
-        class_name,
-        cls,
+    return Div(
+        *children,
+        cls=cn(
+            "bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm",
+            cls,
+        ),
+        data_slot="card",
+        **kwargs,
     )
-    return Div(*children, cls=classes, data_slot="card", **attrs)
 
 
 def CardHeader(
     *children,
-    class_name: str = "",
     cls: str = "",
-    **attrs,
+    **kwargs,
 ) -> FT:
-    classes = cn(
-        "@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6",
-        class_name,
-        cls,
+    return Div(
+        *children,
+        cls=cn(
+            "@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6",
+            cls,
+        ),
+        data_slot="card-header",
+        **kwargs,
     )
-    return Div(*children, cls=classes, data_slot="card-header", **attrs)
 
 
 def CardTitle(
     *children,
     level: HeadingLevel = "h3",
-    class_name: str = "",
     cls: str = "",
-    **attrs,
+    **kwargs,
 ) -> FT:
-    classes = cn("leading-none font-semibold", class_name, cls)
-
-    heading_components = {
-        "h1": HTMLH1,
-        "h2": HTMLH2,
-        "h3": HTMLH3,
-        "h4": HTMLH4,
-        "h5": HTMLH5,
-        "h6": HTMLH6,
-    }
-
-    Heading = heading_components[level]
-    return Heading(*children, cls=classes, data_slot="card-title", **attrs)
+    Heading = _HEADING_COMPONENTS[level]
+    return Heading(
+        *children,
+        cls=cn("leading-none font-semibold", cls),
+        data_slot="card-title",
+        **kwargs,
+    )
 
 
 def CardDescription(
     *children,
-    class_name: str = "",
     cls: str = "",
-    **attrs,
+    **kwargs,
 ) -> FT:
-    classes = cn("text-muted-foreground text-sm", class_name, cls)
-    return P(*children, cls=classes, data_slot="card-description", **attrs)
+    return P(
+        *children,
+        cls=cn("text-muted-foreground text-sm", cls),
+        data_slot="card-description",
+        **kwargs,
+    )
 
 
 def CardAction(
     *children,
-    class_name: str = "",
     cls: str = "",
-    **attrs,
+    **kwargs,
 ) -> FT:
-    classes = cn(
-        "col-start-2 row-span-2 row-start-1 self-start justify-self-end",
-        class_name,
-        cls,
+    return Div(
+        *children,
+        cls=cn(
+            "col-start-2 row-span-2 row-start-1 self-start justify-self-end",
+            cls,
+        ),
+        data_slot="card-action",
+        **kwargs,
     )
-    return Div(*children, cls=classes, data_slot="card-action", **attrs)
 
 
 def CardContent(
     *children,
-    class_name: str = "",
     cls: str = "",
-    **attrs,
+    **kwargs,
 ) -> FT:
-    classes = cn("px-6", class_name, cls)
-    return Div(*children, cls=classes, data_slot="card-content", **attrs)
+    return Div(*children, cls=cn("px-6", cls), data_slot="card-content", **kwargs)
 
 
 def CardFooter(
     *children,
-    class_name: str = "",
     cls: str = "",
-    **attrs,
+    **kwargs,
 ) -> FT:
-    classes = cn("flex items-center px-6 [.border-t]:pt-6", class_name, cls)
-    return Div(*children, cls=classes, data_slot="card-footer", **attrs)
+    return Div(
+        *children,
+        cls=cn("flex items-center px-6 [.border-t]:pt-6", cls),
+        data_slot="card-footer",
+        **kwargs,
+    )

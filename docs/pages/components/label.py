@@ -2,363 +2,211 @@
 Label component documentation - Form field labels.
 """
 
-# Component metadata for auto-discovery
 TITLE = "Label"
 DESCRIPTION = "Renders an accessible label associated with form controls."
 CATEGORY = "ui"
 ORDER = 30
 STATUS = "stable"
 
-from starhtml import Div, P, Span, Icon
+from starhtml import Div, P, Span, Icon, Button, Signal, regex
 from starui.registry.components.label import Label
 from starui.registry.components.input import Input
-from starui.registry.components.checkbox import Checkbox, CheckboxWithLabel
+from starui.registry.components.checkbox import CheckboxWithLabel
 from starui.registry.components.radio_group import RadioGroup, RadioGroupItem
-from widgets.component_preview import ComponentPreview
+from utils import with_code, Prop, build_api_reference, auto_generate_page
 
 
-def examples():
-    """Generate Label examples using ComponentPreview with tabs."""
-    
-    # Basic usage - moved to hero example
-    # This will be the first example after the hero
-    
-    # Required fields and validation
-    yield ComponentPreview(
+@with_code
+def interactive_validation_example():
+    return Div(
+        (project_name := Signal("project_name", "my-project")),
+        (project_name_valid := Signal("project_name_valid", True)),
         Div(
-            Div(
-                Label(
-                    "Password",
-                    Span(" *", cls="text-destructive"),
-                    for_="password"
-                ),
-                Input(type="password", id="password", placeholder="Enter your password"),
-                cls="space-y-2"
+            Label(
+                "Project Name",
+                Span(" *", cls="text-destructive"),
+                fr="project-name-val"
+            ),
+            Input(
+                id="project-name-val",
+                placeholder="awesome-project",
+                signal=project_name,
+                data_on_input=project_name_valid.set(project_name.match(regex(r"^[a-zA-Z0-9-]+$"))),
+                cls="w-80"
             ),
             Div(
-                Label(
-                    "Email Address",
-                    Span(" *", cls="text-destructive"),
-                    for_="email-required"
+                P(
+                    "Project names can only contain letters, numbers, and hyphens",
+                    data_show=~project_name_valid & (project_name.length > 0),
+                    cls="text-xs text-destructive"
                 ),
-                Input(type="email", id="email-required", placeholder="john.doe@example.com", required=True),
-                P("Required fields are marked with an asterisk", cls="text-xs text-muted-foreground mt-1"),
-                cls="space-y-2"
+                P(
+                    "✓ Valid project name",
+                    data_show=project_name_valid & (project_name.length > 0),
+                    cls="text-xs text-green-600"
+                ),
+                cls="mt-1 h-4"
             ),
-            cls="grid gap-4 max-w-md"
+            cls="space-y-2"
         ),
-        '''from starui.registry.components.label import Label
-from starhtml import Input, Span
-
-Label(
-    "Password",
-    Span(" *", cls="text-destructive"),
-    for_="password"
-)
-Input(type="password", id="password", placeholder="Enter your password")''',
-        title="Required Fields",
-        description="Labels with required field indicators"
+        cls="w-full max-w-md"
     )
-    
-    # Labels with icons
-    yield ComponentPreview(
+
+
+@with_code
+def interactive_label_controls_example():
+    return Div(
+        (show_secret := Signal("show_secret", False)),
+        (secret_input := Signal("secret_input", _ref_only=True)),
+        Div(
+            Label(
+                Icon("lucide:database", cls="h-4 w-4"),
+                "Database Connection",
+                fr="db-connection-ctx",
+                cls="flex items-center gap-2"
+            ),
+            Input(id="db-connection-ctx", placeholder="postgresql://user:pass@host:5432/db", cls="font-mono text-sm w-80"),
+            cls="space-y-2"
+        ),
         Div(
             Div(
                 Label(
-                    Icon("lucide:user", cls="h-4 w-4"),
-                    "Username",
-                    for_="username-icon",
+                    Icon("lucide:key", cls="h-4 w-4"),
+                    "API Secret Key",
+                    fr="api-secret-ctx",
                     cls="flex items-center gap-2"
                 ),
-                Input(id="username-icon", placeholder="Enter your username"),
-                cls="space-y-2"
-            ),
-            Div(
-                Label(
-                    Icon("lucide:mail", cls="h-4 w-4"),
-                    "Email",
-                    for_="email-icon",
-                    cls="flex items-center gap-2"
+                Button(
+                    Icon("lucide:eye-off", cls="h-3 w-3", data_show=~show_secret),
+                    Icon("lucide:eye", cls="h-3 w-3", data_show=show_secret),
+                    data_on_click=[
+                        show_secret.set(~show_secret),
+                        secret_input.setAttribute("type", show_secret.if_("text", "password"))
+                    ],
+                    variant="ghost",
+                    size="sm",
+                    cls="ml-auto p-0 h-auto text-muted-foreground hover:text-foreground"
                 ),
-                Input(type="email", id="email-icon", placeholder="Enter your email"),
-                cls="space-y-2"
+                cls="flex items-center justify-between"
             ),
-            Div(
-                Label(
-                    Icon("lucide:lock", cls="h-4 w-4"),
-                    "Password",
-                    for_="password-icon",
-                    cls="flex items-center gap-2"
-                ),
-                Input(type="password", id="password-icon", placeholder="Enter your password"),
-                cls="space-y-2"
+            Input(
+                id="api-secret-ctx",
+                placeholder="sk_live_...",
+                value="sk_live_abc123xyz789",
+                type="password",
+                data_ref=secret_input,
+                cls="font-mono text-sm w-80"
             ),
-            cls="grid gap-4 max-w-md"
+            cls="space-y-2"
         ),
-        '''from starui.registry.components.label import Label
-from starhtml import Icon, Input
+        cls="grid gap-4 max-w-md"
+    )
 
-Label(
-    Icon("lucide:user", cls="h-4 w-4"),
-    "Username",
-    for_="username",
-    cls="flex items-center gap-2"
+
+@with_code
+def advanced_label_patterns_example():
+    return Div(
+        Div(
+            Label(
+                "Deployment Region",
+                Span("(affects latency)", cls="text-xs text-muted-foreground font-normal"),
+                fr="region",
+                cls="font-medium"
+            ),
+            Input(id="region", value="us-east-1", readonly=True, cls="bg-muted font-mono text-sm w-80"),
+            P("Contact support to change regions after deployment", cls="text-xs text-muted-foreground mt-1"),
+            cls="space-y-2"
+        ),
+        Div(
+            Label(
+                "Custom Domain",
+                Span("Optional", cls="text-xs bg-muted px-2 py-0.5 rounded-full ml-2"),
+                fr="domain",
+                cls="flex items-center font-medium"
+            ),
+            Input(id="domain", placeholder="app.yourdomain.com", cls="w-80"),
+            P("Requires DNS configuration and SSL certificate", cls="text-xs text-muted-foreground mt-1"),
+            cls="space-y-2"
+        ),
+        cls="grid gap-4 max-w-md"
+    )
+
+
+@with_code
+def radio_checkbox_groups_example():
+    return Div(
+        Div(
+            Label("Preferred Contact Method", cls="text-base font-semibold mb-3 block"),
+            RadioGroup(
+                RadioGroupItem("email", "Email"),
+                RadioGroupItem("phone", "Phone"),
+                RadioGroupItem("mail", "Mail"),
+                value="email"
+            ),
+            cls="p-4 border rounded-lg"
+        ),
+        Div(
+            Label("Notification Preferences", cls="text-base font-semibold mb-3 block"),
+            Div(
+                CheckboxWithLabel(label="Email notifications", name="notify-email"),
+                CheckboxWithLabel(label="SMS notifications", name="notify-sms"),
+                CheckboxWithLabel(label="Push notifications", name="notify-push"),
+                cls="space-y-3"
+            ),
+            cls="p-4 border rounded-lg"
+        ),
+        cls="grid gap-4 max-w-md"
+    )
+
+
+@with_code
+def complete_form_layout_example():
+    return Div(
+        Div(
+            Label("Developer Name", fr="dev-name-form"),
+            Input(id="dev-name-form", placeholder="Sarah Chen", cls="w-80"),
+            cls="space-y-2"
+        ),
+        Div(
+            Label("GitHub Username", fr="github-form"),
+            Input(id="github-form", placeholder="sarahc", cls="font-mono text-sm w-80"),
+            P("Used for repository access and commit attribution", cls="text-xs text-muted-foreground mt-1"),
+            cls="space-y-2"
+        ),
+        Div(
+            Label(
+                "Team Role",
+                Span(" *", cls="text-destructive"),
+                fr="role-form"
+            ),
+            Input(id="role-form", placeholder="Frontend Engineer", cls="w-80"),
+            cls="space-y-2"
+        ),
+        Div(
+            Label("Salary Range", fr="salary-form"),
+            Input(id="salary-form", placeholder="$120,000 - $150,000", cls="font-mono text-sm w-80"),
+            P("Optional - used for budget planning", cls="text-xs text-muted-foreground mt-1"),
+            cls="space-y-2"
+        ),
+        cls="space-y-4 max-w-md border rounded-lg p-4"
+    )
+
+
+EXAMPLES_DATA = [
+    {"title": "Interactive Validation", "description": "Labels with real-time validation feedback", "fn": interactive_validation_example},
+    {"title": "Interactive Label Controls", "description": "Labels with interactive elements like visibility toggles", "fn": interactive_label_controls_example},
+    {"title": "Advanced Patterns", "description": "Labels with badges, annotations, and contextual information", "fn": advanced_label_patterns_example},
+    {"title": "Radio & Checkbox Groups", "description": "Labels for grouped form controls", "fn": radio_checkbox_groups_example},
+    {"title": "Complete Form Layout", "description": "Real-world form with various label patterns", "fn": complete_form_layout_example},
+]
+
+API_REFERENCE = build_api_reference(
+    main_props=[
+        Prop("fr", "str | None", "ID of the associated form control (sets 'for' attribute)", "None"),
+        Prop("cls", "str", "Additional CSS classes for spacing/layout", "''"),
+    ]
 )
-Input(id="username", placeholder="Enter your username")''',
-        title="Labels with Icons",
-        description="Enhance labels with iconography"
-    )
-    
-    # With help text
-    yield ComponentPreview(
-        Div(
-            Div(
-                Label("API Key", for_="api-key"),
-                Input(id="api-key", placeholder="sk-..."),
-                P("Your API key can be found in your account settings.", cls="text-sm text-muted-foreground mt-1"),
-                cls="space-y-2"
-            ),
-            Div(
-                Label("Database URL", for_="db-url"),
-                Input(id="db-url", placeholder="postgresql://..."),
-                P("Connection string for your database", cls="text-sm text-muted-foreground mt-1"),
-                cls="space-y-2"
-            ),
-            cls="grid gap-4 max-w-md"
-        ),
-        '''from starui.registry.components.label import Label
-from starhtml import Input, P
-
-Div(
-    Label("API Key", for_="api-key"),
-    Input(id="api-key", placeholder="sk-..."),
-    P("Your API key can be found in your account settings.", 
-      cls="text-sm text-muted-foreground mt-1"),
-    cls="space-y-2"
-)''',
-        title="With Help Text",
-        description="Labels with additional helper text"
-    )
-    
-    # Radio and checkbox groups  
-    yield ComponentPreview(
-        Div(
-            Div(
-                Label("Preferred Contact Method", cls="text-base font-semibold mb-3 block"),
-                RadioGroup(
-                    RadioGroupItem("email", "Email"),
-                    RadioGroupItem("phone", "Phone"), 
-                    RadioGroupItem("mail", "Mail"),
-                    initial_value="email"
-                ),
-                cls="p-4 border rounded-lg"
-            ),
-            Div(
-                Label("Notification Preferences", cls="text-base font-semibold mb-3 block"),
-                Div(
-                    CheckboxWithLabel("Email notifications", name="notify-email"),
-                    CheckboxWithLabel("SMS notifications", name="notify-sms"),
-                    CheckboxWithLabel("Push notifications", name="notify-push"),
-                    cls="space-y-3"
-                ),
-                cls="p-4 border rounded-lg"
-            ),
-            cls="grid gap-4 max-w-md"
-        ),
-        '''Label("Preferred Contact Method", cls="text-base font-semibold mb-3 block")
-RadioGroup(
-    RadioGroupItem("email", "Email"),
-    RadioGroupItem("phone", "Phone"),
-    RadioGroupItem("mail", "Mail"),
-    initial_value="email"
-)
-
-Label("Notification Preferences", cls="text-base font-semibold mb-3 block")
-CheckboxWithLabel("Email notifications", name="notify-email")
-CheckboxWithLabel("SMS notifications", name="notify-sms")
-CheckboxWithLabel("Push notifications", name="notify-push")''',
-        title="Radio & Checkbox Groups",
-        description="Labels for grouped form controls"
-    )
-    
-    # File upload
-    yield ComponentPreview(
-        Div(
-            Div(
-                Label("Resume Upload", for_="resume"),
-                Input(type="file", id="resume", accept=".pdf,.doc,.docx"),
-                P("Accepted formats: PDF, DOC, DOCX (Max 5MB)", cls="text-sm text-muted-foreground mt-1"),
-                cls="space-y-2"
-            ),
-            Div(
-                Label("Profile Picture", for_="avatar"),
-                Input(type="file", id="avatar", accept="image/*"),
-                P("Accepted formats: JPG, PNG, GIF (Max 2MB)", cls="text-sm text-muted-foreground mt-1"),
-                cls="space-y-2"
-            ),
-            cls="grid gap-4 max-w-md"
-        ),
-        '''from starui.registry.components.label import Label
-from starhtml import Input, P
-
-Div(
-    Label("Resume Upload", for_="resume"),
-    Input(type="file", id="resume", accept=".pdf,.doc,.docx"),
-    P("Accepted formats: PDF, DOC, DOCX (Max 5MB)", 
-      cls="text-sm text-muted-foreground mt-1"),
-    cls="space-y-2"
-)''',
-        title="File Upload",
-        description="Labels for file input controls"
-    )
-    
-    # Disabled state
-    yield ComponentPreview(
-        Div(
-            Div(
-                Label("Disabled Field", for_="disabled-input", cls="opacity-50"),
-                Input(id="disabled-input", placeholder="This field is disabled", disabled=True),
-                cls="space-y-2"
-            ),
-            Div(
-                Label("Read-only Field", for_="readonly-input"),
-                Input(id="readonly-input", value="Read-only value", readonly=True),
-                cls="space-y-2"
-            ),
-            cls="grid gap-4 max-w-md"
-        ),
-        '''from starui.registry.components.label import Label
-from starhtml import Input
-
-Div(
-    Label("Disabled Field", for_="disabled-input", cls="opacity-50"),
-    Input(id="disabled-input", placeholder="This field is disabled", disabled=True),
-    cls="space-y-2"
-)''',
-        title="Disabled & Read-only",
-        description="Labels for disabled and read-only fields"
-    )
-    
-    # Complete form example
-    yield ComponentPreview(
-        Div(
-            Div(
-                Label("First Name", for_="first-name"),
-                Input(id="first-name", placeholder="John"),
-                cls="space-y-2"
-            ),
-            Div(
-                Label("Last Name", for_="last-name"),
-                Input(id="last-name", placeholder="Doe"),
-                cls="space-y-2"
-            ),
-            Div(
-                Label(
-                    "Email Address",
-                    Span(" *", cls="text-destructive"),
-                    for_="email-address"
-                ),
-                Input(type="email", id="email-address", placeholder="john.doe@example.com"),
-                cls="space-y-2"
-            ),
-            Div(
-                Label("Phone Number", for_="phone"),
-                Input(type="tel", id="phone", placeholder="+1 (555) 123-4567"),
-                cls="space-y-2"
-            ),
-            cls="space-y-4 max-w-md"
-        ),
-        '''Label("First Name", for_="first-name")
-Input(id="first-name", placeholder="John")
-
-Label("First Name", for_="first-name")
-Input(id="first-name", placeholder="John")
-
-Label(
-    "Email Address",
-    Span(" *", cls="text-destructive"),
-    for_="email-address"
-)
-Input(type="email", id="email-address", placeholder="john.doe@example.com")''',
-        title="Complete Form",
-        description="Labels in a full form layout"
-    )
 
 
 def create_label_docs():
-    """Create label documentation page using convention-based approach."""
-    from utils import auto_generate_page
-    
-    # Hero example - showcase different label patterns
-    hero_example = ComponentPreview(
-        Div(
-            # Basic form fields
-            Div(
-                Label("Email", for_="email"),
-                Input(type="email", id="email", placeholder="Enter your email"),
-                cls="space-y-2"
-            ),
-            # Required field
-            Div(
-                Label(
-                    "Password",
-                    Span(" *", cls="text-destructive"),
-                    for_="password"
-                ),
-                Input(type="password", id="password", placeholder="Enter your password"),
-                cls="space-y-2"
-            ),
-            # Label with icon
-            Div(
-                Label(
-                    Icon("lucide:user", width="16", height="16"),
-                    "Username",
-                    for_="username",
-                    cls="flex items-center gap-2"
-                ),
-                Input(id="username", placeholder="Enter your username"),
-                cls="space-y-2"
-            ),
-            cls="grid gap-6 max-w-sm"
-        ),
-        '''Label("Email", for_="email")
-Input(type="email", id="email", placeholder="Enter your email")
-
-Label(
-    "Password",
-    Span(" *", cls="text-destructive"),
-    for_="password"
-)
-
-Label(
-    Icon("lucide:user", width="16", height="16"),
-    "Username", 
-    for_="username",
-    cls="flex items-center gap-2"
-)'''
-    )
-    
-    return auto_generate_page(
-        TITLE,
-        DESCRIPTION,
-        list(examples()),
-        cli_command="star add label",
-        hero_example=hero_example,
-        component_slug="label",
-        api_reference={
-            "props": [
-                {
-                    "name": "for_",
-                    "type": "str | None",
-                    "default": "None",
-                    "description": "ID of the form control this label is for"
-                },
-                {
-                    "name": "cls",
-                    "type": "str",
-                    "default": "''",
-                    "description": "Additional CSS classes"
-                }
-            ]
-        }
-    )
+    return auto_generate_page(TITLE, DESCRIPTION, EXAMPLES_DATA, API_REFERENCE)

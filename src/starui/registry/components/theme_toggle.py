@@ -1,32 +1,35 @@
-from starhtml import FT, Div, Icon
-from starhtml import Span as HTMLSpan
-from starhtml.datastar import ds_effect, ds_on_click, ds_on_load, ds_show, ds_signals
+from starhtml import FT, Div, Icon, Style, js
 
 from .button import Button
+from .utils import ALT_THEME, DEFAULT_THEME
 
 
-def ThemeToggle(alt_theme="dark", default_theme="light", **attrs) -> FT:
-    """Reactive theme toggle supporting arbitrary theme names."""
+def ThemeToggle(**kwargs) -> FT:
+    """Theme toggle button with CSS-only icon switching.
+
+    Uses CSS selectors tied to [data-theme] — set synchronously by
+    theme_script() before first paint, so there is zero flash.
+    """
 
     return Div(
-        Button(
-            HTMLSpan(Icon("ph:moon-bold", width="20", height="20"), ds_show("!$isAlt")),
-            HTMLSpan(Icon("ph:sun-bold", width="20", height="20"), ds_show("$isAlt")),
-            ds_on_click("$isAlt = !$isAlt"),
-            variant="ghost",
-            aria_label="Toggle theme",
-            cls="h-9 px-4 py-2 flex-shrink-0",
-        ),
-        ds_signals(isAlt=False),
-        ds_on_load(
-            f"$isAlt = localStorage.getItem('theme') === '{alt_theme}' || "
-            f"(!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)"
-        ),
-        ds_effect(f"""
-            const theme = $isAlt ? '{alt_theme}' : '{default_theme}';
-            document.documentElement.classList.toggle('{alt_theme}', $isAlt);
-            document.documentElement.setAttribute('data-theme', theme);
-            localStorage.setItem('theme', theme);
+        Style(f"""
+            [data-theme="{DEFAULT_THEME}"] .theme-icon-alt,
+            [data-theme="{ALT_THEME}"] .theme-icon-default {{
+                display: none;
+            }}
         """),
-        **attrs,
+        Button(
+            Icon("ph:moon-bold", width="20", height="20", cls="theme-icon-default"),
+            Icon("ph:sun-bold", width="20", height="20", cls="theme-icon-alt"),
+            data_on_click=js(f"""
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === '{ALT_THEME}' ? '{DEFAULT_THEME}' : '{ALT_THEME}';
+                document.documentElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+            """),
+            variant="ghost",
+            size="icon",
+            aria_label="Toggle theme",
+        ),
+        **kwargs,
     )

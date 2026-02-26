@@ -1,28 +1,22 @@
 from typing import Any
-from uuid import uuid4
 
-from starhtml import FT, Div, Img
-from starhtml.datastar import ds_on, ds_show, ds_signals
+from starhtml import FT, Div, Img, Signal
 
-from .utils import cn
+from .utils import cn, gen_id
 
 
 def Avatar(
     *children: Any,
-    class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
-    """Avatar container component."""
     return Div(
         *children,
-        data_slot="avatar",
         cls=cn(
             "relative flex size-10 shrink-0 overflow-hidden rounded-full",
-            class_name,
             cls,
         ),
-        **attrs,
+        **kwargs,
     )
 
 
@@ -30,78 +24,38 @@ def AvatarImage(
     src: str,
     alt: str = "",
     loading: str = "lazy",
-    class_name: str = "",
+    signal: str | Signal = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
-    """Avatar image component."""
-    return Img(
-        src=src,
-        alt=alt,
-        loading=loading,
-        data_slot="avatar-image",
-        cls=cn("aspect-square size-full object-cover", class_name, cls),
-        **attrs,
+    sig = getattr(signal, "_id", signal) or gen_id("avatar_img_error")
+    error_state = Signal(sig, False)
+
+    return Div(
+        error_state,
+        Img(
+            src=src,
+            alt=alt,
+            loading=loading,
+            data_on_error=error_state.set(True),
+            data_show=~error_state,
+            cls=cn("aspect-square size-full object-cover", cls),
+            **kwargs,
+        ),
+        style="display: contents",
     )
 
 
 def AvatarFallback(
     *children: Any,
-    class_name: str = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
-    """Avatar fallback component."""
-    has_bg = any("bg-" in str(c) for c in [class_name, cls])
-
     return Div(
         *children,
-        data_slot="avatar-fallback",
         cls=cn(
-            "flex size-full items-center justify-center rounded-full",
-            "bg-muted" if not has_bg else "",
-            class_name,
+            "flex size-full items-center justify-center rounded-full bg-muted",
             cls,
         ),
-        **attrs,
-    )
-
-
-def AvatarWithFallback(
-    src: str | None = None,
-    alt: str = "",
-    fallback: str = "?",
-    class_name: str = "",
-    cls: str = "",
-    **attrs: Any,
-) -> FT:
-    """Avatar with automatic fallback on image load error."""
-    if not src:
-        return Avatar(
-            AvatarFallback(fallback),
-            cls=cn(class_name, cls),
-            **attrs,
-        )
-
-    signal = f"avatar_{str(uuid4())[:8]}_error"
-
-    return Avatar(
-        ds_signals(**{signal: False}),
-        Img(
-            ds_show(f"!${signal}"),
-            ds_on("error", f"${signal} = true"),
-            src=src,
-            alt=alt,
-            loading="lazy",
-            cls="aspect-square size-full object-cover",
-            data_slot="avatar-image",
-        ),
-        Div(
-            fallback,
-            ds_show(f"${signal}"),
-            cls="flex size-full items-center justify-center rounded-full bg-muted",
-            data_slot="avatar-fallback",
-        ),
-        cls=cn(class_name, cls),
-        **attrs,
+        **kwargs,
     )

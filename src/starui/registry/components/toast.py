@@ -1,7 +1,8 @@
+import json
+import time
 from typing import Any, Literal
 
-from starhtml import FT, Button, Div, Icon, Span
-from starhtml.datastar import ds_on_click, ds_show, ds_signals, ds_text, value
+from starhtml import FT, Button, Div, Icon, Signal, js, set_timeout, signals
 
 from .utils import cn, cva
 
@@ -14,15 +15,6 @@ ToastPosition = Literal[
     "bottom-center",
     "bottom-right",
 ]
-
-position_map = {
-    "top-left": "top-0 left-0",
-    "top-center": "top-0 left-1/2 -translate-x-1/2",
-    "top-right": "top-0 right-0",
-    "bottom-left": "bottom-0 left-0",
-    "bottom-center": "bottom-0 left-1/2 -translate-x-1/2",
-    "bottom-right": "bottom-0 right-0",
-}
 
 toast_variants = cva(
     base="group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-6 pr-8 shadow-lg transition-all",
@@ -41,168 +33,209 @@ toast_variants = cva(
     },
 )
 
-variant_icons = {
-    "success": ("lucide:check-circle", "text-green-600 dark:text-green-400"),
-    "error": ("lucide:x-circle", "text-red-600 dark:text-red-400"),
-    "warning": ("lucide:alert-triangle", "text-yellow-600 dark:text-yellow-400"),
-    "info": ("lucide:info", "text-blue-600 dark:text-blue-400"),
-    "destructive": ("lucide:x-circle", ""),
-}
-
 
 def Toaster(
     position: ToastPosition = "bottom-right",
-    signal: str = "toasts",
     max_visible: int = 3,
-    class_name: str = "",
-    **attrs: Any,
+    cls: str = "",
+    **kwargs: Any,
 ) -> FT:
+    toasts = Signal("toasts", [])
+
+    position_cls = {
+        "top-left": "top-0 left-0",
+        "top-center": "top-0 left-1/2 -translate-x-1/2",
+        "top-right": "top-0 right-0",
+        "bottom-left": "bottom-0 left-0",
+        "bottom-center": "bottom-0 left-1/2 -translate-x-1/2",
+        "bottom-right": "bottom-0 right-0",
+    }[position]
+
     return Div(
-        ds_signals(
-            **{
-                signal: value([]),
-                f"{signal}_counter": value(0),
-            }
-        ),
+        toasts,
         Div(
-            *[_toast_slot(signal, i) for i in range(max_visible)],
+            *[_toast_slot(i)(toasts=toasts) for i in range(max_visible)],
             cls=cn(
-                "fixed z-[100] flex flex-col-reverse gap-2 p-4 max-w-[420px] pointer-events-none",
-                position_map.get(position, "bottom-right"),
-                class_name,
+                "fixed z-[100] flex flex-col-reverse gap-2 p-4 w-[calc(100%-2rem)] sm:w-[420px] pointer-events-none",
+                position_cls,
+                cls,
             ),
-            **attrs,
+            **kwargs,
         ),
     )
 
 
-def _toast_slot(signal: str, index: int) -> FT:
-    return Div(
-        *[
-            _toast_element(signal, index, variant)
-            for variant in [
-                "default",
-                "success",
-                "error",
-                "warning",
-                "info",
-                "destructive",
+def _toast_slot(index: int) -> FT:
+    def _(*, toasts, **_):
+        return Div(
+            *[
+                _toast_element(index, variant)(toasts=toasts)
+                for variant in [
+                    "default",
+                    "success",
+                    "error",
+                    "warning",
+                    "info",
+                    "destructive",
+                ]
             ]
-        ]
-    )
+        )
+
+    return _
 
 
-def _toast_element(signal: str, index: int, variant: str) -> FT:
-    show_condition = (
-        f"${signal}[{index}] && (!${signal}[{index}].variant || ${signal}[{index}].variant === 'default')"
-        if variant == "default"
-        else f"${signal}[{index}] && ${signal}[{index}].variant === '{variant}'"
-    )
+def _toast_element(index: int, variant: str) -> FT:
+    def _(*, toasts, **_):
+        toast_item = toasts[index]
 
-    icon_name, icon_cls = variant_icons.get(variant, (None, None))
+        if variant == "default":
+            show_condition = toast_item & (
+                ~toast_item.variant | toast_item.variant.eq("default")
+            )
+        else:
+            show_condition = toast_item & toast_item.variant.eq(variant)
 
-    return Div(
-        Div(
-            Span(Icon(icon_name, cls=f"h-4 w-4 {icon_cls}"), cls="shrink-0")
-            if icon_name
-            else None,
-            Div(
-                Div(
-                    ds_text(f"${signal}[{index}] ? ${signal}[{index}].title : ''"),
-                    cls="text-sm font-semibold",
-                ),
-                Div(
-                    ds_text(
-                        f"${signal}[{index}] && ${signal}[{index}].description ? ${signal}[{index}].description : ''"
-                    ),
-                    ds_show(f"${signal}[{index}] && ${signal}[{index}].description"),
-                    cls="text-sm opacity-90",
-                ),
-                cls="grid gap-1",
+        icon_name, icon_cls = {
+            "success": ("lucide:check-circle", "text-green-600 dark:text-green-400"),
+            "error": ("lucide:x-circle", "text-red-600 dark:text-red-400"),
+            "warning": (
+                "lucide:alert-triangle",
+                "text-yellow-600 dark:text-yellow-400",
             ),
-            cls="flex items-start space-x-3" if icon_name else "flex items-start",
-        ),
-        Button(
-            Icon("lucide:x", cls="h-4 w-4"),
-            ds_on_click(f"""
-                const toastId = ${signal}[{index}].id;
-                ${signal} = ${signal}.filter(t => t.id !== toastId);
-            """),
-            type="button",
-            cls="absolute right-2 top-2 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none",
-        ),
-        ds_show(show_condition),
-        cls=toast_variants(variant=variant),
-        role="status",
-        aria_live="polite",
-        aria_atomic="true",
-    )
+            "info": ("lucide:info", "text-blue-600 dark:text-blue-400"),
+            "destructive": ("lucide:x-circle", ""),
+        }.get(variant, (None, None))
+
+        return Div(
+            Div(
+                Icon(icon_name, cls=cn("h-4 w-4", icon_cls)) if icon_name else None,
+                Div(
+                    Div(
+                        data_text=toast_item.title,
+                        cls="text-sm font-semibold",
+                    ),
+                    Div(
+                        data_text=toast_item.description,
+                        data_show=toast_item.description,
+                        style="display: none",
+                        cls="text-sm opacity-90",
+                    ),
+                    cls="grid gap-1",
+                ),
+                cls=cn("flex items-start", "space-x-3" if icon_name else ""),
+            ),
+            Button(
+                Icon("lucide:x", cls="h-4 w-4"),
+                data_on_click=js(
+                    f"{toasts} = {toasts}.filter(t => t.id !== {toast_item.id})"
+                ),
+                type="button",
+                cls="absolute right-2 top-2 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none",
+            ),
+            data_show=show_condition,
+            cls=toast_variants(variant=variant),
+            style="display: none",
+            role="status",
+            aria_live="polite",
+            aria_atomic="true",
+        )
+
+    return _
 
 
-def toast(
-    message: str,
-    description: str = "",
-    variant: ToastVariant = "default",
-    duration: int = 4000,
-    signal: str = "toasts",
-    max_visible: int = 3,
-) -> str:
-    """Generate Datastar action to trigger a toast notification."""
-    message = message.replace("'", "\\'")
-    description = description.replace("'", "\\'")
+class ToastHelper:
+    """shadcn/Sonner-style toast API for client-side usage."""
 
-    return f"""
-        const newToast = {{
-            id: ++${signal}_counter,
-            title: '{message}',
-            description: '{description}',
-            variant: '{variant}',
-            timestamp: Date.now()
-        }};
+    def __call__(
+        self,
+        title: str,
+        description: str = "",
+        variant: ToastVariant = "default",
+        duration: int = 4000,
+    ) -> str:
+        data = json.dumps(
+            {"title": title, "description": description, "variant": variant}
+        )
+        auto_dismiss = (
+            set_timeout(js("$toasts=$toasts.filter(x=>x.id!==t.id)"), duration)
+            if duration
+            else ""
+        )
+        return f"""(()=>{{const t={{...{data},id:Date.now(),timestamp:Date.now()}};$toasts=[t,...$toasts].slice(0,3);{auto_dismiss}}})()"""
 
-        ${signal} = [newToast, ...${signal}];
+    def success(self, title: str, description: str = "", duration: int = 4000) -> str:
+        return self(title, description, "success", duration)
 
-        if (${signal}.length > {max_visible}) {{
-            ${signal} = ${signal}.slice(0, {max_visible});
-        }}
+    def error(self, title: str, description: str = "", duration: int = 4000) -> str:
+        return self(title, description, "error", duration)
 
-        if ({duration} > 0) {{
-            setTimeout(() => {{
-                ${signal} = ${signal}.filter(t => t.id !== newToast.id);
-            }}, {duration});
-        }}
-    """
+    def warning(self, title: str, description: str = "", duration: int = 4000) -> str:
+        return self(title, description, "warning", duration)
 
+    def info(self, title: str, description: str = "", duration: int = 4000) -> str:
+        return self(title, description, "info", duration)
 
-def success_toast(
-    message: str, description: str = "", duration: int = 4000, signal: str = "toasts"
-) -> str:
-    """Generate a success toast notification."""
-    return toast(
-        message, description, variant="success", duration=duration, signal=signal
-    )
+    def destructive(
+        self, title: str, description: str = "", duration: int = 4000
+    ) -> str:
+        return self(title, description, "destructive", duration)
 
 
-def error_toast(
-    message: str, description: str = "", duration: int = 4000, signal: str = "toasts"
-) -> str:
-    """Generate an error toast notification."""
-    return toast(
-        message, description, variant="error", duration=duration, signal=signal
-    )
+class ToastQueue:
+    """Toast state manager for SSE routes."""
+
+    def __init__(self, max_visible: int = 3):
+        self.toasts = []
+        self.max_visible = max_visible
+
+    def _make_toast(self, title: str, description: str, variant: ToastVariant) -> dict:
+        return {
+            "id": int(time.time() * 1000000),  # Microseconds for uniqueness
+            "title": title,
+            "description": description,
+            "variant": variant,
+            "timestamp": int(time.time() * 1000),
+        }
+
+    def __call__(
+        self, title: str, description: str = "", variant: ToastVariant = "default"
+    ):
+        return self.show(title, description, variant)
+
+    def show(
+        self, title: str, description: str = "", variant: ToastVariant = "default"
+    ):
+        new_toast = self._make_toast(title, description, variant)
+        self.toasts = [new_toast] + self.toasts[: self.max_visible - 1]
+        return signals(toasts=self.toasts)
+
+    def success(self, title: str, description: str = ""):
+        return self.show(title, description, "success")
+
+    def error(self, title: str, description: str = ""):
+        return self.show(title, description, "error")
+
+    def warning(self, title: str, description: str = ""):
+        return self.show(title, description, "warning")
+
+    def info(self, title: str, description: str = ""):
+        return self.show(title, description, "info")
+
+    def destructive(self, title: str, description: str = ""):
+        return self.show(title, description, "destructive")
+
+    def clear(self):
+        self.toasts = []
+        return signals(toasts=[])
 
 
-def warning_toast(
-    message: str, description: str = "", duration: int = 4000, signal: str = "toasts"
-) -> str:
-    """Generate a warning toast notification."""
-    return toast(
-        message, description, variant="warning", duration=duration, signal=signal
-    )
+toast = ToastHelper()
 
 
-def info_toast(
-    message: str, description: str = "", duration: int = 4000, signal: str = "toasts"
-) -> str:
-    """Generate an info toast notification."""
-    return toast(message, description, variant="info", duration=duration, signal=signal)
+__all__ = [
+    "Toaster",
+    "toast",
+    "ToastQueue",
+    "ToastVariant",
+    "ToastPosition",
+]

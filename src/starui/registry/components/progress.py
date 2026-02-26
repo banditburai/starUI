@@ -1,54 +1,43 @@
-"""Progress component - Loading and completion indicators."""
-
 from typing import Any
-from uuid import uuid4
 
-from starhtml import FT, Div
-from starhtml.datastar import ds_signals, ds_style, value
+from starhtml import FT, Div, Signal
+from starhtml.datastar import Expr
 
-from .utils import cn
+from .utils import cn, gen_id
 
 
 def Progress(
-    progress_value: float | None = None,
+    value: float | None = None,
     max_value: float = 100,
-    signal: str = "",
-    class_name: str = "",
+    signal: str | Signal = "",
     cls: str = "",
-    **attrs: Any,
+    **kwargs: Any,
 ) -> FT:
-    signal = signal or f"progress_{str(uuid4())[:8]}"
+    sig = getattr(signal, "_id", signal) or gen_id("progress")
+    initial = getattr(signal, "_initial", value) if value is None else value
 
-    initial_percentage = max(
-        0,
-        min(
-            100,
-            (progress_value / max_value) * 100
-            if progress_value is not None and max_value > 0
-            else 0,
-        ),
-    )
-    initial_percentage = (
-        int(initial_percentage)
-        if initial_percentage.is_integer()
-        else initial_percentage
-    )
+    if isinstance(initial, Expr):
+        pct = initial
+    elif initial is not None and max_value > 0:
+        pct = max(0, min(100, initial / max_value * 100))
+        pct = int(pct) if pct == int(pct) else pct
+    else:
+        pct = 0
 
     return Div(
-        ds_signals({signal: value(initial_percentage)}),
+        (progress := Signal(sig, pct)),
         Div(
-            ds_style(width=f"${signal} + '%'"),
+            data_style_width=progress + "%",
             cls="bg-primary h-full transition-all duration-300 ease-out",
-            style=f"width: {initial_percentage}%",
         ),
         role="progressbar",
         aria_valuemin="0",
         aria_valuemax=str(max_value),
-        aria_valuenow=str(progress_value) if progress_value is not None else None,
+        aria_valuenow=str(value) if value is not None else None,
+        data_slot="progress",
         cls=cn(
             "bg-primary/20 relative h-2 w-full overflow-hidden rounded-full",
-            class_name,
             cls,
         ),
-        **attrs,
+        **kwargs,
     )
