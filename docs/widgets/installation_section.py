@@ -2,7 +2,7 @@ from starhtml import *
 from starui.registry.components.utils import cn
 from .code_block import CodeBlock
 
-SCROLLBAR_STYLE = "scrollbar-width: thin; scrollbar-color: transparent transparent;"
+SCROLLBAR_STYLE = "scrollbar-width: thin;"
 
 
 def _cli_installation_section(cli_command: str) -> FT:

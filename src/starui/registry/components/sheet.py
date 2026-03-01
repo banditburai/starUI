@@ -1,46 +1,150 @@
-from typing import Any, Literal
+from typing import Literal
 
-from starhtml import FT, Div, P, Signal, Span
+from starhtml import FT, Div, Icon, P, Signal, Span, Style
 from starhtml import H2 as HTMLH2
-from starhtml.datastar import document, evt
+from starhtml import Dialog as HTMLDialog
+from starhtml.datastar import document, evt, seq
 
-from .utils import cn, gen_id, inject_context, merge_actions, with_signals
+from .utils import cn, gen_id, inject_context, merge_actions
 
 SheetSide = Literal["top", "right", "bottom", "left"]
 SheetSize = Literal["sm", "md", "lg", "xl", "full"]
 
+_SHEET_STYLES = """
+dialog[data-side]{
+  --_dur-in:500ms;--_dur-out:300ms;--_ease:cubic-bezier(0.32,0.72,0,1);
+  position:fixed;margin:0;max-height:none;
+  transition:translate var(--_dur-out) var(--_ease),display var(--_dur-out) allow-discrete,overlay var(--_dur-out) allow-discrete;
+}
+dialog[data-side][open]{transition-duration:var(--_dur-in)}
+dialog[data-side]:not([open]){display:none}
+dialog[data-side]::backdrop{
+  background:rgb(0 0 0/.5);backdrop-filter:blur(4px);
+  transition:background 200ms ease,backdrop-filter 200ms ease,display var(--_dur-out) allow-discrete,overlay var(--_dur-out) allow-discrete;
+}
+dialog[data-side]:not([open])::backdrop{background:rgb(0 0 0/0);backdrop-filter:blur(0)}
+dialog[data-side="right"]{inset:0 0 0 auto}
+dialog[data-side="right"]:not([open]){translate:100% 0}
+dialog[data-side="right"][open]{@starting-style{translate:100% 0}}
+dialog[data-side="left"]{inset:0 auto 0 0}
+dialog[data-side="left"]:not([open]){translate:-100% 0}
+dialog[data-side="left"][open]{@starting-style{translate:-100% 0}}
+dialog[data-side="top"]{inset:0 0 auto 0;max-width:none}
+dialog[data-side="top"]:not([open]){translate:0 -100%}
+dialog[data-side="top"][open]{@starting-style{translate:0 -100%}}
+dialog[data-side="bottom"]{inset:auto 0 0 0;max-width:none}
+dialog[data-side="bottom"]:not([open]){translate:0 100%}
+dialog[data-side="bottom"][open]{@starting-style{translate:0 100%}}
+dialog[data-side][open]::backdrop{@starting-style{background:rgb(0 0 0/0);backdrop-filter:blur(0)}}
+@media(prefers-reduced-motion:reduce){dialog[data-side],dialog[data-side]::backdrop{transition-duration:0ms!important}}
+"""
+
 
 def Sheet(
-    *children: Any,
+    *children,
     signal: str | Signal = "",
     modal: bool = True,
     default_open: bool = False,
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     sig = getattr(signal, "_id", signal) or gen_id("sheet")
     sheet_open = Signal(f"{sig}_open", default_open)
+    dialog_ref = Signal(sig, _ref_only=True)
 
-    escape_handler = (evt.key == "Escape").then(sheet_open.set(False))
+    trigger = next(
+        (
+            c
+            for c in children
+            if callable(c) and getattr(c, "__name__", None) == "trigger"
+        ),
+        None,
+    )
+    content = next(
+        (
+            c
+            for c in children
+            if callable(c) and getattr(c, "__name__", None) == "content"
+        ),
+        None,
+    )
 
-    ctx = {"sig": sig, "sheet_open": sheet_open, "modal": modal}
+    side = getattr(content, "_side", "right") if content else "right"
+    size = getattr(content, "_size", "sm") if content else "sm"
+    content_cls = getattr(content, "_cls", "") if content else ""
+    content_kwargs = getattr(content, "_kwargs", {}) if content else {}
 
-    return with_signals(
-        Div(
-            sheet_open,
-            Div(
-                data_effect=document.body.style.overflow.set(sheet_open.if_("hidden")),
-                style="display: none;",
+    ctx = {
+        "sig": sig,
+        "sheet_open": sheet_open,
+        "dialog_ref": dialog_ref,
+        "modal": modal,
+    }
+
+    side_cls = {
+        "right": "h-full border-l",
+        "left": "h-full border-r",
+        "top": "w-full border-b",
+        "bottom": "w-full border-t",
+    }[side]
+
+    size_cls = (
+        ""
+        if side in ("top", "bottom")
+        else {
+            "sm": "w-3/4 sm:max-w-sm",
+            "md": "w-3/4 sm:max-w-md",
+            "lg": "w-3/4 sm:max-w-lg",
+            "xl": "w-3/4 sm:max-w-xl",
+            "full": "max-w-none w-full",
+        }[size]
+    )
+
+    show_action = dialog_ref.showModal() if modal else dialog_ref.show()
+
+    return Div(
+        Style(_SHEET_STYLES),
+        sheet_open,
+        trigger(**ctx) if trigger else None,
+        HTMLDialog(
+            content(**ctx) if content else None,
+            data_ref=dialog_ref,
+            data_on_close=sheet_open.set(False),
+            data_on_click=(evt.target == evt.currentTarget).then(
+                seq(dialog_ref.close(), sheet_open.set(False))
             )
             if modal
             else None,
-            *[child(**ctx) if callable(child) else child for child in children],
-            data_on_keydown=(escape_handler, {"window": True}) if modal else None,
-            data_attr_data_state=sheet_open.if_("open", "closed"),
-            cls=cn("relative", cls),
-            **kwargs,
+            data_side=side,
+            id=f"{sig}_content",
+            aria_labelledby=f"{sig}_content-title",
+            aria_describedby=f"{sig}_content-description",
+            cls=cn(
+                "bg-background text-foreground bg-clip-padding shadow-lg",
+                "flex flex-col gap-4 p-0 outline-none",
+                side_cls,
+                size_cls,
+                "overflow-y-auto",
+                content_cls,
+            ),
+            **content_kwargs,
         ),
-        open=sheet_open,
+        # Sync signal → native dialog (supports external triggers like mobile menu)
+        Div(
+            data_effect=[
+                (sheet_open & ~dialog_ref.open).then(show_action),
+                (~sheet_open & dialog_ref.open).then(dialog_ref.close()),
+            ],
+            style="display: none;",
+        ),
+        Div(
+            data_effect=document.body.style.overflow.set(sheet_open.if_("hidden", "")),
+            style="display: none;",
+        )
+        if modal
+        else None,
+        cls=cls,
+        **kwargs,
     )
 
 
@@ -50,10 +154,11 @@ def SheetTrigger(
     cls: str = "",
     **kwargs,
 ) -> FT:
-    def trigger(*, sig, sheet_open, **_):
+    def trigger(*, sig, sheet_open, dialog_ref, modal, **_):
         from .button import Button
 
-        click_actions = merge_actions(sheet_open.set(True), kwargs=kwargs)
+        show_method = dialog_ref.showModal() if modal else dialog_ref.show()
+        click_actions = merge_actions(show_method, sheet_open.set(True), kwargs=kwargs)
 
         return Button(
             *children,
@@ -79,78 +184,25 @@ def SheetContent(
     cls: str = "",
     **kwargs,
 ) -> FT:
-    def content(*, sig, sheet_open, modal, **ctx):
-        side_cls = {
-            "right": "inset-y-0 right-0 h-full border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right",
-            "left": "inset-y-0 left-0 h-full border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left",
-            "top": "inset-x-0 top-0 w-full border-b data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top",
-            "bottom": "inset-x-0 bottom-0 w-full border-t data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
-        }[side]
-
-        size_cls = (
-            ""
-            if side in ("top", "bottom")
-            else {
-                "sm": "max-w-sm",
-                "md": "max-w-md",
-                "lg": "max-w-lg",
-                "xl": "max-w-xl",
-                "full": "max-w-none w-full",
-            }[size]
-        )
-
-        overlay = (
-            Div(
-                data_show=sheet_open,
-                data_on_click=sheet_open.set(False),
-                data_attr_data_state=sheet_open.if_("open", "closed"),
-                cls="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm animate-in fade-in-0",
-                style="display: none;",
-            )
-            if modal
-            else None
-        )
-
+    def content(*, sig, sheet_open, dialog_ref, **ctx):
+        all_ctx = dict(sig=sig, sheet_open=sheet_open, dialog_ref=dialog_ref, **ctx)
         return Div(
-            overlay,
-            Div(
-                SheetClose(
-                    Span(
-                        "×",
-                        aria_hidden="true",
-                        cls="text-2xl font-light leading-none -mt-0.5",
-                    ),
-                    size="icon",
-                    cls="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary",
-                )(sig=sig, sheet_open=sheet_open, **ctx)
-                if show_close
-                else None,
-                *[
-                    inject_context(child, sig=sig, sheet_open=sheet_open, **ctx)
-                    for child in children
-                ],
-                data_show=sheet_open,
-                id=f"{sig}_content",
-                role="dialog",
-                aria_modal=modal,
-                aria_labelledby=f"{sig}_content-title",
-                aria_describedby=f"{sig}_content-description",
-                data_attr_data_state=sheet_open.if_("open", "closed"),
-                cls=cn(
-                    "fixed z-[110] bg-background shadow-lg border flex flex-col",
-                    "transition-all duration-300 ease-in-out",
-                    "data-[state=open]:animate-in data-[state=closed]:animate-out",
-                    "data-[state=closed]:duration-300 data-[state=open]:duration-500",
-                    side_cls,
-                    size_cls,
-                    "overflow-y-auto",
-                    cls,
-                ),
-                style="display: none;",
-                **kwargs,
-            ),
+            SheetClose(
+                Icon("lucide:x", cls="size-4"),
+                Span("Close", cls="sr-only"),
+                size="icon",
+                cls="absolute top-4 right-4 opacity-70 hover:opacity-100 transition-opacity",
+            )(**all_ctx)
+            if show_close
+            else None,
+            *[inject_context(child, **all_ctx) for child in children],
+            cls="relative flex flex-col flex-1",
         )
 
+    content._side = side
+    content._size = size
+    content._cls = cls
+    content._kwargs = kwargs
     return content
 
 
@@ -161,10 +213,13 @@ def SheetClose(
     cls: str = "",
     **kwargs,
 ) -> FT:
-    def close(*, sheet_open, **_):
+    def close(*, sheet_open, dialog_ref, **_):
         from .button import Button
 
-        click_actions = merge_actions(kwargs=kwargs, after=sheet_open.set(False))
+        click_actions = merge_actions(
+            kwargs=kwargs,
+            after=[sheet_open.set(False), dialog_ref.close()],
+        )
 
         return Button(
             *children,
@@ -184,7 +239,7 @@ def SheetHeader(*children, cls: str = "", **kwargs) -> FT:
         return Div(
             *[inject_context(child, **ctx) for child in children],
             data_slot="sheet-header",
-            cls=cn("flex flex-col space-y-1.5 p-6", cls),
+            cls=cn("flex flex-col gap-1.5 p-4", cls),
             **kwargs,
         )
 
@@ -196,10 +251,7 @@ def SheetFooter(*children, cls: str = "", **kwargs) -> FT:
         return Div(
             *[inject_context(child, **ctx) for child in children],
             data_slot="sheet-footer",
-            cls=cn(
-                "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 p-6",
-                cls,
-            ),
+            cls=cn("mt-auto flex flex-col gap-2 p-4", cls),
             **kwargs,
         )
 
@@ -212,7 +264,7 @@ def SheetTitle(*children, cls: str = "", **kwargs) -> FT:
             *children,
             id=f"{sig}_content-title",
             data_slot="sheet-title",
-            cls=cn("text-lg font-semibold text-foreground", cls),
+            cls=cn("text-foreground font-semibold", cls),
             **kwargs,
         )
 

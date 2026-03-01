@@ -25,7 +25,14 @@ def ToggleGroup(
 ) -> FT:
     sig = getattr(signal, "_id", signal) or gen_id("toggle_group")
     initial = value if value is not None else ("" if type == "single" else [])
-    ctx = {"type": type, "variant": variant, "size": size, "disabled": disabled}
+    is_vertical = orientation == "vertical"
+    ctx = {
+        "type": type,
+        "variant": variant,
+        "size": size,
+        "disabled": disabled,
+        "orientation": orientation,
+    }
 
     items = [
         ToggleGroupItem(child[1], value=child[0])
@@ -43,9 +50,10 @@ def ToggleGroup(
         data_type=type,
         data_orientation=orientation,
         role="radiogroup" if type == "single" else "group",
-        aria_orientation=orientation,
+        aria_orientation=orientation if type == "single" else None,
         cls=cn(
-            "group/toggle-group flex w-fit items-center rounded-md",
+            "group/toggle-group flex w-fit rounded-md",
+            "flex-col items-stretch" if is_vertical else "items-center",
             "data-[variant=outline]:shadow-xs" if variant == "outline" else "",
             cls,
         ),
@@ -60,8 +68,9 @@ def ToggleGroupItem(
     cls: str = "",
     **kwargs: Any,
 ):
-    def _(*, selected, type, variant, size, disabled, **_):
+    def _(*, selected, type, variant, size, disabled, orientation="horizontal", **_):
         item_id = kwargs.pop("id", gen_id("toggle_item"))
+        is_vertical = orientation == "vertical"
         is_selected = (
             selected.eq(value) if type == "single" else selected.contains(value)
         )
@@ -78,7 +87,7 @@ def ToggleGroupItem(
             role="radio" if type == "single" else "checkbox",
             id=item_id,
             disabled=disabled,
-            aria_label=aria_label,
+            aria_label=aria_label or value,
             data_attr_aria_checked=is_selected.if_("true", "false"),
             data_attr_data_state=is_selected.if_("on", "off"),
             data_slot="toggle-group-item",
@@ -87,10 +96,16 @@ def ToggleGroupItem(
             data_value=value,
             cls=cn(
                 toggle_variants(variant=variant, size=size),
-                "shrink-0 rounded-none shadow-none",
-                "first:rounded-l-md last:rounded-r-md",
+                "w-auto min-w-0 shrink-0 px-3 rounded-none shadow-none",
+                "first:rounded-t-md last:rounded-b-md"
+                if is_vertical
+                else "first:rounded-l-md last:rounded-r-md",
                 "focus:z-10 focus-visible:z-10",
-                "data-[variant=outline]:border-l-0 data-[variant=outline]:first:border-l"
+                (
+                    "data-[variant=outline]:border-t-0 data-[variant=outline]:first:border-t"
+                    if is_vertical
+                    else "data-[variant=outline]:border-l-0 data-[variant=outline]:first:border-l"
+                )
                 if variant == "outline"
                 else "",
                 cls,

@@ -11,7 +11,7 @@ TAILWIND_CSS_TEMPLATE = """\
 @theme {
   --radius: 0.65rem;
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
-  --font-mono: "SF Mono", "Monaco", "Inconsolata", "Fira Code", "Fira Mono", "Roboto Mono", monospace;
+  --font-mono: ui-monospace, "SF Mono", "Monaco", "Inconsolata", "Fira Code", "Fira Mono", "Roboto Mono", monospace;
 }
 :root {
   --radius: 0.625rem;
@@ -65,9 +65,9 @@ TAILWIND_CSS_TEMPLATE = """\
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.521 0.245 27.325);
   --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.31 0 0);
-  --input: oklch(0.31 0 0);
-  --ring: oklch(0.851 0 0);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
   --chart-1: oklch(0.828 0.189 84.429);
   --chart-2: oklch(0.769 0.188 70.08);
   --chart-3: oklch(0.646 0.222 41.116);

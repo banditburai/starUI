@@ -1,40 +1,7 @@
-.code-container {
-    background: var(--code-bg);
-    color: var(--code-color);
-    border: 1px solid var(--code-border);
-    border-radius: 8px;
-    padding: 20px;
-    overflow-x: auto !important;
-    margin: 0;
-    min-width: 0;
-    max-width: 100% !important;
-    width: 100%;
-    box-sizing: border-box;
-    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'SF Mono', monospace;
-    font-size: 14px;
-    line-height: 1.5;
-}
-
-.code-container pre {
-    margin: 0;
-    font-family: inherit;
-    font-size: inherit;
-    line-height: inherit;
-    white-space: pre;
-    overflow-x: auto;
-    min-width: 0;
-    max-width: 100%;
-}
-
-.code-container code {
-    font-family: inherit;
-    background: none;
-    padding: 0;
-    display: block;
-    white-space: pre;
-    overflow-x: auto;
-}
-
+[data-slot="code-block"]::-webkit-scrollbar { height: 8px; width: 8px; }
+[data-slot="code-block"]::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+[data-slot="code-block"]::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 4px; }
+[data-slot="code-block"]::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
 .token-keyword { color: var(--token-keyword); }
 .token-string { color: var(--token-string); }
 .token-comment { color: var(--token-comment); font-style: italic; }
@@ -44,25 +11,11 @@
 .token-builtin { color: var(--token-builtin); }
 .token-decorator { color: var(--token-decorator); }
 .token-punctuation { color: var(--token-punctuation); }
-
-.code-container::-webkit-scrollbar {
-    height: 8px;
-    width: 8px;
-}
-
-.code-container::-webkit-scrollbar-track {
-    background: var(--scrollbar-track);
-}
-
-.code-container::-webkit-scrollbar-thumb {
-    background: var(--scrollbar-thumb);
-    border-radius: 4px;
-}
-
-.code-container::-webkit-scrollbar-thumb:hover {
-    background: var(--scrollbar-thumb-hover);
-}
-
+.token-starhtml-element { color: var(--token-starhtml-element); }
+.token-datastar-attr { color: var(--token-datastar-attr); }
+.token-css-class { color: var(--token-css-class); }
+.token-css-style { color: var(--token-css-style); }
+.token-signal { color: var(--token-signal); }
 
 :root {
     --code-bg: #ffffff;
@@ -70,13 +23,18 @@
     --code-border: #e1e4e8;
     --token-keyword: #d73a49;
     --token-string: #032f62;
-    --token-comment: #6f42c1;
+    --token-comment: #6e7781;
     --token-number: #005cc5;
     --token-operator: #24292e;
     --token-identifier: #6f42c1;
-    --token-builtin: #e36209;
+    --token-builtin: #b45309;
     --token-decorator: #6f42c1;
     --token-punctuation: #24292e;
+    --token-starhtml-element: #40a02b;
+    --token-datastar-attr: #8839ef;
+    --token-css-class: #179299;
+    --token-css-style: #d20f39;
+    --token-signal: #fe640b;
     --scrollbar-track: #ffffff;
     --scrollbar-thumb: #e1e4e8;
     --scrollbar-thumb-hover: #c8e1ff;
@@ -95,6 +53,11 @@
     --token-builtin: #ffa657;
     --token-decorator: #d2a8ff;
     --token-punctuation: #c9d1d9;
+    --token-starhtml-element: #a6e3a1;
+    --token-datastar-attr: #cba6f7;
+    --token-css-class: #94e2d5;
+    --token-css-style: #f38ba8;
+    --token-signal: #fab387;
     --scrollbar-track: #0d1117;
     --scrollbar-thumb: #30363d;
     --scrollbar-thumb-hover: #484f58;
@@ -113,6 +76,11 @@
     --token-builtin: #ffa657;
     --token-decorator: #d2a8ff;
     --token-punctuation: #c9d1d9;
+    --token-starhtml-element: #a6e3a1;
+    --token-datastar-attr: #cba6f7;
+    --token-css-class: #94e2d5;
+    --token-css-style: #f38ba8;
+    --token-signal: #fab387;
     --scrollbar-track: #0d1117;
     --scrollbar-thumb: #30363d;
     --scrollbar-thumb-hover: #484f58;

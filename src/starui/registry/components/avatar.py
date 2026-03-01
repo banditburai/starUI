@@ -1,17 +1,16 @@
-from typing import Any
-
 from starhtml import FT, Div, Img, Signal
 
 from .utils import cn, gen_id
 
 
 def Avatar(
-    *children: Any,
+    *children,
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     return Div(
         *children,
+        data_slot="avatar",
         cls=cn(
             "relative flex size-10 shrink-0 overflow-hidden rounded-full",
             cls,
@@ -26,7 +25,7 @@ def AvatarImage(
     loading: str = "lazy",
     signal: str | Signal = "",
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     sig = getattr(signal, "_id", signal) or gen_id("avatar_img_error")
     error_state = Signal(sig, False)
@@ -42,14 +41,15 @@ def AvatarImage(
             cls=cn("aspect-square size-full object-cover", cls),
             **kwargs,
         ),
-        style="display: contents",
+        cls="contents",
+        data_slot="avatar-image",
     )
 
 
 def AvatarFallback(
-    *children: Any,
+    *children,
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     return Div(
         *children,
@@ -57,5 +57,6 @@ def AvatarFallback(
             "flex size-full items-center justify-center rounded-full bg-muted",
             cls,
         ),
+        data_slot="avatar-fallback",
         **kwargs,
     )

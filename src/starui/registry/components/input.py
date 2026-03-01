@@ -124,5 +124,6 @@ def InputWithLabel(
         HTMLP(helper_text, cls="text-sm text-muted-foreground mt-1.5")
         if helper_text and not error_text
         else None,
+        data_slot="input-with-label",
         cls=cn("space-y-1.5", cls),
     )

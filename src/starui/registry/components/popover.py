@@ -2,7 +2,7 @@ from typing import Literal
 
 from starhtml import FT, Div, Signal
 
-from .utils import cn, gen_id
+from .utils import cn, gen_id, inject_context
 
 
 def Popover(
@@ -15,7 +15,7 @@ def Popover(
     ctx = {"sig": sig}
 
     return Div(
-        *[child(**ctx) if callable(child) else child for child in children],
+        *[inject_context(child, **ctx) for child in children],
         data_slot="popover",
         cls=cn("relative inline-block", cls),
         **kwargs,
@@ -73,10 +73,7 @@ def PopoverContent(
             position_mods["offset"] = offset
 
         return Div(
-            *[
-                child(sig=sig, **ctx) if callable(child) else child
-                for child in children
-            ],
+            *[inject_context(child, sig=sig, **ctx) for child in children],
             data_ref=content_ref,
             data_position=(f"{sig}_trigger", position_mods),
             popover="auto",
@@ -86,7 +83,7 @@ def PopoverContent(
             tabindex="-1",
             data_slot="popover-content",
             cls=cn(
-                "z-50 rounded-md border border-input bg-popover text-popover-foreground shadow-md outline-none",
+                "z-50 rounded-md border bg-popover text-popover-foreground shadow-md outline-none",
                 "w-72 p-4",
                 cls,
             ),

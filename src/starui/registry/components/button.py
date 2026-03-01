@@ -1,4 +1,4 @@
-from typing import Any, Literal
+from typing import Literal
 
 from starhtml import FT
 from starhtml import Button as HTMLButton
@@ -43,13 +43,13 @@ button_variants = cva(
 
 
 def Button(
-    *children: Any,
+    *children,
     variant: ButtonVariant = "default",
     size: ButtonSize = "default",
     disabled: bool = False,
     type: Literal["button", "submit", "reset"] = "button",
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     return HTMLButton(
         *children,

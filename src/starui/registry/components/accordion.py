@@ -1,21 +1,21 @@
 from itertools import count
-from typing import Any, Literal
+from typing import Literal
 
 from starhtml import FT, Button, Div, Icon, Signal
 
-from .utils import cn, gen_id, merge_actions
+from .utils import cn, gen_id, inject_context, merge_actions
 
 AccordionType = Literal["single", "multiple"]
 
 
 def Accordion(
-    *children: Any,
+    *children,
     type: AccordionType = "single",
     collapsible: bool = False,
     value: str | int | list[str | int] | None = None,
     signal: str | Signal = "",
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     sig = getattr(signal, "_id", signal) or gen_id("accordion")
 
@@ -33,6 +33,7 @@ def Accordion(
     accordion_state = Signal(sig, initial)
     ctx = {
         "accordion_state": accordion_state,
+        "id": sig,
         "type": type,
         "collapsible": collapsible,
         "initial_value": value,
@@ -41,19 +42,20 @@ def Accordion(
 
     return Div(
         accordion_state,
-        *[child(**ctx) if callable(child) else child for child in children],
+        *[inject_context(child, **ctx) for child in children],
+        data_slot="accordion",
         cls=cn("w-full min-w-0", cls),
         **kwargs,
     )
 
 
 def AccordionItem(
-    *children: Any,
+    *children,
     value: str | int | None = None,
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
-    def _(*, accordion_state, type, collapsible, initial_value, _item_index, **_):
+    def _(*, accordion_state, id, type, collapsible, initial_value, _item_index, **_):
         item_value = value if value is not None else next(_item_index)
         is_open = (
             (accordion_state == item_value)
@@ -76,6 +78,7 @@ def AccordionItem(
             click_action = accordion_state.toggle_in(item_value)
 
         child_ctx = {
+            "id": id,
             "item_value": item_value,
             "is_open": is_open,
             "is_default_open": is_default_open,
@@ -83,7 +86,8 @@ def AccordionItem(
         }
 
         return Div(
-            *[child(**child_ctx) if callable(child) else child for child in children],
+            *[inject_context(child, **child_ctx) for child in children],
+            data_slot="accordion-item",
             data_value=str(item_value),
             # SSR initial + reactive binding (prevents FOUC before Datastar hydrates)
             data_state="open" if is_default_open else "closed",
@@ -96,18 +100,18 @@ def AccordionItem(
 
 
 def AccordionTrigger(
-    *children: Any,
+    *children,
     cls: str = "",
     icon: str | None = "lucide:chevron-down",
-    icon_cls: str = "h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 ease-out",
+    icon_cls: str = "size-4 shrink-0 text-muted-foreground transition-transform duration-200 ease-out",
     icon_rotation: int = 180,
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
-    def _(*, item_value, is_open, is_default_open, click_action, **_):
+    def _(*, id, item_value, is_open, is_default_open, click_action, **_):
         click_actions = merge_actions(click_action, kwargs=kwargs)
 
         icon_el = (
-            (
+            [
                 Icon(
                     icon,
                     cls=icon_cls,
@@ -118,51 +122,53 @@ def AccordionTrigger(
                         f"transform: rotate({icon_rotation}deg)",
                         "transform: rotate(0deg)",
                     ),
-                ),
-            )
+                )
+            ]
             if icon
-            else ()
+            else []
         )
 
-        return Div(
-            Button(
-                *children,
-                *icon_el,
-                data_on_click=click_actions,
-                type="button",
-                id=f"{item_value}-trigger",
-                aria_controls=f"{item_value}-content",
-                aria_expanded="true" if is_default_open else "false",
-                data_attr_aria_expanded=is_open.if_("true", "false"),
-                data_state="open" if is_default_open else "closed",
-                data_attr_data_state=is_open.if_("open", "closed"),
-                cls=cn(
-                    "flex w-full items-center justify-between py-4 text-sm font-medium transition-all hover:underline text-left",
-                    cls,
-                ),
-                **kwargs,
+        return Button(
+            *children,
+            *icon_el,
+            data_on_click=click_actions,
+            type="button",
+            id=f"{id}-{item_value}-trigger",
+            data_slot="accordion-trigger",
+            aria_controls=f"{id}-{item_value}-content",
+            aria_expanded="true" if is_default_open else "false",
+            data_attr_aria_expanded=is_open.if_("true", "false"),
+            data_state="open" if is_default_open else "closed",
+            data_attr_data_state=is_open.if_("open", "closed"),
+            cls=cn(
+                "flex w-full min-w-0 items-center justify-between py-4 text-sm font-medium "
+                "transition-colors hover:underline text-left outline-none "
+                "focus-visible:ring-ring/50 focus-visible:ring-[3px] focus-visible:rounded-sm "
+                "[&_[data-icon-sh]]:pointer-events-none [&_[data-icon-sh]]:shrink-0",
+                cls,
             ),
-            cls="flex w-full",
+            **kwargs,
         )
 
     return _
 
 
 def AccordionContent(
-    *children: Any,
+    *children,
     cls: str = "",
     role: str = "region",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
-    def _(*, item_value, is_open, is_default_open, **_):
+    def _(*, id, item_value, is_open, is_default_open, **_):
         return Div(
             Div(
-                Div(*children, cls="pb-4 pt-0"),
+                Div(*children, cls="pb-4"),
                 cls="overflow-hidden min-h-0",
             ),
+            data_slot="accordion-content",
             role=role,
-            id=f"{item_value}-content",
-            aria_labelledby=f"{item_value}-trigger",
+            id=f"{id}-{item_value}-content",
+            aria_labelledby=f"{id}-{item_value}-trigger",
             style="grid-template-rows: 1fr"
             if is_default_open
             else "grid-template-rows: 0fr",

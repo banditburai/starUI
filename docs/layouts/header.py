@@ -45,6 +45,7 @@ def _navigation_menu(nav_items: list[dict[str, Any]]) -> FT:
             for item in nav_items
         ],
         cls="hidden xl:flex items-center gap-6",
+        aria_label="Main",
     )
 
 
@@ -52,7 +53,7 @@ def _navigation_menu(nav_items: list[dict[str, Any]]) -> FT:
 
 
 def _github_links() -> FT:
-    link_cls = "text-[11px] font-mono text-foreground/50 hover:text-foreground transition-colors"
+    link_cls = "text-[11px] font-mono text-muted-foreground hover:text-foreground transition-colors"
     return Div(
         A("starHTML", href="https://github.com/banditburai/starhtml", target="_blank", rel="noopener noreferrer", cls=link_cls),
         A(_star_mark_small(), href="https://ko-fi.com/promptsiren", target="_blank", rel="noopener noreferrer", aria_label="Support on Ko-fi", cls="flex items-center"),

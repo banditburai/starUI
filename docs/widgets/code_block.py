@@ -4,8 +4,6 @@ from starui.registry.components.utils import cn
 from starui.registry.components.code_block import CodeBlock as BaseCodeBlock
 from .copy_button import CopyButton
 
-SCROLLBAR_STYLE = "scrollbar-width: thin; scrollbar-color: transparent transparent;"
-
 
 def CodePanel(
     code: str,
@@ -37,7 +35,7 @@ def CodePanel(
                 data_attr_cls=collapsed.if_("", "border-b border-border/50") if collapsible else None
             ),
             Div(
-                BaseCodeBlock(code, language, id=code_id, cls="font-mono text-sm !border-0 !border-none overflow-x-auto", style=SCROLLBAR_STYLE),
+                BaseCodeBlock(code, language, id=code_id, cls="font-mono text-sm !border-0 !border-none overflow-x-auto"),
                 cls=cn("transition-all duration-300 ease-in-out", not collapsible and "max-h-[2000px]"),
                 data_attr_cls=collapsed.if_("max-h-0 overflow-hidden", "max-h-[2000px]") if collapsible else None
             ),
@@ -54,7 +52,7 @@ def CodeBlock(code: str, language: str = "bash", cls: str = "", center_button: b
 
     return Div(
         (copied := Signal(signal_name, False)),
-        BaseCodeBlock(code, language=language, id=code_id, cls="overflow-x-auto", style=SCROLLBAR_STYLE),
+        BaseCodeBlock(code, language=language, id=code_id, cls="overflow-x-auto"),
         CopyButton(code_id, copied, variant="positioned", center=center_button),
         cls=cn("relative group", cls),
         **attrs

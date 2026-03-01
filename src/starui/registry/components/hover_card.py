@@ -1,8 +1,8 @@
-from typing import Any, Literal
+from typing import Literal
 
 from starhtml import FT, Div, Signal, clear_timeout, reset_timeout
 
-from .utils import cn, gen_id
+from .utils import cn, gen_id, inject_context
 
 
 def HoverCard(
@@ -10,7 +10,7 @@ def HoverCard(
     signal: str | Signal = "",
     default_open: bool = False,
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     sig = getattr(signal, "_id", signal) or gen_id("hover_card")
     open_state = Signal(f"{sig}_open", default_open)
@@ -20,7 +20,7 @@ def HoverCard(
 
     return Div(
         open_state,
-        *[child(**ctx) if callable(child) else child for child in children],
+        *[inject_context(child, **ctx) for child in children],
         data_slot="hover-card",
         cls=cn("relative inline-block", cls),
         **kwargs,
@@ -28,11 +28,11 @@ def HoverCard(
 
 
 def HoverCardTrigger(
-    *children: Any,
+    *children,
     hover_delay: int = 700,
     hide_delay: int = 300,
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ):
     def trigger(*, sig, open_state, timer_state, **_):
         trigger_ref = Signal(f"{sig}_trigger", _ref_only=True)
@@ -59,12 +59,12 @@ def HoverCardTrigger(
 
 
 def HoverCardContent(
-    *children: Any,
+    *children,
     side: Literal["top", "right", "bottom", "left"] = "bottom",
     align: Literal["start", "center", "end"] = "center",
     hide_delay: int = 300,
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ):
     def content(*, sig, open_state, timer_state, **_):
         content_ref = Signal(f"{sig}_content", _ref_only=True)
@@ -78,7 +78,7 @@ def HoverCardContent(
                 f"{sig}_trigger",
                 {
                     "placement": placement,
-                    "offset": 8,
+                    "offset": 4,
                     "flip": True,
                     "shift": True,
                     "hide": True,
@@ -94,10 +94,9 @@ def HoverCardContent(
             aria_labelledby=f"{sig}_trigger",
             tabindex="-1",
             data_slot="hover-card-content",
-            style="display: none",
             cls=cn(
-                "fixed z-50 w-72 max-w-[90vw] pointer-events-auto",
-                "rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none overflow-hidden",
+                "fixed z-50 w-64 max-w-[90vw] pointer-events-auto",
+                "rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none",
                 cls,
             ),
             **kwargs,

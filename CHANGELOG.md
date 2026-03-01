@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- `Sheet` rewritten to use native HTML `<dialog>` with CSS transitions and backdrop animations
+- `Dialog` and `AlertDialog` migrated to native `<dialog>` element
+- `Tabs` variant system reworked — "plain" renamed to "line", new active indicator styling
+- `Toast` ordering system with fixed-size slots and View Transition API animations
+- `Calendar` added `caption_layout` parameter ("label" vs "dropdown"), shows outside dates
+- `Command` added optional `shortcut` parameter for global keyboard triggers
+- `Switch` added `size` parameter ("default", "sm")
+- `DropdownMenu` smart scroll with `--popover-available-height` and overflow handling
+- `CodeBlock` self-contained token colors, removed starlighter theme dependency
+- `Alert` added `live` parameter for conditional `role="alert"`
+- Component context passing simplified with new `inject_context()` utility
+- Requires starhtml >=0.5.12
+
 ## [0.2.0] - 2026-02-26
 
 ### Added

@@ -2,6 +2,8 @@ from collections.abc import Callable
 from typing import Any
 from uuid import uuid4
 
+from fastcore.xml import FT
+
 try:
     from starmerge import merge
 except ImportError:
@@ -107,40 +109,31 @@ def ensure_signal(signal: str | None, prefix: str) -> str:
     return signal or gen_id(prefix)
 
 
-def _extend(result: list, val: Any) -> None:
-    if isinstance(val, list):
-        result.extend(val)
-    elif val is not None:
-        result.append(val)
+def _flatten(*items: Any) -> list:
+    result: list = []
+    for item in items:
+        if isinstance(item, list | tuple):
+            result.extend(item)
+        elif item is not None:
+            result.append(item)
+    return result
 
 
 def merge_actions(*before: Any, kwargs: dict | None = None, after: Any = None) -> list:
-    """Merge framework actions with user-supplied data_on_click from kwargs.
-
-    Open/trigger: merge_actions(open_action, kwargs=kwargs)
-    Close/dismiss: merge_actions(kwargs=kwargs, after=close_action)
-    """
-    result = [a for a in before if a is not None]
+    # Flattens so callers can pass single actions or lists of actions freely
+    result = _flatten(*before)
     if kwargs is not None:
-        _extend(result, kwargs.pop("data_on_click", None))
-    _extend(result, after)
+        result.extend(_flatten(kwargs.pop("data_on_click", None)))
+    result.extend(_flatten(after))
     return result
 
 
 def inject_context(element, **context):
-    """Recursively inject context into callable children, preserving structure.
+    """Recursively inject context into callable children, preserving structure."""
+    if callable(element) and not isinstance(element, FT):
+        element = element(**context)
 
-    Allows arbitrary HTML wrappers while ensuring context flows to nested callables.
-    """
-    if callable(element):
-        result = element(**context)
-        if hasattr(result, "children") and result.children:
-            result.children = tuple(
-                inject_context(c, **context) for c in result.children
-            )
-        return result
-
-    if hasattr(element, "children") and element.children:
+    if isinstance(element, FT) and element.children:
         element.children = tuple(inject_context(c, **context) for c in element.children)
 
     return element

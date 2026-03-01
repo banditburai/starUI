@@ -9,7 +9,7 @@ CATEGORY = "overlay"
 ORDER = 45
 STATUS = "stable"
 
-from starhtml import Div, P, Icon, Span, H3, Code, Ul, Li, Signal, js, get, Strong
+from starhtml import Div, P, Icon, Span, Ul, Li, Signal, js
 from starui.registry.components.alert_dialog import (
     AlertDialog, AlertDialogTrigger, AlertDialogContent,
     AlertDialogHeader, AlertDialogFooter, AlertDialogTitle,
@@ -17,12 +17,9 @@ from starui.registry.components.alert_dialog import (
 )
 from starui.registry.components.button import Button
 from starui.registry.components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
-from starui.registry.components.badge import Badge
 from starui.registry.components.input import InputWithLabel
 from starui.registry.components.checkbox import CheckboxWithLabel
-from starui.registry.components.utils import cn
 from utils import auto_generate_page, with_code, Prop, Component, build_api_reference
-from widgets.component_preview import ComponentPreview
 
 
 
@@ -45,24 +42,6 @@ def hero_alert_dialog_example():
         )
     )
 
-
-@with_code
-def basic_alert_dialog_example():
-    return AlertDialog(
-        AlertDialogTrigger("Show Alert"),
-        AlertDialogContent(
-            AlertDialogHeader(
-                AlertDialogTitle("Heads up!"),
-                AlertDialogDescription(
-                    "This is an important message that requires your attention."
-                )
-            ),
-            AlertDialogFooter(
-                AlertDialogCancel("Dismiss"),
-                AlertDialogAction("Understood")
-            )
-        )
-    )
 
 
 @with_code
@@ -199,107 +178,60 @@ def unsaved_changes_alert_dialog_example():
 
 @with_code
 def session_timeout_alert_dialog_example():
-    session_time = Signal("session_time", 15)
-    logged_in = Signal("logged_in", False)
-    timer_active = Signal("timer_active", False)
-
-    reset_actions = [
-        logged_in.set(False),
-        timer_active.set(False),
-        session_time.set(15)
-    ]
-
-    start_session_actions = [
-        logged_in.set(True),
-        session_time.set(15),
-        timer_active.set(True)
-    ]
-
-    progress_bar = Div(
-        Div(
-            data_attr_style="width: " + (session_time / 15) * 100 + "%",
-            cls="h-2 bg-orange-500 rounded-full transition-all duration-1000"
-        ),
-        cls="w-full bg-secondary rounded-full h-2 mt-2"
-    )
-
-    session_display = Div(
-        P("Logged in as: user@example.com", cls="text-sm font-medium mb-2"),
-        P(
-            "Session expires in: ",
-            Span(data_text=session_time, cls="font-mono font-bold text-lg"),
-            " seconds",
-            cls="text-sm"
-        ),
-        progress_bar,
-        Button("Logout", data_on_click=reset_actions, variant="outline", size="sm", cls="mt-4"),
-        data_show=logged_in,
-        cls="space-y-2"
-    )
-
-    timer_effect = Div(
-        data_effect=js("""
-            if ($timer_active && $logged_in) {
-                const timer = setInterval(() => {
-                    if (!$timer_active || !$logged_in) {
-                        clearInterval(timer);
-                        return;
-                    }
-                    $session_time--;
-                    if ($session_time === 5) $timeout_dialog?.showModal();
-                    if ($session_time <= 0) {
-                        clearInterval(timer);
-                        $timeout_dialog?.close();
-                        $logged_in = false;
-                        $timer_active = false;
-                        $session_time = 15;
-                    }
-                }, 1000);
-                return () => clearInterval(timer);
-            }
-        """)
-    )
+    countdown = Signal("countdown", 10)
+    active = Signal("active", False)
 
     timeout_dialog = AlertDialog(
         AlertDialogContent(
-            Icon("lucide:clock", cls="h-12 w-12 text-orange-500 mx-auto mb-4"),
             AlertDialogHeader(
-                AlertDialogTitle("Session Expiring Soon"),
+                AlertDialogTitle("Session Expiring"),
                 AlertDialogDescription(
-                    "Your session will expire in ",
-                    Span(data_text=session_time, cls="font-bold text-orange-500"),
-                    " seconds. Do you want to continue?"
+                    "Your session expires in ",
+                    Span(data_text=countdown, cls="font-bold text-orange-500"),
+                    " seconds."
                 )
             ),
             AlertDialogFooter(
-                AlertDialogAction("Logout Now", variant="destructive", action=reset_actions),
-                AlertDialogAction("Continue Session", action=session_time.set(15))
+                AlertDialogAction("Logout", variant="destructive", action=active.set(False)),
+                AlertDialogAction("Stay Logged In", action=countdown.set(10))
             )
         ),
         signal="timeout_dialog"
     )
 
-    return Div(
-        Card(
-            session_time,
-            logged_in,
-            timer_active,
-            CardHeader(
-                CardTitle("Session Management"),
-                CardDescription("Auto-logout demonstration with warning")
-            ),
-            CardContent(
-                Div(
-                    Button("Login", data_on_click=start_session_actions, variant="default"),
-                    data_show=~logged_in
-                ),
-                session_display,
-                timer_effect,
-                timeout_dialog
-            ),
-            cls="w-full max-w-lg"
+    timer = Div(data_effect=js("""
+        if ($active) {
+            const id = setInterval(() => {
+                if (!$active) { clearInterval(id); return }
+                $countdown--
+                if ($countdown === 5) $timeout_dialog?.showModal()
+                if ($countdown <= 0) { clearInterval(id); $active = false; $countdown = 10 }
+            }, 1000)
+            return () => clearInterval(id)
+        }
+    """))
+
+    return Card(
+        countdown, active,
+        CardHeader(
+            CardTitle("Session Demo"),
+            CardDescription("Programmatic dialog open via signal prop")
         ),
-        cls="w-full max-w-2xl"
+        CardContent(
+            Div(
+                Button("Start Session", data_on_click=[active.set(True), countdown.set(10)]),
+                data_show=~active
+            ),
+            Div(
+                P("Session expires in: ",
+                  Span(data_text=countdown, cls="font-mono font-bold text-lg"), " seconds",
+                  cls="text-sm"),
+                Button("Logout", data_on_click=active.set(False), variant="outline", size="sm", cls="mt-3"),
+                data_show=active, cls="space-y-2"
+            ),
+            timer, timeout_dialog
+        ),
+        cls="max-w-md"
     )
 
 
@@ -387,98 +319,29 @@ def batch_operation_alert_dialog_example():
     )
 
 
-@with_code
-def payment_confirmation_alert_dialog_example():
-    def order_line(label, value, extra_cls=""):
-        return Div(
-            P(label, cls="text-sm text-muted-foreground"),
-            P(value, cls="font-medium"),
-            cls=cn("flex justify-between py-2", extra_cls)
-        )
-    
-    order_summary = Div(
-        order_line("Product:", "Premium Plan"),
-        order_line("Price:", "$99.00"),
-        order_line("Tax:", "$9.90", "border-b"),
-        Div(
-            P("Total:", cls="font-medium"),
-            P("$108.90", cls="text-xl font-bold"),
-            cls="flex justify-between py-2"
-        )
-    )
-    
-    security_badge = Div(
-        Div(
-            Icon("lucide:lock", cls="h-4 w-4 text-green-500"),
-            P("Secure Payment", cls="text-sm font-medium"),
-            cls="flex items-center gap-2"
-        ),
-        P("Your payment information is encrypted and secure", 
-          cls="text-xs text-muted-foreground mt-1"),
-        cls="p-3 bg-green-50 dark:bg-green-950/20 rounded-md mb-4"
-    )
-    
-    payment_details = Div(
-        P("Amount to charge: ", Span("$108.90", cls="font-bold text-lg")),
-        P("Card ending in: ", Span("****4242", cls="font-mono")),
-        cls="space-y-2"
-    )
-    
-    return Card(
-        CardHeader(
-            CardTitle("Complete Purchase"),
-            CardDescription("Review your order")
-        ),
-        CardContent(
-            order_summary,
-            AlertDialog(
-                AlertDialogTrigger(
-                    Icon("lucide:credit-card", cls="h-4 w-4 mr-2"),
-                    "Complete Purchase",
-                    cls="w-full"
-                ),
-                AlertDialogContent(
-                    AlertDialogHeader(
-                        AlertDialogTitle(
-                            Icon("lucide:shield-check", cls="h-6 w-6 mr-2 text-green-500"),
-                            "Confirm Payment"
-                        ),
-                        AlertDialogDescription("Please review and confirm your purchase")
-                    ),
-                    Div(security_badge, payment_details, cls="py-4"),
-                    AlertDialogFooter(
-                        AlertDialogCancel("Cancel"),
-                        AlertDialogAction("Confirm Payment")
-                    )
-                )
-            )
-        ),
-        cls="max-w-sm"
-    )
-
-
-
 EXAMPLES_DATA = [
-    {"fn": hero_alert_dialog_example, "title": "Hero Alert Dialog", "description": "Confirmation dialog with destructive action"},
-    {"fn": basic_alert_dialog_example, "title": "Basic Alert Dialog", "description": "Simple alert dialog with dismiss and confirm actions"},
-    {"fn": destructive_alert_dialog_example, "title": "Destructive Action", "description": "Delete confirmation with detailed information"},
-    {"fn": unsaved_changes_alert_dialog_example, "title": "Unsaved Changes", "description": "Prompt user about unsaved changes before exiting"},
-    {"fn": session_timeout_alert_dialog_example, "title": "Session Timeout", "description": "Auto-triggered alert with countdown timer"},
-    {"fn": batch_operation_alert_dialog_example, "title": "Batch Operations", "description": "Confirm actions on multiple selected items"},
-    {"fn": payment_confirmation_alert_dialog_example, "title": "Payment Confirmation", "description": "Secure payment confirmation with order details"},
+    {"fn": hero_alert_dialog_example, "title": "Destructive Confirmation", "description": "Basic confirm/cancel pattern with a destructive action"},
+    {"fn": destructive_alert_dialog_example, "title": "Rich Content", "description": "Icons, consequence lists, and Card composition for a danger zone pattern"},
+    {"fn": unsaved_changes_alert_dialog_example, "title": "Reactive Content", "description": "Using action callbacks to reset signals — multi-button footer with live data preview"},
+    {"fn": session_timeout_alert_dialog_example, "title": "Programmatic Open", "description": "Opening the dialog from JavaScript via the signal prop — no trigger click needed"},
+    {"fn": batch_operation_alert_dialog_example, "title": "Batch Operations", "description": "Reactive selection state with dynamic button labels and conditional content"},
 ]
 
 API_REFERENCE = build_api_reference(
+    main_props=[
+        Prop("signal", "str | Signal", "Named signal for programmatic open/close. Creates a DOM ref accessible as $name in Datastar expressions", "auto-generated"),
+        Prop("cls", "str", "Additional CSS classes for the dialog element", "''"),
+    ],
     components=[
-        Component("AlertDialog", "Container for alert dialog functionality"),
-        Component("AlertDialogTrigger", "Button or element that opens the dialog"),
-        Component("AlertDialogContent", "Main dialog content container"),
-        Component("AlertDialogHeader", "Header section with title and description"),
-        Component("AlertDialogTitle", "Dialog title text"),
-        Component("AlertDialogDescription", "Dialog description or message"),
-        Component("AlertDialogFooter", "Footer with action buttons"),
-        Component("AlertDialogAction", "Primary action button (e.g., Confirm, Delete)"),
-        Component("AlertDialogCancel", "Cancel/dismiss button"),
+        Component("AlertDialog", "Root container that manages dialog open/close state"),
+        Component("AlertDialogTrigger", "Button that opens the dialog. Props: variant ('default' | 'destructive'), size, and all Button props are passed through"),
+        Component("AlertDialogContent", "Dialog content container rendered inside the native <dialog> element"),
+        Component("AlertDialogHeader", "Flex column layout for title and description"),
+        Component("AlertDialogTitle", "Dialog title — rendered as <h2> with aria-labelledby linkage"),
+        Component("AlertDialogDescription", "Dialog description — rendered as <p> with aria-describedby linkage"),
+        Component("AlertDialogFooter", "Footer layout — stacks vertically on mobile, horizontal on sm+"),
+        Component("AlertDialogAction", "Confirm button. Props: action (Any) — signal setters or js() to run before close; variant ('default' | 'destructive')"),
+        Component("AlertDialogCancel", "Cancel button — always renders with variant='outline'. Closes the dialog with no additional action"),
     ]
 )
 

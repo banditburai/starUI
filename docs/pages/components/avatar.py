@@ -1,6 +1,5 @@
 """
 Avatar component documentation - User profile images with fallback.
-Clean, minimal, and reactive.
 """
 
 TITLE = "Avatar"
@@ -11,9 +10,7 @@ STATUS = "stable"
 
 from starhtml import Div, P, Span
 from starui.registry.components.avatar import Avatar, AvatarFallback, AvatarImage
-from utils import auto_generate_page, with_code, Component, build_api_reference
-from widgets.component_preview import ComponentPreview
-
+from utils import auto_generate_page, with_code, Prop, Component, build_api_reference
 
 
 @with_code
@@ -21,63 +18,27 @@ def hero_avatar_example():
     return Div(
         Avatar(
             AvatarImage(
-                src="https://github.com/shadcn.png",
-                alt="@shadcn"
+                src="https://avatars.githubusercontent.com/u/1024025?v=4",
+                alt="Sarah Miller"
             )
         ),
         Avatar(
             AvatarImage(
-                src="https://avatars.githubusercontent.com/u/2?v=4",
-                alt="User 2"
+                src="https://avatars.githubusercontent.com/u/25?v=4",
+                alt="James Chen"
             )
         ),
-        Avatar(AvatarFallback("CN")),
-        Avatar(AvatarFallback("JD", cls="bg-red-600 dark:bg-red-500 text-white font-semibold")),
-        Avatar(AvatarFallback("AS", cls="bg-blue-600 dark:bg-blue-500 text-white font-semibold")),
-        Div(
-            Avatar(
-                AvatarImage(
-                    src="https://avatars.githubusercontent.com/u/3?v=4",
-                    alt="User 3"
-                )
+        Avatar(AvatarFallback("AR")),
+        Avatar(AvatarFallback("TK", cls="bg-red-600 dark:bg-red-500 text-white font-semibold")),
+        Avatar(AvatarFallback("LW", cls="bg-blue-600 dark:bg-blue-500 text-white font-semibold")),
+        Avatar(
+            AvatarImage(
+                src="https://invalid-url.example.com/missing.jpg",
+                alt="Dev Patel"
             ),
-            Span(cls="absolute bottom-0 right-0 size-3 bg-green-500 rounded-full ring-2 ring-background"),
-            cls="relative inline-block"
-        ),
-        Div(
-            Avatar(AvatarFallback("MN")),
-            Span("3", cls="absolute bottom-0 right-0 size-4 bg-red-500 rounded-full ring-2 ring-background flex items-center justify-center text-[8px] font-bold text-white"),
-            cls="relative inline-block"
-        ),
-        Div(
-            Avatar(AvatarFallback("A", cls="text-xs")),
-            Avatar(AvatarFallback("B", cls="text-xs")),
-            Avatar(AvatarFallback("+2", cls="text-xs font-medium")),
-            cls="flex -space-x-3 [&>*[data-slot=avatar]]:ring-2 [&>*[data-slot=avatar]]:ring-background [&>*[data-slot=avatar]]:size-8"
+            AvatarFallback("DP")
         ),
         cls="flex items-center gap-3 flex-wrap justify-center"
-    )
-
-
-@with_code
-def basic_avatar_example():
-    return Div(
-        Avatar(
-            AvatarImage(
-                src="https://github.com/shadcn.png",
-                alt="@shadcn",
-            )
-        ),
-        Avatar(
-            AvatarFallback("CN")
-        ),
-        Avatar(
-            AvatarImage(
-                src="https://avatars.githubusercontent.com/u/1?v=4",
-                alt="User",
-            )
-        ),
-        cls="flex items-center gap-4"
     )
 
 
@@ -86,122 +47,153 @@ def avatar_sizes_example():
     sizes = [
         ("XS", "size-6"),
         ("SM", "size-8"),
-        ("MD", ""),  # default size-10
+        ("MD", ""),
         ("LG", "size-12"),
         ("XL", "size-16"),
         ("2X", "size-20")
     ]
 
-    size_avatars = [
-        Avatar(AvatarFallback(label), cls=size_cls)
-        for label, size_cls in sizes
-    ]
-
-    return Div(*size_avatars, cls="flex items-center gap-4")
-
-
-@with_code
-def avatar_fallback_example():
     return Div(
-        Avatar(AvatarFallback("CN")),
-        Avatar(AvatarFallback("JD")),
-        Avatar(AvatarFallback("AB")),
+        *[Avatar(AvatarFallback(label), cls=size_cls) for label, size_cls in sizes],
         cls="flex items-center gap-4"
     )
 
 
 @with_code
-def automatic_fallback_avatar_example():
+def image_error_fallback_avatar_example():
     examples = [
-        ("https://github.com/shadcn.png", "@shadcn", "CN", "Valid URL"),
-        ("https://invalid-url.com/image.jpg", "Invalid", "IN", "Invalid URL"),
-        (None, None, "NI", "No URL")
+        ("https://avatars.githubusercontent.com/u/25?v=4", "James Chen", "JC", "Valid URL"),
+        ("https://invalid-url.example.com/missing.jpg", "Dev Patel", "DP", "Broken URL"),
+        (None, None, "AR", "No image"),
     ]
 
-    avatar_demos = [
-        Div(
+    return Div(
+        *[Div(
             Avatar(
                 AvatarImage(src=src, alt=alt) if src else None,
-                AvatarFallback(fallback)
+                AvatarFallback(initials)
             ),
-            P(description, cls="text-xs text-muted-foreground text-center mt-1"),
+            P(label, cls="text-xs text-muted-foreground text-center mt-1"),
             cls="flex flex-col items-center"
-        )
-        for src, alt, fallback, description in examples
-    ]
+        ) for src, alt, initials, label in examples],
+        cls="flex items-start gap-6"
+    )
 
-    return Div(*avatar_demos, cls="flex items-start gap-4")
+
+@with_code
+def status_badge_avatar_example():
+    def with_status(initials, color, label):
+        return Div(
+            Avatar(AvatarFallback(initials)),
+            Span(
+                cls=f"absolute bottom-0 right-0 size-3 {color} rounded-full ring-2 ring-background",
+                role="status",
+                aria_label=label,
+            ),
+            cls="relative inline-block"
+        )
+
+    def with_count(src, alt, initials, count):
+        return Div(
+            Avatar(
+                AvatarImage(src=src, alt=alt),
+                AvatarFallback(initials)
+            ),
+            Span(
+                str(count),
+                cls="absolute -top-1 -right-1 size-5 bg-red-500 rounded-full ring-2 ring-background flex items-center justify-center text-[10px] font-bold text-white",
+                role="status",
+                aria_label=f"{count} notifications",
+            ),
+            cls="relative inline-block"
+        )
+
+    return Div(
+        with_status("SM", "bg-green-500", "Online"),
+        with_status("JC", "bg-red-500", "Busy"),
+        with_status("AR", "bg-yellow-500", "Away"),
+        with_count(
+            "https://avatars.githubusercontent.com/u/1024025?v=4",
+            "Sarah Miller", "SM", 3
+        ),
+        cls="flex items-center gap-5"
+    )
 
 
 @with_code
 def avatar_group_example():
+    members = [
+        ("https://avatars.githubusercontent.com/u/25?v=4", "James Chen", "JC"),
+        ("https://avatars.githubusercontent.com/u/1024025?v=4", "Sarah Miller", "SM"),
+        (None, "Ava Rodriguez", "AR"),
+        (None, "Tom Kim", "TK"),
+    ]
+
     return Div(
-        Avatar(AvatarFallback("JD")),
-        Avatar(AvatarFallback("AS")),
-        Avatar(AvatarFallback("PQ")),
-        Avatar(AvatarFallback("+2", cls="text-xs font-medium")),
-        cls="flex -space-x-2 [&>*[data-slot=avatar]]:ring-2 [&>*[data-slot=avatar]]:ring-background"
+        *[Avatar(
+            AvatarImage(src=src, alt=name) if src else None,
+            AvatarFallback(initials, cls="text-xs")
+        ) for src, name, initials in members],
+        Avatar(AvatarFallback("+3", cls="text-xs font-medium")),
+        cls="flex -space-x-3 [&>*[data-slot=avatar]]:ring-2 [&>*[data-slot=avatar]]:ring-background [&>*[data-slot=avatar]]:size-9"
     )
 
 
 @with_code
-def avatar_with_badge_example():
-    def create_status_avatar(initials, badge_color):
-        avatar = Avatar(AvatarFallback(initials))
-        badge = Span(cls=f"absolute bottom-0 right-0 size-3 {badge_color} rounded-full ring-2 ring-background")
-        return Div(avatar, badge, cls="relative inline-block")
-
-    def create_count_avatar(initials, count):
-        avatar = Avatar(AvatarFallback(initials))
-        badge = Span(count, cls="absolute bottom-0 right-0 size-4 bg-red-500 rounded-full ring-2 ring-background flex items-center justify-center text-[8px] font-bold text-white")
-        return Div(avatar, badge, cls="relative inline-block")
+def user_profile_avatar_example():
+    def profile_row(src, alt, initials, name, detail, color=""):
+        return Div(
+            Avatar(
+                AvatarImage(src=src, alt=alt) if src else None,
+                AvatarFallback(initials, cls=f"{color} text-white font-semibold" if color else "")
+            ),
+            Div(
+                P(name, cls="text-sm font-medium leading-none"),
+                P(detail, cls="text-sm text-muted-foreground"),
+                cls="space-y-1"
+            ),
+            cls="flex items-center gap-3"
+        )
 
     return Div(
-        create_status_avatar("JD", "bg-green-500"),
-        create_status_avatar("AS", "bg-red-500"),
-        create_status_avatar("PQ", "bg-yellow-500"),
-        create_count_avatar("MN", "5"),
-        cls="flex items-center gap-4"
+        profile_row(
+            "https://avatars.githubusercontent.com/u/25?v=4",
+            "James Chen", "JC",
+            "James Chen", "james@example.com"
+        ),
+        profile_row(
+            None, None, "AR",
+            "Ava Rodriguez", "Engineering Lead",
+            color="bg-red-600 dark:bg-red-500"
+        ),
+        profile_row(
+            None, None, "TK",
+            "Tom Kim", "Last active 2 hours ago",
+            color="bg-blue-600 dark:bg-blue-500"
+        ),
+        cls="space-y-4"
     )
-
-
-@with_code
-def colored_initials_avatar_example():
-    avatars = [
-        ("JD", "red"),
-        ("AS", "blue"),
-        ("PQ", "green"),
-        ("MN", "purple"),
-        ("XY", "orange")
-    ]
-
-    colored_avatars = [
-        Avatar(AvatarFallback(initials, cls=f"bg-{color}-600 dark:bg-{color}-500 text-white font-semibold"))
-        for initials, color in avatars
-    ]
-
-    return Div(*colored_avatars, cls="flex items-center gap-4")
 
 
 EXAMPLES_DATA = [
-    {"fn": hero_avatar_example, "title": "Avatar", "description": "Display user avatar with image and fallback"},
-    {"fn": basic_avatar_example, "title": "Basic Avatar", "description": "Simple avatar with image"},
-    {"fn": avatar_sizes_example, "title": "Sizes", "description": "Avatars in different sizes"},
-    {"fn": avatar_fallback_example, "title": "Fallback", "description": "Avatar with initials fallback"},
-    {"fn": automatic_fallback_avatar_example, "title": "Automatic Fallback", "description": "Automatically extract initials from name"},
-    {"fn": avatar_group_example, "title": "Avatar Group", "description": "Display multiple avatars together"},
-    {"fn": avatar_with_badge_example, "title": "With Badge", "description": "Avatar with status badge"},
-    {"fn": colored_initials_avatar_example, "title": "Colored Initials", "description": "Avatars with colored backgrounds"},
+    {"fn": hero_avatar_example, "title": "Image & Fallback", "description": "Image avatars, initials fallback, colored backgrounds, and automatic error recovery"},
+    {"fn": avatar_sizes_example, "title": "Sizes", "description": "Override the default size-10 using Tailwind size utilities on the Avatar container"},
+    {"fn": image_error_fallback_avatar_example, "title": "Image Error Fallback", "description": "AvatarFallback content appears when the image URL is broken or omitted"},
+    {"fn": status_badge_avatar_example, "title": "Status & Badges", "description": "Overlay status dots and notification counts using absolute positioning with accessible labels"},
+    {"fn": avatar_group_example, "title": "Avatar Group", "description": "Stack avatars with negative spacing and ring borders via the data-slot selector"},
+    {"fn": user_profile_avatar_example, "title": "User Profiles", "description": "Avatar paired with name and metadata in common layout patterns"},
 ]
 
 API_REFERENCE = build_api_reference(
+    main_props=[
+        Prop("cls", "str", "Additional CSS classes. Use Tailwind size utilities (size-6 through size-20) to override the default size-10", "''"),
+    ],
     components=[
-        Component("Avatar", "Main avatar container"),
-        Component("AvatarImage", "Image displayed in avatar"),
-        Component("AvatarFallback", "Fallback content when image fails or loads"),
+        Component("Avatar", "Root container. Renders as a rounded-full overflow-hidden flex container with data-slot='avatar' for parent-context selectors"),
+        Component("AvatarImage", "Image element with built-in error detection via Datastar signals. Props: src (str, required), alt (str), loading (str, default 'lazy'), signal (str | Signal) for external error state control"),
+        Component("AvatarFallback", "Displayed when no AvatarImage is provided or the image fails to load. Accepts any children — typically 1-2 character initials"),
     ]
 )
-
 
 
 def create_avatar_docs():

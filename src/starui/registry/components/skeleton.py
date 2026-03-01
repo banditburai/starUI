@@ -12,8 +12,10 @@ def Skeleton(
 ) -> FT:
     return Div(
         *children,
+        data_slot="skeleton",
+        aria_hidden="true",
         cls=cn(
-            "animate-pulse bg-muted rounded-md",
+            "bg-accent animate-pulse rounded-md motion-reduce:animate-none",
             cls,
         ),
         **kwargs,

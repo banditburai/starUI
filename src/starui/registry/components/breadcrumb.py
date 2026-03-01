@@ -12,6 +12,7 @@ def Breadcrumb(*children, cls: str = "", **kwargs) -> FT:
     return HTMLNav(
         *children,
         aria_label="breadcrumb",
+        data_slot="breadcrumb",
         cls=cls,
         **kwargs,
     )
@@ -24,6 +25,7 @@ def BreadcrumbList(*children, cls: str = "", **kwargs) -> FT:
             "text-muted-foreground flex flex-wrap items-center gap-1.5 text-sm break-words sm:gap-2.5",
             cls,
         ),
+        data_slot="breadcrumb-list",
         **kwargs,
     )
 
@@ -32,6 +34,7 @@ def BreadcrumbItem(*children, cls: str = "", **kwargs) -> FT:
     return HTMLLi(
         *children,
         cls=cn("inline-flex items-center gap-1.5", cls),
+        data_slot="breadcrumb-item",
         **kwargs,
     )
 
@@ -41,6 +44,7 @@ def BreadcrumbLink(*children, href: str = "#", cls: str = "", **kwargs) -> FT:
         *children,
         href=href,
         cls=cn("hover:text-foreground transition-colors", cls),
+        data_slot="breadcrumb-link",
         **kwargs,
     )
 
@@ -48,10 +52,9 @@ def BreadcrumbLink(*children, href: str = "#", cls: str = "", **kwargs) -> FT:
 def BreadcrumbPage(*children, cls: str = "", **kwargs) -> FT:
     return HTMLSpan(
         *children,
-        role="link",
-        aria_disabled="true",
         aria_current="page",
         cls=cn("text-foreground font-normal", cls),
+        data_slot="breadcrumb-page",
         **kwargs,
     )
 
@@ -62,16 +65,17 @@ def BreadcrumbSeparator(*children, cls: str = "", **kwargs) -> FT:
         role="presentation",
         aria_hidden="true",
         cls=cn("[&_[data-icon-sh]]:size-3.5", cls),
+        data_slot="breadcrumb-separator",
         **kwargs,
     )
 
 
 def BreadcrumbEllipsis(cls: str = "", **kwargs) -> FT:
     return HTMLSpan(
-        Icon("lucide:more-horizontal", cls="size-4"),
+        Icon("lucide:more-horizontal", cls="size-4", aria_hidden="true"),
         HTMLSpan("More", cls="sr-only"),
         role="presentation",
-        aria_hidden="true",
         cls=cn("flex size-9 items-center justify-center", cls),
+        data_slot="breadcrumb-ellipsis",
         **kwargs,
     )

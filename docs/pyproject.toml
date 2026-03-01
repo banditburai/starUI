@@ -5,11 +5,14 @@ description = "Documentation for StarUI component library"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "starhtml>=0.5.10",
-    "starlighter>=0.1.5",
-    "starui>=0.1.8",
+    "starhtml>=0.5.12",
+    "starlighter>=0.2.0",
+    "starui",
     "uvicorn>=0.30.0",
 ]
+
+[tool.uv.sources]
+starui = { path = "../", editable = true }
 
 [dependency-groups]
 dev = [

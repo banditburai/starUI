@@ -4,19 +4,49 @@ CATEGORY = "form"
 ORDER = 20
 STATUS = "stable"
 
-from starhtml import Div, P, Label, Icon, Span, Form, Signal, js
+from starhtml import Div, P, Code, Label, Form, Signal, js
 from starui.registry.components.select import (
     Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
-    SelectGroup, SelectLabel, SelectWithLabel
+    SelectLabel, SelectSeparator, SelectWithLabel
 )
 from starui.registry.components.button import Button
 from starui.registry.components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
-from starui.registry.components.badge import Badge
 from utils import auto_generate_page, with_code, Component, build_api_reference
 
 
 @with_code
-def grouped_options_select_example():
+def default_example():
+    status_value = Signal("status_value", "")
+    return Div(
+        status_value,
+        Select(
+            SelectTrigger(
+                SelectValue(placeholder="Set status"),
+                cls="w-[200px]",
+                aria_label="Set status",
+            ),
+            SelectContent(
+                SelectLabel("Active"),
+                SelectItem("Draft", value="draft"),
+                SelectItem("In Review", value="review"),
+                SelectItem("Published", value="published"),
+                SelectSeparator(),
+                SelectLabel("Closed"),
+                SelectItem("Archived", value="archived"),
+            ),
+            signal="status",
+        ),
+        P(
+            "Selected: ",
+            Code(data_text=status_value.or_("none")),
+            cls="text-sm text-muted-foreground mt-3"
+        ),
+        cls="max-w-sm"
+    )
+
+
+@with_code
+def grouped_options_example():
     return SelectWithLabel(
         label="Timezone",
         options=[
@@ -44,44 +74,76 @@ def grouped_options_select_example():
 
 
 @with_code
-def form_integration_select_example():
+def states_example():
+    return Div(
+        SelectWithLabel(
+            label="Placeholder",
+            options=["Option A", "Option B", "Option C"],
+            placeholder="Pick one...",
+        ),
+        SelectWithLabel(
+            label="Disabled",
+            options=["Option A", "Option B", "Option C"],
+            value="Option B",
+            disabled=True,
+        ),
+        SelectWithLabel(
+            label="Required",
+            options=["Option A", "Option B", "Option C"],
+            placeholder="Pick one...",
+            required=True,
+        ),
+        SelectWithLabel(
+            label="Error",
+            options=["Option A", "Option B", "Option C"],
+            error_text="Please select an option",
+            disabled=True,
+        ),
+        cls="grid w-full max-w-sm gap-6"
+    )
+
+
+@with_code
+def form_example():
+    template_value = Signal("project_template_value", "")
     return Card(
+        CardHeader(
+            CardTitle("New Project"),
+            CardDescription("Choose a starting template and visibility")
+        ),
         CardContent(
             Form(
+                template_value,
                 SelectWithLabel(
-                    label="Country",
+                    label="Template",
                     options=[
-                        ("us", "United States"),
-                        ("uk", "United Kingdom"),
-                        ("ca", "Canada"),
-                        ("au", "Australia"),
-                        ("de", "Germany"),
-                        ("fr", "France"),
-                        ("jp", "Japan")
+                        ("blank", "Blank"),
+                        ("blog", "Blog"),
+                        ("dashboard", "Dashboard"),
+                        ("api", "API"),
                     ],
-                    placeholder="Choose your country",
-                    helper_text="Select your country of residence",
+                    placeholder="Select a template",
                     required=True,
-                    signal="country_form",
+                    signal="project_template",
                     select_cls="w-full"
                 ),
                 SelectWithLabel(
-                    label="Preferred Language",
+                    label="Visibility",
                     options=[
-                        {"group": "Popular", "items": [("en", "English"), ("es", "Spanish"), ("zh", "Chinese")]},
-                        {"group": "European", "items": [("fr", "French"), ("de", "German"), ("it", "Italian")]},
-                        {"group": "Other", "items": [("ja", "Japanese"), ("ko", "Korean"), ("ar", "Arabic")]}
+                        ("public", "Public"),
+                        ("private", "Private"),
+                        ("team", "Team"),
                     ],
-                    value="en",
-                    helper_text="We'll use this for communication",
-                    signal="language_form",
+                    value="private",
+                    helper_text="Controls who can see this project",
                     select_cls="w-full"
                 ),
                 Button(
-                    "Save Preferences",
+                    "Create Project",
                     type="submit",
                     cls="w-full mt-4",
-                    data_on_click=(js("alert(`Country: ${$country_form_value}, Language: ${$language_form_value}`)"), dict(prevent=True))
+                    data_attr_disabled=~template_value,
+                    data_on_click=(js("alert(`Template: ${$project_template_label}`)"), dict(prevent=True))
                 ),
                 cls="space-y-4"
             )
@@ -91,201 +153,78 @@ def form_integration_select_example():
 
 
 @with_code
-def product_filtering_select_example():
-    category_value = Signal("category_filter_value", "")
-    category_label = Signal("category_filter_label", "")
-    price_value = Signal("price_filter_value", "")
-    sort_value = Signal("sort_filter_value", "")
-    sort_label = Signal("sort_filter_label", "")
+def dependent_selects_example():
+    make_value = Signal("vehicle_make_value", "")
+    make_label = Signal("vehicle_make_label", "")
+    model_value = Signal("vehicle_model_value", "")
+    model_label = Signal("vehicle_model_label", "")
 
-    has_filters = category_value | price_value | sort_value
-
-    price_formatted = price_value.if_(
-        (price_value == "0-25").if_(
-            "Under " + "$" + price_value.split("-")[1],
-            (price_value == "250+").if_(
-                "Over " + "$" + price_value.replace("+", ""),
-                "$" + price_value.split("-")[0] + " - " + "$" + price_value.split("-")[1]
-            )
-        ),
-        ""
-    )
+    invalid_toyota = (make_value == "toyota") & ~((model_value == "camry") | (model_value == "corolla") | (model_value == "rav4"))
+    invalid_honda = (make_value == "honda") & ~((model_value == "civic") | (model_value == "accord") | (model_value == "crv"))
+    invalid_ford = (make_value == "ford") & ~((model_value == "mustang") | (model_value == "f150") | (model_value == "explorer"))
+    should_clear = ~make_value | invalid_toyota | invalid_honda | invalid_ford
 
     return Card(
         CardHeader(
-            CardTitle("Product Filter"),
-            CardDescription("Find the perfect product for your needs")
+            CardTitle("Vehicle Selection"),
+            CardDescription("Choose a make and model")
         ),
         CardContent(
             Div(
-                category_value, category_label, price_value, sort_value, sort_label,
+                make_value, make_label, model_value, model_label,
                 SelectWithLabel(
-                    label="Category",
+                    label="Make",
                     options=[
-                        "Electronics",
-                        "Clothing",
-                        "Books",
-                        "Home & Garden",
-                        "Sports"
+                        ("toyota", "Toyota"),
+                        ("honda", "Honda"),
+                        ("ford", "Ford"),
                     ],
-                    placeholder="All Categories",
-                    signal="category_filter",
+                    placeholder="Select make",
+                    signal="vehicle_make",
                     select_cls="w-full"
                 ),
                 Div(
-                    Label("Price Range", cls="block text-sm font-medium mb-1.5"),
+                    Label("Model", fr="vehicle_model_trigger", cls="block text-sm font-medium mb-1.5"),
                     Select(
                         SelectTrigger(
-                            SelectValue(
-                                placeholder="All Prices",
-                                data_text=price_formatted.or_("All Prices")
-                            ),
-                            cls="w-full"
+                            SelectValue(placeholder="Select model"),
+                            data_attr_disabled=~make_value,
+                            cls="w-full",
+                            id="vehicle_model_trigger",
                         ),
                         SelectContent(
-                            SelectItem("Under $25", value="0-25"),
-                            SelectItem("$25 - $50", value="25-50"),
-                            SelectItem("$50 - $100", value="50-100"),
-                            SelectItem("$100 - $250", value="100-250"),
-                            SelectItem("Over $250", value="250+"),
+                            Div(
+                                SelectItem("Camry", value="camry"),
+                                SelectItem("Corolla", value="corolla"),
+                                SelectItem("RAV4", value="rav4"),
+                                data_show=make_value == "toyota"
+                            ),
+                            Div(
+                                SelectItem("Civic", value="civic"),
+                                SelectItem("Accord", value="accord"),
+                                SelectItem("CR-V", value="crv"),
+                                data_show=make_value == "honda"
+                            ),
+                            Div(
+                                SelectItem("Mustang", value="mustang"),
+                                SelectItem("F-150", value="f150"),
+                                SelectItem("Explorer", value="explorer"),
+                                data_show=make_value == "ford"
+                            ),
                         ),
-                        signal="price_filter"
+                        signal="vehicle_model"
                     ),
                     cls="space-y-1.5"
                 ),
-                SelectWithLabel(
-                    label="Sort By",
-                    options=[
-                        ("price-low", "Price: Low to High"),
-                        ("price-high", "Price: High to Low"),
-                        ("rating", "Customer Rating"),
-                        ("newest", "Newest First")
-                    ],
-                    placeholder="Relevance",
-                    signal="sort_filter",
-                    select_cls="w-full"
-                ),
-                Button(
-                    Icon("lucide:search", cls="h-4 w-4 mr-2"),
-                    "Apply Filters",
-                    cls="w-full mt-4",
-                    data_on_click=js("alert(`Searching: Category=${$category_filter_value || 'All'}, Price=${$price_filter_value || 'All'}, Sort=${$sort_filter_label || 'Relevance'}`)")
-                ),
-                Div(
-                    Div(
-                        Badge(data_text=category_label, variant="secondary"),
-                        data_show=category_value
-                    ),
-                    Div(
-                        Badge(data_text=price_formatted, variant="secondary"),
-                        data_show=price_value
-                    ),
-                    Div(
-                        Badge(data_text="Sort: " + sort_label, variant="secondary"),
-                        data_show=sort_value
-                    ),
-                    cls="flex flex-col gap-1 mt-4",
-                    data_show=has_filters
-                ),
-                cls="space-y-3"
-            )
-        ),
-        cls="w-full max-w-md"
-    )
-
-
-@with_code
-def dependent_selects_example():
-    country_value = Signal("location_country_value", "")
-    country_label = Signal("location_country_label", "")
-    state_value = Signal("location_state_value", "")
-    state_label = Signal("location_state_label", "")
-
-    location_text = (state_label & country_label).if_(
-        state_label + ", " + country_label,
-        country_label.or_("Not selected")
-    )
-
-    invalid_us_state = (country_value == "us") & ~((state_value == "ca") | (state_value == "tx") | (state_value == "ny") | (state_value == "fl"))
-    invalid_ca_province = (country_value == "ca") & ~((state_value == "on") | (state_value == "qc") | (state_value == "bc") | (state_value == "ab"))
-    invalid_mx_state = (country_value == "mx") & ~((state_value == "mx_city") | (state_value == "jal") | (state_value == "nl") | (state_value == "ver"))
-
-    should_clear_state = ~country_value | invalid_us_state | invalid_ca_province | invalid_mx_state
-
-    return Card(
-        CardHeader(
-            CardTitle("Location Selection"),
-            CardDescription("Choose your location details")
-        ),
-        CardContent(
-            Form(
-                country_value, country_label, state_value, state_label,
-                Div(
-                    Label("Country", cls="text-sm font-medium"),
-                    Select(
-                        SelectTrigger(
-                            SelectValue(placeholder="Select country"),
-                            cls="w-full"
-                        ),
-                        SelectContent(
-                            SelectItem("United States", value="us"),
-                            SelectItem("Canada", value="ca"),
-                            SelectItem("Mexico", value="mx")
-                        ),
-                        signal="location_country"
-                    ),
-                    cls="space-y-2"
-                ),
-                Div(
-                    Label("State/Province", cls="text-sm font-medium"),
-                    Select(
-                        SelectTrigger(
-                            SelectValue(placeholder="Select state"),
-                            data_attr_disabled=~country_value,
-                            cls="w-full"
-                        ),
-                        SelectContent(
-                            Div(
-                                SelectItem("California", value="ca"),
-                                SelectItem("Texas", value="tx"),
-                                SelectItem("New York", value="ny"),
-                                SelectItem("Florida", value="fl"),
-                                data_show=country_value == "us"
-                            ),
-                            Div(
-                                SelectItem("Ontario", value="on"),
-                                SelectItem("Quebec", value="qc"),
-                                SelectItem("British Columbia", value="bc"),
-                                SelectItem("Alberta", value="ab"),
-                                data_show=country_value == "ca"
-                            ),
-                            Div(
-                                SelectItem("Mexico City", value="mx_city"),
-                                SelectItem("Jalisco", value="jal"),
-                                SelectItem("Nuevo León", value="nl"),
-                                SelectItem("Veracruz", value="ver"),
-                                data_show=country_value == "mx"
-                            )
-                        ),
-                        signal="location_state"
-                    ),
-                    cls="space-y-2"
-                ),
-                Div(
-                    Div(
-                        Icon("lucide:map-pin", cls="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0"),
-                        Div(
-                            P("Location", cls="text-xs text-muted-foreground mb-0.5"),
-                            P(data_text=location_text, cls="text-sm font-medium"),
-                            cls="flex-1"
-                        ),
-                        cls="flex gap-2 items-start"
-                    ),
-                    cls="mt-4 p-3 bg-muted/50 rounded-md border"
+                P(
+                    "Selected: ",
+                    Code(data_text=make_label + " " + model_label),
+                    cls="text-sm text-muted-foreground mt-2",
+                    data_show=make_value & model_value
                 ),
                 data_effect=[
-                    state_value.set(should_clear_state.if_("", state_value)),
-                    state_label.set(should_clear_state.if_("", state_label))
+                    model_value.set(should_clear.if_("", model_value)),
+                    model_label.set(should_clear.if_("", model_label))
                 ],
                 cls="space-y-4"
             )
@@ -295,72 +234,52 @@ def dependent_selects_example():
 
 
 @with_code
-def role_management_select_example():
-    users = [
-        {"name": "John Doe", "email": "john@example.com", "role": "editor", "role_label": "Editor", "signal": "user1_role"},
-        {"name": "Jane Smith", "email": "jane@example.com", "role": "viewer", "role_label": "Viewer", "signal": "user2_role"},
-        {"name": "Bob Wilson", "email": "bob@example.com", "role": "admin", "role_label": "Admin", "signal": "user3_role"}
-    ]
-
-    signals = []
-    for user in users:
-        signals.extend([
-            Signal(f"{user['signal']}_value", user['role']),
-            Signal(f"{user['signal']}_label", user['role_label'])
-        ])
-
-    def create_user_row(user):
-        return Div(
-            Div(
-                P(user['name'], cls="font-medium"),
-                P(user['email'], cls="text-sm text-muted-foreground"),
-                cls="flex-1"
+def inline_selects_example():
+    font_value = Signal("inline_font_value", "sans")
+    size_value = Signal("inline_size_value", "medium")
+    return Div(
+        font_value, size_value,
+        Div(
+            SelectWithLabel(
+                label="Font",
+                options=[
+                    ("sans", "Sans"),
+                    ("serif", "Serif"),
+                    ("mono", "Mono"),
+                ],
+                value="sans",
+                signal="inline_font",
+                select_cls="w-[120px]"
             ),
-            Select(
-                SelectTrigger(
-                    SelectValue(placeholder="Select role"),
-                    cls="w-[160px]"
-                ),
-                SelectContent(
-                    SelectItem("Viewer", value="viewer"),
-                    SelectItem("Editor", value="editor"),
-                    SelectItem("Admin", value="admin"),
-                    SelectItem("Owner", value="owner", disabled=True)
-                ),
-                value=user['role'],
-                label=user['role_label'],
-                signal=user['signal']
+            SelectWithLabel(
+                label="Size",
+                options=[
+                    ("small", "Small"),
+                    ("medium", "Medium"),
+                    ("large", "Large"),
+                ],
+                value="medium",
+                signal="inline_size",
+                select_cls="w-[120px]"
             ),
-            cls="flex items-center justify-between gap-6 px-4 py-3 first:pt-4 last:pb-4"
-        )
-
-    return Card(
-        CardHeader(
-            CardTitle("User Management"),
-            CardDescription("Manage user roles and permissions")
+            cls="flex gap-4"
         ),
-        CardContent(
-            Div(
-                *signals,
-                *[create_user_row(user) for user in users],
-                cls="divide-y border rounded-lg"
-            ),
-            Button(
-                "Save Changes",
-                cls="w-full mt-4",
-                data_on_click=js("alert(`Roles updated:\\nJohn: ${$user1_role_label}\\nJane: ${$user2_role_label}\\nBob: ${$user3_role_label}`)")
-            )
+        P(
+            Code(data_text=font_value),
+            " / ",
+            Code(data_text=size_value),
+            cls="text-sm text-muted-foreground mt-3"
         ),
-        cls="max-w-2xl"
     )
 
 
 EXAMPLES_DATA = [
-    {"title": "Grouped Options", "description": "Organize options into logical groups", "fn": grouped_options_select_example},
-    {"title": "Form Integration", "description": "Select with labels, helper text, and form submission", "fn": form_integration_select_example},
-    {"title": "Product Filtering", "description": "Multi-select filtering system with active filter display", "fn": product_filtering_select_example},
-    {"title": "Dependent Selects", "description": "Cascading selects that update based on parent selection", "fn": dependent_selects_example},
-    {"title": "Role Management", "description": "Manage multiple user roles with inline selects", "fn": role_management_select_example},
+    {"fn": default_example, "title": "Default", "description": "Bare Select API with labels, separator, and reactive signal display"},
+    {"fn": grouped_options_example, "title": "Grouped Options", "description": "Convenience wrapper organizing options into labeled groups"},
+    {"fn": states_example, "title": "States", "description": "Disabled, required, and error states"},
+    {"fn": form_example, "title": "Form Integration", "description": "Project creation form with required fields and conditional submit"},
+    {"fn": dependent_selects_example, "title": "Dependent Selects", "description": "Cascading selects where child options depend on parent selection"},
+    {"fn": inline_selects_example, "title": "Inline Selects", "description": "Side-by-side selects with immediate effect, no form submission"},
 ]
 
 API_REFERENCE = build_api_reference(
@@ -372,6 +291,7 @@ API_REFERENCE = build_api_reference(
         Component("SelectItem", "Individual selectable option with value and label"),
         Component("SelectGroup", "Group related options for easier scanning"),
         Component("SelectLabel", "Label heading for a group of options"),
+        Component("SelectSeparator", "Visual divider between items or groups"),
         Component("SelectWithLabel", "Convenience wrapper with label, helper, and error text")
     ]
 )

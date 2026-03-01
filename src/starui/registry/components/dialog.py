@@ -1,25 +1,42 @@
 from typing import Any, Literal
 
-from starhtml import FT, Div, Icon, Signal, Span
+from starhtml import FT, Div, Icon, Signal, Span, Style
 from starhtml import H2 as HTMLH2
 from starhtml import Button as HTMLButton
 from starhtml import Dialog as HTMLDialog
 from starhtml import P as HTMLP
 from starhtml.datastar import document, evt, seq
 
-from .utils import cn, cva, gen_id, merge_actions
+from .utils import cn, cva, gen_id, inject_context, merge_actions
 
 DialogSize = Literal["sm", "md", "lg", "xl", "full"]
 
+_DIALOG_STYLES = """
+dialog[data-dialog]{
+  --_dur-in:200ms;--_dur-out:150ms;
+  transition:opacity var(--_dur-out) ease,scale var(--_dur-out) ease,display var(--_dur-out) allow-discrete,overlay var(--_dur-out) allow-discrete;
+}
+dialog[data-dialog][open]{transition-duration:var(--_dur-in);transition-timing-function:cubic-bezier(0.16,1,0.3,1)}
+dialog[data-dialog]:not([open]){opacity:0;scale:0.95}
+dialog[data-dialog][open]{@starting-style{opacity:0;scale:0.95}}
+dialog[data-dialog]::backdrop{
+  background:rgb(0 0 0/.5);backdrop-filter:blur(4px);
+  transition:background var(--_dur-out) ease,backdrop-filter var(--_dur-out) ease,display var(--_dur-out) allow-discrete,overlay var(--_dur-out) allow-discrete;
+}
+dialog[data-dialog]:not([open])::backdrop{background:rgb(0 0 0/0);backdrop-filter:blur(0)}
+dialog[data-dialog][open]::backdrop{transition-timing-function:cubic-bezier(0.16,1,0.3,1);@starting-style{background:rgb(0 0 0/0);backdrop-filter:blur(0)}}
+@media(prefers-reduced-motion:reduce){dialog[data-dialog],dialog[data-dialog]::backdrop{transition-duration:0ms!important}}
+"""
+
 dialog_variants = cva(
-    base="fixed max-h-[85vh] w-full overflow-auto m-auto bg-background text-foreground border rounded-lg shadow-lg p-0 backdrop:bg-black/50 backdrop:backdrop-blur-sm open:animate-in open:fade-in-0 open:zoom-in-95 open:duration-200 open:backdrop:animate-in open:backdrop:fade-in-0 open:backdrop:duration-200 outline-none",
+    base="fixed inset-0 z-50 max-h-[85vh] max-w-[calc(100%-2rem)] w-full overflow-auto m-auto bg-background text-foreground border rounded-lg shadow-lg p-0 outline-none",
     config={
         "variants": {
             "size": {
-                "sm": "max-w-sm",
-                "md": "max-w-lg",
-                "lg": "max-w-2xl",
-                "xl": "max-w-4xl",
+                "sm": "sm:max-w-sm",
+                "md": "sm:max-w-lg",
+                "lg": "sm:max-w-2xl",
+                "xl": "sm:max-w-4xl",
                 "full": "max-w-[95vw]",
             }
         },
@@ -41,10 +58,20 @@ def Dialog(
     dialog_ref = Signal(sig, _ref_only=True)
 
     trigger = next(
-        (c for c in children if callable(c) and c.__name__ == "trigger"), None
+        (
+            c
+            for c in children
+            if callable(c) and getattr(c, "__name__", None) == "trigger"
+        ),
+        None,
     )
     content = next(
-        (c for c in children if callable(c) and c.__name__ == "content"), None
+        (
+            c
+            for c in children
+            if callable(c) and getattr(c, "__name__", None) == "content"
+        ),
+        None,
     )
 
     ctx = {
@@ -55,6 +82,7 @@ def Dialog(
     }
 
     return Div(
+        Style(_DIALOG_STYLES),
         trigger(**ctx) if trigger else None,
         HTMLDialog(
             content(**ctx) if content else None,
@@ -64,6 +92,7 @@ def Dialog(
             & seq(dialog_ref.close(), open_state.set(False))
             if modal
             else None,
+            data_dialog="",
             id=sig,
             aria_labelledby=f"{sig}-title",
             aria_describedby=f"{sig}-description",
@@ -73,7 +102,9 @@ def Dialog(
         Div(
             data_effect=document.body.style.overflow.set(open_state.if_("hidden", "")),
             style="display: none;",
-        ),
+        )
+        if modal
+        else None,
     )
 
 
@@ -113,18 +144,18 @@ def DialogContent(
         dialog_ref = ctx["dialog_ref"]
 
         return Div(
-            *[child(**ctx) if callable(child) else child for child in children],
+            *[inject_context(child, **ctx) for child in children],
             HTMLButton(
-                Icon("lucide:x", cls="h-4 w-4"),
+                Icon("lucide:x", cls="size-4"),
                 Span("Close", cls="sr-only"),
                 data_on_click=[open_state.set(False), dialog_ref.close()],
-                cls="absolute top-4 right-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none ring-offset-background focus:ring-ring",
+                cls="absolute top-4 right-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0",
                 type="button",
                 aria_label="Close",
             )
             if show_close_button
             else None,
-            cls=cn("relative p-6", cls),
+            cls=cn("relative grid gap-4 p-6", cls),
             **kwargs,
         )
 
@@ -168,7 +199,7 @@ def DialogHeader(
 ) -> FT:
     def _(**ctx):
         return Div(
-            *[child(**ctx) if callable(child) else child for child in children],
+            *[inject_context(child, **ctx) for child in children],
             cls=cn("flex flex-col gap-2 text-center sm:text-left", cls),
             **kwargs,
         )
@@ -183,8 +214,8 @@ def DialogFooter(
 ) -> FT:
     def _(**ctx):
         return Div(
-            *[child(**ctx) if callable(child) else child for child in children],
-            cls=cn("flex flex-col-reverse gap-2 sm:flex-row sm:justify-end mt-6", cls),
+            *[inject_context(child, **ctx) for child in children],
+            cls=cn("flex flex-col-reverse gap-2 sm:flex-row sm:justify-end", cls),
             **kwargs,
         )
 
@@ -200,7 +231,7 @@ def DialogTitle(
         return HTMLH2(
             *children,
             id=f"{sig}-title",
-            cls=cn("text-lg leading-none font-semibold text-foreground", cls),
+            cls=cn("text-lg leading-none font-semibold", cls),
             **kwargs,
         )
 

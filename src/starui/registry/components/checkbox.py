@@ -1,5 +1,3 @@
-from typing import Any
-
 from starhtml import FT, Div, Icon, Signal
 from starhtml import Input as HTMLInput
 from starhtml import Label as HTMLLabel
@@ -19,7 +17,7 @@ def Checkbox(
     required: bool = False,
     cls: str = "",
     indicator_cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     sig = getattr(signal, "_id", signal) or gen_id("checkbox")
     initial = "indeterminate" if indeterminate else (checked or False)
@@ -38,9 +36,9 @@ def Checkbox(
             if indeterminate
             else checked_state.if_("checked", "unchecked"),
             cls=cn(
-                "peer appearance-none size-4 shrink-0 rounded-[4px] border shadow-xs transition-all outline-none",
-                "border-input bg-background dark:bg-input/30",
-                "checked:bg-foreground checked:border-foreground dark:checked:bg-foreground dark:checked:border-foreground",
+                "peer appearance-none size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none",
+                "border-input dark:bg-input/30",
+                "checked:bg-primary checked:border-primary dark:checked:bg-primary dark:checked:border-primary",
                 "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
                 "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive aria-invalid:checked:border-destructive",
                 "disabled:cursor-not-allowed disabled:opacity-50",
@@ -49,22 +47,22 @@ def Checkbox(
             **kwargs,
         ),
         HTMLSpan(
-            Icon("lucide:minus" if indeterminate else "lucide:check"),
-            data_attr_style="opacity: 1"
+            Icon("lucide:minus" if indeterminate else "lucide:check", size=14),
+            data_attr_style="'opacity: 1'"
             if indeterminate
             else checked_state.if_("opacity: 1", "opacity: 0"),
             data_slot="checkbox-indicator",
             cls=cn(
-                "absolute inset-0 flex items-center justify-center text-background text-sm transition-opacity pointer-events-none",
+                "absolute inset-0 grid place-content-center text-primary-foreground transition-none pointer-events-none",
                 indicator_cls,
             ),
         ),
-        cls="relative inline-block",
+        cls="relative inline-grid size-4",
     )
 
 
 def CheckboxWithLabel(
-    *attrs: Any,
+    *attrs,
     label: str,
     checked: bool | None = None,
     name: str | None = None,
@@ -79,9 +77,10 @@ def CheckboxWithLabel(
     label_cls: str = "",
     checkbox_cls: str = "",
     indicator_cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
-    checkbox_id = kwargs.pop("id", signal)
+    sig = getattr(signal, "_id", signal) or gen_id("checkbox")
+    checkbox_id = kwargs.pop("id", None) or sig
 
     return Div(
         Div(
@@ -89,7 +88,7 @@ def CheckboxWithLabel(
                 checked=checked,
                 name=name,
                 value=value,
-                signal=signal,
+                signal=sig,
                 indeterminate=indeterminate,
                 disabled=disabled,
                 required=required,
@@ -105,14 +104,14 @@ def CheckboxWithLabel(
                     fr=checkbox_id,
                     cls=cn(
                         "flex items-center gap-2 text-sm leading-none font-medium select-none",
-                        "peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
+                        "peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
                         label_cls,
                     ),
                     data_slot="label",
                 ),
                 HTMLP(
                     helper_text,
-                    cls=cn("text-muted-foreground text-sm", disabled and "opacity-50"),
+                    cls=cn("text-muted-foreground text-sm", disabled and "opacity-70"),
                 )
                 if helper_text
                 else None,
