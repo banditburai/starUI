@@ -242,22 +242,22 @@ def session_takes_example():
         {"id": "cb_take4", "name": "Take 4 — Bridge.wav", "dur": "1:36"},
     ]
 
-    take_signals = {t["id"]: Signal(t["id"], _ref_only=True) for t in takes}
-    discarded_signals = {t["id"]: Signal(t["id"] + "_dis", False) for t in takes}
+    take_sigs = [Signal(t["id"], _ref_only=True) for t in takes]
+    discards = [Signal(t["id"] + "_dis", False) for t in takes]
     select_all = Signal("cb_takes_all", False)
 
     selected_count = Signal(
         "cb_takes_sel",
-        sum([take_signals[t["id"]] & ~discarded_signals[t["id"]] for t in takes]),
+        sum([sig & ~dis for sig, dis in zip(take_sigs, discards)]),
     )
 
     discard_actions = [
-        take_signals[t["id"]].then(discarded_signals[t["id"]].set(True)) for t in takes
+        sig.then(dis.set(True)) for sig, dis in zip(take_sigs, discards)
     ] + [select_all.set(False)]
 
     select_actions = [
-        (~discarded_signals[t["id"]]).then(take_signals[t["id"]].set(select_all))
-        for t in takes
+        (~dis).then(sig.set(select_all))
+        for sig, dis in zip(take_sigs, discards)
     ]
 
     return Card(
@@ -268,7 +268,7 @@ def session_takes_example():
         CardContent(
             Div(
                 select_all,
-                *discarded_signals.values(),
+                discards,
                 selected_count,
                 Div(
                     CheckboxWithLabel(
@@ -284,12 +284,12 @@ def session_takes_example():
                         Div(
                             CheckboxWithLabel(
                                 label=t["name"],
-                                signal=take_signals[t["id"]],
+                                signal=sig,
                                 helper_text=t["dur"],
                             ),
-                            data_show=~discarded_signals[t["id"]],
+                            data_show=~dis,
                         )
-                        for t in takes
+                        for t, sig, dis in zip(takes, take_sigs, discards)
                     ],
                     cls="space-y-2 pl-6",
                 ),

@@ -171,9 +171,7 @@ class ToastHelper:
             {"title": title, "description": description, "variant": variant}
         )
         auto_dismiss = (
-            set_timeout(
-                js("$toasts=$toasts.map(x=>x&&x.id===t.id?null:x)"), duration
-            )
+            set_timeout(js("$toasts=$toasts.map(x=>x&&x.id===t.id?null:x)"), duration)
             if duration
             else ""
         )

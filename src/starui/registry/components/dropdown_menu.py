@@ -28,9 +28,7 @@ dropdown_item_variants = cva(
 )
 
 
-def DropdownMenu(
-    *children, signal: str | Signal = "", cls: str = "", **kwargs
-) -> FT:
+def DropdownMenu(*children, signal: str | Signal = "", cls: str = "", **kwargs) -> FT:
     sig = getattr(signal, "_id", signal) or gen_id("dropdown")
 
     ctx = {"sig": sig}
@@ -201,7 +199,9 @@ def DropdownMenuRadioGroup(
     def _(**ctx):
         return Div(
             *[
-                inject_context(child, radio_signal=getattr(signal, "_id", signal), **ctx)
+                inject_context(
+                    child, radio_signal=getattr(signal, "_id", signal), **ctx
+                )
                 for child in children
             ],
             role="radiogroup",
@@ -265,9 +265,7 @@ def DropdownMenuSeparator(cls: str = "", **kwargs) -> FT:
     return _
 
 
-def DropdownMenuLabel(
-    *children, inset: bool = False, cls: str = "", **kwargs
-) -> FT:
+def DropdownMenuLabel(*children, inset: bool = False, cls: str = "", **kwargs) -> FT:
     def _(**_):
         return Div(
             *children,

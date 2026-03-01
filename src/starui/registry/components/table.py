@@ -4,13 +4,15 @@ from starhtml import (
     FT,
     Caption,
     Div,
-    Table as HTMLTable,
     Tbody,
     Td,
     Tfoot,
     Th,
     Thead,
     Tr,
+)
+from starhtml import (
+    Table as HTMLTable,
 )
 
 from .utils import cn
@@ -68,9 +70,7 @@ def TableFooter(
     return Tfoot(
         *children,
         data_slot="table-footer",
-        cls=cn(
-            "bg-muted/50 border-t font-medium [&>tr]:last:border-b-0", cls
-        ),
+        cls=cn("bg-muted/50 border-t font-medium [&>tr]:last:border-b-0", cls),
         **kwargs,
     )
 

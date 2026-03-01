@@ -39,7 +39,9 @@ def Progress(
             aria_valuemax="100",
             data_attr_aria_valuenow=s,
             data_slot="progress",
-            cls=cn("bg-primary/20 relative h-2 w-full overflow-hidden rounded-full", cls),
+            cls=cn(
+                "bg-primary/20 relative h-2 w-full overflow-hidden rounded-full", cls
+            ),
             **kwargs,
         )
 

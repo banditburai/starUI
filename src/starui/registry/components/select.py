@@ -52,7 +52,11 @@ def SelectTrigger(
         return HTMLButton(
             *[
                 inject_context(
-                    child, sig=sig, selected_label=selected_label, open_state=open_state, **ctx
+                    child,
+                    sig=sig,
+                    selected_label=selected_label,
+                    open_state=open_state,
+                    **ctx,
                 )
                 for child in children
             ],

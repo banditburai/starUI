@@ -4,7 +4,7 @@ CATEGORY = "form"
 ORDER = 30
 STATUS = "stable"
 
-from starhtml import Div, P, Icon, Form, Code, Signal, js
+from starhtml import Div, P, Span, Icon, Form, Code, Signal, js, match
 from starui.registry.components.radio_group import RadioGroup, RadioGroupItem, RadioGroupWithLabel
 from starui.registry.components.button import Button
 from starui.registry.components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
@@ -164,6 +164,35 @@ def custom_cards_example():
     )
 
 
+@with_code
+def plan_selector_example():
+    plan = Signal("hosting_plan", "starter")
+
+    price = match(plan, starter="$9/mo", pro="$29/mo", business="$99/mo")
+    desc = match(plan, starter="1 project, 1GB storage, community support",
+                 pro="10 projects, 50GB storage, priority support",
+                 business="Unlimited projects, 500GB, dedicated support")
+
+    return Div(
+        plan,
+        RadioGroup(
+            RadioGroupItem(value="starter", label="Starter"),
+            RadioGroupItem(value="pro", label="Pro"),
+            RadioGroupItem(value="business", label="Business"),
+            value="starter",
+            signal=plan,
+            cls="flex gap-4",
+        ),
+        Div(
+            Span(data_text=price, cls="text-sm font-semibold"),
+            Span(" — "),
+            Span(data_text=desc, cls="text-sm text-muted-foreground"),
+            cls="mt-1",
+        ),
+        cls="grid gap-2 w-full max-w-md",
+    )
+
+
 API_REFERENCE = build_api_reference(
     components=[
         Component("RadioGroup", "Container that manages a single selection across contained items"),
@@ -179,6 +208,7 @@ EXAMPLES_DATA = [
     {"fn": states_example, "title": "States", "description": "Disabled, required, and error states"},
     {"fn": form_integration_example, "title": "Form Integration", "description": "Contact preference form with conditional submit button"},
     {"fn": custom_cards_example, "title": "Custom Cards", "description": "Hidden indicators with custom card labels and selection styling"},
+    {"fn": plan_selector_example, "title": "Plan Selector", "description": "Detail panel updates with price and features per selection [match(), data_text]"},
 ]
 
 

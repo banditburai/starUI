@@ -58,10 +58,20 @@ def Dialog(
     dialog_ref = Signal(sig, _ref_only=True)
 
     trigger = next(
-        (c for c in children if callable(c) and getattr(c, "__name__", None) == "trigger"), None,
+        (
+            c
+            for c in children
+            if callable(c) and getattr(c, "__name__", None) == "trigger"
+        ),
+        None,
     )
     content = next(
-        (c for c in children if callable(c) and getattr(c, "__name__", None) == "content"), None,
+        (
+            c
+            for c in children
+            if callable(c) and getattr(c, "__name__", None) == "content"
+        ),
+        None,
     )
 
     ctx = {

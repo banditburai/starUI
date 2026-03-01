@@ -8,7 +8,7 @@ CATEGORY = "layout"
 ORDER = 10
 STATUS = "stable"
 
-from starhtml import Div, P, Icon, Signal, Span
+from starhtml import Div, P, Icon, Signal, Span, match
 from starui.registry.components.card import (
     Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent, CardFooter
 )
@@ -201,6 +201,58 @@ def settings_card_example():
     )
 
 
+@with_code
+def dashboard_stats_example():
+    period = Signal("card_period", "month")
+
+    revenue = match(period, week="$4.2k", month="$18.7k", quarter="$54.1k")
+    users = match(period, week="89", month="342", quarter="1,204")
+    growth = match(period, week="+12%", month="+28%", quarter="+64%")
+
+    def PeriodButton(label, value):
+        return Button(
+            label, size="sm",
+            data_attr_variant=period.eq(value).if_("default", "outline"),
+            data_on_click=period.set(value),
+        )
+
+    rows = [
+        ("Revenue", revenue),
+        ("New users", users),
+        ("Growth", growth),
+    ]
+
+    return Div(
+        period,
+        Card(
+            CardHeader(
+                CardTitle("Analytics"),
+                CardDescription("Deployment performance by period"),
+            ),
+            Div(
+                PeriodButton("Week", "week"),
+                PeriodButton("Month", "month"),
+                PeriodButton("Quarter", "quarter"),
+                cls="flex gap-1 px-6 pb-4 border-b",
+            ),
+            CardContent(
+                Div(
+                    *[
+                        Div(
+                            Span(label, cls="text-sm text-muted-foreground"),
+                            Span(data_text=val, cls="text-sm font-medium tabular-nums"),
+                            cls="flex justify-between",
+                        )
+                        for label, val in rows
+                    ],
+                    cls="space-y-3",
+                ),
+            ),
+            cls="w-full max-w-sm",
+        ),
+    )
+
+
 API_REFERENCE = build_api_reference(
     main_props=[
         Prop("level", "Literal['h1', 'h2', 'h3', 'h4', 'h5', 'h6']",
@@ -226,6 +278,7 @@ EXAMPLES_DATA = [
     {"fn": card_image_example, "title": "With Image", "description": "Media card with badge metadata and icon placeholder"},
     {"fn": heading_levels_example, "title": "Heading Levels", "description": "CardTitle level prop for semantic HTML headings (h1-h6)"},
     {"fn": settings_card_example, "title": "Settings Card", "description": "Interactive card composing switches with border dividers"},
+    {"fn": dashboard_stats_example, "title": "Dashboard Stats", "description": "Period switcher with match() for value lookup and reactive stat cards [match(), data_text, .eq(), .if_()]"},
 ]
 
 

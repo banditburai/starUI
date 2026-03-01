@@ -26,7 +26,13 @@ def ToggleGroup(
     sig = getattr(signal, "_id", signal) or gen_id("toggle_group")
     initial = value if value is not None else ("" if type == "single" else [])
     is_vertical = orientation == "vertical"
-    ctx = {"type": type, "variant": variant, "size": size, "disabled": disabled, "orientation": orientation}
+    ctx = {
+        "type": type,
+        "variant": variant,
+        "size": size,
+        "disabled": disabled,
+        "orientation": orientation,
+    }
 
     items = [
         ToggleGroupItem(child[1], value=child[0])
@@ -91,7 +97,9 @@ def ToggleGroupItem(
             cls=cn(
                 toggle_variants(variant=variant, size=size),
                 "w-auto min-w-0 shrink-0 px-3 rounded-none shadow-none",
-                "first:rounded-t-md last:rounded-b-md" if is_vertical else "first:rounded-l-md last:rounded-r-md",
+                "first:rounded-t-md last:rounded-b-md"
+                if is_vertical
+                else "first:rounded-l-md last:rounded-r-md",
                 "focus:z-10 focus-visible:z-10",
                 (
                     "data-[variant=outline]:border-t-0 data-[variant=outline]:first:border-t"

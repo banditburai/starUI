@@ -121,9 +121,7 @@ def TabsTrigger(
     return _
 
 
-def TabsContent(
-    *children, id: str | int | None = None, cls: str = "", **kwargs
-) -> FT:
+def TabsContent(*children, id: str | int | None = None, cls: str = "", **kwargs) -> FT:
     def _(*, tabs_state, _content_index, **_):
         tab_id = id if id is not None else next(_content_index)
         is_active = tabs_state == tab_id

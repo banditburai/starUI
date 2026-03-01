@@ -8,7 +8,7 @@ CATEGORY = "ui"
 ORDER = 10
 STATUS = "stable"
 
-from starhtml import Div, Icon
+from starhtml import Div, Span, Icon, Signal, set_timeout
 from starui.registry.components.button import Button
 from utils import auto_generate_page, Prop, Component, build_api_reference, with_code
 
@@ -93,12 +93,50 @@ def action_patterns_example():
     )
 
 
+@with_code
+def click_counter_example():
+    count = Signal("btn_count", 0)
+    return Div(
+        count,
+        Button(
+            Span(data_text=count),
+            " clicks",
+            data_on_click=count.add(1),
+        ),
+        Button("Reset", variant="outline", data_on_click=count.set(0)),
+        cls="flex items-center gap-2"
+    )
+
+
+@with_code
+def copy_feedback_example():
+    copied = Signal("btn_copied", False)
+    return Div(
+        copied,
+        Button(
+            "Copy link",
+            data_show=~copied,
+            data_on_click=[copied.set(True), set_timeout(copied.set(False), 2000)],
+            variant="outline",
+        ),
+        Button(
+            Icon("lucide:check", cls="h-4 w-4"), "Copied!",
+            data_show=copied,
+            variant="outline",
+            cls="text-green-600",
+        ),
+        cls="flex gap-2"
+    )
+
+
 EXAMPLES_DATA = [
     {"fn": hero_button_example, "title": "Variants", "description": "The six built-in variants — default, secondary, destructive, outline, ghost, and link"},
     {"fn": button_sizes_example, "title": "Sizes", "description": "Four size options including icon-only buttons — always pair size='icon' with aria_label"},
     {"fn": with_icons_button_example, "title": "With Icons", "description": "Place icons before or after text as children — the built-in gap handles spacing, no manual margin needed"},
     {"fn": icon_toolbar_example, "title": "Icon Toolbar", "description": "Ghost icon buttons composed as a text formatting toolbar with accessible labels"},
     {"fn": action_patterns_example, "title": "Action Patterns", "description": "Mixing variants to convey intent — outline for cancel, default for confirm, destructive for danger"},
+    {"fn": click_counter_example, "title": "Click Counter", "description": "Signal-driven counter — the simplest reactive pattern [Signal, .add(), data_text]"},
+    {"fn": copy_feedback_example, "title": "Copy Feedback", "description": "Temporary state swap with auto-reset [set_timeout, data_show]"},
 ]
 
 API_REFERENCE = build_api_reference(

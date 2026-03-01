@@ -110,15 +110,23 @@ def AccordionTrigger(
     def _(*, id, item_value, is_open, is_default_open, click_action, **_):
         click_actions = merge_actions(click_action, kwargs=kwargs)
 
-        icon_el = [Icon(
-            icon,
-            cls=icon_cls,
-            style=f"transform: rotate({icon_rotation}deg)" if is_default_open else None,
-            data_attr_style=is_open.if_(
-                f"transform: rotate({icon_rotation}deg)",
-                "transform: rotate(0deg)",
-            ),
-        )] if icon else []
+        icon_el = (
+            [
+                Icon(
+                    icon,
+                    cls=icon_cls,
+                    style=f"transform: rotate({icon_rotation}deg)"
+                    if is_default_open
+                    else None,
+                    data_attr_style=is_open.if_(
+                        f"transform: rotate({icon_rotation}deg)",
+                        "transform: rotate(0deg)",
+                    ),
+                )
+            ]
+            if icon
+            else []
+        )
 
         return Button(
             *children,

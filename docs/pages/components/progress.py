@@ -9,7 +9,7 @@ CATEGORY = "ui"
 ORDER = 65
 STATUS = "stable"
 
-from starhtml import Div, Span, Signal, Icon
+from starhtml import Div, P, Span, Signal, Icon, seq, set_timeout, switch, clear_timeout
 from starui.registry.components.progress import Progress
 from starui.registry.components.button import Button
 from utils import auto_generate_page, with_code, Prop, build_api_reference
@@ -83,11 +83,52 @@ def reactive_example():
     )
 
 
+@with_code
+def multi_step_example():
+    step = Signal("prog_step", 0)
+    pct = Signal("prog_pct", 0)
+    t1 = Signal("prog_t1", 0)
+    t2 = Signal("prog_t2", 0)
+    t3 = Signal("prog_t3", 0)
+
+    label = switch([
+        (step.eq(1), "Connecting..."),
+        (step.eq(2), "Authenticating..."),
+        (step.eq(3), "Loading data..."),
+        (step.eq(4), "Complete"),
+    ], default="Ready")
+
+    start = seq(
+        step.set(1), pct.set(15),
+        set_timeout([step.set(2), pct.set(45)], 800, store=t1),
+        set_timeout([step.set(3), pct.set(75)], 1600, store=t2),
+        set_timeout([step.set(4), pct.set(100)], 2400, store=t3),
+    )
+
+    reset = seq(
+        clear_timeout(t1), clear_timeout(t2), clear_timeout(t3),
+        step.set(0), pct.set(0),
+    )
+
+    return Div(
+        step, pct, t1, t2, t3,
+        P(data_text=label, cls="text-sm font-medium"),
+        Progress(signal=pct, aria_label="Deployment progress"),
+        Div(
+            Button("Deploy", data_on_click=start, data_attr_disabled=(step > 0) & (step < 4)),
+            Button("Reset", variant="outline", data_on_click=reset, data_attr_disabled=step.eq(0)),
+            cls="flex gap-2",
+        ),
+        cls="grid gap-3 w-full max-w-sm",
+    )
+
+
 EXAMPLES_DATA = [
     {"title": "Default", "description": "A simple progress bar with a static value", "fn": default_example},
     {"title": "With Label", "description": "Progress bar with a label and reactive percentage readout", "fn": with_label_example},
     {"title": "Sizes", "description": "Height variants using Tailwind classes via cls", "fn": sizes_example},
     {"title": "Reactive", "description": "Signal-driven progress bar with controls to update the value", "fn": reactive_example},
+    {"title": "Multi-Step Loading", "description": "Sequenced deployment pipeline with step labels [seq(), set_timeout, switch()]", "fn": multi_step_example},
 ]
 
 API_REFERENCE = build_api_reference(

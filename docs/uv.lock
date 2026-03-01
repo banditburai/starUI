@@ -800,7 +800,7 @@ wheels = [
 
 [[package]]
 name = "starhtml"
-version = "0.5.11"
+version = "0.5.12"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "beautifulsoup4" },
@@ -816,9 +816,9 @@ dependencies = [
     { name = "starlette-compress" },
     { name = "uvicorn", extra = ["standard"] },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/92/68/c911072f782411f48c3e2393b1c4a7765d7b3b75a8b49141cce53659c3c7/starhtml-0.5.11.tar.gz", hash = "sha256:791674ea607ac8b3c4b541abf2676909856bc8df0817f1d5fffe6abe96dbcd4f", size = 767103, upload-time = "2026-02-28T19:52:55.342Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f4/7b/3e863654371b8189b67d328ea66c2a7745e1b5ad35054dfb463cbcb9d2dc/starhtml-0.5.12.tar.gz", hash = "sha256:b457de26df106224b2cfa4dbdae810ea5c19f9c2607da76b01f43422b8bec615", size = 767853, upload-time = "2026-03-01T15:37:14.612Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a8/14/82d34a09dffb72b6b49d2129c0c101d84b68f3ab750a7d135e757c824426/starhtml-0.5.11-py3-none-any.whl", hash = "sha256:a151de6cb627c3cc6acd755e67ce64cf493dbffff65b6672c257fa21e568dfc3", size = 145970, upload-time = "2026-02-28T19:52:53.633Z" },
+    { url = "https://files.pythonhosted.org/packages/03/7d/8650ddae68cbb79c64e63dcb6148c62d20607583095007aed972b45994a6/starhtml-0.5.12-py3-none-any.whl", hash = "sha256:e0309d1bad9dfbcfa66ce539939a759db83b46b7166e6e8f728721d2820aede6", size = 146128, upload-time = "2026-03-01T15:37:13.28Z" },
 ]
 
 [[package]]
@@ -886,7 +886,7 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2.5.0,<3.0.0" },
     { name = "requests", specifier = ">=2.31.0,<3.0.0" },
     { name = "rich", specifier = ">=13.7.0,<14.0.0" },
-    { name = "starhtml", specifier = ">=0.5.11" },
+    { name = "starhtml", specifier = ">=0.5.12" },
     { name = "starmerge", specifier = ">=0.2.0" },
     { name = "typer", specifier = ">=0.9.0,<1.0.0" },
     { name = "websockets", specifier = ">=12.0.0,<16.0.0" },
@@ -923,7 +923,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "starhtml", specifier = ">=0.5.11" },
+    { name = "starhtml", specifier = ">=0.5.12" },
     { name = "starlighter", specifier = ">=0.2.0" },
     { name = "starui", editable = "../" },
     { name = "uvicorn", specifier = ">=0.30.0" },

@@ -145,6 +145,47 @@ def file_upload_example():
 
 
 
+@with_code
+def debounced_search_example():
+    query = Signal("search_q", "")
+    active = Signal("search_active", "")
+
+    packages = [
+        ("starhtml", "Modern web framework for Python"),
+        ("starui", "Accessible UI component library"),
+        ("datastar", "Reactive frontend via HTML attributes"),
+        ("fastcore", "Core utilities and functional tools"),
+        ("starlette", "Lightweight ASGI framework"),
+    ]
+
+    return Div(
+        query, active,
+        Div(
+            Icon("lucide:search", cls="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"),
+            Input(
+                placeholder="Search packages...",
+                signal=query,
+                data_on_input=(active.set(query), dict(debounce=300)),
+                cls="pl-9",
+            ),
+            cls="relative",
+        ),
+        Div(
+            *[
+                Div(
+                    Span(name, cls="text-sm font-medium"),
+                    Span(desc, cls="text-xs text-muted-foreground"),
+                    data_show=~active | js(f"'{name.lower()}'.includes($search_active.toLowerCase())"),
+                    cls="grid gap-0.5 py-2 border-b last:border-0",
+                )
+                for name, desc in packages
+            ],
+            cls="mt-2",
+        ),
+        cls="grid w-full max-w-sm",
+    )
+
+
 EXAMPLES_DATA = [
     {"title": "Default", "description": "A simple labeled input with helper text", "fn": default_example},
     {"title": "With Icon", "description": "Inputs with leading icons using absolute positioning", "fn": input_with_icon_example},
@@ -152,6 +193,7 @@ EXAMPLES_DATA = [
     {"title": "Reactive Validation", "description": "Real-time input validation using signals and regex", "fn": reactive_validation_example},
     {"title": "States", "description": "Disabled, read-only, and required inputs", "fn": input_states_example},
     {"title": "File Upload", "description": "Custom file input with a styled trigger button", "fn": file_upload_example},
+    {"title": "Debounced Search", "description": "Filtered list with typing delay using event modifiers [.with_(debounce), data_on_input]", "fn": debounced_search_example},
 ]
 
 API_REFERENCE = build_api_reference(

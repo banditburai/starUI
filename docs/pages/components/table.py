@@ -227,21 +227,37 @@ def selection_example():
         {"id": "msg5", "from": "Linear", "subject": "Sprint 14 starts Monday", "date": "Feb 17"},
     ]
 
-    msg_sigs = {m["id"]: Signal(f"tbl_{m['id']}", False) for m in messages}
+    sigs = [Signal(f"tbl_{m['id']}", False) for m in messages]
+    archs = [Signal(f"tbl_arch_{m['id']}", False) for m in messages]
     select_all = Signal("tbl_select_all", False)
 
-    sync_select_all = select_all.set(sum(msg_sigs.values()).eq(len(messages)))
+    selected_count = sum(sigs)
+    visible_count = len(messages) - sum(archs)
+
+    sync_select_all = select_all.set(
+        (visible_count > 0) & selected_count.eq(visible_count)
+    )
+
+    archive_selected = [
+        *[sig.then(arch.set(True)) for sig, arch in zip(sigs, archs)],
+        *[sig.set(False) for sig in sigs],
+        select_all.set(False),
+    ]
 
     return Div(
         select_all,
-        *msg_sigs.values(),
+        sigs,
+        archs,
         Table(
             TableHeader(
                 TableRow(
                     TableHead(
                         Checkbox(
                             signal=select_all,
-                            data_on_change=[sig.set(select_all) for sig in msg_sigs.values()],
+                            data_on_change=[
+                                (~arch).then(sig.set(select_all))
+                                for sig, arch in zip(sigs, archs)
+                            ],
                         ),
                         cls="w-12",
                     ),
@@ -253,23 +269,25 @@ def selection_example():
             TableBody(
                 *[TableRow(
                     TableCell(Checkbox(
-                        signal=msg_sigs[m["id"]],
+                        signal=sig,
                         data_on_change=sync_select_all,
                     )),
                     TableCell(m["from"], cls="font-medium"),
                     TableCell(m["subject"]),
                     TableCell(m["date"], cls="text-right text-muted-foreground"),
-                ) for m in messages]
+                    data_show=~arch,
+                ) for m, sig, arch in zip(messages, sigs, archs)]
             ),
         ),
         Div(
-            Span(data_text=sum(msg_sigs.values()), cls="font-bold"),
-            Span(f" of {len(messages)} selected"),
+            Span(data_text=selected_count, cls="font-bold"),
+            Span(data_text=" of " + visible_count + " selected"),
             Button(
                 "Archive",
                 size="sm",
                 variant="outline",
-                data_attr_disabled=sum(msg_sigs.values()).eq(0),
+                data_on_click=archive_selected,
+                data_attr_disabled=selected_count.eq(0),
                 cls="ml-auto",
             ),
             cls="mt-3 flex items-center gap-1 text-sm text-muted-foreground",
@@ -309,7 +327,7 @@ EXAMPLES_DATA = [
     {"title": "Selected Rows", "description": "TableRow selected prop for persistent highlighted background", "fn": selected_rows_example},
     {"title": "Row Actions", "description": "DropdownMenu composed in table cells for per-row actions", "fn": row_actions_example},
     {"title": "Rich Composition", "description": "Avatar, Badge, Progress, and Skeleton composed in table cells", "fn": composition_example},
-    {"title": "Selection", "description": "Checkbox select-all with Signal, reactive count, and disabled button", "fn": selection_example},
+    {"title": "Selection", "description": "Checkbox select-all with functional Archive using .then() conditional actions [Signal, sum(), .then()]", "fn": selection_example},
     {"title": "Empty State", "description": "Empty table body with icon and message using colspan", "fn": empty_state_example},
 ]
 

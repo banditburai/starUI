@@ -135,7 +135,7 @@ def Blockquote(*children, cls="", **kwargs) -> FT:
 
 
 def List(*children, ordered=False, cls="", **kwargs) -> FT:
-    items = [c if getattr(c, 'tag', None) == 'li' else Li(c) for c in children]
+    items = [c if getattr(c, "tag", None) == "li" else Li(c) for c in children]
     classes = cn(
         "my-6 ml-6 [&>li]:mt-2",
         "list-decimal" if ordered else "list-disc",
