@@ -22,7 +22,8 @@ def default_example():
         Select(
             SelectTrigger(
                 SelectValue(placeholder="Set status"),
-                cls="w-[200px]"
+                cls="w-[200px]",
+                aria_label="Set status",
             ),
             SelectContent(
                 SelectLabel("Active"),
@@ -183,12 +184,13 @@ def dependent_selects_example():
                     select_cls="w-full"
                 ),
                 Div(
-                    Label("Model", cls="block text-sm font-medium mb-1.5"),
+                    Label("Model", fr="vehicle_model_trigger", cls="block text-sm font-medium mb-1.5"),
                     Select(
                         SelectTrigger(
                             SelectValue(placeholder="Select model"),
                             data_attr_disabled=~make_value,
-                            cls="w-full"
+                            cls="w-full",
+                            id="vehicle_model_trigger",
                         ),
                         SelectContent(
                             Div(

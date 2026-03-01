@@ -1,9 +1,8 @@
-from typing import Any
-
 from starhtml import FT, Div, Icon, Signal, Span
 from starhtml import Button as HTMLButton
 from starhtml import Label as HTMLLabel
 from starhtml import P as HTMLP
+from starhtml.datastar import evt
 
 from .utils import cn, gen_id, inject_context, merge_actions
 
@@ -14,7 +13,7 @@ def Select(
     label: str | None = None,
     signal: str | Signal = "",
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     sig = getattr(signal, "_id", signal) or gen_id("select")
 
@@ -43,16 +42,18 @@ def Select(
 def SelectTrigger(
     *children,
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
-    def trigger(*, sig, selected_label, **ctx):
+    def trigger(*, sig, selected_label, open_state, **ctx):
         custom_id = kwargs.pop("id", None)
         trigger_id = custom_id or f"{sig}_trigger"
         trigger_ref = Signal(trigger_id, _ref_only=True)
 
         return HTMLButton(
             *[
-                inject_context(child, sig=sig, selected_label=selected_label, **ctx)
+                inject_context(
+                    child, sig=sig, selected_label=selected_label, open_state=open_state, **ctx
+                )
                 for child in children
             ],
             Icon("lucide:chevron-down", cls="size-4 shrink-0 opacity-50"),
@@ -62,6 +63,8 @@ def SelectTrigger(
             type="button",
             role="combobox",
             aria_haspopup="listbox",
+            aria_expanded="false",
+            data_attr_aria_expanded=open_state.if_("true", "false"),
             aria_controls=f"{sig}_content",
             id=trigger_ref._id,
             cls=cn(
@@ -86,7 +89,7 @@ def SelectValue(
     *children,
     placeholder: str = "Select an option",
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     def value_component(*, selected_label, **_):
         if children:
@@ -103,7 +106,11 @@ def SelectValue(
             else selected_label.or_(placeholder)
         )
 
+        # Static text for SSR/accessibility; data_text overrides once Datastar initializes
+        ssr_text = getattr(selected_label, "_initial", "") or placeholder
+
         return Span(
+            ssr_text,
             data_text=text_expr,
             cls=cn("pointer-events-none truncate flex-1 text-left", cls),
             data_class_text_muted_foreground=~selected_label,
@@ -121,9 +128,9 @@ def SelectContent(
     side_offset: int = 4,
     container: str = "none",
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
-    def content(*, sig, **ctx):
+    def content(*, sig, open_state, **ctx):
         trigger_ref = Signal(f"{sig}_trigger", _ref_only=True)
         content_ref = Signal(f"{sig}_content", _ref_only=True)
         placement = side if align == "center" else f"{side}-{align}"
@@ -137,7 +144,7 @@ def SelectContent(
             "container": container,
         }
 
-        context = dict(sig=sig, **ctx)
+        context = dict(sig=sig, open_state=open_state, **ctx)
 
         return Div(
             Div(
@@ -145,6 +152,7 @@ def SelectContent(
                 cls="p-1",
             ),
             data_ref=content_ref,
+            data_on_toggle=open_state.set(evt.newState == "open"),
             data_style_min_width=trigger_ref.if_(
                 trigger_ref.offsetWidth + "px", "8rem"
             ),
@@ -170,17 +178,14 @@ def SelectItem(
     value: str = "",
     disabled: bool = False,
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     def item(*, sig, selected, selected_label, **_):
         content_ref = Signal(f"{sig}_content", _ref_only=True)
 
-        item_value = value or (
-            children[0] if children and isinstance(children[0], str) else ""
-        )
-        label_text = (
-            children[0] if (children and isinstance(children[0], str)) else item_value
-        )
+        first_text = children[0] if children and isinstance(children[0], str) else ""
+        item_value = value or first_text
+        label_text = first_text or item_value
         is_selected = selected.eq(item_value)
 
         click_actions = merge_actions(
@@ -223,7 +228,7 @@ def SelectGroup(
     *children,
     label: str | None = None,
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     def group(*, sig, **ctx):
         return Div(
@@ -240,7 +245,7 @@ def SelectGroup(
 def SelectLabel(
     *children,
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     def label(**_):
         return Div(
@@ -255,7 +260,7 @@ def SelectLabel(
 
 def SelectSeparator(
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     def separator(**_):
         return Div(
@@ -317,7 +322,7 @@ def _build_select_items(options: list) -> list:
 
 
 def SelectWithLabel(
-    *attrs: Any,
+    *attrs,
     label: str,
     options: list[str | tuple[str, str] | dict],
     value: str | None = None,
@@ -333,7 +338,7 @@ def SelectWithLabel(
     label_cls: str = "",
     select_cls: str = "",
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     sig = getattr(signal, "_id", signal) or gen_id("select")
     trigger_id = id or f"{sig}_trigger"
@@ -367,5 +372,6 @@ def SelectWithLabel(
         HTMLP(helper_text, cls="text-sm text-muted-foreground mt-1.5")
         if helper_text and not error_text
         else None,
+        data_slot="select-with-label",
         cls=cn("space-y-1.5", cls),
     )

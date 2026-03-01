@@ -182,9 +182,9 @@ def form_integration_example():
                 ("weekly", "Weekly Summary"),
                 ("never", "Never"),
                 type="single",
+                variant="outline",
                 signal=frequency,
                 orientation="vertical",
-                cls="w-full"
             ),
             cls="mb-6 transition-opacity",
             data_class_opacity_0=no_methods,

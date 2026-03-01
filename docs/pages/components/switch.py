@@ -64,7 +64,7 @@ def states_example():
         SwitchWithLabel(
             label="Custom styling",
             signal="sw_st_custom",
-            label_cls="text-green-600 dark:text-green-400",
+            label_cls="text-green-700 dark:text-green-400",
             switch_cls="border-2 border-green-500",
             helper_text="Green tint on label and track border",
         ),
@@ -183,7 +183,7 @@ def encoder_settings_example():
             signal=signal,
             checked=checked,
             helper_text=helper_text,
-            label_cls=signal.if_("text-green-600 dark:text-green-400"),
+            label_cls=signal.if_("text-green-700 dark:text-green-400"),
         )
 
     return Card(
@@ -311,6 +311,7 @@ def scene_layers_example():
                                     size="sm",
                                     cls="border-2 border-amber-500",
                                     data_attr_disabled=~layer_signals[name],
+                                    aria_label=f"Preview {label}",
                                 ),
                                 cls="flex items-center gap-2",
                             ),

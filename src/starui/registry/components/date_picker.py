@@ -267,6 +267,7 @@ def DatePickerWithInput(
             popoveraction="toggle",
             variant="ghost",
             size="icon",
+            aria_label="Open calendar",
             aria_haspopup="dialog",
             aria_describedby=content_ref._id,
             data_slot="popover-trigger",
@@ -515,7 +516,7 @@ def _datetime_sync_effect(
 def _input_sync_effect(
     selected, cal_selected, cal_month, cal_year, cal_month_display, input_ref
 ) -> str:
-    return f"const c={cal_selected}??'',i={input_ref},ps={selected}??'';if(i&&c&&c!==ps){{i.value=c;{selected}=c}}if(i){{const u=()=>{{const v=i.value;if(/^\\d{{4}}-\\d{{2}}-\\d{{2}}$/.test(v)){{{selected}=v;{cal_selected}=v;const[y,m,d]=v.split('-').map(Number);{cal_month}=m;{cal_year}=y;const M={str(MONTHS)};{cal_month_display}=M[m-1]}}}};i.removeEventListener('change',u);i.addEventListener('change',u)}}"
+    return f"const c={cal_selected}??'',i={input_ref},ps={selected}??'';if(i&&c&&c!==ps){{i.value=c;{selected}=c}}if(i){{const u=()=>{{const v=i.value;if(/^\\d{{4}}-\\d{{2}}-\\d{{2}}$/.test(v)){{{selected}=v;{cal_selected}=v;const[y,m,d]=v.split('-').map(Number);{cal_month}=m;{cal_year}=y;const M={str(list(MONTHS))};{cal_month_display}=M[m-1]}}}};i.removeEventListener('change',u);i.addEventListener('change',u)}}"
 
 
 def _input_close_effect(selected, content_ref) -> str:

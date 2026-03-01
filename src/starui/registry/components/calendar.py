@@ -18,20 +18,26 @@ class CalendarElement(Protocol):
     month_display: Signal  # "January", "February", etc.
 
 
-MONTHS = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-]
+MONTHS = (
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
+)
+
+_CALENDAR_STYLES = """
+.cal-cell:not(.outside):not(.selected):not(.disabled):hover{background-color:var(--accent);color:var(--accent-foreground)}
+.cal-cell.outside{color:var(--muted-foreground);pointer-events:none}
+.cal-cell.selected{background-color:var(--primary)!important;color:var(--primary-foreground)!important}
+.cal-cell.today:not(.selected):not(.range-middle){background-color:var(--accent);color:var(--accent-foreground);border-radius:var(--radius-md)}
+.cal-cell.disabled{opacity:0.5;cursor:not-allowed;pointer-events:none}
+.cal-cell.range-start{border-top-right-radius:0!important;border-bottom-right-radius:0!important}
+.cal-cell.range-middle{border-radius:0!important;background-color:var(--accent);color:var(--accent-foreground)}
+.cal-cell.range-middle.selected{background-color:var(--accent)!important;color:var(--accent-foreground)!important}
+.cal-cell.range-end{border-top-left-radius:0!important;border-bottom-left-radius:0!important}
+.cal-cell.range-week-start{border-top-left-radius:0.375rem!important;border-bottom-left-radius:0.375rem!important}
+.cal-cell.range-week-end{border-top-right-radius:0.375rem!important;border-bottom-right-radius:0.375rem!important}
+.scrollbar-hide{scrollbar-width:none;-ms-overflow-style:none}
+.scrollbar-hide::-webkit-scrollbar{display:none}
+"""
 
 
 def Calendar(
@@ -135,20 +141,18 @@ def _build_navigation(
                 month,
                 year,
                 month_display,
-                "month",
-                MONTHS[current_month - 1],
-                [(i + 1, name) for i, name in enumerate(MONTHS)],
-                disabled,
+                kind="month",
+                items=[(i + 1, name) for i, name in enumerate(MONTHS)],
+                disabled=disabled,
             ),
             _build_dropdown(
                 sig,
                 month,
                 year,
                 month_display,
-                "year",
-                current_year,
-                [(y, y) for y in range(current_year - 10, current_year + 11)],
-                disabled,
+                kind="year",
+                items=[(y, y) for y in range(current_year - 10, current_year + 11)],
+                disabled=disabled,
             ),
             cls="flex items-center gap-1",
         )
@@ -175,15 +179,14 @@ def _build_dropdown(
     month,
     year,
     month_display,
-    type: str,
-    current_display: str | int,
+    kind: str,
     items: list[tuple],
     disabled: bool,
 ) -> Div:
-    type_sig = month if type == "month" else year
-    trigger_ref = Signal(f"{sig}_{type}_trigger", _ref_only=True)
-    content_ref = Signal(f"{sig}_{type}_content", _ref_only=True)
-    display_sig = month_display if type == "month" else type_sig
+    kind_sig = month if kind == "month" else year
+    trigger_ref = Signal(f"{sig}_{kind}_trigger", _ref_only=True)
+    content_ref = Signal(f"{sig}_{kind}_content", _ref_only=True)
+    display_sig = month_display if kind == "month" else kind_sig
 
     trigger = HTMLButton(
         Span(data_text=display_sig, cls="pointer-events-none"),
@@ -194,7 +197,7 @@ def _build_dropdown(
         popoveraction="toggle",
         type="button",
         disabled=disabled,
-        aria_label="Select " + type,
+        aria_label="Select " + kind,
         aria_haspopup="listbox",
         cls="flex h-7 items-center gap-1 rounded-md px-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground focus:outline-none disabled:opacity-50",
     )
@@ -207,11 +210,11 @@ def _build_dropdown(
     def make_item(value, display):
         attrs = {
             "cls": item_cls,
-            "data_selected": type_sig == value,
-            "aria_selected": type_sig == value,
+            "data_selected": kind_sig == value,
+            "aria_selected": kind_sig == value,
             "role": "option",
         }
-        if type == "month":
+        if kind == "month":
             attrs["data_month"] = value
             attrs["data_month_name"] = display
         else:
@@ -230,7 +233,7 @@ def _build_dropdown(
     dropdown = Div(
         *[make_item(value, display) for value, display in items],
         data_on_click=js(
-            _dropdown_handler(month, year, month_display, type, content_ref)
+            _dropdown_handler(month, year, month_display, kind, content_ref)
         )
         if not disabled
         else None,
@@ -240,7 +243,7 @@ def _build_dropdown(
         popover="auto",
         id=content_ref._id,
         role="listbox",
-        aria_label=type.capitalize() + " selection",
+        aria_label=kind.capitalize() + " selection",
         cls="z-50 max-h-[200px] overflow-y-auto scrollbar-hide rounded-md border bg-popover text-popover-foreground shadow-md outline-none dark:border",
     )
 
@@ -249,15 +252,7 @@ def _build_dropdown(
 
 def _build_weekdays() -> Div:
     weekdays = ("Su", "Mo", "Tu", "We", "Th", "Fr", "Sa")
-    full_weekdays = (
-        "Sunday",
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-    )
+    full_weekdays = ("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")
     return Div(
         *[
             Div(
@@ -293,13 +288,13 @@ def _build_calendar_grid(
 
 def _nav_handler(month, year, month_display, is_next: bool) -> str:
     op = "+" if is_next else "-"
-    months_str = str(MONTHS)
+    months_str = str(list(MONTHS))
     return f"let mm=parseInt({month}){op}1,y=parseInt({year});if(mm>12){{mm=1;y++}}else if(mm<1){{mm=12;y--}};{month}=mm;{year}=y;const months={months_str};{month_display}=months[mm-1]"
 
 
-def _dropdown_handler(month, year, month_display, type: str, content_ref) -> str:
+def _dropdown_handler(month, year, month_display, kind: str, content_ref) -> str:
     close = content_ref.hidePopover()
-    if type == "month":
+    if kind == "month":
         return f"const t=evt.target;if(!t.dataset.month)return;const m=parseInt(t.dataset.month),n=t.dataset.monthName;{month}=m;{month_display}=n;{close}"
     return f"const t=evt.target;if(!t.dataset.year)return;const y=parseInt(t.dataset.year);{year}=y;{close}"
 
@@ -358,20 +353,3 @@ def _render_days_effect(
 
     disabled_check = "if(!o&&!e)l+=' disabled';" if disabled else ""
     return f"""const b=document.querySelector('[data-calendar-body="{sig}"]'),m='{mode}';if(!b)return;{selected};const y=parseInt(${sig}_year),mm=parseInt(${sig}_month);{gen_cal};const {selected_setup};let h='';let lastWeekWithDates=5;for(let w=5;w>=0;w--){{let hasDate=false;for(let yy=0;yy<7;yy++){{const i=w*7+yy,c=a[i]||{{}};if(c.date&&!c.outside){{hasDate=true;break}}}}if(hasDate){{lastWeekWithDates=w;break}}}}for(let w=0;w<=lastWeekWithDates;w++){{h+='<div role="row" class="flex w-full mt-2">';for(let yy=0;yy<7;yy++){{const i=w*7+yy,c=a[i]||{{}},o=c.outside,e=!c.date,t=c.date==='{today_str}'&&!o,x=!o&&({sel_check});let l='cal-cell h-8 min-w-8 flex-1 text-center text-sm rounded-md transition-colors flex items-center justify-center';if(!o&&!e&&!{str(disabled).lower()})l+=' cursor-pointer';{disabled_check}if(o)l+=' outside';if(t)l+=' today';if(x)l+=' selected';{range_logic}h+=`<div class="${{l}}" data-date="${{o?'':c.date||''}}" role="gridcell" aria-selected="${{!!x}}"${{o?' aria-disabled="true"':''}}>${{c.day||''}}</div>`}}h+='</div>'}}b.innerHTML=h"""
-
-
-_CALENDAR_STYLES = """
-.cal-cell:not(.outside):not(.selected):not(.disabled):hover{background-color:var(--accent);color:var(--accent-foreground)}
-.cal-cell.outside{color:var(--muted-foreground);pointer-events:none}
-.cal-cell.selected{background-color:var(--primary)!important;color:var(--primary-foreground)!important}
-.cal-cell.today:not(.selected):not(.range-middle){background-color:var(--accent);color:var(--accent-foreground);border-radius:var(--radius-md)}
-.cal-cell.disabled{opacity:0.5;cursor:not-allowed;pointer-events:none}
-.cal-cell.range-start{border-top-right-radius:0!important;border-bottom-right-radius:0!important}
-.cal-cell.range-middle{border-radius:0!important;background-color:var(--accent);color:var(--accent-foreground)}
-.cal-cell.range-middle.selected{background-color:var(--accent)!important;color:var(--accent-foreground)!important}
-.cal-cell.range-end{border-top-left-radius:0!important;border-bottom-left-radius:0!important}
-.cal-cell.range-week-start{border-top-left-radius:0.375rem!important;border-bottom-left-radius:0.375rem!important}
-.cal-cell.range-week-end{border-top-right-radius:0.375rem!important;border-bottom-right-radius:0.375rem!important}
-.scrollbar-hide{scrollbar-width:none;-ms-overflow-style:none}
-.scrollbar-hide::-webkit-scrollbar{display:none}
-"""

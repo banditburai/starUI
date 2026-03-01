@@ -1,4 +1,4 @@
-from typing import Any, Literal
+from typing import Literal
 
 from starhtml import FT, Div
 
@@ -9,7 +9,7 @@ def Separator(
     orientation: Literal["horizontal", "vertical"] = "horizontal",
     decorative: bool = True,
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     return Div(
         role=None if decorative else "separator",

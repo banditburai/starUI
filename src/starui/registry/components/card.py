@@ -63,7 +63,7 @@ def CardTitle(
     Heading = _HEADING_COMPONENTS[level]
     return Heading(
         *children,
-        cls=cn("leading-none font-semibold", cls),
+        cls=cn("min-w-0 leading-none font-semibold", cls),
         data_slot="card-title",
         **kwargs,
     )
@@ -76,7 +76,7 @@ def CardDescription(
 ) -> FT:
     return P(
         *children,
-        cls=cn("text-muted-foreground text-sm", cls),
+        cls=cn("min-w-0 break-words text-muted-foreground text-sm", cls),
         data_slot="card-description",
         **kwargs,
     )

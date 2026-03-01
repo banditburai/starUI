@@ -16,15 +16,16 @@ dialog[data-dialog]{
   --_dur-in:200ms;--_dur-out:150ms;
   transition:opacity var(--_dur-out) ease,scale var(--_dur-out) ease,display var(--_dur-out) allow-discrete,overlay var(--_dur-out) allow-discrete;
 }
-dialog[data-dialog][open]{transition-duration:var(--_dur-in)}
+dialog[data-dialog][open]{transition-duration:var(--_dur-in);transition-timing-function:cubic-bezier(0.16,1,0.3,1)}
 dialog[data-dialog]:not([open]){opacity:0;scale:0.95}
 dialog[data-dialog][open]{@starting-style{opacity:0;scale:0.95}}
 dialog[data-dialog]::backdrop{
-  background:rgb(0 0 0/.5);
-  transition:background var(--_dur-out) ease,display var(--_dur-out) allow-discrete,overlay var(--_dur-out) allow-discrete;
+  background:rgb(0 0 0/.5);backdrop-filter:blur(4px);
+  transition:background var(--_dur-out) ease,backdrop-filter var(--_dur-out) ease,display var(--_dur-out) allow-discrete,overlay var(--_dur-out) allow-discrete;
 }
-dialog[data-dialog]:not([open])::backdrop{background:rgb(0 0 0/0)}
-dialog[data-dialog][open]::backdrop{@starting-style{background:rgb(0 0 0/0)}}
+dialog[data-dialog]:not([open])::backdrop{background:rgb(0 0 0/0);backdrop-filter:blur(0)}
+dialog[data-dialog][open]::backdrop{transition-timing-function:cubic-bezier(0.16,1,0.3,1);@starting-style{background:rgb(0 0 0/0);backdrop-filter:blur(0)}}
+@media(prefers-reduced-motion:reduce){dialog[data-dialog],dialog[data-dialog]::backdrop{transition-duration:0ms!important}}
 """
 
 dialog_variants = cva(
@@ -138,7 +139,7 @@ def DialogContent(
                 Icon("lucide:x", cls="size-4"),
                 Span("Close", cls="sr-only"),
                 data_on_click=[open_state.set(False), dialog_ref.close()],
-                cls="absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:outline-hidden focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none ring-offset-background focus:ring-ring [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                cls="absolute top-4 right-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0",
                 type="button",
                 aria_label="Close",
             )

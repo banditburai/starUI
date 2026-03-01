@@ -1,5 +1,3 @@
-from typing import Any
-
 from starhtml import FT, Div, Icon, Signal
 from starhtml import Input as HTMLInput
 from starhtml import Label as HTMLLabel
@@ -19,7 +17,7 @@ def Checkbox(
     required: bool = False,
     cls: str = "",
     indicator_cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     sig = getattr(signal, "_id", signal) or gen_id("checkbox")
     initial = "indeterminate" if indeterminate else (checked or False)
@@ -64,7 +62,7 @@ def Checkbox(
 
 
 def CheckboxWithLabel(
-    *attrs: Any,
+    *attrs,
     label: str,
     checked: bool | None = None,
     name: str | None = None,
@@ -79,7 +77,7 @@ def CheckboxWithLabel(
     label_cls: str = "",
     checkbox_cls: str = "",
     indicator_cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     sig = getattr(signal, "_id", signal) or gen_id("checkbox")
     checkbox_id = kwargs.pop("id", None) or sig

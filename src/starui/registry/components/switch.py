@@ -1,4 +1,4 @@
-from typing import Any, Literal
+from typing import Literal
 
 from starhtml import FT, Div, Signal
 from starhtml import Button as HTMLButton
@@ -52,7 +52,7 @@ def Switch(
     required: bool = False,
     size: SwitchSize = "default",
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     sig = getattr(signal, "_id", signal) or gen_id("switch")
     switch_id = kwargs.pop("id", sig)
@@ -88,7 +88,7 @@ def Switch(
 
 
 def SwitchWithLabel(
-    *attrs: Any,
+    *attrs,
     label: str,
     checked: bool | None = None,
     signal: str | Signal | None = None,
@@ -100,7 +100,7 @@ def SwitchWithLabel(
     cls: str = "",
     label_cls: str = "",
     switch_cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     sig = getattr(signal, "_id", signal) or gen_id("switch")
     switch_id = kwargs.pop("id", sig)

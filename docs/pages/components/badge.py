@@ -105,7 +105,7 @@ def custom_styling_badge_example():
             cls="flex gap-2 items-center"
         ),
         Div(
-            Badge("Success", cls="bg-green-500 text-white border-transparent"),
+            Badge("Success", cls="bg-green-700 text-white border-transparent"),
             Badge("Danger", cls="bg-red-600 text-white border-transparent"),
             Badge("Info", cls="bg-blue-600 text-white border-transparent"),
             cls="flex gap-2"

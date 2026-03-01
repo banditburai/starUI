@@ -1,5 +1,5 @@
 from itertools import count
-from typing import Any, Literal
+from typing import Literal
 
 from starhtml import FT, Div, Signal
 from starhtml import Button as HTMLButton
@@ -31,19 +31,18 @@ _TABS_TRIGGER = {
 
 
 def Tabs(
-    *children: Any,
+    *children,
     value: str | int = 0,
     variant: TabsVariant = "default",
     signal: str | Signal = "",
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     sig = getattr(signal, "_id", signal) or gen_id("tabs")
 
     ctx = {
         "tabs_state": (tabs_state := Signal(sig, value)),
         "variant": variant,
-        "initial_value": value,
         "_trigger_index": count(),
         "_content_index": count(),
     }
@@ -57,7 +56,7 @@ def Tabs(
     )
 
 
-def TabsList(*children: Any, cls: str = "", **kwargs: Any) -> FT:
+def TabsList(*children, cls: str = "", **kwargs) -> FT:
     def _(**ctx):
         variant = ctx.get("variant", "default")
 
@@ -79,11 +78,11 @@ def TabsList(*children: Any, cls: str = "", **kwargs: Any) -> FT:
 
 
 def TabsTrigger(
-    *children: Any,
+    *children,
     id: str | int | None = None,
     disabled: bool = False,
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     def _(*, tabs_state, variant="default", _trigger_index, **_):
         tab_id = id if id is not None else next(_trigger_index)
@@ -123,9 +122,9 @@ def TabsTrigger(
 
 
 def TabsContent(
-    *children: Any, id: str | int | None = None, cls: str = "", **kwargs: Any
+    *children, id: str | int | None = None, cls: str = "", **kwargs
 ) -> FT:
-    def _(*, tabs_state, initial_value, _content_index, **_):
+    def _(*, tabs_state, _content_index, **_):
         tab_id = id if id is not None else next(_content_index)
         is_active = tabs_state == tab_id
 
@@ -138,7 +137,6 @@ def TabsContent(
             id=f"panel-{tab_id}",
             aria_labelledby=str(tab_id),
             tabindex="0",
-            style="display: none" if tab_id != initial_value else None,
             cls=cn("mt-2 outline-none overflow-x-auto", cls),
             **kwargs,
         )

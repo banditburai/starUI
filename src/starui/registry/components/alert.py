@@ -1,4 +1,4 @@
-from typing import Any, Literal
+from typing import Literal
 
 from starhtml import FT, Div
 
@@ -9,7 +9,7 @@ AlertVariant = Literal["default", "destructive"]
 
 alert_variants = cva(
     base=(
-        "relative w-full rounded-lg border px-4 py-3 text-sm grid "
+        "relative w-full overflow-hidden rounded-lg border px-4 py-3 text-sm grid "
         "has-[[data-icon-sh]]:grid-cols-[calc(var(--spacing)*4)_1fr] grid-cols-[0_1fr] "
         "has-[[data-icon-sh]]:gap-x-3 gap-y-0.5 items-start "
         "[&_[data-icon-sh]]:size-4 [&_[data-icon-sh]]:translate-y-0.5"
@@ -27,16 +27,17 @@ alert_variants = cva(
 
 
 def Alert(
-    *children: Any,
+    *children,
     variant: AlertVariant = "default",
     live: bool = False,
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     return Div(
         *children,
         role="alert" if live else None,
         cls=cn(alert_variants(variant=variant), cls),
+        data_slot="alert",
         **kwargs,
     )
 
@@ -49,9 +50,10 @@ def AlertTitle(
     return Div(
         *children,
         cls=cn(
-            "col-start-2 line-clamp-1 min-h-4 font-medium tracking-tight",
+            "col-start-2 min-w-0 line-clamp-1 min-h-4 font-medium tracking-tight",
             cls,
         ),
+        data_slot="alert-title",
         **kwargs,
     )
 
@@ -64,8 +66,9 @@ def AlertDescription(
     return Div(
         *children,
         cls=cn(
-            "col-start-2 grid justify-items-start gap-1 text-sm [&_p]:leading-relaxed",
+            "col-start-2 min-w-0 break-words grid justify-items-start gap-1 text-sm [&_p]:leading-relaxed",
             cls,
         ),
+        data_slot="alert-description",
         **kwargs,
     )

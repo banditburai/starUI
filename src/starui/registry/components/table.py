@@ -4,15 +4,13 @@ from starhtml import (
     FT,
     Caption,
     Div,
+    Table as HTMLTable,
     Tbody,
     Td,
     Tfoot,
     Th,
     Thead,
     Tr,
-)
-from starhtml import (
-    Table as HTMLTable,
 )
 
 from .utils import cn

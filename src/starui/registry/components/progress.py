@@ -1,5 +1,3 @@
-from typing import Any
-
 from starhtml import FT, Div, Signal
 from starhtml.datastar import Expr
 
@@ -11,7 +9,7 @@ def Progress(
     max_value: float = 100,
     signal: str | Signal = "",
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     sig = getattr(signal, "_id", signal) or gen_id("progress")
     initial = getattr(signal, "_initial", value) if value is None else value

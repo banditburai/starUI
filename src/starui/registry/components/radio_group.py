@@ -1,4 +1,4 @@
-from typing import Any, Literal
+from typing import Literal
 
 from starhtml import FT, Div, Signal
 from starhtml import Input as HTMLInput
@@ -10,7 +10,7 @@ from .utils import cn, gen_id, inject_context
 
 
 def RadioGroup(
-    *children: Any,
+    *children,
     value: str = "",
     signal: str | Signal = "",
     name: str = "",
@@ -18,7 +18,7 @@ def RadioGroup(
     hide_indicators: bool = False,
     aria_label: str = "",
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     sig = getattr(signal, "_id", signal) or gen_id("radio")
     group_name = name or f"radio_group_{sig}"
@@ -50,7 +50,7 @@ def RadioGroupItem(
     disabled: bool = False,
     cls: str = "",
     indicator_cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ):
     def item(*, sig, selected, group_name, hide_indicators, initial_value="", **_):
         radio_id = gen_id("radio")
@@ -140,9 +140,9 @@ def RadioGroupItem(
 
 
 def RadioGroupWithLabel(
-    *attrs: Any,
+    *attrs,
     label: str,
-    options: list[dict[str, Any]],
+    options: list[dict],
     value: str = "",
     signal: str | Signal = "",
     name: str = "",
@@ -154,7 +154,7 @@ def RadioGroupWithLabel(
     hide_indicators: bool = False,
     orientation: Literal["vertical", "horizontal"] = "vertical",
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     sig = getattr(signal, "_id", signal) or gen_id("radio")
     group_name = name or f"radio_group_{sig}"
@@ -196,5 +196,6 @@ def RadioGroupWithLabel(
         HTMLP(helper_text, cls="text-sm text-muted-foreground mt-1.5")
         if helper_text and not error_text
         else None,
+        data_slot="radio-group-with-label",
         cls=cn("space-y-1.5", cls),
     )

@@ -1,6 +1,6 @@
-from typing import Any, Literal
+from typing import Literal
 
-from starhtml import FT, Div, Icon, P, Signal, Span, Style, js
+from starhtml import FT, Div, Icon, P, Signal, Span, Style
 from starhtml import H2 as HTMLH2
 from starhtml import Dialog as HTMLDialog
 from starhtml.datastar import document, evt, seq
@@ -19,10 +19,10 @@ dialog[data-side]{
 dialog[data-side][open]{transition-duration:var(--_dur-in)}
 dialog[data-side]:not([open]){display:none}
 dialog[data-side]::backdrop{
-  background:rgb(0 0 0/.5);
-  transition:background 200ms ease,display var(--_dur-out) allow-discrete,overlay var(--_dur-out) allow-discrete;
+  background:rgb(0 0 0/.5);backdrop-filter:blur(4px);
+  transition:background 200ms ease,backdrop-filter 200ms ease,display var(--_dur-out) allow-discrete,overlay var(--_dur-out) allow-discrete;
 }
-dialog[data-side]:not([open])::backdrop{background:rgb(0 0 0/0)}
+dialog[data-side]:not([open])::backdrop{background:rgb(0 0 0/0);backdrop-filter:blur(0)}
 dialog[data-side="right"]{inset:0 0 0 auto}
 dialog[data-side="right"]:not([open]){translate:100% 0}
 dialog[data-side="right"][open]{@starting-style{translate:100% 0}}
@@ -35,17 +35,18 @@ dialog[data-side="top"][open]{@starting-style{translate:0 -100%}}
 dialog[data-side="bottom"]{inset:auto 0 0 0;max-width:none}
 dialog[data-side="bottom"]:not([open]){translate:0 100%}
 dialog[data-side="bottom"][open]{@starting-style{translate:0 100%}}
-dialog[data-side][open]::backdrop{@starting-style{background:rgb(0 0 0/0)}}
+dialog[data-side][open]::backdrop{@starting-style{background:rgb(0 0 0/0);backdrop-filter:blur(0)}}
+@media(prefers-reduced-motion:reduce){dialog[data-side],dialog[data-side]::backdrop{transition-duration:0ms!important}}
 """
 
 
 def Sheet(
-    *children: Any,
+    *children,
     signal: str | Signal = "",
     modal: bool = True,
     default_open: bool = False,
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     sig = getattr(signal, "_id", signal) or gen_id("sheet")
     sheet_open = Signal(f"{sig}_open", default_open)
@@ -91,7 +92,7 @@ def Sheet(
         }[size]
     )
 
-    show_method = "showModal" if modal else "show"
+    show_action = dialog_ref.showModal() if modal else dialog_ref.show()
 
     return Div(
         Style(_SHEET_STYLES),
@@ -101,8 +102,9 @@ def Sheet(
             content(**ctx) if content else None,
             data_ref=dialog_ref,
             data_on_close=sheet_open.set(False),
-            data_on_click=(evt.target == evt.currentTarget)
-            & seq(dialog_ref.close(), sheet_open.set(False))
+            data_on_click=(evt.target == evt.currentTarget).then(
+                seq(dialog_ref.close(), sheet_open.set(False))
+            )
             if modal
             else None,
             data_side=side,
@@ -121,10 +123,10 @@ def Sheet(
         ),
         # Sync signal → native dialog (supports external triggers like mobile menu)
         Div(
-            data_effect=js(
-                f"if (${sig}_open && !${sig}.open) ${sig}.{show_method}();"
-                f" if (!${sig}_open && ${sig}.open) ${sig}.close()"
-            ),
+            data_effect=[
+                (sheet_open & ~dialog_ref.open).then(show_action),
+                (~sheet_open & dialog_ref.open).then(dialog_ref.close()),
+            ],
             style="display: none;",
         ),
         Div(

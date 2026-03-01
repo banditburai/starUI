@@ -1,5 +1,3 @@
-from typing import Any
-
 from starhtml import FT
 from starhtml import Label as HTMLLabel
 
@@ -7,9 +5,9 @@ from .utils import cn
 
 
 def Label(
-    *children: Any,
+    *children,
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     return HTMLLabel(
         *children,

@@ -24,6 +24,7 @@ heading_variants = cva(
     config={
         "variants": {
             "level": {
+                "display": "text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight",
                 "h1": "text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight",
                 "h2": "border-b pb-2 text-2xl sm:text-3xl font-semibold leading-tight",
                 "h3": "text-2xl font-semibold leading-tight",
@@ -66,14 +67,7 @@ prose_variants = cva(
 
 
 def Display(*children, cls="", **kwargs) -> FT:
-    return HTMLH1(
-        *children,
-        cls=cn(
-            "scroll-m-20 text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight text-balance first:mt-0",
-            cls,
-        ),
-        **kwargs,
-    )
+    return HTMLH1(*children, cls=cn(heading_variants(level="display"), cls), **kwargs)
 
 
 def H1(*children, cls="", **kwargs) -> FT:
@@ -141,7 +135,7 @@ def Blockquote(*children, cls="", **kwargs) -> FT:
 
 
 def List(*children, ordered=False, cls="", **kwargs) -> FT:
-    items = [Li(c) if not (hasattr(c, 'tag') and c.tag == 'li') else c for c in children]
+    items = [c if getattr(c, 'tag', None) == 'li' else Li(c) for c in children]
     classes = cn(
         "my-6 ml-6 [&>li]:mt-2",
         "list-decimal" if ordered else "list-disc",

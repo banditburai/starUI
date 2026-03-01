@@ -1,4 +1,4 @@
-from typing import Any, Literal
+from typing import Literal
 
 from starhtml import FT, Div, Signal, clear_timeout, reset_timeout
 from starhtml.datastar import evt
@@ -10,7 +10,7 @@ def Tooltip(
     *children,
     signal: str | Signal = "",
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     sig = getattr(signal, "_id", signal) or gen_id("tooltip")
     open_state = Signal(f"{sig}_open", False)
@@ -28,11 +28,11 @@ def Tooltip(
 
 
 def TooltipTrigger(
-    *children: Any,
+    *children,
     delay_duration: int = 700,
     hide_delay: int = 0,
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ):
     def trigger(*, sig, open_state, timer_state, **_):
         trigger_ref = Signal(f"{sig}_trigger", _ref_only=True)
@@ -66,7 +66,7 @@ def TooltipTrigger(
 
 
 def TooltipContent(
-    *children: Any,
+    *children,
     side: Literal["top", "right", "bottom", "left"] = "top",
     align: Literal["start", "center", "end"] = "center",
     side_offset: int = 0,
@@ -74,7 +74,7 @@ def TooltipContent(
     strategy: Literal["fixed", "absolute"] = "fixed",
     container: Literal["auto", "none", "parent"] = "auto",
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ):
     def content(*, sig, open_state, **_):
         content_ref = Signal(f"{sig}_content", _ref_only=True)
@@ -97,7 +97,6 @@ def TooltipContent(
             ),
             data_ref=content_ref,
             data_show=open_state,
-            style="display: none",
             data_position=(
                 f"{sig}_trigger",
                 {
@@ -131,5 +130,5 @@ def TooltipContent(
     return content
 
 
-def TooltipProvider(*children, **kwargs: Any) -> FT:
+def TooltipProvider(*children, **kwargs) -> FT:
     return Div(*children, data_slot="tooltip-provider", **kwargs)

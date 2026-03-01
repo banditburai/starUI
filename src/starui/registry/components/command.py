@@ -1,5 +1,5 @@
 from itertools import count
-from typing import Any, Literal
+from typing import Literal
 
 from starhtml import FT, Div, Icon, Input, Signal, Span, expr, js, set_timeout
 from starhtml import Dialog as HTMLDialog
@@ -36,13 +36,13 @@ command_variants = cva(
 
 
 def Command(
-    *children: Any,
+    *children,
     signal: str | Signal = "",
     size: CommandSize = "md",
     label: str = "Command Menu",
     cls: str = "",
     _dialog_ref=None,
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     sig = getattr(signal, "_id", signal) or gen_id("command")
     search = Signal(f"{sig}_search", "")
@@ -89,7 +89,7 @@ def CommandDialog(
     shortcut: str | None = None,
     label: str = "Command Menu",
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     sig = getattr(signal, "_id", signal) or gen_id("command")
     dialog_ref = Signal(f"{sig}_dialog", _ref_only=True)
@@ -141,12 +141,12 @@ def CommandDialog(
     trigger_elem = Div(
         trigger,
         data_on_click=[show_method, dialog_open.set(True)],
-        style="display:contents",
+        cls="contents",
     )
 
     scroll_lock = Div(
         data_effect=document.body.style.overflow.set(dialog_open.if_("hidden", "")),
-        style="display:none",
+        cls="hidden",
     )
 
     shortcut_listener = None
@@ -159,7 +159,7 @@ def CommandDialog(
                 shortcut_match.then(seq(evt.preventDefault(), toggle)),
                 {"window": True},
             ),
-            style="display:none",
+            cls="hidden",
         )
 
     return Div(trigger_elem, command_dialog, scroll_lock, shortcut_listener)
@@ -168,7 +168,7 @@ def CommandDialog(
 def CommandInput(
     placeholder: str = "Type a command or search...",
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ):
     def _(*, sig, search, selected, visible_items, input_ref, **_):
         return Div(
@@ -205,7 +205,7 @@ def CommandInput(
 def CommandList(
     *children,
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ):
     def _(*, sig, visible_count, visible_items, search, selected, **ctx):
         # RAF ensures DOM updates (data-show hiding) complete before scanning
@@ -255,7 +255,7 @@ def CommandList(
 def CommandEmpty(
     *children,
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ):
     def _(*, sig, visible_count, **_):
         return Div(
@@ -274,7 +274,7 @@ def CommandGroup(
     *children,
     heading: str | None = None,
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ):
     if not heading and children and isinstance(children[0], str):
         heading, children = children[0], children[1:]
@@ -312,7 +312,7 @@ def CommandItem(
     keywords: str | None = None,
     show: str | None = None,
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ):
     def _(*, sig, search, selected, _item_index, dialog_ref, **_):
         index = next(_item_index)
@@ -363,7 +363,7 @@ def CommandItem(
     return _
 
 
-def CommandSeparator(cls: str = "", **kwargs: Any):
+def CommandSeparator(cls: str = "", **kwargs):
     return lambda **_: Div(
         role="separator",
         data_slot="command-separator",
@@ -380,7 +380,7 @@ def CommandSeparator(cls: str = "", **kwargs: Any):
 def CommandShortcut(
     *children,
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     return Span(
         *children,

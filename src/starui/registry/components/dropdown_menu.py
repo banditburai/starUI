@@ -1,4 +1,4 @@
-from typing import Any, Literal
+from typing import Literal
 
 from starhtml import FT, Div, Hr, Icon, Signal, Span
 from starhtml import Button as HTMLButton
@@ -29,7 +29,7 @@ dropdown_item_variants = cva(
 
 
 def DropdownMenu(
-    *children, signal: str | Signal = "", cls: str = "", **kwargs: Any
+    *children, signal: str | Signal = "", cls: str = "", **kwargs
 ) -> FT:
     sig = getattr(signal, "_id", signal) or gen_id("dropdown")
 
@@ -38,6 +38,7 @@ def DropdownMenu(
     return Div(
         Signal(f"{sig}_open", False),
         *[inject_context(child, **ctx) for child in children],
+        data_slot="dropdown-menu",
         cls=cn("relative inline-block", cls),
         **kwargs,
     )
@@ -50,7 +51,7 @@ def DropdownMenuTrigger(
     ] = "outline",
     size: Literal["default", "sm", "lg", "icon"] = "default",
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     def trigger(*, sig, **_):
         from .button import Button
@@ -63,6 +64,7 @@ def DropdownMenuTrigger(
             popovertarget=f"{sig}_content",
             popoveraction="toggle",
             id=trigger_ref._id,
+            data_slot="dropdown-menu-trigger",
             variant=variant,
             size=size,
             type="button",
@@ -79,7 +81,7 @@ def DropdownMenuContent(
     align: Literal["start", "center", "end"] = "start",
     side_offset: int = 4,
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     def content(*, sig, **ctx):
         trigger_ref = Signal(f"{sig}_trigger", _ref_only=True)
@@ -105,8 +107,10 @@ def DropdownMenuContent(
             role="menu",
             aria_labelledby=trigger_ref._id,
             tabindex="-1",
+            data_slot="dropdown-menu-content",
             cls=cn(
-                "z-50 min-w-[8rem] overflow-x-hidden overflow-y-auto rounded-md border",
+                "z-50 max-h-[min(var(--popover-available-height,80vh),80vh)] min-w-[8rem]",
+                "overflow-x-hidden overflow-y-auto rounded-md border",
                 "bg-popover text-popover-foreground shadow-md p-1",
                 cls,
             ),
@@ -122,7 +126,7 @@ def DropdownMenuItem(
     inset: bool = False,
     disabled: bool = False,
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     def _(*, sig, **_):
         content_ref = Signal(f"{sig}_content", _ref_only=True)
@@ -141,6 +145,7 @@ def DropdownMenuItem(
             type="button",
             disabled=disabled,
             role="menuitem",
+            data_slot="dropdown-menu-item",
             **kwargs,
         )
 
@@ -152,7 +157,7 @@ def DropdownMenuCheckboxItem(
     signal: str | Signal,
     disabled: bool = False,
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     def _(*, sig, **_):
         checked = Signal(getattr(signal, "_id", signal), _ref_only=True)
@@ -178,6 +183,7 @@ def DropdownMenuCheckboxItem(
             ),
             type="button",
             role="menuitemcheckbox",
+            data_slot="dropdown-menu-checkbox-item",
             data_attr_aria_checked=checked.if_("true", "false"),
             disabled=disabled,
             **kwargs,
@@ -190,7 +196,7 @@ def DropdownMenuRadioGroup(
     *children,
     signal: str | Signal,
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     def _(**ctx):
         return Div(
@@ -199,6 +205,7 @@ def DropdownMenuRadioGroup(
                 for child in children
             ],
             role="radiogroup",
+            data_slot="dropdown-menu-radio-group",
             cls=cls,
             **kwargs,
         )
@@ -211,7 +218,7 @@ def DropdownMenuRadioItem(
     value: str,
     disabled: bool = False,
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     def _(*, sig, radio_signal, **_):
         radio = Signal(radio_signal, _ref_only=True)
@@ -238,6 +245,7 @@ def DropdownMenuRadioItem(
             ),
             type="button",
             role="menuitemradio",
+            data_slot="dropdown-menu-radio-item",
             data_attr_aria_checked=is_checked.if_("true", "false"),
             disabled=disabled,
             **kwargs,
@@ -246,19 +254,24 @@ def DropdownMenuRadioItem(
     return _
 
 
-def DropdownMenuSeparator(cls: str = "", **kwargs: Any) -> FT:
+def DropdownMenuSeparator(cls: str = "", **kwargs) -> FT:
     def _(**_):
-        return Hr(cls=cn("-mx-1 my-1 border-border", cls), **kwargs)
+        return Hr(
+            data_slot="dropdown-menu-separator",
+            cls=cn("-mx-1 my-1 border-border", cls),
+            **kwargs,
+        )
 
     return _
 
 
 def DropdownMenuLabel(
-    *children, inset: bool = False, cls: str = "", **kwargs: Any
+    *children, inset: bool = False, cls: str = "", **kwargs
 ) -> FT:
     def _(**_):
         return Div(
             *children,
+            data_slot="dropdown-menu-label",
             cls=cn(
                 "px-2 py-1.5 text-sm font-medium",
                 "pl-8" if inset else "",
@@ -273,10 +286,11 @@ def DropdownMenuLabel(
 def DropdownMenuShortcut(
     *children,
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     return Span(
         *children,
+        data_slot="dropdown-menu-shortcut",
         cls=cn("ml-auto text-xs tracking-widest text-muted-foreground", cls),
         **kwargs,
     )
@@ -285,12 +299,13 @@ def DropdownMenuShortcut(
 def DropdownMenuGroup(
     *children,
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     def _(**ctx):
         return Div(
             *[inject_context(child, **ctx) for child in children],
             role="group",
+            data_slot="dropdown-menu-group",
             cls=cls,
             **kwargs,
         )
@@ -302,7 +317,7 @@ def DropdownMenuSub(
     *children,
     signal: str | Signal = "",
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     def _(**ctx):
         sub = getattr(signal, "_id", signal) or gen_id("dropdown_sub")
@@ -311,6 +326,7 @@ def DropdownMenuSub(
         return Div(
             Signal(f"{sub}_open", False),
             *[inject_context(child, **sub_ctx) for child in children],
+            data_slot="dropdown-menu-sub",
             cls=cn("relative", cls),
             **kwargs,
         )
@@ -322,7 +338,7 @@ def DropdownMenuSubTrigger(
     *children,
     inset: bool = False,
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     def _(*, sub, **_):
         sub_trigger_ref = Signal(f"{sub}_trigger", _ref_only=True)
@@ -348,6 +364,7 @@ def DropdownMenuSubTrigger(
             data_attr_data_state=sub_open.if_("open", "closed"),
             type="button",
             role="menuitem",
+            data_slot="dropdown-menu-sub-trigger",
             aria_haspopup="menu",
             data_attr_aria_expanded=sub_open.if_("true", "false"),
             **kwargs,
@@ -359,7 +376,7 @@ def DropdownMenuSubTrigger(
 def DropdownMenuSubContent(
     *children,
     cls: str = "",
-    **kwargs: Any,
+    **kwargs,
 ) -> FT:
     def _(*, sub, **ctx):
         sub_trigger_ref = Signal(f"{sub}_trigger", _ref_only=True)
@@ -381,12 +398,14 @@ def DropdownMenuSubContent(
             data_position=(sub_trigger_ref._id, position_mods),
             popover="auto",
             id=sub_content_ref._id,
+            role="menu",
+            data_slot="dropdown-menu-sub-content",
             cls=cn(
-                "z-50 min-w-[8rem] overflow-hidden rounded-md border",
+                "z-50 max-h-[min(var(--popover-available-height,80vh),80vh)] min-w-[8rem]",
+                "overflow-x-hidden overflow-y-auto rounded-md border",
                 "bg-popover text-popover-foreground shadow-lg p-1",
                 cls,
             ),
-            role="menu",
             **kwargs,
         )
 

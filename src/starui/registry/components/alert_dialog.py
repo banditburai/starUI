@@ -1,6 +1,6 @@
 from typing import Any, Literal
 
-from starhtml import FT, Div, Signal
+from starhtml import FT, Div, Signal, Style
 from starhtml import H2 as HTMLH2
 from starhtml import Dialog as HTMLDialog
 from starhtml import P as HTMLP
@@ -9,6 +9,23 @@ from starhtml.datastar import document
 from .utils import cn, gen_id, inject_context, merge_actions
 
 AlertDialogVariant = Literal["default", "destructive"]
+
+_ALERT_DIALOG_STYLES = """
+dialog[data-alert-dialog]{
+  --_dur-in:200ms;--_dur-out:150ms;
+  transition:opacity var(--_dur-out) ease,scale var(--_dur-out) ease,display var(--_dur-out) allow-discrete,overlay var(--_dur-out) allow-discrete;
+}
+dialog[data-alert-dialog][open]{transition-duration:var(--_dur-in);transition-timing-function:cubic-bezier(0.16,1,0.3,1)}
+dialog[data-alert-dialog]:not([open]){opacity:0;scale:0.95}
+dialog[data-alert-dialog][open]{@starting-style{opacity:0;scale:0.95}}
+dialog[data-alert-dialog]::backdrop{
+  background:rgb(0 0 0/.5);backdrop-filter:blur(4px);
+  transition:background var(--_dur-out) ease,backdrop-filter var(--_dur-out) ease,display var(--_dur-out) allow-discrete,overlay var(--_dur-out) allow-discrete;
+}
+dialog[data-alert-dialog]:not([open])::backdrop{background:rgb(0 0 0/0);backdrop-filter:blur(0)}
+dialog[data-alert-dialog][open]::backdrop{transition-timing-function:cubic-bezier(0.16,1,0.3,1);@starting-style{background:rgb(0 0 0/0);backdrop-filter:blur(0)}}
+@media(prefers-reduced-motion:reduce){dialog[data-alert-dialog],dialog[data-alert-dialog]::backdrop{transition-duration:0ms!important}}
+"""
 
 
 def AlertDialog(
@@ -22,36 +39,28 @@ def AlertDialog(
     dialog_ref = Signal(sig, _ref_only=True)
 
     trigger = next(
-        (
-            c
-            for c in children
-            if callable(c) and getattr(c, "__name__", None) == "trigger"
-        ),
-        None,
+        (c for c in children if callable(c) and getattr(c, "__name__", None) == "trigger"), None,
     )
     content = next(
-        (
-            c
-            for c in children
-            if callable(c) and getattr(c, "__name__", None) == "content"
-        ),
-        None,
+        (c for c in children if callable(c) and getattr(c, "__name__", None) == "content"), None,
     )
 
     ctx = {"open_state": open_state, "dialog_ref": dialog_ref, "sig": sig}
 
     return Div(
+        Style(_ALERT_DIALOG_STYLES),
         trigger(**ctx) if trigger else None,
         HTMLDialog(
             content(**ctx) if content else None,
             data_ref=dialog_ref,
             data_on_close=open_state.set(False),
+            data_alert_dialog="",
             id=sig,
             role="alertdialog",
             aria_labelledby=f"{sig}-title",
             aria_describedby=f"{sig}-description",
             cls=cn(
-                "fixed max-h-[85vh] w-full max-w-lg overflow-auto m-auto bg-background text-foreground border rounded-lg shadow-lg p-0 backdrop:bg-black/50 backdrop:backdrop-blur-sm open:animate-in open:fade-in-0 open:zoom-in-95 open:duration-200 open:backdrop:animate-in open:backdrop:fade-in-0 open:backdrop:duration-200",
+                "fixed inset-0 z-50 max-h-[85vh] max-w-[calc(100%-2rem)] sm:max-w-lg w-full overflow-auto m-auto bg-background text-foreground border rounded-lg shadow-lg p-0 outline-none",
                 cls,
             ),
             **kwargs,

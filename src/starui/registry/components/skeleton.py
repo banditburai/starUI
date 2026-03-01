@@ -13,8 +13,9 @@ def Skeleton(
     return Div(
         *children,
         data_slot="skeleton",
+        aria_hidden="true",
         cls=cn(
-            "bg-accent animate-pulse rounded-md",
+            "bg-accent animate-pulse rounded-md motion-reduce:animate-none",
             cls,
         ),
         **kwargs,

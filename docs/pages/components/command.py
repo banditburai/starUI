@@ -2,7 +2,8 @@
 Command component documentation - Command palette for searching and executing actions.
 """
 
-from starhtml import Div, P, Span, Icon, Kbd, js, clipboard
+from starhtml import Div, P, Span, Icon, Kbd, clipboard
+from starhtml.datastar import window
 from starui.registry.components.command import (
     Command, CommandInput, CommandList, CommandEmpty,
     CommandGroup, CommandItem, CommandSeparator, CommandShortcut,
@@ -183,7 +184,7 @@ def command_dialog_example():
                             "Copy Page Link",
                             CommandShortcut("⌘L"),
                             value="copy-link",
-                            data_on_click=clipboard(js("window.location.href")),
+                            data_on_click=clipboard(window.location.href),
                         ),
                     ),
                     CommandSeparator(),

@@ -2,6 +2,8 @@ from collections.abc import Callable
 from typing import Any
 from uuid import uuid4
 
+from fastcore.xml import FT
+
 try:
     from starmerge import merge
 except ImportError:
@@ -128,11 +130,10 @@ def merge_actions(*before: Any, kwargs: dict | None = None, after: Any = None) -
 
 def inject_context(element, **context):
     """Recursively inject context into callable children, preserving structure."""
-    # FT elements are callable (__call__ merges kwargs as HTML attrs) — skip them
-    if callable(element) and not hasattr(element, "tag"):
+    if callable(element) and not isinstance(element, FT):
         element = element(**context)
 
-    if hasattr(element, "children") and element.children:
+    if isinstance(element, FT) and element.children:
         element.children = tuple(inject_context(c, **context) for c in element.children)
 
     return element
