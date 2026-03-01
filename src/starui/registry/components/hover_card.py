@@ -2,7 +2,7 @@ from typing import Any, Literal
 
 from starhtml import FT, Div, Signal, clear_timeout, reset_timeout
 
-from .utils import cn, gen_id
+from .utils import cn, gen_id, inject_context
 
 
 def HoverCard(
@@ -20,7 +20,7 @@ def HoverCard(
 
     return Div(
         open_state,
-        *[child(**ctx) if callable(child) else child for child in children],
+        *[inject_context(child, **ctx) for child in children],
         data_slot="hover-card",
         cls=cn("relative inline-block", cls),
         **kwargs,
@@ -78,7 +78,7 @@ def HoverCardContent(
                 f"{sig}_trigger",
                 {
                     "placement": placement,
-                    "offset": 8,
+                    "offset": 4,
                     "flip": True,
                     "shift": True,
                     "hide": True,
@@ -96,8 +96,8 @@ def HoverCardContent(
             data_slot="hover-card-content",
             style="display: none",
             cls=cn(
-                "fixed z-50 w-72 max-w-[90vw] pointer-events-auto",
-                "rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none overflow-hidden",
+                "fixed z-50 w-64 max-w-[90vw] pointer-events-auto",
+                "rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none",
                 cls,
             ),
             **kwargs,

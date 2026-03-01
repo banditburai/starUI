@@ -8,15 +8,12 @@ CATEGORY = "navigation"
 ORDER = 160
 STATUS = "stable"
 
-from starhtml import Div, P, Span, Icon
+from starhtml import Div, Span, Icon
 from starui.registry.components.breadcrumb import (
     Breadcrumb, BreadcrumbList, BreadcrumbItem,
     BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator, BreadcrumbEllipsis
 )
-from starui.registry.components.button import Button
-from utils import auto_generate_page, Component, build_api_reference, with_code
-from widgets.component_preview import ComponentPreview
-
+from utils import auto_generate_page, Prop, Component, build_api_reference, with_code
 
 
 @with_code
@@ -24,15 +21,15 @@ def hero_breadcrumb_example():
     return Breadcrumb(
         BreadcrumbList(
             BreadcrumbItem(
-                BreadcrumbLink("Home", href="/")
+                BreadcrumbLink("Projects", href="/projects")
             ),
             BreadcrumbSeparator(),
             BreadcrumbItem(
-                BreadcrumbLink("Components", href="/components")
+                BreadcrumbLink("Acme Redesign", href="/projects/acme-redesign")
             ),
             BreadcrumbSeparator(),
             BreadcrumbItem(
-                BreadcrumbPage("Breadcrumb")
+                BreadcrumbPage("Tasks")
             )
         )
     )
@@ -40,109 +37,69 @@ def hero_breadcrumb_example():
 
 @with_code
 def custom_separator_example():
-    return Breadcrumb(
-        BreadcrumbList(
-            BreadcrumbItem(
-                BreadcrumbLink("Home", href="/")
-            ),
-            BreadcrumbSeparator(
-                Icon("lucide:slash", cls="h-4 w-4 align-middle")
-            ),
-            BreadcrumbItem(
-                BreadcrumbLink("Library", href="/library")
-            ),
-            BreadcrumbSeparator(
-                Icon("lucide:slash", cls="h-4 w-4 align-middle")
-            ),
-            BreadcrumbItem(
-                BreadcrumbPage("Data")
+    return Div(
+        Breadcrumb(
+            BreadcrumbList(
+                BreadcrumbItem(BreadcrumbLink("Settings", href="/settings")),
+                BreadcrumbSeparator(
+                    Icon("lucide:slash", cls="h-4 w-4 align-middle")
+                ),
+                BreadcrumbItem(BreadcrumbLink("Security", href="/settings/security")),
+                BreadcrumbSeparator(
+                    Icon("lucide:slash", cls="h-4 w-4 align-middle")
+                ),
+                BreadcrumbItem(BreadcrumbPage("Two-Factor Auth"))
             )
-        )
+        ),
+        Breadcrumb(
+            BreadcrumbList(
+                BreadcrumbItem(BreadcrumbLink("Blog", href="/blog")),
+                BreadcrumbSeparator(Span("·", cls="px-1 text-muted-foreground")),
+                BreadcrumbItem(BreadcrumbLink("Engineering", href="/blog/engineering")),
+                BreadcrumbSeparator(Span("·", cls="px-1 text-muted-foreground")),
+                BreadcrumbItem(BreadcrumbPage("Migrating to Postgres"))
+            )
+        ),
+        Breadcrumb(
+            BreadcrumbList(
+                BreadcrumbItem(BreadcrumbLink("Docs", href="/docs")),
+                BreadcrumbSeparator(Span("→", cls="px-1 text-muted-foreground")),
+                BreadcrumbItem(BreadcrumbLink("API", href="/docs/api")),
+                BreadcrumbSeparator(Span("→", cls="px-1 text-muted-foreground")),
+                BreadcrumbItem(BreadcrumbPage("Authentication"))
+            )
+        ),
+        cls="space-y-4"
     )
 
 
 @with_code
-def collapsed_breadcrumb_example():
-    return Breadcrumb(
-        BreadcrumbList(
-            BreadcrumbItem(
-                BreadcrumbLink("Home", href="/")
-            ),
-            BreadcrumbSeparator(),
-            BreadcrumbItem(
-                BreadcrumbEllipsis()
-            ),
-            BreadcrumbSeparator(),
-            BreadcrumbItem(
-                BreadcrumbLink("Components", href="/docs/components")
-            ),
-            BreadcrumbSeparator(),
-            BreadcrumbItem(
-                BreadcrumbPage("Breadcrumb")
-            )
-        )
-    )
-
-
-@with_code
-def long_path_example():
-    return Breadcrumb(
-        BreadcrumbList(
-            BreadcrumbItem(
-                BreadcrumbLink("Home", href="/")
-            ),
-            BreadcrumbSeparator(),
-            BreadcrumbItem(
-                BreadcrumbLink("Documentation", href="/docs")
-            ),
-            BreadcrumbSeparator(),
-            BreadcrumbItem(
-                BreadcrumbLink("Components", href="/docs/components")
-            ),
-            BreadcrumbSeparator(),
-            BreadcrumbItem(
-                BreadcrumbLink("Navigation", href="/docs/components/navigation")
-            ),
-            BreadcrumbSeparator(),
-            BreadcrumbItem(
-                BreadcrumbPage("Breadcrumb")
-            )
-        )
-    )
-
-
-@with_code
-def breadcrumb_with_icons_example():
+def with_icons_breadcrumb_example():
     return Breadcrumb(
         BreadcrumbList(
             BreadcrumbItem(
                 BreadcrumbLink(
-                    Icon("lucide:home", cls="h-4 w-4 mr-1 inline-block align-text-bottom"),
+                    Icon("lucide:home", cls="size-4"),
                     "Home",
-                    href="/"
+                    href="/",
+                    cls="inline-flex items-center gap-1.5"
                 )
             ),
             BreadcrumbSeparator(),
             BreadcrumbItem(
                 BreadcrumbLink(
-                    Icon("lucide:folder", cls="h-4 w-4 mr-1 inline-block align-text-bottom"),
+                    Icon("lucide:folder", cls="size-4"),
                     "Documents",
-                    href="/documents"
-                )
-            ),
-            BreadcrumbSeparator(),
-            BreadcrumbItem(
-                BreadcrumbLink(
-                    Icon("lucide:folder", cls="h-4 w-4 mr-1 inline-block align-text-bottom"),
-                    "Projects",
-                    href="/documents/projects"
+                    href="/documents",
+                    cls="inline-flex items-center gap-1.5"
                 )
             ),
             BreadcrumbSeparator(),
             BreadcrumbItem(
                 BreadcrumbPage(
-                    Icon("lucide:file-text", cls="h-4 w-4 mr-1 inline-block align-text-bottom"),
-                    "README.md"
+                    Icon("lucide:file-text", cls="size-4"),
+                    "deploy.yml",
+                    cls="inline-flex items-center gap-1.5"
                 )
             )
         )
@@ -150,61 +107,25 @@ def breadcrumb_with_icons_example():
 
 
 @with_code
-def ecommerce_breadcrumb_example():
-    path_items = [
+def programmatic_breadcrumb_example():
+    segments = [
         ("Shop", "/shop"),
-        ("Electronics", "/shop/electronics"),
-        ("Smartphones", "/shop/electronics/smartphones"),
-        ("Apple", "/shop/electronics/smartphones/apple"),
-        ("iPhone 15 Pro", None)
+        ("Audio", "/shop/audio"),
+        ("Headphones", "/shop/audio/headphones"),
+        ("Sennheiser HD 600", None),
     ]
 
-    separator = BreadcrumbSeparator(Icon("lucide:chevron-right", cls="h-4 w-4"))
-
-    breadcrumb_items = []
-    for i, (label, href) in enumerate(path_items):
-        item = BreadcrumbItem(BreadcrumbLink(label, href=href) if href else BreadcrumbPage(label))
-        breadcrumb_items.append(item)
-
-        if i < len(path_items) - 1:
-            breadcrumb_items.append(separator)
-
-    return Breadcrumb(BreadcrumbList(*breadcrumb_items))
-
-
-@with_code
-def separator_styles_example():
-    return Div(
-        Breadcrumb(
-            BreadcrumbList(
-                BreadcrumbItem(BreadcrumbLink("Blog", href="/blog")),
-                BreadcrumbSeparator(Span("•", cls="px-2 text-muted-foreground")),
-                BreadcrumbItem(BreadcrumbLink("Technology", href="/blog/tech")),
-                BreadcrumbSeparator(Span("•", cls="px-2 text-muted-foreground")),
-                BreadcrumbItem(BreadcrumbPage("AI Trends 2024"))
-            ),
-            cls="mb-4"
-        ),
-        Breadcrumb(
-            BreadcrumbList(
-                BreadcrumbItem(BreadcrumbLink("Settings", href="/settings")),
-                BreadcrumbSeparator(Span("→", cls="px-2 text-muted-foreground")),
-                BreadcrumbItem(BreadcrumbLink("Security", href="/settings/security")),
-                BreadcrumbSeparator(Span("→", cls="px-2 text-muted-foreground")),
-                BreadcrumbItem(BreadcrumbPage("Two-Factor Auth"))
-            ),
-            cls="mb-4"
-        ),
-        Breadcrumb(
-            BreadcrumbList(
-                BreadcrumbItem(BreadcrumbLink("Docs", href="/docs")),
-                BreadcrumbSeparator(Span("|", cls="px-2 text-muted-foreground")),
-                BreadcrumbItem(BreadcrumbLink("API", href="/docs/api")),
-                BreadcrumbSeparator(Span("|", cls="px-2 text-muted-foreground")),
-                BreadcrumbItem(BreadcrumbPage("Authentication"))
+    items = []
+    for i, (label, href) in enumerate(segments):
+        if i > 0:
+            items.append(BreadcrumbSeparator())
+        items.append(
+            BreadcrumbItem(
+                BreadcrumbLink(label, href=href) if href else BreadcrumbPage(label)
             )
         )
-    )
+
+    return Breadcrumb(BreadcrumbList(*items))
 
 
 @with_code
@@ -221,45 +142,45 @@ def responsive_breadcrumb_example():
             ),
             BreadcrumbSeparator(cls="md:hidden"),
             BreadcrumbItem(
-                BreadcrumbLink("Documentation", href="/docs"),
+                BreadcrumbLink("Team", href="/team"),
                 cls="hidden md:inline-flex"
             ),
             BreadcrumbSeparator(cls="hidden md:inline-flex"),
             BreadcrumbItem(
-                BreadcrumbLink("Components", href="/docs/components"),
+                BreadcrumbLink("Permissions", href="/team/permissions"),
                 cls="hidden md:inline-flex"
             ),
             BreadcrumbSeparator(cls="hidden md:inline-flex"),
             BreadcrumbItem(
-                BreadcrumbPage("Breadcrumb")
+                BreadcrumbPage("Roles")
             )
         )
     )
 
 
 EXAMPLES_DATA = [
-    {"fn": hero_breadcrumb_example, "title": "Breadcrumb", "description": "Navigation breadcrumb trail"},
-    {"fn": custom_separator_example, "title": "Custom Separator", "description": "Use custom separator between items"},
-    {"fn": collapsed_breadcrumb_example, "title": "Collapsed", "description": "Collapse middle items for long paths"},
-    {"fn": long_path_example, "title": "Long Path", "description": "Handle deeply nested navigation paths"},
-    {"fn": breadcrumb_with_icons_example, "title": "With Icons", "description": "Add icons to breadcrumb items"},
-    {"fn": ecommerce_breadcrumb_example, "title": "E-commerce", "description": "Product category navigation"},
-    {"fn": separator_styles_example, "title": "Separator Styles", "description": "Different separator styles"},
-    {"fn": responsive_breadcrumb_example, "title": "Responsive", "description": "Breadcrumb that adapts to screen size"},
+    {"fn": hero_breadcrumb_example, "title": "Default", "description": "Three-segment breadcrumb with the default chevron separator and current page marker"},
+    {"fn": custom_separator_example, "title": "Custom Separators", "description": "Override the default chevron by passing any child to BreadcrumbSeparator — icons, text characters, or styled spans"},
+    {"fn": with_icons_breadcrumb_example, "title": "With Icons", "description": "Pair icons with text in BreadcrumbLink and BreadcrumbPage for a file-browser style path"},
+    {"fn": programmatic_breadcrumb_example, "title": "From Data", "description": "Build breadcrumbs from a list of (label, href) tuples — create a fresh BreadcrumbSeparator per iteration"},
+    {"fn": responsive_breadcrumb_example, "title": "Responsive", "description": "Collapse middle segments into BreadcrumbEllipsis on mobile using Tailwind responsive utilities"},
 ]
 
 API_REFERENCE = build_api_reference(
+    main_props=[
+        Prop("href", "str", "Link destination for BreadcrumbLink. Renders as an <a> element", "'#'"),
+        Prop("cls", "str", "Additional CSS classes — accepted by all sub-components", "''"),
+    ],
     components=[
-        Component("Breadcrumb", "Main breadcrumb container"),
-        Component("BreadcrumbList", "List wrapper for breadcrumb items"),
-        Component("BreadcrumbItem", "Individual breadcrumb item"),
-        Component("BreadcrumbLink", "Clickable link in breadcrumb"),
-        Component("BreadcrumbPage", "Current page indicator (non-clickable)"),
-        Component("BreadcrumbSeparator", "Separator between items"),
-        Component("BreadcrumbEllipsis", "Collapsed items indicator"),
+        Component("Breadcrumb", "Root <nav aria-label='breadcrumb'> container"),
+        Component("BreadcrumbList", "Ordered list (<ol>) wrapper. Provides flex layout with gap and text-sm styling"),
+        Component("BreadcrumbItem", "List item (<li>) for a single breadcrumb segment"),
+        Component("BreadcrumbLink", "Anchor (<a>) with hover color transition. Props: href (str, default '#')"),
+        Component("BreadcrumbPage", "Current page indicator (<span aria-current='page'>). Non-interactive, styled in foreground color"),
+        Component("BreadcrumbSeparator", "Visual separator (<li role='presentation' aria-hidden='true'>). Defaults to a chevron-right icon — pass any child to override"),
+        Component("BreadcrumbEllipsis", "Collapsed-items indicator with a horizontal dots icon and sr-only 'More' text for screen readers"),
     ]
 )
-
 
 
 def create_breadcrumb_docs():

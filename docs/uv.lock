@@ -800,7 +800,7 @@ wheels = [
 
 [[package]]
 name = "starhtml"
-version = "0.5.10"
+version = "0.5.11"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "beautifulsoup4" },
@@ -816,9 +816,9 @@ dependencies = [
     { name = "starlette-compress" },
     { name = "uvicorn", extra = ["standard"] },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/b1/cb/df6d63c652f92c1d31d238f19f4e8e1c8fda0d9b97fece2b4f55f6079fc0/starhtml-0.5.10.tar.gz", hash = "sha256:833e8c1686263b07b39d3a4ef6a3ab88a406da862580ac8dbe6ce2fb861928af", size = 765610, upload-time = "2026-02-26T16:24:55.765Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/92/68/c911072f782411f48c3e2393b1c4a7765d7b3b75a8b49141cce53659c3c7/starhtml-0.5.11.tar.gz", hash = "sha256:791674ea607ac8b3c4b541abf2676909856bc8df0817f1d5fffe6abe96dbcd4f", size = 767103, upload-time = "2026-02-28T19:52:55.342Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/5f/08/a0973597fbbad686cad1f927a58ce9f529d2076a5921fc177c5f65cb7ce9/starhtml-0.5.10-py3-none-any.whl", hash = "sha256:b5621ed363876cc5c28cfcba0fc43fe7052591aaeff873cbb4485a11e72d0809", size = 145444, upload-time = "2026-02-26T16:24:53.927Z" },
+    { url = "https://files.pythonhosted.org/packages/a8/14/82d34a09dffb72b6b49d2129c0c101d84b68f3ab750a7d135e757c824426/starhtml-0.5.11-py3-none-any.whl", hash = "sha256:a151de6cb627c3cc6acd755e67ce64cf493dbffff65b6672c257fa21e568dfc3", size = 145970, upload-time = "2026-02-28T19:52:53.633Z" },
 ]
 
 [[package]]
@@ -851,11 +851,11 @@ wheels = [
 
 [[package]]
 name = "starlighter"
-version = "0.1.5"
+version = "0.2.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/10/96/0815a7e81713650c4255f889293c67ddc3e9f702a74b3646055803b99bb7/starlighter-0.1.5.tar.gz", hash = "sha256:5e64e90dca8eab3045582174e013d0d793f98b38e6fbbe5e09b9cc7fd1113405", size = 11779, upload-time = "2025-08-22T17:51:05.783Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ec/b6/6b93e2a82094f5b483dfa6140dc5feb61d0e4630a41f0d85295d7bfcb653/starlighter-0.2.0.tar.gz", hash = "sha256:e74134ce1e38ef27b181c09e138021e327024d8fbe8d1054048962323540e04f", size = 10946, upload-time = "2026-02-28T16:56:49.991Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e7/a8/1072d3a39726964742f60088b389820aeb295f693fcc9014455bec432da5/starlighter-0.1.5-py3-none-any.whl", hash = "sha256:76fce8643294363ae12b41bdd1812b38d275da32c642075018639231a495fb04", size = 12627, upload-time = "2025-08-22T17:51:03.739Z" },
+    { url = "https://files.pythonhosted.org/packages/69/7c/ecc8a9bce5737c4668f6e4963a114e610bb5b413a452133e7ce0032ff437/starlighter-0.2.0-py3-none-any.whl", hash = "sha256:faab3babc81eb6b33bac4e86ded536e5381b87554497cafebe142b4b98264ce3", size = 11923, upload-time = "2026-02-28T16:56:48.718Z" },
 ]
 
 [[package]]
@@ -870,7 +870,7 @@ wheels = [
 [[package]]
 name = "starui"
 version = "0.2.0"
-source = { registry = "https://pypi.org/simple" }
+source = { editable = "../" }
 dependencies = [
     { name = "pydantic" },
     { name = "requests" },
@@ -880,9 +880,28 @@ dependencies = [
     { name = "typer" },
     { name = "websockets" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c2/a1/a8cc114e79de4f9cdad3dab1d65d327e72093e47830d78aaa4196eae8d35/starui-0.2.0.tar.gz", hash = "sha256:64327f14863cdc7472a124974d2f6b78bb61ed0d8bfc1141574fdc8cc917fb38", size = 58442, upload-time = "2026-02-26T16:59:05.05Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/40/3d/9891b71d5fc3f52adf03b56fe3f940c53bbc02a19e12b4fe67c7b7d852ed/starui-0.2.0-py3-none-any.whl", hash = "sha256:c0d76bea9ad17e14ed7cdaf7bdedcb80d0150bc95b62d053ac2722bc4ef9d97f", size = 88583, upload-time = "2026-02-26T16:59:03.789Z" },
+
+[package.metadata]
+requires-dist = [
+    { name = "pydantic", specifier = ">=2.5.0,<3.0.0" },
+    { name = "requests", specifier = ">=2.31.0,<3.0.0" },
+    { name = "rich", specifier = ">=13.7.0,<14.0.0" },
+    { name = "starhtml", specifier = ">=0.5.11" },
+    { name = "starmerge", specifier = ">=0.2.0" },
+    { name = "typer", specifier = ">=0.9.0,<1.0.0" },
+    { name = "websockets", specifier = ">=12.0.0,<16.0.0" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "build", specifier = ">=1.0.0" },
+    { name = "pyright", specifier = ">=1.1.403" },
+    { name = "pytest", specifier = ">=7.4.4" },
+    { name = "pytest-asyncio", specifier = ">=0.24.0" },
+    { name = "pytest-cov", specifier = ">=4.1.0" },
+    { name = "pytest-mock", specifier = ">=3.14.1" },
+    { name = "ruff", specifier = ">=0.12.8" },
+    { name = "twine", specifier = ">=4.0.0" },
 ]
 
 [[package]]
@@ -904,9 +923,9 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "starhtml", specifier = ">=0.5.10" },
-    { name = "starlighter", specifier = ">=0.1.5" },
-    { name = "starui", specifier = ">=0.1.8" },
+    { name = "starhtml", specifier = ">=0.5.11" },
+    { name = "starlighter", specifier = ">=0.2.0" },
+    { name = "starui", editable = "../" },
     { name = "uvicorn", specifier = ">=0.30.0" },
 ]
 

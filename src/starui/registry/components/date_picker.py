@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, timedelta
 from typing import Any, Protocol
 
@@ -5,7 +6,7 @@ from starhtml import FT, Div, Icon, Signal, Span, js
 from starhtml import Button as HTMLButton
 
 from .button import Button
-from .calendar import MONTHS, Calendar, CalendarElement, CalendarMode
+from .calendar import MONTHS, Calendar, CalendarElement, CalendarMode, CaptionLayout
 from .input import Input
 from .popover import Popover, PopoverContent, PopoverTrigger
 from .utils import cn, gen_id, with_signals
@@ -27,6 +28,7 @@ def DatePicker(
     *attrs,
     signal: str | Signal = "",
     mode: CalendarMode = "single",
+    caption_layout: CaptionLayout = "label",
     selected: str | list[str] | None = None,
     placeholder: str | None = None,
     disabled: bool = False,
@@ -58,11 +60,16 @@ def DatePicker(
     calendar = Calendar(
         signal=cal,
         mode=mode,
+        caption_layout=caption_layout,
         selected=initial_selected,
         disabled=disabled,
         on_select=on_select if not disabled else None,
-        cls="border-0 rounded-none",
+        cls="border-0 rounded-none w-full",
     )
+
+    # Extract CSS value from trigger width class for popover min-width alignment
+    _w = re.search(r"\[(.+?)\]", width or "")
+    popover_min_style = f"min-width: {_w.group(1)};" if _w else ""
 
     if with_presets and mode == "single":
         today = datetime.now()
@@ -99,7 +106,13 @@ def DatePicker(
         _build_trigger(
             sig, selected, mode, placeholder, width, disabled, "lucide:calendar"
         ),
-        PopoverContent(content, cls=popover_cls, align="start", container="none"),
+        PopoverContent(
+            content,
+            cls=popover_cls,
+            align="start",
+            container="none",
+            style=popover_min_style,
+        ),
         signal=f"{sig}_popover",
     )
 
@@ -151,7 +164,7 @@ def DateTimePicker(
         mode="single",
         selected=initial_date,
         disabled=disabled,
-        cls="border-0 rounded-none",
+        cls="border-0 rounded-none w-full",
     )
 
     content = Div(
@@ -298,7 +311,7 @@ def _build_input_popover_content(
             mode="single",
             selected=initial_selected,
             disabled=disabled,
-            cls="border-0 rounded-none",
+            cls="border-0 rounded-none w-full",
         ),
         data_ref=content_id,
         data_position=(trigger_id, position_mods),

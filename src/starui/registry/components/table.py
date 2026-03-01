@@ -44,7 +44,7 @@ def TableHeader(
     return Thead(
         *children,
         data_slot="table-header",
-        cls=cn("[&_tr]:border-b [&_tr]:border-input", cls),
+        cls=cn("[&_tr]:border-b", cls),
         **kwargs,
     )
 
@@ -71,7 +71,7 @@ def TableFooter(
         *children,
         data_slot="table-footer",
         cls=cn(
-            "bg-muted/50 border-t border-input font-medium [&>tr]:last:border-b-0", cls
+            "bg-muted/50 border-t font-medium [&>tr]:last:border-b-0", cls
         ),
         **kwargs,
     )
@@ -88,7 +88,7 @@ def TableRow(
         data_slot="table-row",
         data_state="selected" if selected else None,
         cls=cn(
-            "border-b border-input transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted",
+            "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted",
             cls,
         ),
         **kwargs,

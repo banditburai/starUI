@@ -3,12 +3,13 @@ from typing import Any, Literal
 
 from starhtml import FT, Div, Icon, Input, Signal, Span, expr, js, set_timeout
 from starhtml import Dialog as HTMLDialog
-from starhtml.datastar import document, evt
+from starhtml.datastar import document, evt, seq
 
-from .utils import cn, cva, gen_id, merge_actions, with_signals
+from .utils import cn, cva, gen_id, inject_context, merge_actions, with_signals
 
 CommandSize = Literal["sm", "md", "lg"]
 
+# Native dialog needs a frame to finish opening before input can receive focus
 _DIALOG_FOCUS_DELAY_MS = 50
 
 
@@ -18,8 +19,8 @@ def _get_nav_handler(sig, search, selected, visible_items) -> str:
 
 command_variants = cva(
     base=(
-        "flex w-full flex-col overflow-hidden rounded-lg border border-input "
-        "bg-popover text-popover-foreground shadow-md outline-none"
+        "flex h-full w-full flex-col overflow-hidden rounded-xl border border-input "
+        "bg-popover p-1 text-popover-foreground shadow-md"
     ),
     config={
         "variants": {
@@ -67,7 +68,7 @@ def Command(
             selected,
             visible_count,
             visible_items,
-            *[c(**ctx) if callable(c) else c for c in children],
+            *[inject_context(c, **ctx) for c in children],
             data_command_root=sig,
             data_slot="command",
             aria_label=label,
@@ -85,6 +86,7 @@ def CommandDialog(
     content: list[FT],
     signal: str | Signal = "",
     modal: bool = True,
+    shortcut: str | None = None,
     label: str = "Command Menu",
     cls: str = "",
     **kwargs: Any,
@@ -98,9 +100,10 @@ def CommandDialog(
         signal=sig,
         _dialog_ref=dialog_ref,
         label=label,
-        cls="border-0",
+        cls="border-0 **:data-[slot=command-input-wrapper]:h-12",
     )
 
+    # Shares ID with Command's internal input_ref for focus management
     input_ref = Signal(f"{sig}_input", _ref_only=True)
 
     reset_signals = [
@@ -146,7 +149,20 @@ def CommandDialog(
         style="display:none",
     )
 
-    return Div(trigger_elem, command_dialog, scroll_lock)
+    shortcut_listener = None
+    if shortcut:
+        open_dialog = seq(show_method, dialog_open.set(True))
+        toggle = dialog_open.if_(dialog_ref.close(), open_dialog)
+        shortcut_match = (evt.metaKey | evt.ctrlKey) & (evt.key == shortcut)
+        shortcut_listener = Div(
+            data_on_keydown=(
+                shortcut_match.then(seq(evt.preventDefault(), toggle)),
+                {"window": True},
+            ),
+            style="display:none",
+        )
+
+    return Div(trigger_elem, command_dialog, scroll_lock, shortcut_listener)
 
 
 def CommandInput(
@@ -157,32 +173,30 @@ def CommandInput(
     def _(*, sig, search, selected, visible_items, input_ref, **_):
         return Div(
             Div(
-                Icon(
-                    "lucide:search",
-                    width="16",
-                    height="16",
-                    style="display: block; width: 100%; height: 100%;",
+                Icon("lucide:search", cls="size-4 shrink-0 opacity-50"),
+                Input(
+                    data_ref=input_ref,
+                    data_bind=search,
+                    data_on_keydown=js(
+                        _get_nav_handler(sig, search, selected, visible_items)
+                    ),
+                    placeholder=placeholder,
+                    data_slot="command-input",
+                    cls="flex-1 min-w-0 bg-transparent px-2 text-sm text-ellipsis outline-hidden placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
+                    autocomplete="off",
+                    autocorrect="off",
+                    spellcheck="false",
+                    type="text",
+                    **kwargs,
                 ),
-                style="display: inline-block; width: 16px; height: 16px; flex-shrink: 0; overflow: hidden;",
-                cls="opacity-50",
-            ),
-            Input(
-                data_ref=input_ref,
-                data_bind=search,
-                data_on_keydown=js(
-                    _get_nav_handler(sig, search, selected, visible_items)
+                data_slot="command-input-wrapper",
+                cls=cn(
+                    "relative flex h-8 items-center gap-2 rounded-lg px-3",
+                    "border border-input/30 bg-input/30",
+                    cls,
                 ),
-                placeholder=placeholder,
-                data_slot="command-input",
-                cls="flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 focus-visible:ring-0 focus-visible:border-transparent",
-                autocomplete="off",
-                autocorrect="off",
-                spellcheck="false",
-                type="text",
-                **kwargs,
             ),
-            data_slot="command-input-wrapper",
-            cls=cn("flex h-9 items-center gap-2 border-b border-border px-3", cls),
+            cls="p-1 pb-0",
         )
 
     return _
@@ -211,7 +225,8 @@ def CommandList(
 
         return Div(
             *[
-                c(
+                inject_context(
+                    c,
                     sig=sig,
                     visible_count=visible_count,
                     visible_items=visible_items,
@@ -219,8 +234,6 @@ def CommandList(
                     selected=selected,
                     **ctx,
                 )
-                if callable(c)
-                else c
                 for c in children
             ],
             data_effect=scan_effect,
@@ -229,7 +242,8 @@ def CommandList(
             data_command_list=sig,
             data_slot="command-list",
             cls=cn(
-                "max-h-[300px] scroll-py-1 overflow-x-hidden overflow-y-auto outline-none",
+                "max-h-[300px] scroll-py-1 overflow-x-hidden overflow-y-auto",
+                "[&>[role=group]:not(:has([data-command-item]:not([style*='none'])))+[role=separator]]:hidden",
                 cls,
             ),
             **kwargs,
@@ -249,7 +263,6 @@ def CommandEmpty(
             data_show=visible_count.eq(0),
             data_command_empty=sig,
             data_slot="command-empty",
-            style="display:none",
             cls=cn("py-6 text-center text-sm", cls),
             **kwargs,
         )
@@ -263,6 +276,9 @@ def CommandGroup(
     cls: str = "",
     **kwargs: Any,
 ):
+    if not heading and children and isinstance(children[0], str):
+        heading, children = children[0], children[1:]
+
     def _(*, sig, **ctx):
         return Div(
             Div(
@@ -273,13 +289,12 @@ def CommandGroup(
             )
             if heading
             else None,
-            *[c(sig=sig, **ctx) if callable(c) else c for c in children],
+            *[inject_context(c, sig=sig, **ctx) for c in children],
             role="group",
             data_command_group=sig,
             data_slot="command-group",
             cls=cn(
                 "overflow-hidden p-1 text-foreground",
-                "[&_[data-slot='command-group-heading']]:text-muted-foreground [&_[data-slot='command-group-heading']]:px-2 [&_[data-slot='command-group-heading']]:py-1.5 [&_[data-slot='command-group-heading']]:text-xs [&_[data-slot='command-group-heading']]:font-medium [&_[data-slot='command-group-heading']]:select-none",
                 "[&:not(:has([data-command-item]:not([style*='none'])))]:hidden",
                 cls,
             ),
@@ -327,17 +342,19 @@ def CommandItem(
             data_attr_aria_selected=selected.eq(index),
             role="option",
             aria_disabled="true" if disabled else "false",
+            data_disabled="true" if disabled else None,
             data_command_item=sig,
             data_slot="command-item",
             data_value=value,
             data_keywords=keywords or "",
             data_index=str(index),
             cls=cn(
-                "relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none select-none transition-colors",
+                "group/command-item relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none",
                 "[&_[data-icon-sh]:not([class*='text-'])]:text-muted-foreground [&_[data-icon-sh]]:pointer-events-none [&_[data-icon-sh]]:shrink-0 [&_[data-icon-sh]:not([class*='size-'])]:size-4",
-                "hover:bg-accent/50 data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground"
+                "data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50",
+                "data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground"
                 if not disabled
-                else "opacity-50 cursor-not-allowed pointer-events-none",
+                else "",
                 cls,
             ),
             **kwargs,
@@ -368,6 +385,10 @@ def CommandShortcut(
     return Span(
         *children,
         data_slot="command-shortcut",
-        cls=cn("ml-auto text-xs tracking-widest text-muted-foreground", cls),
+        cls=cn(
+            "text-muted-foreground group-data-[selected=true]/command-item:text-accent-foreground",
+            "ml-auto text-xs tracking-widest",
+            cls,
+        ),
         **kwargs,
     )

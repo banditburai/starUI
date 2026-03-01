@@ -48,8 +48,6 @@ def BreadcrumbLink(*children, href: str = "#", cls: str = "", **kwargs) -> FT:
 def BreadcrumbPage(*children, cls: str = "", **kwargs) -> FT:
     return HTMLSpan(
         *children,
-        role="link",
-        aria_disabled="true",
         aria_current="page",
         cls=cn("text-foreground font-normal", cls),
         **kwargs,
@@ -68,10 +66,9 @@ def BreadcrumbSeparator(*children, cls: str = "", **kwargs) -> FT:
 
 def BreadcrumbEllipsis(cls: str = "", **kwargs) -> FT:
     return HTMLSpan(
-        Icon("lucide:more-horizontal", cls="size-4"),
+        Icon("lucide:more-horizontal", cls="size-4", aria_hidden="true"),
         HTMLSpan("More", cls="sr-only"),
         role="presentation",
-        aria_hidden="true",
         cls=cn("flex size-9 items-center justify-center", cls),
         **kwargs,
     )

@@ -14,7 +14,7 @@ from starui.registry.components.card import Card, CardHeader, CardContent, CardT
 from starui.registry.components.input import InputWithLabel
 from starui.registry.components.checkbox import CheckboxWithLabel
 from starui.registry.components.utils import cn
-from utils import auto_generate_page, Prop, build_api_reference, with_code
+from utils import auto_generate_page, Prop, Component, build_api_reference, with_code
 from widgets.component_preview import ComponentPreview
 
 
@@ -43,29 +43,6 @@ def hero_accordion_example():
             *accordion_items,
             type="single",
             collapsible=True
-        ),
-        cls="w-full max-w-2xl"
-    )
-
-@with_code
-def basic_accordion_example():
-    return Div(
-        Accordion(
-            AccordionItem(
-                AccordionTrigger("Is it accessible?"),
-                AccordionContent(P("Yes. It adheres to the WAI-ARIA design pattern..."))
-            ),
-            AccordionItem(
-                AccordionTrigger("Is it styled?"),
-                AccordionContent(P("Yes. It comes with default styles..."))
-            ),
-            AccordionItem(
-                AccordionTrigger("Is it animated?"),
-                AccordionContent(P("Yes. It's animated by default..."))
-            ),
-            type="single",
-            collapsible=True,
-            value=1
         ),
         cls="w-full max-w-2xl"
     )
@@ -371,7 +348,7 @@ def course_curriculum_accordion_example():
                 Div(
                     Badge("Coming Soon" if locked else f"{lesson_count} lessons",
                           variant="outline" if locked else "secondary", cls="mr-2"),
-                    Strong(title),
+                    Strong(title, cls="mx-1"),
                     Icon("lucide:lock", cls="h-4 w-4 ml-auto mr-2 text-muted-foreground") if locked
                     else Badge(duration, variant="outline", cls="ml-auto mr-2"),
                     cls="flex items-center w-full"
@@ -434,10 +411,16 @@ def course_curriculum_accordion_example():
 API_REFERENCE = build_api_reference(
     main_props=[
         Prop("type", "Literal['single', 'multiple']", "Whether one or multiple items can be open", "'single'"),
-        Prop("collapsible", "bool", "When type='single', allows closing all items", "False"),
-        Prop("value", "str | int | list[str | int] | None", "Initially open item(s). Can be index (int) or custom value (str)", "None"),
-        Prop("signal", "str", "Datastar signal name for state management", "auto-generated"),
+        Prop("collapsible", "bool", "When type='single', allows closing the open item so no items are open", "False"),
+        Prop("value", "str | int | list[str | int] | None", "Initially open item(s) by index (int) or custom value (str)", "None"),
+        Prop("signal", "str | Signal", "Datastar signal name for reactive state management", "auto-generated"),
         Prop("cls", "str", "Additional CSS classes", "''"),
+    ],
+    components=[
+        Component("Accordion", "Root container that manages open/close state for all items"),
+        Component("AccordionItem", "Wraps a trigger and content pair. Accepts value (str | int) for custom identification, defaults to auto-incrementing index"),
+        Component("AccordionTrigger", "Clickable heading that toggles its content panel. Props: icon (str | None), icon_cls (str), icon_rotation (int, default 180)"),
+        Component("AccordionContent", "Collapsible content panel with CSS grid animation. Accepts role (str, default 'region')"),
     ]
 )
 
@@ -445,12 +428,11 @@ API_REFERENCE = build_api_reference(
 
 EXAMPLES_DATA = [
     {"fn": hero_accordion_example, "title": "Basic Usage", "description": "Single selection accordion with collapsible items"},
-    {"fn": basic_accordion_example, "title": "Collapsible Single", "description": "Single item open at a time, all items can be closed"},
+    {"fn": course_curriculum_accordion_example, "title": "Always One Open", "description": "Non-collapsible single selection - exactly one item must always be open"},
     {"fn": faq_accordion_example, "title": "Rich Content", "description": "Single selection with icons, badges, and formatted content"},
     {"fn": multiple_selection_accordion_example, "title": "Multiple Selection", "description": "Multiple items can be open simultaneously"},
     {"fn": settings_accordion_example, "title": "With Forms", "description": "Single selection accordion containing interactive form elements"},
     {"fn": file_explorer_accordion_example, "title": "Nested Accordions", "description": "Accordions nested within accordion items for hierarchical content"},
-    {"fn": course_curriculum_accordion_example, "title": "Always One Open", "description": "Non-collapsible single selection - exactly one item must always be open"},
 ]
 
 

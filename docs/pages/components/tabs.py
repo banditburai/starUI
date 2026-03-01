@@ -10,209 +10,310 @@ CATEGORY = "ui"
 ORDER = 30
 STATUS = "stable"
 
-from starhtml import Div, P, Pre, Code
+from starhtml import Div, P, Span, Icon
 from starui.registry.components.tabs import Tabs, TabsList, TabsTrigger, TabsContent
+from starui.registry.components.card import (
+    Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter,
+)
+from starui.registry.components.input import Input
+from starui.registry.components.label import Label
 from starui.registry.components.button import Button
+from starui.registry.components.separator import Separator
+from starui.registry.components.switch import SwitchWithLabel
+from starui.registry.components.badge import Badge
 from utils import auto_generate_page, with_code, Component, build_api_reference
 
 
-
 @with_code
-def dashboard_tabs_example():
+def account_form_example():
     return Tabs(
         TabsList(
-            TabsTrigger("Overview"),
-            TabsTrigger("Analytics"),
-            TabsTrigger("Reports")
+            TabsTrigger("Account", id="account"),
+            TabsTrigger("Password", id="password"),
         ),
         TabsContent(
-            P("Welcome to your dashboard. Here you can see a summary of your activity.", cls="text-muted-foreground mb-4"),
-            Div(
-                Div("Total Users: 1,234", cls="p-3 bg-muted rounded-lg text-sm"),
-                Div("Active Sessions: 89", cls="p-3 bg-muted rounded-lg text-sm"),
-                Div("Revenue: $12,450", cls="p-3 bg-muted rounded-lg text-sm"),
-                cls="grid grid-cols-3 gap-3"
+            Card(
+                CardHeader(
+                    CardTitle("Account"),
+                    CardDescription("Update your account details."),
+                ),
+                CardContent(
+                    Div(
+                        Div(
+                            Label("Name", fr="tab_name"),
+                            Input(id="tab_name", value="Ada Lovelace"),
+                            cls="grid gap-1.5",
+                        ),
+                        Div(
+                            Label("Username", fr="tab_username"),
+                            Input(id="tab_username", value="@ada"),
+                            cls="grid gap-1.5",
+                        ),
+                        cls="space-y-4",
+                    )
+                ),
+                CardFooter(Button("Save")),
             ),
-            cls="min-h-[200px]"
+            id="account",
         ),
         TabsContent(
-            P("View detailed analytics and metrics for your account.", cls="text-muted-foreground mb-4"),
-            Div("📊 Analytics charts would go here", cls="p-8 border border-dashed rounded-lg text-center text-muted-foreground"),
-            cls="min-h-[200px]"
-        ),
-        TabsContent(
-            P("Generate and download comprehensive reports for your data.", cls="text-muted-foreground mb-4"),
-            Div(
-                Button("Download Report", variant="outline", cls="mr-2"),
-                Button("Generate New Report")
+            Card(
+                CardHeader(
+                    CardTitle("Password"),
+                    CardDescription("Change your password here."),
+                ),
+                CardContent(
+                    Div(
+                        Div(
+                            Label("Current password", fr="tab_curpw"),
+                            Input(type="password", id="tab_curpw"),
+                            cls="grid gap-1.5",
+                        ),
+                        Div(
+                            Label("New password", fr="tab_newpw"),
+                            Input(type="password", id="tab_newpw"),
+                            cls="grid gap-1.5",
+                        ),
+                        cls="space-y-4",
+                    )
+                ),
+                CardFooter(Button("Update password")),
             ),
-            cls="min-h-[200px]"
+            id="password",
         ),
-        cls="w-full"
+        value="account",
+        cls="w-full max-w-md",
     )
 
 
 @with_code
-def code_preview_tabs_example():
+def line_variant_example():
     return Tabs(
         TabsList(
-            TabsTrigger("Preview", id="preview"),
-            TabsTrigger("Code", id="code")
+            TabsTrigger("Overview", id="overview"),
+            TabsTrigger("Specs", id="specs"),
         ),
         TabsContent(
             Div(
-                Button("Click me!", cls="mr-2"),
-                Button("Secondary", variant="secondary", cls="mr-2"),
-                Button("Outline", variant="outline"),
-                cls="p-6 border rounded-lg"
+                Div(
+                    Badge("In Stock"),
+                    Badge("v4.2", variant="outline"),
+                    cls="flex gap-2",
+                ),
+                P(
+                    "Studio-grade condenser microphone with a wide frequency response "
+                    "and low self-noise floor, designed for vocal recording and live streaming.",
+                    cls="text-sm text-muted-foreground mt-3",
+                ),
+            ),
+            id="overview",
+            cls="min-h-[120px]",
+        ),
+        TabsContent(
+            Div(
+                Div(
+                    Span("Type", cls="text-sm text-muted-foreground"),
+                    Span("Condenser", cls="text-sm font-medium"),
+                    cls="flex justify-between py-2",
+                ),
+                Separator(),
+                Div(
+                    Span("Pattern", cls="text-sm text-muted-foreground"),
+                    Span("Cardioid", cls="text-sm font-medium"),
+                    cls="flex justify-between py-2",
+                ),
+                Separator(),
+                Div(
+                    Span("Impedance", cls="text-sm text-muted-foreground"),
+                    Span("200\u2126", cls="text-sm font-medium"),
+                    cls="flex justify-between py-2",
+                ),
+            ),
+            id="specs",
+            cls="min-h-[120px]",
+        ),
+        value="overview",
+        variant="line",
+        cls="w-full max-w-sm",
+    )
+
+
+@with_code
+def disabled_tab_example():
+    return Tabs(
+        TabsList(
+            TabsTrigger("Draft", id="draft"),
+            TabsTrigger("Preview", id="preview"),
+            TabsTrigger("Publish", id="publish", disabled=True),
+        ),
+        TabsContent(
+            Div(
+                Div(
+                    Label("Title", fr="tab_post_title"),
+                    Input(id="tab_post_title", placeholder="Post title"),
+                    cls="grid gap-1.5",
+                ),
+                Div(
+                    Label("Slug", fr="tab_post_slug"),
+                    Input(id="tab_post_slug", placeholder="/blog/my-post"),
+                    cls="grid gap-1.5",
+                ),
+                cls="space-y-4",
+            ),
+            id="draft",
+            cls="min-h-[150px]",
+        ),
+        TabsContent(
+            Div(
+                "Post preview will render here once the draft is saved.",
+                cls="p-6 border border-dashed rounded-lg text-sm text-muted-foreground text-center",
             ),
             id="preview",
-            cls="min-h-[120px]"
+            cls="min-h-[150px]",
         ),
         TabsContent(
-            Pre(
-                Code('''Button("Click me!")
-Button("Secondary", variant="secondary")
-Button("Outline", variant="outline")'''),
-                cls="p-4 bg-muted rounded-lg text-sm overflow-x-auto"
+            P(
+                "Save a draft first to unlock publishing.",
+                cls="text-sm text-muted-foreground",
             ),
-            id="code",
-            cls="min-h-[120px]"
+            id="publish",
+            cls="min-h-[150px]",
         ),
-        value="preview",
-        cls="w-full"
+        value="draft",
+        cls="w-full max-w-sm",
     )
 
 
 @with_code
-def settings_tabs_example():
+def icon_tabs_example():
     return Tabs(
         TabsList(
-            TabsTrigger("General", id="general"),
-            TabsTrigger("Security", id="security"),
-            TabsTrigger("Notifications", id="notifications")
+            TabsTrigger(Icon("lucide:user"), "Profile", id="profile"),
+            TabsTrigger(Icon("lucide:settings"), "Settings", id="settings"),
+            TabsTrigger(Icon("lucide:bell"), "Alerts", id="alerts"),
         ),
         TabsContent(
-            P("Manage your account preferences and basic information.", cls="text-muted-foreground mb-4"),
             Div(
-                "Username, language, timezone settings would go here",
-                cls="p-4 border rounded-lg text-sm text-muted-foreground"
+                Div(
+                    Label("Display name", fr="tab_display"),
+                    Input(id="tab_display", value="Ada Lovelace"),
+                    cls="grid gap-1.5",
+                ),
+                Div(
+                    Label("Email", fr="tab_email"),
+                    Input(type="email", id="tab_email", value="ada@example.com"),
+                    cls="grid gap-1.5",
+                ),
+                cls="space-y-4",
             ),
-            id="general",
-            cls="min-h-[150px]"
+            id="profile",
+            cls="min-h-[140px]",
         ),
         TabsContent(
-            P("Configure your account security and authentication settings.", cls="text-muted-foreground mb-4"),
             Div(
-                "Password, two-factor auth settings would go here",
-                cls="p-4 border rounded-lg text-sm text-muted-foreground"
+                SwitchWithLabel(
+                    label="Two-factor authentication",
+                    signal="sw_tab_2fa",
+                ),
+                SwitchWithLabel(
+                    label="Session timeout",
+                    signal="sw_tab_timeout",
+                    helper_text="Log out after 30 minutes of inactivity",
+                ),
+                cls="space-y-4",
             ),
-            id="security",
-            cls="min-h-[150px]"
+            id="settings",
+            cls="min-h-[140px]",
         ),
         TabsContent(
-            P("Control how and when you receive notifications from our platform.", cls="text-muted-foreground mb-4"),
             Div(
-                "Email, push notification settings would go here",
-                cls="p-4 border rounded-lg text-sm text-muted-foreground"
+                SwitchWithLabel(
+                    label="Email notifications",
+                    signal="sw_tab_email_notif",
+                    checked=True,
+                ),
+                SwitchWithLabel(
+                    label="Push notifications",
+                    signal="sw_tab_push_notif",
+                ),
+                cls="space-y-4",
             ),
-            id="notifications",
-            cls="min-h-[150px]"
+            id="alerts",
+            cls="min-h-[140px]",
         ),
-        value="general",
-        cls="w-full"
+        value="profile",
+        cls="w-full max-w-sm",
     )
 
 
 @with_code
-def plain_variant_tabs_example():
+def auto_indexed_example():
     return Tabs(
         TabsList(
-            TabsTrigger("Documentation", id="docs"),
-            TabsTrigger("Examples", id="examples"),
-            TabsTrigger("API Reference", id="api")
+            TabsTrigger("RGB"),
+            TabsTrigger("HSL"),
+            TabsTrigger("HEX"),
         ),
         TabsContent(
-            P("Read the comprehensive guides and tutorials to get started.", cls="text-muted-foreground mb-3"),
-            P("Learn how to integrate components into your application with step-by-step instructions and best practices.", cls="text-sm text-muted-foreground"),
-            id="docs",
-            cls="min-h-[100px]"
-        ),
-        TabsContent(
-            P("Explore interactive examples and code samples for all components.", cls="text-muted-foreground mb-3"),
-            P("Copy and paste working examples directly into your project with full source code.", cls="text-sm text-muted-foreground"),
-            id="examples",
-            cls="min-h-[100px]"
-        ),
-        TabsContent(
-            P("Complete API documentation for all components and their props.", cls="text-muted-foreground mb-3"),
-            P("TypeScript definitions, method signatures, and usage patterns for every component.", cls="text-sm text-muted-foreground"),
-            id="api",
-            cls="min-h-[100px]"
-        ),
-        value="docs",
-        variant="plain",
-        cls="w-full"
-    )
-
-
-@with_code
-def navigation_tabs_example():
-    return Tabs(
-        TabsList(
-            TabsTrigger("Home", id="home"),
-            TabsTrigger("About", id="about"),
-            TabsTrigger("Services", id="services"),
-            TabsTrigger("Contact", id="contact")
-        ),
-        TabsContent(
-            P("Welcome to our platform! Discover amazing tools and services designed for developers.", cls="text-lg text-muted-foreground mb-4"),
             Div(
-                Button("Get Started", cls="mr-2"),
-                Button("Learn More", variant="outline")
+                Div(
+                    Label("R", fr="tab_r"),
+                    Input(type="number", id="tab_r", value="99", min=0, max=255),
+                    cls="grid gap-1.5",
+                ),
+                Div(
+                    Label("G", fr="tab_g"),
+                    Input(type="number", id="tab_g", value="102", min=0, max=255),
+                    cls="grid gap-1.5",
+                ),
+                Div(
+                    Label("B", fr="tab_b"),
+                    Input(type="number", id="tab_b", value="241", min=0, max=255),
+                    cls="grid gap-1.5",
+                ),
+                cls="grid grid-cols-3 gap-3",
             ),
-            id="home",
-            cls="min-h-[150px]"
+            cls="min-h-[80px]",
         ),
         TabsContent(
-            P("We're passionate about building tools that make developers more productive.", cls="text-muted-foreground mb-4"),
-            P("Founded in 2020, we've been creating amazing products for developers worldwide, focusing on simplicity and performance.", cls="text-sm text-muted-foreground"),
-            id="about",
-            cls="min-h-[150px]"
-        ),
-        TabsContent(
-            P("We offer comprehensive solutions to help your business grow.", cls="text-muted-foreground mb-4"),
             Div(
-                "🚀 Web Development - Full-stack applications",
-                "📱 Mobile Apps - iOS and Android development",
-                "☁️ Cloud Solutions - Scalable infrastructure",
-                cls="grid grid-cols-1 gap-3 text-sm"
+                Div(
+                    Label("H", fr="tab_h"),
+                    Input(type="number", id="tab_h", value="239", min=0, max=360),
+                    cls="grid gap-1.5",
+                ),
+                Div(
+                    Label("S", fr="tab_s"),
+                    Input(type="number", id="tab_s", value="84", min=0, max=100),
+                    cls="grid gap-1.5",
+                ),
+                Div(
+                    Label("L", fr="tab_l"),
+                    Input(type="number", id="tab_l", value="67", min=0, max=100),
+                    cls="grid gap-1.5",
+                ),
+                cls="grid grid-cols-3 gap-3",
             ),
-            id="services",
-            cls="min-h-[150px]"
+            cls="min-h-[80px]",
         ),
         TabsContent(
-            P("Ready to work with us? We'd love to hear about your project!", cls="text-muted-foreground mb-4"),
             Div(
-                P("📧 hello@example.com", cls="text-sm text-muted-foreground"),
-                P("📞 (555) 123-4567", cls="text-sm text-muted-foreground"),
-                cls="space-y-2"
+                Label("Hex", fr="tab_hex"),
+                Input(id="tab_hex", value="#6366F1", cls="font-mono"),
+                cls="grid gap-1.5",
             ),
-            id="contact",
-            cls="min-h-[150px]"
+            cls="min-h-[80px]",
         ),
-        value="home",
-        variant="plain",
-        cls="w-full"
+        cls="w-full max-w-md",
     )
 
 
 EXAMPLES_DATA = [
-    {"title": "Dashboard Tabs", "description": "Multiple tabs for different content sections", "fn": dashboard_tabs_example},
-    {"title": "Code Preview", "description": "Tabs for showing preview and code", "fn": code_preview_tabs_example},
-    {"title": "Settings Tabs", "description": "Multi-section settings interface", "fn": settings_tabs_example},
-    {"title": "Plain Variant", "description": "Clean minimal tabs without background styling", "fn": plain_variant_tabs_example},
-    {"title": "Navigation Tabs", "description": "Website navigation-style tabs using plain variant", "fn": navigation_tabs_example},
+    {"title": "Account Form", "description": "Card and form composition with string id pairing", "fn": account_form_example},
+    {"title": "Line Variant", "description": "Underline indicator with Badge and Separator composition", "fn": line_variant_example},
+    {"title": "Disabled Tab", "description": "Blog editor workflow with a disabled Publish trigger", "fn": disabled_tab_example},
+    {"title": "With Icons", "description": "Lucide icons inside triggers with auto-sizing", "fn": icon_tabs_example},
+    {"title": "Auto-Indexed", "description": "Zero-config pairing — no id or value props needed", "fn": auto_indexed_example},
 ]
 
 API_REFERENCE = build_api_reference(

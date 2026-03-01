@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Any, Literal
 
 from starhtml import FT, Div
 
@@ -27,14 +27,15 @@ alert_variants = cva(
 
 
 def Alert(
-    *children,
+    *children: Any,
     variant: AlertVariant = "default",
+    live: bool = False,
     cls: str = "",
-    **kwargs,
+    **kwargs: Any,
 ) -> FT:
     return Div(
         *children,
-        role="alert",
+        role="alert" if live else None,
         cls=cn(alert_variants(variant=variant), cls),
         **kwargs,
     )

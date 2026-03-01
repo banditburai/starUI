@@ -27,7 +27,8 @@ def InlineCode(
         Div(
             Div(NotStr(highlight(code, language)), id=code_id),
             copy_button and CopyButton(code_id, copied, variant="inline"),
-            cls="code-container inline-flex items-center gap-0 !py-2 !pl-4 !pr-3"
+            cls="inline-flex items-center gap-0 rounded-md bg-[var(--code-bg,_var(--muted))] text-[color:var(--code-color,_var(--foreground))] border border-[var(--code-border,_var(--border))] font-mono text-sm [font-variant-ligatures:none] py-2 pl-4 pr-3",
+            data_slot="code-block"
         ),
         cls=cn("inline-block", cls),
         **attrs

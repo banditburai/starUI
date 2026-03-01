@@ -3,7 +3,7 @@ from typing import Any, Literal
 
 from starhtml import FT, Button, Div, Icon, Signal
 
-from .utils import cn, gen_id, merge_actions
+from .utils import cn, gen_id, inject_context, merge_actions
 
 AccordionType = Literal["single", "multiple"]
 
@@ -33,6 +33,7 @@ def Accordion(
     accordion_state = Signal(sig, initial)
     ctx = {
         "accordion_state": accordion_state,
+        "id": sig,
         "type": type,
         "collapsible": collapsible,
         "initial_value": value,
@@ -41,7 +42,7 @@ def Accordion(
 
     return Div(
         accordion_state,
-        *[child(**ctx) if callable(child) else child for child in children],
+        *[inject_context(child, **ctx) for child in children],
         cls=cn("w-full min-w-0", cls),
         **kwargs,
     )
@@ -53,7 +54,7 @@ def AccordionItem(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    def _(*, accordion_state, type, collapsible, initial_value, _item_index, **_):
+    def _(*, accordion_state, id, type, collapsible, initial_value, _item_index, **_):
         item_value = value if value is not None else next(_item_index)
         is_open = (
             (accordion_state == item_value)
@@ -76,6 +77,7 @@ def AccordionItem(
             click_action = accordion_state.toggle_in(item_value)
 
         child_ctx = {
+            "id": id,
             "item_value": item_value,
             "is_open": is_open,
             "is_default_open": is_default_open,
@@ -83,7 +85,7 @@ def AccordionItem(
         }
 
         return Div(
-            *[child(**child_ctx) if callable(child) else child for child in children],
+            *[inject_context(child, **child_ctx) for child in children],
             data_value=str(item_value),
             # SSR initial + reactive binding (prevents FOUC before Datastar hydrates)
             data_state="open" if is_default_open else "closed",
@@ -103,7 +105,7 @@ def AccordionTrigger(
     icon_rotation: int = 180,
     **kwargs: Any,
 ) -> FT:
-    def _(*, item_value, is_open, is_default_open, click_action, **_):
+    def _(*, id, item_value, is_open, is_default_open, click_action, **_):
         click_actions = merge_actions(click_action, kwargs=kwargs)
 
         icon_el = (
@@ -130,8 +132,8 @@ def AccordionTrigger(
                 *icon_el,
                 data_on_click=click_actions,
                 type="button",
-                id=f"{item_value}-trigger",
-                aria_controls=f"{item_value}-content",
+                id=f"{id}-{item_value}-trigger",
+                aria_controls=f"{id}-{item_value}-content",
                 aria_expanded="true" if is_default_open else "false",
                 data_attr_aria_expanded=is_open.if_("true", "false"),
                 data_state="open" if is_default_open else "closed",
@@ -154,15 +156,15 @@ def AccordionContent(
     role: str = "region",
     **kwargs: Any,
 ) -> FT:
-    def _(*, item_value, is_open, is_default_open, **_):
+    def _(*, id, item_value, is_open, is_default_open, **_):
         return Div(
             Div(
                 Div(*children, cls="pb-4 pt-0"),
                 cls="overflow-hidden min-h-0",
             ),
             role=role,
-            id=f"{item_value}-content",
-            aria_labelledby=f"{item_value}-trigger",
+            id=f"{id}-{item_value}-content",
+            aria_labelledby=f"{id}-{item_value}-trigger",
             style="grid-template-rows: 1fr"
             if is_default_open
             else "grid-template-rows: 0fr",

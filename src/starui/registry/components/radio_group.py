@@ -6,7 +6,7 @@ from starhtml import Label as HTMLLabel
 from starhtml import P as HTMLP
 from starhtml import Span as HTMLSpan
 
-from .utils import cn, gen_id
+from .utils import cn, gen_id, inject_context
 
 
 def RadioGroup(
@@ -29,11 +29,12 @@ def RadioGroup(
         "selected": selected,
         "group_name": group_name,
         "hide_indicators": hide_indicators,
+        "initial_value": value,
     }
 
     return Div(
         selected,
-        *[child(**ctx) if callable(child) else child for child in children],
+        *[inject_context(child, **ctx) for child in children],
         cls=cn("grid gap-2", cls),
         data_slot="radio-group",
         role="radiogroup",
@@ -51,7 +52,7 @@ def RadioGroupItem(
     indicator_cls: str = "",
     **kwargs: Any,
 ):
-    def item(*, sig, selected, group_name, hide_indicators, **_):
+    def item(*, sig, selected, group_name, hide_indicators, initial_value="", **_):
         radio_id = gen_id("radio")
         is_checked = selected.eq(value)
 
@@ -61,8 +62,9 @@ def RadioGroupItem(
             id=radio_id,
             value=value,
             name=group_name,
+            checked=(value == initial_value) or None,
             disabled=disabled,
-            data_state=is_checked.if_("checked", "unchecked"),
+            data_attr_data_state=is_checked.if_("checked", "unchecked"),
             data_disabled="" if disabled else None,
             data_slot="radio-input",
             cls="sr-only peer",
@@ -71,39 +73,47 @@ def RadioGroupItem(
 
         if hide_indicators:
             return (
-                Div(
-                    radio_input,
-                    cls="relative inline-flex items-center",
-                    data_slot="radio-container",
-                )
-                if not label
-                else HTMLLabel(
+                HTMLLabel(
                     radio_input,
                     HTMLSpan(label, cls="block w-full"),
                     fr=radio_id,
                     cls="block w-full cursor-pointer",
                     data_slot="radio-container",
                 )
+                if label
+                else Div(
+                    radio_input,
+                    cls="relative inline-flex items-center",
+                    data_slot="radio-container",
+                )
             )
 
         visual_radio = Div(
             Div(
-                Div(cls="size-2 rounded-full bg-primary"),
+                cls="absolute -inset-px rounded-full bg-primary",
                 style="opacity: 0; transition: opacity 0.15s",
                 data_style_opacity=is_checked.if_("1", "0"),
+            ),
+            Div(
+                Div(cls="size-2 rounded-full bg-primary-foreground"),
                 cls=cn(
-                    "absolute inset-0 flex items-center justify-center",
+                    "absolute inset-0 flex items-center justify-center pointer-events-none",
                     indicator_cls,
                 ),
-                data_slot="radio-indicator",
+                style="opacity: 0; transition: opacity 0.15s",
+                data_style_opacity=is_checked.if_("1", "0"),
+                data_slot="radio-group-indicator",
             ),
             cls=cn(
-                "relative aspect-square size-4 shrink-0 rounded-full border transition-all",
+                "relative flex aspect-square size-4 shrink-0 rounded-full border outline-none",
                 "border-input bg-background dark:bg-input/30",
+                "peer-focus-visible:border-ring peer-focus-visible:ring-ring/50 peer-focus-visible:ring-3",
+                "peer-aria-[invalid]:ring-destructive/20 dark:peer-aria-[invalid]:ring-destructive/40",
+                "dark:peer-aria-[invalid]:border-destructive/50 peer-aria-[invalid]:border-destructive peer-aria-[invalid]:ring-3",
                 "peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
                 cls,
             ),
-            data_slot="radio-visual",
+            data_slot="radio-group-item",
         )
 
         if not label:
@@ -119,10 +129,10 @@ def RadioGroupItem(
             visual_radio,
             HTMLSpan(
                 label,
-                cls="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
+                cls="text-sm font-medium leading-none select-none peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
             ),
             fr=radio_id,
-            cls="flex items-center gap-2 cursor-pointer",
+            cls="flex items-center gap-3 cursor-pointer",
             data_slot="radio-container",
         )
 

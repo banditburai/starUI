@@ -12,12 +12,14 @@ from .utils import confirm, console, error, info, status_context, success, warni
 
 def _setup_code_highlighting(config, theme: str | None) -> None:
     try:
-        from starlighter import StarlighterStyles
+        from starlighter import THEMES
     except ImportError:
         warning(
             "Starlighter not installed. This should have been installed automatically. Try: uv add starlighter"
         )
         return
+
+    from starui.registry.components.code_block import _RESIDUAL_CSS
 
     css_dir = config.css_dir_absolute
     input_css = css_dir / "input.css"
@@ -41,20 +43,25 @@ def _setup_code_highlighting(config, theme: str | None) -> None:
     else:
         light_theme, dark_theme = None, theme
 
+    def _wrap_vars(selector: str, theme_name: str) -> str:
+        rules = "\n    ".join(f"{k}: {v};" for k, v in THEMES[theme_name].items())
+        return f"{selector} {{\n    {rules}\n}}"
+
+    css_parts = [_RESIDUAL_CSS.strip()]
+
     if light_theme and dark_theme:
-        styles = StarlighterStyles(light_theme, dark_theme, auto_switch=True)
+        css_parts.append(_wrap_vars(":root", light_theme))
+        css_parts.append(_wrap_vars(".dark", dark_theme))
+        css_parts.append(_wrap_vars("[data-theme='dark']", dark_theme))
         theme_name = f"{light_theme}/{dark_theme}"
         mode = "light/dark auto-switching"
     else:
-        styles = StarlighterStyles(dark_theme or theme)
-        theme_name = dark_theme or theme
+        selected = dark_theme or theme
+        css_parts.append(_wrap_vars(":root", selected))
+        theme_name = selected
         mode = "dark only"
 
-    css_content = str(styles)
-    if css_content.startswith("<style>") and css_content.endswith("</style>"):
-        css_content = css_content[7:-8].strip()
-
-    (css_dir / "starlighter.css").write_text(css_content)
+    (css_dir / "starlighter.css").write_text("\n\n".join(css_parts) + "\n")
     success(f"Generated starlighter.css with {theme_name} theme ({mode})")
 
     if input_css.exists():
@@ -120,18 +127,23 @@ def add_command(
             resolved.update(loader.load_component_with_dependencies(normalized))
 
         component_dir = config.component_dir_absolute
-        existing = [
-            component_dir / f"{name}.py"
-            for name in resolved
-            if (component_dir / f"{name}.py").exists()
-        ]
+        requested = {c.replace("-", "_") for c in components}
 
-        if existing and not force:
-            warning(f"Found {len(existing)} existing files:")
-            for path in existing:
-                console.print(f"  • {path}")
+        def exists(n):
+            return (component_dir / f"{n}.py").exists()
+
+        conflicts = [n for n in resolved if n in requested and exists(n)]
+        if conflicts and not force:
+            warning("The following requested components already exist:")
+            for name in conflicts:
+                console.print(f"  • {component_dir / f'{name}.py'}")
             if not confirm("Overwrite?", default=False):
                 raise typer.Exit(0)
+
+        if not force:
+            resolved = {
+                n: src for n, src in resolved.items() if n in requested or not exists(n)
+            }
 
         packages = {
             pkg
@@ -171,17 +183,17 @@ def add_command(
             (component_dir / "__init__.py").touch()
 
             for name, source in resolved.items():
-                source = re.sub(
-                    r"from\s+\.utils\s+import", "from starui import", source
-                )
                 (component_dir / f"{name}.py").write_text(source)
 
-        success(f"Installed components: {', '.join(resolved.keys())}")
+        if resolved:
+            success(f"Installed components: {', '.join(resolved.keys())}")
+        else:
+            info("All components already installed (dependencies unchanged)")
 
         if verbose:
             info(f"Location: {component_dir}")
 
-        first = list(resolved)[0].title().replace("_", "")
+        first = (list(resolved) or list(requested))[0].title().replace("_", "")
         console.print(f"\n💡 Next steps:\n  • Import: from starui import {first}")
 
     except Exception as e:

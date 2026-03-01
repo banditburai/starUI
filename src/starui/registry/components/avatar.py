@@ -12,6 +12,7 @@ def Avatar(
 ) -> FT:
     return Div(
         *children,
+        data_slot="avatar",
         cls=cn(
             "relative flex size-10 shrink-0 overflow-hidden rounded-full",
             cls,

@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 @import './starlighter.css';
 @import './landing.css';
 
@@ -8,9 +9,9 @@
 @custom-variant dark (&:where(.dark, .dark *, [data-theme="dark"], [data-theme="dark"] *));
 
 @theme {
-  /* Font families - Exact shadcn system */
-  --font-sans: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
-  --font-mono: var(--font-geist-mono), "SF Mono", "Monaco", "Inconsolata", "Fira Code", "Fira Mono", "Roboto Mono", monospace;
+  /* Font families */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Monaco", "Inconsolata", "Fira Code", "Fira Mono", "Roboto Mono", monospace;
   
   /* Radius system - Exact shadcn values */
   --radius: 0.625rem;
@@ -57,23 +58,6 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-  
-  /* Starlighter code highlighting - GitHub Light theme */
-  --code-bg: #ffffff;
-  --code-color: #24292e;
-  --code-border: #e1e4e8;
-  --token-keyword: #d73a49;
-  --token-string: #032f62;
-  --token-comment: #6a737d;
-  --token-number: #005cc5;
-  --token-operator: #24292e;
-  --token-identifier: #6f42c1;
-  --token-builtin: #e36209;
-  --token-decorator: #6f42c1;
-  --token-punctuation: #24292e;
-  --scrollbar-track: #f6f8fa;
-  --scrollbar-thumb: #d1d5da;
-  --scrollbar-thumb-hover: #a8b1bb;
 }
 
 .dark, [data-theme="dark"] {
@@ -93,9 +77,9 @@
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.521 0.245 27.325);
   --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.31 0 0);
-  --input: oklch(100% 0 0 / 0.15);
-  --ring: oklch(0.851 0 0);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
   --chart-1: oklch(0.828 0.189 84.429);
   --chart-2: oklch(0.769 0.188 70.08);
   --chart-3: oklch(0.646 0.222 41.116);
@@ -109,23 +93,6 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(0.31 0 0);
   --sidebar-ring: oklch(0.851 0 0);
-  
-  /* Starlighter code highlighting - GitHub Dark theme */
-  --code-bg: #0d1117;
-  --code-color: #c9d1d9;
-  --code-border: #30363d;
-  --token-keyword: #ff7b72;
-  --token-string: #a5d6ff;
-  --token-comment: #8b949e;
-  --token-number: #79c0ff;
-  --token-operator: #c9d1d9;
-  --token-identifier: #d2a8ff;
-  --token-builtin: #ffa657;
-  --token-decorator: #d2a8ff;
-  --token-punctuation: #c9d1d9;
-  --scrollbar-track: #0d1117;
-  --scrollbar-thumb: #30363d;
-  --scrollbar-thumb-hover: #484f58;
 }
 
 [data-theme="blue"] { --primary: oklch(59.2% 0.221 239.314); --primary-foreground: oklch(98.5% 0 0); }
@@ -215,9 +182,10 @@
   --radius: var(--radius);
 }
 
-/* Additional styles from Copan styles.css */
-* {
-  border-color: var(--color-border);
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
 }
 
 html {
@@ -302,70 +270,6 @@ article p:first-child {
   margin-top: 0;
 }
 
-/* Starlighter code block styles */
-.code-container {
-  background: var(--code-bg);
-  color: var(--code-color);
-  border: 1px solid var(--code-border);
-  border-radius: 8px;
-  padding: 20px;
-  overflow-x: auto;
-  margin: 0;
-  min-width: 0;
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'SF Mono', monospace;
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-.code-container pre {
-  margin: 0;
-  font-family: inherit;
-  font-size: inherit;
-  line-height: inherit;
-  white-space: pre;
-  overflow-x: auto;
-  min-width: 0;
-}
-
-.code-container code {
-  font-family: inherit;
-  background: none;
-  padding: 0;
-  display: block;
-  white-space: pre;
-  overflow-x: auto;
-}
-
-/* Token colors */
-.token-keyword { color: var(--token-keyword); }
-.token-string { color: var(--token-string); }
-.token-comment { color: var(--token-comment); font-style: italic; }
-.token-number { color: var(--token-number); }
-.token-operator { color: var(--token-operator); }
-.token-identifier { color: var(--token-identifier); }
-.token-builtin { color: var(--token-builtin); }
-.token-decorator { color: var(--token-decorator); }
-.token-punctuation { color: var(--token-punctuation); }
-
-/* Scrollbar styling */
-.code-container::-webkit-scrollbar {
-  height: 8px;
-  width: 8px;
-}
-
-.code-container::-webkit-scrollbar-track {
-  background: var(--scrollbar-track);
-}
-
-.code-container::-webkit-scrollbar-thumb {
-  background: var(--scrollbar-thumb);
-  border-radius: 4px;
-}
-
-.code-container::-webkit-scrollbar-thumb:hover {
-  background: var(--scrollbar-thumb-hover);
-}
-
 /* Fix overflow issues - minimal necessary changes */
 
 /* Add missing Tailwind utility class */
@@ -390,6 +294,7 @@ main {
 .font-serif-body { font-family: 'Cormorant Garamond', serif; }
 .text-sunset { color: #FB923C; }
 [data-theme="light"] .text-sunset { color: #b85a08; }
+
 
 /* Star mark hover rotation */
 .star-mark-header {

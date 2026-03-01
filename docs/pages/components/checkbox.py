@@ -1,500 +1,417 @@
+"""
+Checkbox component documentation - Toggle controls for forms and settings.
+"""
+
 TITLE = "Checkbox"
 DESCRIPTION = "A control that allows the user to toggle between checked and not checked."
 CATEGORY = "form"
 ORDER = 15
 STATUS = "stable"
 
-from starhtml import Div, P, Input, Label, Icon, Span, H3, Form, Signal, all_, any_, collect, js, evt
+from starhtml import Div, P, Label, Icon, Span, H3, Form, Signal, all_, collect, evt
 from starui.registry.components.checkbox import Checkbox, CheckboxWithLabel
 from starui.registry.components.button import Button
 from starui.registry.components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
 from starui.registry.components.badge import Badge
 from starui.registry.components.progress import Progress
 from utils import auto_generate_page, with_code, Prop, Component, build_api_reference
-from widgets.component_preview import ComponentPreview
-
-
 
 
 @with_code
 def hero_checkbox_example():
-    dark_mode = Signal("dark_mode", _ref_only=True)
-    notifications = Signal("notifications", _ref_only=True)
-    auto_save = Signal("auto_save", _ref_only=True)
-
-    preferences = [
-        (dark_mode, "Enable dark mode", "Reduce eye strain in low-light conditions", True),
-        (notifications, "Show notifications", "Stay updated with real-time alerts", False),
-        (auto_save, "Auto-save drafts", "Never lose your work", True),
-    ]
-
-    checkboxes = [
-        CheckboxWithLabel(label=label, helper_text=helper, signal=sig, checked=checked)
-        for sig, label, helper, checked in preferences
-    ]
-
-    selected_text = collect([
-        (dark_mode, "Dark Mode"),
-        (notifications, "Notifications"),
-        (auto_save, "Auto-save"),
-        ], join_with=" | ")
-
-    preference_summary = Div(
-        P("Your preferences: ", cls="text-sm text-muted-foreground mb-1"),
-        P(
-            Span(
-                data_text=selected_text.if_(selected_text, "None selected"),
-                cls="font-medium text-sm break-words"
-            ),
-            cls="min-h-[1.25rem]"
-        ),
-        cls="mt-4 pt-4 border-t"
-    )
-
-    return Card(
-        CardHeader(
-            CardTitle("Quick Setup"),
-            CardDescription("Configure your preferences in seconds")
-        ),
-        CardContent(
+    return Div(
+        Div(
+            Checkbox(signal="cb_hero_monitor", id="cb_monitor", checked=True),
             Div(
-                *checkboxes,
-                preference_summary,
-                cls="space-y-3"
-            )
+                Label("Monitor input", fr="cb_monitor", cls="text-sm font-medium leading-none"),
+                cls="grid gap-1.5",
+            ),
+            cls="flex items-start gap-3",
         ),
-        cls="max-w-md mx-auto"
+        CheckboxWithLabel(
+            label="48V phantom power",
+            helper_text="Required for condenser microphones",
+            signal="cb_hero_phantom",
+        ),
+        CheckboxWithLabel(
+            label="-20dB pad",
+            signal="cb_hero_pad",
+        ),
+        cls="space-y-4 max-w-sm",
     )
+
 
 @with_code
-def terms_conditions_example():
-    terms_accepted = Signal("terms_accepted", _ref_only=True)
-    privacy_accepted = Signal("privacy_accepted", _ref_only=True)
+def states_example():
+    return Div(
+        CheckboxWithLabel(label="Unchecked", signal="cb_st_off"),
+        CheckboxWithLabel(label="Checked", signal="cb_st_on", checked=True),
+        CheckboxWithLabel(
+            label="Indeterminate",
+            helper_text="Compile-time only — icon and data-state are fixed at render",
+            signal="cb_st_ind",
+            indeterminate=True,
+        ),
+        CheckboxWithLabel(
+            label="With error",
+            signal="cb_st_err",
+            error_text="Input level exceeds safe range",
+        ),
+        CheckboxWithLabel(
+            label="Custom indicator",
+            helper_text="Uses indicator_cls to tint the check icon",
+            signal="cb_st_custom",
+            checked=True,
+            indicator_cls="text-green-600 dark:text-green-400",
+        ),
+        cls="space-y-4 max-w-sm",
+    )
+
+
+@with_code
+def session_prep_example():
+    levels = Signal("cb_prep_levels", _ref_only=True)
+    backup = Signal("cb_prep_backup", _ref_only=True)
+    silence = Signal("cb_prep_silence", _ref_only=True)
 
     return Card(
         CardHeader(
-            CardTitle("Complete Registration"),
-            CardDescription("Please review and accept our terms")
+            CardTitle("Session Prep"),
+            CardDescription("Complete required checks before recording"),
         ),
         CardContent(
             Form(
                 Div(
                     CheckboxWithLabel(
-                        label="I accept the Terms of Service",
-                        helper_text="You must accept to continue",
-                        signal=terms_accepted,
-                        required=True
+                        label="Input levels verified",
+                        helper_text="All channels reading between -18 and -12 dBFS",
+                        signal=levels,
+                        required=True,
                     ),
                     CheckboxWithLabel(
-                        label="I accept the Privacy Policy",
-                        helper_text="Learn how we protect your data",
-                        signal=privacy_accepted,
-                        required=True
+                        label="Backup drive connected",
+                        signal=backup,
+                        required=True,
                     ),
                     CheckboxWithLabel(
-                        label="Send me product updates and offers",
-                        helper_text="You can unsubscribe at any time"
+                        label="Studio silence confirmed",
+                        helper_text="No HVAC, phones, or foot traffic",
+                        signal=silence,
+                        required=True,
                     ),
-                    cls="space-y-3"
+                    CheckboxWithLabel(
+                        label="Count in before recording",
+                        signal="cb_prep_countin",
+                    ),
+                    cls="space-y-3",
                 ),
                 Button(
-                    "Create Account",
+                    "Begin Session",
                     type="submit",
                     cls="w-full mt-4",
-                    data_attr_disabled=~all_(terms_accepted, privacy_accepted),
-                    data_on_click=evt.preventDefault()
-                )
+                    data_attr_disabled=~all_(levels, backup, silence),
+                    data_on_click=evt.preventDefault(),
+                ),
             )
         ),
-        cls="max-w-md"
+        cls="max-w-md",
     )
 
 
 @with_code
-def feature_permissions_example():
-    camera = Signal("camera", _ref_only=True)
-    location = Signal("location", _ref_only=True)
-    contacts = Signal("contacts", _ref_only=True)
-    notify = Signal("notify", _ref_only=True)
-    optional_count = Signal("optional_count", camera + location + contacts + notify)
+def bus_routing_example():
+    drums = Signal("cb_bus_drums", _ref_only=True)
+    keys = Signal("cb_bus_keys", _ref_only=True)
+    brass = Signal("cb_bus_brass", _ref_only=True)
+    strings = Signal("cb_bus_strings", _ref_only=True)
+    optional_count = Signal("cb_bus_count", drums + keys + brass + strings)
 
     return Card(
         CardHeader(
-            CardTitle("App Permissions"),
-            CardDescription("Control what this app can access")
+            CardTitle("Bus Routing"),
+            CardDescription("Configure audio bus assignments"),
         ),
         CardContent(
             Div(
                 optional_count,
                 Div(
-                    H3("Essential", cls="text-sm font-semibold mb-2 text-muted-foreground"),
+                    H3("Required", cls="text-sm font-semibold mb-2 text-muted-foreground"),
                     CheckboxWithLabel(
-                        label="Storage",
-                        helper_text="Save files and preferences",
+                        label="Master",
+                        helper_text="Main stereo output",
                         checked=True,
-                        disabled=True
+                        disabled=True,
                     ),
                     CheckboxWithLabel(
-                        label="Network",
-                        helper_text="Connect to the internet",
+                        label="Talkback",
+                        helper_text="Engineer-to-talent communication",
                         checked=True,
-                        disabled=True
+                        disabled=True,
                     ),
-                    cls="space-y-2 mb-4"
+                    cls="space-y-2 mb-4",
                 ),
                 Div(
                     H3("Optional", cls="text-sm font-semibold mb-2 text-muted-foreground"),
                     CheckboxWithLabel(
-                        label="Camera",
-                        helper_text="Take photos and videos",
-                        signal=camera
+                        label="Drums sub",
+                        signal=drums,
+                        checked=True,
                     ),
                     CheckboxWithLabel(
-                        label="Location",
-                        helper_text="Access your location for maps",
-                        signal=location,
-                        checked=True
+                        label="Keys sub",
+                        signal=keys,
                     ),
                     CheckboxWithLabel(
-                        label="Contacts",
-                        helper_text="Find friends using this app",
-                        signal=contacts
+                        label="Brass sub",
+                        signal=brass,
                     ),
                     CheckboxWithLabel(
-                        label="Notifications",
-                        helper_text="Show alerts and reminders",
-                        signal=notify,
-                        checked=True
+                        label="Strings sub",
+                        signal=strings,
                     ),
-                    cls="space-y-2"
+                    cls="space-y-2",
                 ),
                 Div(
                     Badge(
-                        data_text=optional_count + " optional permissions",
-                        variant="secondary"
+                        data_text=optional_count + " optional active",
+                        variant="secondary",
                     ),
-                    cls="mt-4 flex justify-center"
-                )
+                    cls="mt-4 flex justify-center",
+                ),
             )
         ),
-        cls="max-w-md"
+        cls="max-w-md",
     )
 
 
 @with_code
-def interactive_todo_list_example():
-    todo1 = Signal("todo1", _ref_only=True)
-    todo2 = Signal("todo2", _ref_only=True)
-    todo3 = Signal("todo3", _ref_only=True)
-    todo4 = Signal("todo4", _ref_only=True)
-    completed_count = Signal("completed_count", todo1 + todo2 + todo3 + todo4)
-    todo_progress = Signal("todo_progress", completed_count / 4 * 100)
+def take_tracker_example():
+    mic = Signal("cb_take_mic", _ref_only=True)
+    hp = Signal("cb_take_hp", _ref_only=True)
+    gain = Signal("cb_take_gain", _ref_only=True)
+    ref = Signal("cb_take_ref", _ref_only=True)
+    completed_count = Signal("cb_take_done", mic + hp + gain + ref)
+    take_progress = Signal("cb_take_pct", completed_count / 4 * 100)
 
-    def todo_item(label, signal, checked=False):
+    def task_item(label, signal, checked=False):
         return CheckboxWithLabel(
             label=label,
             signal=signal,
             checked=checked,
-            label_cls=signal.if_("line-through text-muted-foreground")
+            label_cls=signal.if_("line-through text-muted-foreground"),
         )
 
     return Card(
         CardHeader(
-            CardTitle("✓ Todo List"),
-            CardDescription("Track your daily tasks")
+            CardTitle("Take Tracker"),
+            CardDescription("Pre-session setup tasks"),
         ),
         CardContent(
             Div(
-                completed_count, todo_progress,
+                completed_count,
+                take_progress,
                 Div(
-                    todo_item("Write documentation", todo1, checked=True),
-                    todo_item("Review pull requests", todo2, checked=True),
-                    todo_item("Update dependencies", todo3),
-                    todo_item("Deploy to production", todo4),
-                    cls="space-y-3"
+                    task_item("Mic placement check", mic, checked=True),
+                    task_item("Headphone mix approved", hp, checked=True),
+                    task_item("Gain staging complete", gain),
+                    task_item("Reference track loaded", ref),
+                    cls="space-y-3",
                 ),
                 Div(
                     P(
                         "Completed: ",
                         Span(data_text=completed_count, cls="font-bold"),
                         " of 4",
-                        cls="text-sm text-muted-foreground"
+                        cls="text-sm text-muted-foreground",
                     ),
-                    Progress(
-                        signal=todo_progress,
-                        cls="w-full h-2 mt-2"
-                    ),
-                    cls="mt-4"
-                )
+                    Progress(signal=take_progress, cls="w-full h-2 mt-2", aria_label="Task completion"),
+                    cls="mt-4",
+                ),
             )
         ),
-        cls="max-w-md"
+        cls="max-w-md",
     )
 
 
 @with_code
-def select_all_pattern_example():
-    files = [
-        {"id": "file1", "name": "invoice-2024-001.pdf", "size": "2.4 MB"},
-        {"id": "file2", "name": "report-q3.xlsx", "size": "1.8 MB"},
-        {"id": "file3", "name": "presentation.pptx", "size": "5.2 MB"},
-        {"id": "file4", "name": "contracts.zip", "size": "12.1 MB"}
+def session_takes_example():
+    takes = [
+        {"id": "cb_take1", "name": "Take 1 — Intro.wav", "dur": "3:42"},
+        {"id": "cb_take2", "name": "Take 2 — Verse.wav", "dur": "4:18"},
+        {"id": "cb_take3", "name": "Take 3 — Chorus.wav", "dur": "2:55"},
+        {"id": "cb_take4", "name": "Take 4 — Bridge.wav", "dur": "1:36"},
     ]
 
-    file_signals = {file["id"]: Signal(file["id"], _ref_only=True) for file in files}
-    deleted_signals = {file["id"]: Signal(file["id"] + "_deleted", False) for file in files}
-    select_all = Signal("select_all", False)
+    take_signals = {t["id"]: Signal(t["id"], _ref_only=True) for t in takes}
+    discarded_signals = {t["id"]: Signal(t["id"] + "_dis", False) for t in takes}
+    select_all = Signal("cb_takes_all", False)
 
-    selected_count = Signal("selected_count",
-        sum([file_signals[file["id"]] & ~deleted_signals[file["id"]] for file in files])
+    selected_count = Signal(
+        "cb_takes_sel",
+        sum([take_signals[t["id"]] & ~discarded_signals[t["id"]] for t in takes]),
     )
 
-    delete_actions = [
-        file_signals[file["id"]].then(deleted_signals[file["id"]].set(True))
-        for file in files
+    discard_actions = [
+        take_signals[t["id"]].then(discarded_signals[t["id"]].set(True)) for t in takes
     ] + [select_all.set(False)]
 
     select_actions = [
-        (~deleted_signals[file["id"]]).then(file_signals[file["id"]].set(select_all))
-        for file in files
+        (~discarded_signals[t["id"]]).then(take_signals[t["id"]].set(select_all))
+        for t in takes
     ]
 
     return Card(
         CardHeader(
-            CardTitle("Bulk Delete"),
-            CardDescription("Select-all pattern with bulk delete functionality")
+            CardTitle("Session Takes"),
+            CardDescription("Review and discard recordings"),
         ),
         CardContent(
             Div(
-                select_all, *deleted_signals.values(), selected_count,
+                select_all,
+                *discarded_signals.values(),
+                selected_count,
                 Div(
                     CheckboxWithLabel(
                         label="Select All",
                         signal=select_all,
                         checkbox_cls="border-2",
-                        data_on_change=select_actions
+                        data_on_change=select_actions,
                     ),
-                    cls="border-b pb-2 mb-3"
+                    cls="border-b pb-2 mb-3",
                 ),
                 Div(
                     *[
                         Div(
                             CheckboxWithLabel(
-                                label=file["name"],
-                                signal=file_signals[file["id"]],
-                                helper_text=file["size"]
+                                label=t["name"],
+                                signal=take_signals[t["id"]],
+                                helper_text=t["dur"],
                             ),
-                            data_show=~deleted_signals[file["id"]]
+                            data_show=~discarded_signals[t["id"]],
                         )
-                        for file in files
+                        for t in takes
                     ],
-                    cls="space-y-2 pl-6"
+                    cls="space-y-2 pl-6",
                 ),
                 Div(
                     Button(
-                        Icon("lucide:trash-2", cls="h-4 w-4 mr-2"),
-                        Span(data_text=(selected_count > 0).if_("Delete " + selected_count + " Selected", "Delete Selected")),
-                        data_on_click=delete_actions,
+                        Icon("lucide:trash-2", cls="h-4 w-4"),
+                        "Discard selected",
+                        data_on_click=discard_actions,
                         variant="destructive",
                         size="sm",
-                        data_attr_disabled=selected_count == 0
+                        data_attr_disabled=selected_count == 0,
                     ),
-                    cls="mt-4 pt-4 border-t"
-                )
+                    cls="mt-4 pt-4 border-t",
+                ),
             )
         ),
-        cls="max-w-md"
+        cls="max-w-md",
     )
 
 
 @with_code
-def filter_form_example():
-    # (signal_name, label, collect_label, checked)
-    categories = [
-        ("cat_electronics", "Electronics", "Electronics", True),
-        ("cat_clothing", "Clothing", "Clothing", False),
-        ("cat_books", "Books", "Books", True),
-        ("cat_home", "Home & Garden", "Home & Garden", False),
+def export_settings_example():
+    formats = [
+        ("cb_exp_wav", "WAV", "WAV", True),
+        ("cb_exp_mp3", "MP3", "MP3", False),
+        ("cb_exp_flac", "FLAC", "FLAC", False),
     ]
 
-    # Dollar signs in collect expressions are interpreted as signal references
-    prices = [
-        ("price_1", "Under $25", "Under 25", False),
-        ("price_2", "$25 - $50", "25-50", True),
-        ("price_3", "$50 - $100", "50-100", True),
-        ("price_4", "Over $100", "Over 100", False),
+    rates = [
+        ("cb_exp_44", "44.1 kHz", "44.1 kHz", True),
+        ("cb_exp_48", "48 kHz", "48 kHz", False),
+        ("cb_exp_96", "96 kHz", "96 kHz", False),
     ]
 
-    shipping = [
-        ("free_shipping", "Free Shipping", "Free Shipping", True),
-        ("express", "Express Available", "Express", False),
+    metadata = [
+        ("cb_exp_art", "Embed artwork", "Artwork", False),
+        ("cb_exp_ts", "Include timestamps", "Timestamps", True),
     ]
 
-    all_filters = categories + prices + shipping
-    filter_signals = {name: Signal(name, _ref_only=True) for name, _, _, _ in all_filters}
-    reset_actions = [filter_signals[name].set(False) for name, _, _, _ in all_filters]
+    all_options = formats + rates + metadata
+    option_signals = {name: Signal(name, _ref_only=True) for name, _, _, _ in all_options}
+    reset_actions = [option_signals[name].set(False) for name, _, _, _ in all_options]
 
-    active_filters = collect([
-        (filter_signals[name], collect_label)
-        for name, _, collect_label, _ in all_filters
-    ], join_with=", ")
-
-    filter_message = Signal("filter_message",
-        active_filters.if_("Filters: " + active_filters, "No filters selected")
+    active_summary = collect(
+        [(option_signals[name], collect_label) for name, _, collect_label, _ in all_options],
+        join_with=", ",
     )
 
-    def filter_group(title, options, mb_class="mb-6"):
+    def option_group(title, options, mb_class="mb-6"):
         return Div(
             H3(title, cls="text-sm font-semibold mb-3"),
             Div(
-                *[CheckboxWithLabel(label=label, signal=filter_signals[name], checked=checked)
-                  for name, label, _, checked in options],
-                cls="space-y-2"
+                *[
+                    CheckboxWithLabel(label=label, signal=option_signals[name], checked=checked)
+                    for name, label, _, checked in options
+                ],
+                cls="space-y-2",
             ),
-            cls=mb_class
+            cls=mb_class,
         )
 
     return Card(
         CardHeader(
-            CardTitle("Filter Options"),
-            CardDescription("Customize your search results")
+            CardTitle("Export Settings"),
+            CardDescription("Configure output format and options"),
         ),
         CardContent(
             Form(
-                filter_message,
-                filter_group("Categories", categories),
-                filter_group("Price Range", prices),
-                filter_group("Shipping", shipping, mb_class=""),
+                option_group("Format", formats),
+                option_group("Sample Rate", rates),
+                option_group("Metadata", metadata, mb_class=""),
                 Div(
-                    Button(
-                        "Apply Filters",
-                        type="submit",
-                        cls="w-full",
-                        data_on_click=(js("alert($filter_message)"), dict(prevent=True))
-                    ),
-                    Button(
-                        "Reset",
-                        variant="outline",
-                        cls="w-full mt-2",
-                        data_on_click=(reset_actions, dict(prevent=True))
-                    ),
-                    cls="mt-6"
-                )
-            )
-        ),
-        cls="max-w-sm"
-    )
-
-
-@with_code
-def settings_with_validation_example():
-    email_notif = Signal("email_notif", _ref_only=True)
-    push_notif = Signal("push_notif", _ref_only=True)
-    sms_notif = Signal("sms_notif", _ref_only=True)
-    marketing = Signal("marketing", _ref_only=True)
-
-    active_notifs_text = collect([
-        (email_notif, "Email"),
-        (push_notif, "Push"),
-        (sms_notif, "SMS")
-    ], join_with=" | ")
-
-    # (label, helper_text, signal, checked)
-    notifications = [
-        ("Email Notifications", "Receive important updates via email", email_notif, True),
-        ("Push Notifications", "Get instant updates on your device", push_notif, False),
-        ("SMS Alerts", "Critical alerts sent to your phone", sms_notif, False),
-    ]
-
-    return Card(
-        CardHeader(
-            CardTitle("Notification Settings"),
-            CardDescription("Choose how you want to be notified")
-        ),
-        CardContent(
-            Form(
-                Div(
-                    *[CheckboxWithLabel(
-                        label=label,
-                        helper_text=helper,
-                        signal=signal,
-                        checked=checked
-                    ) for label, helper, signal, checked in notifications],
-                    cls="space-y-4"
-                ),
-                Div(
-                    H3("Optional", cls="text-sm font-semibold mb-3"),
-                    CheckboxWithLabel(
-                        label="Marketing Communications",
-                        helper_text="Product updates and special offers",
-                        signal=marketing
-                    ),
-                    cls="mt-6 pt-6 border-t"
+                    Button("Export", type="submit", cls="w-full", data_on_click=evt.preventDefault()),
+                    Button("Reset", variant="outline", cls="w-full mt-2", data_on_click=(reset_actions, dict(prevent=True))),
+                    cls="mt-6",
                 ),
                 Div(
                     P(
-                        Icon("lucide:alert-circle", cls="h-4 w-4 mr-1 flex-shrink-0"),
-                        "At least one notification method must be enabled",
-                        data_show=~any_(email_notif, push_notif, sms_notif),
-                        cls="text-sm text-destructive flex items-start"
+                        "Selected: ",
+                        Span(data_text=active_summary.if_(active_summary, "None"), cls="font-medium"),
+                        cls="text-sm text-muted-foreground",
                     ),
-                    cls="mt-4 min-h-[1.5rem] w-full max-w-full overflow-hidden"
+                    cls="mt-4 pt-4 border-t",
                 ),
-                Button(
-                    "Save Settings",
-                    type="submit",
-                    data_attr_disabled=~any_(email_notif, push_notif, sms_notif),
-                    data_on_click=evt.preventDefault(),
-                    cls="w-full mt-4"
-                ),
-                Div(
-                    Div(
-                        Badge(
-                            data_text="Active: " + active_notifs_text,
-                            data_show=any_(email_notif, push_notif, sms_notif),
-                            variant="secondary"
-                        ),
-                        cls="flex justify-center"
-                    ),
-                    Div(
-                        Badge(
-                            "Marketing enabled",
-                            data_show=marketing,
-                            variant="outline"
-                        ),
-                        cls="flex justify-center mt-2"
-                    ),
-                    cls="mt-4"
-                )
             )
         ),
-        cls="w-80"
+        cls="max-w-sm",
     )
-
 
 
 API_REFERENCE = build_api_reference(
     main_props=[
-        Prop("checked", "bool | None", "Initial checked state of the checkbox", "None"),
-        Prop("signal", "str | None", "Datastar signal name for state management and reactive updates", "auto-generated"),
-        Prop("label", "str", "Label text for the checkbox (CheckboxWithLabel only)"),
-        Prop("helper_text", "str | None", "Helper text displayed below the label", "None"),
-        Prop("disabled", "bool", "Whether checkbox is disabled", "False"),
-        Prop("required", "bool", "Whether checkbox is required for form validation", "False"),
+        Prop("checked", "bool | None", "Initial checked state", "None"),
+        Prop("signal", "str | Signal", "Signal name for reactive state management", "auto-generated"),
+        Prop("indeterminate", "bool", "Show indeterminate state (minus icon). Use for parent checkboxes when some children are selected", "False"),
+        Prop("disabled", "bool", "Disables the checkbox and blocks pointer events", "False"),
+        Prop("required", "bool", "Marks as required for form validation. CheckboxWithLabel appends a red asterisk", "False"),
         Prop("name", "str | None", "Name attribute for form submission", "None"),
-        Prop("cls", "str", "Additional CSS classes for styling", "''"),
-    ]
+        Prop("value", "str | None", "Value submitted with forms when checked", "'on'"),
+        Prop("label", "str", "Label text (CheckboxWithLabel only)"),
+        Prop("helper_text", "str | None", "Muted text below the label (CheckboxWithLabel only)", "None"),
+        Prop("error_text", "str | None", "Destructive text below the control. Sets aria-invalid on the checkbox (CheckboxWithLabel only)", "None"),
+        Prop("cls", "str", "Additional CSS classes", "''"),
+        Prop("indicator_cls", "str", "Additional CSS classes for the check/minus icon overlay", "''"),
+        Prop("label_cls", "str", "Additional CSS classes for the label element (CheckboxWithLabel only)", "''"),
+        Prop("checkbox_cls", "str", "Additional CSS classes for the inner checkbox (CheckboxWithLabel only)", "''"),
+    ],
+    components=[
+        Component("Checkbox", "Standalone checkbox control. Renders a native input with an icon overlay. Compose with Label for manual layout"),
+        Component("CheckboxWithLabel", "Convenience wrapper that composes Checkbox + Label + helper text + error text with standard spacing"),
+    ],
 )
 
 
 EXAMPLES_DATA = [
-    {"title": "Quick Setup", "description": "Basic checkbox usage with dynamic preference summary", "fn": hero_checkbox_example},
-    {"title": "Terms & Conditions", "description": "Registration form with required checkboxes", "fn": terms_conditions_example},
-    {"title": "Feature Permissions", "description": "Grouped checkboxes with disabled states", "fn": feature_permissions_example},
-    {"title": "Interactive Todo List", "description": "Task tracking with progress visualization", "fn": interactive_todo_list_example},
-    {"title": "Bulk Delete", "description": "Select-all pattern with bulk delete - selected items are removed from view", "fn": select_all_pattern_example},
-    {"title": "Filter Form", "description": "Multi-category filtering interface", "fn": filter_form_example},
-    {"title": "Settings with Validation", "description": "Form validation based on checkbox selections", "fn": settings_with_validation_example},
+    {"fn": hero_checkbox_example, "title": "Checkbox", "description": "Bare Checkbox with manual label composition, and CheckboxWithLabel convenience wrapper"},
+    {"fn": states_example, "title": "States", "description": "All visual states — unchecked, checked, indeterminate, error text, and custom indicator styling"},
+    {"fn": session_prep_example, "title": "Form Validation", "description": "Required checkboxes that gate form submission with all_() signal logic"},
+    {"fn": bus_routing_example, "title": "Disabled States", "description": "Required buses locked as disabled, optional buses interactive with active count"},
+    {"fn": take_tracker_example, "title": "Progress Tracking", "description": "Reactive strikethrough styling and progress bar driven by checkbox signals"},
+    {"fn": session_takes_example, "title": "Select All", "description": "Bulk selection with select-all toggle and destructive batch action"},
+    {"fn": export_settings_example, "title": "Grouped Filters", "description": "Grouped checkboxes with reset and active summary via collect()"},
 ]
 
 

@@ -14,6 +14,7 @@ def build_sidebar_nav(sections: list[dict[str, Any]] | None = None) -> FT:
         _SIDEBAR_NAV_CACHE[cache_key] = Nav(
             *[_sidebar_section(section) for section in sections],
             cls="grid items-start px-2 text-sm font-medium lg:px-4",
+            aria_label="Components",
         )
     
     return _SIDEBAR_NAV_CACHE[cache_key]

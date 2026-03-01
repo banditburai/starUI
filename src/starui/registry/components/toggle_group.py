@@ -43,7 +43,7 @@ def ToggleGroup(
         data_type=type,
         data_orientation=orientation,
         role="radiogroup" if type == "single" else "group",
-        aria_orientation=orientation,
+        aria_orientation=orientation if type == "single" else None,
         cls=cn(
             "group/toggle-group flex w-fit items-center rounded-md",
             "data-[variant=outline]:shadow-xs" if variant == "outline" else "",
@@ -78,7 +78,7 @@ def ToggleGroupItem(
             role="radio" if type == "single" else "checkbox",
             id=item_id,
             disabled=disabled,
-            aria_label=aria_label,
+            aria_label=aria_label or value,
             data_attr_aria_checked=is_selected.if_("true", "false"),
             data_attr_data_state=is_selected.if_("on", "off"),
             data_slot="toggle-group-item",
@@ -87,7 +87,7 @@ def ToggleGroupItem(
             data_value=value,
             cls=cn(
                 toggle_variants(variant=variant, size=size),
-                "shrink-0 rounded-none shadow-none",
+                "w-auto min-w-0 shrink-0 px-3 rounded-none shadow-none",
                 "first:rounded-l-md last:rounded-r-md",
                 "focus:z-10 focus-visible:z-10",
                 "data-[variant=outline]:border-l-0 data-[variant=outline]:first:border-l"

@@ -2,7 +2,7 @@
 Command component documentation - Command palette for searching and executing actions.
 """
 
-from starhtml import Div, P, Span, Icon, Hr, Kbd, Input, Signal, js, any_, clipboard
+from starhtml import Div, P, Span, Icon, Kbd, js, clipboard
 from starui.registry.components.command import (
     Command, CommandInput, CommandList, CommandEmpty,
     CommandGroup, CommandItem, CommandSeparator, CommandShortcut,
@@ -10,8 +10,7 @@ from starui.registry.components.command import (
 )
 from starui.registry.components.button import Button
 from starui.registry.components.badge import Badge
-from utils import auto_generate_page, with_code, Prop, Component, build_api_reference
-from widgets.component_preview import ComponentPreview
+from utils import auto_generate_page, with_code, Component, build_api_reference
 
 # Component metadata for auto-discovery
 TITLE = "Command"
@@ -21,501 +20,284 @@ ORDER = 30
 STATUS = "stable"
 
 
-
-
-
-tasks = [
-    {"id": "task1", "name": "Review pull requests", "status": "progress", "priority": "normal"},
-    {"id": "task2", "name": "Fix critical bug", "status": "pending", "priority": "urgent"},
-    {"id": "task3", "name": "Update documentation", "status": "pending", "priority": "normal"},
-    {"id": "task4", "name": "Write unit tests", "status": "completed", "priority": "normal"},
-    {"id": "task5", "name": "Deploy to staging", "status": "pending", "priority": "urgent"},
-]
-
-
-def generate_task_items(tasks_list, status_filter, signals_dict):
-    items = []
-    all_task_ids = [t["id"] for t in tasks_list] + [f"task{i}" for i in range(len(tasks_list) + 1, len(tasks_list) + 6)]
-
-    def create_task_icon(task_id, icon_name, icon_class=None):
-        if icon_class:
-            return Icon(icon_name, cls=f"h-4 w-4 mr-2 {icon_class}")
-
-        priority_sig = signals_dict[f"{task_id}_priority"]
-        return Icon(
-            icon_name,
-            cls="h-4 w-4 mr-2",
-            data_class_text_yellow_500=priority_sig.eq("urgent"),
-            data_class_text_gray_400=priority_sig.eq("normal")
-        )
-
-    def create_task_badge(task, task_id, status_filter):
-        if task:
-            if status_filter == "pending":
-                badge_text = "Urgent" if task["priority"] == "urgent" else "Pending"
-                badge_variant = "destructive" if task["priority"] == "urgent" else "secondary"
-            elif status_filter == "progress":
-                badge_text = "Urgent" if task["priority"] == "urgent" else "In Progress"
-                badge_variant = "destructive" if task["priority"] == "urgent" else "default"
-            else:
-                badge_text = "Done"
-                badge_variant = "outline"
-            return Badge(badge_text, variant=badge_variant, cls="ml-auto")
-        else:
-            priority_sig = signals_dict[f"{task_id}_priority"]
-            if status_filter == "pending":
-                urgent_badge = Badge("Urgent", data_show=priority_sig.eq("urgent"),
-                                   variant="destructive", cls="ml-auto")
-                normal_badge = Badge("Pending", data_show=priority_sig.eq("normal"),
-                                   variant="secondary", cls="ml-auto")
-            elif status_filter == "progress":
-                urgent_badge = Badge("Urgent", data_show=priority_sig.eq("urgent"),
-                                   variant="destructive", cls="ml-auto")
-                normal_badge = Badge("In Progress", data_show=priority_sig.eq("normal"),
-                                   variant="default", cls="ml-auto")
-            else:
-                return Badge("Done", variant="outline", cls="ml-auto opacity-60")
-
-            return Div(urgent_badge, normal_badge, cls="ml-auto")
-
-    for task_id in all_task_ids:
-        existing_task = next((t for t in tasks_list if t["id"] == task_id), None)
-        visible_sig = signals_dict[f"{task_id}_visible"]
-        status_sig = signals_dict[f"{task_id}_status"]
-        name_sig = signals_dict[f"{task_id}_name"]
-        show_condition = visible_sig & status_sig.eq(status_filter)
-
-        if status_filter == "pending":
-            if existing_task:
-                icon_class = "text-yellow-500" if existing_task["priority"] == "urgent" else "text-gray-400"
-                icon_name = "lucide:alert-circle" if existing_task["priority"] == "urgent" else "lucide:circle-dot"
-                task_icon = create_task_icon(task_id, icon_name, icon_class)
-                task_text = existing_task["name"]
-                task_badge = create_task_badge(existing_task, task_id, status_filter)
-            else:
-                task_icon = create_task_icon(task_id, "lucide:circle-dot")
-                task_text = Span(data_text=name_sig)
-                task_badge = create_task_badge(None, task_id, status_filter)
-
-            items.append(
-                CommandItem(
-                    task_icon,
-                    task_text,
-                    task_badge,
-                    value=f"{task_id}_pending",
-                    data_on_click=status_sig.set("progress"),
-                    show=show_condition
-                )
-            )
-
-        elif status_filter == "progress":
-            if existing_task:
-                icon_name = "lucide:alert-circle" if existing_task["priority"] == "urgent" else "lucide:circle"
-                icon_color = "text-yellow-500" if existing_task["priority"] == "urgent" else "text-blue-500"
-                task_icon = create_task_icon(task_id, icon_name, icon_color)
-                task_text = existing_task["name"]
-                task_badge = create_task_badge(existing_task, task_id, status_filter)
-            else:
-                priority_sig = signals_dict[f"{task_id}_priority"]
-                task_icon = Icon(
-                    "lucide:circle",
-                    cls="h-4 w-4 mr-2",
-                    data_class_text_yellow_500=priority_sig.eq("urgent"),
-                    data_class_text_blue_500=priority_sig.eq("normal")
-                )
-                task_text = Span(data_text=name_sig)
-                task_badge = create_task_badge(None, task_id, status_filter)
-
-            items.append(
-                CommandItem(
-                    task_icon,
-                    task_text,
-                    task_badge,
-                    value=f"{task_id}_progress",
-                    data_on_click=status_sig.set("completed"),
-                    show=show_condition
-                )
-            )
-
-        else:
-            task_icon = Icon("lucide:check-circle", cls="h-4 w-4 mr-2 text-green-500")
-            task_badge = Badge("Done", variant="outline", cls="ml-auto opacity-60")
-
-            if existing_task:
-                task_text = Span(existing_task["name"], cls="line-through opacity-60")
-            else:
-                task_text = Span(data_text=name_sig, cls="line-through opacity-60")
-
-            items.append(
-                CommandItem(
-                    task_icon,
-                    task_text,
-                    task_badge,
-                    value=f"{task_id}_completed",
-                    data_on_click=visible_sig.set(False),
-                    show=show_condition
-                )
-            )
-
-    empty_icons = {"pending": "lucide:inbox", "progress": "lucide:clock", "completed": "lucide:check"}
-    empty_messages = {"pending": "No pending tasks", "progress": "No tasks in progress", "completed": "No completed tasks yet"}
-
-    matching = [signals_dict[f"{tid}_visible"] & signals_dict[f"{tid}_status"].eq(status_filter) for tid in all_task_ids]
-    empty_show = ~any_(*matching)
-
-    items.append(
-        CommandItem(
-            Icon(empty_icons[status_filter], cls="h-4 w-4 mr-2 opacity-50"),
-            Span(empty_messages[status_filter], cls="text-muted-foreground italic"),
-            value=f"empty_{status_filter}",
-            disabled=True,
-            show=empty_show
-        )
-    )
-
-    return items
-
-
-all_task_ids = [t["id"] for t in tasks] + [f"task{i}" for i in range(len(tasks) + 1, len(tasks) + 6)]
-
-task_signals_dict = {}
-for task in tasks:
-    task_signals_dict[f"{task['id']}_status"] = Signal(f"{task['id']}_status", task["status"])
-    task_signals_dict[f"{task['id']}_visible"] = Signal(f"{task['id']}_visible", True)
-    task_signals_dict[f"{task['id']}_name"] = Signal(f"{task['id']}_name", task["name"])
-    task_signals_dict[f"{task['id']}_priority"] = Signal(f"{task['id']}_priority", task["priority"])
-
-for i in range(len(tasks) + 1, len(tasks) + 6):
-    task_id = f"task{i}"
-    task_signals_dict[f"{task_id}_status"] = Signal(f"{task_id}_status", "pending")
-    task_signals_dict[f"{task_id}_visible"] = Signal(f"{task_id}_visible", False)
-    task_signals_dict[f"{task_id}_name"] = Signal(f"{task_id}_name", "New task")
-    task_signals_dict[f"{task_id}_priority"] = Signal(f"{task_id}_priority", "normal")
-
-task_signals_dict["task_cmd_next_id"] = Signal("task_cmd_next_id", len(tasks) + 1)
-
-task_signals = list(task_signals_dict.values())
-
-
-def TaskCommandInput(placeholder: str = "Add a new task...", **kwargs):
-    def _(sig=None, **ctx):
-        task_input = Signal("task_cmd_new", "", _ref_only=True)
-        return Div(
-            Icon("lucide:plus", cls="h-4 w-4 opacity-50"),
-            Input(
-                task_input,
-                data_bind=task_input,
-                data_on_keydown="""
-                    if(evt.key==='Enter' && $task_cmd_new.trim()) {
-                        const text = $task_cmd_new.trim();
-                        const isUrgent = text.startsWith('!');
-                        const name = text.replace(/^!/, '').trim();
-                        if(name) {
-                            const nextId = $task_cmd_next_id;
-
-                            if(nextId === 6) {
-                                $task6_name = name;
-                                $task6_status = 'pending';
-                                $task6_priority = isUrgent ? 'urgent' : 'normal';
-                                $task6_visible = true;
-                            } else if(nextId === 7) {
-                                $task7_name = name;
-                                $task7_status = 'pending';
-                                $task7_priority = isUrgent ? 'urgent' : 'normal';
-                                $task7_visible = true;
-                            } else if(nextId === 8) {
-                                $task8_name = name;
-                                $task8_status = 'pending';
-                                $task8_priority = isUrgent ? 'urgent' : 'normal';
-                                $task8_visible = true;
-                            } else if(nextId === 9) {
-                                $task9_name = name;
-                                $task9_status = 'pending';
-                                $task9_priority = isUrgent ? 'urgent' : 'normal';
-                                $task9_visible = true;
-                            } else if(nextId === 10) {
-                                $task10_name = name;
-                                $task10_status = 'pending';
-                                $task10_priority = isUrgent ? 'urgent' : 'normal';
-                                $task10_visible = true;
-                            }
-
-                            if(nextId < 10) {
-                                $task_cmd_next_id = nextId + 1;
-                            }
-                            $task_cmd_new = '';
-                        }
-                    }
-                """,
-                placeholder=placeholder,
-                data_slot="command-input",
-                cls="flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
-                autocomplete="off",
-                autocorrect="off",
-                spellcheck="false",
-                type="text",
-                **kwargs
-            ),
-            data_slot="command-input-wrapper",
-            cls="flex h-9 items-center gap-2 border-b border-border px-3"
-        )
-    return _
-
-
-
-
-
 @with_code
 def hero_command_example():
     return Div(
         Command(
-            CommandInput(
-                placeholder="Type a command or search...",
-            ),
+            CommandInput(placeholder="Search files and commands..."),
             CommandList(
                 CommandEmpty("No results found."),
                 CommandGroup(
-                    "Suggestions",
+                    "Files",
                     CommandItem(
-                        Icon("lucide:rocket", cls="h-4 w-4 mr-2"),
-                        "Launch",
-                        CommandShortcut("⌘L"),
-                        value="launch",
-                        onclick="alert('Launching...')",
+                        Icon("lucide:file-text"),
+                        "settings.py",
+                        CommandShortcut("⌘P"),
+                        value="settings.py",
+                        keywords="config configuration env",
                     ),
                     CommandItem(
-                        Icon("lucide:search", cls="h-4 w-4 mr-2"),
-                        "Search",
-                        CommandShortcut("⌘K"),
-                        value="search",
-                        onclick="alert('Opening search...')",
+                        Icon("lucide:file-code"),
+                        "deploy.yml",
+                        Badge("Modified", variant="secondary", cls="ml-auto"),
+                        value="deploy.yml",
+                        keywords="ci cd pipeline github actions",
                     ),
                     CommandItem(
-                        Icon("lucide:terminal", cls="h-4 w-4 mr-2"),
-                        "Terminal",
-                        CommandShortcut("⌘T"),
-                        value="terminal",
-                        onclick="alert('Opening terminal...')",
+                        Icon("lucide:file-text"),
+                        "README.md",
+                        value="README.md",
+                        keywords="docs documentation",
                     ),
                 ),
                 CommandSeparator(),
                 CommandGroup(
-                    "Recent",
+                    "Commands",
                     CommandItem(
-                        Icon("lucide:file", cls="h-4 w-4 mr-2"),
-                        "Project Alpha",
-                        Badge("Active", variant="default", cls="ml-auto"),
-                        value="project-alpha",
-                        onclick="alert('Opening Project Alpha')",
+                        Icon("lucide:git-branch"),
+                        "Switch Branch",
+                        CommandShortcut("⌘B"),
+                        value="switch-branch",
+                        keywords="git checkout",
                     ),
                     CommandItem(
-                        Icon("lucide:file", cls="h-4 w-4 mr-2"),
-                        "Project Beta",
-                        value="project-beta",
-                        onclick="alert('Opening Project Beta')",
+                        Icon("lucide:terminal"),
+                        "Open Terminal",
+                        CommandShortcut("⌘`"),
+                        value="open-terminal",
+                        keywords="shell console cli",
+                    ),
+                    CommandItem(
+                        Icon("lucide:palette"),
+                        "Change Theme",
+                        value="change-theme",
+                        keywords="color scheme appearance dark light",
                     ),
                 ),
             ),
             signal="hero_cmd",
-            size="md"
         ),
-        cls="max-w-2xl mx-auto"
+        cls="max-w-2xl mx-auto",
     )
 
 
 @with_code
-def interactive_task_manager_example():
+def search_and_keywords_example():
     return Div(
-        *task_signals,
         Command(
-            TaskCommandInput(
-                placeholder="Add a new task (use ! for urgent)..."
-            ),
+            CommandInput(placeholder="Search settings..."),
             CommandList(
-                CommandEmpty("No tasks yet. Add your first task above!"),
-                CommandGroup(
-                    "Pending Tasks",
-                    *generate_task_items(tasks, "pending", task_signals_dict)
+                CommandEmpty(
+                    Div(
+                        Icon("lucide:search-x", cls="size-10 text-muted-foreground/50 mx-auto mb-3"),
+                        P("No matching settings.", cls="font-medium"),
+                        P("Try a different search term.", cls="text-muted-foreground"),
+                        cls="text-center text-sm",
+                    )
                 ),
                 CommandGroup(
-                    "In Progress",
-                    *generate_task_items(tasks, "progress", task_signals_dict)
+                    "General",
+                    CommandItem(
+                        Icon("lucide:globe"),
+                        "Language & Region",
+                        Span("English (US)", cls="ml-auto text-xs text-muted-foreground"),
+                        value="language-region",
+                        keywords="locale timezone i18n translation",
+                    ),
+                    CommandItem(
+                        Icon("lucide:bell"),
+                        "Notifications",
+                        value="notifications",
+                        keywords="alerts push email digest",
+                    ),
+                    CommandItem(
+                        Icon("lucide:key"),
+                        "Two-Factor Authentication",
+                        Badge("Recommended", variant="secondary", cls="ml-auto"),
+                        value="two-factor",
+                        keywords="2fa security mfa totp",
+                    ),
                 ),
                 CommandSeparator(),
                 CommandGroup(
-                    "Completed",
-                    *generate_task_items(tasks, "completed", task_signals_dict)
+                    "Workspace",
+                    CommandItem(
+                        Icon("lucide:users"),
+                        "Team Members",
+                        value="team-members",
+                        keywords="invite collaborators people roles",
+                    ),
+                    CommandItem(
+                        Icon("lucide:webhook"),
+                        "API Keys",
+                        value="api-keys",
+                        keywords="tokens secrets credentials",
+                    ),
+                    CommandItem(
+                        Icon("lucide:database"),
+                        "Data Export",
+                        value="data-export",
+                        keywords="download backup csv json",
+                        disabled=True,
+                    ),
                 ),
-                cls="max-h-none overflow-visible"
             ),
-            signal="tasks",
-            size="md"
-        )
+            signal="settings_cmd",
+        ),
+        cls="max-w-2xl mx-auto",
     )
 
 
 @with_code
-def command_palette_with_actions_example():
+def command_dialog_example():
     return Div(
         CommandDialog(
             Button(
-                Icon("lucide:terminal", cls="h-4 w-4 mr-2"),
-                "Open command palette",
+                Icon("lucide:search"),
+                Span("Search...", cls="text-muted-foreground font-normal"),
                 Kbd("⌘K", cls="ml-auto text-xs"),
                 variant="outline",
-                cls="w-64 justify-start text-sm text-muted-foreground"
+                cls="w-64 justify-start text-sm",
             ),
             [
-                CommandInput(placeholder="Type a command or search..."),
+                CommandInput(placeholder="What do you need?"),
                 CommandList(
-                    CommandEmpty("No commands found."),
+                    CommandEmpty("Nothing found."),
                     CommandGroup(
-                        "Navigation",
+                        "Quick Actions",
                         CommandItem(
-                            Icon("lucide:home", cls="h-4 w-4 mr-2"),
-                            "Go to Home",
-                            value="home",
-                            onclick="window.location.href='/'",
-                            ),
+                            Icon("lucide:plus"),
+                            "New Document",
+                            CommandShortcut("⌘N"),
+                            value="new-doc",
+                            keywords="create file page",
+                        ),
                         CommandItem(
-                            Icon("lucide:book-open", cls="h-4 w-4 mr-2"),
-                            "Documentation",
-                            Icon("lucide:external-link", cls="h-3 w-3 ml-auto opacity-50"),
-                            value="docs",
-                            onclick="window.open('https://docs.example.com', '_blank')",
-                            ),
+                            Icon("lucide:upload"),
+                            "Import File",
+                            value="import",
+                            keywords="upload add",
+                        ),
                         CommandItem(
-                            Icon("lucide:github", cls="h-4 w-4 mr-2"),
-                            "GitHub Repository",
-                            Icon("lucide:external-link", cls="h-3 w-3 ml-auto opacity-50"),
-                            value="github",
-                            onclick="window.open('https://github.com', '_blank')",
-                            ),
-                    ),
-                    CommandSeparator(),
-                    CommandGroup(
-                        "Utilities",
-                        CommandItem(
-                            Icon("lucide:copy", cls="h-4 w-4 mr-2"),
-                            "Copy Email",
-                            CommandShortcut("⌘C"),
-                            value="copy-email",
-                            data_on_click=clipboard("user@example.com"),
-                            ),
-                        CommandItem(
-                            Icon("lucide:link", cls="h-4 w-4 mr-2"),
-                            "Copy Share Link",
+                            Icon("lucide:link"),
+                            "Copy Page Link",
                             CommandShortcut("⌘L"),
                             value="copy-link",
                             data_on_click=clipboard(js("window.location.href")),
-                            ),
-                        CommandItem(
-                            Icon("lucide:download", cls="h-4 w-4 mr-2"),
-                            "Export Data",
-                            Badge("CSV", variant="secondary", cls="ml-auto"),
-                            value="export",
-                            onclick="alert('Exporting data as CSV...')",
-                            ),
+                        ),
                     ),
                     CommandSeparator(),
                     CommandGroup(
-                        "System",
+                        "Navigate",
                         CommandItem(
-                            Icon("lucide:moon", cls="h-4 w-4 mr-2"),
-                            "Toggle Dark Mode",
-                            CommandShortcut("⌘D"),
-                            value="dark-mode",
-                            onclick="document.documentElement.classList.toggle('dark')",
-                            ),
+                            Icon("lucide:layout-dashboard"),
+                            "Dashboard",
+                            value="dashboard",
+                            onclick="window.location.href='/'",
+                        ),
                         CommandItem(
-                            Icon("lucide:log-out", cls="h-4 w-4 mr-2 text-red-500"),
-                            Span("Sign Out", cls="text-red-500"),
-                            value="signout",
-                            onclick="if(confirm('Sign out?')) window.location.href='/logout'",
-                            ),
+                            Icon("lucide:folder"),
+                            "Projects",
+                            value="projects",
+                            keywords="workspace repos",
+                        ),
+                        CommandItem(
+                            Icon("lucide:bar-chart-3"),
+                            "Analytics",
+                            value="analytics",
+                            keywords="stats metrics usage",
+                        ),
                     ),
-                    signal="action_cmd",
-                    cls="max-h-none overflow-visible"
-                )
+                ),
             ],
-            signal="action_cmd"
+            signal="dialog_cmd",
+            shortcut="k",
         ),
-        cls="flex justify-center"
+        cls="flex justify-center",
     )
 
 
 @with_code
-def compact_context_menu_example():
+def file_context_menu_example():
     return Div(
         Command(
             CommandList(
                 CommandGroup(
-                    "Item Actions",
                     CommandItem(
-                        Icon("lucide:edit", cls="h-4 w-4 mr-2"),
-                        "Edit",
-                        CommandShortcut("⌘E"),
-                        value="edit",
-                        onclick="alert('Edit mode activated')",
+                        Icon("lucide:pencil"),
+                        "Rename",
+                        CommandShortcut("F2"),
+                        value="rename",
                     ),
                     CommandItem(
-                        Icon("lucide:copy", cls="h-4 w-4 mr-2"),
+                        Icon("lucide:folder-input"),
+                        "Move to...",
+                        value="move",
+                    ),
+                    CommandItem(
+                        Icon("lucide:copy"),
                         "Duplicate",
                         CommandShortcut("⌘D"),
                         value="duplicate",
-                        onclick="alert('Item duplicated')",
-                    ),
-                    CommandItem(
-                        Icon("lucide:archive", cls="h-4 w-4 mr-2"),
-                        "Archive",
-                        value="archive",
-                        onclick="alert('Item archived')",
                     ),
                 ),
                 CommandSeparator(),
                 CommandGroup(
-                    "Share",
                     CommandItem(
-                        Icon("lucide:link", cls="h-4 w-4 mr-2"),
-                        "Copy Link",
-                        value="copy-link",
-                        data_on_click=clipboard("https://example.com/item/123"),
+                        Icon("lucide:share-2"),
+                        "Share",
+                        value="share",
                     ),
                     CommandItem(
-                        Icon("lucide:mail", cls="h-4 w-4 mr-2"),
-                        "Email",
-                        value="email",
-                        onclick="window.location.href='mailto:?subject=Check this out'",
+                        Icon("lucide:star"),
+                        "Add to Favorites",
+                        value="favorite",
                     ),
                     CommandItem(
-                        Icon("lucide:message-circle", cls="h-4 w-4 mr-2"),
-                        "Send to Slack",
-                        Icon("lucide:external-link", cls="h-3 w-3 ml-auto opacity-50"),
-                        value="slack",
-                        onclick="alert('Opening Slack...')",
+                        Icon("lucide:info"),
+                        "Get Info",
+                        CommandShortcut("⌘I"),
+                        value="info",
                     ),
                 ),
                 CommandSeparator(),
-                CommandItem(
-                    Icon("lucide:trash", cls="h-4 w-4 mr-2 text-red-500"),
-                    Span("Delete", cls="text-red-500"),
-                    CommandShortcut("Del"),
-                    value="delete",
-                    onclick="if(confirm('Delete this item?')) alert('Item deleted')",
+                CommandGroup(
+                    CommandItem(
+                        Icon("lucide:trash", cls="text-destructive"),
+                        Span("Move to Trash", cls="text-destructive"),
+                        CommandShortcut("⌘⌫"),
+                        value="delete",
+                    ),
                 ),
             ),
-            signal="context_cmd",
-            size="sm"
+            signal="file_ctx",
+            size="sm",
         ),
-        cls="max-w-xs"
+        cls="max-w-xs",
     )
 
 
 EXAMPLES_DATA = [
-    {"title": "Basic Command Menu", "description": "Simple command palette with search, keyboard shortcuts, and grouped items", "fn": hero_command_example},
-    {"title": "Interactive Task Manager", "description": "Command component as a task manager with state transitions. Click tasks to move them: Pending → In Progress → Completed. Add new tasks with Enter (use ! prefix for urgent).", "fn": interactive_task_manager_example},
-    {"title": "Command Palette with Actions", "description": "Interactive command dialog with real actions: navigation, clipboard operations, and system controls", "fn": command_palette_with_actions_example},
-    {"title": "Compact Context Menu", "description": "Small command menu for context-specific actions, perfect for dropdowns and right-click menus", "fn": compact_context_menu_example},
+    {
+        "title": "Basic Command Menu",
+        "description": "A searchable command palette with grouped items and keyboard shortcuts. Try typing 'git' or 'docs' — items match on hidden keywords, not just their visible label.",
+        "fn": hero_command_example,
+    },
+    {
+        "title": "Search with Keywords and Disabled Items",
+        "description": "Items have keyword aliases for search discovery — type '2fa' to find Two-Factor Authentication, or 'csv' to find Data Export. The Data Export item is disabled to indicate an unavailable feature. Custom empty state content replaces the default string.",
+        "fn": search_and_keywords_example,
+    },
+    {
+        "title": "Command Dialog",
+        "description": "A modal command palette triggered by a button or keyboard shortcut (⌘K). Includes clipboard integration and navigation actions.",
+        "fn": command_dialog_example,
+    },
+    {
+        "title": "File Context Menu",
+        "description": "A compact command menu without a search input, used as a file context menu. The size='sm' variant and no CommandInput keep it tight.",
+        "fn": file_context_menu_example,
+    },
 ]
 
 API_REFERENCE = build_api_reference(

@@ -51,7 +51,7 @@ def ComponentPreview(
     else:
         preview_component = Div(
             preview_content,
-            cls=cn("flex min-h-[350px] w-full items-center justify-center p-10", preview_class),
+            cls=cn("flex min-h-[200px] w-full items-center justify-center p-10", preview_class),
         )
 
     copied_signal_name = f"copied_{preview_id}"
@@ -77,7 +77,7 @@ def ComponentPreview(
                             language="python",
                             id=preview_id,
                             cls="max-h-[650px] overflow-auto",
-                            style="scrollbar-width: thin; scrollbar-color: transparent transparent;"
+                            style="scrollbar-width: thin;"
                         ),
                         CopyButton(preview_id, copied, variant="group-hover") if copy_button else None,
                         cls="relative group overflow-x-auto"

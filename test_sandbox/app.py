@@ -103,7 +103,7 @@ app, rt = star_app(
     hdrs=(
         theme_script(use_data_theme=True),
         CodeBlockStyles(
-            custom_css=".code-container pre { border-radius: 8px; }"
+            custom_css="[data-slot='code-block'] pre { border-radius: 8px; }"
         ),
         styles,
         iconify_script(),
@@ -3067,7 +3067,7 @@ def test_toast():
                 data_on_click=f"""
                     {toast('Loading...', 'Please wait...', duration=0)}
                     setTimeout(() => {{
-                        $toasts = $toasts.filter(t => t.title !== 'Loading...');
+                        $toasts = $toasts.map(t => t && t.title === 'Loading...' ? null : t);
                         {toast.success('Success!', 'Promise resolved successfully')}
                     }}, 2000);
                 """,

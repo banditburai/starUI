@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import asyncio
 import sys
 from pathlib import Path
 from contextlib import asynccontextmanager
@@ -161,6 +162,7 @@ def components_index():
 
 @rt("/components/{component_name}")
 def component_page(component_name: str):
+    component_name = component_name.replace("-", "_")
     registry = get_registry()
     component = registry.get(component_name)
 
@@ -566,6 +568,13 @@ iframe_app, iframe_rt = star_app(
                               (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 
                 document.documentElement.setAttribute('data-theme', theme);
+
+                // Follow parent theme changes unless this iframe has its own override
+                window.addEventListener('storage', function(e) {
+                    if (e.key === 'theme' && !localStorage.getItem(iframeKey)) {
+                        document.documentElement.setAttribute('data-theme', e.newValue);
+                    }
+                });
             })();
         """),
         Style("""
@@ -580,6 +589,17 @@ iframe_app, iframe_rt = star_app(
     bodykw=dict(cls="min-h-screen bg-background text-foreground"),
 )
 iframe_app.register(position, clipboard)
+
+@iframe_rt("/toast-sse-demo")
+@sse
+async def toast_sse_demo():
+    from starui.registry.components.toast import ToastQueue
+    t = ToastQueue()
+    yield t.info("Deploying...", "Building from main branch")
+    await asyncio.sleep(1.5)
+    yield t.success("Deployed", "v2.4.1 is live on production")
+    await asyncio.sleep(4)
+    yield t.clear()
 
 @iframe_rt("/{preview_id}")
 def component_preview_iframe(preview_id: str):

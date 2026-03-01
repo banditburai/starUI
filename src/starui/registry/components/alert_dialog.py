@@ -4,9 +4,9 @@ from starhtml import FT, Div, Signal
 from starhtml import H2 as HTMLH2
 from starhtml import Dialog as HTMLDialog
 from starhtml import P as HTMLP
-from starhtml.datastar import document, evt, seq
+from starhtml.datastar import document
 
-from .utils import cn, gen_id, merge_actions
+from .utils import cn, gen_id, inject_context, merge_actions
 
 AlertDialogVariant = Literal["default", "destructive"]
 
@@ -46,8 +46,6 @@ def AlertDialog(
             content(**ctx) if content else None,
             data_ref=dialog_ref,
             data_on_close=open_state.set(False),
-            data_on_click=(evt.target == evt.currentTarget)
-            & seq(dialog_ref.close(), open_state.set(False)),
             id=sig,
             role="alertdialog",
             aria_labelledby=f"{sig}-title",
@@ -97,7 +95,7 @@ def AlertDialogContent(
 ) -> FT:
     def content(**ctx):
         return Div(
-            *[child(**ctx) if callable(child) else child for child in children],
+            *[inject_context(child, **ctx) for child in children],
             cls=cn("relative p-6", cls),
             **kwargs,
         )
@@ -112,7 +110,7 @@ def AlertDialogHeader(
 ) -> FT:
     def _(**ctx):
         return Div(
-            *[child(**ctx) if callable(child) else child for child in children],
+            *[inject_context(child, **ctx) for child in children],
             cls=cn("flex flex-col gap-2 text-center sm:text-left", cls),
             **kwargs,
         )
@@ -127,7 +125,7 @@ def AlertDialogFooter(
 ) -> FT:
     def _(**ctx):
         return Div(
-            *[child(**ctx) if callable(child) else child for child in children],
+            *[inject_context(child, **ctx) for child in children],
             cls=cn("flex flex-col-reverse gap-2 sm:flex-row sm:justify-end mt-6", cls),
             **kwargs,
         )
