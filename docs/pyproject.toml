@@ -7,12 +7,9 @@ requires-python = ">=3.12"
 dependencies = [
     "starhtml>=0.5.12",
     "starlighter>=0.2.0",
-    "starui",
+    "starui>=0.2.0",
     "uvicorn>=0.30.0",
 ]
-
-[tool.uv.sources]
-starui = { path = "../", editable = true }
 
 [dependency-groups]
 dev = [
