@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-03-01
+
 ### Changed
 - `Sheet` rewritten to use native HTML `<dialog>` with CSS transitions and backdrop animations
 - `Dialog` and `AlertDialog` migrated to native `<dialog>` element
@@ -302,3 +304,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [0.1.8]: https://github.com/banditburai/starUI/releases/tag/v0.1.8
 
 [0.2.0]: https://github.com/banditburai/starUI/releases/tag/v0.2.0
+
+[0.2.1]: https://github.com/banditburai/starUI/releases/tag/v0.2.1
