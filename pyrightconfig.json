@@ -1,5 +1,5 @@
 {
-    "include": ["src", "tests", "docs"],
+    "include": ["src", "tests"],
     "exclude": ["**/node_modules", "**/__pycache__", "**/.venv", "**/build", "**/dist", "**/reference"],
     "pythonVersion": "3.12",
     "pythonPlatform": "All",
@@ -25,7 +25,6 @@
     "reportAssertAlwaysTrue": false,
     "reportUnnecessaryTypeIgnoreComment": false,
     "reportImplicitOverride": false,
-    "reportShadowedImports": false,
     "reportUndefinedVariable": false,
     "reportCallIssue": false,
     "reportArgumentType": false,
