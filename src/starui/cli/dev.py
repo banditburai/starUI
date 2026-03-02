@@ -8,7 +8,7 @@ import typer
 from rich.panel import Panel
 from rich.table import Table
 
-from ..config import detect_project_config
+from ..config import ProjectConfig, get_project_config
 from ..css import TailwindBinaryManager
 from ..dev.analyzer import resolve_port
 from ..dev.process_manager import ProcessManager
@@ -16,11 +16,11 @@ from ..templates import generate_css_input
 from .utils import console, error, success
 
 
-def get_or_create_css_input(config) -> Path:
-    if (existing := config.project_root / "static" / "css" / "input.css").exists():
+def get_or_create_css_input(config: ProjectConfig) -> Path:
+    if (existing := config.css_dir_absolute / "input.css").exists():
         return existing
 
-    css_dir = config.css_output_absolute.parent
+    css_dir = config.css_dir_absolute
     css_dir.mkdir(parents=True, exist_ok=True)
 
     with tempfile.NamedTemporaryFile(mode="w", suffix=".css", dir=css_dir, delete=False) as tmp:
@@ -28,27 +28,28 @@ def get_or_create_css_input(config) -> Path:
         return Path(tmp.name)
 
 
-def setup_tailwind(manager: ProcessManager, config, enable_hot_reload: bool = True):
+def setup_tailwind(manager: ProcessManager, config: ProjectConfig, enable_hot_reload: bool = True) -> Path:
     from ..dev.unified_reload import DevReloadHandler
 
     input_css = get_or_create_css_input(config)
     binary = Path(TailwindBinaryManager("latest").get_binary())
 
-    async def notify(path: Path):
+    async def notify(path: Path) -> None:
         with suppress(Exception):
             await DevReloadHandler.notify_css_update(path, time.time())
 
+    callback = (lambda p: asyncio.run(notify(p))) if enable_hot_reload else None
     manager.start_tailwind_watcher(
         binary,
         input_css,
         config.css_output_absolute,
         config.project_root,
-        lambda p: asyncio.run(notify(p)) if enable_hot_reload else None,
+        callback,
     )
     return input_css
 
 
-def wait_for_css(css_path: Path, timeout: int = 10):
+def wait_for_css(css_path: Path, timeout: int = 10) -> None:
     if css_path.exists():
         return success("CSS ready")
 
@@ -64,12 +65,12 @@ def wait_for_css(css_path: Path, timeout: int = 10):
     raise typer.Exit(1)
 
 
-def cleanup(*paths: Path):
+def cleanup(*paths: Path) -> None:
     for path in filter(None, paths):
         path.unlink(missing_ok=True)
 
 
-def show_status(config, port: int, hot_reload: bool, app_file: str):
+def show_status(config: ProjectConfig, port: int, hot_reload: bool, app_file: str) -> None:
     table = Table(title="StarUI Development Server", show_header=False)
     table.add_column(style="cyan")
     table.add_column(style="green")
@@ -91,7 +92,7 @@ def dev_command(
     css_hot_reload: bool = typer.Option(True, "--css-hot/--no-css-hot"),
     strict: bool = typer.Option(False, "--strict"),
     debug: bool = typer.Option(True, "--debug/--no-debug"),
-):
+) -> None:
     """Start development server with hot reload."""
 
     app_path = Path(app_file).resolve()
@@ -99,7 +100,12 @@ def dev_command(
         error(f"App file not found: {app_file}")
         raise typer.Exit(1)
 
-    config = detect_project_config()
+    try:
+        config = get_project_config()
+    except Exception as e:
+        error(f"Config error: {e}")
+        raise typer.Exit(1) from e
+
     manager = ProcessManager()
     temp_files = []
 

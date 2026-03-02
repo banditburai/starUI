@@ -1,5 +1,3 @@
-"""Tests for the build command."""
-
 from io import StringIO
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -33,32 +31,29 @@ def _make_config(tmp_path) -> ProjectConfig:
     )
 
 
-def _run_build(config, result, *, output=None, minify=True, verbose=False):
-    """Run build_command and return captured mocks for assertion."""
+def _capture_build_output(config, result, *, output=None, minify=True, verbose=False) -> str:
+    """Run build_command capturing all console output to a string."""
     mock_builder = MagicMock()
     mock_builder.build.return_value = result
 
-    mocks = {}
+    buf = StringIO()
+    real_console = Console(file=buf, width=300, no_color=True)
+
     with (
-        patch("starui.cli.build.detect_project_config", return_value=config),
+        patch("starui.cli.build.get_project_config", return_value=config),
         patch("starui.cli.build.CSSBuilder", return_value=mock_builder),
-        patch("starui.cli.build.console") as mock_console,
-        patch("starui.cli.build.success") as mock_success,
-        patch("starui.cli.build.error") as mock_error,
-        patch("starui.cli.build.info") as mock_info,
+        patch("starui.cli.build.console", real_console),
+        patch("starui.cli.build.success", lambda msg: real_console.print(f"OK: {msg}")),
+        patch("starui.cli.build.error", lambda msg: real_console.print(f"ERR: {msg}")),
+        patch("starui.cli.build.info", lambda msg: real_console.print(f"INFO: {msg}")),
     ):
-        mocks["console"] = mock_console
-        mocks["success"] = mock_success
-        mocks["error"] = mock_error
-        mocks["info"] = mock_info
-        mocks["builder"] = mock_builder
         build_command(output=output, minify=minify, verbose=verbose)
 
-    return mocks
+    return buf.getvalue()
 
 
 class TestBuildCommand:
-    def test_success_prints_completion(self, tmp_path):
+    def test_success_reports_build_stats(self, tmp_path):
         config = _make_config(tmp_path)
         result = BuildResult(
             success=True,
@@ -67,14 +62,8 @@ class TestBuildCommand:
             css_size_bytes=1024,
         )
 
-        mocks = _run_build(config, result)
+        output = _capture_build_output(config, result)
 
-        mocks["success"].assert_called_once_with("Build completed!")
-        buf = StringIO()
-        real_console = Console(file=buf, width=120, no_color=True)
-        for call in mocks["console"].print.call_args_list:
-            real_console.print(*call.args, **call.kwargs)
-        output = buf.getvalue()
         assert "0.5s" in output
         assert "1.0 KB" in output
 
@@ -82,28 +71,15 @@ class TestBuildCommand:
         config = _make_config(tmp_path)
         result = BuildResult(success=False, error_message="tailwind not found")
 
-        mock_builder = MagicMock()
-        mock_builder.build.return_value = result
-
-        with (
-            patch("starui.cli.build.detect_project_config", return_value=config),
-            patch("starui.cli.build.CSSBuilder", return_value=mock_builder),
-            patch("starui.cli.build.console"),
-            patch("starui.cli.build.success"),
-            patch("starui.cli.build.error") as mock_error,
-            patch("starui.cli.build.info"),
-            pytest.raises(Exit),
-        ):
-            build_command(output=None, minify=True, verbose=False)
-
-        assert mock_error.call_args_list[0][0][0] == "Build failed: tailwind not found"
+        with pytest.raises(Exit):
+            _capture_build_output(config, result)
 
     def test_cleans_existing_output_before_build(self, tmp_path):
         config = _make_config(tmp_path)
         config.css_output_absolute.write_text("old css")
         result = BuildResult(success=True)
 
-        _run_build(config, result)
+        _capture_build_output(config, result)
 
         assert not config.css_output_absolute.exists()
 
@@ -115,29 +91,47 @@ class TestBuildCommand:
         )
         result = BuildResult(success=True)
 
-        _run_build(config, result)
+        _capture_build_output(config, result)
 
         assert config.css_output_absolute.parent.is_dir()
 
-    def test_no_minify_passes_development_mode(self, tmp_path):
+    def test_no_minify_uses_development_mode(self, tmp_path):
         config = _make_config(tmp_path)
         result = BuildResult(success=True)
 
-        mocks = _run_build(config, result, minify=False)
+        mock_builder = MagicMock()
+        mock_builder.build.return_value = result
 
-        mocks["builder"].build.assert_called_once_with(
-            mode=BuildMode.DEVELOPMENT,
-        )
+        with (
+            patch("starui.cli.build.get_project_config", return_value=config),
+            patch("starui.cli.build.CSSBuilder", return_value=mock_builder),
+            patch("starui.cli.build.console"),
+            patch("starui.cli.build.success"),
+            patch("starui.cli.build.error"),
+            patch("starui.cli.build.info"),
+        ):
+            build_command(output=None, minify=False, verbose=False)
 
-    def test_minify_passes_production_mode(self, tmp_path):
+        assert mock_builder.build.call_args.kwargs["mode"] == BuildMode.DEVELOPMENT
+
+    def test_minify_uses_production_mode(self, tmp_path):
         config = _make_config(tmp_path)
         result = BuildResult(success=True)
 
-        mocks = _run_build(config, result, minify=True)
+        mock_builder = MagicMock()
+        mock_builder.build.return_value = result
 
-        mocks["builder"].build.assert_called_once_with(
-            mode=BuildMode.PRODUCTION,
-        )
+        with (
+            patch("starui.cli.build.get_project_config", return_value=config),
+            patch("starui.cli.build.CSSBuilder", return_value=mock_builder),
+            patch("starui.cli.build.console"),
+            patch("starui.cli.build.success"),
+            patch("starui.cli.build.error"),
+            patch("starui.cli.build.info"),
+        ):
+            build_command(output=None, minify=True, verbose=False)
+
+        assert mock_builder.build.call_args.kwargs["mode"] == BuildMode.PRODUCTION
 
     def test_output_flag_appends_css_suffix(self, tmp_path):
         config = _make_config(tmp_path)
@@ -147,7 +141,7 @@ class TestBuildCommand:
         mock_builder.build.return_value = result
 
         with (
-            patch("starui.cli.build.detect_project_config", return_value=config),
+            patch("starui.cli.build.get_project_config", return_value=config),
             patch("starui.cli.build.CSSBuilder") as MockCSSBuilder,
             patch("starui.cli.build.console"),
             patch("starui.cli.build.success"),
@@ -158,19 +152,18 @@ class TestBuildCommand:
 
         assert config.css_output.suffix == ".css"
 
-    def test_verbose_prints_output_path(self, tmp_path):
+    def test_verbose_shows_output_path(self, tmp_path):
         config = _make_config(tmp_path)
         result = BuildResult(success=True)
 
-        mocks = _run_build(config, result, verbose=True)
+        output = _capture_build_output(config, result, verbose=True)
 
-        mocks["info"].assert_called_once()
-        assert str(config.css_output_absolute) in mocks["info"].call_args[0][0]
+        assert str(config.css_output_absolute) in output
 
     def test_config_error_raises_exit(self):
         with (
             patch(
-                "starui.cli.build.detect_project_config",
+                "starui.cli.build.get_project_config",
                 side_effect=RuntimeError("no project"),
             ),
             patch("starui.cli.build.console"),

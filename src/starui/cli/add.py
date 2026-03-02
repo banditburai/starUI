@@ -2,10 +2,9 @@ import subprocess
 
 import typer
 
-from starui.config import get_project_config
-from starui.registry.client import RegistryClient
-from starui.registry.manifest import Manifest
-
+from ..config import ProjectConfig, get_project_config
+from ..registry.client import RegistryClient
+from ..registry.manifest import Manifest
 from .utils import (
     confirm,
     console,
@@ -20,10 +19,7 @@ from .utils import (
 
 
 def _build_token_rules(theme_keys: dict[str, str]) -> str:
-    lines: list[str] = []
-
-    # Scrollbar rules for code blocks
-    lines.append('[data-slot="code-block"]::-webkit-scrollbar { height: 8px; width: 8px; }')
+    lines = ['[data-slot="code-block"]::-webkit-scrollbar { height: 8px; width: 8px; }']
     for suffix, extra in [
         ("track", ""),
         ("thumb", " border-radius: 4px;"),
@@ -33,7 +29,6 @@ def _build_token_rules(theme_keys: dict[str, str]) -> str:
         if prop in theme_keys:
             lines.append(f'[data-slot="code-block"]::-webkit-scrollbar-{suffix} {{ background: var({prop});{extra} }}')
 
-    # Token class rules derived from --token-* keys
     for key in theme_keys:
         if not key.startswith("--token-"):
             continue
@@ -44,7 +39,7 @@ def _build_token_rules(theme_keys: dict[str, str]) -> str:
     return "\n".join(lines)
 
 
-def _setup_code_highlighting(config, theme: str | None) -> None:
+def _setup_code_highlighting(config: ProjectConfig, theme: str | None) -> None:
     try:
         from starlighter import THEMES
     except ImportError:
@@ -113,7 +108,7 @@ def _setup_code_highlighting(config, theme: str | None) -> None:
     info("Run 'star build css' to rebuild your styles")
 
 
-def _setup_css_imports(config, css_imports: list[str]) -> None:
+def _setup_css_imports(config: ProjectConfig, css_imports: list[str]) -> None:
     input_css = config.css_dir_absolute / "input.css"
     if not input_css.exists():
         return
@@ -149,6 +144,7 @@ def add_command(
     force: bool = typer.Option(False, "--force", help="Overwrite existing files"),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Show details"),
     theme: str = typer.Option(None, "--theme", help="Theme for code highlighting"),
+    component_dir: str | None = typer.Option(None, "--component-dir", help="Component install directory"),
 ) -> None:
     """Add components to your project."""
 
@@ -157,7 +153,7 @@ def add_command(
         raise typer.Exit(1)
 
     try:
-        config = get_project_config()
+        config = get_project_config(component_dir=component_dir)
         manifest = Manifest(config.project_root)
         client = RegistryClient(version=manifest.registry_version)
     except Exception as e:
@@ -172,21 +168,19 @@ def add_command(
                 info(f"Resolving {component} -> {normalized}...")
             resolved.update(client.get_component_with_dependencies(normalized))
 
-        component_dir = config.component_dir_absolute
+        comp_dir = config.component_dir_absolute
         requested = {c.replace("-", "_") for c in components}
 
-        conflicts = [n for n in resolved if n in requested and (component_dir / f"{n}.py").exists()]
+        conflicts = [n for n in resolved if n in requested and (comp_dir / f"{n}.py").exists()]
         if conflicts and not force:
             warning("The following requested components already exist:")
             for name in conflicts:
-                console.print(f"  • {component_dir / f'{name}.py'}")
+                console.print(f"  • {comp_dir / f'{name}.py'}")
             if not confirm("Overwrite?", default=False):
                 raise typer.Exit(0)
 
         if not force:
-            resolved = {
-                n: src for n, src in resolved.items() if n in requested or not (component_dir / f"{n}.py").exists()
-            }
+            resolved = {n: src for n, src in resolved.items() if n in requested or not (comp_dir / f"{n}.py").exists()}
         packages: set[str] = set()
         css_imports: list[str] = []
         for name in resolved:
@@ -206,8 +200,8 @@ def add_command(
             _setup_css_imports(config, list(dict.fromkeys(css_imports)))
 
         with status_context("Installing components..."):
-            component_dir.mkdir(parents=True, exist_ok=True)
-            (component_dir / "__init__.py").touch()
+            comp_dir.mkdir(parents=True, exist_ok=True)
+            (comp_dir / "__init__.py").touch()
 
             for name, source in resolved.items():
                 install_component(name, source, config=config, client=client, manifest=manifest)
@@ -220,7 +214,7 @@ def add_command(
             info("All components already installed (dependencies unchanged)")
 
         if verbose:
-            info(f"Location: {component_dir}")
+            info(f"Location: {comp_dir}")
 
         if first_name := next(iter(resolved or requested), None):
             class_name = first_name.title().replace("_", "")

@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `star status` — color-coded component health table showing up-to-date, modified, update-available, and missing states via local checksum comparison against both manifest and remote registry; falls back gracefully when offline
+- `star update` — smart component updater that compares remote checksums against local, skips already-current components, warns about locally modified files (skips by default), requires `--force` to overwrite modifications, and updates manifest after install
+- `star diff <component>` — unified diff between local file and registry version for reviewing upstream changes before updating
+- `star add` overwrite protection: detects conflicts, prompts with `confirm("Overwrite?", default=False)`, `--force` bypasses; existing dependencies are skipped automatically
+- Registry manifest system (`.starui/manifest.json`) with SHA256 checksums, version tracking, and atomic writes
+
+### Changed
+- CLI config migrated from `starui.toml` to `[tool.starui]` in `pyproject.toml`, following Python ecosystem conventions
+- All CLI commands now use unified config resolution: CLI flag > `pyproject.toml` > auto-detect
+- `star init` accepts `--component-dir` flag and `--no-interaction` for CI usage
+- `star build` and `star dev` now respect configured paths instead of hardcoding `static/css/`
+
+### Fixed
+- `star dev` hot-reload callback was always truthy even when disabled — now correctly `None` when `--no-hot-reload`
+- `star build` result display treated `0` build time or `0` byte CSS as missing (truthiness vs `is not None`)
+- `star build` swallowed deliberate `typer.Exit` in generic exception handler
+
 ## [0.3.0] - 2026-03-02
 
 ### Added
