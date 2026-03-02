@@ -1,15 +1,10 @@
-"""Tests for configuration models."""
-
 from pathlib import Path
 
 from starui.config import ProjectConfig
 
 
 class TestProjectConfig:
-    """Test the ProjectConfig model."""
-
     def test_config_creation(self):
-        """Test creating a config with required values."""
         config = ProjectConfig(
             project_root=Path("/test/path"),
             css_output=Path("static/css/app.css"),
@@ -21,7 +16,6 @@ class TestProjectConfig:
         assert config.component_dir == Path("src/ui")
 
     def test_css_output_absolute_path(self):
-        """Test css_output_absolute property."""
         config = ProjectConfig(
             project_root=Path("/project"),
             css_output=Path("static/css/app.css"),
@@ -30,7 +24,6 @@ class TestProjectConfig:
 
         assert config.css_output_absolute == Path("/project/static/css/app.css")
 
-        # Test with already absolute path
         config2 = ProjectConfig(
             project_root=Path("/project"),
             css_output=Path("/absolute/path/app.css"),
@@ -40,7 +33,6 @@ class TestProjectConfig:
         assert config2.css_output_absolute == Path("/absolute/path/app.css")
 
     def test_component_dir_absolute_path(self):
-        """Test component_dir_absolute property."""
         config = ProjectConfig(
             project_root=Path("/project"),
             css_output=Path("static/css/app.css"),
@@ -49,7 +41,6 @@ class TestProjectConfig:
 
         assert config.component_dir_absolute == Path("/project/src/ui")
 
-        # Test with already absolute path
         config2 = ProjectConfig(
             project_root=Path("/project"),
             css_output=Path("static/css/app.css"),
@@ -57,3 +48,31 @@ class TestProjectConfig:
         )
 
         assert config2.component_dir_absolute == Path("/absolute/ui")
+
+    def test_css_dir_absolute_defaults_to_css_output_parent(self):
+        """Falls back to css_output parent when css_dir is None."""
+        config = ProjectConfig(
+            project_root=Path("/project"),
+            css_output=Path("static/css/app.css"),
+            component_dir=Path("ui"),
+        )
+        assert config.css_dir is None
+        assert config.css_dir_absolute == Path("/project/static/css")
+
+    def test_css_dir_absolute_with_explicit_css_dir(self):
+        config = ProjectConfig(
+            project_root=Path("/project"),
+            css_output=Path("dist/app.css"),
+            component_dir=Path("ui"),
+            css_dir=Path("assets/styles"),
+        )
+        assert config.css_dir_absolute == Path("/project/assets/styles")
+
+    def test_css_dir_absolute_with_absolute_css_dir(self):
+        config = ProjectConfig(
+            project_root=Path("/project"),
+            css_output=Path("dist/app.css"),
+            component_dir=Path("ui"),
+            css_dir=Path("/absolute/styles"),
+        )
+        assert config.css_dir_absolute == Path("/absolute/styles")

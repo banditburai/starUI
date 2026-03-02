@@ -3,7 +3,7 @@ from pathlib import Path
 import typer
 from rich.table import Table
 
-from ..config import detect_project_config
+from ..config import get_project_config
 from ..css import BuildMode, CSSBuilder
 from .utils import console, error, info, success
 
@@ -24,19 +24,18 @@ def build_command(
     """Build production CSS."""
 
     try:
-        config = detect_project_config()
+        config = get_project_config()
 
         if output:
             path = Path(output)
             if not path.suffix:
                 path = path.with_suffix(".css")
-            config.css_output = path.absolute() if path.is_absolute() else path
+            config.css_output = path
 
         if verbose:
             info(f"Output: {config.css_output_absolute}")
 
-        if config.css_output_absolute.exists():
-            config.css_output_absolute.unlink()
+        config.css_output_absolute.unlink(missing_ok=True)
         config.css_output_absolute.parent.mkdir(parents=True, exist_ok=True)
 
         builder = CSSBuilder(config)
@@ -52,11 +51,11 @@ def build_command(
             table.add_column("Metric", style="cyan")
             table.add_column("Value", style="green")
 
-            if result.css_path:
+            if result.css_path is not None:
                 table.add_row("Output", str(result.css_path))
-            if result.build_time:
+            if result.build_time is not None:
                 table.add_row("Time", f"{result.build_time:.1f}s")
-            if result.css_size_bytes:
+            if result.css_size_bytes is not None:
                 table.add_row("Size", format_size(result.css_size_bytes))
 
             console.print(table)
@@ -64,6 +63,8 @@ def build_command(
             error(f"Build failed: {result.error_message}")
             raise typer.Exit(1)
 
+    except typer.Exit:
+        raise
     except Exception as e:
         error(f"Build error: {e}")
         raise typer.Exit(1) from e

@@ -1,8 +1,14 @@
 import re
-from typing import Any
+from typing import TYPE_CHECKING
 
 import typer
 from rich.console import Console
+from rich.status import Status
+
+if TYPE_CHECKING:
+    from ..config import ProjectConfig
+    from ..registry.client import RegistryClient
+    from ..registry.manifest import Manifest
 
 console = Console()
 
@@ -31,7 +37,7 @@ def validate_component_name(name: str) -> bool:
     return bool(name and re.match(r"^[a-z][a-z0-9_-]*$", name))
 
 
-def status_context(message: str):
+def status_context(message: str) -> Status:
     return console.status(message)
 
 
@@ -39,9 +45,9 @@ def install_component(
     name: str,
     source: str,
     *,
-    config: Any,
-    client: Any,
-    manifest: Any,
+    config: "ProjectConfig",
+    client: "RegistryClient",
+    manifest: "Manifest",
 ) -> None:
     file_path = config.component_dir_absolute / f"{name}.py"
     file_path.write_text(source)
@@ -54,7 +60,7 @@ def install_component(
             file_path=str(file_path.relative_to(config.project_root)),
         )
     except FileNotFoundError:
-        pass
+        pass  # Manifest recording is best-effort; component is usable without it
 
 
 MSG_NO_MANIFEST = "No manifest found. Run 'star init' or 'star add' first."

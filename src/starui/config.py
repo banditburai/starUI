@@ -1,5 +1,6 @@
 """Project configuration."""
 
+import re
 import tomllib
 from dataclasses import dataclass
 from pathlib import Path
@@ -41,8 +42,6 @@ def detect_css_output(root: Path) -> Path:
 
 
 def detect_component_dir(root: Path) -> Path:
-    if (root / "components" / "ui").exists():
-        return Path("components/ui")
     if (root / "ui").exists():
         return Path("ui")
     return Path("components/ui")
@@ -57,26 +56,67 @@ def detect_project_config(project_root: Path | None = None) -> ProjectConfig:
     )
 
 
-CONTENT_PATTERNS = ["**/*.py", "!**/__pycache__/**", "!**/test_*.py"]
-
-
-def load_toml_config(project_root: Path) -> ProjectConfig | None:
-    toml_path = project_root / "starui.toml"
-    if not toml_path.exists():
+def load_pyproject_config(project_root: Path) -> ProjectConfig | None:
+    pyproject_path = project_root / "pyproject.toml"
+    if not pyproject_path.exists():
         return None
 
-    with open(toml_path, "rb") as f:
+    with open(pyproject_path, "rb") as f:
         data = tomllib.load(f)
 
-    project = data.get("project", {})
+    starui = data.get("tool", {}).get("starui")
+    if starui is None:
+        return None
+
     return ProjectConfig(
         project_root=project_root,
-        css_output=Path(project.get("css_output", "starui.css")),
-        component_dir=Path(project.get("component_dir", "components/ui")),
-        css_dir=Path(project["css_dir"]) if "css_dir" in project else None,
+        css_output=Path(starui["css_output"]) if "css_output" in starui else detect_css_output(project_root),
+        component_dir=Path(starui["component_dir"])
+        if "component_dir" in starui
+        else detect_component_dir(project_root),
+        css_dir=Path(starui["css_dir"]) if "css_dir" in starui else None,
     )
 
 
-def get_project_config(project_root: Path | None = None) -> ProjectConfig:
+def save_config(
+    project_root: Path,
+    component_dir: str,
+    css_output: str | None = None,
+    css_dir: str | None = None,
+) -> None:
+    """Append [tool.starui] section to pyproject.toml."""
+    pyproject_path = project_root / "pyproject.toml"
+    lines = ["\n[tool.starui]", f'component_dir = "{component_dir}"']
+    if css_output:
+        lines.append(f'css_output = "{css_output}"')
+    if css_dir:
+        lines.append(f'css_dir = "{css_dir}"')
+    block = "\n".join(lines) + "\n"
+
+    if pyproject_path.exists():
+        content = pyproject_path.read_text()
+        if re.search(r"^\[tool\.starui\]", content, re.MULTILINE):
+            return
+        if not content.endswith("\n"):
+            content += "\n"
+        pyproject_path.write_text(content + block)
+    else:
+        pyproject_path.write_text(block.lstrip())
+
+
+def get_project_config(
+    project_root: Path | None = None,
+    component_dir: str | None = None,
+    css_output: str | None = None,
+    css_dir: str | None = None,
+) -> ProjectConfig:
+    """Load project config. Resolution: CLI flag > pyproject.toml [tool.starui] > auto-detect."""
     root = project_root or Path.cwd()
-    return load_toml_config(root) or detect_project_config(root)
+    config = load_pyproject_config(root) or detect_project_config(root)
+    if component_dir is not None:
+        config.component_dir = Path(component_dir)
+    if css_output is not None:
+        config.css_output = Path(css_output)
+    if css_dir is not None:
+        config.css_dir = Path(css_dir)
+    return config

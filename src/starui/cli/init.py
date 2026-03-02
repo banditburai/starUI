@@ -3,27 +3,17 @@ from pathlib import Path
 import typer
 from rich.progress import track
 
-from ..config import ProjectConfig, detect_project_config
+from ..config import ProjectConfig, detect_component_dir, get_project_config, load_pyproject_config, save_config
 from ..registry.client import RegistryClient
 from ..registry.manifest import Manifest
 from ..templates import generate_app_starter, generate_css_input
 from .utils import confirm, console, error, info, install_component
 
 
-def validate_project(root: Path, force: bool = False) -> None:
-    conflicts = []
-
-    if (root / "starui.py").exists():
-        conflicts.append("starui.py configuration file")
-
-    for comp_dir in ["components/ui", "ui"]:
-        path = root / comp_dir
-        if path.exists() and any(path.iterdir()):
-            conflicts.append(f"{comp_dir} directory with content")
-            break
-
-    if conflicts and not force:
-        error("Project appears to already be initialized. Found:\n" + "\n".join(f"  • {item}" for item in conflicts))
+def validate_project(root: Path, component_dir: str = "components/ui", force: bool = False) -> None:
+    path = root / component_dir
+    if path.exists() and any(path.iterdir()) and not force:
+        error(f"Project appears to already be initialized. Found:\n  • {component_dir} directory with content")
         info("Use --force to reinitialize anyway")
         raise typer.Exit(1)
 
@@ -32,7 +22,7 @@ def setup_directories(config: ProjectConfig, verbose: bool = False) -> None:
     dirs = [
         config.component_dir_absolute,
         config.css_output_absolute.parent,
-        config.project_root / "static" / "css",
+        config.css_dir_absolute,
     ]
 
     for dir_path in dirs:
@@ -48,7 +38,7 @@ def setup_directories(config: ProjectConfig, verbose: bool = False) -> None:
 
 
 def create_css_input(config: ProjectConfig, verbose: bool = False) -> None:
-    input_path = config.project_root / "static" / "css" / "input.css"
+    input_path = config.css_dir_absolute / "input.css"
     input_path.write_text(generate_css_input(config))
     if verbose:
         console.print("[green]Created:[/green] input.css")
@@ -90,7 +80,7 @@ def create_app(config: ProjectConfig, verbose: bool = False) -> None:
 def update_gitignore(config: ProjectConfig, verbose: bool = False) -> None:
     gitignore = config.project_root / ".gitignore"
     gitignore_lines = [
-        "\n# StarUI generated files",
+        "# StarUI generated files",
         str(config.css_output),
         "*.css.map",
         "",
@@ -104,37 +94,34 @@ def update_gitignore(config: ProjectConfig, verbose: bool = False) -> None:
     if "# StarUI generated files" not in content:
         if content and not content.endswith("\n"):
             content += "\n"
-        gitignore.write_text(content + "\n".join(gitignore_lines))
+        block = "\n".join(gitignore_lines)
+        gitignore.write_text(content + ("\n" if content else "") + block)
         if verbose:
             console.print(f"[green]{'Updated' if content else 'Created'}:[/green] .gitignore")
     elif verbose:
         console.print("[yellow]Skipped:[/yellow] .gitignore (StarUI patterns exist)")
 
 
-def create_config_file(config: ProjectConfig, verbose: bool = False) -> None:
-    config_path = config.project_root / "starui.py"
+def resolve_component_dir(
+    root: Path, component_dir: str | None, existing: ProjectConfig | None, no_interaction: bool
+) -> str:
+    if component_dir:
+        return component_dir
+    if existing:
+        return str(existing.component_dir)
 
-    if config_path.exists():
-        if verbose:
-            console.print("[yellow]Skipped:[/yellow] starui.py (already exists)")
-        return
+    default = str(detect_component_dir(root))
+    if no_interaction:
+        return default
 
-    config_path.write_text(f'''"""StarUI configuration."""
-
-from pathlib import Path
-
-CSS_OUTPUT = Path("{config.css_output}")
-COMPONENT_DIR = Path("{config.component_dir}")
-''')
-
-    if verbose:
-        console.print("[green]Created:[/green] starui.py")
+    return typer.prompt("Where should components be installed?", default=default)
 
 
 def init_command(
     force: bool = typer.Option(False, "--force", help="Force initialization"),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Show details"),
-    config: bool = typer.Option(False, "--config", help="Create starui.py"),
+    component_dir: str | None = typer.Option(None, "--component-dir", help="Component install directory"),
+    no_interaction: bool = typer.Option(False, "--no-interaction", help="Non-interactive mode for CI"),
 ) -> None:
     """Initialize a new StarUI project."""
     try:
@@ -143,13 +130,22 @@ def init_command(
         if verbose:
             console.print(f"[blue]Initializing StarUI in:[/blue] {root}")
 
-        project_config = detect_project_config(root)
+        existing = load_pyproject_config(root)
+        chosen_dir = resolve_component_dir(root, component_dir, existing, no_interaction)
+
+        validate_project(root, component_dir=chosen_dir, force=force)
+
+        if existing:
+            info(f"Using existing config (component_dir: {existing.component_dir})")
+        else:
+            save_config(root, chosen_dir)
+            info("Wrote [tool.starui] config to pyproject.toml")
+
+        project_config = get_project_config(root, component_dir=chosen_dir)
 
         if verbose:
             console.print(f"[dim]CSS output:[/dim] {project_config.css_output}")
             console.print(f"[dim]Components:[/dim] {project_config.component_dir}")
-
-        validate_project(root, force)
 
         if not force and project_config.css_output_absolute.exists():
             console.print(f"\n[yellow]Will overwrite:[/yellow]\n  • {project_config.css_output}")
@@ -157,30 +153,15 @@ def init_command(
                 info("Cancelled")
                 raise typer.Exit()
 
-        console.print("\n[green]✨ Initializing StarUI...[/green]")
-
-        def setup_and_update_config():
-            nonlocal project_config
-            setup_directories(project_config, verbose)
-            # Re-detect config after directories are created
-            project_config = detect_project_config(root)
+        console.print("\n[green]Initializing StarUI...[/green]")
 
         steps = [
-            (
-                "Creating directories",
-                setup_and_update_config,
-            ),
+            ("Creating directories", lambda: setup_directories(project_config, verbose)),
             ("Creating CSS input", lambda: create_css_input(project_config, verbose)),
-            (
-                "Adding default components",
-                lambda: add_default_components(project_config, verbose),
-            ),
+            ("Adding default components", lambda: add_default_components(project_config, verbose)),
             ("Creating starter app", lambda: create_app(project_config, verbose)),
             ("Updating .gitignore", lambda: update_gitignore(project_config, verbose)),
         ]
-
-        if config:
-            steps.append(("Creating config", lambda: create_config_file(project_config, verbose)))
 
         if verbose:
             for name, func in steps:
@@ -190,14 +171,11 @@ def init_command(
             for _, func in track(steps, description="Initializing..."):
                 func()
 
-        console.print("\n[green]🎉 StarUI initialized![/green]")
+        console.print("\n[green]StarUI initialized![/green]")
         console.print("\n[bold]Next steps:[/bold]")
         console.print("  1. Run [blue]star dev[/blue] to start development")
         console.print("  2. Run [blue]star add[/blue] to add components")
         console.print("  3. Run [blue]star build[/blue] for production CSS")
-
-        if not config:
-            console.print("\n[dim]💡 Use [blue]star init --config[/blue] for config file[/dim]")
 
     except typer.Exit:
         raise

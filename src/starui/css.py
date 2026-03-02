@@ -63,6 +63,7 @@ def get_cache_dir(version: str) -> Path:
 
 class TailwindBinaryManager:
     DEFAULT_VERSION = "latest"
+    FALLBACK_VERSION = "v4.1.0"
     GITHUB_RELEASES_URL = "https://github.com/tailwindlabs/tailwindcss/releases/download"
     GITHUB_API_URL = "https://api.github.com/repos/tailwindlabs/tailwindcss/releases/latest"
 
@@ -73,10 +74,10 @@ class TailwindBinaryManager:
         try:
             response = requests.get(self.GITHUB_API_URL, timeout=10)
             response.raise_for_status()
-            return response.json().get("tag_name", "v4.1.0")
+            return response.json().get("tag_name", self.FALLBACK_VERSION)
         except requests.RequestException:
             # Fallback when offline — will attempt download and fail clearly
-            return "v4.1.0"
+            return self.FALLBACK_VERSION
 
     def _get_download_url(self) -> str:
         platform_name, arch = get_platform_info()
@@ -119,7 +120,7 @@ class TailwindBinaryManager:
 class CSSBuilder:
     def __init__(self, config: ProjectConfig):
         self.config = config
-        self.binary_manager = TailwindBinaryManager("latest")
+        self.binary_manager = TailwindBinaryManager()
 
     def build(self, mode: BuildMode = BuildMode.DEVELOPMENT) -> BuildResult:
         start_time = time.time()
@@ -129,7 +130,7 @@ class CSSBuilder:
         try:
             binary_path = self.binary_manager.get_binary()
 
-            project_input_css = self.config.project_root / "static" / "css" / "input.css"
+            project_input_css = self.config.css_dir_absolute / "input.css"
 
             if project_input_css.exists():
                 input_file = project_input_css
