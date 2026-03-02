@@ -1,6 +1,6 @@
 from starhtml import FT, Icon, Signal, Span, clipboard
 from starhtml.datastar import js
-from starui.registry.components.button import Button
+from components.button import Button
 
 
 def CopyButton(

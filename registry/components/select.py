@@ -1,0 +1,368 @@
+from starhtml import FT, Div, Icon, Signal, Span
+from starhtml import Button as HTMLButton
+from starhtml import Label as HTMLLabel
+from starhtml import P as HTMLP
+from starhtml.datastar import evt
+
+from .utils import cn, gen_id, inject_context, merge_actions
+
+__metadata__ = {
+    "description": "Dropdown selection",
+    "handlers": ["position"],
+}
+
+
+def Select(
+    *children,
+    value: str | None = None,
+    label: str | None = None,
+    signal: str | Signal = "",
+    cls: str = "",
+    **kwargs,
+) -> FT:
+    sig = getattr(signal, "_id", signal) or gen_id("select")
+
+    selected = Signal(f"{sig}_value", value or "")
+    selected_label = Signal(f"{sig}_label", label or "")
+    open_state = Signal(f"{sig}_open", False)
+
+    ctx = {
+        "sig": sig,
+        "selected": selected,
+        "selected_label": selected_label,
+        "open_state": open_state,
+    }
+
+    return Div(
+        selected,
+        selected_label,
+        open_state,
+        *[inject_context(child, **ctx) for child in children],
+        cls=cn("relative", cls),
+        data_slot="select",
+        **kwargs,
+    )
+
+
+def SelectTrigger(
+    *children,
+    cls: str = "",
+    **kwargs,
+) -> FT:
+    def _(*, sig, selected_label, open_state, **ctx):
+        custom_id = kwargs.pop("id", None)
+        trigger_id = custom_id or f"{sig}_trigger"
+        trigger_ref = Signal(trigger_id, _ref_only=True)
+
+        return HTMLButton(
+            *[
+                inject_context(
+                    child,
+                    sig=sig,
+                    selected_label=selected_label,
+                    open_state=open_state,
+                    **ctx,
+                )
+                for child in children
+            ],
+            Icon("lucide:chevron-down", cls="size-4 shrink-0 opacity-50"),
+            data_ref=trigger_ref,
+            popovertarget=f"{sig}_content",
+            popoveraction="toggle",
+            type="button",
+            role="combobox",
+            aria_haspopup="listbox",
+            aria_expanded="false",
+            data_attr_aria_expanded=open_state.if_("true", "false"),
+            aria_controls=f"{sig}_content",
+            id=trigger_ref._id,
+            cls=cn(
+                "flex w-full h-9 items-center justify-between gap-2 rounded-md border border-input",
+                "bg-transparent px-3 py-2 text-sm shadow-xs",
+                "transition-[color,box-shadow] outline-hidden truncate",
+                "dark:bg-input/30 dark:hover:bg-input/50",
+                "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
+                "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40",
+                "aria-invalid:border-destructive",
+                "disabled:cursor-not-allowed disabled:opacity-50",
+                cls,
+            ),
+            data_slot="select-trigger",
+            **kwargs,
+        )
+
+    return _
+
+
+def SelectValue(
+    *children,
+    placeholder: str = "Select an option",
+    cls: str = "",
+    **kwargs,
+) -> FT:
+    def _(*, selected_label, **_):
+        if children:
+            return Span(
+                *children,
+                cls=cn("pointer-events-none truncate flex-1 text-left", cls),
+                data_slot="select-value",
+                **kwargs,
+            )
+
+        text_expr = kwargs.pop("data_text") if "data_text" in kwargs else selected_label.or_(placeholder)
+
+        # Static text for SSR/accessibility; data_text overrides once Datastar initializes
+        ssr_text = getattr(selected_label, "_initial", "") or placeholder
+
+        return Span(
+            ssr_text,
+            data_text=text_expr,
+            cls=cn("pointer-events-none truncate flex-1 text-left", cls),
+            data_class_text_muted_foreground=~selected_label,
+            data_slot="select-value",
+            **kwargs,
+        )
+
+    return _
+
+
+def SelectContent(
+    *children,
+    side: str = "bottom",
+    align: str = "start",
+    side_offset: int = 4,
+    container: str = "none",
+    cls: str = "",
+    **kwargs,
+) -> FT:
+    def _(*, sig, open_state, **ctx):
+        trigger_ref = Signal(f"{sig}_trigger", _ref_only=True)
+        content_ref = Signal(f"{sig}_content", _ref_only=True)
+        placement = side if align == "center" else f"{side}-{align}"
+
+        position_mods = {
+            "placement": placement,
+            "offset": side_offset,
+            "flip": True,
+            "shift": True,
+            "hide": True,
+            "container": container,
+        }
+
+        context = dict(sig=sig, open_state=open_state, **ctx)
+
+        return Div(
+            Div(
+                *[inject_context(child, **context) for child in children],
+                cls="p-1",
+            ),
+            data_ref=content_ref,
+            data_on_toggle=open_state.set(evt.newState == "open"),
+            data_style_min_width=trigger_ref.if_(trigger_ref.offsetWidth + "px", "8rem"),
+            data_position=(trigger_ref._id, position_mods),
+            popover="auto",
+            id=content_ref._id,
+            role="listbox",
+            aria_labelledby=trigger_ref._id,
+            tabindex="-1",
+            cls=cn(
+                "z-50 max-h-[300px] min-w-[8rem] overflow-x-hidden overflow-y-auto rounded-md border bg-popover text-popover-foreground shadow-md",
+                cls,
+            ),
+            data_slot="select-content",
+            **kwargs,
+        )
+
+    return _
+
+
+def SelectItem(
+    *children,
+    value: str = "",
+    disabled: bool = False,
+    cls: str = "",
+    **kwargs,
+) -> FT:
+    def _(*, sig, selected, selected_label, **_):
+        content_ref = Signal(f"{sig}_content", _ref_only=True)
+
+        first_text = children[0] if children and isinstance(children[0], str) else ""
+        item_value = value or first_text
+        label_text = first_text or item_value
+        is_selected = selected.eq(item_value)
+
+        click_actions = merge_actions(
+            kwargs=kwargs,
+            after=[
+                selected.set(item_value),
+                selected_label.set(label_text),
+                content_ref.hidePopover(),
+            ],
+        )
+
+        return Div(
+            *children,
+            Span(
+                Icon("lucide:check", cls="size-4"),
+                style="opacity: 0; transition: opacity 0.15s",
+                data_style_opacity=is_selected.if_("1", "0"),
+                cls="absolute right-2 flex size-3.5 items-center justify-center",
+                data_slot="select-item-indicator",
+            ),
+            data_on_click=click_actions if not disabled else None,
+            role="option",
+            data_value=item_value,
+            data_selected=is_selected,
+            data_disabled="true" if disabled else None,
+            cls=cn(
+                "relative flex w-full cursor-default select-none items-center gap-2 rounded-sm py-1.5 pl-2 pr-8 text-sm outline-hidden",
+                "hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+                "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+                cls,
+            ),
+            data_slot="select-item",
+            **kwargs,
+        )
+
+    return _
+
+
+def SelectGroup(
+    *children,
+    label: str | None = None,
+    cls: str = "",
+    **kwargs,
+) -> FT:
+    def _(*, sig, **ctx):
+        return Div(
+            SelectLabel(label) if label else None,
+            *[inject_context(child, sig=sig, **ctx) for child in children],
+            cls=cls,
+            data_slot="select-group",
+            **kwargs,
+        )
+
+    return _
+
+
+def SelectLabel(
+    *children,
+    cls: str = "",
+    **kwargs,
+) -> FT:
+    return Div(
+        *children,
+        cls=cn("text-muted-foreground px-2 py-1.5 text-xs", cls),
+        data_slot="select-label",
+        **kwargs,
+    )
+
+
+def SelectSeparator(
+    cls: str = "",
+    **kwargs,
+) -> FT:
+    return Div(
+        cls=cn("bg-border pointer-events-none -mx-1 my-1 h-px", cls),
+        data_slot="select-separator",
+        **kwargs,
+    )
+
+
+def _get_value_label(item: str | tuple) -> tuple[str, str]:
+    match item:
+        case str():
+            return item, item
+        case (value, label):
+            return value, label
+        case _:
+            return "", ""
+
+
+def _find_initial_label(options: list, value: str | None) -> str:
+    if not value:
+        return ""
+
+    for opt in options:
+        match opt:
+            case str() if opt == value:
+                return opt
+            case (opt_value, label) if opt_value == value:
+                return label
+            case {"items": items}:
+                for item in items:
+                    item_value, item_label = _get_value_label(item)
+                    if item_value == value:
+                        return item_label
+    return ""
+
+
+def _build_select_items(options: list) -> list:
+    def _process_option(opt):
+        match opt:
+            case str():
+                return SelectItem(opt)
+            case (value, label):
+                return SelectItem(label, value=value)
+            case {"group": group_label, "items": group_items}:
+                return SelectGroup(
+                    *[
+                        SelectItem(item_label, value=item_value)
+                        for item_value, item_label in [_get_value_label(item) for item in group_items]
+                    ],
+                    label=group_label,
+                )
+
+    return [_process_option(opt) for opt in options]
+
+
+def SelectWithLabel(
+    *attrs,
+    label: str,
+    options: list[str | tuple[str, str] | dict],
+    value: str | None = None,
+    placeholder: str = "Select an option",
+    name: str | None = None,
+    signal: str | Signal = "",
+    id: str = "",
+    helper_text: str = "",
+    error_text: str = "",
+    required: bool = False,
+    disabled: bool = False,
+    side: str = "bottom",
+    label_cls: str = "",
+    select_cls: str = "",
+    cls: str = "",
+    **kwargs,
+) -> FT:
+    sig = getattr(signal, "_id", signal) or gen_id("select")
+    trigger_id = id or f"{sig}_trigger"
+
+    return Div(
+        HTMLLabel(
+            label,
+            Span(" *", cls="text-destructive") if required else None,
+            fr=trigger_id,
+            cls=cn("block text-sm font-medium mb-1.5", label_cls),
+        ),
+        Select(
+            SelectTrigger(
+                SelectValue(placeholder=placeholder),
+                cls=select_cls,
+                disabled=disabled or None,
+                aria_invalid="true" if error_text else None,
+                id=trigger_id,
+            ),
+            SelectContent(*_build_select_items(options), side=side),
+            *attrs,
+            value=value,
+            label=_find_initial_label(options, value),
+            signal=sig,
+            cls="w-full",
+            **kwargs,
+        ),
+        HTMLP(error_text, cls="text-sm text-destructive mt-1.5") if error_text else None,
+        HTMLP(helper_text, cls="text-sm text-muted-foreground mt-1.5") if helper_text and not error_text else None,
+        data_slot="select-with-label",
+        cls=cn("space-y-1.5", cls),
+    )

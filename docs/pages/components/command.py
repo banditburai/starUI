@@ -4,13 +4,13 @@ Command component documentation - Command palette for searching and executing ac
 
 from starhtml import Div, P, Span, Icon, Kbd, clipboard
 from starhtml.datastar import window
-from starui.registry.components.command import (
+from components.command import (
     Command, CommandInput, CommandList, CommandEmpty,
     CommandGroup, CommandItem, CommandSeparator, CommandShortcut,
     CommandDialog
 )
-from starui.registry.components.button import Button
-from starui.registry.components.badge import Badge
+from components.button import Button
+from components.badge import Badge
 from utils import auto_generate_page, with_code, Component, build_api_reference
 
 # Component metadata for auto-discovery

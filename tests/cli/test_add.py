@@ -1,5 +1,3 @@
-"""Tests for the add command."""
-
 import subprocess
 from contextlib import nullcontext
 from unittest.mock import MagicMock, patch
@@ -10,23 +8,27 @@ from click.exceptions import Exit
 from starui.cli.add import _setup_css_imports, add_command
 
 
-def _mock_loader(resolved: dict[str, str]):
-    """Create a mock loader that returns resolved sources."""
-    loader = MagicMock()
-    loader.load_component_with_dependencies.return_value = resolved
-    return loader
+def _mock_client(resolved: dict[str, str]):
+    client = MagicMock()
+    client.get_component_with_dependencies.return_value = resolved
+    client.get_component_metadata.side_effect = lambda name: {
+        "name": name,
+        "packages": [],
+        "css_imports": [],
+        "checksum": "",
+    }
+    client.version = "main"
+    return client
 
 
-def _run_add(
-    project, components, resolved, *, force=False, verbose=False, confirm_response=False
-):
-    """Run add_command with mocked dependencies. Returns captured mocks."""
-    loader = _mock_loader(resolved)
+def _run_add(project, components, resolved, *, force=False, verbose=False, confirm_response=False):
+    client = _mock_client(resolved)
 
     mocks = {}
     with (
         patch("starui.cli.add.get_project_config", return_value=project),
-        patch("starui.cli.add.ComponentLoader", return_value=loader),
+        patch("starui.cli.add.RegistryClient", return_value=client),
+        patch("starui.cli.add.Manifest", return_value=MagicMock()),
         patch("starui.cli.add.confirm", return_value=confirm_response),
         patch("starui.cli.add.subprocess.run") as mock_subprocess,
         patch("starui.cli.add.status_context", return_value=nullcontext()),
@@ -36,7 +38,7 @@ def _run_add(
         patch("starui.cli.add.info") as mock_info,
         patch("starui.cli.add.error") as mock_error,
     ):
-        mocks["loader"] = loader
+        mocks["client"] = client
         mocks["subprocess"] = mock_subprocess
         mocks["success"] = mock_success
         mocks["warning"] = mock_warning
@@ -48,8 +50,6 @@ def _run_add(
 
 
 class TestAddNewComponent:
-    """Adding a component that doesn't exist yet."""
-
     def test_writes_component_file(self, project):
         comp_dir = project.component_dir_absolute
         _run_add(
@@ -105,8 +105,6 @@ class TestAddNewComponent:
 
 
 class TestSkipExistingDeps:
-    """Dependencies already installed by init should be silently skipped."""
-
     def test_skips_existing_deps(self, project):
         comp_dir = project.component_dir_absolute
         (comp_dir / "utils.py").write_text("# local utils")
@@ -142,10 +140,7 @@ class TestSkipExistingDeps:
 
 
 class TestOverwriteConflicts:
-    """Explicitly requested components that already exist trigger a prompt."""
-
     def test_prompts_for_requested_that_exists(self, project):
-        """confirm returns True → file should be overwritten with new content."""
         comp_dir = project.component_dir_absolute
         (comp_dir / "utils.py").write_text("# u")
         (comp_dir / "button.py").write_text("# old button")
@@ -193,7 +188,6 @@ class TestOverwriteConflicts:
 
 class TestAllComponentsAlreadyInstalled:
     def test_no_new_files_written(self, project):
-        """All deps exist, nothing new requested — no new files."""
         comp_dir = project.component_dir_absolute
         (comp_dir / "utils.py").write_text("# u")
 
@@ -202,14 +196,10 @@ class TestAllComponentsAlreadyInstalled:
         after = set(comp_dir.iterdir())
 
         assert before == after
-        mocks["info"].assert_any_call(
-            "All components already installed (dependencies unchanged)"
-        )
+        mocks["info"].assert_any_call("All components already installed (dependencies unchanged)")
 
 
 class TestImportPreservation:
-    """Source is written verbatim — no import rewriting."""
-
     def test_preserves_relative_utils_import(self, project):
         source = "from .utils import cn, cva\n\ndef Button(): pass"
         _run_add(project, ["button"], {"utils": "# u", "button": source})
@@ -259,11 +249,18 @@ class TestInvalidComponentNames:
 
 class TestPackageInstallation:
     def test_installs_packages_via_subprocess(self, project):
-        loader = _mock_loader({"utils": "# u", "code_block": "# cb"})
+        client = _mock_client({"utils": "# u", "code_block": "# cb"})
+        client.get_component_metadata.side_effect = lambda name: {
+            "name": name,
+            "packages": ["starlighter"] if name == "code_block" else [],
+            "css_imports": [],
+            "checksum": "",
+        }
 
         with (
             patch("starui.cli.add.get_project_config", return_value=project),
-            patch("starui.cli.add.ComponentLoader", return_value=loader),
+            patch("starui.cli.add.RegistryClient", return_value=client),
+            patch("starui.cli.add.Manifest", return_value=MagicMock()),
             patch("starui.cli.add.confirm", return_value=False),
             patch("starui.cli.add.subprocess.run") as mock_run,
             patch("starui.cli.add.status_context", return_value=nullcontext()),
@@ -274,9 +271,7 @@ class TestPackageInstallation:
             patch("starui.cli.add.error"),
             patch("starui.cli.add._setup_code_highlighting"),
         ):
-            add_command(
-                components=["code_block"], force=False, verbose=False, theme=None
-            )
+            add_command(components=["code_block"], force=False, verbose=False, theme=None)
 
         mock_run.assert_called_once_with(
             ["uv", "add", "starlighter"],
@@ -286,12 +281,18 @@ class TestPackageInstallation:
         )
 
     def test_install_failure_warns_but_continues(self, project):
-        """If uv add fails, component is still installed."""
-        loader = _mock_loader({"utils": "# u", "code_block": "# cb"})
+        client = _mock_client({"utils": "# u", "code_block": "# cb"})
+        client.get_component_metadata.side_effect = lambda name: {
+            "name": name,
+            "packages": ["starlighter"] if name == "code_block" else [],
+            "css_imports": [],
+            "checksum": "",
+        }
 
         with (
             patch("starui.cli.add.get_project_config", return_value=project),
-            patch("starui.cli.add.ComponentLoader", return_value=loader),
+            patch("starui.cli.add.RegistryClient", return_value=client),
+            patch("starui.cli.add.Manifest", return_value=MagicMock()),
             patch("starui.cli.add.confirm", return_value=False),
             patch(
                 "starui.cli.add.subprocess.run",
@@ -305,11 +306,8 @@ class TestPackageInstallation:
             patch("starui.cli.add.error"),
             patch("starui.cli.add._setup_code_highlighting"),
         ):
-            add_command(
-                components=["code_block"], force=False, verbose=False, theme=None
-            )
+            add_command(components=["code_block"], force=False, verbose=False, theme=None)
 
-        # Component was still written despite package install failure
         assert (project.component_dir_absolute / "code_block.py").exists()
         mock_warning.assert_called_once()
         assert "starlighter" in mock_warning.call_args[0][0]
@@ -320,20 +318,42 @@ class TestCssImports:
         input_css = project.css_dir_absolute / "input.css"
         input_css.write_text('@import "tailwindcss";\n')
 
-        _run_add(project, ["typography"], {"utils": "# u", "typography": "# t"})
+        client = _mock_client({"utils": "# u", "typography": "# t"})
+        client.get_component_metadata.side_effect = lambda name: {
+            "name": name,
+            "packages": [],
+            "css_imports": ['@plugin "@tailwindcss/typography";'] if name == "typography" else [],
+            "checksum": "",
+        }
+
+        with (
+            patch("starui.cli.add.get_project_config", return_value=project),
+            patch("starui.cli.add.RegistryClient", return_value=client),
+            patch("starui.cli.add.Manifest", return_value=MagicMock()),
+            patch("starui.cli.add.confirm", return_value=False),
+            patch("starui.cli.add.subprocess.run"),
+            patch("starui.cli.add.status_context", return_value=nullcontext()),
+            patch("starui.cli.add.console"),
+            patch("starui.cli.add.success"),
+            patch("starui.cli.add.warning"),
+            patch("starui.cli.add.info"),
+            patch("starui.cli.add.error"),
+        ):
+            add_command(components=["typography"], force=False, verbose=False, theme=None)
 
         content = input_css.read_text()
         assert '@plugin "@tailwindcss/typography";' in content
 
 
 class TestErrorPaths:
-    def test_loader_failure_raises_exit_with_message(self, project):
-        loader = MagicMock()
-        loader.load_component_with_dependencies.side_effect = RuntimeError("boom")
+    def test_client_failure_raises_exit_with_message(self, project):
+        client = MagicMock()
+        client.get_component_with_dependencies.side_effect = RuntimeError("boom")
 
         with (
             patch("starui.cli.add.get_project_config", return_value=project),
-            patch("starui.cli.add.ComponentLoader", return_value=loader),
+            patch("starui.cli.add.RegistryClient", return_value=client),
+            patch("starui.cli.add.Manifest", return_value=MagicMock()),
             patch("starui.cli.add.status_context", return_value=nullcontext()),
             patch("starui.cli.add.console"),
             patch("starui.cli.add.error") as mock_error,

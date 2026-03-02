@@ -10,7 +10,7 @@ ORDER = 15
 STATUS = "stable"
 
 from starhtml import Div, Span, Strong, Icon, Signal
-from starui.registry.components.dropdown_menu import (
+from components.dropdown_menu import (
     DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
     DropdownMenuCheckboxItem, DropdownMenuRadioGroup, DropdownMenuRadioItem,
     DropdownMenuSeparator, DropdownMenuLabel, DropdownMenuShortcut, DropdownMenuGroup,

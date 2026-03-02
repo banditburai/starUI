@@ -5,7 +5,7 @@ ORDER = 25
 STATUS = "stable"
 
 from starhtml import Div, P, Signal, Span, js
-from starui.registry.components.calendar import Calendar
+from components.calendar import Calendar
 from utils import auto_generate_page, Prop, build_api_reference, with_code
 
 

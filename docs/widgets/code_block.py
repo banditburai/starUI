@@ -1,7 +1,7 @@
 from starhtml import Div, FT, Icon, Span, Signal
 from starhtml.datastar import js
-from starui.registry.components.utils import cn
-from starui.registry.components.code_block import CodeBlock as BaseCodeBlock
+from components.utils import cn
+from components.code_block import CodeBlock as BaseCodeBlock
 from .copy_button import CopyButton
 
 

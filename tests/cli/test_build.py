@@ -10,7 +10,7 @@ from rich.console import Console
 
 from starui.cli.build import build_command, format_size
 from starui.config import ProjectConfig
-from starui.css.builder import BuildMode, BuildResult
+from starui.css import BuildMode, BuildResult
 
 
 class TestFormatSize:
@@ -70,7 +70,6 @@ class TestBuildCommand:
         mocks = _run_build(config, result)
 
         mocks["success"].assert_called_once_with("Build completed!")
-        # Verify the stats table was printed with our values
         buf = StringIO()
         real_console = Console(file=buf, width=120, no_color=True)
         for call in mocks["console"].print.call_args_list:
@@ -97,7 +96,6 @@ class TestBuildCommand:
         ):
             build_command(output=None, minify=True, verbose=False)
 
-        # First error call is the specific failure message
         assert mock_error.call_args_list[0][0][0] == "Build failed: tailwind not found"
 
     def test_cleans_existing_output_before_build(self, tmp_path):
@@ -128,7 +126,7 @@ class TestBuildCommand:
         mocks = _run_build(config, result, minify=False)
 
         mocks["builder"].build.assert_called_once_with(
-            mode=BuildMode.DEVELOPMENT, watch=False, scan_content=True
+            mode=BuildMode.DEVELOPMENT,
         )
 
     def test_minify_passes_production_mode(self, tmp_path):
@@ -138,7 +136,7 @@ class TestBuildCommand:
         mocks = _run_build(config, result, minify=True)
 
         mocks["builder"].build.assert_called_once_with(
-            mode=BuildMode.PRODUCTION, watch=False, scan_content=True
+            mode=BuildMode.PRODUCTION,
         )
 
     def test_output_flag_appends_css_suffix(self, tmp_path):
@@ -158,7 +156,6 @@ class TestBuildCommand:
             MockCSSBuilder.return_value = mock_builder
             build_command(output="dist/styles", minify=True, verbose=False)
 
-        # The config passed to CSSBuilder should have .css suffix
         assert config.css_output.suffix == ".css"
 
     def test_verbose_prints_output_path(self, tmp_path):

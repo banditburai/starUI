@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `Menubar` component with hover-intent navigation, submenus, checkbox/radio items, and keyboard support
+- `NavigationMenu` component with viewport popover, timer-based hover, and content panels
+- `Pagination` component with sliding page window, jump-5 ellipsis, and reactive page state
+- `SimplePagination` helper for common pagination patterns
+- CLI `star status`, `star diff`, `star update` commands for component management
+- Registry manifest system with checksum-based integrity verification
+
+### Changed
+- Registry restructured — components moved to `registry/components/`, metadata derived from source via AST
+- Component conciseness audit across all 35+ components: consistent patterns, removed dead code, improved accessibility attributes
+
 ## [0.2.1] - 2026-03-01
 
 ### Changed

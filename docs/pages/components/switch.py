@@ -9,11 +9,11 @@ ORDER = 35
 STATUS = "stable"
 
 from starhtml import Div, P, Label, Span, Form, Signal, all_, collect, evt
-from starui.registry.components.switch import Switch, SwitchWithLabel
-from starui.registry.components.button import Button
-from starui.registry.components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
-from starui.registry.components.badge import Badge
-from starui.registry.components.progress import Progress
+from components.switch import Switch, SwitchWithLabel
+from components.button import Button
+from components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
+from components.badge import Badge
+from components.progress import Progress
 from utils import auto_generate_page, with_code, Prop, Component, build_api_reference
 
 

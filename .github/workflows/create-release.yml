@@ -92,9 +92,12 @@ jobs:
         { print }
         ' pyproject.toml > pyproject.toml.tmp && mv pyproject.toml.tmp pyproject.toml
         
+    - name: Regenerate registry index
+      run: uv run python scripts/generate_index.py
+
     - name: Commit version bump
       run: |
-        git add pyproject.toml
+        git add pyproject.toml registry/index.json
         git commit -m "🔖 Bump version to ${{ steps.new_version.outputs.version }}"
         
     - name: Update CHANGELOG.md

@@ -5,9 +5,9 @@ ORDER = 65
 STATUS = "stable"
 
 from starhtml import Div, P, Span, Icon, Label, Code
-from starui.registry.components.tooltip import Tooltip, TooltipTrigger, TooltipContent
-from starui.registry.components.button import Button
-from starui.registry.components.input import Input as StarInput
+from components.tooltip import Tooltip, TooltipTrigger, TooltipContent
+from components.button import Button
+from components.input import Input as StarInput
 from utils import auto_generate_page, with_code, build_api_reference, Component
 
 

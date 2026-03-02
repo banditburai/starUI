@@ -1,7 +1,7 @@
 from typing import Any, TYPE_CHECKING
 from starhtml import *
-from starui.registry.components.theme_toggle import ThemeToggle
-from starui.registry.components.button import Button
+from components.theme_toggle import ThemeToggle
+from components.button import Button
 
 if TYPE_CHECKING:
     from layouts.base import HeaderConfig

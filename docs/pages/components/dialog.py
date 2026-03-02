@@ -9,13 +9,13 @@ ORDER = 40
 STATUS = "stable"
 
 from starhtml import Div, P, H3, Icon, Signal
-from starui.registry.components.dialog import (
+from components.dialog import (
     Dialog, DialogTrigger, DialogContent, DialogHeader, DialogFooter,
     DialogTitle, DialogDescription, DialogClose
 )
-from starui.registry.components.button import Button
-from starui.registry.components.input import InputWithLabel
-from starui.registry.components.checkbox import CheckboxWithLabel
+from components.button import Button
+from components.input import InputWithLabel
+from components.checkbox import CheckboxWithLabel
 from utils import auto_generate_page, with_code, Prop, Component, build_api_reference
 
 

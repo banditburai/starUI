@@ -9,7 +9,7 @@ ORDER = 15
 STATUS = "stable"
 
 from starhtml import Div, P, Span
-from starui.registry.components.avatar import Avatar, AvatarFallback, AvatarImage
+from components.avatar import Avatar, AvatarFallback, AvatarImage
 from utils import auto_generate_page, with_code, Prop, Component, build_api_reference
 
 

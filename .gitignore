@@ -82,8 +82,8 @@ Desktop.ini
 CLAUDE.md
 scratchpad/
 
-daisyft-reference/
 # StarUI generated files
+registry/index.json
 starui.css
 *.css.map
 
@@ -104,3 +104,6 @@ designs/
 
 # OG image build output (uncompressed — compress before copying to static/images/og/)
 docs/og_build/
+
+
+COMPONENT_CHECKLIST.md

@@ -27,9 +27,11 @@ class TestMainCLI:
 
     def test_version_command(self):
         """Test that version command works."""
+        from starui import __version__
+
         result = self.runner.invoke(app, ["--version"])
         assert result.exit_code == 0
-        assert "0.1.0" in result.stdout
+        assert __version__ in result.stdout
 
     def test_init_command_exists(self):
         """Test that init command is registered."""

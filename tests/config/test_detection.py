@@ -3,10 +3,10 @@
 from pathlib import Path
 
 from starui.config import (
+    CONTENT_PATTERNS,
     detect_component_dir,
     detect_css_output,
     detect_project_config,
-    get_content_patterns,
     get_project_config,
 )
 
@@ -103,10 +103,7 @@ class TestProjectConfigDetection:
 class TestContentPatterns:
     """Test content pattern generation."""
 
-    def test_get_content_patterns(self, tmp_path):
-        """Test get_content_patterns returns expected patterns."""
-        patterns = get_content_patterns(tmp_path)
-
-        assert "**/*.py" in patterns
-        assert "!**/__pycache__/**" in patterns
-        assert "!**/test_*.py" in patterns
+    def test_content_patterns(self):
+        assert "**/*.py" in CONTENT_PATTERNS
+        assert "!**/__pycache__/**" in CONTENT_PATTERNS
+        assert "!**/test_*.py" in CONTENT_PATTERNS

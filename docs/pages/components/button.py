@@ -9,7 +9,7 @@ ORDER = 10
 STATUS = "stable"
 
 from starhtml import Div, Span, Icon, Signal, set_timeout
-from starui.registry.components.button import Button
+from components.button import Button
 from utils import auto_generate_page, Prop, Component, build_api_reference, with_code
 
 

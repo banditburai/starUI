@@ -9,8 +9,8 @@ ORDER = 2
 STATUS = "stable"
 
 from starhtml import Div, P, Code, Ul, Li, Icon
-from starui.registry.components.alert import Alert, AlertTitle, AlertDescription
-from starui.registry.components.button import Button
+from components.alert import Alert, AlertTitle, AlertDescription
+from components.button import Button
 from utils import auto_generate_page, with_code, Prop, Component, build_api_reference
 
 

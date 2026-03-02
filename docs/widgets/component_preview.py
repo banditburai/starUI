@@ -1,8 +1,8 @@
 import hashlib
 from starhtml import FT, Div, P, H3, Iframe, Signal
-from starui.registry.components.tabs import Tabs, TabsContent, TabsList, TabsTrigger
-from starui.registry.components.code_block import CodeBlock as BaseCodeBlock
-from starui.registry.components.utils import cn
+from components.tabs import Tabs, TabsContent, TabsList, TabsTrigger
+from components.code_block import CodeBlock as BaseCodeBlock
+from components.utils import cn
 from .copy_button import CopyButton
 
 IFRAME_PREVIEW_REGISTRY = {}
@@ -22,8 +22,8 @@ def ComponentPreview(
     iframe_height: str = "400px",
     **attrs,
 ) -> FT:
-    if include_imports and not code_content.strip().startswith(('from starhtml import', 'from starui import')):
-        code_content = f"from starhtml import *\nfrom starui import *\n\n{code_content}"
+    if include_imports and not code_content.strip().startswith(('from starhtml import', 'from components')):
+        code_content = f"from starhtml import *\n\n{code_content}"
     
     preview_id = preview_id or f"preview_{hashlib.md5(code_content.encode()).hexdigest()[:8]}"
 

@@ -10,9 +10,9 @@ ORDER = 10
 STATUS = "stable"
 
 from starhtml import Div, P, Span, Icon, Signal, regex, js
-from starui.registry.components.input import Input
-from starui.registry.components.button import Button
-from starui.registry.components.label import Label as UILabel
+from components.input import Input
+from components.button import Button
+from components.label import Label as UILabel
 from utils import auto_generate_page, with_code, Prop, build_api_reference
 
 

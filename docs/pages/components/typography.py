@@ -10,14 +10,14 @@ ORDER = 85
 STATUS = "stable"
 
 from starhtml import Div, Li
-from starui.registry.components.typography import (
+from components.typography import (
     Display, H1, H2, H3, H4,
     P, Lead, Large, Small, Muted, Caption,
     InlineCode, Blockquote, List, Prose,
     Kbd, Mark, Hr
 )
-from starui.registry.components.card import Card, CardContent
-from starui.registry.components.badge import Badge
+from components.card import Card, CardContent
+from components.badge import Badge
 from utils import auto_generate_page, with_code, Component, Prop, build_api_reference
 
 

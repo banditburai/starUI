@@ -1,5 +1,5 @@
 from starhtml import *
-from starui.registry.components.utils import cn
+from components.utils import cn
 from .code_block import CodeBlock
 
 SCROLLBAR_STYLE = "scrollbar-width: thin;"

@@ -6,9 +6,9 @@ STATUS = "stable"
 
 from starhtml import Div, P, H3, Span, Icon, Signal, clipboard
 from starhtml.datastar import set_timeout
-from starui.registry.components.button import Button
-from starui.registry.components.code_block import CodeBlock, InlineCode
-from starui.registry.components.separator import Separator
+from components.button import Button
+from components.code_block import CodeBlock, InlineCode
+from components.separator import Separator
 from utils import auto_generate_page, with_code, Component, build_api_reference
 
 
@@ -36,8 +36,8 @@ def copy_button(signal, content, size="sm", button_cls=""):
 def python_syntax_highlighting_example():
     return Div(
         CodeBlock('''from starhtml import Div, H1, P, Form, Input
-from starui.registry.components.button import Button
-from starui.registry.components.card import Card, CardContent, CardHeader, CardTitle
+from components.button import Button
+from components.card import Card, CardContent, CardHeader, CardTitle
 
 
 def contact_form():
@@ -101,7 +101,7 @@ def inline_code_snippets_example():
     return Div(
         P(
             "Components are imported from the registry, e.g. ",
-            InlineCode("from starui.registry.components.button import Button"),
+            InlineCode("from components.button import Button"),
             ". Each component accepts a ",
             InlineCode("cls"),
             " parameter for additional Tailwind classes and ",
@@ -230,7 +230,6 @@ EXAMPLES_DATA = [
 API_REFERENCE = build_api_reference(
     components=[
         Component("CodeBlock", "Display multi-line code with syntax highlighting"),
-        Component("CodeBlockStyles", "Generate theme-aware styles for code blocks (add once to app headers)"),
         Component("InlineCode", "Highlight short code snippets within text and documentation"),
     ]
 )

@@ -5,8 +5,8 @@ from layouts.footer import DocsFooter
 from layouts.header import DocsHeader
 from layouts.sidebar import DocsSidebar, MobileSidebar
 from layouts.navigation import TopNavigation, BottomNavigation
-from starui.registry.components.button import Button
-from starui.registry.components.sheet import Sheet, SheetContent
+from components.button import Button
+from components.sheet import Sheet, SheetContent
 
 
 @dataclass

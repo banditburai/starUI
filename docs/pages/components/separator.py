@@ -5,8 +5,8 @@ ORDER = 25
 STATUS = "stable"
 
 from starhtml import Div, P, Span, Icon, Code
-from starui.registry.components.separator import Separator
-from starui.registry.components.button import Button
+from components.separator import Separator
+from components.button import Button
 from utils import with_code, Prop, build_api_reference, auto_generate_page
 
 

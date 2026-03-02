@@ -9,13 +9,13 @@ ORDER = 10
 STATUS = "stable"
 
 from starhtml import Div, P, Icon, Signal, Span, match
-from starui.registry.components.card import (
+from components.card import (
     Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent, CardFooter
 )
-from starui.registry.components.button import Button
-from starui.registry.components.badge import Badge
-from starui.registry.components.switch import SwitchWithLabel
-from starui.registry.components.dropdown_menu import (
+from components.button import Button
+from components.badge import Badge
+from components.switch import SwitchWithLabel
+from components.dropdown_menu import (
     DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
     DropdownMenuItem, DropdownMenuSeparator,
 )

@@ -10,12 +10,12 @@ ORDER = 60
 STATUS = "stable"
 
 from starhtml import Div, P, H3, Icon, Ul, Li, Signal
-from starui.registry.components.popover import (
+from components.popover import (
     Popover, PopoverTrigger, PopoverContent, PopoverClose
 )
-from starui.registry.components.button import Button
-from starui.registry.components.input import InputWithLabel
-from starui.registry.components.label import Label
+from components.button import Button
+from components.input import InputWithLabel
+from components.label import Label
 from utils import auto_generate_page, with_code, Component, build_api_reference
 
 

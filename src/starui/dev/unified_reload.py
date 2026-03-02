@@ -2,7 +2,6 @@
 
 import json
 from pathlib import Path
-from typing import Any
 
 from starlette.endpoints import WebSocketEndpoint
 from starlette.routing import WebSocketRoute
@@ -17,44 +16,19 @@ class DevReloadHandler(WebSocketEndpoint):
     async def on_connect(self, websocket: WebSocket) -> None:
         await websocket.accept()
         self.clients.add(websocket)
-        await self._send_message(
-            websocket, {"type": "connected", "message": "StarUI dev reload connected"}
-        )
+        await self._send_message(websocket, {"type": "connected", "message": "StarUI dev reload connected"})
 
     async def on_disconnect(self, websocket: WebSocket, close_code: int) -> None:
         self.clients.discard(websocket)
 
-    async def on_receive(self, websocket: WebSocket, data: Any) -> None:
-        pass  # Handle client messages if needed
-
     @classmethod
     async def notify_css_update(cls, css_path: Path, build_time: float = 0) -> None:
         """Notify all clients of CSS updates."""
-        if not cls.clients:
-            return
-
         await cls._broadcast_message(
             {
                 "type": "css-update",
                 "path": str(css_path.name),
-                "timestamp": build_time,
                 "buildTime": build_time,
-            }
-        )
-
-    @classmethod
-    async def notify_build_error(
-        cls, error: str, file_path: Path | None = None
-    ) -> None:
-        """Notify clients of build errors."""
-        if not cls.clients:
-            return
-
-        await cls._broadcast_message(
-            {
-                "type": "build-error",
-                "error": error,
-                "file": str(file_path) if file_path else None,
             }
         )
 
@@ -89,7 +63,7 @@ def create_dev_reload_route() -> WebSocketRoute:
     return WebSocketRoute("/live-reload", endpoint=DevReloadHandler)
 
 
-def DevReloadJs(**kwargs):
+def DevReloadJs():
     """Generate unified development reload JavaScript."""
     from starhtml.xtend import Script
 
@@ -123,7 +97,6 @@ def DevReloadJs(**kwargs):
 
             switch (message.type) {
                 case 'css-update':
-                    // Hot reload CSS without page refresh
                     const links = document.querySelectorAll('link[href*="starui.css"], link[href*="tailwind"]');
                     links.forEach(link => {
                         const newLink = link.cloneNode();

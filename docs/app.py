@@ -7,6 +7,8 @@ from contextlib import asynccontextmanager
 
 # Add docs directory to path so component modules can import utils
 sys.path.insert(0, str(Path(__file__).parent))
+# Add registry directory to path so docs can import components directly
+sys.path.insert(0, str(Path(__file__).parent.parent / "registry"))
 
 from starhtml import *
 from starhtml.plugins import motion, scroll
@@ -305,8 +307,8 @@ def _parse_component_previews_from_source(source: str) -> list[dict]:
 def installation():
     from widgets.component_preview import ComponentPreview
     from widgets.code_block import CodeBlock
-    from starui.registry.components.button import Button
-    from starui.registry.components.input import Input
+    from components.button import Button
+    from components.input import Input
     
     return (
         Title("Installation \u2014 StarUI"),
@@ -332,12 +334,12 @@ def installation():
                         Button("View Components", variant="outline"),
                         cls="flex gap-3 items-center justify-center"
                     ),
-                    '''from starui import Button
+                    '''from components.ui.button import Button
 
 Button("Get Started")
 Button("View Components", variant="outline")''',
                     title="Quick Start",
-                    description="Import and use components immediately",
+                    description="Import and use components in your app",
                     default_tab="code"
                 ),
                 cls="mb-12"
@@ -445,7 +447,8 @@ star list''',
                         Button("Subscribe", cls="w-full"),
                         cls="max-w-sm mx-auto space-y-3"
                     ),
-                    '''from starui import Button, Input
+                    '''from components.ui.button import Button
+from components.ui.input import Input
 
 # Use components in your StarHTML app
 Div(
@@ -454,7 +457,7 @@ Div(
     cls="space-y-3"
 )''',
                     title="Basic Component Usage",
-                    description="Import and use components directly in your StarHTML templates"
+                    description="Import and use components from your local project"
                 ),
                 
                 ComponentPreview(
@@ -464,8 +467,8 @@ Div(
                         P("Clicked: ", Span(data_text=count, cls="font-bold text-primary")),
                         cls="text-center space-y-3"
                     ),
-                    '''from starui import Button
-from starhtml import Signal
+                    '''from starhtml import Signal
+from components.ui.button import Button
 
 # Add interactivity with Datastar
 Div(
@@ -593,7 +596,7 @@ iframe_app.register(position, clipboard)
 @iframe_rt("/toast-sse-demo")
 @sse
 async def toast_sse_demo():
-    from starui.registry.components.toast import ToastQueue
+    from components.toast import ToastQueue
     t = ToastQueue()
     yield t.info("Deploying...", "Building from main branch")
     await asyncio.sleep(1.5)

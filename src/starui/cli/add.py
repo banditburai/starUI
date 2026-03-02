@@ -1,30 +1,60 @@
-import re
 import subprocess
 
 import typer
 
 from starui.config import get_project_config
-from starui.registry.component_metadata import get_component_metadata
-from starui.registry.loader import ComponentLoader
+from starui.registry.client import RegistryClient
+from starui.registry.manifest import Manifest
 
-from .utils import confirm, console, error, info, status_context, success, warning
+from .utils import (
+    confirm,
+    console,
+    error,
+    info,
+    install_component,
+    status_context,
+    success,
+    validate_component_name,
+    warning,
+)
+
+
+def _build_token_rules(theme_keys: dict[str, str]) -> str:
+    lines: list[str] = []
+
+    # Scrollbar rules for code blocks
+    lines.append('[data-slot="code-block"]::-webkit-scrollbar { height: 8px; width: 8px; }')
+    for suffix, extra in [
+        ("track", ""),
+        ("thumb", " border-radius: 4px;"),
+        ("thumb-hover", ""),
+    ]:
+        prop = f"--scrollbar-{suffix}"
+        if prop in theme_keys:
+            lines.append(f'[data-slot="code-block"]::-webkit-scrollbar-{suffix} {{ background: var({prop});{extra} }}')
+
+    # Token class rules derived from --token-* keys
+    for key in theme_keys:
+        if not key.startswith("--token-"):
+            continue
+        cls_name = key.removeprefix("--")
+        extra = " font-style: italic;" if key == "--token-comment" else ""
+        lines.append(f".{cls_name} {{ color: var({key});{extra} }}")
+
+    return "\n".join(lines)
 
 
 def _setup_code_highlighting(config, theme: str | None) -> None:
     try:
         from starlighter import THEMES
     except ImportError:
-        warning(
-            "Starlighter not installed. This should have been installed automatically. Try: uv add starlighter"
-        )
+        warning("Starlighter not installed. This should have been installed automatically. Try: uv add starlighter")
         return
-
-    from starui.registry.components.code_block import _RESIDUAL_CSS
 
     css_dir = config.css_dir_absolute
     input_css = css_dir / "input.css"
 
-    if not theme:
+    if theme is None:
         console.print("\n[bold]Select a syntax highlighting theme:[/bold]")
         themes = [
             (
@@ -38,8 +68,12 @@ def _setup_code_highlighting(config, theme: str | None) -> None:
         for i, (_, _, desc) in enumerate(themes, 1):
             console.print(f"{i}. {desc}")
 
-        choice = int(typer.prompt("Enter choice (1-3)", default="1")) - 1
-        light_theme, dark_theme, _ = themes[min(choice, len(themes) - 1)]
+        try:
+            choice = int(typer.prompt("Enter choice (1-3)", default="1")) - 1
+        except ValueError:
+            choice = 0
+        choice = max(0, min(choice, len(themes) - 1))
+        light_theme, dark_theme, _ = themes[choice]
     else:
         light_theme, dark_theme = None, theme
 
@@ -47,7 +81,8 @@ def _setup_code_highlighting(config, theme: str | None) -> None:
         rules = "\n    ".join(f"{k}: {v};" for k, v in THEMES[theme_name].items())
         return f"{selector} {{\n    {rules}\n}}"
 
-    css_parts = [_RESIDUAL_CSS.strip()]
+    ref_theme = THEMES.get(dark_theme or light_theme, {})
+    css_parts = [_build_token_rules(ref_theme)]
 
     if light_theme and dark_theme:
         css_parts.append(_wrap_vars(":root", light_theme))
@@ -56,9 +91,8 @@ def _setup_code_highlighting(config, theme: str | None) -> None:
         theme_name = f"{light_theme}/{dark_theme}"
         mode = "light/dark auto-switching"
     else:
-        selected = dark_theme or theme
-        css_parts.append(_wrap_vars(":root", selected))
-        theme_name = selected
+        css_parts.append(_wrap_vars(":root", dark_theme))
+        theme_name = dark_theme
         mode = "dark only"
 
     (css_dir / "starlighter.css").write_text("\n\n".join(css_parts) + "\n")
@@ -69,11 +103,7 @@ def _setup_code_highlighting(config, theme: str | None) -> None:
         if "@import './starlighter.css'" not in content:
             lines = content.split("\n")
             idx = next(
-                (
-                    i + 1
-                    for i, line in enumerate(lines)
-                    if '@import "tailwindcss"' in line
-                ),
+                (i + 1 for i, line in enumerate(lines) if '@import "tailwindcss"' in line),
                 1,
             )
             lines.insert(idx, "@import './starlighter.css';")
@@ -99,6 +129,21 @@ def _setup_css_imports(config, css_imports: list[str]) -> None:
         input_css.write_text(content)
 
 
+def _install_packages(packages: set[str]) -> None:
+    for package in packages:
+        info(f"Installing package: {package}")
+        try:
+            subprocess.run(
+                ["uv", "add", package],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            success(f"Installed: {package}")
+        except subprocess.CalledProcessError as e:
+            warning(f"Failed to install {package}: {e.stderr}")
+
+
 def add_command(
     components: list[str] = typer.Argument(..., help="Components to add"),
     force: bool = typer.Option(False, "--force", help="Overwrite existing files"),
@@ -107,13 +152,14 @@ def add_command(
 ) -> None:
     """Add components to your project."""
 
-    if invalid := [c for c in components if not re.match(r"^[a-z][a-z0-9_-]*$", c)]:
+    if invalid := [c for c in components if not validate_component_name(c)]:
         error(f"Invalid component names: {', '.join(invalid)}")
         raise typer.Exit(1)
 
     try:
         config = get_project_config()
-        loader = ComponentLoader()
+        manifest = Manifest(config.project_root)
+        client = RegistryClient(version=manifest.registry_version)
     except Exception as e:
         error(f"Initialization failed: {e}")
         raise typer.Exit(1) from e
@@ -124,15 +170,12 @@ def add_command(
             normalized = component.replace("-", "_")
             if verbose:
                 info(f"Resolving {component} -> {normalized}...")
-            resolved.update(loader.load_component_with_dependencies(normalized))
+            resolved.update(client.get_component_with_dependencies(normalized))
 
         component_dir = config.component_dir_absolute
         requested = {c.replace("-", "_") for c in components}
 
-        def exists(n):
-            return (component_dir / f"{n}.py").exists()
-
-        conflicts = [n for n in resolved if n in requested and exists(n)]
+        conflicts = [n for n in resolved if n in requested and (component_dir / f"{n}.py").exists()]
         if conflicts and not force:
             warning("The following requested components already exist:")
             for name in conflicts:
@@ -142,48 +185,34 @@ def add_command(
 
         if not force:
             resolved = {
-                n: src for n, src in resolved.items() if n in requested or not exists(n)
+                n: src for n, src in resolved.items() if n in requested or not (component_dir / f"{n}.py").exists()
             }
-
-        packages = {
-            pkg
-            for name in resolved
-            if (metadata := get_component_metadata(name))
-            for pkg in metadata.packages
-        }
-
-        css_imports = [
-            css_import
-            for name in resolved
-            if (metadata := get_component_metadata(name))
-            for css_import in metadata.css_imports
-        ]
-
-        for package in packages:
-            info(f"Installing package: {package}")
+        packages: set[str] = set()
+        css_imports: list[str] = []
+        for name in resolved:
             try:
-                subprocess.run(
-                    ["uv", "add", package],
-                    check=True,
-                    capture_output=True,
-                    text=True,
-                )
-                success(f"Installed: {package}")
-            except subprocess.CalledProcessError as e:
-                warning(f"Failed to install {package}: {e.stderr}")
+                meta = client.get_component_metadata(name)
+                packages.update(meta.get("packages", []))
+                css_imports.extend(meta.get("css_imports", []))
+            except FileNotFoundError:
+                pass
+
+        _install_packages(packages)
 
         if "code_block" in resolved:
             _setup_code_highlighting(config, theme)
 
         if css_imports:
-            _setup_css_imports(config, css_imports)
+            _setup_css_imports(config, list(dict.fromkeys(css_imports)))
 
         with status_context("Installing components..."):
             component_dir.mkdir(parents=True, exist_ok=True)
             (component_dir / "__init__.py").touch()
 
             for name, source in resolved.items():
-                (component_dir / f"{name}.py").write_text(source)
+                install_component(name, source, config=config, client=client, manifest=manifest)
+
+            manifest.save()
 
         if resolved:
             success(f"Installed components: {', '.join(resolved.keys())}")
@@ -193,9 +222,13 @@ def add_command(
         if verbose:
             info(f"Location: {component_dir}")
 
-        first = (list(resolved) or list(requested))[0].title().replace("_", "")
-        console.print(f"\n💡 Next steps:\n  • Import: from starui import {first}")
+        if first_name := next(iter(resolved or requested), None):
+            class_name = first_name.title().replace("_", "")
+            import_path = str(config.component_dir).replace("/", ".").replace("\\", ".")
+            console.print(f"\n  Next steps:\n  • Import: from {import_path}.{first_name} import {class_name}")
 
+    except typer.Exit:
+        raise
     except Exception as e:
         error(f"Installation failed: {e}")
         raise typer.Exit(1) from e

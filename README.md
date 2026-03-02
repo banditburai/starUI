@@ -21,7 +21,8 @@ uv add starui
 
 ```python
 from starhtml import *
-from starui import *
+from components.ui.button import Button
+from components.ui.card import Card, CardHeader, CardTitle, CardContent
 
 app, rt = star_app()
 

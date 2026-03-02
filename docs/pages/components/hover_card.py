@@ -10,12 +10,12 @@ ORDER = 120
 STATUS = "stable"
 
 from starhtml import Div, P, Icon, Span, H4, A, Img
-from starui.registry.components.hover_card import (
+from components.hover_card import (
     HoverCard, HoverCardTrigger, HoverCardContent,
 )
-from starui.registry.components.button import Button
-from starui.registry.components.badge import Badge
-from starui.registry.components.avatar import Avatar
+from components.button import Button
+from components.badge import Badge
+from components.avatar import Avatar
 from utils import auto_generate_page, with_code, Component, build_api_reference
 
 

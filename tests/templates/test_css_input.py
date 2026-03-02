@@ -3,7 +3,7 @@
 from pathlib import Path
 
 from starui.config import ProjectConfig
-from starui.templates.css_input import generate_css_input
+from starui.templates import generate_css_input
 
 
 class TestCSSInput:

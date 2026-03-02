@@ -102,16 +102,16 @@ class TestAddDefaultComponents:
 
         mock_client = MagicMock()
         mock_client.get_component_source.return_value = "# utils source"
-
-        mock_loader = MagicMock()
-        mock_loader.load_component_with_dependencies.return_value = {
+        mock_client.version = "main"
+        mock_client.get_component_metadata.return_value = {"checksum": "", "packages": [], "css_imports": []}
+        mock_client.get_component_with_dependencies.return_value = {
             "theme_toggle": "# toggle",
             "button": "# button",
         }
 
         with (
             patch("starui.cli.init.RegistryClient", return_value=mock_client),
-            patch("starui.cli.init.ComponentLoader", return_value=mock_loader),
+            patch("starui.cli.init.Manifest", return_value=MagicMock()),
         ):
             add_default_components(project)
 
@@ -124,9 +124,7 @@ class TestAddDefaultComponents:
     def test_exception_swallowed(self, project):
         from starui.cli.init import add_default_components
 
-        with patch(
-            "starui.cli.init.RegistryClient", side_effect=RuntimeError("network error")
-        ):
+        with patch("starui.cli.init.RegistryClient", side_effect=RuntimeError("network error")):
             add_default_components(project, verbose=True)
 
         assert not (project.component_dir_absolute / "utils.py").exists()
@@ -220,16 +218,16 @@ class TestInitCommand:
 
         mock_client = MagicMock()
         mock_client.get_component_source.return_value = "# utils"
-
-        mock_loader = MagicMock()
-        mock_loader.load_component_with_dependencies.return_value = {
+        mock_client.version = "main"
+        mock_client.get_component_metadata.return_value = {"checksum": "", "packages": [], "css_imports": []}
+        mock_client.get_component_with_dependencies.return_value = {
             "theme_toggle": "# toggle",
         }
 
         with (
             patch("starui.cli.init.detect_project_config", return_value=project),
             patch("starui.cli.init.RegistryClient", return_value=mock_client),
-            patch("starui.cli.init.ComponentLoader", return_value=mock_loader),
+            patch("starui.cli.init.Manifest", return_value=MagicMock()),
             patch("starui.cli.init.console"),
         ):
             init_command(force=True, verbose=True, config=False)
@@ -249,14 +247,14 @@ class TestInitCommand:
 
         mock_client = MagicMock()
         mock_client.get_component_source.return_value = "# utils"
-
-        mock_loader = MagicMock()
-        mock_loader.load_component_with_dependencies.return_value = {}
+        mock_client.version = "main"
+        mock_client.get_component_metadata.return_value = {"checksum": "", "packages": [], "css_imports": []}
+        mock_client.get_component_with_dependencies.return_value = {}
 
         with (
             patch("starui.cli.init.detect_project_config", return_value=project),
             patch("starui.cli.init.RegistryClient", return_value=mock_client),
-            patch("starui.cli.init.ComponentLoader", return_value=mock_loader),
+            patch("starui.cli.init.Manifest", return_value=MagicMock()),
             patch("starui.cli.init.console"),
         ):
             init_command(force=True, verbose=True, config=True)
