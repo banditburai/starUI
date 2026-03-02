@@ -1,0 +1,502 @@
+{
+  "version": "0.2.1",
+  "schema_version": 1,
+  "components": {
+    "accordion": {
+      "name": "accordion",
+      "description": "Collapsible content sections",
+      "file": "components/accordion.py",
+      "dependencies": [
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [],
+      "checksum": "sha256:ae538f63bb953645e3449302d4817816198c3510bc9ad216de0e4c30b0657344"
+    },
+    "alert": {
+      "name": "alert",
+      "description": "Alert notifications",
+      "file": "components/alert.py",
+      "dependencies": [
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [],
+      "checksum": "sha256:b4b55714c0ecae389df6d4298d11e3d8bcfc2c3cb816e1ddcca8ba90ee343641"
+    },
+    "alert_dialog": {
+      "name": "alert_dialog",
+      "description": "Alert dialog for confirmations",
+      "file": "components/alert_dialog.py",
+      "dependencies": [
+        "button",
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [],
+      "checksum": "sha256:f403efa380e230ed5dc1075c0e8f5b89fd6389eebd04a1371b2174357fbe26fc"
+    },
+    "avatar": {
+      "name": "avatar",
+      "description": "User profile images with fallback",
+      "file": "components/avatar.py",
+      "dependencies": [
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [],
+      "checksum": "sha256:4bb312e8696ca34ec422c38add2395a26ababb77754e3bf92e3eb978fda00f73"
+    },
+    "badge": {
+      "name": "badge",
+      "description": "Badge for labels",
+      "file": "components/badge.py",
+      "dependencies": [
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [],
+      "checksum": "sha256:784db78b4ab35fd854c90a7719fbffc87ccb18b1ec7c6df4f477d5d91bc4993b"
+    },
+    "breadcrumb": {
+      "name": "breadcrumb",
+      "description": "Breadcrumb navigation",
+      "file": "components/breadcrumb.py",
+      "dependencies": [
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [],
+      "checksum": "sha256:c16228f730ae6f72c8f6634317c20d79960c79f77ecc0fb3bf02b0824c6406c4"
+    },
+    "button": {
+      "name": "button",
+      "description": "Button with variants",
+      "file": "components/button.py",
+      "dependencies": [
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [],
+      "checksum": "sha256:081b7270b5f7ad77bbcf948b9f8386e76aae662a45ca698ab84f394145b23d0d"
+    },
+    "calendar": {
+      "name": "calendar",
+      "description": "Date picker with range and multiple selection",
+      "file": "components/calendar.py",
+      "dependencies": [
+        "button",
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [],
+      "checksum": "sha256:ce9ffe0a598ca0ff688ecc68fd5c045f5c7cdd5710070175163298c18203c36c"
+    },
+    "card": {
+      "name": "card",
+      "description": "Card container",
+      "file": "components/card.py",
+      "dependencies": [
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [],
+      "checksum": "sha256:1563800f3f4901add2b6aef253f26bba6ed9b9e36dd6a8300386e77a8fc9ec0b"
+    },
+    "checkbox": {
+      "name": "checkbox",
+      "description": "Checkbox input",
+      "file": "components/checkbox.py",
+      "dependencies": [
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [],
+      "checksum": "sha256:62c8d4fcf12f59ec0751858c7e604a69c7ce699e3d91ea931608787ddcf943fe"
+    },
+    "code_block": {
+      "name": "code_block",
+      "description": "Code block with syntax highlighting",
+      "file": "components/code_block.py",
+      "dependencies": [
+        "utils"
+      ],
+      "packages": [
+        "starlighter"
+      ],
+      "css_imports": [],
+      "handlers": [],
+      "checksum": "sha256:8f155bc4698df525213449a57abe4ba7a869dbe4f14bd28a599b4a83f63be724"
+    },
+    "command": {
+      "name": "command",
+      "description": "Command palette interface",
+      "file": "components/command.py",
+      "dependencies": [
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [],
+      "checksum": "sha256:e2e8fd266aa6c9088fbbf3ceda20fbaeeb419427876c08d59aaa8c66c1d51543"
+    },
+    "date_picker": {
+      "name": "date_picker",
+      "description": "Date picker with popover calendar",
+      "file": "components/date_picker.py",
+      "dependencies": [
+        "button",
+        "calendar",
+        "input",
+        "popover",
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [],
+      "checksum": "sha256:f10844c42292a15ff012e17cb02b603d5191a174cdef064a47671b76cf9ed774"
+    },
+    "dialog": {
+      "name": "dialog",
+      "description": "Modal dialog",
+      "file": "components/dialog.py",
+      "dependencies": [
+        "button",
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [],
+      "checksum": "sha256:4abf8ff6e7850a8e0835186305c4303201408ac2421930f9d043fe13e60e2969"
+    },
+    "dropdown_menu": {
+      "name": "dropdown_menu",
+      "description": "Dropdown menu with items",
+      "file": "components/dropdown_menu.py",
+      "dependencies": [
+        "button",
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [
+        "position"
+      ],
+      "checksum": "sha256:2dbd45e71a147fc5dd66cb78eb9e2d0745d216335a04456ae224a0eac52d707c"
+    },
+    "hover_card": {
+      "name": "hover_card",
+      "description": "Hover card with content",
+      "file": "components/hover_card.py",
+      "dependencies": [
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [
+        "position"
+      ],
+      "checksum": "sha256:8da61e8e329182ea46ace63d5205c55ea685d3dd1d135333b200b598f5bc77ec"
+    },
+    "input": {
+      "name": "input",
+      "description": "Form input",
+      "file": "components/input.py",
+      "dependencies": [
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [],
+      "checksum": "sha256:61ee626c7578773aaf7e0b154e5718112831115492fdbb9d02fd52013418824f"
+    },
+    "label": {
+      "name": "label",
+      "description": "Form label",
+      "file": "components/label.py",
+      "dependencies": [
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [],
+      "checksum": "sha256:fb16966a56b39526e2d576cb1466e7e6ee93764af8da92219116150301655574"
+    },
+    "menubar": {
+      "name": "menubar",
+      "description": "Desktop-style persistent menu bar",
+      "file": "components/menubar.py",
+      "dependencies": [
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [
+        "position"
+      ],
+      "checksum": "sha256:2979ab3ee9227321f6c139c625d1af2e64fbbfd23ab4a6d25b1539a5aaa3037a"
+    },
+    "navigation_menu": {
+      "name": "navigation_menu",
+      "description": "Horizontal nav with hover-activated panels",
+      "file": "components/navigation_menu.py",
+      "dependencies": [
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [
+        "position"
+      ],
+      "checksum": "sha256:e8936086dae3867535de64eca8fb801f21dca70afa1c8e7418e4f0c2d61fc0da"
+    },
+    "pagination": {
+      "name": "pagination",
+      "description": "Page navigation with prev/next controls",
+      "file": "components/pagination.py",
+      "dependencies": [
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [],
+      "checksum": "sha256:f3086126219b70867c108b53709c1553cb8c5c627e4dc731d27a4670981fa97a"
+    },
+    "popover": {
+      "name": "popover",
+      "description": "Popover with trigger",
+      "file": "components/popover.py",
+      "dependencies": [
+        "button",
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [
+        "position"
+      ],
+      "checksum": "sha256:ccae233098e79c4818cb3d59833fb2cc639aeddfae62ac56d0c873f20ec65622"
+    },
+    "progress": {
+      "name": "progress",
+      "description": "Progress indicators",
+      "file": "components/progress.py",
+      "dependencies": [
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [],
+      "checksum": "sha256:61004583c8e6848278c11f0344e195638c3b4faaa1dbd0fb5c92794b616b032f"
+    },
+    "radio_group": {
+      "name": "radio_group",
+      "description": "Radio button group",
+      "file": "components/radio_group.py",
+      "dependencies": [
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [],
+      "checksum": "sha256:eaa4d808c9934b7e750b8f05aaba20c76793a74a0ef2798b7d61e8e25ef35d55"
+    },
+    "select": {
+      "name": "select",
+      "description": "Dropdown selection",
+      "file": "components/select.py",
+      "dependencies": [
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [
+        "position"
+      ],
+      "checksum": "sha256:6b2529a323a10e10bdafb8eaca23feb690c2890e0daa4bd006182788e5c5f63b"
+    },
+    "separator": {
+      "name": "separator",
+      "description": "Visual separators",
+      "file": "components/separator.py",
+      "dependencies": [
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [],
+      "checksum": "sha256:0f5fff36c5d9d010df89f3f8ee8dfdeb13fed3420309c5be10fe1b76857f04e7"
+    },
+    "sheet": {
+      "name": "sheet",
+      "description": "Slide-out panel",
+      "file": "components/sheet.py",
+      "dependencies": [
+        "button",
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [],
+      "checksum": "sha256:a2ef038168184378b55a3fdfea44346ceb768186489aada6da94eb0d7cc71fb0"
+    },
+    "skeleton": {
+      "name": "skeleton",
+      "description": "Loading placeholder",
+      "file": "components/skeleton.py",
+      "dependencies": [
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [],
+      "checksum": "sha256:1dd21a1de567d9195c802c20f6ae7f6e980b6bdbb38ef35191be0b9c9221d731"
+    },
+    "switch": {
+      "name": "switch",
+      "description": "Toggle switch",
+      "file": "components/switch.py",
+      "dependencies": [
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [],
+      "checksum": "sha256:9a0a2a6e1314fad50fb26802e6053255048ab29894dfbfe600dde2b24b593ee6"
+    },
+    "table": {
+      "name": "table",
+      "description": "Data display in rows and columns",
+      "file": "components/table.py",
+      "dependencies": [
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [],
+      "checksum": "sha256:e683e0016cbc6051d0aef03f34bf346bdbe2dcac518e0591d210ddc38497f0fd"
+    },
+    "tabs": {
+      "name": "tabs",
+      "description": "Tabbed interface",
+      "file": "components/tabs.py",
+      "dependencies": [
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [],
+      "checksum": "sha256:b2b3504918b5944f4b631d63fd8d894184992cd0062ba7707ff77c2436e202b0"
+    },
+    "textarea": {
+      "name": "textarea",
+      "description": "Multi-line text input",
+      "file": "components/textarea.py",
+      "dependencies": [
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [],
+      "checksum": "sha256:fbd1ae8bcb58e6e0ceee5b85c82569018fa284ce38f0514bdbdda034a1eb93d7"
+    },
+    "theme_toggle": {
+      "name": "theme_toggle",
+      "description": "Theme toggle button",
+      "file": "components/theme_toggle.py",
+      "dependencies": [
+        "button",
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [],
+      "checksum": "sha256:80064f64cb55d32b2dce08f1aeb131c7b72bb54099750606a4c4ffde43139586"
+    },
+    "toast": {
+      "name": "toast",
+      "description": "Toast notifications",
+      "file": "components/toast.py",
+      "dependencies": [
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [],
+      "checksum": "sha256:be4e78ba17fe5c1bfab8cecd466475a3d65b461e337e92b5e344072f7727eb0d"
+    },
+    "toggle": {
+      "name": "toggle",
+      "description": "Toggle button",
+      "file": "components/toggle.py",
+      "dependencies": [
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [],
+      "checksum": "sha256:090589f3118670982e20fa525f15bceaca190cdd264a5ab06cedf24d632c4311"
+    },
+    "toggle_group": {
+      "name": "toggle_group",
+      "description": "Toggle button group",
+      "file": "components/toggle_group.py",
+      "dependencies": [
+        "toggle",
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [],
+      "checksum": "sha256:10547c63338096b7ecf99c5b16a1fbecd430982378999701a5da06a5d05f956b"
+    },
+    "tooltip": {
+      "name": "tooltip",
+      "description": "Hover and focus tooltips",
+      "file": "components/tooltip.py",
+      "dependencies": [
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [
+        "position"
+      ],
+      "checksum": "sha256:f39c72fd2ed14daa6e29c4bd2262acff1c00512b3f3befec9be032accf4af3f1"
+    },
+    "typography": {
+      "name": "typography",
+      "description": "Typography components with beautiful defaults",
+      "file": "components/typography.py",
+      "dependencies": [
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [
+        "@plugin \"@tailwindcss/typography\";"
+      ],
+      "handlers": [],
+      "checksum": "sha256:8974fc3346afb8e0d7c59722ff60960fa088dfdcbef892fb93346886dc002a68"
+    },
+    "utils": {
+      "name": "utils",
+      "description": "Class name utilities",
+      "file": "components/utils.py",
+      "dependencies": [],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [],
+      "checksum": "sha256:583f910d676558c407ac5eaef5c40dfd2bc4a84be6414f683252dc5ac7dfa043"
+    }
+  }
+}

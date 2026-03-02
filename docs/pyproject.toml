@@ -7,7 +7,7 @@ requires-python = ">=3.12"
 dependencies = [
     "starhtml>=0.5.12",
     "starlighter>=0.2.0",
-    "starui @ file:///${PROJECT_ROOT}/../",
+    "starui>=0.3.0",
     "uvicorn>=0.30.0",
 ]
 

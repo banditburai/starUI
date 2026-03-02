@@ -83,7 +83,6 @@ CLAUDE.md
 scratchpad/
 
 # StarUI generated files
-registry/index.json
 starui.css
 *.css.map
 
