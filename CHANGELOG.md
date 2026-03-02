@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-03-02
+
 ### Added
 - `Menubar` component with hover-intent navigation, submenus, checkbox/radio items, and keyboard support
 - `NavigationMenu` component with viewport popover, timer-based hover, and content panels
@@ -318,3 +320,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [0.2.0]: https://github.com/banditburai/starUI/releases/tag/v0.2.0
 
 [0.2.1]: https://github.com/banditburai/starUI/releases/tag/v0.2.1
+
+[0.3.0]: https://github.com/banditburai/starUI/releases/tag/v0.3.0
