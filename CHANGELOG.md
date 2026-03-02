@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-03-02
+
 ### Added
 - `star status` — color-coded component health table showing up-to-date, modified, update-available, and missing states via local checksum comparison against both manifest and remote registry; falls back gracefully when offline
 - `star update` — smart component updater that compares remote checksums against local, skips already-current components, warns about locally modified files (skips by default), requires `--force` to overwrite modifications, and updates manifest after install
@@ -340,3 +342,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [0.2.1]: https://github.com/banditburai/starUI/releases/tag/v0.2.1
 
 [0.3.0]: https://github.com/banditburai/starUI/releases/tag/v0.3.0
+
+[0.3.1]: https://github.com/banditburai/starUI/releases/tag/v0.3.1
