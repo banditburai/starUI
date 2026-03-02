@@ -4,7 +4,6 @@ from starhtml import FT, Div
 
 from .utils import cn, cva
 
-
 __metadata__ = {"description": "Alert notifications"}
 
 

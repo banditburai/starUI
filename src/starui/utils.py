@@ -13,24 +13,12 @@ except ImportError:
 
 
 def with_signals(component, **signals):
-    """
-    Attach signals as attributes to a component for IDE autocomplete and type hints.
-
-    Usage:
-        return with_signals(
-            Div(...),
-            selected=selected_sig,
-            month=month_sig,
-        )
-
-    This allows users to access component.selected, component.month, etc.
-    """
+    """Attach signals as attributes for IDE autocomplete (e.g. component.selected)."""
     for name, signal in signals.items():
         setattr(component, name, signal)
     return component
 
 
-# Theme configuration
 DEFAULT_THEME = "light"
 ALT_THEME = "dark"
 
@@ -67,32 +55,17 @@ def cva(base: str = "", config: dict[str, Any] | None = None) -> Callable[..., s
 
     def variant_function(**props: Any) -> str:
         classes = [base] if base else []
-
-        # Merge defaults with props
         final_props = {**default_variants, **props}
 
-        # Apply variants
         for variant_key, variant_values in variants.items():
-            prop_value = final_props.get(variant_key)
-            if prop_value and prop_value in variant_values:
-                classes.append(variant_values[prop_value])
+            if (val := final_props.get(variant_key)) is not None and val in variant_values:
+                classes.append(variant_values[val])
 
-        # Apply compound variants
         for compound in compound_variants:
-            compound_class = compound.get("class", "")
-            if not compound_class:
-                continue
-
-            matches = True
-            for key, value in compound.items():
-                if key == "class":
-                    continue
-                if final_props.get(key) != value:
-                    matches = False
-                    break
-
-            if matches:
-                classes.append(compound_class)
+            if (cls := compound.get("class")) and all(
+                final_props.get(k) == v for k, v in compound.items() if k != "class"
+            ):
+                classes.append(cls)
 
         return cn(*classes)
 
@@ -100,13 +73,7 @@ def cva(base: str = "", config: dict[str, Any] | None = None) -> Callable[..., s
 
 
 def gen_id(prefix: str) -> str:
-    """Generate a short, unique id with a given prefix."""
     return f"{prefix}_{uuid4().hex[:8]}"
-
-
-def ensure_signal(signal: str | None, prefix: str) -> str:
-    """Return the provided signal or generate one with the prefix."""
-    return signal or gen_id(prefix)
 
 
 def _flatten(*items: Any) -> list:
@@ -120,7 +87,6 @@ def _flatten(*items: Any) -> list:
 
 
 def merge_actions(*before: Any, kwargs: dict | None = None, after: Any = None) -> list:
-    # Flattens so callers can pass single actions or lists of actions freely
     result = _flatten(*before)
     if kwargs is not None:
         result.extend(_flatten(kwargs.pop("data_on_click", None)))

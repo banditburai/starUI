@@ -21,7 +21,7 @@ def detect_app_port(app_file: Path) -> int | None:
         for pattern in patterns:
             if matches := re.findall(pattern, content, re.IGNORECASE | re.DOTALL):
                 port = int(matches[-1])  # Last match likely in __main__
-                if 1000 <= port <= 65535:
+                if 1024 <= port <= 65535:
                     return port
 
         return None
@@ -47,9 +47,7 @@ def find_port(start: int = 5000, max_tries: int = 100) -> int:
     raise RuntimeError(f"No ports available in {start}-{start + max_tries}")
 
 
-def resolve_port(
-    requested: int, strict: bool, app_file: Path | None = None
-) -> tuple[int, str | None]:
+def resolve_port(requested: int, strict: bool, app_file: Path | None = None) -> tuple[int, str | None]:
     """Resolve port: try detected → requested → auto-find.
 
     Returns (port, message) where message explains the choice if non-default.
@@ -59,9 +57,7 @@ def resolve_port(
         if port_available(detected):
             return detected, f"Using port {detected} from {app_file.name}"
         elif strict:
-            raise RuntimeError(
-                f"Port {detected} from {app_file.name} is already in use"
-            )
+            raise RuntimeError(f"Port {detected} from {app_file.name} is already in use")
 
     # Try requested port
     if port_available(requested):

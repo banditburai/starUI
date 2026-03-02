@@ -9,13 +9,13 @@ ORDER = 93
 STATUS = "stable"
 
 from starhtml import Div, get, js, set_timeout
-from starui.registry.components.toast import Toaster, toast
-from starui.registry.components.button import Button
+from components.toast import Toaster, toast
+from components.button import Button
 from utils import auto_generate_page, with_code, Prop, Component, build_api_reference
 
 
 USAGE_CODE = '''\
-from starui.registry.components.toast import Toaster, toast
+from components.toast import Toaster, toast
 
 # Place Toaster once in your layout
 Toaster()
@@ -24,7 +24,7 @@ Toaster()
 Button("Save", data_on_click=toast.success("Profile updated", "Name and email saved."))
 
 # Server-side — trigger from an SSE route
-from starui.registry.components.toast import ToastQueue
+from components.toast import ToastQueue
 
 @rt("/process")
 @sse

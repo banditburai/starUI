@@ -3,7 +3,6 @@ from starhtml.datastar import Expr
 
 from .utils import cn, gen_id
 
-
 __metadata__ = {"description": "Progress indicators"}
 
 

@@ -6,7 +6,6 @@ from starhtml.datastar import evt
 
 from .utils import cn, gen_id, inject_context, merge_actions
 
-
 __metadata__ = {
     "description": "Dropdown selection",
     "handlers": ["position"],
@@ -50,7 +49,7 @@ def SelectTrigger(
     cls: str = "",
     **kwargs,
 ) -> FT:
-    def trigger(*, sig, selected_label, open_state, **ctx):
+    def _(*, sig, selected_label, open_state, **ctx):
         custom_id = kwargs.pop("id", None)
         trigger_id = custom_id or f"{sig}_trigger"
         trigger_ref = Signal(trigger_id, _ref_only=True)
@@ -92,7 +91,7 @@ def SelectTrigger(
             **kwargs,
         )
 
-    return trigger
+    return _
 
 
 def SelectValue(
@@ -101,7 +100,7 @@ def SelectValue(
     cls: str = "",
     **kwargs,
 ) -> FT:
-    def value_component(*, selected_label, **_):
+    def _(*, selected_label, **_):
         if children:
             return Span(
                 *children,
@@ -124,7 +123,7 @@ def SelectValue(
             **kwargs,
         )
 
-    return value_component
+    return _
 
 
 def SelectContent(
@@ -136,7 +135,7 @@ def SelectContent(
     cls: str = "",
     **kwargs,
 ) -> FT:
-    def content(*, sig, open_state, **ctx):
+    def _(*, sig, open_state, **ctx):
         trigger_ref = Signal(f"{sig}_trigger", _ref_only=True)
         content_ref = Signal(f"{sig}_content", _ref_only=True)
         placement = side if align == "center" else f"{side}-{align}"
@@ -174,7 +173,7 @@ def SelectContent(
             **kwargs,
         )
 
-    return content
+    return _
 
 
 def SelectItem(
@@ -184,7 +183,7 @@ def SelectItem(
     cls: str = "",
     **kwargs,
 ) -> FT:
-    def item(*, sig, selected, selected_label, **_):
+    def _(*, sig, selected, selected_label, **_):
         content_ref = Signal(f"{sig}_content", _ref_only=True)
 
         first_text = children[0] if children and isinstance(children[0], str) else ""
@@ -225,7 +224,7 @@ def SelectItem(
             **kwargs,
         )
 
-    return item
+    return _
 
 
 def SelectGroup(
@@ -234,16 +233,16 @@ def SelectGroup(
     cls: str = "",
     **kwargs,
 ) -> FT:
-    def group(*, sig, **ctx):
+    def _(*, sig, **ctx):
         return Div(
-            SelectLabel(label)(sig=sig, **ctx) if label else None,
+            SelectLabel(label) if label else None,
             *[inject_context(child, sig=sig, **ctx) for child in children],
             cls=cls,
             data_slot="select-group",
             **kwargs,
         )
 
-    return group
+    return _
 
 
 def SelectLabel(
@@ -251,29 +250,23 @@ def SelectLabel(
     cls: str = "",
     **kwargs,
 ) -> FT:
-    def label(**_):
-        return Div(
-            *children,
-            cls=cn("text-muted-foreground px-2 py-1.5 text-xs", cls),
-            data_slot="select-label",
-            **kwargs,
-        )
-
-    return label
+    return Div(
+        *children,
+        cls=cn("text-muted-foreground px-2 py-1.5 text-xs", cls),
+        data_slot="select-label",
+        **kwargs,
+    )
 
 
 def SelectSeparator(
     cls: str = "",
     **kwargs,
 ) -> FT:
-    def separator(**_):
-        return Div(
-            cls=cn("bg-border pointer-events-none -mx-1 my-1 h-px", cls),
-            data_slot="select-separator",
-            **kwargs,
-        )
-
-    return separator
+    return Div(
+        cls=cn("bg-border pointer-events-none -mx-1 my-1 h-px", cls),
+        data_slot="select-separator",
+        **kwargs,
+    )
 
 
 def _get_value_label(item: str | tuple) -> tuple[str, str]:

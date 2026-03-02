@@ -11,16 +11,16 @@ ORDER = 30
 STATUS = "stable"
 
 from starhtml import Div, P, Span, Icon
-from starui.registry.components.tabs import Tabs, TabsList, TabsTrigger, TabsContent
-from starui.registry.components.card import (
+from components.tabs import Tabs, TabsList, TabsTrigger, TabsContent
+from components.card import (
     Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter,
 )
-from starui.registry.components.input import Input
-from starui.registry.components.label import Label
-from starui.registry.components.button import Button
-from starui.registry.components.separator import Separator
-from starui.registry.components.switch import SwitchWithLabel
-from starui.registry.components.badge import Badge
+from components.input import Input
+from components.label import Label
+from components.button import Button
+from components.separator import Separator
+from components.switch import SwitchWithLabel
+from components.badge import Badge
 from utils import auto_generate_page, with_code, Component, build_api_reference
 
 

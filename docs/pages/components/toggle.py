@@ -10,7 +10,7 @@ ORDER = 80
 STATUS = "stable"
 
 from starhtml import Div, Span, Icon, Signal
-from starui.registry.components.toggle import Toggle
+from components.toggle import Toggle
 from utils import auto_generate_page, with_code, Prop, build_api_reference
 
 

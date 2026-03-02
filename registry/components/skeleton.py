@@ -4,7 +4,6 @@ from starhtml import FT, Div
 
 from .utils import cn
 
-
 __metadata__ = {"description": "Loading placeholder"}
 
 

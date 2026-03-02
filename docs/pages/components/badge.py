@@ -9,7 +9,7 @@ ORDER = 20
 STATUS = "stable"
 
 from starhtml import Div, Icon
-from starui.registry.components.badge import Badge
+from components.badge import Badge
 from utils import auto_generate_page, Prop, Component, build_api_reference, with_code
 
 

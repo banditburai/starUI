@@ -5,9 +5,9 @@ ORDER = 25
 STATUS = "stable"
 
 from starhtml import Div, Signal
-from starui.registry.components.skeleton import Skeleton
-from starui.registry.components.button import Button
-from starui.registry.components.card import Card, CardContent, CardHeader
+from components.skeleton import Skeleton
+from components.button import Button
+from components.card import Card, CardContent, CardHeader
 from utils import auto_generate_page, with_code, Prop, build_api_reference
 
 

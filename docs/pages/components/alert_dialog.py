@@ -10,15 +10,15 @@ ORDER = 45
 STATUS = "stable"
 
 from starhtml import Div, P, Icon, Span, Ul, Li, Signal, js
-from starui.registry.components.alert_dialog import (
+from components.alert_dialog import (
     AlertDialog, AlertDialogTrigger, AlertDialogContent,
     AlertDialogHeader, AlertDialogFooter, AlertDialogTitle,
     AlertDialogDescription, AlertDialogAction, AlertDialogCancel
 )
-from starui.registry.components.button import Button
-from starui.registry.components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
-from starui.registry.components.input import InputWithLabel
-from starui.registry.components.checkbox import CheckboxWithLabel
+from components.button import Button
+from components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
+from components.input import InputWithLabel
+from components.checkbox import CheckboxWithLabel
 from utils import auto_generate_page, with_code, Prop, Component, build_api_reference
 
 

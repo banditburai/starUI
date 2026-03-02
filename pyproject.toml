@@ -47,7 +47,7 @@ module-root = "src"
 # Ruff configuration for linting and formatting
 [tool.ruff]
 target-version = "py312"
-line-length = 88
+line-length = 120
 exclude = ["test_sandbox", "docs"]
 
 [tool.ruff.lint]

@@ -7,7 +7,6 @@ from starhtml.datastar import document, evt, seq
 
 from .utils import cn, gen_id, inject_context, merge_actions
 
-
 __metadata__ = {"description": "Slide-out panel"}
 
 
@@ -207,7 +206,7 @@ def SheetClose(
     cls: str = "",
     **kwargs,
 ) -> FT:
-    def close(*, sheet_open, dialog_ref, **_):
+    def _(*, sheet_open, dialog_ref, **_):
         from .button import Button
 
         click_actions = merge_actions(
@@ -225,7 +224,7 @@ def SheetClose(
             **kwargs,
         )
 
-    return close
+    return _
 
 
 def SheetHeader(*children, cls: str = "", **kwargs) -> FT:

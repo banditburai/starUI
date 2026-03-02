@@ -7,7 +7,6 @@ from starhtml.datastar import document, evt, seq
 
 from .utils import cn, cva, gen_id, inject_context, merge_actions, with_signals
 
-
 __metadata__ = {"description": "Command palette interface"}
 
 
@@ -360,7 +359,7 @@ def CommandItem(
 
 
 def CommandSeparator(cls: str = "", **kwargs):
-    return lambda **_: Div(
+    return Div(
         role="separator",
         data_slot="command-separator",
         cls=cn(

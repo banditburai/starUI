@@ -7,7 +7,6 @@ from starhtml import Textarea as HTMLTextarea
 
 from .utils import cn, gen_id
 
-
 __metadata__ = {"description": "Multi-line text input"}
 
 

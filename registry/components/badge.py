@@ -5,7 +5,6 @@ from starhtml import Button as HTMLButton
 
 from .utils import cn, cva
 
-
 __metadata__ = {"description": "Badge for labels"}
 
 

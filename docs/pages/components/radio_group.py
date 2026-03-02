@@ -5,9 +5,9 @@ ORDER = 30
 STATUS = "stable"
 
 from starhtml import Div, P, Span, Icon, Form, Code, Signal, js, match
-from starui.registry.components.radio_group import RadioGroup, RadioGroupItem, RadioGroupWithLabel
-from starui.registry.components.button import Button
-from starui.registry.components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
+from components.radio_group import RadioGroup, RadioGroupItem, RadioGroupWithLabel
+from components.button import Button
+from components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
 from utils import auto_generate_page, with_code, Component, build_api_reference
 
 

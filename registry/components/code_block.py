@@ -10,8 +10,8 @@ except ImportError:
     def highlight(code: str, language: str = "python") -> str:
         return f'<pre><code class="language-{language}">{escape(code)}</code></pre>'
 
-from .utils import cn
 
+from .utils import cn
 
 __metadata__ = {"description": "Code block with syntax highlighting", "packages": ["starlighter"]}
 

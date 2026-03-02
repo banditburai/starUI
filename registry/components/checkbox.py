@@ -6,7 +6,6 @@ from starhtml import Span as HTMLSpan
 
 from .utils import cn, gen_id
 
-
 __metadata__ = {"description": "Checkbox input"}
 
 

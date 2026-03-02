@@ -8,7 +8,6 @@ from starhtml.datastar import document
 
 from .utils import cn, gen_id, inject_context, merge_actions
 
-
 __metadata__ = {"description": "Alert dialog for confirmations"}
 
 

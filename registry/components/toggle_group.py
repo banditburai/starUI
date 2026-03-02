@@ -6,7 +6,6 @@ from starhtml import Button as HTMLButton
 from .toggle import toggle_variants
 from .utils import cn, gen_id, inject_context
 
-
 __metadata__ = {"description": "Toggle button group"}
 
 

@@ -7,7 +7,6 @@ from starhtml.datastar import evt, seq
 
 from .utils import cn, cva, gen_id, inject_context, merge_actions
 
-
 __metadata__ = {
     "description": "Desktop-style persistent menu bar",
     "handlers": ["position"],
@@ -124,13 +123,16 @@ def MenubarContent(
             *[inject_context(child, **ctx) for child in children],
             data_ref=content_ref,
             data_on_toggle=active.set((evt.newState == "open").if_(menu_id, (active == menu_id).if_("", active))),
-            data_position=(trigger_ref._id, {
-                "placement": f"{side}-{align}" if align != "center" else side,
-                "offset": side_offset,
-                "flip": True,
-                "shift": True,
-                "hide": True,
-            }),
+            data_position=(
+                trigger_ref._id,
+                {
+                    "placement": f"{side}-{align}" if align != "center" else side,
+                    "offset": side_offset,
+                    "flip": True,
+                    "shift": True,
+                    "hide": True,
+                },
+            ),
             popover="auto",
             id=content_ref._id,
             role="menu",
@@ -349,16 +351,21 @@ def MenubarSubContent(
             data_on_toggle=sub_open.set(evt.newState == "open"),
             data_on_mouseenter=clear_timeout(sub_timer),
             data_on_mouseleave=reset_timeout(sub_timer, 150, sub_content_ref.hidePopover()),
-            data_position=(sub_trigger_ref._id, {
-                "placement": "right-start",
-                "flip": True,
-                "shift": True,
-                "hide": True,
-                "container": "auto",
-            }),
+            data_position=(
+                sub_trigger_ref._id,
+                {
+                    "placement": "right-start",
+                    "flip": True,
+                    "shift": True,
+                    "hide": True,
+                    "container": "auto",
+                },
+            ),
             popover="auto",
             id=sub_content_ref._id,
             role="menu",
+            aria_labelledby=sub_trigger_ref._id,
+            tabindex="-1",
             data_slot="menubar-sub-content",
             cls=cn(
                 "z-50 max-h-[min(var(--popover-available-height,80vh),80vh)] min-w-32",

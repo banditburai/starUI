@@ -11,8 +11,8 @@ ORDER = 40
 STATUS = "stable"
 
 from starhtml import Div, P, H4, Icon, Label, Signal, collect
-from starui.registry.components.toggle_group import ToggleGroup
-from starui.registry.components.separator import Separator
+from components.toggle_group import ToggleGroup
+from components.separator import Separator
 from utils import auto_generate_page, with_code, Component, Prop, build_api_reference
 
 

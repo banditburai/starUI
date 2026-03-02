@@ -9,7 +9,7 @@ ORDER = 160
 STATUS = "stable"
 
 from starhtml import Div, Span, Icon
-from starui.registry.components.breadcrumb import (
+from components.breadcrumb import (
     Breadcrumb, BreadcrumbList, BreadcrumbItem,
     BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator, BreadcrumbEllipsis
 )

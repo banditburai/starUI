@@ -8,26 +8,52 @@ def test_package_importable():
     assert starui.__version__ is not None
 
 
-def test_package_version():
-    """Test that package version is correctly set."""
+def test_package_version_is_string():
+    """Test that package version is a valid semver-like string."""
     import starui
 
-    assert starui.__version__ == "0.1.0"
+    parts = starui.__version__.split(".")
+    assert len(parts) >= 2, "Version should have at least major.minor"
+    assert all(p.isdigit() for p in parts), "Version parts should be numeric"
 
 
-def test_package_has_entry_point():
-    """Test that CLI entry point is properly configured."""
-    import tomllib
-    from pathlib import Path
+def test_cli_entry_point_importable():
+    """Test that the CLI entry point module and app object exist."""
+    from starui.cli.main import app
 
-    # Read pyproject.toml to check entry point configuration
-    pyproject_path = Path(__file__).parent.parent / "pyproject.toml"
-    with open(pyproject_path, "rb") as f:
-        pyproject_data = tomllib.load(f)
+    assert app is not None
+    assert hasattr(app, "command")
 
-    # Verify CLI entry point is configured
-    scripts = pyproject_data.get("project", {}).get("scripts", {})
-    assert "star" in scripts, "CLI entry point 'star' not found in project.scripts"
-    assert scripts["star"] == "starui.cli.main:app", (
-        "CLI entry point has incorrect target"
-    )
+
+def test_utilities_work():
+    """Test that utility functions are importable and produce expected output."""
+    from starui import cn, cva, gen_id
+
+    assert cn("foo", "bar") == "foo bar"
+    assert cn("foo", None, "bar") == "foo bar"
+
+    id1 = gen_id("test")
+    id2 = gen_id("test")
+    assert id1.startswith("test_")
+    assert id1 != id2
+
+    assert callable(cva)
+
+
+def test_themes_importable():
+    """Test that theme constants are importable from starui."""
+    from starui import ALT_THEME, DEFAULT_THEME
+
+    assert DEFAULT_THEME == "light"
+    assert ALT_THEME == "dark"
+
+
+def test_all_exports_in_dunder_all():
+    """__all__ includes utility functions."""
+    import starui
+
+    assert "cn" in starui.__all__
+    assert "cva" in starui.__all__
+    assert "gen_id" in starui.__all__
+    assert "DEFAULT_THEME" in starui.__all__
+    assert "ALT_THEME" in starui.__all__

@@ -10,8 +10,8 @@ ORDER = 95
 STATUS = "stable"
 
 from starhtml import A, Div, Icon, Span, Style, FT, js
-from starui.registry.components.button import Button
-from starui.registry.components.dropdown_menu import (
+from components.button import Button
+from components.dropdown_menu import (
     DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
 )
 from utils import auto_generate_page, with_code, Prop, build_api_reference

@@ -17,8 +17,10 @@ from starhtml import Small as HTMLSmall
 
 from .utils import cn, cva
 
-
-__metadata__ = {"description": "Typography components with beautiful defaults", "css_imports": ["@plugin \"@tailwindcss/typography\";"]}
+__metadata__ = {
+    "description": "Typography components with beautiful defaults",
+    "css_imports": ['@plugin "@tailwindcss/typography";'],
+}
 
 
 ProseSize = Literal["sm", "base", "lg", "xl"]

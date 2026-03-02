@@ -5,15 +5,15 @@ ORDER = 60
 STATUS = "stable"
 
 from starhtml import Div, P, Icon, Span, Code, Ul, Li, Strong, Signal
-from starui.registry.components.accordion import (
+from components.accordion import (
     Accordion, AccordionItem, AccordionTrigger, AccordionContent
 )
-from starui.registry.components.button import Button
-from starui.registry.components.badge import Badge
-from starui.registry.components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
-from starui.registry.components.input import InputWithLabel
-from starui.registry.components.checkbox import CheckboxWithLabel
-from starui.registry.components.utils import cn
+from components.button import Button
+from components.badge import Badge
+from components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
+from components.input import InputWithLabel
+from components.checkbox import CheckboxWithLabel
+from components.utils import cn
 from utils import auto_generate_page, Prop, Component, build_api_reference, with_code
 from widgets.component_preview import ComponentPreview
 

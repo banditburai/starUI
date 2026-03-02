@@ -4,7 +4,6 @@ from starhtml import FT, Div, Signal
 
 from .utils import cn, gen_id, inject_context
 
-
 __metadata__ = {
     "description": "Popover with trigger",
     "handlers": ["position"],
@@ -34,7 +33,7 @@ def PopoverTrigger(
     cls: str = "",
     **kwargs,
 ):
-    def trigger(*, sig, **_):
+    def _(*, sig, **_):
         from .button import Button
 
         trigger_ref = Signal(f"{sig}_trigger", _ref_only=True)
@@ -51,7 +50,7 @@ def PopoverTrigger(
             **kwargs,
         )
 
-    return trigger
+    return _
 
 
 def PopoverContent(
@@ -64,7 +63,7 @@ def PopoverContent(
     aria_label: str | None = None,
     **kwargs,
 ):
-    def content(*, sig, **ctx):
+    def _(*, sig, **ctx):
         content_ref = Signal(f"{sig}_content", _ref_only=True)
         placement = side if align == "center" else f"{side}-{align}"
 
@@ -96,7 +95,7 @@ def PopoverContent(
             **kwargs,
         )
 
-    return content
+    return _
 
 
 def PopoverClose(
@@ -106,7 +105,7 @@ def PopoverClose(
     size: str = "sm",
     **kwargs,
 ):
-    def close(*, sig, **_):
+    def _(*, sig, **_):
         from .button import Button
 
         return Button(
@@ -121,4 +120,4 @@ def PopoverClose(
             **kwargs,
         )
 
-    return close
+    return _

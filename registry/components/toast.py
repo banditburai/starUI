@@ -6,7 +6,6 @@ from starhtml import FT, Button, Div, Icon, Signal, js, set_timeout, signals
 
 from .utils import cn, cva
 
-
 __metadata__ = {"description": "Toast notifications"}
 
 

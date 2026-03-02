@@ -7,7 +7,6 @@ from starhtml import P as HTMLP
 
 from .utils import cn, gen_id
 
-
 __metadata__ = {"description": "Form input"}
 
 

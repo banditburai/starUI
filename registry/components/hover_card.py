@@ -4,7 +4,6 @@ from starhtml import FT, Div, Signal, clear_timeout, reset_timeout
 
 from .utils import cn, gen_id, inject_context
 
-
 __metadata__ = {
     "description": "Hover card with content",
     "handlers": ["position"],
@@ -40,7 +39,7 @@ def HoverCardTrigger(
     cls: str = "",
     **kwargs,
 ):
-    def trigger(*, sig, open_state, timer_state, **_):
+    def _(*, sig, open_state, timer_state, **_):
         trigger_ref = Signal(f"{sig}_trigger", _ref_only=True)
 
         return Div(
@@ -57,7 +56,7 @@ def HoverCardTrigger(
             **kwargs,
         )
 
-    return trigger
+    return _
 
 
 def HoverCardContent(
@@ -68,7 +67,7 @@ def HoverCardContent(
     cls: str = "",
     **kwargs,
 ):
-    def content(*, sig, open_state, timer_state, **_):
+    def _(*, sig, open_state, timer_state, **_):
         content_ref = Signal(f"{sig}_content", _ref_only=True)
         placement = side if align == "center" else f"{side}-{align}"
 
@@ -102,4 +101,4 @@ def HoverCardContent(
             **kwargs,
         )
 
-    return content
+    return _

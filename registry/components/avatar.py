@@ -2,7 +2,6 @@ from starhtml import FT, Div, Img, Signal
 
 from .utils import cn, gen_id
 
-
 __metadata__ = {"description": "User profile images with fallback"}
 
 

@@ -8,7 +8,6 @@ from starhtml import Span as HTMLSpan
 
 from .utils import cn, cva, gen_id, merge_actions
 
-
 __metadata__ = {"description": "Toggle switch"}
 
 

@@ -5,7 +5,6 @@ from starhtml import FT, Button, Div, Icon, Signal
 
 from .utils import cn, gen_id, inject_context, merge_actions
 
-
 __metadata__ = {"description": "Collapsible content sections"}
 
 

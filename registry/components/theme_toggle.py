@@ -3,7 +3,6 @@ from starhtml import FT, Div, Icon, Style, js
 from .button import Button
 from .utils import ALT_THEME, DEFAULT_THEME
 
-
 __metadata__ = {"description": "Theme toggle button"}
 
 

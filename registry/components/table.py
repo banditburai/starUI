@@ -17,7 +17,6 @@ from starhtml import (
 
 from .utils import cn
 
-
 __metadata__ = {"description": "Data display in rows and columns"}
 
 

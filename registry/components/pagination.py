@@ -1,10 +1,9 @@
 from typing import Literal
 
-from starhtml import Icon, Li, Nav, Signal, Span, Ul
 from starhtml import Button as HTMLButton
+from starhtml import Icon, Li, Nav, Signal, Span, Ul
 
 from .utils import cn, cva, gen_id, inject_context
-
 
 __metadata__ = {"description": "Page navigation with prev/next controls"}
 
@@ -39,22 +38,29 @@ pagination_link_variants = cva(
 
 
 def Pagination(
-    *children, signal: str | Signal = "", total_pages=1, current_page=1,
-    aria_label="pagination", cls="", **kwargs,
+    *children,
+    signal: str | Signal = "",
+    total_pages=1,
+    current_page=1,
+    aria_label="pagination",
+    cls="",
+    **kwargs,
 ):
     sig = getattr(signal, "_id", signal) or gen_id("pagination")
-    ctx = {"page_sig": (page_sig := Signal(sig, current_page)),
-           "total_pages": total_pages}
+    ctx = {"page_sig": (page_sig := Signal(sig, current_page)), "total_pages": total_pages}
     return Nav(
-        page_sig, *[inject_context(c, **ctx) for c in children],
-        role="navigation", aria_label=aria_label,
-        data_slot="pagination", cls=cn("mx-auto flex w-full justify-center", cls), **kwargs,
+        page_sig,
+        *[inject_context(c, **ctx) for c in children],
+        role="navigation",
+        aria_label=aria_label,
+        data_slot="pagination",
+        cls=cn("mx-auto flex w-full justify-center", cls),
+        **kwargs,
     )
 
 
 def PaginationContent(*children, cls="", **kwargs):
-    return Ul(*children, data_slot="pagination-content",
-              cls=cn("flex flex-row items-center gap-1", cls), **kwargs)
+    return Ul(*children, data_slot="pagination-content", cls=cn("flex flex-row items-center gap-1", cls), **kwargs)
 
 
 def PaginationItem(*children, cls="", **kwargs):
@@ -62,13 +68,18 @@ def PaginationItem(*children, cls="", **kwargs):
 
 
 def PaginationLink(
-    *children, page, size: PaginationSize = "icon",
-    disabled=False, cls="", **kwargs,
+    *children,
+    page,
+    size: PaginationSize = "icon",
+    disabled=False,
+    cls="",
+    **kwargs,
 ):
     def _(*, page_sig, **_):
         is_active = page_sig == page
         return HTMLButton(
-            *children, type="button",
+            *children,
+            type="button",
             data_on_click=page_sig.set(page) if not disabled else None,
             disabled=disabled,
             data_attr_aria_current=is_active.if_("page", ""),
@@ -77,6 +88,7 @@ def PaginationLink(
             cls=cn(pagination_link_variants(size=size), "cursor-pointer", cls),
             **kwargs,
         )
+
     return _
 
 
@@ -90,16 +102,21 @@ def _PaginationNav(direction, show_text=True, cls="", **kwargs):
         at_boundary = (page_sig <= 1) if is_prev else (page_sig >= total_pages)
         new_val = (page_sig - 1).max(1) if is_prev else (page_sig + 1).min(total_pages)
         return HTMLButton(
-            *body, data_on_click=page_sig.set(new_val), type="button",
+            *body,
+            data_on_click=page_sig.set(new_val),
+            type="button",
             data_attr_disabled=at_boundary,
             aria_label=f"Go to {'previous' if is_prev else 'next'} page",
             data_slot="pagination-link",
             cls=cn(
-                pagination_link_variants(size="default"), "cursor-pointer gap-1 px-2.5",
-                ("sm:pl-2.5" if is_prev else "sm:pr-2.5") if show_text else "", cls,
+                pagination_link_variants(size="default"),
+                "cursor-pointer gap-1 px-2.5",
+                ("sm:pl-2.5" if is_prev else "sm:pr-2.5") if show_text else "",
+                cls,
             ),
             **kwargs,
         )
+
     return _
 
 
@@ -136,17 +153,25 @@ def _JumpEllipsis(page_sig, direction, total_pages):
             cls="hidden items-center justify-center group-hover:flex group-focus-within:flex",
         ),
         Span(label, cls="sr-only"),
-        data_on_click=page_sig.set(target), type="button", aria_label=label,
+        data_on_click=page_sig.set(target),
+        type="button",
+        aria_label=label,
         data_slot="pagination-ellipsis",
         cls=cn(pagination_link_variants(size="icon"), "group cursor-pointer"),
     )
 
 
 def SimplePagination(
-    current_page=1, total_pages=1, signal: str | Signal = "",
-    max_visible=7, show_prev_next_text=True, cls="", **kwargs,
+    current_page=1,
+    total_pages=1,
+    signal: str | Signal = "",
+    max_visible=7,
+    show_prev_next_text=True,
+    cls="",
+    **kwargs,
 ):
     total_pages = max(total_pages, 1)
+    max_visible = max(max_visible, 5)
     current_page = max(1, min(current_page, total_pages))
 
     sig = getattr(signal, "_id", signal) or gen_id("pagination")
@@ -157,12 +182,14 @@ def SimplePagination(
 
     if total_pages <= max_visible:
         pages = [
-            PaginationItem(PaginationLink(
-                str(p), page=p,
-                aria_label=f"Page {p}" if p == current_page else f"Go to page {p}",
-                data_attr_aria_label=(page_sig == p).if_(
-                    f"Page {p}", f"Go to page {p}"),
-            ))
+            PaginationItem(
+                PaginationLink(
+                    str(p),
+                    page=p,
+                    aria_label=f"Page {p}" if p == current_page else f"Go to page {p}",
+                    data_attr_aria_label=(page_sig == p).if_(f"Page {p}", f"Go to page {p}"),
+                )
+            )
             for p in range(1, total_pages + 1)
         ]
     else:
@@ -178,8 +205,10 @@ def SimplePagination(
             (page_sig >= right_snap).if_(total_pages - middle_count, page_sig - half),
         )
         ssr_start = (
-            2 if current_page <= left_snap
-            else total_pages - middle_count if current_page >= right_snap
+            2
+            if current_page <= left_snap
+            else total_pages - middle_count
+            if current_page >= right_snap
             else current_page - half
         )
 
@@ -187,31 +216,45 @@ def SimplePagination(
         for i in range(middle_count):
             page_expr = window_start + i
             ssr_page = ssr_start + i
-            middle.append(PaginationItem(PaginationLink(
-                str(ssr_page), page=page_expr,
-                data_text=page_expr,
-                aria_label=f"Page {ssr_page}" if ssr_page == current_page else f"Go to page {ssr_page}",
-                data_attr_aria_label=(page_sig == page_expr).if_(
-                    "Page " + page_expr, "Go to page " + page_expr),
-            )))
+            middle.append(
+                PaginationItem(
+                    PaginationLink(
+                        str(ssr_page),
+                        page=page_expr,
+                        data_text=page_expr,
+                        aria_label=f"Page {ssr_page}" if ssr_page == current_page else f"Go to page {ssr_page}",
+                        data_attr_aria_label=(page_sig == page_expr).if_(
+                            "Page " + page_expr, "Go to page " + page_expr
+                        ),
+                    )
+                )
+            )
 
         pages = [
             PaginationItem(PaginationLink("1", page=1, aria_label="Go to page 1")),
             PaginationItem(
-                _JumpEllipsis(page_sig, -1, total_pages), data_show=page_sig > left_snap,
+                _JumpEllipsis(page_sig, -1, total_pages),
+                data_show=page_sig > left_snap,
             ),
             *middle,
             PaginationItem(
-                _JumpEllipsis(page_sig, 1, total_pages), data_show=page_sig < right_snap,
+                _JumpEllipsis(page_sig, 1, total_pages),
+                data_show=page_sig < right_snap,
             ),
-            PaginationItem(PaginationLink(
-                str(total_pages), page=total_pages,
-                aria_label=f"Go to page {total_pages}",
-            )),
+            PaginationItem(
+                PaginationLink(
+                    str(total_pages),
+                    page=total_pages,
+                    aria_label=f"Go to page {total_pages}",
+                )
+            ),
         ]
 
     return Pagination(
         PaginationContent(prev, *pages, nxt),
-        signal=sig, total_pages=total_pages, current_page=current_page,
-        cls=cls, **kwargs,
+        signal=sig,
+        total_pages=total_pages,
+        current_page=current_page,
+        cls=cls,
+        **kwargs,
     )

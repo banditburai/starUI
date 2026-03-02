@@ -9,7 +9,6 @@ from starhtml.datastar import document, evt, seq
 
 from .utils import cn, cva, gen_id, inject_context, merge_actions
 
-
 __metadata__ = {"description": "Modal dialog"}
 
 
@@ -134,10 +133,8 @@ def DialogContent(
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
-    def content(**ctx):
-        open_state = ctx["open_state"]
-        dialog_ref = ctx["dialog_ref"]
-
+    def content(*, open_state, dialog_ref, **ctx):
+        ctx = dict(open_state=open_state, dialog_ref=dialog_ref, **ctx)
         return Div(
             *[inject_context(child, **ctx) for child in children],
             HTMLButton(

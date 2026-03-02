@@ -2,11 +2,9 @@ from itertools import count
 
 from starhtml import FT, A, Div, Icon, Li, Nav, Signal, Ul, clear_timeout, reset_timeout
 from starhtml import Button as HTMLButton
-
 from starhtml.datastar import evt
 
 from .utils import cn, gen_id, inject_context
-
 
 __metadata__ = {
     "description": "Horizontal nav with hover-activated panels",
@@ -45,14 +43,15 @@ def NavigationMenu(
         Div(
             *content_panels,
             data_ref=viewport_ref,
-            data_on_toggle=active.set(
-                (evt.newState == "closed").if_("", active)
+            data_on_toggle=active.set((evt.newState == "closed").if_("", active)),
+            data_position=(
+                list_id,
+                {
+                    "placement": "bottom-start",
+                    "offset": 6,
+                    "shift": True,
+                },
             ),
-            data_position=(list_id, {
-                "placement": "bottom-start",
-                "offset": 6,
-                "shift": True,
-            }),
             data_on_mouseenter=clear_timeout(timer),
             data_on_mouseleave=reset_timeout(timer, 150, viewport_ref.hidePopover()),
             tabindex="-1",
@@ -63,7 +62,9 @@ def NavigationMenu(
                 "z-50 overflow-hidden rounded-md border",
                 "bg-popover text-popover-foreground shadow-lg",
             ),
-        ) if content_panels else None,
+        )
+        if content_panels
+        else None,
         aria_label=aria_label,
         data_slot="navigation-menu",
         cls=cn(
@@ -152,14 +153,16 @@ def NavigationMenuContent(
 ) -> FT:
     def _(*, active, item_id, _content_panels, **_):
         is_active = active == item_id
-        _content_panels.append(Div(
-            *children,
-            data_show=is_active,
-            data_slot="navigation-menu-content",
-            data_attr_data_state=is_active.if_("open", "closed"),
-            cls=cls,
-            **kwargs,
-        ))
+        _content_panels.append(
+            Div(
+                *children,
+                data_show=is_active,
+                data_slot="navigation-menu-content",
+                data_attr_data_state=is_active.if_("open", "closed"),
+                cls=cls,
+                **kwargs,
+            )
+        )
         return None
 
     return _
@@ -175,6 +178,7 @@ def NavigationMenuLink(
     return A(
         *children,
         href=href,
+        aria_current="page" if active else None,
         data_active="true" if active else "false",
         data_slot="navigation-menu-link",
         cls=cn(

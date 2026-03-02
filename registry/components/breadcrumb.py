@@ -7,7 +7,6 @@ from starhtml import Span as HTMLSpan
 
 from .utils import cn
 
-
 __metadata__ = {"description": "Breadcrumb navigation"}
 
 

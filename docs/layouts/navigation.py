@@ -1,7 +1,7 @@
 from functools import lru_cache
 from starhtml import FT, Div, A, Span
-from starui.registry.components.button import Button
-from starui.registry.components.utils import cn
+from components.button import Button
+from components.utils import cn
 from component_registry import get_registry
 
 

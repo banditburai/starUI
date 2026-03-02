@@ -3,7 +3,6 @@ from starhtml import Label as HTMLLabel
 
 from .utils import cn
 
-
 __metadata__ = {"description": "Form label"}
 
 

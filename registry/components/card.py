@@ -10,7 +10,6 @@ from starhtml import H6 as HTMLH6
 
 from .utils import cn
 
-
 __metadata__ = {"description": "Card container"}
 
 

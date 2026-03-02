@@ -10,9 +10,9 @@ ORDER = 30
 STATUS = "stable"
 
 from starhtml import Div, P, Span, Icon
-from starui.registry.components.label import Label
-from starui.registry.components.input import Input
-from starui.registry.components.checkbox import CheckboxWithLabel
+from components.label import Label
+from components.input import Input
+from components.checkbox import CheckboxWithLabel
 from utils import with_code, Prop, build_api_reference, auto_generate_page
 
 

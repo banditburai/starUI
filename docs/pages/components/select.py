@@ -5,12 +5,12 @@ ORDER = 20
 STATUS = "stable"
 
 from starhtml import Div, P, Code, Label, Form, Signal, js
-from starui.registry.components.select import (
+from components.select import (
     Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
     SelectLabel, SelectSeparator, SelectWithLabel
 )
-from starui.registry.components.button import Button
-from starui.registry.components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
+from components.button import Button
+from components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
 from utils import auto_generate_page, with_code, Component, build_api_reference
 
 

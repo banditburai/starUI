@@ -109,15 +109,23 @@ class ProcessManager:
                                 sys.stdout.write(f"{clean}\n")
                                 sys.stdout.flush()
                             else:
-                                self.console.print(
-                                    f"[dim cyan][{name}][/dim cyan] {clean}"
-                                )
+                                self.console.print(f"[dim cyan][{name}][/dim cyan] {clean}")
                     else:
                         time.sleep(0.1)
 
         thread = threading.Thread(target=run, daemon=True)
         thread.start()
         self.threads[f"{name}_monitor"] = thread
+
+    @staticmethod
+    def _find_project_root(start: Path) -> Path:
+        """Walk up from start to find directory containing pyproject.toml."""
+        current = start.resolve()
+        while current != current.parent:
+            if (current / "pyproject.toml").exists():
+                return current
+            current = current.parent
+        return start.resolve()
 
     def start_uvicorn(
         self,
@@ -149,12 +157,19 @@ class ProcessManager:
             cmd.extend(["--reload-exclude", exclude])
 
         env = os.environ.copy()
+
+        path_parts = []
+
+        project_root = self._find_project_root(app_file.parent)
+        path_parts.append(str(project_root))
+
         if hot_reload:
-            temp_dir = Path(gettempdir())
-            pythonpath = env.get("PYTHONPATH", "")
-            env["PYTHONPATH"] = (
-                f"{temp_dir}:{pythonpath}" if pythonpath else str(temp_dir)
-            )
+            path_parts.append(str(Path(gettempdir())))
+
+        if existing := env.get("PYTHONPATH", ""):
+            path_parts.append(existing)
+
+        env["PYTHONPATH"] = os.pathsep.join(path_parts)
 
         return self.start_process("uvicorn", cmd, app_file.parent, env)
 
@@ -165,11 +180,7 @@ class ProcessManager:
         temp_dir = Path(gettempdir())
         wrapper = temp_dir / f"starui_dev_{app_file.stem}_{os.getpid()}.py"
 
-        wrapper.write_text(
-            WRAPPER_TEMPLATE.format(
-                app_dir=app_file.parent, app_stem=app_file.stem, debug=debug
-            )
-        )
+        wrapper.write_text(WRAPPER_TEMPLATE.format(app_dir=app_file.parent, app_stem=app_file.stem, debug=debug))
         return f"{wrapper.stem}:app"
 
     def start_tailwind_watcher(
@@ -198,14 +209,14 @@ class ProcessManager:
 
     def _watch(self, path: Path, callback: Callable[[Path], None]) -> None:
         def run() -> None:
-            last = path.stat().st_mtime if path.exists() else 0
-            if last:
+            last_mtime = path.stat().st_mtime if path.exists() else 0
+            if last_mtime:
                 callback(path)
 
             while not self.shutdown.is_set():
                 with suppress(Exception):
-                    if path.exists() and (mtime := path.stat().st_mtime) > last:
-                        last = mtime
+                    if path.exists() and (mtime := path.stat().st_mtime) > last_mtime:
+                        last_mtime = mtime
                         callback(path)
                 time.sleep(0.5)
 
@@ -247,8 +258,7 @@ class ProcessManager:
             dead = [
                 name
                 for name, proc in self.processes.items()
-                if proc.poll() is not None
-                and not (name == "tailwind" and proc.returncode == 0)
+                if proc.poll() is not None and not (name == "tailwind" and proc.returncode == 0)
             ]
 
             if dead:

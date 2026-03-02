@@ -3,9 +3,9 @@ Date Picker component documentation — Calendar-based date selection with popov
 """
 
 from starhtml import Div, P, Span, Label, Signal, js
-from starui.registry.components.date_picker import DatePicker, DateTimePicker, DatePickerWithInput
-from starui.registry.components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
-from starui.registry.components.input import Input
+from components.date_picker import DatePicker, DateTimePicker, DatePickerWithInput
+from components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
+from components.input import Input
 from utils import auto_generate_page, with_code, Prop, Component, build_api_reference
 
 # Component metadata for auto-discovery

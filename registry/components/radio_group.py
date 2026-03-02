@@ -8,7 +8,6 @@ from starhtml import Span as HTMLSpan
 
 from .utils import cn, gen_id, inject_context
 
-
 __metadata__ = {"description": "Radio button group"}
 
 
@@ -55,7 +54,7 @@ def RadioGroupItem(
     indicator_cls: str = "",
     **kwargs,
 ):
-    def item(*, sig, selected, group_name, hide_indicators, initial_value="", **_):
+    def _(*, selected, group_name, hide_indicators, initial_value="", **_):
         radio_id = gen_id("radio")
         is_checked = selected.eq(value)
 
@@ -139,7 +138,7 @@ def RadioGroupItem(
             data_slot="radio-container",
         )
 
-    return item
+    return _
 
 
 def RadioGroupWithLabel(

@@ -1,5 +1,3 @@
-"""Development server with hot reload and Tailwind CSS."""
-
 import asyncio
 import tempfile
 import time
@@ -11,10 +9,10 @@ from rich.panel import Panel
 from rich.table import Table
 
 from ..config import detect_project_config
-from ..css.binary import TailwindBinaryManager
+from ..css import TailwindBinaryManager
 from ..dev.analyzer import resolve_port
 from ..dev.process_manager import ProcessManager
-from ..templates.css_input import generate_css_input
+from ..templates import generate_css_input
 from .utils import console, error, success
 
 
@@ -25,9 +23,7 @@ def get_or_create_css_input(config) -> Path:
     css_dir = config.css_output_absolute.parent
     css_dir.mkdir(parents=True, exist_ok=True)
 
-    with tempfile.NamedTemporaryFile(
-        mode="w", suffix=".css", dir=css_dir, delete=False
-    ) as tmp:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".css", dir=css_dir, delete=False) as tmp:
         tmp.write(generate_css_input(config))
         return Path(tmp.name)
 
@@ -95,11 +91,10 @@ def dev_command(
     css_hot_reload: bool = typer.Option(True, "--css-hot/--no-css-hot"),
     strict: bool = typer.Option(False, "--strict"),
     debug: bool = typer.Option(True, "--debug/--no-debug"),
-    verbose: bool = typer.Option(False, "--verbose", "-v"),
 ):
     """Start development server with hot reload."""
 
-    app_path = Path(app_file)
+    app_path = Path(app_file).resolve()
     if not app_path.exists():
         error(f"App file not found: {app_file}")
         raise typer.Exit(1)
@@ -132,7 +127,6 @@ def dev_command(
             debug,
         )
 
-        # Collect wrapper files for cleanup (now in temp dir)
         temp_dir = Path(tempfile.gettempdir())
         temp_files.extend(temp_dir.glob(f"starui_dev_{app_path.stem}_*.py"))
         temp_files.extend(config.css_output_absolute.parent.glob("tmp*.css"))

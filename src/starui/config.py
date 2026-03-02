@@ -15,7 +15,6 @@ class ProjectConfig:
     css_dir: Path | None = None
 
     def _absolute(self, path: Path) -> Path:
-        """Convert relative path to absolute."""
         return path if path.is_absolute() else self.project_root / path
 
     @property
@@ -58,8 +57,7 @@ def detect_project_config(project_root: Path | None = None) -> ProjectConfig:
     )
 
 
-def get_content_patterns(project_root: Path) -> list[str]:
-    return ["**/*.py", "!**/__pycache__/**", "!**/test_*.py"]
+CONTENT_PATTERNS = ["**/*.py", "!**/__pycache__/**", "!**/test_*.py"]
 
 
 def load_toml_config(project_root: Path) -> ProjectConfig | None:

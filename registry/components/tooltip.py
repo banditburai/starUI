@@ -5,7 +5,6 @@ from starhtml.datastar import evt
 
 from .utils import cn, gen_id, inject_context
 
-
 __metadata__ = {
     "description": "Hover and focus tooltips",
     "handlers": ["position"],
@@ -40,7 +39,7 @@ def TooltipTrigger(
     cls: str = "",
     **kwargs,
 ):
-    def trigger(*, sig, open_state, timer_state, **_):
+    def _(*, sig, open_state, timer_state, **_):
         trigger_ref = Signal(f"{sig}_trigger", _ref_only=True)
 
         open_expr = reset_timeout(timer_state, delay_duration, open_state.set(True))
@@ -64,7 +63,7 @@ def TooltipTrigger(
             **kwargs,
         )
 
-    return trigger
+    return _
 
 
 def TooltipContent(
@@ -78,7 +77,7 @@ def TooltipContent(
     cls: str = "",
     **kwargs,
 ):
-    def content(*, sig, open_state, **_):
+    def _(*, sig, open_state, **_):
         content_ref = Signal(f"{sig}_content", _ref_only=True)
         placement = side if align == "center" else f"{side}-{align}"
 
@@ -129,7 +128,7 @@ def TooltipContent(
             **kwargs,
         )
 
-    return content
+    return _
 
 
 def TooltipProvider(*children, **kwargs) -> FT:

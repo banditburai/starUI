@@ -6,7 +6,6 @@ from starhtml.datastar import evt
 
 from .utils import cn, cva, gen_id, inject_context, merge_actions
 
-
 __metadata__ = {
     "description": "Dropdown menu with items",
     "handlers": ["position"],
@@ -39,14 +38,16 @@ dropdown_item_variants = cva(
 
 def DropdownMenu(*children, signal: str | Signal = "", cls: str = "", **kwargs) -> FT:
     sig = getattr(signal, "_id", signal) or gen_id("dropdown")
+    open_state = Signal(f"{sig}_open", False)
 
     ctx = {
+        "open_state": open_state,
         "trigger_ref": Signal(f"{sig}_trigger", _ref_only=True),
         "content_ref": Signal(f"{sig}_content", _ref_only=True),
     }
 
     return Div(
-        Signal(f"{sig}_open", False),
+        open_state,
         *[inject_context(child, **ctx) for child in children],
         data_slot="dropdown-menu",
         cls=cn("relative inline-block", cls),
@@ -61,7 +62,7 @@ def DropdownMenuTrigger(
     cls: str = "",
     **kwargs,
 ) -> FT:
-    def _(*, trigger_ref, content_ref, **_):
+    def _(*, open_state, trigger_ref, content_ref, **_):
         from .button import Button
 
         return Button(
@@ -71,6 +72,8 @@ def DropdownMenuTrigger(
             popoveraction="toggle",
             id=trigger_ref._id,
             data_slot="dropdown-menu-trigger",
+            aria_haspopup="menu",
+            data_attr_aria_expanded=open_state.if_("true", "false"),
             variant=variant,
             size=size,
             type="button",
@@ -89,20 +92,24 @@ def DropdownMenuContent(
     cls: str = "",
     **kwargs,
 ) -> FT:
-    def _(*, trigger_ref, content_ref, **ctx):
-        ctx = dict(trigger_ref=trigger_ref, content_ref=content_ref, **ctx)
+    def _(*, open_state, trigger_ref, content_ref, **ctx):
+        ctx = dict(open_state=open_state, trigger_ref=trigger_ref, content_ref=content_ref, **ctx)
 
         return Div(
             *[inject_context(child, **ctx) for child in children],
             data_ref=content_ref,
+            data_on_toggle=open_state.set(evt.newState == "open"),
             data_style_min_width=trigger_ref.if_(trigger_ref.offsetWidth + "px", "8rem"),
-            data_position=(trigger_ref._id, {
-                "placement": f"{side}-{align}" if align != "center" else side,
-                "offset": side_offset,
-                "flip": True,
-                "shift": True,
-                "hide": True,
-            }),
+            data_position=(
+                trigger_ref._id,
+                {
+                    "placement": f"{side}-{align}" if align != "center" else side,
+                    "offset": side_offset,
+                    "flip": True,
+                    "shift": True,
+                    "hide": True,
+                },
+            ),
             popover="auto",
             id=content_ref._id,
             role="menu",
@@ -367,16 +374,21 @@ def DropdownMenuSubContent(
             *[inject_context(child, **ctx) for child in children],
             data_ref=sub_content_ref,
             data_on_toggle=sub_open.set(evt.newState == "open"),
-            data_position=(sub_trigger_ref._id, {
-                "placement": "right-start",
-                "flip": True,
-                "shift": True,
-                "hide": True,
-                "container": "auto",
-            }),
+            data_position=(
+                sub_trigger_ref._id,
+                {
+                    "placement": "right-start",
+                    "flip": True,
+                    "shift": True,
+                    "hide": True,
+                    "container": "auto",
+                },
+            ),
             popover="auto",
             id=sub_content_ref._id,
             role="menu",
+            aria_labelledby=sub_trigger_ref._id,
+            tabindex="-1",
             data_slot="dropdown-menu-sub-content",
             cls=cn(
                 "z-50 max-h-[min(var(--popover-available-height,80vh),80vh)] min-w-[8rem]",

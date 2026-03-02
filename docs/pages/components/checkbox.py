@@ -9,11 +9,11 @@ ORDER = 15
 STATUS = "stable"
 
 from starhtml import Div, P, Label, Icon, Span, H3, Form, Signal, all_, collect, evt
-from starui.registry.components.checkbox import Checkbox, CheckboxWithLabel
-from starui.registry.components.button import Button
-from starui.registry.components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
-from starui.registry.components.badge import Badge
-from starui.registry.components.progress import Progress
+from components.checkbox import Checkbox, CheckboxWithLabel
+from components.button import Button
+from components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
+from components.badge import Badge
+from components.progress import Progress
 from utils import auto_generate_page, with_code, Prop, Component, build_api_reference
 
 

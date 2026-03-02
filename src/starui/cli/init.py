@@ -5,10 +5,9 @@ from rich.progress import track
 
 from ..config import ProjectConfig, detect_project_config
 from ..registry.client import RegistryClient
-from ..registry.loader import ComponentLoader
-from ..templates.app_starter import generate_app_starter
-from ..templates.css_input import generate_css_input
-from .utils import confirm, console, error, info
+from ..registry.manifest import Manifest
+from ..templates import generate_app_starter, generate_css_input
+from .utils import confirm, console, error, info, install_component
 
 
 def validate_project(root: Path, force: bool = False) -> None:
@@ -24,10 +23,7 @@ def validate_project(root: Path, force: bool = False) -> None:
             break
 
     if conflicts and not force:
-        error(
-            "Project appears to already be initialized. Found:\n"
-            + "\n".join(f"  • {item}" for item in conflicts)
-        )
+        error("Project appears to already be initialized. Found:\n" + "\n".join(f"  • {item}" for item in conflicts))
         info("Use --force to reinitialize anyway")
         raise typer.Exit(1)
 
@@ -39,20 +35,16 @@ def setup_directories(config: ProjectConfig, verbose: bool = False) -> None:
         config.project_root / "static" / "css",
     ]
 
-    for d in dirs:
-        d.mkdir(parents=True, exist_ok=True)
+    for dir_path in dirs:
+        dir_path.mkdir(parents=True, exist_ok=True)
         if verbose:
-            console.print(
-                f"[green]Created:[/green] {d.relative_to(config.project_root)}"
-            )
+            console.print(f"[green]Created:[/green] {dir_path.relative_to(config.project_root)}")
 
     component_init = config.component_dir_absolute / "__init__.py"
     if not component_init.exists():
         component_init.touch()
         if verbose:
-            console.print(
-                f"[green]Created:[/green] {component_init.relative_to(config.project_root)}"
-            )
+            console.print(f"[green]Created:[/green] {component_init.relative_to(config.project_root)}")
 
 
 def create_css_input(config: ProjectConfig, verbose: bool = False) -> None:
@@ -65,22 +57,22 @@ def create_css_input(config: ProjectConfig, verbose: bool = False) -> None:
 def add_default_components(config: ProjectConfig, verbose: bool = False) -> None:
     try:
         client = RegistryClient()
-        loader = ComponentLoader(client)
+        manifest = Manifest(config.project_root)
 
-        # Utils needed by all components
-        utils_path = config.component_dir_absolute / "utils.py"
-        utils_path.write_text(client.get_component_source("utils"))
+        utils_source = client.get_component_source("utils")
+        install_component("utils", utils_source, config=config, client=client, manifest=manifest)
         if verbose:
             console.print("[green]Added:[/green] utils.py")
 
-        components = loader.load_component_with_dependencies("theme_toggle")
+        components = client.get_component_with_dependencies("theme_toggle")
         for name, source in components.items():
-            (config.component_dir_absolute / f"{name}.py").write_text(source)
+            install_component(name, source, config=config, client=client, manifest=manifest)
             if verbose:
                 console.print(f"[green]Added component:[/green] {name}")
+
+        manifest.save()
     except Exception as e:
-        if verbose:
-            console.print(f"[yellow]Could not add default components:[/yellow] {e}")
+        console.print(f"[yellow]Could not add default components:[/yellow] {e}")
 
 
 def create_app(config: ProjectConfig, verbose: bool = False) -> None:
@@ -97,7 +89,7 @@ def create_app(config: ProjectConfig, verbose: bool = False) -> None:
 
 def update_gitignore(config: ProjectConfig, verbose: bool = False) -> None:
     gitignore = config.project_root / ".gitignore"
-    starui_ignores = [
+    gitignore_lines = [
         "\n# StarUI generated files",
         str(config.css_output),
         "*.css.map",
@@ -112,11 +104,9 @@ def update_gitignore(config: ProjectConfig, verbose: bool = False) -> None:
     if "# StarUI generated files" not in content:
         if content and not content.endswith("\n"):
             content += "\n"
-        gitignore.write_text(content + "\n".join(starui_ignores))
+        gitignore.write_text(content + "\n".join(gitignore_lines))
         if verbose:
-            console.print(
-                f"[green]{'Updated' if content else 'Created'}:[/green] .gitignore"
-            )
+            console.print(f"[green]{'Updated' if content else 'Created'}:[/green] .gitignore")
     elif verbose:
         console.print("[yellow]Skipped:[/yellow] .gitignore (StarUI patterns exist)")
 
@@ -162,9 +152,7 @@ def init_command(
         validate_project(root, force)
 
         if not force and project_config.css_output_absolute.exists():
-            console.print(
-                f"\n[yellow]Will overwrite:[/yellow]\n  • {project_config.css_output}"
-            )
+            console.print(f"\n[yellow]Will overwrite:[/yellow]\n  • {project_config.css_output}")
             if not confirm("\nProceed?", default=True):
                 info("Cancelled")
                 raise typer.Exit()
@@ -192,9 +180,7 @@ def init_command(
         ]
 
         if config:
-            steps.append(
-                ("Creating config", lambda: create_config_file(project_config, verbose))
-            )
+            steps.append(("Creating config", lambda: create_config_file(project_config, verbose)))
 
         if verbose:
             for name, func in steps:
@@ -211,10 +197,10 @@ def init_command(
         console.print("  3. Run [blue]star build[/blue] for production CSS")
 
         if not config:
-            console.print(
-                "\n[dim]💡 Use [blue]star init --config[/blue] for config file[/dim]"
-            )
+            console.print("\n[dim]💡 Use [blue]star init --config[/blue] for config file[/dim]")
 
+    except typer.Exit:
+        raise
     except Exception as e:
         error(f"Initialization failed: {e}")
         raise typer.Exit(1) from e

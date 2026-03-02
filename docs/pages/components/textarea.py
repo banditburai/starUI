@@ -5,11 +5,11 @@ ORDER = 25
 STATUS = "stable"
 
 from starhtml import Div, P, Span, Icon, Signal, switch, clipboard
-from starui.registry.components.textarea import Textarea, TextareaWithLabel
-from starui.registry.components.button import Button
-from starui.registry.components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
-from starui.registry.components.badge import Badge
-from starui.registry.components.label import Label
+from components.textarea import Textarea, TextareaWithLabel
+from components.button import Button
+from components.card import Card, CardHeader, CardContent, CardTitle, CardDescription
+from components.badge import Badge
+from components.label import Label
 from utils import auto_generate_page, with_code, Prop, build_api_reference
 
 

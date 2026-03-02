@@ -5,12 +5,12 @@ ORDER = 150
 STATUS = "stable"
 
 from starhtml import Div, P, Span, Icon, Signal
-from starui.registry.components.sheet import (
+from components.sheet import (
     Sheet, SheetTrigger, SheetContent, SheetClose,
     SheetHeader, SheetFooter, SheetTitle, SheetDescription
 )
-from starui.registry.components.input import InputWithLabel
-from starui.registry.components.button import Button
+from components.input import InputWithLabel
+from components.button import Button
 from utils import auto_generate_page, with_code, Prop, Component, build_api_reference
 
 

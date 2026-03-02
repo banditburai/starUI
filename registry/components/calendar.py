@@ -7,7 +7,6 @@ from starhtml import Div, Icon, Signal, Span, Style, js
 from .button import Button
 from .utils import cn, gen_id, with_signals
 
-
 __metadata__ = {"description": "Date picker with range and multiple selection"}
 
 

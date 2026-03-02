@@ -10,20 +10,20 @@ ORDER = 30
 STATUS = "stable"
 
 from starhtml import Div, P, Icon, Span, Signal
-from starui.registry.components.table import (
+from components.table import (
     Table, TableHeader, TableBody, TableFooter, TableRow,
     TableHead, TableCell, TableCaption
 )
-from starui.registry.components.button import Button
-from starui.registry.components.checkbox import Checkbox
-from starui.registry.components.badge import Badge
-from starui.registry.components.avatar import Avatar, AvatarFallback
-from starui.registry.components.dropdown_menu import (
+from components.button import Button
+from components.checkbox import Checkbox
+from components.badge import Badge
+from components.avatar import Avatar, AvatarFallback
+from components.dropdown_menu import (
     DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
     DropdownMenuItem, DropdownMenuSeparator,
 )
-from starui.registry.components.skeleton import Skeleton
-from starui.registry.components.progress import Progress
+from components.skeleton import Skeleton
+from components.progress import Progress
 from utils import auto_generate_page, with_code, Prop, Component, build_api_reference
 
 

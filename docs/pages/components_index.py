@@ -21,9 +21,12 @@ COMPONENT_ICONS = {
     "date_picker": "lucide:calendar-days",
     "dialog": "lucide:app-window",
     "dropdown_menu": "lucide:menu",
+    "menubar": "lucide:menu",
     "hover_card": "lucide:mouse-pointer",
     "input": "lucide:type",
     "label": "lucide:text",
+    "navigation_menu": "lucide:compass",
+    "pagination": "lucide:chevrons-left-right",
     "popover": "lucide:message-square",
     "progress": "lucide:loader",
     "radio_group": "lucide:circle-dot",
@@ -36,6 +39,7 @@ COMPONENT_ICONS = {
     "tabs": "lucide:layout-list",
     "textarea": "lucide:align-left",
     "theme_toggle": "lucide:sun-moon",
+    "toast": "lucide:bell",
     "toggle": "lucide:toggle-right",
     "toggle_group": "lucide:group",
     "tooltip": "lucide:message-circle",
@@ -355,6 +359,63 @@ def _preview_dropdown_menu() -> FT:
     )
 
 
+def _preview_menubar() -> FT:
+    return Div(
+        Div(
+            Div("File", cls="text-[9px] px-1.5 py-0.5 rounded text-foreground"),
+            Div("Edit", cls="text-[9px] px-1.5 py-0.5 rounded text-foreground"),
+            Div("View", cls="text-[9px] px-1.5 py-0.5 rounded text-foreground"),
+            Div("Help", cls="text-[9px] px-1.5 py-0.5 rounded text-foreground"),
+            cls="flex gap-0.5 px-1 py-1 border border-border rounded-md bg-background",
+        ),
+    )
+
+
+def _preview_navigation_menu() -> FT:
+    return Div(
+        Div(
+            Span("Getting Started", cls="text-[9px] font-medium text-foreground px-2 py-1"),
+            Span("Components", cls="text-[9px] font-medium text-foreground px-2 py-1"),
+            Span("Docs", cls="text-[9px] font-medium text-muted-foreground px-2 py-1"),
+            cls="flex gap-0.5 px-1 py-1 rounded-md bg-background border border-border",
+        ),
+        Div(
+            Div(cls="h-1.5 w-20 rounded bg-muted-foreground/30 mb-1"),
+            Div(cls="h-1.5 w-24 rounded bg-muted-foreground/20"),
+            cls="w-40 rounded-lg border border-border p-2 bg-popover shadow-lg mt-1",
+        ),
+    )
+
+
+def _preview_pagination() -> FT:
+    return Div(
+        Div(
+            Icon("lucide:chevron-left", width="8", height="8", cls="text-muted-foreground"),
+            Div("1", cls="w-6 h-6 rounded-md flex items-center justify-center text-[9px] font-medium bg-primary text-primary-foreground"),
+            Div("2", cls="w-6 h-6 rounded-md flex items-center justify-center text-[9px] font-medium text-muted-foreground"),
+            Div("3", cls="w-6 h-6 rounded-md flex items-center justify-center text-[9px] font-medium text-muted-foreground"),
+            Icon("lucide:ellipsis", width="8", height="8", cls="text-muted-foreground"),
+            Icon("lucide:chevron-right", width="8", height="8", cls="text-muted-foreground"),
+            cls="flex gap-1 items-center",
+        ),
+    )
+
+
+def _preview_toast() -> FT:
+    return Div(
+        Div(
+            Div(
+                Div(cls="h-2 w-20 rounded bg-foreground/80 mb-0.5"),
+                Div(cls="h-1.5 w-28 rounded bg-muted-foreground/30"),
+                cls="flex-1",
+            ),
+            Div("×", cls="text-[10px] text-muted-foreground shrink-0"),
+            cls="flex items-start gap-2",
+        ),
+        cls="w-44 rounded-lg border border-border p-2.5 bg-background shadow-lg",
+    )
+
+
 def _preview_popover() -> FT:
     return Div(
         Div("Open", cls="h-6 px-2 rounded-md bg-primary text-primary-foreground text-[9px] flex items-center font-medium"),
@@ -494,6 +555,9 @@ PREVIEW_MAP = {
     "hover_card": _preview_hover_card,
     "input": _preview_input,
     "label": _preview_label,
+    "menubar": _preview_menubar,
+    "navigation_menu": _preview_navigation_menu,
+    "pagination": _preview_pagination,
     "popover": _preview_popover,
     "progress": _preview_progress,
     "radio_group": _preview_radio_group,
@@ -504,6 +568,7 @@ PREVIEW_MAP = {
     "switch": _preview_switch,
     "table": _preview_table,
     "tabs": _preview_tabs,
+    "toast": _preview_toast,
     "textarea": _preview_textarea,
     "theme_toggle": _preview_theme_toggle,
     "toggle": _preview_toggle,

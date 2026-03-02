@@ -1,15 +1,15 @@
 from starhtml import *
 from starhtml.plugins import in_view, press
-from starui.registry.components.code_block import CodeBlock as StarlighterCode
-from starui.registry.components.button import Button as StarButton
-from starui.registry.components.card import (
+from components.code_block import CodeBlock as StarlighterCode
+from components.button import Button as StarButton
+from components.card import (
     Card as StarCard, CardHeader, CardTitle, CardDescription, CardContent,
 )
-from starui.registry.components.input import Input as StarInput
-from starui.registry.components.label import Label as StarLabel
-from starui.registry.components.switch import Switch as StarSwitch
-from starui.registry.components.tabs import Tabs, TabsList, TabsTrigger, TabsContent
-from starui.registry.components.command import (
+from components.input import Input as StarInput
+from components.label import Label as StarLabel
+from components.switch import Switch as StarSwitch
+from components.tabs import Tabs, TabsList, TabsTrigger, TabsContent
+from components.command import (
     Command, CommandInput, CommandList, CommandGroup,
     CommandItem, CommandEmpty, CommandSeparator, CommandShortcut,
 )
@@ -257,11 +257,11 @@ def hero_section() -> FT:
 
 def code_example_section() -> FT:
     example_code = '''from starhtml import *
-from starui import (
+from components.ui.card import (
     Card, CardHeader, CardTitle,
     CardDescription, CardContent,
-    Input,
 )
+from components.ui.input import Input
 
 def profile():
     name = Signal("name", "friend")

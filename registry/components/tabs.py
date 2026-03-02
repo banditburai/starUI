@@ -6,7 +6,6 @@ from starhtml import Button as HTMLButton
 
 from .utils import cn, gen_id, inject_context, merge_actions
 
-
 __metadata__ = {"description": "Tabbed interface"}
 
 
@@ -61,11 +60,9 @@ def Tabs(
 
 
 def TabsList(*children, cls: str = "", **kwargs) -> FT:
-    def _(**ctx):
-        variant = ctx.get("variant", "default")
-
+    def _(*, variant="default", **ctx):
         return Div(
-            *[inject_context(child, **ctx) for child in children],
+            *[inject_context(child, variant=variant, **ctx) for child in children],
             data_slot="tabs-list",
             data_variant=variant,
             role="tablist",

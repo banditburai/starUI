@@ -1,7 +1,7 @@
 """Inline code widget with optional copy button - for single-line code snippets."""
 
 from starhtml import Div, FT, NotStr, Signal
-from starui.registry.components.utils import cn
+from components.utils import cn
 from .copy_button import CopyButton
 
 try:
