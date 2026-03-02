@@ -18,11 +18,11 @@ RENDER_PROCESSES = {"uvicorn", "tailwind"}
 
 WRAPPER_TEMPLATE = """import sys
 import warnings
-sys.path.insert(0, r'{app_dir}')
+sys.path.insert(0, r'{sys_path_root}')
 
 warnings.filterwarnings('ignore', message='live=True requires debug=True.*', category=UserWarning)
 
-from {app_stem} import app as original_app
+from {app_module} import app as original_app
 from starui.dev.unified_reload import create_dev_reload_route, DevReloadJs
 from starlette.routing import WebSocketRoute
 
@@ -158,10 +158,13 @@ class ProcessManager:
 
         env = os.environ.copy()
 
-        path_parts = []
-
         project_root = self._find_project_root(app_file.parent)
-        path_parts.append(str(project_root))
+        _, sys_path_root = self._resolve_module_path(app_file, project_root)
+
+        path_parts = [str(project_root)]
+        # src-layout: the importable root may differ from the project root
+        if sys_path_root != project_root:
+            path_parts.append(str(sys_path_root))
 
         if hot_reload:
             path_parts.append(str(Path(gettempdir())))
@@ -173,14 +176,35 @@ class ProcessManager:
 
         return self.start_process("uvicorn", cmd, app_file.parent, env)
 
+    @staticmethod
+    def _resolve_module_path(app_file: Path, project_root: Path) -> tuple[str, Path]:
+        """Resolve dotted module path and sys.path root for an app file."""
+        parts: list[str] = []
+        current = app_file.parent.resolve()
+        root = project_root.resolve()
+
+        while current != root and current != current.parent:
+            if not (current / "__init__.py").exists():
+                break
+            parts.append(current.name)
+            current = current.parent
+
+        if parts:
+            parts.reverse()
+            return ".".join(parts + [app_file.stem]), current
+        return app_file.stem, app_file.parent.resolve()
+
     def _get_app_module(self, app_file: Path, hot_reload: bool, debug: bool) -> str:
+        project_root = self._find_project_root(app_file.parent)
+        app_module, sys_path_root = self._resolve_module_path(app_file, project_root)
+
         if not hot_reload:
-            return f"{app_file.stem}:app"
+            return f"{app_module}:app"
 
         temp_dir = Path(gettempdir())
         wrapper = temp_dir / f"starui_dev_{app_file.stem}_{os.getpid()}.py"
 
-        wrapper.write_text(WRAPPER_TEMPLATE.format(app_dir=app_file.parent, app_stem=app_file.stem, debug=debug))
+        wrapper.write_text(WRAPPER_TEMPLATE.format(sys_path_root=sys_path_root, app_module=app_module, debug=debug))
         return f"{wrapper.stem}:app"
 
     def start_tailwind_watcher(
