@@ -25,6 +25,16 @@ jobs:
     - name: Install dependencies
       run: uv sync --all-extras
         
+    - name: Verify registry index is up to date
+      run: |
+        uv run python scripts/generate_index.py
+        if ! git diff --exit-code registry/index.json; then
+          echo ""
+          echo "ERROR: registry/index.json is out of date."
+          echo "Run 'uv run python scripts/generate_index.py' and commit the result."
+          exit 1
+        fi
+
     - name: Lint with ruff
       run: |
         uv run ruff check --config pyproject.toml
