@@ -3,6 +3,7 @@
     "build": {
       "commands": [
         "...",
+        "cp -r ../registry/components components",
         "uv run star build"
       ]
     }
