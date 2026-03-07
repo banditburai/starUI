@@ -7,7 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `AspectRatio` component — content within a desired ratio, prevents layout shift
+- `Collapsible` component — expand/collapse with smooth CSS grid animation, nesting, and disabled state
+- `Drawer` component — slide-from-edge panel with drag-to-dismiss, all 4 directions, modal/non-modal
+- `InputOTP` component — one-time password input with individual character slots and caret animation
+- `ScrollArea` component — custom styled scrollbars with vertical/horizontal/both orientations and auto-hide
+- `Slider` component — single value and dual-thumb range slider with vertical orientation support
+
 ## [0.3.2] - 2026-03-02
+
+### Fixed
+- `star dev` wrapper uses dotted module path for package layouts
 
 ## [0.3.1] - 2026-03-02
 

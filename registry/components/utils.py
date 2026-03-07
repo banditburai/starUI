@@ -61,8 +61,7 @@ def cn(*classes: Any) -> str:
 
 
 def cva(base: str = "", config: dict[str, Any] | None = None) -> Callable[..., str]:
-    if config is None:
-        config = {}
+    config = config or {}
 
     variants = config.get("variants", {})
     compound_variants = config.get("compoundVariants", [])
@@ -71,16 +70,13 @@ def cva(base: str = "", config: dict[str, Any] | None = None) -> Callable[..., s
     def variant_function(**props: Any) -> str:
         classes = [base] if base else []
 
-        # Merge defaults with props
         final_props = {**default_variants, **props}
 
-        # Apply variants
         for variant_key, variant_values in variants.items():
             prop_value = final_props.get(variant_key)
             if prop_value and prop_value in variant_values:
                 classes.append(variant_values[prop_value])
 
-        # Apply compound variants
         for compound in compound_variants:
             compound_class = compound.get("class", "")
             if not compound_class:
@@ -105,11 +101,6 @@ def cva(base: str = "", config: dict[str, Any] | None = None) -> Callable[..., s
 def gen_id(prefix: str) -> str:
     """Generate a short, unique id with a given prefix."""
     return f"{prefix}_{uuid4().hex[:8]}"
-
-
-def ensure_signal(signal: str | None, prefix: str) -> str:
-    """Return the provided signal or generate one with the prefix."""
-    return signal or gen_id(prefix)
 
 
 def _flatten(*items: Any) -> list:

@@ -62,6 +62,7 @@ select = [
 ]
 ignore = [
     "E501", # line too long, handled by formatter
+    "C408", # dict() is preferred over {} for HTML attribute dicts
     "B008", # do not perform function calls in argument defaults
 ]
 

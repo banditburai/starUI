@@ -39,6 +39,18 @@
       "handlers": [],
       "checksum": "sha256:f403efa380e230ed5dc1075c0e8f5b89fd6389eebd04a1371b2174357fbe26fc"
     },
+    "aspect_ratio": {
+      "name": "aspect_ratio",
+      "description": "Aspect ratio container",
+      "file": "components/aspect_ratio.py",
+      "dependencies": [
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [],
+      "checksum": "sha256:51bb235383d6339e8fabb18385a9ed0b898eb8275aab448df66cfc808ed562d6"
+    },
     "avatar": {
       "name": "avatar",
       "description": "User profile images with fallback",
@@ -138,6 +150,18 @@
       "handlers": [],
       "checksum": "sha256:8f155bc4698df525213449a57abe4ba7a869dbe4f14bd28a599b4a83f63be724"
     },
+    "collapsible": {
+      "name": "collapsible",
+      "description": "Expandable/collapsible content section",
+      "file": "components/collapsible.py",
+      "dependencies": [
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [],
+      "checksum": "sha256:ec6dc0818e9e8fb8c9885cb580c05383e41040908e4aaf0e98c64a07dbc5cecd"
+    },
     "command": {
       "name": "command",
       "description": "Command palette interface",
@@ -179,6 +203,19 @@
       "handlers": [],
       "checksum": "sha256:4abf8ff6e7850a8e0835186305c4303201408ac2421930f9d043fe13e60e2969"
     },
+    "drawer": {
+      "name": "drawer",
+      "description": "Draggable drawer panel",
+      "file": "components/drawer.py",
+      "dependencies": [
+        "button",
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [],
+      "checksum": "sha256:9ff02537f2474735b706cca0f03d578c38ed843e4191ca5aa6554dd845cd02d5"
+    },
     "dropdown_menu": {
       "name": "dropdown_menu",
       "description": "Dropdown menu with items",
@@ -219,6 +256,18 @@
       "css_imports": [],
       "handlers": [],
       "checksum": "sha256:61ee626c7578773aaf7e0b154e5718112831115492fdbb9d02fd52013418824f"
+    },
+    "input_otp": {
+      "name": "input_otp",
+      "description": "One-time password input",
+      "file": "components/input_otp.py",
+      "dependencies": [
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [],
+      "checksum": "sha256:6b02eb41660e6625d9526a1b52567cebc5d7977289cc2f4bb38b2c5efc61b321"
     },
     "label": {
       "name": "label",
@@ -270,7 +319,7 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:f3086126219b70867c108b53709c1553cb8c5c627e4dc731d27a4670981fa97a"
+      "checksum": "sha256:e3a3466eb1f3aa215b7635c7c566a9aef8bf4e35a3b54dfec8e2cffe9563f78c"
     },
     "popover": {
       "name": "popover",
@@ -311,6 +360,18 @@
       "handlers": [],
       "checksum": "sha256:eaa4d808c9934b7e750b8f05aaba20c76793a74a0ef2798b7d61e8e25ef35d55"
     },
+    "scroll_area": {
+      "name": "scroll_area",
+      "description": "Scrollable viewport with styled scrollbars",
+      "file": "components/scroll_area.py",
+      "dependencies": [
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [],
+      "checksum": "sha256:974f2b31a78e88ece82fea4d7e258245ea23b3ebaef58e615800252b864fe69d"
+    },
     "select": {
       "name": "select",
       "description": "Dropdown selection",
@@ -348,7 +409,7 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:a2ef038168184378b55a3fdfea44346ceb768186489aada6da94eb0d7cc71fb0"
+      "checksum": "sha256:66ae456f40cd785ab3128da1c487642c2e1f27c6b6bb72aac023ea7370183387"
     },
     "skeleton": {
       "name": "skeleton",
@@ -361,6 +422,18 @@
       "css_imports": [],
       "handlers": [],
       "checksum": "sha256:1dd21a1de567d9195c802c20f6ae7f6e980b6bdbb38ef35191be0b9c9221d731"
+    },
+    "slider": {
+      "name": "slider",
+      "description": "Slider component for selecting values",
+      "file": "components/slider.py",
+      "dependencies": [
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [],
+      "checksum": "sha256:9528f4aea3405de756a4b52bf801350a75a293644f5f997177a20c710f04a9d3"
     },
     "switch": {
       "name": "switch",
@@ -496,7 +569,7 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:583f910d676558c407ac5eaef5c40dfd2bc4a84be6414f683252dc5ac7dfa043"
+      "checksum": "sha256:30b8a7d8b5403b67db2df9eb8f0e049d5ed3272c6ab49502f027d24f340d84ee"
     }
   }
 }
