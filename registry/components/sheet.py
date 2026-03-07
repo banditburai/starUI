@@ -55,19 +55,13 @@ def Sheet(
     sheet_open = Signal(f"{sig}_open", default_open)
     dialog_ref = Signal(sig, _ref_only=True)
 
-    trigger = next(
-        (c for c in children if callable(c) and getattr(c, "__name__", None) == "trigger"),
-        None,
-    )
-    content = next(
-        (c for c in children if callable(c) and getattr(c, "__name__", None) == "content"),
-        None,
-    )
+    trigger = next((c for c in children if callable(c) and getattr(c, "__name__", None) == "trigger"), None)
+    content = next((c for c in children if callable(c) and getattr(c, "__name__", None) == "content"), None)
 
-    side = getattr(content, "_side", "right") if content else "right"
-    size = getattr(content, "_size", "sm") if content else "sm"
-    content_cls = getattr(content, "_cls", "") if content else ""
-    content_kwargs = getattr(content, "_kwargs", {}) if content else {}
+    side = getattr(content, "_side", "right")
+    size = getattr(content, "_size", "sm")
+    content_cls = getattr(content, "_cls", "")
+    content_kwargs = getattr(content, "_kwargs", {})
 
     ctx = {
         "sig": sig,
@@ -150,8 +144,11 @@ def SheetTrigger(
     def trigger(*, sig, sheet_open, dialog_ref, modal, **_):
         from .button import Button
 
-        show_method = dialog_ref.showModal() if modal else dialog_ref.show()
-        click_actions = merge_actions(show_method, sheet_open.set(True), kwargs=kwargs)
+        click_actions = merge_actions(
+            dialog_ref.showModal() if modal else dialog_ref.show(),
+            sheet_open.set(True),
+            kwargs=kwargs,
+        )
 
         return Button(
             *children,

@@ -83,7 +83,7 @@ def PaginationLink(
             data_on_click=page_sig.set(page) if not disabled else None,
             disabled=disabled,
             data_attr_aria_current=is_active.if_("page", ""),
-            data_attr_data_active=is_active.if_("true", ""),
+            data_attr_data_active=is_active,
             data_slot="pagination-link",
             cls=cn(pagination_link_variants(size=size), "cursor-pointer", cls),
             **kwargs,

@@ -44,6 +44,12 @@ COMPONENT_ICONS = {
     "toggle_group": "lucide:group",
     "tooltip": "lucide:message-circle",
     "typography": "lucide:heading",
+    "aspect_ratio": "lucide:proportions",
+    "collapsible": "lucide:chevrons-up-down",
+    "drawer": "lucide:panel-bottom",
+    "input_otp": "lucide:rectangle-ellipsis",
+    "scroll_area": "lucide:scroll-text",
+    "slider": "lucide:sliders-horizontal",
 }
 
 
@@ -534,6 +540,105 @@ def _preview_code_block() -> FT:
     )
 
 
+def _preview_aspect_ratio() -> FT:
+    return Div(
+        Div(
+            Icon("lucide:image", width="16", height="16", cls="text-muted-foreground/50"),
+            cls="absolute inset-0 flex items-center justify-center bg-muted/50 rounded-md",
+        ),
+        cls="relative w-40 rounded-lg border border-border bg-background overflow-hidden",
+        style="aspect-ratio: 16/9",
+    )
+
+
+def _preview_collapsible() -> FT:
+    return Div(
+        Div(
+            Span("Section A", cls="text-[10px] font-medium text-foreground"),
+            Icon("lucide:chevron-down", width="8", height="8", cls="text-muted-foreground rotate-180"),
+            cls="flex items-center justify-between px-2 py-1.5",
+        ),
+        Div(
+            Div(cls="h-1.5 w-24 rounded bg-muted-foreground/20 mb-1"),
+            Div(cls="h-1.5 w-16 rounded bg-muted-foreground/20"),
+            cls="px-2 pb-2",
+        ),
+        Div(
+            Span("Section B", cls="text-[10px] font-medium text-muted-foreground"),
+            Icon("lucide:chevron-down", width="8", height="8", cls="text-muted-foreground"),
+            cls="flex items-center justify-between px-2 py-1.5 border-t border-border",
+        ),
+        cls="w-36 rounded-lg border border-border bg-background overflow-hidden",
+    )
+
+
+def _preview_drawer() -> FT:
+    return Div(
+        Div(cls="flex-1 bg-foreground/[0.04] rounded"),
+        Div(
+            Div(cls="w-8 h-1 rounded-full bg-muted-foreground/30 mx-auto mb-1.5"),
+            Div(cls="h-2 w-16 rounded bg-foreground/80 mb-1"),
+            Div(cls="h-1.5 w-full rounded bg-muted-foreground/20"),
+            cls="border-t border-border p-2",
+        ),
+        cls="flex flex-col w-36 h-16 rounded-lg border border-border overflow-hidden bg-background",
+    )
+
+
+def _preview_input_otp() -> FT:
+    return Div(
+        Div(
+            *[Div(
+                Span(c, cls="text-[10px] font-mono font-medium text-foreground") if c else None,
+                cls="w-7 h-8 rounded-md border border-border flex items-center justify-center bg-background",
+            ) for c in ["4", "2", ""]],
+            cls="flex gap-0.5",
+        ),
+        Div(
+            Div(cls="w-1.5 h-px bg-muted-foreground/40"),
+            cls="flex items-center px-1",
+        ),
+        Div(
+            *[Div(cls="w-7 h-8 rounded-md border border-border bg-background") for _ in range(3)],
+            cls="flex gap-0.5",
+        ),
+        cls="flex items-center",
+    )
+
+
+def _preview_scroll_area() -> FT:
+    return Div(
+        Div(
+            Div(cls="h-1.5 w-20 rounded bg-muted-foreground/20 mb-1.5"),
+            Div(cls="h-1.5 w-16 rounded bg-muted-foreground/20 mb-1.5"),
+            Div(cls="h-1.5 w-22 rounded bg-muted-foreground/20 mb-1.5"),
+            Div(cls="h-1.5 w-14 rounded bg-muted-foreground/20 mb-1.5"),
+            Div(cls="h-1.5 w-18 rounded bg-muted-foreground/20 mb-1.5"),
+            Div(cls="h-1.5 w-20 rounded bg-muted-foreground/20"),
+            cls="p-2 flex-1 min-w-0",
+        ),
+        Div(
+            Div(cls="w-[3px] h-7 rounded-full bg-foreground/25"),
+            cls="pr-1 py-1.5 flex items-start justify-end",
+        ),
+        cls="flex w-36 h-16 rounded-lg border border-border overflow-hidden bg-background",
+    )
+
+
+def _preview_slider() -> FT:
+    return Div(
+        Div(
+            Div(
+                Div(cls="h-full w-3/5 rounded-full bg-primary"),
+                cls="h-1.5 w-full rounded-full bg-foreground/10 relative",
+            ),
+            Div(cls="w-3.5 h-3.5 rounded-full bg-background border-2 border-primary shadow-sm absolute top-1/2 -translate-y-1/2",
+                style="left: calc(60% - 7px)"),
+            cls="relative w-36",
+        ),
+    )
+
+
 # ── Preview mapping ─────────────────────────────────────────────────
 
 PREVIEW_MAP = {
@@ -575,6 +680,12 @@ PREVIEW_MAP = {
     "toggle_group": _preview_toggle_group,
     "tooltip": _preview_tooltip,
     "typography": _preview_typography,
+    "aspect_ratio": _preview_aspect_ratio,
+    "collapsible": _preview_collapsible,
+    "drawer": _preview_drawer,
+    "input_otp": _preview_input_otp,
+    "scroll_area": _preview_scroll_area,
+    "slider": _preview_slider,
 }
 
 
