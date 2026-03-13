@@ -157,8 +157,6 @@ def _toast_element(index: int, variant: str) -> FT:
 
 
 class ToastHelper:
-    """Client-side toast API — returns JS expressions for data_on_click."""
-
     def __call__(
         self,
         title: str,
@@ -195,8 +193,6 @@ class ToastHelper:
 
 
 class ToastQueue:
-    """Toast state manager for SSE routes."""
-
     def __init__(self, max_visible: int = 3):
         self.toasts: list[dict | None] = [None] * max_visible
         self.max_visible = max_visible
@@ -219,8 +215,7 @@ class ToastQueue:
         for i, t in enumerate(self.toasts):
             if t is not None:
                 self.toasts[i] = {**t, "order": t["order"] + 1}
-        idx = next((i for i, t in enumerate(self.toasts) if t is None), None)
-        if idx is None:
+        if (idx := next((i for i, t in enumerate(self.toasts) if t is None), None)) is None:
             oldest_idx, oldest_ts = 0, float("inf")
             for i, t in enumerate(self.toasts):
                 if t is not None and t["timestamp"] < oldest_ts:

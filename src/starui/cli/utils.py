@@ -1,4 +1,5 @@
 import re
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import typer
@@ -61,6 +62,37 @@ def install_component(
         )
     except FileNotFoundError:
         pass  # Manifest recording is best-effort; component is usable without it
+
+
+def install_block(
+    name: str,
+    install_name: str,
+    source: str,
+    *,
+    config: "ProjectConfig",
+    client: "RegistryClient",
+    manifest: "Manifest",
+) -> None:
+    file_path = config.component_dir_absolute / f"{install_name}.py"
+    file_path.write_text(source)
+    try:
+        meta = client.get_block_metadata(name)
+        manifest.record_block_install(
+            name,
+            version=client.version,
+            checksum=meta.get("checksum", ""),
+            file_path=str(file_path.relative_to(config.project_root)),
+        )
+    except FileNotFoundError:
+        pass  # Best-effort; block is usable without manifest entry
+
+
+def find_block_by_install_name(name: str, installed_blocks: dict[str, dict]) -> str | None:
+    """Match a block by its install_name (file stem), e.g. 'user_button' -> 'user_button_01'."""
+    return next(
+        (bn for bn, rec in installed_blocks.items() if Path(rec.get("file", "")).stem == name),
+        None,
+    )
 
 
 MSG_NO_MANIFEST = "No manifest found. Run 'star init' or 'star add' first."

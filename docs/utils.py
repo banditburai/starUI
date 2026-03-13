@@ -8,7 +8,7 @@ from typing import Any, Callable, Generator
 # Explicit imports to preserve Python built-ins (any, all, match, etc.)
 # since utils.py contains Python logic alongside HTML generation
 from starhtml import (
-    Div, H2, H3, P, Table, Thead, Tbody, Tr, Th, Td, Code, FT
+    A, Div, H2, H3, P, Span, Table, Thead, Tbody, Tr, Th, Td, Code, FT
 )
 from widgets.installation_section import InstallationSection
 from widgets.code_block import CodeBlock
@@ -81,6 +81,51 @@ def auto_generate_page(
     )
 
 
+def auto_generate_block_page(
+    block_name: str,
+    description: str,
+    preview_fn: Callable,
+    source_code: str | None = None,
+    source_files: list[dict[str, str]] | None = None,
+    cli_command: str | None = None,
+    dependencies: list[str] | None = None,
+    **layout_attrs
+) -> FT:
+    from layouts.base import DocsLayout, LayoutConfig, SidebarConfig
+    from app import DOCS_SIDEBAR_SECTIONS
+
+    cli = cli_command or f"star add {block_name.lower().replace(' ', '-')}"
+    slug = block_name.lower().replace(' ', '-').replace('_', '-')
+
+    # Standalone preview — no Preview/Code tabs
+    hero = Div(
+        Div(preview_fn(), cls="flex min-h-[200px] w-full items-center justify-center p-10"),
+        cls="rounded-lg border mb-8",
+    )
+
+    # Normalize source input
+    files = source_files
+    if files is None and source_code:
+        files = [{"name": f"{slug.replace('-', '_')}.py", "content": source_code}]
+
+    sections = [
+        hero,
+        _installation(cli, None, None),
+        _block_source_files(files),
+        _block_dependencies(dependencies),
+    ]
+
+    return DocsLayout(
+        Div(*filter(None, sections)),
+        layout=LayoutConfig(
+            title=block_name,
+            description=description,
+        ),
+        sidebar=SidebarConfig(sections=DOCS_SIDEBAR_SECTIONS),
+        **layout_attrs
+    )
+
+
 # ============================================================================
 # SECTIONS
 # ============================================================================
@@ -113,6 +158,38 @@ def _usage(code: str | None, description: str | None = None) -> FT | None:
         P(description, cls="text-muted-foreground mb-4") if description else "",
         CodeBlock(code, language="python"),
         cls="space-y-4"
+    )
+
+
+def _block_source_files(files: list[dict[str, str]] | None) -> FT | None:
+    if not files:
+        return None
+    from widgets.file_viewer import FileViewer
+    return Div(
+        H2("Source", cls="text-2xl font-bold tracking-tight mb-4 mt-12"),
+        P("Full source code for this block.", cls="text-sm text-muted-foreground mb-4"),
+        FileViewer(files),
+    )
+
+
+def _block_dependencies(dependencies: list[str] | None) -> FT | None:
+    if not dependencies:
+        return None
+    dep_links = [
+        A(
+            Code(dep.replace("_", "-"), cls="text-sm font-mono"),
+            href=f"/components/{dep}",
+            cls="inline-flex items-center rounded-md border border-border px-2.5 py-1 text-sm hover:bg-muted transition-colors",
+        )
+        for dep in dependencies
+        if dep != "utils"
+    ]
+    if not dep_links:
+        return None
+    return Div(
+        H2("Dependencies", cls="text-2xl font-bold tracking-tight mb-4 mt-12"),
+        P("This block composes the following components:", cls="text-sm text-muted-foreground mb-4"),
+        Div(*dep_links, cls="flex flex-wrap gap-2"),
     )
 
 

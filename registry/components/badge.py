@@ -41,17 +41,15 @@ def Badge(
     cls: str = "",
     **kwargs,
 ) -> FT:
-    base_classes = badge_variants(variant=variant)
-
     if href:
-        return A(*children, href=href, cls=cn(base_classes, cls), **kwargs)
+        return A(*children, href=href, cls=cn(badge_variants(variant=variant), cls), **kwargs)
 
     if clickable:
         return HTMLButton(
             *children,
-            cls=cn(base_classes, "cursor-pointer", cls),
+            cls=cn(badge_variants(variant=variant), "cursor-pointer", cls),
             type="button",
             **kwargs,
         )
 
-    return Span(*children, cls=cn(base_classes, cls), **kwargs)
+    return Span(*children, cls=cn(badge_variants(variant=variant), cls), **kwargs)

@@ -69,7 +69,6 @@ def HoverCardContent(
 ):
     def _(*, sig, open_state, timer_state, **_):
         content_ref = Signal(f"{sig}_content", _ref_only=True)
-        placement = side if align == "center" else f"{side}-{align}"
 
         return Div(
             *children,
@@ -78,7 +77,7 @@ def HoverCardContent(
             data_position=(
                 f"{sig}_trigger",
                 {
-                    "placement": placement,
+                    "placement": side if align == "center" else f"{side}-{align}",
                     "offset": 4,
                     "flip": True,
                     "shift": True,

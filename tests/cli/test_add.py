@@ -12,7 +12,7 @@ from starui.cli.add import _setup_css_imports, add_command
 def _mock_client(resolved: dict[str, str], *, metadata_fn=None):
     client = MagicMock()
     client.get_component_with_dependencies.return_value = resolved
-    client.get_component_metadata.side_effect = metadata_fn or (
+    default_meta = metadata_fn or (
         lambda name: {
             "name": name,
             "packages": [],
@@ -20,6 +20,8 @@ def _mock_client(resolved: dict[str, str], *, metadata_fn=None):
             "checksum": "",
         }
     )
+    client.get_component_metadata.side_effect = default_meta
+    client.lookup.side_effect = lambda name: ("component", default_meta(name))
     client.version = "main"
     return client
 
@@ -341,6 +343,7 @@ class TestCssImports:
 class TestErrorPaths:
     def test_client_failure_raises_exit_with_message(self, project):
         client = MagicMock()
+        client.lookup.return_value = ("component", {"name": "button"})
         client.get_component_with_dependencies.side_effect = RuntimeError("boom")
 
         with (
@@ -392,3 +395,132 @@ class TestSetupCssImports:
 
     def test_noop_without_input_css(self, project):
         _setup_css_imports(project, ['@plugin "@tailwindcss/typography";'])
+
+
+# ── Block tests ────────────────────────────────────────────────────────────
+
+
+def _mock_block_client(
+    comp_deps: dict[str, str],
+    block_source: str,
+    *,
+    registry_name: str = "user_button_01",
+    install_name: str = "user_button",
+    block_meta: dict | None = None,
+):
+    """Create a mock client that supports both component and block lookups."""
+    block_entry = {
+        "name": registry_name,
+        "install_name": install_name,
+        "packages": [],
+        "css_imports": [],
+        "handlers": [],
+        "checksum": "",
+        **(block_meta or {}),
+    }
+    comp_meta_fn = lambda name: {"name": name, "packages": [], "css_imports": [], "checksum": ""}
+
+    client = MagicMock()
+    client.version = "main"
+    client.get_component_metadata.side_effect = comp_meta_fn
+    client.get_block_metadata.return_value = block_entry
+    client.get_block_with_dependencies.return_value = (comp_deps, block_source)
+
+    def lookup(name):
+        if name in comp_deps and name != "utils":
+            return ("component", comp_meta_fn(name))
+        if name == registry_name:
+            return ("block", block_entry)
+        if name == install_name:
+            return ("block", block_entry)
+        raise FileNotFoundError(f"'{name}' not found")
+
+    client.lookup.side_effect = lookup
+    return client
+
+
+class TestBlockInstallByRegistryName:
+    def test_installs_block_and_component_deps(self, project):
+        comp_dir = project.component_dir_absolute
+        client = _mock_block_client(
+            {"utils": "# u", "avatar": "# avatar", "dropdown_menu": "# dm"},
+            "# user_button source",
+        )
+
+        _run_add(project, ["user-button-01"], {}, client=client)
+
+        assert (comp_dir / "avatar.py").read_text() == "# avatar"
+        assert (comp_dir / "dropdown_menu.py").read_text() == "# dm"
+        assert (comp_dir / "user_button.py").read_text() == "# user_button source"
+
+    def test_success_message_includes_block(self, project):
+        client = _mock_block_client(
+            {"utils": "# u"},
+            "# block src",
+        )
+        result = _run_add(project, ["user-button-01"], {}, client=client)
+        success_text = " ".join(result.successes)
+        assert "user_button" in success_text
+
+
+class TestBlockInstallByInstallName:
+    def test_resolves_install_name_to_registry_name(self, project):
+        """star add user-button should work via install_name fallback."""
+        comp_dir = project.component_dir_absolute
+        client = _mock_block_client(
+            {"utils": "# u", "avatar": "# av"},
+            "# block src",
+        )
+
+        _run_add(project, ["user-button"], {}, client=client)
+
+        assert (comp_dir / "user_button.py").read_text() == "# block src"
+        # Verify get_block_with_dependencies was called with registry name, not install name
+        client.get_block_with_dependencies.assert_called_with("user_button_01")
+
+
+class TestBlockConflictDetection:
+    def test_conflict_detected_by_install_name(self, project):
+        comp_dir = project.component_dir_absolute
+        (comp_dir / "user_button.py").write_text("# existing")
+
+        client = _mock_block_client({"utils": "# u"}, "# new block")
+
+        # When user types the install_name, conflict should still be detected
+        _run_add(project, ["user-button"], {}, client=client, confirm_response=True)
+        assert (comp_dir / "user_button.py").read_text() == "# new block"
+
+    def test_conflict_detected_by_registry_name(self, project):
+        comp_dir = project.component_dir_absolute
+        (comp_dir / "user_button.py").write_text("# existing")
+
+        client = _mock_block_client({"utils": "# u"}, "# new block")
+
+        _run_add(project, ["user-button-01"], {}, client=client, confirm_response=True)
+        assert (comp_dir / "user_button.py").read_text() == "# new block"
+
+
+class TestBlockPackagesAndCssImports:
+    def test_block_packages_are_collected(self, project):
+        client = _mock_block_client(
+            {"utils": "# u"},
+            "# block src",
+            block_meta={"packages": ["some-pkg"]},
+        )
+
+        result = _run_add(project, ["user-button-01"], {}, client=client)
+        assert len(result.subprocess_calls) == 1
+        assert "some-pkg" in result.subprocess_calls[0]
+
+    def test_block_css_imports_are_added(self, project):
+        input_css = project.css_dir_absolute / "input.css"
+        input_css.write_text('@import "tailwindcss";\n')
+
+        client = _mock_block_client(
+            {"utils": "# u"},
+            "# block src",
+            block_meta={"css_imports": ['@plugin "some-plugin";']},
+        )
+
+        _run_add(project, ["user-button-01"], {}, client=client)
+        assert '@plugin "some-plugin";' in input_css.read_text()

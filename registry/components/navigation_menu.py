@@ -108,6 +108,7 @@ def NavigationMenuItem(*children, cls: str = "", **kwargs) -> FT:
 def NavigationMenuTrigger(*children, cls: str = "", **kwargs) -> FT:
     def _(*, active, timer, item_id, viewport_ref, **_):
         is_active = active == item_id
+        hover_actions = [clear_timeout(timer), active.set(item_id), viewport_ref.showPopover()]
 
         return HTMLButton(
             *children,
@@ -121,11 +122,7 @@ def NavigationMenuTrigger(*children, cls: str = "", **kwargs) -> FT:
                 active.set(is_active.if_("", item_id)),
                 is_active.if_(viewport_ref.hidePopover(), viewport_ref.showPopover()),
             ],
-            data_on_mouseenter=[
-                clear_timeout(timer),
-                active.set(item_id),
-                viewport_ref.showPopover(),
-            ],
+            data_on_mouseenter=hover_actions,
             data_on_mouseleave=reset_timeout(timer, 150, viewport_ref.hidePopover()),
             type="button",
             data_slot="navigation-menu-trigger",

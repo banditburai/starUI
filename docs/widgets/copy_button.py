@@ -1,5 +1,5 @@
 from starhtml import FT, Icon, Signal, Span, clipboard
-from starhtml.datastar import js
+from starhtml.datastar import evt
 from components.button import Button
 
 
@@ -27,7 +27,7 @@ def CopyButton(
 
     click_handler = clipboard(element=f'#{code_id}', signal=copied)
     if stop_propagation:
-        click_handler = (js("evt.stopPropagation()"), click_handler)
+        click_handler = (evt.stopPropagation(), click_handler)
 
     return Button(
         Icon("lucide:check", cls="h-3 w-3", data_show=copied),

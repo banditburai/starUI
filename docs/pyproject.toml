@@ -5,7 +5,7 @@ description = "Documentation for StarUI component library"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "starhtml>=0.5.12",
+    "starhtml",
     "starlighter>=0.2.0",
     "starui>=0.3.0",
     "uvicorn>=0.30.0",

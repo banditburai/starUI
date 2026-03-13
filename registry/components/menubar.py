@@ -1,9 +1,9 @@
 from itertools import count
 from typing import Literal
 
-from starhtml import FT, Div, Hr, Icon, Signal, Span, clear_timeout, reset_timeout
+from starhtml import FT, Div, Hr, Icon, Signal, Span, Style, clear_timeout, js, reset_timeout
 from starhtml import Button as HTMLButton
-from starhtml.datastar import evt, seq
+from starhtml.datastar import seq
 
 from .utils import cn, cva, gen_id, inject_context, merge_actions
 
@@ -12,10 +12,33 @@ __metadata__ = {
     "handlers": ["position"],
 }
 
+_POPOVER_ANIMATE = """\
+[data-popover-animate]{--_dur-in:150ms;--_dur-out:100ms;transform-origin:var(--popover-origin,center);transition:opacity var(--_dur-out) ease,scale var(--_dur-out) ease,display var(--_dur-out) allow-discrete,overlay var(--_dur-out) allow-discrete}
+[data-popover-animate]:popover-open{transition-duration:var(--_dur-in);transition-timing-function:cubic-bezier(0.16,1,0.3,1)}
+[data-popover-animate]:not(:popover-open){opacity:0;scale:0.95}
+[data-popover-animate]:popover-open{@starting-style{opacity:0;scale:0.95}}
+@media(prefers-reduced-motion:reduce){[data-popover-animate]{transition-duration:0ms!important}}"""
+
+_MENU_ITEM_SEL = "[role=menuitem]:not([disabled]),[role=menuitemcheckbox]:not([disabled]),[role=menuitemradio]:not([disabled])"
+_MENU_NAV = (
+    f"const items=[...evt.currentTarget.querySelectorAll('{_MENU_ITEM_SEL}')];"
+    "if(!items.length)return;const k=evt.key;let i=items.indexOf(document.activeElement);"
+    "if(k==='ArrowDown'){evt.preventDefault();i=(i+1)%items.length;items[i].focus()}"
+    "else if(k==='ArrowUp'){evt.preventDefault();i=(i-1+items.length)%items.length;items[i].focus()}"
+    "else if(k==='Home'){evt.preventDefault();items[0].focus()}"
+    "else if(k==='End'){evt.preventDefault();items[items.length-1].focus()}"
+    "else if(k.length===1&&!evt.ctrlKey&&!evt.metaKey&&!evt.altKey){"
+    "const m=evt.currentTarget;m._sb=(m._sb||'')+k.toLowerCase();"
+    "clearTimeout(m._st);m._st=setTimeout(()=>{m._sb=''},500);"
+    "const b=m._sb,s=b.length===1?i+1:0;"
+    "for(let j=0;j<items.length;j++){const x=(s+j)%items.length;"
+    "if(items[x].textContent.trim().toLowerCase().startsWith(b)){items[x].focus();break}}}"
+)
+
 
 menubar_item_variants = cva(
     base=(
-        "relative flex w-full cursor-default select-none items-center gap-1.5 rounded-sm px-1.5 py-1 "
+        "relative flex cursor-default select-none items-center gap-1.5 rounded-sm px-1.5 py-1 "
         "text-sm outline-hidden "
         "[&_[data-icon-sh]:not([class*='text-'])]:text-muted-foreground "
         "[&_[data-icon-sh]]:pointer-events-none [&_[data-icon-sh]]:shrink-0 [&_[data-icon-sh]]:size-4"
@@ -37,6 +60,12 @@ menubar_item_variants = cva(
 )
 
 
+def _menubar_item_cls(
+    *, variant: Literal["default", "destructive"] = "default", inset: str = "", disabled: bool = False, cls: str = ""
+) -> str:
+    return cn(menubar_item_variants(variant=variant), inset, "pointer-events-none opacity-50" if disabled else "", cls)
+
+
 def Menubar(*children, signal: str | Signal = "", cls: str = "", **kwargs) -> FT:
     sig = getattr(signal, "_id", signal) or gen_id("menubar")
     active = Signal(f"{sig}_active", "")
@@ -48,6 +77,7 @@ def Menubar(*children, signal: str | Signal = "", cls: str = "", **kwargs) -> FT
     }
 
     return Div(
+        Style(_POPOVER_ANIMATE),
         active,
         *[inject_context(child, **ctx) for child in children],
         role="menubar",
@@ -97,7 +127,7 @@ def MenubarTrigger(*children, cls: str = "", **kwargs) -> FT:
             data_attr_data_state=is_active.if_("open", "closed"),
             data_attr_aria_expanded=is_active.if_("true", "false"),
             cls=cn(
-                "flex items-center rounded-sm px-1.5 py-[2px] text-sm font-medium "
+                "flex items-center rounded-sm px-1.5 py-0.5 text-sm font-medium "
                 "outline-hidden select-none cursor-default "
                 "hover:bg-muted focus:bg-muted data-[state=open]:bg-muted",
                 cls,
@@ -119,10 +149,18 @@ def MenubarContent(
     def _(*, trigger_ref, content_ref, active, menu_id, **ctx):
         ctx = dict(trigger_ref=trigger_ref, content_ref=content_ref, active=active, menu_id=menu_id, **ctx)
 
+        toggle_handler = js(
+            f"const o=evt.newState==='open';"
+            f"{active}=o?'{menu_id}':({active}==='{menu_id}'?'':{active});"
+            f"if(o)requestAnimationFrame(()=>"
+            f"evt.target.querySelector('{_MENU_ITEM_SEL}')?.focus())"
+        )
+
         return Div(
             *[inject_context(child, **ctx) for child in children],
             data_ref=content_ref,
-            data_on_toggle=active.set((evt.newState == "open").if_(menu_id, (active == menu_id).if_("", active))),
+            data_on_toggle=toggle_handler,
+            data_on_keydown=js(_MENU_NAV),
             data_position=(
                 trigger_ref._id,
                 {
@@ -134,6 +172,7 @@ def MenubarContent(
                 },
             ),
             popover="auto",
+            data_popover_animate="",
             id=content_ref._id,
             role="menu",
             aria_labelledby=trigger_ref._id,
@@ -165,15 +204,11 @@ def MenubarItem(
         return HTMLButton(
             *children,
             data_on_click=click_actions if not disabled else None,
-            cls=cn(
-                menubar_item_variants(variant=variant),
-                "pl-7" if inset else "",
-                "pointer-events-none opacity-50" if disabled else "",
-                cls,
-            ),
+            cls=_menubar_item_cls(variant=variant, inset="pl-7" if inset else "", disabled=disabled, cls=cls),
             type="button",
             disabled=disabled,
             role="menuitem",
+            tabindex="-1",
             data_slot="menubar-item",
             **kwargs,
         )
@@ -201,14 +236,10 @@ def MenubarCheckboxItem(
             ),
             *children,
             data_on_click=click_actions if not disabled else None,
-            cls=cn(
-                menubar_item_variants(variant="default"),
-                "pl-7 pr-1.5",
-                "pointer-events-none opacity-50" if disabled else "",
-                cls,
-            ),
+            cls=_menubar_item_cls(inset="pl-7 pr-1.5", disabled=disabled, cls=cls),
             type="button",
             role="menuitemcheckbox",
+            tabindex="-1",
             data_slot="menubar-checkbox-item",
             data_attr_aria_checked=checked.if_("true", "false"),
             disabled=disabled,
@@ -257,14 +288,10 @@ def MenubarRadioItem(
             ),
             *children,
             data_on_click=click_actions if not disabled else None,
-            cls=cn(
-                menubar_item_variants(variant="default"),
-                "pl-7 pr-1.5",
-                "pointer-events-none opacity-50" if disabled else "",
-                cls,
-            ),
+            cls=_menubar_item_cls(inset="pl-7 pr-1.5", disabled=disabled, cls=cls),
             type="button",
             role="menuitemradio",
+            tabindex="-1",
             data_slot="menubar-radio-item",
             data_attr_aria_checked=is_checked.if_("true", "false"),
             disabled=disabled,
@@ -322,14 +349,13 @@ def MenubarSubTrigger(
             data_on_mouseenter=clear_timeout(sub_timer, sub_content_ref.showPopover()),
             data_on_mouseleave=reset_timeout(sub_timer, 150, sub_content_ref.hidePopover()),
             cls=cn(
-                menubar_item_variants(variant="default"),
+                _menubar_item_cls(inset="pl-7" if inset else "", cls=cls),
                 "data-[state=open]:bg-accent data-[state=open]:text-accent-foreground",
-                "pl-7" if inset else "",
-                cls,
             ),
             data_attr_data_state=sub_open.if_("open", "closed"),
             type="button",
             role="menuitem",
+            tabindex="-1",
             data_slot="menubar-sub-trigger",
             aria_haspopup="menu",
             data_attr_aria_expanded=sub_open.if_("true", "false"),
@@ -345,10 +371,17 @@ def MenubarSubContent(
     **kwargs,
 ) -> FT:
     def _(*, sub_open, sub_trigger_ref, sub_content_ref, sub_timer, **ctx):
+        toggle_handler = js(
+            f"const o=evt.newState==='open';{sub_open}=o;"
+            f"if(o)requestAnimationFrame(()=>"
+            f"evt.target.querySelector('{_MENU_ITEM_SEL}')?.focus())"
+        )
+
         return Div(
             *[inject_context(child, **ctx) for child in children],
             data_ref=sub_content_ref,
-            data_on_toggle=sub_open.set(evt.newState == "open"),
+            data_on_toggle=toggle_handler,
+            data_on_keydown=js(_MENU_NAV),
             data_on_mouseenter=clear_timeout(sub_timer),
             data_on_mouseleave=reset_timeout(sub_timer, 150, sub_content_ref.hidePopover()),
             data_position=(
@@ -362,6 +395,7 @@ def MenubarSubContent(
                 },
             ),
             popover="auto",
+            data_popover_animate="",
             id=sub_content_ref._id,
             role="menu",
             aria_labelledby=sub_trigger_ref._id,
@@ -382,7 +416,7 @@ def MenubarSubContent(
 def MenubarSeparator(cls: str = "", **kwargs) -> FT:
     return Hr(
         data_slot="menubar-separator",
-        cls=cn("-mx-1 my-1 border-border", cls),
+        cls=cn("-mx-1 my-1 h-px border-0 bg-border", cls),
         **kwargs,
     )
 
@@ -404,6 +438,7 @@ def MenubarShortcut(*children, cls: str = "", **kwargs) -> FT:
     return Span(
         *children,
         data_slot="menubar-shortcut",
+        aria_hidden="true",
         cls=cn("ml-auto text-xs tracking-widest text-muted-foreground", cls),
         **kwargs,
     )

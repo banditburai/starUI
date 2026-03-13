@@ -70,12 +70,10 @@ def _render_handle(sig, direction):
             f"{ds}=evt.client{axis};{dy}=0;{dg}=1;evt.currentTarget.setPointerCapture(evt.pointerId)"
         ),
         data_on_pointermove=js(f"if({dg}){{var raw=evt.client{axis}-{ds};{dy}={clamp}}}"),
-        # dg=0 re-enables CSS transitions; past threshold closes, below snaps back
         data_on_pointerup=js(
             f"if({dg}){{var wasDelta=Math.abs({dy});{dg}=0;{dy}=0;"
             f"if(wasDelta>{_DISMISS_THRESHOLD}){{evt.currentTarget.closest('dialog').close()}}}}"
         ),
-        # pointercancel from system gestures, notifications, etc.
         data_on_pointercancel=js(f"if({dg}){{{dg}=0;{dy}=0}}"),
         aria_hidden="true",
         data_slot="drawer-handle",
@@ -96,8 +94,8 @@ def Drawer(
     drawer_open = Signal(f"{sig}_open", default_open)
     dialog_ref = Signal(sig, _ref_only=True)
 
-    trigger = next((c for c in children if callable(c) and getattr(c, "__name__", None) == "trigger"), None)
-    content = next((c for c in children if callable(c) and getattr(c, "__name__", None) == "content"), None)
+    trigger = next((c for c in children if getattr(c, "__name__", None) == "trigger"), None)
+    content = next((c for c in children if getattr(c, "__name__", None) == "content"), None)
 
     direction = getattr(content, "_direction", "bottom")
     show_handle = getattr(content, "_show_handle", True)
@@ -180,15 +178,11 @@ def DrawerTrigger(
     def trigger(*, sig, drawer_open, dialog_ref, modal, **_):
         from .button import Button
 
-        click_actions = merge_actions(
-            dialog_ref.showModal() if modal else dialog_ref.show(),
-            drawer_open.set(True),
-            kwargs=kwargs,
-        )
-
         return Button(
             *children,
-            data_on_click=click_actions,
+            data_on_click=merge_actions(
+                dialog_ref.showModal() if modal else dialog_ref.show(), drawer_open.set(True), kwargs=kwargs
+            ),
             id=f"{sig}_trigger",
             data_attr_aria_expanded=drawer_open.if_("true", "false"),
             aria_haspopup="dialog",
@@ -245,14 +239,9 @@ def DrawerClose(
     def _(*, drawer_open, dialog_ref, **_):
         from .button import Button
 
-        click_actions = merge_actions(
-            kwargs=kwargs,
-            after=[drawer_open.set(False), dialog_ref.close()],
-        )
-
         return Button(
             *children,
-            data_on_click=click_actions,
+            data_on_click=merge_actions(kwargs=kwargs, after=[drawer_open.set(False), dialog_ref.close()]),
             data_slot="drawer-close",
             variant=variant,
             size=size,

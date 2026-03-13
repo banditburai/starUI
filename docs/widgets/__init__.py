@@ -2,11 +2,13 @@
 
 from .code_block import CodeBlock, CodePanel
 from .component_preview import ComponentPreview
+from .file_viewer import FileViewer
 from .installation_section import InstallationSection
 
 __all__ = [
     "CodeBlock",
     "CodePanel",
     "ComponentPreview",
-    "InstallationSection"
+    "FileViewer",
+    "InstallationSection",
 ]

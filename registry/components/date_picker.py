@@ -15,12 +15,12 @@ __metadata__ = {"description": "Date picker with popover calendar"}
 
 
 class DatePickerElement(Protocol):
-    selected: Signal  # str for single, list for range/multiple
+    selected: Signal
     calendar: CalendarElement
 
 
 class DateTimePickerElement(Protocol):
-    datetime: Signal  # combined datetime string
+    datetime: Signal
     date: Signal
     time: Signal
     calendar: CalendarElement
@@ -69,7 +69,6 @@ def DatePicker(
         cls="border-0 rounded-none w-full",
     )
 
-    # Extract CSS value from trigger width class for popover min-width alignment
     _w = re.search(r"\[(.+?)\]", width or "")
     popover_min_style = f"min-width: {_w.group(1)};" if _w else ""
 
@@ -296,14 +295,6 @@ def DatePickerWithInput(
 def _build_input_popover_content(
     content_id: str, trigger_id: str, cal: str, initial_selected: str, disabled: bool
 ) -> Div:
-    position_mods = {
-        "placement": "bottom-end",
-        "flip": True,
-        "shift": True,
-        "hide": True,
-        "container": "none",
-    }
-
     return Div(
         Calendar(
             signal=cal,
@@ -313,7 +304,10 @@ def _build_input_popover_content(
             cls="border-0 rounded-none w-full",
         ),
         data_ref=content_id,
-        data_position=(trigger_id, position_mods),
+        data_position=(
+            trigger_id,
+            {"placement": "bottom-end", "flip": True, "shift": True, "hide": True, "container": "none"},
+        ),
         popover="auto",
         id=content_id,
         role="dialog",

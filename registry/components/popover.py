@@ -65,10 +65,8 @@ def PopoverContent(
 ):
     def _(*, sig, **ctx):
         content_ref = Signal(f"{sig}_content", _ref_only=True)
-        placement = side if align == "center" else f"{side}-{align}"
-
         position_mods = {
-            "placement": placement,
+            "placement": side if align == "center" else f"{side}-{align}",
             "flip": True,
             "shift": True,
             "hide": True,

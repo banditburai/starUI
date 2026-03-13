@@ -42,7 +42,6 @@ def InputOTP(
     slot_refs = [Signal(f"{sig}_{i}_ref", _ref_only=True) for i in range(max_length)]
     otp = Signal(sig, value, ifmissing=not value)
 
-    # These belong on the slot inputs, not the container
     aria_invalid = kwargs.pop("aria_invalid", None)
     aria_describedby = kwargs.pop("aria_describedby", None)
 
@@ -114,21 +113,16 @@ def InputOTPSlot(
         next_ref = f"${sig}_{index + 1}_ref" if index < max_length - 1 else None
         prev_ref = f"${sig}_{index - 1}_ref" if index > 0 else None
 
-        # data-on-input fires after data-bind has synced the value
         replace = f"{s}.replace(/[^{allow}]/g, '')" if allow else s
         advance = (
-            f"if ({s}.length > 0) {{ {next_ref}.focus(); {next_ref}.select() }}"
-            if next_ref
-            else "evt.target.select()"  # Re-select so next keystroke replaces
+            f"if ({s}.length > 0) {{ {next_ref}.focus(); {next_ref}.select() }}" if next_ref else "evt.target.select()"
         )
         input_handler = js(f"{s} = {replace}.slice(0, 1); {sync_composite}; {advance}")
 
         keydown_handler = js(
             "; ".join(
                 [
-                    # IME composition guard (mobile keyboards, CJK input)
                     "if (evt.isComposing || evt.keyCode === 229) return",
-                    # Block invalid chars before they reach data-bind
                     *(
                         [
                             f"if (evt.key.length === 1 && !evt.ctrlKey && !evt.metaKey && !/[{allow}]/.test(evt.key)) "

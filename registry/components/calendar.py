@@ -15,10 +15,10 @@ CaptionLayout = Literal["label", "dropdown"]
 
 
 class CalendarElement(Protocol):
-    selected: Signal  # str for single, list for range/multiple
-    month: Signal  # 1-12
+    selected: Signal
+    month: Signal
     year: Signal
-    month_display: Signal  # "January", "February", etc.
+    month_display: Signal
 
 
 MONTHS = (
@@ -226,21 +226,15 @@ def _build_dropdown(
             attrs["data_year"] = value
         return Div(str(display), **attrs)
 
-    position_mods = {
-        "placement": "bottom",
-        "offset": 8,
-        "flip": True,
-        "shift": True,
-        "hide": True,
-        "container": "none",  # Key for calendar dropdowns to position correctly
-    }
-
     dropdown = Div(
         *[make_item(value, display) for value, display in items],
         data_on_click=js(_dropdown_handler(month, year, month_display, kind, content_ref)) if not disabled else None,
         data_ref=content_ref,
         data_style_min_width=trigger_ref.if_(trigger_ref.offsetWidth + "px", "8rem"),
-        data_position=(trigger_ref._id, position_mods),
+        data_position=(
+            trigger_ref._id,
+            {"placement": "bottom", "offset": 8, "flip": True, "shift": True, "hide": True, "container": "none"},
+        ),
         popover="auto",
         id=content_ref._id,
         role="listbox",

@@ -59,13 +59,11 @@ def Toggle(
 
     pressed_state = Signal(sig, pressed)
 
-    click_actions = merge_actions(pressed_state.toggle(), kwargs=kwargs) if not disabled else None
-
     return Div(
         pressed_state,
         HTMLButton(
             *children,
-            data_on_click=click_actions,
+            data_on_click=merge_actions(pressed_state.toggle(), kwargs=kwargs) if not disabled else None,
             type="button",
             id=toggle_id,
             disabled=disabled,

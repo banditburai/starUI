@@ -7,12 +7,6 @@ __metadata__ = {"description": "Theme toggle button"}
 
 
 def ThemeToggle(**kwargs) -> FT:
-    """Theme toggle button with CSS-only icon switching.
-
-    Uses CSS selectors tied to [data-theme] — set synchronously by
-    theme_script() before first paint, so there is zero flash.
-    """
-
     return Div(
         Style(f"""
             [data-theme="{DEFAULT_THEME}"] .theme-icon-alt,

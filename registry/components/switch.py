@@ -61,8 +61,6 @@ def Switch(
     switch_id = kwargs.pop("id", sig)
 
     checked_state = Signal(sig, checked or False)
-    click_actions = merge_actions(checked_state.toggle(), kwargs=kwargs)
-    translate = _THUMB_TRANSLATE[size]
 
     return Div(
         checked_state,
@@ -70,12 +68,12 @@ def Switch(
             HTMLSpan(
                 cls=switch_thumb_variants(size=size),
                 data_attr_cls=checked_state.if_(
-                    f"{translate} dark:bg-primary-foreground",
+                    f"{_THUMB_TRANSLATE[size]} dark:bg-primary-foreground",
                     "translate-x-0 dark:bg-foreground",
                 ),
                 data_slot="switch-thumb",
             ),
-            data_on_click=click_actions,
+            data_on_click=merge_actions(checked_state.toggle(), kwargs=kwargs),
             cls=cn(switch_variants(size=size), cls),
             data_attr_cls=checked_state.if_("bg-primary", "bg-input dark:bg-input/80"),
             type="button",

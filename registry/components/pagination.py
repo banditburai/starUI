@@ -196,7 +196,6 @@ def SimplePagination(
         middle_count = max(max_visible - 4, 1)
         half = middle_count // 2
 
-        # Snap thresholds avoid orphan pages (e.g. [1] [...] [3] — page 2 orphaned)
         left_snap = half + 3
         right_snap = total_pages - middle_count + half - 1
 

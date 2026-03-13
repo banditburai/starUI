@@ -1,5 +1,5 @@
 from starhtml import Div, FT, Icon, Span, Signal
-from starhtml.datastar import js
+from starhtml.datastar import evt
 from components.utils import cn
 from components.code_block import CodeBlock as BaseCodeBlock
 from .copy_button import CopyButton
@@ -66,7 +66,7 @@ def _chevron_button(collapsed: Signal) -> FT:
             cls="inline-block transition-transform duration-300",
             data_attr_cls=collapsed.if_("rotate-180", "rotate-0")
         ),
-        data_on_click=(js("evt.stopPropagation()"), collapsed.toggle()),
+        data_on_click=(evt.stopPropagation(), collapsed.toggle()),
         role="button",
         tabindex="0",
         aria_label="Toggle code block",

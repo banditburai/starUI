@@ -81,13 +81,37 @@ async def initialize_docs_sidebar():
 
     print(f"[STARTUP] Loaded {component_count} components")
 
-    all_components = []
-    for name, component in registry.components.items():
-        all_components.append({
-            "href": f"/components/{name}",
-            "label": component["title"],
-        })
+    # Discover blocks
+    blocks_dir = Path(__file__).parent / "pages" / "blocks"
+    block_count = 0
+    if blocks_dir.exists():
+        for block_file in sorted(blocks_dir.glob("*.py")):
+            if block_file.stem in ["__init__", "__pycache__"]:
+                continue
+            try:
+                module_name = f"pages.blocks.{block_file.stem}"
+                module = __import__(module_name, fromlist=["*"])
+                if hasattr(module, "TITLE"):
+                    registry.register_block(
+                        name=block_file.stem,
+                        title=getattr(module, "TITLE", block_file.stem.title()),
+                        description=getattr(module, "DESCRIPTION", ""),
+                        order=getattr(module, "ORDER", 100),
+                        status=getattr(module, "STATUS", "stable"),
+                        create_docs=getattr(module, f"create_{block_file.stem}_docs", lambda: None),
+                        preview=getattr(module, "preview", None),
+                    )
+                    block_count += 1
+            except Exception as e:
+                print(f"[STARTUP] Failed to load block {block_file.stem}: {e}")
 
+    if block_count:
+        print(f"[STARTUP] Loaded {block_count} blocks")
+
+    all_components = [
+        {"href": f"/components/{name}", "label": comp["title"]}
+        for name, comp in registry.components.items()
+    ]
     all_components.sort(key=lambda x: x["label"])
 
     DOCS_SIDEBAR_SECTIONS = [
@@ -100,8 +124,10 @@ async def initialize_docs_sidebar():
         {
             "title": "Components",
             "items": all_components
-        }
+        },
     ]
+
+    # Blocks are accessed via top-level header nav, not sidebar
 
 
 app, rt = star_app(
@@ -117,7 +143,7 @@ app.register(position, clipboard, motion, scroll)
 
 DOCS_NAV_ITEMS = [
     {"href": "/components", "label": "Components"},
-    # {"href": "/blocks", "label": "Blocks"},  # Coming soon
+    {"href": "/blocks", "label": "Blocks"},
     # {"href": "/themes", "label": "Themes"},  # Coming soon
 ]
 
@@ -162,6 +188,81 @@ def components_index():
     )
 
 
+@rt("/blocks")
+def blocks_index():
+    registry = get_registry()
+    blocks = sorted(
+        registry.blocks.items(),
+        key=lambda x: x[1].get("title", x[0]),
+    )
+
+    def block_card(name: str, block: dict) -> FT:
+        slug = name
+        preview_fn = block.get("preview")
+
+        if preview_fn:
+            preview_area = Div(
+                Div(preview_fn(), cls="pointer-events-none scale-90 origin-center"),
+                cls="min-h-[160px] flex items-center justify-center p-6 bg-muted/30 overflow-hidden",
+            )
+        else:
+            preview_area = Div(
+                Icon("lucide:layout-template", width="36", height="36", cls="text-muted-foreground/40"),
+                cls="min-h-[160px] flex items-center justify-center p-6 bg-muted/30",
+            )
+
+        return A(
+            Div(
+                preview_area,
+                Div(
+                    Span(block["title"], cls="text-sm font-semibold text-foreground truncate"),
+                    Code(
+                        f"star add {slug.replace('_', '-')}",
+                        cls="text-[11px] font-mono text-muted-foreground",
+                    ),
+                    cls="flex flex-col gap-0.5 px-4 py-2.5 border-t border-border",
+                ),
+                cls="bg-card border border-border rounded-lg overflow-hidden",
+            ),
+            href=f"/blocks/{slug}",
+            cls="block",
+        )
+
+    return (
+        Title("Blocks \u2014 StarUI"),
+        Socials(
+            title="Blocks \u2014 StarUI",
+            site_name="StarUI",
+            description="Pre-built compositions of StarUI primitives \u2014 higher-level building blocks for common patterns.",
+            image="/static/images/og/starui.jpg",
+            url=f"{SITE_URL}/blocks",
+            card="summary_large_image",
+        ),
+        DocsLayout(
+            Div(
+                P(
+                    "Pre-built compositions of primitives for common UI patterns.",
+                    cls="text-lg text-muted-foreground mb-1",
+                ),
+                P(
+                    "Copy, paste, customize.",
+                    cls="text-sm text-muted-foreground mb-8",
+                ),
+                Div(
+                    *[block_card(name, comp) for name, comp in blocks],
+                    cls="grid gap-4 lg:gap-5 sm:grid-cols-2 lg:grid-cols-3 auto-rows-fr",
+                ) if blocks else P("No blocks available yet.", cls="text-muted-foreground"),
+                cls="max-w-6xl mx-auto",
+            ),
+            layout=LayoutConfig(
+                title="Blocks",
+                description="Explore all available StarUI blocks",
+            ),
+            sidebar=SidebarConfig(sections=DOCS_SIDEBAR_SECTIONS),
+        ),
+    )
+
+
 @rt("/components/{component_name}")
 def component_page(component_name: str):
     component_name = component_name.replace("-", "_")
@@ -196,6 +297,43 @@ def component_page(component_name: str):
             card="summary_large_image",
         ),
         component.get("create_docs", lambda: None)(),
+    )
+
+
+@rt("/blocks/{block_name}")
+def block_page(block_name: str):
+    block_name = block_name.replace("-", "_")
+    registry = get_registry()
+    block = registry.get_block(block_name)
+
+    if not block:
+        return DocsLayout(
+            Div(
+                H1("Block Not Found", cls="text-3xl font-bold mb-4"),
+                P(f"The block '{block_name}' was not found.", cls="text-muted-foreground"),
+                A("View all components", href="/components", cls="text-primary hover:underline"),
+            ),
+            layout=LayoutConfig(
+                title="Block Not Found",
+                show_sidebar=True
+            ),
+            sidebar=SidebarConfig(sections=DOCS_SIDEBAR_SECTIONS),
+        )
+
+    block_title = block.get("title", block_name.replace("_", " ").title())
+    block_desc = block.get("description", f"{block_title} block for StarUI.")
+
+    return (
+        Title(f"{block_title} \u2014 StarUI"),
+        Socials(
+            title=f"{block_title} \u2014 StarUI",
+            site_name="StarUI",
+            description=block_desc,
+            image="/static/images/og/starui.jpg",
+            url=f"{SITE_URL}/blocks/{block_name}",
+            card="summary_large_image",
+        ),
+        block.get("create_docs", lambda: None)(),
     )
 
 
@@ -542,6 +680,7 @@ def sitemap():
     registry = get_registry()
     paths = ["/", "/installation", "/components"]
     paths += [f"/components/{name}" for name in registry.components]
+    paths += [f"/blocks/{name}" for name in registry.blocks]
 
     urls = "\n".join(
         f"  <url><loc>{SITE_URL}{p}</loc></url>"

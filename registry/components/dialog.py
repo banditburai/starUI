@@ -60,14 +60,8 @@ def Dialog(
     open_state = Signal(f"{sig}_open", False)
     dialog_ref = Signal(sig, _ref_only=True)
 
-    trigger = next(
-        (c for c in children if callable(c) and getattr(c, "__name__", None) == "trigger"),
-        None,
-    )
-    content = next(
-        (c for c in children if callable(c) and getattr(c, "__name__", None) == "content"),
-        None,
-    )
+    trigger = next((c for c in children if getattr(c, "__name__", None) == "trigger"), None)
+    content = next((c for c in children if getattr(c, "__name__", None) == "content"), None)
 
     ctx = {
         "open_state": open_state,
@@ -111,12 +105,11 @@ def DialogTrigger(
     def trigger(*, open_state, dialog_ref, modal, **_):
         from .button import Button
 
-        show_method = dialog_ref.showModal() if modal else dialog_ref.show()
-        click_actions = merge_actions(show_method, open_state.set(True), kwargs=kwargs)
-
         return Button(
             *children,
-            data_on_click=click_actions,
+            data_on_click=merge_actions(
+                dialog_ref.showModal() if modal else dialog_ref.show(), open_state.set(True), kwargs=kwargs
+            ),
             type="button",
             aria_haspopup="dialog",
             variant=variant,
@@ -164,17 +157,12 @@ def DialogClose(
     def _(*, open_state, dialog_ref, **_):
         from .button import Button
 
-        close_actions = merge_actions(
-            kwargs=kwargs,
-            after=[
-                open_state.set(False),
-                dialog_ref.close(value) if value else dialog_ref.close(),
-            ],
-        )
-
         return Button(
             *children,
-            data_on_click=close_actions,
+            data_on_click=merge_actions(
+                kwargs=kwargs,
+                after=[open_state.set(False), dialog_ref.close(value) if value else dialog_ref.close()],
+            ),
             type="button",
             variant=variant,
             cls=cls,

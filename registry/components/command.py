@@ -11,7 +11,6 @@ __metadata__ = {"description": "Command palette interface"}
 
 
 CommandSize = Literal["sm", "md", "lg"]
-
 # Native dialog needs a frame to finish opening before input can receive focus
 _DIALOG_FOCUS_DELAY_MS = 50
 
@@ -106,7 +105,6 @@ def CommandDialog(
         cls="border-0 **:data-[slot=command-input-wrapper]:h-12",
     )
 
-    # Shares ID with Command's internal input_ref for focus management
     input_ref = Signal(f"{sig}_input", _ref_only=True)
 
     reset_signals = [
@@ -212,10 +210,7 @@ def CommandList(
                 const items = [...document.querySelectorAll('[data-command-item="{sig}"]')];
                 const visible = items.filter(el => !el.style.display.includes('none') && el.dataset.disabled !== 'true');
                 {visible_count} = visible.length;
-                {visible_items} = visible.map(el => ({{
-                    index: parseInt(el.dataset.index || '0'),
-                    el: el
-                }}));
+                {visible_items} = visible.map(el => ({{ index: parseInt(el.dataset.index || '0') }}));
                 if (visible.length > 0) {selected} = parseInt(visible[0].dataset.index || '0');
             }});
         """)

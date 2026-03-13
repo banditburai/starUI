@@ -88,7 +88,6 @@ def TabsTrigger(
     def _(*, tabs_state, variant="default", _trigger_index, **_):
         tab_id = id if id is not None else next(_trigger_index)
         is_active = tabs_state == tab_id
-
         return HTMLButton(
             *children,
             data_on_click=merge_actions(tabs_state.set(tab_id), kwargs=kwargs),

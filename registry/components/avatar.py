@@ -56,7 +56,7 @@ def AvatarFallback(
     return Div(
         *children,
         cls=cn(
-            "flex size-full items-center justify-center rounded-full bg-muted",
+            "flex size-full items-center justify-center rounded-full bg-muted font-semibold",
             cls,
         ),
         data_slot="avatar-fallback",

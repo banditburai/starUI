@@ -23,7 +23,6 @@ def Checkbox(
 ) -> FT:
     sig = getattr(signal, "_id", signal) or gen_id("checkbox")
     initial = "indeterminate" if indeterminate else (checked or False)
-
     return Div(
         (checked_state := Signal(sig, initial)),
         HTMLInput(

@@ -41,14 +41,8 @@ def AlertDialog(
     open_state = Signal(f"{sig}_open", False)
     dialog_ref = Signal(sig, _ref_only=True)
 
-    trigger = next(
-        (c for c in children if callable(c) and getattr(c, "__name__", None) == "trigger"),
-        None,
-    )
-    content = next(
-        (c for c in children if callable(c) and getattr(c, "__name__", None) == "content"),
-        None,
-    )
+    trigger = next((c for c in children if getattr(c, "__name__", None) == "trigger"), None)
+    content = next((c for c in children if getattr(c, "__name__", None) == "content"), None)
 
     ctx = {"open_state": open_state, "dialog_ref": dialog_ref, "sig": sig}
 
@@ -86,11 +80,9 @@ def AlertDialogTrigger(
     def trigger(*, open_state, dialog_ref, **_):
         from .button import Button
 
-        click_actions = merge_actions(dialog_ref.showModal(), open_state.set(True), kwargs=kwargs)
-
         return Button(
             *children,
-            data_on_click=click_actions,
+            data_on_click=merge_actions(dialog_ref.showModal(), open_state.set(True), kwargs=kwargs),
             aria_haspopup="dialog",
             variant=variant,
             cls=cls,
@@ -187,11 +179,9 @@ def AlertDialogAction(
     def _(*, open_state, dialog_ref, **_):
         from .button import Button
 
-        click_actions = merge_actions(action, after=[open_state.set(False), dialog_ref.close()])
-
         return Button(
             *children,
-            data_on_click=click_actions,
+            data_on_click=merge_actions(action, after=[open_state.set(False), dialog_ref.close()]),
             variant=variant,
             cls=cls,
             **kwargs,
@@ -208,11 +198,9 @@ def AlertDialogCancel(
     def _(*, open_state, dialog_ref, **_):
         from .button import Button
 
-        click_actions = merge_actions(kwargs=kwargs, after=[open_state.set(False), dialog_ref.close()])
-
         return Button(
             *children,
-            data_on_click=click_actions,
+            data_on_click=merge_actions(kwargs=kwargs, after=[open_state.set(False), dialog_ref.close()]),
             variant="outline",
             cls=cls,
             **kwargs,

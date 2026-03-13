@@ -55,8 +55,8 @@ def Sheet(
     sheet_open = Signal(f"{sig}_open", default_open)
     dialog_ref = Signal(sig, _ref_only=True)
 
-    trigger = next((c for c in children if callable(c) and getattr(c, "__name__", None) == "trigger"), None)
-    content = next((c for c in children if callable(c) and getattr(c, "__name__", None) == "content"), None)
+    trigger = next((c for c in children if getattr(c, "__name__", None) == "trigger"), None)
+    content = next((c for c in children if getattr(c, "__name__", None) == "content"), None)
 
     side = getattr(content, "_side", "right")
     size = getattr(content, "_size", "sm")
@@ -144,15 +144,11 @@ def SheetTrigger(
     def trigger(*, sig, sheet_open, dialog_ref, modal, **_):
         from .button import Button
 
-        click_actions = merge_actions(
-            dialog_ref.showModal() if modal else dialog_ref.show(),
-            sheet_open.set(True),
-            kwargs=kwargs,
-        )
-
         return Button(
             *children,
-            data_on_click=click_actions,
+            data_on_click=merge_actions(
+                dialog_ref.showModal() if modal else dialog_ref.show(), sheet_open.set(True), kwargs=kwargs
+            ),
             id=f"{sig}_trigger",
             data_attr_aria_expanded=sheet_open.if_("true", "false"),
             aria_haspopup="dialog",
@@ -206,14 +202,9 @@ def SheetClose(
     def _(*, sheet_open, dialog_ref, **_):
         from .button import Button
 
-        click_actions = merge_actions(
-            kwargs=kwargs,
-            after=[sheet_open.set(False), dialog_ref.close()],
-        )
-
         return Button(
             *children,
-            data_on_click=click_actions,
+            data_on_click=merge_actions(kwargs=kwargs, after=[sheet_open.set(False), dialog_ref.close()]),
             data_slot="sheet-close",
             variant=variant,
             size=size,

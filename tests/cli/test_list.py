@@ -12,6 +12,7 @@ def _mock_client(components: list[dict]):
     client = MagicMock()
     client.list_components.return_value = [c["name"] for c in components]
     client.get_component_metadata.side_effect = lambda name: next(c for c in components if c["name"] == name)
+    client.list_blocks.return_value = []
     return client
 
 
@@ -36,6 +37,7 @@ TWO_COMPONENTS = [
 def _mock_manifest(installed_names: set[str] | None = None):
     manifest = MagicMock()
     manifest.get_installed.return_value = {n: {} for n in (installed_names or set())}
+    manifest.get_installed_blocks.return_value = {}
     return manifest
 
 
@@ -58,6 +60,7 @@ class TestListCommand:
     def test_empty_registry_shows_info_message(self):
         client = MagicMock()
         client.list_components.return_value = []
+        client.list_blocks.return_value = []
 
         with (
             patch("starui.cli.list.get_project_config"),
@@ -68,7 +71,7 @@ class TestListCommand:
         ):
             list_command(search=None, installed=False, verbose=False)
 
-        mock_info.assert_called_once_with("No components found")
+        mock_info.assert_called_once_with("No items match filters")
 
     def test_search_filters_by_name(self):
         client = _mock_client(TWO_COMPONENTS)
@@ -127,11 +130,12 @@ class TestListCommand:
         ):
             list_command(search="zzz_nonexistent", installed=False, verbose=False)
 
-        mock_info.assert_called_with("No components match filters")
+        mock_info.assert_called_with("No items match filters")
 
     def test_metadata_error_skips_component_and_continues(self):
         client = MagicMock()
         client.list_components.return_value = ["good", "bad"]
+        client.list_blocks.return_value = []
 
         def get_meta(name):
             if name == "bad":

@@ -1,4 +1,4 @@
-from starhtml import FT, Div, Icon, Signal, Span
+from starhtml import FT, Div, Icon, Signal, Span, Style
 from starhtml import Button as HTMLButton
 from starhtml import Label as HTMLLabel
 from starhtml import P as HTMLP
@@ -10,6 +10,13 @@ __metadata__ = {
     "description": "Dropdown selection",
     "handlers": ["position"],
 }
+
+_POPOVER_ANIMATE = """\
+[data-popover-animate]{--_dur-in:150ms;--_dur-out:100ms;transform-origin:var(--popover-origin,center);transition:opacity var(--_dur-out) ease,scale var(--_dur-out) ease,display var(--_dur-out) allow-discrete,overlay var(--_dur-out) allow-discrete}
+[data-popover-animate]:popover-open{transition-duration:var(--_dur-in);transition-timing-function:cubic-bezier(0.16,1,0.3,1)}
+[data-popover-animate]:not(:popover-open){opacity:0;scale:0.95}
+[data-popover-animate]:popover-open{@starting-style{opacity:0;scale:0.95}}
+@media(prefers-reduced-motion:reduce){[data-popover-animate]{transition-duration:0ms!important}}"""
 
 
 def Select(
@@ -34,6 +41,7 @@ def Select(
     }
 
     return Div(
+        Style(_POPOVER_ANIMATE),
         selected,
         selected_label,
         open_state,
@@ -109,9 +117,7 @@ def SelectValue(
                 **kwargs,
             )
 
-        text_expr = kwargs.pop("data_text") if "data_text" in kwargs else selected_label.or_(placeholder)
-
-        # Static text for SSR/accessibility; data_text overrides once Datastar initializes
+        text_expr = kwargs.pop("data_text", selected_label.or_(placeholder))
         ssr_text = getattr(selected_label, "_initial", "") or placeholder
 
         return Span(
@@ -161,6 +167,7 @@ def SelectContent(
             data_style_min_width=trigger_ref.if_(trigger_ref.offsetWidth + "px", "8rem"),
             data_position=(trigger_ref._id, position_mods),
             popover="auto",
+            data_popover_animate="",
             id=content_ref._id,
             role="listbox",
             aria_labelledby=trigger_ref._id,
@@ -270,50 +277,27 @@ def SelectSeparator(
 
 
 def _get_value_label(item: str | tuple) -> tuple[str, str]:
-    match item:
-        case str():
-            return item, item
-        case (value, label):
-            return value, label
-        case _:
-            return "", ""
+    return (item, item) if isinstance(item, str) else (item[0], item[1]) if isinstance(item, tuple) else ("", "")
 
 
 def _find_initial_label(options: list, value: str | None) -> str:
     if not value:
         return ""
-
-    for opt in options:
-        match opt:
-            case str() if opt == value:
-                return opt
-            case (opt_value, label) if opt_value == value:
-                return label
-            case {"items": items}:
-                for item in items:
-                    item_value, item_label = _get_value_label(item)
-                    if item_value == value:
-                        return item_label
-    return ""
+    all_items = (item for opt in options for item in (opt.get("items", []) if isinstance(opt, dict) else [opt]))
+    return next((lbl for v, lbl in map(_get_value_label, all_items) if v == value), "")
 
 
-def _build_select_items(options: list) -> list:
-    def _process_option(opt):
-        match opt:
-            case str():
-                return SelectItem(opt)
-            case (value, label):
-                return SelectItem(label, value=value)
-            case {"group": group_label, "items": group_items}:
-                return SelectGroup(
-                    *[
-                        SelectItem(item_label, value=item_value)
-                        for item_value, item_label in [_get_value_label(item) for item in group_items]
-                    ],
-                    label=group_label,
-                )
-
-    return [_process_option(opt) for opt in options]
+def _select_item(opt) -> FT:
+    match opt:
+        case str():
+            return SelectItem(opt)
+        case (value, label):
+            return SelectItem(label, value=value)
+        case {"group": group_label, "items": group_items}:
+            return SelectGroup(
+                *[SelectItem(label, value=value) for value, label in map(_get_value_label, group_items)],
+                label=group_label,
+            )
 
 
 def SelectWithLabel(
@@ -353,7 +337,7 @@ def SelectWithLabel(
                 aria_invalid="true" if error_text else None,
                 id=trigger_id,
             ),
-            SelectContent(*_build_select_items(options), side=side),
+            SelectContent(*[_select_item(opt) for opt in options], side=side),
             *attrs,
             value=value,
             label=_find_initial_label(options, value),

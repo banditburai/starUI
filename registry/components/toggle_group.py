@@ -28,7 +28,6 @@ def ToggleGroup(
 ) -> FT:
     sig = getattr(signal, "_id", signal) or gen_id("toggle_group")
     initial = value if value is not None else ("" if type == "single" else [])
-    is_vertical = orientation == "vertical"
     ctx = {
         "type": type,
         "variant": variant,
@@ -54,7 +53,7 @@ def ToggleGroup(
         aria_orientation=orientation if type == "single" else None,
         cls=cn(
             "group/toggle-group flex w-fit rounded-md",
-            "flex-col items-stretch" if is_vertical else "items-center",
+            "flex-col items-stretch" if orientation == "vertical" else "items-center",
             "data-[variant=outline]:shadow-xs" if variant == "outline" else "",
             cls,
         ),

@@ -41,19 +41,16 @@ def TooltipTrigger(
 ):
     def _(*, sig, open_state, timer_state, **_):
         trigger_ref = Signal(f"{sig}_trigger", _ref_only=True)
-
-        open_expr = reset_timeout(timer_state, delay_duration, open_state.set(True))
         close_expr = clear_timeout(timer_state, open_state.set(False))
-        focus_open_expr = clear_timeout(timer_state, open_state.set(True))
 
         return Div(
             *children,
             data_ref=trigger_ref,
-            data_on_mouseenter=open_expr,
+            data_on_mouseenter=reset_timeout(timer_state, delay_duration, open_state.set(True)),
             data_on_mouseleave=reset_timeout(timer_state, hide_delay, open_state.set(False))
             if hide_delay > 0
             else close_expr,
-            data_on_focusin=focus_open_expr,
+            data_on_focusin=clear_timeout(timer_state, open_state.set(True)),
             data_on_focusout=close_expr,
             data_on_keydown=((evt.key == "Escape") | (evt.key == " ") | (evt.key == "Enter")).then(close_expr),
             aria_describedby=f"{sig}_content",

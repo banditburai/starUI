@@ -31,6 +31,7 @@ class HeaderConfig:
     logo_href: str = "/"
     nav_items: list[dict[str, Any]] = field(default_factory=lambda: [
         {"href": "/components", "label": "Components"},
+        {"href": "/blocks", "label": "Blocks"},
     ])
     show_theme_toggle: bool = True
 

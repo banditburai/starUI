@@ -4,7 +4,8 @@ from typing import Any, Callable
 class ComponentRegistry:
     def __init__(self):
         self.components: dict[str, dict[str, Any]] = {}
-    
+        self.blocks: dict[str, dict[str, Any]] = {}
+
     def register(
         self,
         name: str,
@@ -25,9 +26,31 @@ class ComponentRegistry:
             "examples": examples or [],
             "create_docs": create_docs,
         }
-    
+
+    def register_block(
+        self,
+        name: str,
+        title: str,
+        description: str,
+        create_docs: Callable | None = None,
+        preview: Callable | None = None,
+        order: int = 100,
+        status: str = "stable",
+    ) -> None:
+        self.blocks[name] = {
+            "title": title,
+            "description": description,
+            "create_docs": create_docs,
+            "preview": preview,
+            "order": order,
+            "status": status,
+        }
+
     def get(self, name: str) -> dict[str, Any] | None:
         return self.components.get(name)
+
+    def get_block(self, name: str) -> dict[str, Any] | None:
+        return self.blocks.get(name)
     
     def get_by_category(self, category: str) -> list[tuple[str, dict[str, Any]]]:
         return [
