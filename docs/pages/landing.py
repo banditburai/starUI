@@ -26,7 +26,7 @@ def _component_showcase() -> FT:
     return Div(
         aperture,
         Div(cls="showcase-flash"),
-        P("APERTURE", cls="text-[9px] font-mono font-medium tracking-[0.25em] uppercase text-[#94A3B8] showcase-card-title", style="font-family: 'Inter', sans-serif;"),
+        P("APERTURE", cls="font-mono text-[9px] font-medium tracking-[0.25em] text-[#94A3B8] uppercase showcase-card-title", style="font-family: 'Inter', sans-serif;"),
         Div(
             Input(
                 type="range",
@@ -41,36 +41,36 @@ def _component_showcase() -> FT:
         Div(
             Span(
                 Span(
-                    cls="w-1 h-1 rounded-full inline-block transition-colors duration-300",
+                    cls="inline-block h-1 w-1 rounded-full transition-colors duration-300",
                     data_style_background_color=active.if_("var(--indicator-active)", "var(--indicator-dim)"),
                 ),
                 Span(data_text=active.if_("ACTIVE", "DIM")),
-                cls="inline-flex items-center gap-1.5 text-[9px] font-mono font-medium uppercase tracking-[0.08em] px-1.5 py-0.5 rounded-sm border transition-all duration-300",
+                cls="inline-flex items-center gap-1.5 rounded-sm border px-1.5 py-0.5 font-mono text-[9px] font-medium tracking-[0.08em] uppercase transition-all duration-300",
                 data_style_color=active.if_("var(--indicator-active)", "var(--indicator-dim)"),
                 data_style_border_color=active.if_("var(--indicator-active-border)", "var(--indicator-dim-border)"),
                 data_style_background_color=active.if_("var(--indicator-active-bg)", "var(--indicator-dim-bg)"),
             ),
             Span(
                 data_text="" + aperture + "%",
-                cls="text-[11px] font-mono tabular-nums transition-colors duration-300",
+                cls="font-mono text-[11px] tabular-nums transition-colors duration-300",
                 data_style_color=active.if_("var(--indicator-active)", "var(--indicator-dim)"),
             ),
-            cls="flex items-center justify-between mt-1",
+            cls="mt-1 flex items-center justify-between",
         ),
         # Warms card as aperture rises
         Div(
-            cls="aperture-glow absolute inset-0 rounded-[inherit] pointer-events-none transition-opacity duration-300",
+            cls="pointer-events-none absolute inset-0 rounded-[inherit] transition-opacity duration-300 aperture-glow",
             data_style_opacity=aperture / 100,
         ),
         # Light mode only — desaturates at low aperture
         Div(
-            cls="aperture-cool absolute inset-0 rounded-[inherit] pointer-events-none transition-opacity duration-500",
+            cls="pointer-events-none absolute inset-0 rounded-[inherit] transition-opacity duration-500 aperture-cool",
             data_style_opacity=1 - aperture / 100,
         ),
         Div(cls="showcase-pulse-ring"),
         # Sweep aperture from 50 to 90
         Div(data_init=(aperture.set(90), dict(delay="1400ms"))),
-        cls="showcase-card px-4 py-2 select-none",
+        cls="px-4 py-2 select-none showcase-card",
     )
 
 
@@ -178,7 +178,7 @@ def hero_section() -> FT:
                         # Orange punchline — quick beat after headline
                         Span(
                             "No JS required.",
-                            cls="block hero-subline text-sunset font-normal mt-6",
+                            cls="mt-6 block font-normal hero-subline text-sunset",
                             data_motion=in_view(
                                 y=-6, scale=0.96, opacity=0,
                                 duration=500, delay=500,
@@ -190,7 +190,7 @@ def hero_section() -> FT:
                     # Subtitle + CTA — Fibonacci vertical rhythm (34px, 55px)
                     P(
                         "No npm. No React. Just Python.",
-                        cls="mt-5 md:mt-[55px] font-serif-body text-xl md:text-2xl text-moon-dim italic font-light",
+                        cls="mt-5 text-xl font-light italic md:mt-[55px] md:text-2xl font-serif-body text-moon-dim",
                         style="opacity: 0.85;",
                         data_motion=in_view(
                             y=12, opacity=0,
@@ -202,7 +202,7 @@ def hero_section() -> FT:
                         A(
                             "Get Started",
                             href="/installation",
-                            cls="btn-star rounded-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#FB923C]",
+                            cls="rounded-none focus-visible:ring-2 focus-visible:ring-[#FB923C] focus-visible:ring-offset-2 focus-visible:outline-none btn-star",
                             data_motion=press(scale=0.97, duration=100),
                         ),
                         cls="mt-[34px] md:mt-[55px]",
@@ -216,38 +216,38 @@ def hero_section() -> FT:
                 Div(
                     Div(
                         Div(
-                            Span("Quickstart", cls="text-[11px] font-mono font-semibold tracking-[0.25em] uppercase text-sunset block mb-2"),
-                            Div(cls="showcase-divider-line w-full h-px bg-current text-sunset opacity-40"),
+                            Span("Quickstart", cls="mb-2 block font-mono text-[11px] font-semibold tracking-[0.25em] uppercase text-sunset"),
+                            Div(cls="h-px w-full bg-current opacity-40 showcase-divider-line text-sunset"),
                             cls="showcase-label mb-4",
                         ),
                         Div(
                             Div(
                                 *[P(Span("$", cls="text-[#FB923C]"), f" {cmd}", cls="text-[#94A3B8]")
                               for cmd in ("pip install starui", "star init", "star add button")],
-                                cls="terminal-window p-6 space-y-2 font-mono text-sm",
+                                cls="space-y-2 p-6 font-mono text-sm terminal-window",
                             ),
                             _component_showcase(),
                             cls="showcase-terminal-group",
                         ),
                         cls="showcase-float-wrapper relative",
                     ),
-                    cls="hero-right-col flex flex-col",
+                    cls="flex flex-col hero-right-col",
                     data_motion=in_view(y=20, opacity=0, duration=500, delay=400, spring="gentle"),
                 ),
-                cls="hero-grid-phi relative z-10 grid grid-cols-1 gap-5",
+                cls="relative z-10 grid grid-cols-1 gap-5 hero-grid-phi",
             ),
-            cls="w-full max-w-7xl mx-auto px-6 lg:px-8",
+            cls="mx-auto w-full max-w-7xl px-6 lg:px-8",
         ),
         Div(
             Svg(
                 SvgPath(d="M6 9l6 6 6-6", fill="none", stroke="currentColor", stroke_width="1.5", stroke_linecap="round", stroke_linejoin="round"),
                 viewBox="0 0 24 24",
-                cls="w-5 h-5",
+                cls="h-5 w-5",
             ),
-            cls="scroll-hint absolute bottom-8 left-1/2 -translate-x-1/2 text-moon-dim z-20",
+            cls="absolute bottom-8 left-1/2 z-20 -translate-x-1/2 scroll-hint text-moon-dim",
             aria_hidden="true",
         ),
-        cls="hero-section-mobile relative min-h-[90vh] flex items-center pb-[89px] pt-16 md:pt-20 lg:pt-24 overflow-x-clip",
+        cls="relative flex min-h-[90vh] items-center overflow-x-clip pt-16 pb-[89px] md:pt-20 lg:pt-24 hero-section-mobile",
         aria_label="Welcome to StarUI",
     )
 
@@ -288,10 +288,10 @@ def profile():
     return Section(
         Div(
             Div(
-                Span("FIG. 01", cls="text-[10px] tracking-widest text-sunset font-mono block mb-3", aria_hidden="true"),
+                Span("FIG. 01", cls="mb-3 block font-mono text-[10px] tracking-widest text-sunset", aria_hidden="true"),
                 H2(
                     "Write Python. Get reactivity.",
-                    cls="font-display text-3xl md:text-4xl italic text-moon mt-2",
+                    cls="mt-2 text-3xl italic md:text-4xl font-display text-moon",
                 ),
                 cls="mb-12",
                 data_motion=in_view(y=20, opacity=0, duration=500, spring="gentle"),
@@ -300,40 +300,40 @@ def profile():
                 Div(
                     Div(
                         Div(
-                            Span(cls="w-2.5 h-2.5 rounded-full bg-[#ff5f57]"),
-                            Span(cls="w-2.5 h-2.5 rounded-full bg-[#febc2e]"),
-                            Span(cls="w-2.5 h-2.5 rounded-full bg-[#28c840]"),
+                            Span(cls="h-2.5 w-2.5 rounded-full bg-[#ff5f57]"),
+                            Span(cls="h-2.5 w-2.5 rounded-full bg-[#febc2e]"),
+                            Span(cls="h-2.5 w-2.5 rounded-full bg-[#28c840]"),
                             cls="flex gap-1.5",
                         ),
-                        Span("app.py", cls="text-[11px] font-mono mini-text-dim"),
+                        Span("app.py", cls="font-mono text-[11px] mini-text-dim"),
                         Div(cls="w-[52px]"),
-                        cls="flex items-center justify-between px-4 py-2.5 border-b mini-border",
+                        cls="flex items-center justify-between border-b px-4 py-2.5 mini-border",
                     ),
-                    StarlighterCode(example_code, "python", cls="!rounded-none !border-none !shadow-none !bg-transparent"),
-                    cls="md:col-span-5 mystic-card rounded-xl overflow-hidden editor-panel",
+                    StarlighterCode(example_code, "python", cls="!rounded-none !border-none !bg-transparent !shadow-none"),
+                    cls="overflow-hidden rounded-xl md:col-span-5 mystic-card editor-panel",
                     data_motion=in_view(y=20, opacity=0, duration=500, delay=100, spring="gentle"),
                 ),
                 Div(
                     name,
                     Div(
                         P(data_text=greeting, cls="text-lg font-medium mini-text"),
-                        P("Update your profile", cls="text-xs mini-text-dim mt-1 mb-6"),
+                        P("Update your profile", cls="mt-1 mb-6 text-xs mini-text-dim"),
                         Div(
-                            P("Name", cls="text-xs mini-text font-medium mb-1.5"),
+                            P("Name", cls="mb-1.5 text-xs font-medium mini-text"),
                             Input(
                                 placeholder="Your name",
                                 data_bind=name,
-                                cls="w-full py-2 px-3 rounded-md text-sm bg-transparent border mini-border mini-text outline-none fig01-input transition-colors",
+                                cls="w-full rounded-md border bg-transparent px-3 py-2 text-sm transition-colors outline-none mini-border mini-text fig01-input",
                             ),
                         ),
-                        cls="mini-surface rounded-xl p-6 w-full max-w-sm shadow-xl",
+                        cls="w-full max-w-sm rounded-xl p-6 shadow-xl mini-surface",
                     ),
-                    cls="md:col-span-7 showcase-preview rounded-xl p-8 md:p-12 relative min-h-[400px] flex items-center justify-center",
+                    cls="relative flex min-h-[400px] items-center justify-center rounded-xl p-8 md:col-span-7 md:p-12 showcase-preview",
                     data_motion=in_view(y=20, opacity=0, duration=500, delay=200, spring="gentle"),
                 ),
-                cls="grid grid-cols-1 md:grid-cols-12 gap-6",
+                cls="grid grid-cols-1 gap-6 md:grid-cols-12",
             ),
-            cls="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
+            cls="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8",
         ),
         cls="relative z-10 py-24 section-border-top",
         aria_label="Code example",
@@ -413,23 +413,23 @@ def _explorer_card() -> FT:
                         variant="outline",
                         cls="w-full",
                     ),
-                    cls="grid gap-2 mb-4",
+                    cls="mb-4 grid gap-2",
                 ),
                 Div(
-                    Div(cls="flex-1 h-px bg-border"),
-                    Span("Or continue with", cls="text-[10px] text-muted-foreground uppercase px-2 whitespace-nowrap"),
-                    Div(cls="flex-1 h-px bg-border"),
-                    cls="flex items-center mb-4",
+                    Div(cls="h-px flex-1 bg-border"),
+                    Span("Or continue with", cls="px-2 text-[10px] whitespace-nowrap text-muted-foreground uppercase"),
+                    Div(cls="h-px flex-1 bg-border"),
+                    cls="mb-4 flex items-center",
                 ),
                 Div(
                     StarLabel("Email"),
                     StarInput(type="email", placeholder="m@example.com", signal=email),
-                    cls="space-y-1.5 mb-3",
+                    cls="mb-3 space-y-1.5",
                 ),
                 Div(
                     StarLabel("Password"),
                     StarInput(type="password", placeholder="Enter password"),
-                    cls="space-y-1.5 mb-4",
+                    cls="mb-4 space-y-1.5",
                 ),
                 StarButton("Create Account", cls="w-full"),
             ),
@@ -454,10 +454,10 @@ def _explorer_switch() -> FT:
                 _toggle_row("Dark Mode", "sw_dark", True),
                 cls="space-y-4",
             ),
-            Div(cls="h-px bg-border my-3"),
+            Div(cls="my-3 h-px bg-border"),
             Div(
-                Span("Active", cls="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#FB923C] text-white"),
-                Span("Beta", cls="px-2.5 py-0.5 rounded-full text-[11px] font-medium border text-muted-foreground"),
+                Span("Active", cls="rounded-full bg-[#FB923C] px-2.5 py-0.5 text-[11px] font-medium text-white"),
+                Span("Beta", cls="rounded-full border px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground"),
                 cls="flex gap-2",
             ),
         ),
@@ -476,12 +476,12 @@ def _explorer_dialog() -> FT:
                     H2("Are you absolutely sure?", cls="text-base font-medium"),
                     P(
                         "This action cannot be undone. This will permanently delete your account and remove your data from our servers.",
-                        cls="text-sm text-muted-foreground mt-2 leading-relaxed",
+                        cls="mt-2 text-sm leading-relaxed text-muted-foreground",
                     ),
                     Div(
                         StarButton("Cancel", variant="outline"),
                         StarButton("Continue", data_on_click=confirmed.set(True)),
-                        cls="flex justify-end gap-3 mt-6",
+                        cls="mt-6 flex justify-end gap-3",
                     ),
                     data_show=~confirmed,
                 ),
@@ -491,7 +491,7 @@ def _explorer_dialog() -> FT:
                         cls="mb-3",
                     ),
                     H2("Account deleted.", cls="text-base font-medium"),
-                    P("Your data has been permanently removed.", cls="text-sm text-muted-foreground mt-1"),
+                    P("Your data has been permanently removed.", cls="mt-1 text-sm text-muted-foreground"),
                     StarButton("Done", variant="outline", data_on_click=confirmed.set(False), cls="mt-4"),
                     data_show=confirmed,
                 ),
@@ -510,31 +510,31 @@ def _explorer_tabs() -> FT:
                     TabsTrigger("Password", id="password"),
                 ),
                 TabsContent(
-                    P("Make changes to your account here.", cls="text-sm text-muted-foreground mb-4"),
+                    P("Make changes to your account here.", cls="mb-4 text-sm text-muted-foreground"),
                     Div(
                         StarLabel("Name"),
                         StarInput(value="Pedro Duarte"),
-                        cls="space-y-1.5 mb-3",
+                        cls="mb-3 space-y-1.5",
                     ),
                     Div(
                         StarLabel("Username"),
                         StarInput(value="@peduarte"),
-                        cls="space-y-1.5 mb-5",
+                        cls="mb-5 space-y-1.5",
                     ),
                     StarButton("Save changes"),
                     id="account",
                 ),
                 TabsContent(
-                    P("Change your password here.", cls="text-sm text-muted-foreground mb-4"),
+                    P("Change your password here.", cls="mb-4 text-sm text-muted-foreground"),
                     Div(
                         StarLabel("Current password"),
                         StarInput(type="password"),
-                        cls="space-y-1.5 mb-3",
+                        cls="mb-3 space-y-1.5",
                     ),
                     Div(
                         StarLabel("New password"),
                         StarInput(type="password"),
-                        cls="space-y-1.5 mb-5",
+                        cls="mb-5 space-y-1.5",
                     ),
                     StarButton("Save password"),
                     id="password",
@@ -554,7 +554,7 @@ def _explorer_button() -> FT:
                 StarButton("Primary"),
                 StarButton("Secondary", variant="secondary"),
                 StarButton("Outline", variant="outline"),
-                cls="flex flex-wrap items-center gap-3 mb-5",
+                cls="mb-5 flex flex-wrap items-center gap-3",
             ),
             Div(
                 StarButton("Destructive", variant="destructive"),
@@ -585,18 +585,18 @@ def component_grid_section() -> FT:
     return Section(
         Div(
             Div(
-                Span("FIG. 03", cls="text-[10px] tracking-widest text-sunset font-mono block mb-3", aria_hidden="true"),
+                Span("FIG. 03", cls="mb-3 block font-mono text-[10px] tracking-widest text-sunset", aria_hidden="true"),
                 Div(
                     Div(
                         H2("The Constellation", cls="font-display text-4xl italic text-moon"),
-                        P("34+ components built with Tailwind v4.", cls="font-serif-body text-lg text-moon-dim mt-2 italic"),
+                        P("34+ components built with Tailwind v4.", cls="mt-2 text-lg italic font-serif-body text-moon-dim"),
                     ),
                     A(
                         "View All Components →",
                         href="/components",
-                        cls="text-sunset hover:text-[#FB923C] text-sm font-mono tracking-wide uppercase transition-colors hidden md:block shrink-0",
+                        cls="hidden shrink-0 font-mono text-sm tracking-wide uppercase transition-colors hover:text-[#FB923C] md:block text-sunset",
                     ),
-                    cls="flex flex-col md:flex-row md:items-end md:justify-between gap-4",
+                    cls="flex flex-col gap-4 md:flex-row md:items-end md:justify-between",
                 ),
                 cls="mb-12",
                 data_motion=in_view(y=20, opacity=0, duration=500, spring="gentle"),
@@ -604,7 +604,7 @@ def component_grid_section() -> FT:
             Div(
                 active,
                 Div(
-                    Span("COMPONENTS", cls="text-[10px] font-mono tracking-widest text-sunset px-3 py-2 block"),
+                    Span("COMPONENTS", cls="block px-3 py-2 font-mono text-[10px] tracking-widest text-sunset"),
                     *[
                         Div(
                             Icon(icon, width="15", height="15", cls="shrink-0"),
@@ -617,13 +617,13 @@ def component_grid_section() -> FT:
                             role="tab",
                             tabindex="0",
                             data_attr_aria_selected=(active == slug).if_("true", "false"),
-                            cls="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-colors",
+                            cls="flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 transition-colors",
                         )
                         for name, slug, icon, _ in explorer_items
                     ],
                     role="tablist",
                     aria_label="Component list",
-                    cls="md:col-span-3 mystic-card rounded-xl p-3 flex flex-row md:flex-col gap-1 overflow-x-auto md:overflow-visible",
+                    cls="flex flex-row gap-1 overflow-x-auto rounded-xl p-3 md:col-span-3 md:flex-col md:overflow-visible mystic-card",
                     data_motion=in_view(y=20, opacity=0, duration=500, delay=100, spring="gentle"),
                 ),
                 Div(
@@ -631,7 +631,7 @@ def component_grid_section() -> FT:
                         Div(
                             fn(),
                             data_show=active == slug,
-                            cls="flex items-center justify-center w-full",
+                            cls="flex w-full items-center justify-center",
                         )
                         for _, slug, _, fn in explorer_items
                     ],
@@ -639,26 +639,26 @@ def component_grid_section() -> FT:
                         Code(
                             "star add command",
                             data_text="star add " + active,
-                            cls="text-[10px] font-mono text-moon-dim",
+                            cls="font-mono text-[10px] text-moon-dim",
                         ),
-                        cls="absolute bottom-4 right-6",
+                        cls="absolute right-6 bottom-4",
                     ),
                     role="tabpanel",
                     aria_label="Component preview",
-                    cls="md:col-span-9 showcase-preview rounded-xl p-8 md:p-12 relative min-h-[450px] flex items-center justify-center",
+                    cls="relative flex min-h-[450px] items-center justify-center rounded-xl p-8 md:col-span-9 md:p-12 showcase-preview",
                     data_motion=in_view(y=20, opacity=0, duration=500, delay=200, spring="gentle"),
                 ),
-                cls="grid grid-cols-1 md:grid-cols-12 gap-6",
+                cls="grid grid-cols-1 gap-6 md:grid-cols-12",
             ),
             Div(
                 A(
                     "View All Components →",
                     href="/components",
-                    cls="text-sunset hover:text-[#FB923C] text-sm font-mono tracking-wide uppercase transition-colors",
+                    cls="font-mono text-sm tracking-wide uppercase transition-colors hover:text-[#FB923C] text-sunset",
                 ),
-                cls="text-center mt-8 md:hidden",
+                cls="mt-8 text-center md:hidden",
             ),
-            cls="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
+            cls="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8",
         ),
         cls="relative z-10 py-24 section-border-top constellation-section",
         aria_label="Component explorer",
@@ -678,10 +678,10 @@ def why_starui_section() -> FT:
     return Section(
         Div(
             Div(
-                Span("FIG. 02", cls="text-[10px] tracking-widest text-sunset font-mono block mb-4", aria_hidden="true"),
+                Span("FIG. 02", cls="mb-4 block font-mono text-[10px] tracking-widest text-sunset", aria_hidden="true"),
                 H3(
                     "First Principles",
-                    cls="font-display text-3xl mb-6 italic text-moon",
+                    cls="mb-6 text-3xl italic font-display text-moon",
                 ),
                 P(
                     "The shadcn/ui model, rebuilt for Python. A component library that stays out of your way \u2014 do it all without leaving Python.",
@@ -691,35 +691,35 @@ def why_starui_section() -> FT:
                     "simple-icons:python",
                     width="220",
                     height="220",
-                    cls="python-watermark absolute -bottom-8 -right-4 rotate-12 text-sunset pointer-events-none",
+                    cls="pointer-events-none absolute -right-4 -bottom-8 rotate-12 python-watermark text-sunset",
                     aria_hidden="true",
                 ),
-                cls="md:w-1/3 why-starui-left md:pr-8 relative overflow-visible",
+                cls="relative overflow-visible md:w-1/3 md:pr-8 why-starui-left",
                 data_motion=in_view(y=20, opacity=0, duration=500, spring="gentle"),
             ),
             Div(
                 *[
                     Div(
                         Div(
-                            Span(num, cls="text-sunset font-mono text-sm font-semibold"),
+                            Span(num, cls="font-mono text-sm font-semibold text-sunset"),
                             H4(
                                 title,
-                                cls="text-lg uppercase tracking-[0.15em] font-light text-moon group-hover:text-sunset transition-colors",
+                                cls="text-lg font-light tracking-[0.15em] uppercase transition-colors text-moon group-hover:text-sunset",
                             ),
-                            cls="flex items-baseline gap-4 mb-2",
+                            cls="mb-2 flex items-baseline gap-4",
                         ),
                         P(
                             desc,
-                            cls="pl-10 text-moon-dim leading-relaxed principle-accent py-2",
+                            cls="py-2 pl-10 leading-relaxed text-moon-dim principle-accent",
                         ),
                         cls="group cursor-default principle-row",
                         data_motion=in_view(y=20, opacity=0, duration=500, delay=i * 100, spring="gentle"),
                     )
                     for i, (num, title, desc) in enumerate(principles)
                 ],
-                cls="md:w-2/3 grid grid-cols-1 gap-12",
+                cls="grid grid-cols-1 gap-12 md:w-2/3",
             ),
-            cls="max-w-5xl mx-auto flex flex-col md:flex-row gap-16 px-4 sm:px-6 lg:px-8",
+            cls="mx-auto flex max-w-5xl flex-col gap-16 px-4 sm:px-6 md:flex-row lg:px-8",
         ),
         cls="relative z-10 py-24 section-border-top why-starui-section",
         aria_label="Why StarUI",
@@ -739,7 +739,7 @@ def cta_section() -> FT:
                         fill="currentColor",
                     ),
                     viewBox="0 0 24 24",
-                    cls="star-mark w-10 h-10 mx-auto text-sunset mb-10",
+                    cls="mx-auto mb-10 h-10 w-10 star-mark text-sunset",
                     aria_hidden="true",
                 ),
                 H2(
@@ -747,31 +747,31 @@ def cta_section() -> FT:
                     Br(),
                     Span("is "),
                     Span("open.", cls="italic text-sunset"),
-                    cls="font-display text-5xl md:text-6xl lg:text-7xl text-moon leading-[0.95] tracking-[-0.02em]",
+                    cls="text-5xl leading-[0.95] tracking-[-0.02em] md:text-6xl lg:text-7xl font-display text-moon",
                 ),
                 P(
                     "Start building with components you actually own.",
-                    cls="font-serif-body text-xl md:text-2xl text-moon-dim italic font-light mt-8 max-w-xl mx-auto",
+                    cls="mx-auto mt-8 max-w-xl text-xl font-light italic md:text-2xl font-serif-body text-moon-dim",
                 ),
                 Div(
                     A(
                         "Get Started",
                         href="/installation",
-                        cls="btn-star rounded-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#FB923C]",
+                        cls="rounded-none focus-visible:ring-2 focus-visible:ring-[#FB923C] focus-visible:ring-offset-2 focus-visible:outline-none btn-star",
                         data_motion=press(scale=0.97, duration=100),
                     ),
                     A(
                         "View Components",
                         href="/components",
-                        cls="btn-star-outline rounded-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#FB923C]",
+                        cls="rounded-none focus-visible:ring-2 focus-visible:ring-[#FB923C] focus-visible:ring-offset-2 focus-visible:outline-none btn-star-outline",
                         data_motion=press(scale=0.97, duration=100),
                     ),
-                    cls="flex flex-wrap items-center justify-center gap-4 mt-12",
+                    cls="mt-12 flex flex-wrap items-center justify-center gap-4",
                 ),
                 cls="text-center",
                 data_motion=in_view(y=20, opacity=0, duration=500, spring="gentle"),
             ),
-            cls="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32",
+            cls="mx-auto max-w-7xl px-4 py-24 sm:px-6 md:py-32 lg:px-8",
         ),
         cls="relative z-10 section-border-top cta-section",
         aria_label="Get started with StarUI",
@@ -783,9 +783,9 @@ def footer_section() -> FT:
         Div(
             P(
                 "\u00a9 2026 StarUI. Open Source Apache 2.0.",
-                cls="text-xs uppercase tracking-[0.2em] text-moon-dim text-center",
+                cls="text-center text-xs tracking-[0.2em] uppercase text-moon-dim",
             ),
-            cls="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12",
+            cls="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8",
         ),
         cls="relative z-10 section-border-top footer-section",
     )

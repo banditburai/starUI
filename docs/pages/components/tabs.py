@@ -103,7 +103,7 @@ def line_variant_example():
                 P(
                     "Studio-grade condenser microphone with a wide frequency response "
                     "and low self-noise floor, designed for vocal recording and live streaming.",
-                    cls="text-sm text-muted-foreground mt-3",
+                    cls="mt-3 text-sm text-muted-foreground",
                 ),
             ),
             id="overview",
@@ -166,7 +166,7 @@ def disabled_tab_example():
         TabsContent(
             Div(
                 "Post preview will render here once the draft is saved.",
-                cls="p-6 border border-dashed rounded-lg text-sm text-muted-foreground text-center",
+                cls="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground",
             ),
             id="preview",
             cls="min-h-[150px]",

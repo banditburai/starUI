@@ -97,10 +97,9 @@ def auto_generate_block_page(
     cli = cli_command or f"star add {block_name.lower().replace(' ', '-')}"
     slug = block_name.lower().replace(' ', '-').replace('_', '-')
 
-    # Standalone preview — no Preview/Code tabs
     hero = Div(
         Div(preview_fn(), cls="flex min-h-[200px] w-full items-center justify-center p-10"),
-        cls="rounded-lg border mb-8",
+        cls="mb-8 rounded-lg border",
     )
 
     # Normalize source input
@@ -145,7 +144,7 @@ def _examples(examples: list[Any]) -> FT | None:
     if not examples:
         return None
     return Div(
-        H2("Examples", cls="text-2xl font-bold tracking-tight mb-6 mt-12"),
+        H2("Examples", cls="mt-12 mb-6 text-2xl font-bold tracking-tight"),
         Div(*examples)
     )
 
@@ -154,8 +153,8 @@ def _usage(code: str | None, description: str | None = None) -> FT | None:
     if not code:
         return None
     return Div(
-        H2("Usage", cls="text-2xl font-bold tracking-tight mb-4 mt-12"),
-        P(description, cls="text-muted-foreground mb-4") if description else "",
+        H2("Usage", cls="mt-12 mb-4 text-2xl font-bold tracking-tight"),
+        P(description, cls="mb-4 text-muted-foreground") if description else "",
         CodeBlock(code, language="python"),
         cls="space-y-4"
     )
@@ -166,8 +165,8 @@ def _block_source_files(files: list[dict[str, str]] | None) -> FT | None:
         return None
     from widgets.file_viewer import FileViewer
     return Div(
-        H2("Source", cls="text-2xl font-bold tracking-tight mb-4 mt-12"),
-        P("Full source code for this block.", cls="text-sm text-muted-foreground mb-4"),
+        H2("Source", cls="mt-12 mb-4 text-2xl font-bold tracking-tight"),
+        P("Full source code for this block.", cls="mb-4 text-sm text-muted-foreground"),
         FileViewer(files),
     )
 
@@ -177,9 +176,9 @@ def _block_dependencies(dependencies: list[str] | None) -> FT | None:
         return None
     dep_links = [
         A(
-            Code(dep.replace("_", "-"), cls="text-sm font-mono"),
+            Code(dep.replace("_", "-"), cls="font-mono text-sm"),
             href=f"/components/{dep}",
-            cls="inline-flex items-center rounded-md border border-border px-2.5 py-1 text-sm hover:bg-muted transition-colors",
+            cls="inline-flex items-center rounded-md border border-border px-2.5 py-1 text-sm transition-colors hover:bg-muted",
         )
         for dep in dependencies
         if dep != "utils"
@@ -187,8 +186,8 @@ def _block_dependencies(dependencies: list[str] | None) -> FT | None:
     if not dep_links:
         return None
     return Div(
-        H2("Dependencies", cls="text-2xl font-bold tracking-tight mb-4 mt-12"),
-        P("This block composes the following components:", cls="text-sm text-muted-foreground mb-4"),
+        H2("Dependencies", cls="mt-12 mb-4 text-2xl font-bold tracking-tight"),
+        P("This block composes the following components:", cls="mb-4 text-sm text-muted-foreground"),
         Div(*dep_links, cls="flex flex-wrap gap-2"),
     )
 
@@ -217,7 +216,7 @@ def _api_reference(api_ref: dict[str, Any] | None) -> FT | None:
     ])
 
     return Div(
-        H2("API Reference", cls="text-2xl font-bold tracking-tight mb-6 mt-12"),
+        H2("API Reference", cls="mt-12 mb-6 text-2xl font-bold tracking-tight"),
         *tables,
         cls="space-y-6"
     )
@@ -232,13 +231,13 @@ def _props_table(props: list[dict]) -> FT | None:
         return None
 
     return Div(
-        H3("Props", cls="text-lg font-semibold mb-4"),
+        H3("Props", cls="mb-4 text-lg font-semibold"),
         _table(
             ["Prop", "Type", "Default", "Description"],
             [[
-                Code(p["name"], cls="text-sm font-mono font-medium"),
-                Code(p["type"], cls="text-xs font-mono text-muted-foreground"),
-                Code(p.get("default", "-"), cls="text-xs font-mono text-muted-foreground"),
+                Code(p["name"], cls="font-mono text-sm font-medium"),
+                Code(p["type"], cls="font-mono text-xs text-muted-foreground"),
+                Code(p.get("default", "-"), cls="font-mono text-xs text-muted-foreground"),
                 p.get("description", "")
             ] for p in props]
         ),
@@ -256,8 +255,8 @@ def _api_items_table(items: list[dict]) -> FT | None:
     headers = ["Name", "Type", "Description"] if has_type else ["Component", "Description"]
 
     rows = [[
-        Code(item["name"], cls="text-sm font-mono font-medium"),
-        Code(item.get("type", ""), cls="text-xs font-mono text-muted-foreground") if has_type else None,
+        Code(item["name"], cls="font-mono text-sm font-medium"),
+        Code(item.get("type", ""), cls="font-mono text-xs text-muted-foreground") if has_type else None,
         item.get("description", "")
     ] for item in items]
 
@@ -268,7 +267,7 @@ def _api_items_table(items: list[dict]) -> FT | None:
 
 
 def _table(headers: list[str], rows: list[list]) -> FT:
-    header_cls = "px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"
+    header_cls = "px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase"
     cell_cls = "px-6 py-4"
 
     return Div(

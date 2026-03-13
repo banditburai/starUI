@@ -26,7 +26,7 @@ def headings_scale_example():
     return Div(
         Div(Caption("Display"), Display("Sourdough", cls="mt-0"), cls="space-y-1"),
         Div(Caption("H1"), H1("The Beginner's Loaf", cls="mt-0"), cls="space-y-1"),
-        Div(Caption("H2"), H2("Ingredients", cls="border-0 pb-0 mt-0"), cls="space-y-1"),
+        Div(Caption("H2"), H2("Ingredients", cls="mt-0 border-0 pb-0"), cls="space-y-1"),
         Div(Caption("H3"), H3("Bulk Ferment", cls="mt-0"), cls="space-y-1"),
         Div(Caption("H4"), H4("Shaping Notes", cls="mt-0"), cls="space-y-1"),
         cls="space-y-6"
@@ -42,7 +42,7 @@ def text_variants_example():
         Div(Caption("Small"), Small("University of Queensland · Est. 1927"), cls="space-y-1"),
         Div(Caption("Muted"), Muted("The ninth drop fell on 24 April 2014."), cls="space-y-1"),
         Div(Caption("Caption"), Caption("Fluid Dynamics"), cls="space-y-1"),
-        cls="space-y-6 max-w-prose [&_p]:mt-0"
+        cls="max-w-prose space-y-6 [&_p]:mt-0"
     )
 
 
@@ -52,7 +52,7 @@ def inline_elements_example():
         P("Install the package with ", InlineCode("pip install starui"), " and import what you need."),
         P("Press ", Kbd("⌘"), " + ", Kbd("K"), " to open the command palette, or ", Kbd("Esc"), " to close it."),
         P("The search index will ", Mark("highlight matching terms"), " across all results so you can scan quickly."),
-        cls="space-y-2 max-w-prose"
+        cls="max-w-prose space-y-2"
     )
 
 
@@ -61,7 +61,7 @@ def blockquote_list_example():
     return Div(
         Blockquote(
             P("After all, all he did was string together a bunch of alien quotations and was that any way to write a story?"),
-            Small("— James Michener", cls="not-italic block mt-2"),
+            Small("— James Michener", cls="mt-2 block not-italic"),
         ),
         List(
             "Preheat the oven to 260\u00b0C with the Dutch oven inside",
@@ -168,7 +168,7 @@ def prose_sizes_example():
             ),
             cls="space-y-2"
         ),
-        cls="space-y-8 max-w-2xl"
+        cls="max-w-2xl space-y-8"
     )
 
 

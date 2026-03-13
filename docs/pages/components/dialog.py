@@ -45,7 +45,7 @@ def edit_profile_example():
 def confirmation_example():
     return Dialog(
         DialogTrigger(
-            Icon("lucide:trash-2", cls="h-4 w-4 mr-2"),
+            Icon("lucide:trash-2", cls="mr-2 h-4 w-4"),
             "Delete Account",
             variant="destructive"
         ),
@@ -58,7 +58,7 @@ def confirmation_example():
                 )
             ),
             Div(
-                Icon("lucide:alert-triangle", cls="h-5 w-5 text-destructive shrink-0 mt-0.5"),
+                Icon("lucide:alert-triangle", cls="mt-0.5 h-5 w-5 shrink-0 text-destructive"),
                 P(
                     "All projects, files, and collaborator access will be permanently removed.",
                     cls="text-sm text-muted-foreground"
@@ -93,8 +93,8 @@ def scrollable_content_example():
                 DialogDescription("Please review our terms before continuing")
             ),
             Div(
-                *[Div(H3(title, cls="font-semibold mb-1"), P(body, cls="text-sm text-muted-foreground mb-4")) for title, body in sections],
-                cls="max-h-[300px] overflow-y-auto py-4 px-4 my-4 border rounded-md"
+                *[Div(H3(title, cls="mb-1 font-semibold"), P(body, cls="mb-4 text-sm text-muted-foreground")) for title, body in sections],
+                cls="my-4 max-h-[300px] overflow-y-auto rounded-md border px-4 py-4"
             ),
             CheckboxWithLabel(label="I have read and agree to the terms", signal=terms_accepted),
             DialogFooter(
@@ -146,7 +146,7 @@ def non_modal_example():
             ),
             P(
                 "Try clicking outside this dialog. It stays open without blocking the page.",
-                cls="text-sm text-muted-foreground py-4"
+                cls="py-4 text-sm text-muted-foreground"
             ),
             DialogFooter(DialogClose("Dismiss"))
         ),
@@ -168,7 +168,7 @@ def programmatic_example():
         ),
         P(
             data_text=is_open.if_("Dialog is open", "Dialog is closed"),
-            cls="text-sm text-muted-foreground mt-2"
+            cls="mt-2 text-sm text-muted-foreground"
         ),
         Dialog(
             DialogContent(

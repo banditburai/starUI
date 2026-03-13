@@ -7,8 +7,8 @@ from components.tabs import Tabs, TabsList, TabsTrigger, TabsContent
 from components.utils import cn
 from .copy_button import CopyButton
 
-_CODE_CLS = "!border-none !bg-transparent !rounded-none"
-_CONTAINER_CLS = "bg-muted/30 border border-border rounded-lg overflow-hidden"
+_CODE_CLS = "!rounded-none !border-none !bg-transparent"
+_CONTAINER_CLS = "overflow-hidden rounded-lg border border-border bg-muted/30"
 
 
 def _traffic_lights() -> FT:
@@ -16,7 +16,7 @@ def _traffic_lights() -> FT:
         Span(cls="size-2.5 rounded-full bg-[#ff5f57]"),
         Span(cls="size-2.5 rounded-full bg-[#febc2e]"),
         Span(cls="size-2.5 rounded-full bg-[#28c840]"),
-        cls="flex gap-1.5 items-center px-3 shrink-0",
+        cls="flex shrink-0 items-center gap-1.5 px-3",
     )
 
 
@@ -39,7 +39,7 @@ def FileViewer(
         cls: Additional CSS classes for the outer container.
     """
     if not files:
-        return Div("No files provided.", cls="text-muted-foreground p-4")
+        return Div("No files provided.", cls="p-4 text-muted-foreground")
 
     combined = "|".join(f["name"] for f in files)
     sig_name = signal or f"fv_{hashlib.md5(combined.encode()).hexdigest()[:8]}"
@@ -60,7 +60,7 @@ def FileViewer(
             btn = Div(btn, data_show=tab_state == slug)
         copy_buttons.append(btn)
 
-    copy_area = Div(*copy_buttons, cls="ml-auto px-2 shrink-0 flex items-center")
+    copy_area = Div(*copy_buttons, cls="ml-auto flex shrink-0 items-center px-2")
 
     if multi:
         triggers = [
@@ -68,7 +68,7 @@ def FileViewer(
                 Icon("lucide:file-code-2", cls="size-3 shrink-0 opacity-60"),
                 f["name"],
                 id=slug,
-                cls="font-mono text-xs font-normal rounded-none flex-none h-9 px-3 border-r border-border/50",
+                cls="h-9 flex-none rounded-none border-r border-border/50 px-3 font-mono text-xs font-normal",
             )
             for f, slug in zip(files, slugs)
         ]
@@ -89,7 +89,7 @@ def FileViewer(
                     _traffic_lights(),
                     *triggers,
                     copy_area,
-                    cls="h-auto rounded-none bg-muted/50 p-0 w-full justify-start gap-0 border-b border-border",
+                    cls="h-auto w-full justify-start gap-0 rounded-none border-b border-border bg-muted/50 p-0",
                 ),
                 *contents,
                 variant="line",
@@ -107,9 +107,9 @@ def FileViewer(
         *copy_signals,
         Div(
             _traffic_lights(),
-            Span(f["name"], cls="text-xs font-mono text-muted-foreground truncate"),
+            Span(f["name"], cls="truncate font-mono text-xs text-muted-foreground"),
             copy_area,
-            cls="flex items-center bg-muted/50 h-9 border-b border-border",
+            cls="flex h-9 items-center border-b border-border bg-muted/50",
         ),
         Div(
             BaseCodeBlock(f["content"], "python", id=code_id, cls=_CODE_CLS),

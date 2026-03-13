@@ -110,7 +110,7 @@ def selected_rows_example():
         ),
         TableBody(
             *[TableRow(
-                TableCell(pr["branch"], cls="font-medium font-mono text-sm"),
+                TableCell(pr["branch"], cls="font-mono text-sm font-medium"),
                 TableCell(pr["author"]),
                 TableCell(Badge(pr["status"], variant=pr["variant"])),
                 selected=pr["selected"],
@@ -195,7 +195,7 @@ def composition_example():
                 TableCell(
                     Div(
                         Progress(value=l["progress"], cls="h-2"),
-                        Span(f'{l["progress"]}%', cls="text-xs text-muted-foreground ml-2 tabular-nums"),
+                        Span(f'{l["progress"]}%', cls="ml-2 text-xs text-muted-foreground tabular-nums"),
                         cls="flex items-center",
                     )
                 ),

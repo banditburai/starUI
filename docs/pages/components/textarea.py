@@ -22,7 +22,7 @@ def default_example():
             placeholder="fix: resolve null pointer in auth middleware",
             helper_text="Describe what changed and why",
         ),
-        cls="space-y-6 w-full max-w-sm",
+        cls="w-full max-w-sm space-y-6",
     )
 
 
@@ -102,25 +102,25 @@ def character_limit_example():
             Div(
                 Div(
                     Div(
-                        cls="h-1 bg-primary rounded-full transition-all duration-300",
+                        cls="h-1 rounded-full bg-primary transition-all duration-300",
                         data_style_width=(bio.length >= 280).if_("100%", (bio.length / 280 * 100) + "%"),
                     ),
-                    cls="w-full bg-secondary rounded-full h-1",
+                    cls="h-1 w-full rounded-full bg-secondary",
                 ),
                 P(
                     Span(cls="font-mono font-medium", data_text=bio.length),
                     " / 280",
-                    cls="text-sm text-right",
+                    cls="text-right text-sm",
                     data_attr_cls=switch([
                         (bio.length >= 280, "text-destructive"),
                         (bio.length >= 250, "text-orange-500"),
                     ], default="text-muted-foreground"),
                 ),
-                cls="space-y-2 mt-3",
+                cls="mt-3 space-y-2",
             ),
             Button(
                 "Save",
-                cls="w-full mt-4",
+                cls="mt-4 w-full",
                 data_attr_disabled=bio.length.eq(0),
             ),
         ),
@@ -138,7 +138,7 @@ def code_input_example():
         copied,
         Div(
             Badge("Python", variant="outline"),
-            cls="flex items-center justify-between mb-2",
+            cls="mb-2 flex items-center justify-between",
         ),
         Textarea(
             signal=code,
@@ -156,15 +156,15 @@ def code_input_example():
                 cls="text-xs text-muted-foreground",
             ),
             Button(
-                Icon("lucide:check", cls="h-4 w-4 mr-2", data_show=copied),
-                Icon("lucide:copy", cls="h-4 w-4 mr-2", data_show=copied.eq(False)),
+                Icon("lucide:check", cls="mr-2 h-4 w-4", data_show=copied),
+                Icon("lucide:copy", cls="mr-2 h-4 w-4", data_show=copied.eq(False)),
                 Span("Copied!", data_show=copied),
                 Span("Copy", data_show=copied.eq(False)),
                 size="sm",
                 variant="outline",
                 data_on_click=clipboard(code, signal=copied),
             ),
-            cls="flex items-center justify-between mt-2",
+            cls="mt-2 flex items-center justify-between",
         ),
         cls="w-full max-w-md",
     )

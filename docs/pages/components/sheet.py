@@ -56,7 +56,7 @@ def side_positioning_example():
 
     return Div(
         *[create_side_demo(s) for s in sides],
-        cls="flex flex-wrap gap-2 justify-center"
+        cls="flex flex-wrap justify-center gap-2"
     )
 
 
@@ -89,7 +89,7 @@ def sizes_example():
 
     return Div(
         *[create_size_demo(config) for config in sheet_configs],
-        cls="flex flex-wrap gap-2 justify-center"
+        cls="flex flex-wrap justify-center gap-2"
     )
 
 
@@ -143,19 +143,19 @@ def notifications_example():
                 Div(
                     *[
                         Div(
-                            Icon(n["icon"], cls="h-4 w-4 shrink-0 mt-0.5"),
+                            Icon(n["icon"], cls="mt-0.5 h-4 w-4 shrink-0"),
                             Div(
                                 P(n["title"], cls="text-sm font-medium"),
                                 P(n["desc"], cls="text-xs text-muted-foreground"),
                             ),
                             Button(
                                 Icon("lucide:x", cls="h-3 w-3"),
-                                size="icon", variant="ghost", cls="h-6 w-6 ml-auto shrink-0",
+                                size="icon", variant="ghost", cls="ml-auto h-6 w-6 shrink-0",
                                 data_on_click=n["sig"].set(False),
                                 aria_label="Dismiss",
                             ),
                             data_show=n["sig"],
-                            cls="flex items-start gap-3 p-3 rounded-md border",
+                            cls="flex items-start gap-3 rounded-md border p-3",
                         )
                         for n in notifications
                     ],

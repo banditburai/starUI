@@ -30,7 +30,7 @@ def user_profile_hover_card_example():
                         size="sm",
                     ),
                     Span("@shadcn", cls="text-sm font-medium"),
-                    cls="inline-flex items-center gap-2 p-2 rounded-md hover:bg-muted/50 transition-colors",
+                    cls="inline-flex items-center gap-2 rounded-md p-2 transition-colors hover:bg-muted/50",
                 )
             ),
             HoverCardContent(
@@ -68,7 +68,7 @@ def repository_hover_card_example():
     return Div(
         HoverCard(
             HoverCardTrigger(
-                A("starui/components", href="#", cls="text-primary hover:underline font-medium text-sm"),
+                A("starui/components", href="#", cls="text-sm font-medium text-primary hover:underline"),
             ),
             HoverCardContent(
                 Div(
@@ -94,7 +94,7 @@ def repository_hover_card_example():
                             cls="flex items-center gap-1",
                         ),
                         Div(
-                            Div(cls="size-2.5 bg-blue-500 rounded-full"),
+                            Div(cls="size-2.5 rounded-full bg-blue-500"),
                             Span("Python", cls="text-xs text-muted-foreground"),
                             cls="flex items-center gap-1",
                         ),
@@ -116,13 +116,13 @@ def inline_link_hover_card_example():
             "The component system is built on top of ",
             HoverCard(
                 HoverCardTrigger(
-                    A("StarHTML", href="#", cls="text-primary hover:underline font-semibold"),
+                    A("StarHTML", href="#", cls="font-semibold text-primary hover:underline"),
                 ),
                 HoverCardContent(
                     Div(
                         Div(
                             Icon("lucide:book-open", cls="size-4 text-muted-foreground"),
-                            H4("StarHTML Framework", cls="font-semibold text-sm"),
+                            H4("StarHTML Framework", cls="text-sm font-semibold"),
                             cls="flex items-center gap-2",
                         ),
                         P(
@@ -141,7 +141,7 @@ def inline_link_hover_card_example():
                 ),
             ),
             ", a modern Python web framework with reactive components and server-side rendering.",
-            cls="text-sm leading-relaxed max-w-lg",
+            cls="max-w-lg text-sm leading-relaxed",
         ),
     )
 
@@ -160,7 +160,7 @@ def positioning_hover_card_examples():
             HoverCardTrigger(Button(label, variant="outline", size="sm")),
             HoverCardContent(
                 Div(
-                    H4(f"{label} placement", cls="font-semibold text-sm"),
+                    H4(f"{label} placement", cls="text-sm font-semibold"),
                     P(f"Content positioned to the {side} of the trigger.", cls="text-sm text-muted-foreground"),
                     cls="grid gap-1",
                 ),
@@ -173,7 +173,7 @@ def positioning_hover_card_examples():
         Div(
             *[create_positioned_hover_card(label, side, extra_props)
               for label, side, extra_props in positions],
-            cls="flex gap-4 items-center justify-center flex-wrap",
+            cls="flex flex-wrap items-center justify-center gap-4",
         ),
         cls="py-8",
     )

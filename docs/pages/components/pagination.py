@@ -37,14 +37,14 @@ def hero_example():
             Span("Page ", cls="text-muted-foreground"),
             Span(data_text=page, cls="font-medium"),
             Span(" of 20", cls="text-muted-foreground"),
-            cls="text-sm mb-4",
+            cls="mb-4 text-sm",
         ),
         SimplePagination(
             current_page=1,
             total_pages=20,
             signal="hero_page",
         ),
-        cls="flex flex-col items-center justify-center min-h-[120px]",
+        cls="flex min-h-[120px] flex-col items-center justify-center",
     )
 
 
@@ -117,8 +117,8 @@ def table_pagination_example():
                     data_attr_disabled=at_start,
                     type="button",
                     aria_label="Previous page",
-                    cls="inline-flex items-center justify-center size-8 rounded-md cursor-pointer hover:bg-accent"
-                    " disabled:opacity-50 disabled:pointer-events-none",
+                    cls="inline-flex size-8 cursor-pointer items-center justify-center rounded-md hover:bg-accent"
+                    " disabled:pointer-events-none disabled:opacity-50",
                 ),
                 HTMLButton(
                     Icon("lucide:chevron-right", cls="size-4"),
@@ -126,8 +126,8 @@ def table_pagination_example():
                     data_attr_disabled=at_end,
                     type="button",
                     aria_label="Next page",
-                    cls="inline-flex items-center justify-center size-8 rounded-md cursor-pointer hover:bg-accent"
-                    " disabled:opacity-50 disabled:pointer-events-none",
+                    cls="inline-flex size-8 cursor-pointer items-center justify-center rounded-md hover:bg-accent"
+                    " disabled:pointer-events-none disabled:opacity-50",
                 ),
                 cls="flex gap-1",
             ),
@@ -143,21 +143,21 @@ def content_nav_example():
             Div(Icon("lucide:chevron-left", cls="size-4"), cls="flex items-center"),
             Div(
                 Span("Previous", cls="text-sm text-muted-foreground"),
-                Span("Getting Started with Signals", cls="font-medium text-sm"),
+                Span("Getting Started with Signals", cls="text-sm font-medium"),
                 cls="flex flex-col items-start",
             ),
             href="#",
-            cls="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-accent transition-colors",
+            cls="flex items-center gap-3 rounded-lg px-4 py-3 transition-colors hover:bg-accent",
         ),
         A(
             Div(
                 Span("Next", cls="text-sm text-muted-foreground"),
-                Span("Advanced Reactivity", cls="font-medium text-sm"),
+                Span("Advanced Reactivity", cls="text-sm font-medium"),
                 cls="flex flex-col items-end",
             ),
             Div(Icon("lucide:chevron-right", cls="size-4"), cls="flex items-center"),
             href="#",
-            cls="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-accent transition-colors",
+            cls="flex items-center gap-3 rounded-lg px-4 py-3 transition-colors hover:bg-accent",
         ),
         role="navigation", aria_label="content",
         cls="mx-auto flex w-full justify-between",
@@ -175,7 +175,7 @@ def primitives_example():
             Span("Page ", cls="text-muted-foreground"),
             Span(data_text=page, cls="font-medium"),
             Span(f" of {total_pages}", cls="text-muted-foreground"),
-            cls="text-sm text-center mb-4",
+            cls="mb-4 text-center text-sm",
         ),
         Pagination(
             PaginationContent(
@@ -204,7 +204,7 @@ def primitives_example():
             total_pages=total_pages,
             current_page=1,
         ),
-        cls="flex flex-col items-center justify-center min-h-[120px]",
+        cls="flex min-h-[120px] flex-col items-center justify-center",
     )
 
 

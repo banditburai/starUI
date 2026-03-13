@@ -42,7 +42,7 @@ def vertical_example():
             Separator(orientation="vertical", cls="mx-2 h-6"),
             Button(Icon("lucide:list", cls="size-4"), variant="ghost", size="sm"),
             Button(Icon("lucide:list-ordered", cls="size-4"), variant="ghost", size="sm"),
-            cls="flex items-center p-2 border rounded-lg"
+            cls="flex items-center rounded-lg border p-2"
         ),
         cls="flex justify-center"
     )
@@ -52,17 +52,17 @@ def vertical_example():
 def accessibility_example():
     return Div(
         Div(
-            P("Decorative", cls="text-sm font-medium mb-2"),
+            P("Decorative", cls="mb-2 text-sm font-medium"),
             Separator(),
             P(
                 "Default. Renders ",
                 Code("aria-hidden=\"true\""),
                 " — invisible to screen readers.",
-                cls="text-sm text-muted-foreground mt-2"
+                cls="mt-2 text-sm text-muted-foreground"
             ),
         ),
         Div(
-            P("Semantic", cls="text-sm font-medium mb-2"),
+            P("Semantic", cls="mb-2 text-sm font-medium"),
             Separator(decorative=False),
             P(
                 "Renders ",
@@ -70,7 +70,7 @@ def accessibility_example():
                 " and ",
                 Code("aria-orientation"),
                 " — announced as a content boundary.",
-                cls="text-sm text-muted-foreground mt-2"
+                cls="mt-2 text-sm text-muted-foreground"
             ),
         ),
         cls="max-w-sm space-y-8"
@@ -83,13 +83,13 @@ def custom_styles_example():
         ("Default", ""),
         ("Thick", "h-0.5"),
         ("Colored", "bg-blue-500"),
-        ("Dashed", "border-t border-dashed border-muted-foreground bg-transparent h-0"),
+        ("Dashed", "h-0 border-t border-dashed border-muted-foreground bg-transparent"),
         ("Gradient", "bg-gradient-to-r from-transparent via-muted-foreground to-transparent"),
     ]
     return Div(
         *[
             Div(
-                P(label, cls="text-sm text-muted-foreground mb-2"),
+                P(label, cls="mb-2 text-sm text-muted-foreground"),
                 Separator(cls=cls) if cls else Separator()
             )
             for label, cls in styles

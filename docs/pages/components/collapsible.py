@@ -21,7 +21,7 @@ def hero_collapsible_example():
             CollapsibleTrigger(
                 Icon("lucide:chevrons-up-down", cls="size-4"),
                 Span("Toggle details", cls="sr-only"),
-                cls="inline-flex items-center justify-center size-8 rounded-md "
+                cls="inline-flex size-8 items-center justify-center rounded-md "
                 "hover:bg-accent hover:text-accent-foreground",
             ),
             cls="flex items-center justify-between gap-4 px-4",
@@ -57,10 +57,10 @@ def filter_panel_example():
                 Span(title, cls="text-sm font-medium"),
                 Icon(
                     "lucide:chevron-down",
-                    cls="size-4 ml-auto shrink-0 transition-transform duration-200 "
+                    cls="ml-auto size-4 shrink-0 transition-transform duration-200 "
                     "group-data-[state=open]:rotate-180",
                 ),
-                cls="group flex w-full items-center px-2 py-2 rounded-md "
+                cls="flex w-full items-center rounded-md px-2 py-2 group "
                 "hover:bg-accent hover:text-accent-foreground",
             ),
             CollapsibleContent(
@@ -112,7 +112,7 @@ def file_tree_example():
                 ),
                 Icon("lucide:folder", cls="size-4 shrink-0 text-amber-500 dark:text-amber-400"),
                 Span(name, cls="text-sm"),
-                cls="group flex items-center gap-1.5 w-full py-1 px-1 rounded-sm "
+                cls="flex w-full items-center gap-1.5 rounded-sm px-1 py-1 group "
                 "hover:bg-accent",
             ),
             CollapsibleContent(
@@ -125,7 +125,7 @@ def file_tree_example():
         return Div(
             Icon(icon, cls="size-4 shrink-0 " + icon_cls),
             Span(name, cls="text-sm"),
-            cls="flex items-center gap-1.5 py-1 px-1 ml-5",
+            cls="ml-5 flex items-center gap-1.5 px-1 py-1",
         )
 
     return Card(
@@ -170,7 +170,7 @@ def disabled_collapsible_example():
                 CollapsibleTrigger(
                     Icon("lucide:chevrons-up-down", cls="size-4"),
                     Span("Toggle release notes", cls="sr-only"),
-                    cls="inline-flex items-center justify-center size-8 rounded-md "
+                    cls="inline-flex size-8 items-center justify-center rounded-md "
                     "hover:bg-accent hover:text-accent-foreground",
                 ),
                 cls="flex items-center justify-between gap-4 px-4",
@@ -199,7 +199,7 @@ def disabled_collapsible_example():
                 CollapsibleTrigger(
                     Icon("lucide:lock", cls="size-4"),
                     Span("Toggle roadmap", cls="sr-only"),
-                    cls="inline-flex items-center justify-center size-8 rounded-md",
+                    cls="inline-flex size-8 items-center justify-center rounded-md",
                 ),
                 cls="flex items-center justify-between gap-4 px-4",
             ),

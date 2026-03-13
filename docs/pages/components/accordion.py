@@ -55,14 +55,14 @@ def faq_accordion_example():
             P(answer, cls="mb-2" if (items or badges) else ""),
             badges and Div(*[Badge(b, variant="secondary", cls="mr-2") for b in badges], cls="mb-3"),
             items and Ul(*[Li(item) for item in items],
-                         cls="list-disc list-inside space-y-1 text-sm text-muted-foreground")
+                         cls="list-inside list-disc space-y-1 text-sm text-muted-foreground")
         ]
 
         return AccordionItem(
             AccordionTrigger(
-                Div(Icon(icon, cls="h-4 w-4 mr-2"),
+                Div(Icon(icon, cls="mr-2 h-4 w-4"),
                     Span(question),
-                    cls="flex items-center flex-1")
+                    cls="flex flex-1 items-center")
             ),
             AccordionContent(*content),            
         )
@@ -120,11 +120,11 @@ def faq_accordion_example():
 def multiple_selection_accordion_example():
     def api_endpoint(method, path, description, params=None):
         return Div(
-            Code(f"{method} {path}", cls="block p-2 bg-muted rounded mb-2"),
+            Code(f"{method} {path}", cls="mb-2 block rounded bg-muted p-2"),
             P(description, cls="mb-2" if params else ""),
             Ul(
                 *[Li(Code(p[0]), f" - {p[1]}") for p in params],
-                cls="list-disc list-inside text-sm text-muted-foreground"
+                cls="list-inside list-disc text-sm text-muted-foreground"
             ) if params else None
         )
 
@@ -185,7 +185,7 @@ def settings_accordion_example():
     def settings_trigger(title, *, badge_text=None, badge_variant="secondary", icon=None):
         return Div(
             badge_text and Badge(badge_text, variant=badge_variant, cls="mr-2"),
-            icon and Icon(icon, cls="h-4 w-4 mr-2"),
+            icon and Icon(icon, cls="mr-2 h-4 w-4"),
             Span(title),
             cls="flex items-center"
         )
@@ -265,15 +265,15 @@ def file_explorer_accordion_example():
         return AccordionItem(
             AccordionTrigger(
                 Div(
-                    Icon("lucide:folder", cls="h-4 w-4 mr-2 text-blue-500"),
+                    Icon("lucide:folder", cls="mr-2 h-4 w-4 text-blue-500"),
                     Span(name),
-                    Badge(f"{count} files", variant="outline", cls="ml-auto mr-2"),
-                    cls="flex items-center w-full"
+                    Badge(f"{count} files", variant="outline", cls="mr-2 ml-auto"),
+                    cls="flex w-full items-center"
                 )
             ),
             AccordionContent(
                 Div(
-                    *[Div(Icon("lucide:file", cls="h-4 w-4 mr-2"), f, cls="flex items-center py-1")
+                    *[Div(Icon("lucide:file", cls="mr-2 h-4 w-4"), f, cls="flex items-center py-1")
                       for f in files],
                     cls="text-sm text-muted-foreground"
                 )
@@ -286,14 +286,14 @@ def file_explorer_accordion_example():
             folder_item("utils/", 2, ["cn.ts", "helpers.ts"]),
             type="multiple"
         ),
-        cls="ml-2 pl-3 border-l-2 border-muted"
+        cls="ml-2 border-l-2 border-muted pl-3"
     )
 
     src_trigger = Div(
-        Icon("lucide:folder", cls="h-4 w-4 mr-2 text-blue-500"),
+        Icon("lucide:folder", cls="mr-2 h-4 w-4 text-blue-500"),
         Span("src/"),
-        Badge("12 files", variant="outline", cls="ml-auto mr-2"),
-        cls="flex items-center w-full"
+        Badge("12 files", variant="outline", cls="mr-2 ml-auto"),
+        cls="flex w-full items-center"
     )
 
     file_items = [
@@ -329,7 +329,7 @@ def course_curriculum_accordion_example():
             "quiz": "lucide:check-circle" if completed else "lucide:help-circle"
         }
         icon = "lucide:lock" if locked else icons.get(type, "lucide:file")
-        icon_cls = cn("h-4 w-4 mr-2", completed and "text-green-500", locked and "text-muted-foreground")
+        icon_cls = cn("mr-2 h-4 w-4", completed and "text-green-500", locked and "text-muted-foreground")
 
         right_element = (
             Span(duration, cls="ml-auto text-muted-foreground") if duration
@@ -349,9 +349,9 @@ def course_curriculum_accordion_example():
                     Badge("Coming Soon" if locked else f"{lesson_count} lessons",
                           variant="outline" if locked else "secondary", cls="mr-2"),
                     Strong(title, cls="mx-1"),
-                    Icon("lucide:lock", cls="h-4 w-4 ml-auto mr-2 text-muted-foreground") if locked
-                    else Badge(duration, variant="outline", cls="ml-auto mr-2"),
-                    cls="flex items-center w-full"
+                    Icon("lucide:lock", cls="mr-2 ml-auto h-4 w-4 text-muted-foreground") if locked
+                    else Badge(duration, variant="outline", cls="mr-2 ml-auto"),
+                    cls="flex w-full items-center"
                 )
             ),
             AccordionContent(

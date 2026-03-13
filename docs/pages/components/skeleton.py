@@ -31,7 +31,7 @@ def card_example():
             Div(
                 Skeleton(cls="h-12 w-12 rounded-full"),
                 Div(
-                    Skeleton(cls="h-4 w-24 mb-2"),
+                    Skeleton(cls="mb-2 h-4 w-24"),
                     Skeleton(cls="h-3 w-16"),
                     cls="ml-4"
                 ),
@@ -45,9 +45,9 @@ def card_example():
                 Skeleton(cls="h-4 w-3/4"),
                 cls="space-y-3"
             ),
-            Skeleton(cls="h-8 w-24 mt-4")
+            Skeleton(cls="mt-4 h-8 w-24")
         ),
-        cls="max-w-80 w-full"
+        cls="w-full max-w-80"
     )
 
 
@@ -66,15 +66,15 @@ def loading_example():
         ),
         Div(
             Div(
-                Skeleton(cls="h-7 w-48 mb-3"),
-                Skeleton(cls="h-5 w-full mb-2"),
+                Skeleton(cls="mb-3 h-7 w-48"),
+                Skeleton(cls="mb-2 h-5 w-full"),
                 Skeleton(cls="h-5 w-3/5"),
                 cls="col-start-1 row-start-1",
                 data_attr_cls=loading.if_("", "invisible")
             ),
             Div(
-                Div("Dashboard Overview", cls="text-lg font-semibold mb-3"),
-                Div("Your weekly activity is up 12% compared to last period.", cls="text-sm text-muted-foreground mb-2"),
+                Div("Dashboard Overview", cls="mb-3 text-lg font-semibold"),
+                Div("Your weekly activity is up 12% compared to last period.", cls="mb-2 text-sm text-muted-foreground"),
                 Div("Keep it up — you're on track to hit your monthly goal.", cls="text-sm text-muted-foreground"),
                 cls="col-start-1 row-start-1",
                 data_attr_cls=loading.if_("invisible", "")

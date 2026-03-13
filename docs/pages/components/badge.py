@@ -25,7 +25,7 @@ def hero_badge_example():
         ),
         Div(
             Badge(
-                Icon("lucide:badge-check", cls="w-3 h-3"),
+                Icon("lucide:badge-check", cls="h-3 w-3"),
                 "Verified",
                 variant="secondary",
                 cls="bg-blue-600 text-white dark:bg-blue-700"
@@ -42,22 +42,22 @@ def hero_badge_example():
 @with_code
 def with_icons_badge_example():
     return Div(
-        Badge(Icon("lucide:star", cls="w-3 h-3"), "Featured"),
+        Badge(Icon("lucide:star", cls="h-3 w-3"), "Featured"),
         Badge(
-            Div(cls="w-2 h-2 bg-green-500 rounded-full"),
+            Div(cls="h-2 w-2 rounded-full bg-green-500"),
             "Online",
             variant="outline"
         ),
         Badge(
             "Deploying",
-            Icon("lucide:loader", cls="w-3 h-3 animate-spin"),
+            Icon("lucide:loader", cls="h-3 w-3 animate-spin"),
             variant="secondary"
         ),
         Badge(
-            Icon("lucide:shield-check", cls="w-3 h-3"),
+            Icon("lucide:shield-check", cls="h-3 w-3"),
             "Verified",
         ),
-        cls="flex gap-2 flex-wrap"
+        cls="flex flex-wrap gap-2"
     )
 
 
@@ -66,7 +66,7 @@ def link_badge_example():
     return Div(
         Badge("Changelog", href="/changelog", variant="outline"),
         Badge(
-            Icon("lucide:external-link", cls="w-3 h-3"),
+            Icon("lucide:external-link", cls="h-3 w-3"),
             "Source Code",
             href="https://github.com",
             variant="secondary"
@@ -75,7 +75,7 @@ def link_badge_example():
             "Get Started",
             href="/docs/getting-started",
         ),
-        cls="flex gap-2 flex-wrap"
+        cls="flex flex-wrap gap-2"
     )
 
 
@@ -86,12 +86,12 @@ def clickable_badge_example():
         Badge("FastHTML", clickable=True, variant="outline"),
         Badge("Datastar", clickable=True, variant="outline"),
         Badge(
-            Icon("lucide:x", cls="w-3 h-3"),
+            Icon("lucide:x", cls="h-3 w-3"),
             "Remove Filter",
             clickable=True,
             variant="destructive",
         ),
-        cls="flex gap-2 flex-wrap"
+        cls="flex flex-wrap gap-2"
     )
 
 
@@ -102,12 +102,12 @@ def custom_styling_badge_example():
             Badge("SM", cls="h-5 min-w-5 rounded-full px-1 text-[10px]"),
             Badge("Default"),
             Badge("LG", cls="px-3 py-1 text-sm"),
-            cls="flex gap-2 items-center"
+            cls="flex items-center gap-2"
         ),
         Div(
-            Badge("Success", cls="bg-green-700 text-white border-transparent"),
-            Badge("Danger", cls="bg-red-600 text-white border-transparent"),
-            Badge("Info", cls="bg-blue-600 text-white border-transparent"),
+            Badge("Success", cls="border-transparent bg-green-700 text-white"),
+            Badge("Danger", cls="border-transparent bg-red-600 text-white"),
+            Badge("Info", cls="border-transparent bg-blue-600 text-white"),
             cls="flex gap-2"
         ),
         cls="flex flex-col gap-3"

@@ -110,7 +110,7 @@ def position_example():
             "Top right toast",
             data_on_click=toast.info("Sync complete", "3 files updated from remote."),
         ),
-        cls="flex items-end justify-center min-h-[250px] pb-6",
+        cls="flex min-h-[250px] items-end justify-center pb-6",
     )
 
 

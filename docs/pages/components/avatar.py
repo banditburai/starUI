@@ -29,8 +29,8 @@ def hero_avatar_example():
             )
         ),
         Avatar(AvatarFallback("AR")),
-        Avatar(AvatarFallback("TK", cls="bg-red-600 dark:bg-red-500 text-white font-semibold")),
-        Avatar(AvatarFallback("LW", cls="bg-blue-600 dark:bg-blue-500 text-white font-semibold")),
+        Avatar(AvatarFallback("TK", cls="bg-red-600 font-semibold text-white dark:bg-red-500")),
+        Avatar(AvatarFallback("LW", cls="bg-blue-600 font-semibold text-white dark:bg-blue-500")),
         Avatar(
             AvatarImage(
                 src="https://invalid-url.example.com/missing.jpg",
@@ -38,7 +38,7 @@ def hero_avatar_example():
             ),
             AvatarFallback("DP")
         ),
-        cls="flex items-center gap-3 flex-wrap justify-center"
+        cls="flex flex-wrap items-center justify-center gap-3"
     )
 
 
@@ -73,7 +73,7 @@ def image_error_fallback_avatar_example():
                 AvatarImage(src=src, alt=alt) if src else None,
                 AvatarFallback(initials)
             ),
-            P(label, cls="text-xs text-muted-foreground text-center mt-1"),
+            P(label, cls="mt-1 text-center text-xs text-muted-foreground"),
             cls="flex flex-col items-center"
         ) for src, alt, initials, label in examples],
         cls="flex items-start gap-6"
@@ -101,7 +101,7 @@ def status_badge_avatar_example():
             ),
             Span(
                 str(count),
-                cls="absolute -top-1 -right-1 size-5 bg-red-500 rounded-full ring-2 ring-background flex items-center justify-center text-[10px] font-bold text-white",
+                cls="absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-background",
                 role="status",
                 aria_label=f"{count} notifications",
             ),
@@ -148,7 +148,7 @@ def user_profile_avatar_example():
                 AvatarFallback(initials, cls=f"{color} text-white font-semibold" if color else "")
             ),
             Div(
-                P(name, cls="text-sm font-medium leading-none"),
+                P(name, cls="text-sm leading-none font-medium"),
                 P(detail, cls="text-sm text-muted-foreground"),
                 cls="space-y-1"
             ),

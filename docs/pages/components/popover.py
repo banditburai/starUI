@@ -24,7 +24,7 @@ def basic_popover_example():
     return Popover(
         PopoverTrigger("Open Popover", variant="outline"),
         PopoverContent(
-            H3("Dimensions", cls="font-semibold text-sm"),
+            H3("Dimensions", cls="text-sm font-semibold"),
             P("Set the dimensions for the layer.", cls="text-sm text-muted-foreground"),
             cls="grid gap-2"
         )
@@ -52,7 +52,7 @@ def popover_placement_example():
             )
             for label, side in positions
         ],
-        cls="flex flex-wrap gap-2 justify-center"
+        cls="flex flex-wrap justify-center gap-2"
     )
 
 
@@ -65,7 +65,7 @@ def form_popover_example():
         Popover(
             PopoverTrigger("Open popover", variant="outline"),
             PopoverContent(
-                H3("Dimensions", cls="font-semibold text-sm"),
+                H3("Dimensions", cls="text-sm font-semibold"),
                 P("Set the dimensions for the layer.", cls="text-sm text-muted-foreground"),
                 Div(
                     InputWithLabel(label="Width", placeholder="100%", signal=width_val),
@@ -86,7 +86,7 @@ def form_popover_example():
                     ),
                     cls="flex justify-end gap-2"
                 ),
-                cls="grid gap-3 w-64",
+                cls="grid w-64 gap-3",
             ),
             signal="dims"
         )
@@ -108,20 +108,20 @@ def inline_help_popover_example():
                         aria_label="API key help"
                     ),
                     PopoverContent(
-                        H3("API Key", cls="font-semibold text-sm"),
+                        H3("API Key", cls="text-sm font-semibold"),
                         P("Your API key authenticates requests to the service.", cls="text-sm text-muted-foreground"),
                         Ul(
                             Li("Keep it secret and secure"),
                             Li("Regenerate if compromised"),
-                            cls="list-disc list-inside text-sm text-muted-foreground"
+                            cls="list-inside list-disc text-sm text-muted-foreground"
                         ),
-                        cls="w-64 grid gap-2",
+                        cls="grid w-64 gap-2",
                         side="top"
                     )
                 ),
                 fr="api-key-help",
             ),
-            cls="grid gap-1.5 w-full max-w-sm"
+            cls="grid w-full max-w-sm gap-1.5"
         ),
     )
 
@@ -141,9 +141,9 @@ def popover_with_close_button_example():
                 variant="ghost"
             ),
             Div(
-                Icon("lucide:alert-triangle", cls="size-5 text-amber-500 shrink-0"),
+                Icon("lucide:alert-triangle", cls="size-5 shrink-0 text-amber-500"),
                 Div(
-                    H3("System Maintenance", cls="font-semibold text-sm"),
+                    H3("System Maintenance", cls="text-sm font-semibold"),
                     P("Scheduled maintenance tonight from 2:00 AM to 4:00 AM EST. Some features may be unavailable.",
                       cls="text-sm text-muted-foreground"),
                     cls="grid gap-1"

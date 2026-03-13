@@ -56,14 +56,14 @@ def destructive_alert_dialog_example():
         danger_info = Div(
             P("Delete Repository", cls="font-medium"),
             P("Once deleted, it will be gone forever",
-              cls="text-sm text-muted-foreground mt-1"),
+              cls="mt-1 text-sm text-muted-foreground"),
             cls="flex-1"
         )
 
         dialog_content = AlertDialogContent(
             AlertDialogHeader(
                 AlertDialogTitle(
-                    Icon("lucide:alert-triangle", cls="h-6 w-6 mr-2 text-destructive"),
+                    Icon("lucide:alert-triangle", cls="mr-2 h-6 w-6 text-destructive"),
                     "Delete Repository"
                 ),
                 AlertDialogDescription(
@@ -71,10 +71,10 @@ def destructive_alert_dialog_example():
                 )
             ),
             Div(
-                P("The following will be deleted:", cls="text-sm font-medium mb-2"),
+                P("The following will be deleted:", cls="mb-2 text-sm font-medium"),
                 Ul(
                     *[Li(item, cls="text-sm text-muted-foreground") for item in deletion_items],
-                    cls="list-disc list-inside space-y-1"
+                    cls="list-inside list-disc space-y-1"
                 ),
                 cls="py-4"
             ),
@@ -94,14 +94,14 @@ def destructive_alert_dialog_example():
                     danger_info,
                     AlertDialog(
                         AlertDialogTrigger(
-                            Icon("lucide:trash-2", cls="h-4 w-4 mr-2"),
+                            Icon("lucide:trash-2", cls="mr-2 h-4 w-4"),
                             "Delete",
                             variant="destructive",
                             size="sm"
                         ),
                         dialog_content
                     ),
-                    cls="flex items-end justify-between gap-6 p-6 border rounded-lg"
+                    cls="flex items-end justify-between gap-6 rounded-lg border p-6"
                 )
             ),
             cls="max-w-lg"
@@ -132,7 +132,7 @@ def unsaved_changes_alert_dialog_example():
                     cls="mt-4"
                 ),
                 P("Make changes to the document fields above and try to save.",
-                  cls="text-sm text-muted-foreground italic mt-4")
+                  cls="mt-4 text-sm text-muted-foreground italic")
             ),
             Div(
                 AlertDialog(
@@ -144,14 +144,14 @@ def unsaved_changes_alert_dialog_example():
                         ),
                         Div(
                             Div(
-                                Icon("lucide:save", cls="h-4 w-4 mr-2 text-blue-500"),
+                                Icon("lucide:save", cls="mr-2 h-4 w-4 text-blue-500"),
                                 P("Your changes:", cls="text-sm font-medium"),
-                                cls="flex items-center mb-2"
+                                cls="mb-2 flex items-center"
                             ),
                             Div(
                                 P("Title: ", Span(data_text=doc_title, cls="font-mono"), cls="text-sm"),
                                 P("Author: ", Span(data_text=doc_author, cls="font-mono"), cls="text-sm"),
-                                cls="space-y-1 p-3 bg-muted rounded-md"
+                                cls="space-y-1 rounded-md bg-muted p-3"
                             ),
                             cls="py-6"
                         ),
@@ -224,7 +224,7 @@ def session_timeout_alert_dialog_example():
             ),
             Div(
                 P("Session expires in: ",
-                  Span(data_text=countdown, cls="font-mono font-bold text-lg"), " seconds",
+                  Span(data_text=countdown, cls="font-mono text-lg font-bold"), " seconds",
                   cls="text-sm"),
                 Button("Logout", data_on_click=active.set(False), variant="outline", size="sm", cls="mt-3"),
                 data_show=active, cls="space-y-2"
@@ -274,7 +274,7 @@ def batch_operation_alert_dialog_example():
 
     delete_dialog = AlertDialog(
         AlertDialogTrigger(
-            Icon("lucide:trash-2", cls="h-4 w-4 mr-2"),
+            Icon("lucide:trash-2", cls="mr-2 h-4 w-4"),
             "Delete Selected",
             variant="destructive",
             data_attr_disabled=selected.length.eq(0)
@@ -289,8 +289,8 @@ def batch_operation_alert_dialog_example():
                 )
             ),
             Div(
-                P("The following items will be deleted:", cls="text-sm font-medium mb-2"),
-                Ul(*dialog_items, cls="list-disc list-inside space-y-1"),
+                P("The following items will be deleted:", cls="mb-2 text-sm font-medium"),
+                Ul(*dialog_items, cls="list-inside list-disc space-y-1"),
                 cls="py-4"
             ),
             AlertDialogFooter(
@@ -313,7 +313,7 @@ def batch_operation_alert_dialog_example():
         ),
         CardContent(
             Div(*file_checkboxes, cls="space-y-2"),
-            Div(selection_count, delete_dialog, cls="flex items-center gap-4 mt-4")
+            Div(selection_count, delete_dialog, cls="mt-4 flex items-center gap-4")
         ),
         cls="max-w-md"
     )

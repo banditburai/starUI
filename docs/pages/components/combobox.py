@@ -36,7 +36,7 @@ def default_example():
         P(
             "Selected: ",
             Code(data_text=cb.selected.or_("none")),  #: hide
-            cls="text-sm text-muted-foreground mt-3"
+            cls="mt-3 text-sm text-muted-foreground"
         ),
         cls="max-w-sm"
     )
@@ -49,7 +49,7 @@ def with_icons_example():
         ComboboxContent(
             ComboboxEmpty("No status found."),
             ComboboxItem(
-                Icon("lucide:circle", cls="!size-3.5 text-muted-foreground fill-muted-foreground/30"),
+                Icon("lucide:circle", cls="!size-3.5 fill-muted-foreground/30 text-muted-foreground"),
                 "Backlog", value="backlog",
             ),
             ComboboxItem(
@@ -96,7 +96,7 @@ def multiselect_example():
         P(
             "Selected: ",
             Code(data_text=cb.selected.join(", ").or_("none")),  #: hide
-            cls="text-sm text-muted-foreground mt-3"
+            cls="mt-3 text-sm text-muted-foreground"
         ),
         cls="max-w-sm"
     )
@@ -224,7 +224,7 @@ def form_example():
                 Button(
                     "Send Invite",
                     type="submit",
-                    cls="w-full mt-4",
+                    cls="mt-4 w-full",
                     data_attr_disabled=~role_value,
                 ),
                 cls="space-y-4"

@@ -21,23 +21,23 @@ def hero_date_picker_example():
     return Div(
         Div(
             Div(
-                P("Date", cls="text-sm font-medium mb-2"),
+                P("Date", cls="mb-2 text-sm font-medium"),
                 DatePicker(signal="hero_dp", placeholder="Pick a date"),
                 cls="flex flex-col items-center",
             ),
             Div(
-                P("Date & Time", cls="text-sm font-medium mb-2"),
+                P("Date & Time", cls="mb-2 text-sm font-medium"),
                 DateTimePicker(signal="hero_dtp", placeholder="Pick date & time"),
                 cls="flex flex-col items-center",
             ),
             Div(
-                P("With Input", cls="text-sm font-medium mb-2"),
+                P("With Input", cls="mb-2 text-sm font-medium"),
                 DatePickerWithInput(signal="hero_dpi"),
                 cls="flex flex-col items-center",
             ),
-            cls="grid grid-cols-1 md:grid-cols-3 gap-8",
+            cls="grid grid-cols-1 gap-8 md:grid-cols-3",
         ),
-        cls="w-full max-w-4xl mx-auto",
+        cls="mx-auto w-full max-w-4xl",
     )
 
 
@@ -75,7 +75,7 @@ def trip_planner_example():
                     range_picker,
                     P(
                         Span(data_text=nights_text, cls="font-medium"),
-                        cls="text-sm text-muted-foreground mt-1",
+                        cls="mt-1 text-sm text-muted-foreground",
                         data_show=range_picker.selected.or_([]).length == 2,
                     ),
                     cls="space-y-1.5",
@@ -126,7 +126,7 @@ def meeting_scheduler_example():
                 ),
                 P(
                     Span(data_text=readout),
-                    cls="text-sm text-muted-foreground mt-2",
+                    cls="mt-2 text-sm text-muted-foreground",
                     data_show=picker.date,
                 ),
                 cls="space-y-4",
@@ -148,7 +148,7 @@ def dob_example():
         picker,
         P(
             Span(data_text=picker.selected.or_("Not set"), cls="font-mono text-xs"),
-            cls="text-sm text-muted-foreground mt-1",
+            cls="mt-1 text-sm text-muted-foreground",
         ),
         cls="grid w-full max-w-sm gap-1.5",
     )
@@ -158,16 +158,16 @@ def dob_example():
 def states_example():
     return Div(
         Div(
-            P("Disabled", cls="text-sm font-medium mb-2"),
+            P("Disabled", cls="mb-2 text-sm font-medium"),
             DatePicker(signal="disabled_dp", disabled=True, placeholder="Not available"),
             cls="flex flex-col",
         ),
         Div(
-            P("Custom width", cls="text-sm font-medium mb-2"),
+            P("Custom width", cls="mb-2 text-sm font-medium"),
             DatePicker(signal="wide_dp", width="w-[360px]", placeholder="Full-width picker"),
             cls="flex flex-col",
         ),
-        cls="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-3xl",
+        cls="grid max-w-3xl grid-cols-1 gap-6 sm:grid-cols-2",
     )
 
 

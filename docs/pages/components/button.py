@@ -22,7 +22,7 @@ def hero_button_example():
         Button("Outline", variant="outline"),
         Button("Ghost", variant="ghost"),
         Button("Link", variant="link"),
-        cls="flex flex-wrap gap-2 justify-center"
+        cls="flex flex-wrap justify-center gap-2"
     )
 
 
@@ -56,7 +56,7 @@ def with_icons_button_example():
             "Deploying...",
             disabled=True,
         ),
-        cls="flex gap-2 flex-wrap"
+        cls="flex flex-wrap gap-2"
     )
 
 

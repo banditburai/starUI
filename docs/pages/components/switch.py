@@ -21,7 +21,7 @@ from utils import auto_generate_page, with_code, Prop, Component, build_api_refe
 def hero_switch_example():
     return Div(
         Div(
-            Label("Live", fr="sw_live", cls="text-sm font-medium leading-none cursor-pointer"),
+            Label("Live", fr="sw_live", cls="cursor-pointer text-sm leading-none font-medium"),
             Switch(signal="sw_hero_live", id="sw_live", checked=True),
             cls="flex items-center gap-3",
         ),
@@ -34,7 +34,7 @@ def hero_switch_example():
             label="Mute mic",
             signal="sw_hero_mute",
         ),
-        cls="space-y-4 max-w-sm",
+        cls="max-w-sm space-y-4",
     )
 
 
@@ -68,7 +68,7 @@ def states_example():
             switch_cls="border-2 border-green-500",
             helper_text="Green tint on label and track border",
         ),
-        cls="space-y-4 max-w-sm",
+        cls="max-w-sm space-y-4",
     )
 
 
@@ -98,7 +98,7 @@ def stream_output_example():
                     SwitchWithLabel(label="Multi-quality transcode", signal=transcode),
                     SwitchWithLabel(label="Chat overlay", signal=overlay),
                     SwitchWithLabel(label="Low-latency mode", signal=lowlat, size="sm"),
-                    cls="space-y-3 pl-4 border-l-2 border-muted",
+                    cls="space-y-3 border-l-2 border-muted pl-4",
                     data_show=live,
                     data_effect=[
                         (~live).then(transcode.set(False)),
@@ -111,7 +111,7 @@ def stream_output_example():
                         layer_count.if_(layer_count + " layers active", "No layers enabled"),
                         "Stream offline",
                     ),
-                    cls="text-sm text-muted-foreground mt-3",
+                    cls="mt-3 text-sm text-muted-foreground",
                 ),
                 cls="space-y-4",
             )
@@ -156,7 +156,7 @@ def go_live_checklist_example():
                 Button(
                     "Go Live",
                     type="submit",
-                    cls="w-full mt-4",
+                    cls="mt-4 w-full",
                     data_attr_disabled=~all_(low_latency, vod, dvr),
                     data_on_click=evt.preventDefault(),
                 ),
@@ -206,7 +206,7 @@ def encoder_settings_example():
                         " kbps",
                         cls="text-sm text-muted-foreground",
                     ),
-                    Progress(signal=bitrate_pct, cls="w-full h-2 mt-2", aria_label="Estimated bitrate"),
+                    Progress(signal=bitrate_pct, cls="mt-2 h-2 w-full", aria_label="Estimated bitrate"),
                     cls="mt-4",
                 ),
                 cls="space-y-3",
@@ -252,7 +252,7 @@ def stream_destinations_example():
                 ),
                 Div(
                     Button("Go Multistream", type="submit", cls="w-full", data_on_click=evt.preventDefault()),
-                    Button("Reset All", variant="outline", cls="w-full mt-2", data_on_click=(reset_actions, dict(prevent=True))),
+                    Button("Reset All", variant="outline", cls="mt-2 w-full", data_on_click=(reset_actions, dict(prevent=True))),
                     cls="mt-6",
                 ),
                 Div(
@@ -261,7 +261,7 @@ def stream_destinations_example():
                         Span(data_text=active_summary.if_(active_summary, "None"), cls="font-medium"),
                         cls="text-sm text-muted-foreground",
                     ),
-                    cls="mt-4 pt-4 border-t",
+                    cls="mt-4 border-t pt-4",
                 ),
             )
         ),
@@ -319,7 +319,7 @@ def scene_layers_example():
                         )
                         for name, label, prev in layers
                     ],
-                    cls="space-y-3 pl-4 border-l-2 border-muted",
+                    cls="space-y-3 border-l-2 border-muted pl-4",
                     data_show=renderer,
                     data_effect=[
                         (~renderer).then(layer_signals[name].set(False))

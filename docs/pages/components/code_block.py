@@ -16,14 +16,14 @@ def copy_button(signal, content, size="sm", button_cls=""):
     """Copy/check button pair with visual feedback."""
     return Div(
         Button(
-            Icon("lucide:copy", cls="w-4 h-4"),
+            Icon("lucide:copy", cls="h-4 w-4"),
             aria_label="Copy code",
             data_on_click=[clipboard(text=content), signal.set(True), set_timeout([signal.set(False)], 2000)],
             data_show=~signal,
             variant="ghost", size=size, cls=button_cls,
         ),
         Button(
-            Icon("lucide:check", cls="w-4 h-4"),
+            Icon("lucide:check", cls="h-4 w-4"),
             aria_label="Copied",
             data_show=signal,
             variant="ghost", size=size, cls=f"{button_cls} text-green-600".strip(),
@@ -85,12 +85,12 @@ class AppConfig:
         Div(
             copied,
             Div(
-                Span("config.py", cls="text-sm font-mono text-foreground/70"),
+                Span("config.py", cls="font-mono text-sm text-foreground/70"),
                 copy_button(copied, code),
-                cls="flex items-center justify-between px-4 py-2 bg-muted/80 border-b border-border rounded-t-lg"
+                cls="flex items-center justify-between rounded-t-lg border-b border-border bg-muted/80 px-4 py-2"
             ),
             CodeBlock(code, language="python", cls="!rounded-t-none !border-t-0"),
-            cls="rounded-lg overflow-hidden"
+            cls="overflow-hidden rounded-lg"
         ),
         cls="w-full",
     )
@@ -107,7 +107,7 @@ def inline_code_snippets_example():
             " parameter for additional Tailwind classes and ",
             InlineCode("**kwargs"),
             " for HTML attributes.",
-            cls="text-sm leading-7 mb-4"
+            cls="mb-4 text-sm leading-7"
         ),
         P(
             "Reactive state uses ",
@@ -119,7 +119,7 @@ def inline_code_snippets_example():
             ", and handle events with ",
             InlineCode("data_on_click"),
             ".",
-            cls="text-sm leading-7 mb-4"
+            cls="mb-4 text-sm leading-7"
         ),
         P(
             "Run ",
@@ -129,7 +129,7 @@ def inline_code_snippets_example():
             " to see what's available.",
             cls="text-sm leading-7"
         ),
-        cls="prose prose-sm w-full max-w-none px-3 sm:px-4 py-4 sm:py-6 border rounded-lg",
+        cls="w-full max-w-none rounded-lg border px-3 py-4 sm:px-4 sm:py-6 prose prose-sm",
     )
 
 
@@ -146,10 +146,10 @@ def documentation_layout_example():
         signal = copied_signals[manager]
         return Div(
             signal,
-            P(manager, cls="text-xs text-muted-foreground mb-1"),
+            P(manager, cls="mb-1 text-xs text-muted-foreground"),
             Div(
-                CodeBlock(command, language="bash", cls="text-sm py-3"),
-                copy_button(signal, command, size="icon", button_cls="absolute top-1/2 right-2 -translate-y-1/2 h-8 w-8"),
+                CodeBlock(command, language="bash", cls="py-3 text-sm"),
+                copy_button(signal, command, size="icon", button_cls="absolute top-1/2 right-2 h-8 w-8 -translate-y-1/2"),
                 cls="relative"
             ),
             cls=margin_cls
@@ -157,8 +157,8 @@ def documentation_layout_example():
 
     return Div(
         Div(
-            H3("Installation", cls="text-lg font-semibold mb-3"),
-            P("Install StarUI and initialize your project:", cls="text-sm text-muted-foreground mb-3"),
+            H3("Installation", cls="mb-3 text-lg font-semibold"),
+            P("Install StarUI and initialize your project:", cls="mb-3 text-sm text-muted-foreground"),
             *[install_block(*m) for m in install_methods],
             cls="mb-8"
         ),
@@ -166,8 +166,8 @@ def documentation_layout_example():
         Separator(cls="mb-8"),
 
         Div(
-            H3("Add Components", cls="text-lg font-semibold mb-3"),
-            P("Scaffold the components you need:", cls="text-sm text-muted-foreground mb-3"),
+            H3("Add Components", cls="mb-3 text-lg font-semibold"),
+            P("Scaffold the components you need:", cls="mb-3 text-sm text-muted-foreground"),
             CodeBlock('''# Initialize a new project
 star init
 
@@ -179,7 +179,7 @@ star add card input select
 star list''', language="bash")
         ),
 
-        cls="w-full px-3 sm:px-4 py-4 sm:py-6 border rounded-lg",
+        cls="w-full rounded-lg border px-3 py-4 sm:px-4 sm:py-6",
     )
 
 
@@ -193,7 +193,7 @@ def terminal_output_example():
                     cls="flex gap-2"
                 ),
                 Span("Terminal", cls="text-sm text-muted-foreground"),
-                cls="flex items-center justify-between px-4 py-2 bg-muted/80 border-b border-border rounded-t-lg"
+                cls="flex items-center justify-between rounded-t-lg border-b border-border bg-muted/80 px-4 py-2"
             ),
             CodeBlock('''$ star init
 Initializing StarUI project...
@@ -213,7 +213,7 @@ Watching for changes...
 Serving on http://localhost:5001''',
                        language="bash",
                        style="border-top-left-radius: 0; border-top-right-radius: 0; border-top-width: 0;"),
-            cls="rounded-lg overflow-hidden"
+            cls="overflow-hidden rounded-lg"
         ),
         cls="w-full",
     )

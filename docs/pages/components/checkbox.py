@@ -23,7 +23,7 @@ def hero_checkbox_example():
         Div(
             Checkbox(signal="cb_hero_monitor", id="cb_monitor", checked=True),
             Div(
-                Label("Monitor input", fr="cb_monitor", cls="text-sm font-medium leading-none"),
+                Label("Monitor input", fr="cb_monitor", cls="text-sm leading-none font-medium"),
                 cls="grid gap-1.5",
             ),
             cls="flex items-start gap-3",
@@ -37,7 +37,7 @@ def hero_checkbox_example():
             label="-20dB pad",
             signal="cb_hero_pad",
         ),
-        cls="space-y-4 max-w-sm",
+        cls="max-w-sm space-y-4",
     )
 
 
@@ -64,7 +64,7 @@ def states_example():
             checked=True,
             indicator_cls="text-green-600 dark:text-green-400",
         ),
-        cls="space-y-4 max-w-sm",
+        cls="max-w-sm space-y-4",
     )
 
 
@@ -108,7 +108,7 @@ def session_prep_example():
                 Button(
                     "Begin Session",
                     type="submit",
-                    cls="w-full mt-4",
+                    cls="mt-4 w-full",
                     data_attr_disabled=~all_(levels, backup, silence),
                     data_on_click=evt.preventDefault(),
                 ),
@@ -135,7 +135,7 @@ def bus_routing_example():
             Div(
                 optional_count,
                 Div(
-                    H3("Required", cls="text-sm font-semibold mb-2 text-muted-foreground"),
+                    H3("Required", cls="mb-2 text-sm font-semibold text-muted-foreground"),
                     CheckboxWithLabel(
                         label="Master",
                         helper_text="Main stereo output",
@@ -148,10 +148,10 @@ def bus_routing_example():
                         checked=True,
                         disabled=True,
                     ),
-                    cls="space-y-2 mb-4",
+                    cls="mb-4 space-y-2",
                 ),
                 Div(
-                    H3("Optional", cls="text-sm font-semibold mb-2 text-muted-foreground"),
+                    H3("Optional", cls="mb-2 text-sm font-semibold text-muted-foreground"),
                     CheckboxWithLabel(
                         label="Drums sub",
                         signal=drums,
@@ -198,7 +198,7 @@ def take_tracker_example():
             label=label,
             signal=signal,
             checked=checked,
-            label_cls=signal.if_("line-through text-muted-foreground"),
+            label_cls=signal.if_("text-muted-foreground line-through"),
         )
 
     return Card(
@@ -224,7 +224,7 @@ def take_tracker_example():
                         " of 4",
                         cls="text-sm text-muted-foreground",
                     ),
-                    Progress(signal=take_progress, cls="w-full h-2 mt-2", aria_label="Task completion"),
+                    Progress(signal=take_progress, cls="mt-2 h-2 w-full", aria_label="Task completion"),
                     cls="mt-4",
                 ),
             )
@@ -277,7 +277,7 @@ def session_takes_example():
                         checkbox_cls="border-2",
                         data_on_change=select_actions,
                     ),
-                    cls="border-b pb-2 mb-3",
+                    cls="mb-3 border-b pb-2",
                 ),
                 Div(
                     *[
@@ -302,7 +302,7 @@ def session_takes_example():
                         size="sm",
                         data_attr_disabled=selected_count == 0,
                     ),
-                    cls="mt-4 pt-4 border-t",
+                    cls="mt-4 border-t pt-4",
                 ),
             )
         ),
@@ -340,7 +340,7 @@ def export_settings_example():
 
     def option_group(title, options, mb_class="mb-6"):
         return Div(
-            H3(title, cls="text-sm font-semibold mb-3"),
+            H3(title, cls="mb-3 text-sm font-semibold"),
             Div(
                 *[
                     CheckboxWithLabel(label=label, signal=option_signals[name], checked=checked)
@@ -363,7 +363,7 @@ def export_settings_example():
                 option_group("Metadata", metadata, mb_class=""),
                 Div(
                     Button("Export", type="submit", cls="w-full", data_on_click=evt.preventDefault()),
-                    Button("Reset", variant="outline", cls="w-full mt-2", data_on_click=(reset_actions, dict(prevent=True))),
+                    Button("Reset", variant="outline", cls="mt-2 w-full", data_on_click=(reset_actions, dict(prevent=True))),
                     cls="mt-6",
                 ),
                 Div(
@@ -372,7 +372,7 @@ def export_settings_example():
                         Span(data_text=active_summary.if_(active_summary, "None"), cls="font-medium"),
                         cls="text-sm text-muted-foreground",
                     ),
-                    cls="mt-4 pt-4 border-t",
+                    cls="mt-4 border-t pt-4",
                 ),
             )
         ),

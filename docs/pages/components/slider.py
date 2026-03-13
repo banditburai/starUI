@@ -63,7 +63,7 @@ def states_example():
             value_text="px",
             helper_text="Soft edge width for selection masks",
         ),
-        cls="grid gap-6 w-full max-w-sm",
+        cls="grid w-full max-w-sm gap-6",
     )
 
 
@@ -82,9 +82,9 @@ def typography_preview_example():
                     Span("Font size", cls="text-sm font-medium"),
                     Span(
                         data_text=font_size,
-                        cls="text-sm text-muted-foreground font-mono",
+                        cls="font-mono text-sm text-muted-foreground",
                     ),
-                    cls="flex justify-between mb-2",
+                    cls="mb-2 flex justify-between",
                 ),
                 Slider(
                     signal=font_size,
@@ -96,7 +96,7 @@ def typography_preview_example():
                 P(
                     "The quick brown fox jumps over the lazy dog",
                     data_style_font_size=font_size + "px",
-                    cls="mt-6 text-foreground transition-none leading-snug",
+                    cls="mt-6 leading-snug text-foreground transition-none",
                     style="font-size: 18px",
                 ),
                 cls="space-y-1",
@@ -189,7 +189,7 @@ def color_mixer_example():
 
     def channel_row(label, sig, aria):
         return Div(
-            Span(label, cls="text-sm font-medium w-8"),
+            Span(label, cls="w-8 text-sm font-medium"),
             Button(
                 Icon("lucide:minus", cls="size-3"),
                 data_on_click=sig.set((sig - 1).max(0)),
@@ -240,7 +240,7 @@ def color_mixer_example():
                 channel_row("B", blue, "Blue channel"),
                 Span(
                     data_text="rgb(" + red + ", " + green + ", " + blue + ")",
-                    cls="block text-center text-xs font-mono text-muted-foreground mt-1",
+                    cls="mt-1 block text-center font-mono text-xs text-muted-foreground",
                 ),
                 cls="space-y-3",
             ),
@@ -287,7 +287,7 @@ def layer_opacity_example():
                         ),
                         Span(
                             data_text=sig + "%",
-                            cls="text-xs font-mono text-muted-foreground",
+                            cls="font-mono text-xs text-muted-foreground",
                         ),
                         cls="flex flex-col items-center gap-2",
                     )
@@ -341,16 +341,16 @@ def export_settings_example():
                     Span("Est. size: ", cls="text-sm text-muted-foreground"),
                     Span(
                         data_text=est_size,
-                        cls="text-sm font-mono font-medium",
+                        cls="font-mono text-sm font-medium",
                     ),
                     Span(" KB", cls="text-sm text-muted-foreground"),
-                    cls="flex items-center gap-1 mt-2",
+                    cls="mt-2 flex items-center gap-1",
                 ),
                 Button(
                     Icon("lucide:download", cls="size-4"),
                     "Export",
                     type="submit",
-                    cls="w-full mt-4",
+                    cls="mt-4 w-full",
                 ),
                 cls="space-y-4",
             ),

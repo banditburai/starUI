@@ -39,7 +39,7 @@ def default_example():
         P(
             "Selected: ",
             Code(data_text=status_value.or_("none")),
-            cls="text-sm text-muted-foreground mt-3"
+            cls="mt-3 text-sm text-muted-foreground"
         ),
         cls="max-w-sm"
     )
@@ -141,7 +141,7 @@ def form_example():
                 Button(
                     "Create Project",
                     type="submit",
-                    cls="w-full mt-4",
+                    cls="mt-4 w-full",
                     data_attr_disabled=~template_value,
                     data_on_click=(js("alert(`Template: ${$project_template_label}`)"), dict(prevent=True))
                 ),
@@ -184,7 +184,7 @@ def dependent_selects_example():
                     select_cls="w-full"
                 ),
                 Div(
-                    Label("Model", fr="vehicle_model_trigger", cls="block text-sm font-medium mb-1.5"),
+                    Label("Model", fr="vehicle_model_trigger", cls="mb-1.5 block text-sm font-medium"),
                     Select(
                         SelectTrigger(
                             SelectValue(placeholder="Select model"),
@@ -219,7 +219,7 @@ def dependent_selects_example():
                 P(
                     "Selected: ",
                     Code(data_text=make_label + " " + model_label),
-                    cls="text-sm text-muted-foreground mt-2",
+                    cls="mt-2 text-sm text-muted-foreground",
                     data_show=make_value & model_value
                 ),
                 data_effect=[
@@ -268,7 +268,7 @@ def inline_selects_example():
             Code(data_text=font_value),
             " / ",
             Code(data_text=size_value),
-            cls="text-sm text-muted-foreground mt-3"
+            cls="mt-3 text-sm text-muted-foreground"
         ),
     )
 

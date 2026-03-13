@@ -78,7 +78,7 @@ def hero_command_example():
             ),
             signal="hero_cmd",
         ),
-        cls="max-w-2xl mx-auto",
+        cls="mx-auto max-w-2xl",
     )
 
 
@@ -90,7 +90,7 @@ def search_and_keywords_example():
             CommandList(
                 CommandEmpty(
                     Div(
-                        Icon("lucide:search-x", cls="size-10 text-muted-foreground/50 mx-auto mb-3"),
+                        Icon("lucide:search-x", cls="mx-auto mb-3 size-10 text-muted-foreground/50"),
                         P("No matching settings.", cls="font-medium"),
                         P("Try a different search term.", cls="text-muted-foreground"),
                         cls="text-center text-sm",
@@ -145,7 +145,7 @@ def search_and_keywords_example():
             ),
             signal="settings_cmd",
         ),
-        cls="max-w-2xl mx-auto",
+        cls="mx-auto max-w-2xl",
     )
 
 
@@ -155,7 +155,7 @@ def command_dialog_example():
         CommandDialog(
             Button(
                 Icon("lucide:search"),
-                Span("Search...", cls="text-muted-foreground font-normal"),
+                Span("Search...", cls="font-normal text-muted-foreground"),
                 Kbd("⌘K", cls="ml-auto text-xs"),
                 variant="outline",
                 cls="w-64 justify-start text-sm",

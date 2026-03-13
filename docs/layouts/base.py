@@ -62,7 +62,7 @@ def _copy_page_button(component_name: str | None = None) -> FT:
         data_on_click=copy_action,
         variant="outline",
         size="sm",
-        cls="h-8 rounded-md gap-1.5 px-3"
+        cls="h-8 gap-1.5 rounded-md px-3"
     )
 
 
@@ -80,8 +80,8 @@ def _page_header_section(layout: LayoutConfig) -> FT:
             ),
             cls="flex items-center justify-between"
         ),
-        P(layout.description, cls="text-muted-foreground mt-2") if layout.description else None,
-        cls="pb-8 pt-6 md:pb-10 md:pt-10 lg:py-10"
+        P(layout.description, cls="mt-2 text-muted-foreground") if layout.description else None,
+        cls="pt-6 pb-8 md:pt-10 md:pb-10 lg:py-10"
     )
 
 
@@ -103,7 +103,7 @@ def _mobile_sheet_section(sidebar: SidebarConfig, mobile_menu: Signal) -> FT:
             MobileSidebar(sections=sidebar.sections),
             side="right",
             size="sm",
-            cls="xl:hidden w-80 max-w-[80vw] p-0",
+            cls="w-80 max-w-[80vw] p-0 xl:hidden",
             show_close=True,
         ),
         signal=mobile_menu,

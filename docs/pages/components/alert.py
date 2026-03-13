@@ -44,7 +44,7 @@ def with_action_alert_example():
                     Div(
                         Button("View changelog", variant="outline", size="sm"),
                         Button("Update now", size="sm"),
-                        cls="flex gap-2 mt-3"
+                        cls="mt-3 flex gap-2"
                     )
                 )
             ),
@@ -113,7 +113,7 @@ def without_icon_alert_example():
     return Alert(
         AlertTitle("Keyboard shortcut"),
         AlertDescription(
-            P("Press ", Code("Ctrl+K", cls="text-xs bg-muted px-1 py-0.5 rounded"),
+            P("Press ", Code("Ctrl+K", cls="rounded bg-muted px-1 py-0.5 text-xs"),
               " to open the command palette from anywhere in the app.")
         )
     )

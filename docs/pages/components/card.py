@@ -97,7 +97,7 @@ def card_dividers_example():
                 Div(
                     Span("Total", cls="text-sm font-medium"),
                     Span("$29/mo", cls="text-sm font-bold"),
-                    cls="flex justify-between border-t pt-2 mt-2",
+                    cls="mt-2 flex justify-between border-t pt-2",
                 ),
                 cls="space-y-2",
             )
@@ -115,7 +115,7 @@ def card_image_example():
     return Card(
         Div(
             Icon("lucide:image", cls="h-12 w-12 text-muted-foreground/20"),
-            cls="bg-muted flex items-center justify-center h-48",
+            cls="flex h-48 items-center justify-center bg-muted",
         ),
         CardHeader(
             Div(
@@ -154,7 +154,7 @@ def heading_levels_example():
                 P("Defaults to h3, suitable for most card grids.", cls="text-sm text-muted-foreground")
             ),
         ),
-        cls="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-2xl",
+        cls="grid w-full max-w-2xl grid-cols-1 gap-4 md:grid-cols-2",
     )
 
 
@@ -233,7 +233,7 @@ def dashboard_stats_example():
                 PeriodButton("Week", "week"),
                 PeriodButton("Month", "month"),
                 PeriodButton("Quarter", "quarter"),
-                cls="flex gap-1 px-6 pb-4 border-b",
+                cls="flex gap-1 border-b px-6 pb-4",
             ),
             CardContent(
                 Div(
