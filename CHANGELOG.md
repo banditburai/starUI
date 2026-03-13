@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- `Combobox` component — searchable dropdown with keyboard navigation, custom rendering, and multi-select support
+- `star sort` command — sort Tailwind classes in Python files using Tailwind's canonical order; `--check` mode for CI
+- Blocks system — multi-file component bundles (`star add <block>`, `star list --installed`, `star update`)
+- `UserButton` block — avatar dropdown with user info, theme toggle, and sign-out action
 - `AspectRatio` component — content within a desired ratio, prevents layout shift
 - `Collapsible` component — expand/collapse with smooth CSS grid animation, nesting, and disabled state
 - `Drawer` component — slide-from-edge panel with drag-to-dismiss, all 4 directions, modal/non-modal
