@@ -1,4 +1,4 @@
-from starhtml import FT, Div, Icon, Signal, Span
+from starhtml import FT, Div, Icon, Signal, Span, Style
 from starhtml import Button as HTMLButton
 from starhtml import Label as HTMLLabel
 from starhtml import P as HTMLP
@@ -10,6 +10,13 @@ __metadata__ = {
     "description": "Dropdown selection",
     "handlers": ["position"],
 }
+
+_POPOVER_ANIMATE = """\
+[data-popover-animate]{--_dur-in:150ms;--_dur-out:100ms;transform-origin:var(--popover-origin,center);transition:opacity var(--_dur-out) ease,scale var(--_dur-out) ease,display var(--_dur-out) allow-discrete,overlay var(--_dur-out) allow-discrete}
+[data-popover-animate]:popover-open{transition-duration:var(--_dur-in);transition-timing-function:cubic-bezier(0.16,1,0.3,1)}
+[data-popover-animate]:not(:popover-open){opacity:0;scale:0.95}
+[data-popover-animate]:popover-open{@starting-style{opacity:0;scale:0.95}}
+@media(prefers-reduced-motion:reduce){[data-popover-animate]{transition-duration:0ms!important}}"""
 
 
 def Select(
@@ -34,6 +41,7 @@ def Select(
     }
 
     return Div(
+        Style(_POPOVER_ANIMATE),
         selected,
         selected_label,
         open_state,
@@ -77,11 +85,11 @@ def SelectTrigger(
             aria_controls=f"{sig}_content",
             id=trigger_ref._id,
             cls=cn(
-                "flex w-full h-9 items-center justify-between gap-2 rounded-md border border-input",
+                "flex h-9 w-full items-center justify-between gap-2 rounded-md border border-input",
                 "bg-transparent px-3 py-2 text-sm shadow-xs",
-                "transition-[color,box-shadow] outline-hidden truncate",
+                "truncate outline-hidden transition-[color,box-shadow]",
                 "dark:bg-input/30 dark:hover:bg-input/50",
-                "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
+                "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
                 "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40",
                 "aria-invalid:border-destructive",
                 "disabled:cursor-not-allowed disabled:opacity-50",
@@ -104,20 +112,18 @@ def SelectValue(
         if children:
             return Span(
                 *children,
-                cls=cn("pointer-events-none truncate flex-1 text-left", cls),
+                cls=cn("pointer-events-none flex-1 truncate text-left", cls),
                 data_slot="select-value",
                 **kwargs,
             )
 
-        text_expr = kwargs.pop("data_text") if "data_text" in kwargs else selected_label.or_(placeholder)
-
-        # Static text for SSR/accessibility; data_text overrides once Datastar initializes
+        text_expr = kwargs.pop("data_text", selected_label.or_(placeholder))
         ssr_text = getattr(selected_label, "_initial", "") or placeholder
 
         return Span(
             ssr_text,
             data_text=text_expr,
-            cls=cn("pointer-events-none truncate flex-1 text-left", cls),
+            cls=cn("pointer-events-none flex-1 truncate text-left", cls),
             data_class_text_muted_foreground=~selected_label,
             data_slot="select-value",
             **kwargs,
@@ -161,6 +167,7 @@ def SelectContent(
             data_style_min_width=trigger_ref.if_(trigger_ref.offsetWidth + "px", "8rem"),
             data_position=(trigger_ref._id, position_mods),
             popover="auto",
+            data_popover_animate="",
             id=content_ref._id,
             role="listbox",
             aria_labelledby=trigger_ref._id,
@@ -215,7 +222,7 @@ def SelectItem(
             data_selected=is_selected,
             data_disabled="true" if disabled else None,
             cls=cn(
-                "relative flex w-full cursor-default select-none items-center gap-2 rounded-sm py-1.5 pl-2 pr-8 text-sm outline-hidden",
+                "relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none",
                 "hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
                 "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
                 cls,
@@ -252,7 +259,7 @@ def SelectLabel(
 ) -> FT:
     return Div(
         *children,
-        cls=cn("text-muted-foreground px-2 py-1.5 text-xs", cls),
+        cls=cn("px-2 py-1.5 text-xs text-muted-foreground", cls),
         data_slot="select-label",
         **kwargs,
     )
@@ -263,57 +270,34 @@ def SelectSeparator(
     **kwargs,
 ) -> FT:
     return Div(
-        cls=cn("bg-border pointer-events-none -mx-1 my-1 h-px", cls),
+        cls=cn("pointer-events-none -mx-1 my-1 h-px bg-border", cls),
         data_slot="select-separator",
         **kwargs,
     )
 
 
 def _get_value_label(item: str | tuple) -> tuple[str, str]:
-    match item:
-        case str():
-            return item, item
-        case (value, label):
-            return value, label
-        case _:
-            return "", ""
+    return (item, item) if isinstance(item, str) else (item[0], item[1]) if isinstance(item, tuple) else ("", "")
 
 
 def _find_initial_label(options: list, value: str | None) -> str:
     if not value:
         return ""
-
-    for opt in options:
-        match opt:
-            case str() if opt == value:
-                return opt
-            case (opt_value, label) if opt_value == value:
-                return label
-            case {"items": items}:
-                for item in items:
-                    item_value, item_label = _get_value_label(item)
-                    if item_value == value:
-                        return item_label
-    return ""
+    all_items = (item for opt in options for item in (opt.get("items", []) if isinstance(opt, dict) else [opt]))
+    return next((lbl for v, lbl in map(_get_value_label, all_items) if v == value), "")
 
 
-def _build_select_items(options: list) -> list:
-    def _process_option(opt):
-        match opt:
-            case str():
-                return SelectItem(opt)
-            case (value, label):
-                return SelectItem(label, value=value)
-            case {"group": group_label, "items": group_items}:
-                return SelectGroup(
-                    *[
-                        SelectItem(item_label, value=item_value)
-                        for item_value, item_label in [_get_value_label(item) for item in group_items]
-                    ],
-                    label=group_label,
-                )
-
-    return [_process_option(opt) for opt in options]
+def _select_item(opt) -> FT:
+    match opt:
+        case str():
+            return SelectItem(opt)
+        case (value, label):
+            return SelectItem(label, value=value)
+        case {"group": group_label, "items": group_items}:
+            return SelectGroup(
+                *[SelectItem(label, value=value) for value, label in map(_get_value_label, group_items)],
+                label=group_label,
+            )
 
 
 def SelectWithLabel(
@@ -343,7 +327,7 @@ def SelectWithLabel(
             label,
             Span(" *", cls="text-destructive") if required else None,
             fr=trigger_id,
-            cls=cn("block text-sm font-medium mb-1.5", label_cls),
+            cls=cn("mb-1.5 block text-sm font-medium", label_cls),
         ),
         Select(
             SelectTrigger(
@@ -353,7 +337,7 @@ def SelectWithLabel(
                 aria_invalid="true" if error_text else None,
                 id=trigger_id,
             ),
-            SelectContent(*_build_select_items(options), side=side),
+            SelectContent(*[_select_item(opt) for opt in options], side=side),
             *attrs,
             value=value,
             label=_find_initial_label(options, value),
@@ -361,8 +345,8 @@ def SelectWithLabel(
             cls="w-full",
             **kwargs,
         ),
-        HTMLP(error_text, cls="text-sm text-destructive mt-1.5") if error_text else None,
-        HTMLP(helper_text, cls="text-sm text-muted-foreground mt-1.5") if helper_text and not error_text else None,
+        HTMLP(error_text, cls="mt-1.5 text-sm text-destructive") if error_text else None,
+        HTMLP(helper_text, cls="mt-1.5 text-sm text-muted-foreground") if helper_text and not error_text else None,
         data_slot="select-with-label",
         cls=cn("space-y-1.5", cls),
     )

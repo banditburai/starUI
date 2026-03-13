@@ -17,7 +17,7 @@ def Skeleton(
         data_slot="skeleton",
         aria_hidden="true",
         cls=cn(
-            "bg-accent animate-pulse rounded-md motion-reduce:animate-none",
+            "animate-pulse rounded-md bg-accent motion-reduce:animate-none",
             cls,
         ),
         **kwargs,

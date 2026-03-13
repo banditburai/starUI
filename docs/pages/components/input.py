@@ -29,7 +29,7 @@ def default_example():
 
 @with_code
 def input_with_icon_example():
-    icon_cls = "size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+    icon_cls = "pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
     return Div(
         Div(
             Icon("lucide:mail", cls=icon_cls),
@@ -161,7 +161,7 @@ def debounced_search_example():
     return Div(
         query, active,
         Div(
-            Icon("lucide:search", cls="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"),
+            Icon("lucide:search", cls="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"),
             Input(
                 placeholder="Search packages...",
                 signal=query,
@@ -176,7 +176,7 @@ def debounced_search_example():
                     Span(name, cls="text-sm font-medium"),
                     Span(desc, cls="text-xs text-muted-foreground"),
                     data_show=~active | js(f"'{name.lower()}'.includes($search_active.toLowerCase())"),
-                    cls="grid gap-0.5 py-2 border-b last:border-0",
+                    cls="grid gap-0.5 border-b py-2 last:border-0",
                 )
                 for name, desc in packages
             ],

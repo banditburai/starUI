@@ -15,9 +15,9 @@ SwitchSize = Literal["default", "sm"]
 
 switch_variants = cva(
     base=(
-        "peer inline-flex shrink-0 items-center rounded-full "
+        "inline-flex shrink-0 items-center rounded-full peer "
         "border border-transparent shadow-xs transition-all outline-none "
-        "focus-visible:ring-[3px] focus-visible:border-ring focus-visible:ring-ring/50 "
+        "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 "
         "disabled:cursor-not-allowed disabled:opacity-50"
     ),
     config={
@@ -61,8 +61,6 @@ def Switch(
     switch_id = kwargs.pop("id", sig)
 
     checked_state = Signal(sig, checked or False)
-    click_actions = merge_actions(checked_state.toggle(), kwargs=kwargs)
-    translate = _THUMB_TRANSLATE[size]
 
     return Div(
         checked_state,
@@ -70,12 +68,12 @@ def Switch(
             HTMLSpan(
                 cls=switch_thumb_variants(size=size),
                 data_attr_cls=checked_state.if_(
-                    f"{translate} dark:bg-primary-foreground",
+                    f"{_THUMB_TRANSLATE[size]} dark:bg-primary-foreground",
                     "translate-x-0 dark:bg-foreground",
                 ),
                 data_slot="switch-thumb",
             ),
-            data_on_click=click_actions,
+            data_on_click=merge_actions(checked_state.toggle(), kwargs=kwargs),
             cls=cn(switch_variants(size=size), cls),
             data_attr_cls=checked_state.if_("bg-primary", "bg-input dark:bg-input/80"),
             type="button",
@@ -132,8 +130,8 @@ def SwitchWithLabel(
             ),
             cls="flex items-center gap-3",
         ),
-        HTMLP(error_text, cls="text-sm text-destructive mt-1.5") if error_text else None,
-        HTMLP(helper_text, cls="text-sm text-muted-foreground mt-1.5") if helper_text and not error_text else None,
+        HTMLP(error_text, cls="mt-1.5 text-sm text-destructive") if error_text else None,
+        HTMLP(helper_text, cls="mt-1.5 text-sm text-muted-foreground") if helper_text and not error_text else None,
         *attrs,
         cls=cn("space-y-1.5", cls),
         **kwargs,

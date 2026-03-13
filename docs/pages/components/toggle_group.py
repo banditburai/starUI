@@ -23,7 +23,7 @@ def editor_controls_example():
 
     return Div(
         alignment, decoration,  #: hide
-        P("Text Alignment", cls="font-medium mb-4"),
+        P("Text Alignment", cls="mb-4 font-medium"),
         ToggleGroup(
             ("left", Icon("lucide:align-left", cls="size-4")),
             ("center", Icon("lucide:align-center", cls="size-4")),
@@ -36,7 +36,7 @@ def editor_controls_example():
 
         Separator(cls="my-6"),
 
-        P("Text Decoration", cls="font-medium mb-4"),
+        P("Text Decoration", cls="mb-4 font-medium"),
         ToggleGroup(
             ("bold", Icon("lucide:bold", cls="size-4")),
             ("italic", Icon("lucide:italic", cls="size-4")),
@@ -48,7 +48,7 @@ def editor_controls_example():
         Div(
             P(
                 "The quick brown fox jumps over the lazy dog.",
-                cls="p-4 bg-muted rounded transition-all",
+                cls="rounded bg-muted p-4 transition-all",
                 data_class_text_left=alignment.eq("left") | ~alignment,
                 data_class_text_center=alignment.eq("center"),
                 data_class_text_right=alignment.eq("right"),
@@ -69,7 +69,7 @@ def view_mode_switcher_example():
 
     return Div(
         view_mode,  #: hide
-        P("View Mode", cls="font-medium mb-4"),
+        P("View Mode", cls="mb-4 font-medium"),
         ToggleGroup(
             ("grid", Div(Icon("lucide:grid-3x3", cls="size-4"), "Grid", cls="flex items-center gap-2")),
             ("list", Div(Icon("lucide:list", cls="size-4"), "List", cls="flex items-center gap-2")),
@@ -80,30 +80,30 @@ def view_mode_switcher_example():
         ),
         Div(
             Div(
-                Div("Inception (2010)", cls="p-4 border rounded bg-muted"),
-                Div("The Matrix (1999)", cls="p-4 border rounded bg-muted"),
-                Div("Interstellar (2014)", cls="p-4 border rounded bg-muted"),
-                Div("Blade Runner (1982)", cls="p-4 border rounded bg-muted"),
+                Div("Inception (2010)", cls="rounded border bg-muted p-4"),
+                Div("The Matrix (1999)", cls="rounded border bg-muted p-4"),
+                Div("Interstellar (2014)", cls="rounded border bg-muted p-4"),
+                Div("Blade Runner (1982)", cls="rounded border bg-muted p-4"),
                 cls="grid grid-cols-2 gap-2",
                 data_show=view_mode.eq("grid")
             ),
             Div(
-                Div("Inception (2010)", cls="p-3 border rounded bg-muted mb-2"),
-                Div("The Matrix (1999)", cls="p-3 border rounded bg-muted mb-2"),
-                Div("Interstellar (2014)", cls="p-3 border rounded bg-muted mb-2"),
-                Div("Blade Runner (1982)", cls="p-3 border rounded bg-muted"),
+                Div("Inception (2010)", cls="mb-2 rounded border bg-muted p-3"),
+                Div("The Matrix (1999)", cls="mb-2 rounded border bg-muted p-3"),
+                Div("Interstellar (2014)", cls="mb-2 rounded border bg-muted p-3"),
+                Div("Blade Runner (1982)", cls="rounded border bg-muted p-3"),
                 data_show=view_mode.eq("list")
             ),
             Div(
                 Div(
                     H4("Inception", cls="font-medium"),
                     P("2010 · Sci-Fi · 2h 28m", cls="text-sm text-muted-foreground"),
-                    cls="p-4 border rounded bg-muted mb-3"
+                    cls="mb-3 rounded border bg-muted p-4"
                 ),
                 Div(
                     H4("The Matrix", cls="font-medium"),
                     P("1999 · Sci-Fi · 2h 16m", cls="text-sm text-muted-foreground"),
-                    cls="p-4 border rounded bg-muted mb-3"
+                    cls="mb-3 rounded border bg-muted p-4"
                 ),
                 data_show=view_mode.eq("card")
             ),
@@ -136,10 +136,10 @@ def multi_select_filters_example():
             signal=filters
         ),
         Div(
-            P("Active:", cls="text-sm font-medium mb-2"),
+            P("Active:", cls="mb-2 text-sm font-medium"),
             Div(
                 data_text=filters_text.or_("None selected"),
-                cls="text-sm bg-muted p-3 rounded font-mono"
+                cls="rounded bg-muted p-3 font-mono text-sm"
             ),
             cls="mt-6"
         ),
@@ -161,9 +161,9 @@ def form_integration_example():
 
     return Div(
         methods, frequency,  #: hide
-        P("Notification Preferences", cls="font-medium mb-4"),
+        P("Notification Preferences", cls="mb-4 font-medium"),
         Div(
-            Label("Communication Methods:", cls="text-sm font-medium mb-2 block"),
+            Label("Communication Methods:", cls="mb-2 block text-sm font-medium"),
             ToggleGroup(
                 ("email", Div(Icon("lucide:mail", cls="size-4"), "Email", cls="flex items-center gap-2")),
                 ("sms", Div(Icon("lucide:message-square", cls="size-4"), "SMS", cls="flex items-center gap-2")),
@@ -175,7 +175,7 @@ def form_integration_example():
             cls="mb-6"
         ),
         Div(
-            Label("Frequency:", cls="text-sm font-medium mb-2 block"),
+            Label("Frequency:", cls="mb-2 block text-sm font-medium"),
             ToggleGroup(
                 ("immediate", "Immediate"),
                 ("daily", "Daily Digest"),
@@ -191,13 +191,13 @@ def form_integration_example():
             data_class_pointer_events_none=no_methods,
         ),
         Div(
-            P("Summary:", cls="text-sm font-medium mb-2"),
+            P("Summary:", cls="mb-2 text-sm font-medium"),
             Div(
                 P(data_text="Methods: " + methods_text.or_("None"),
-                  cls="text-sm mb-1"),
+                  cls="mb-1 text-sm"),
                 P(data_text="Frequency: " + frequency.or_("Not set"),
                   cls="text-sm"),
-                cls="bg-muted p-3 rounded text-sm"
+                cls="rounded bg-muted p-3 text-sm"
             ),
         ),
         cls="w-full max-w-lg"

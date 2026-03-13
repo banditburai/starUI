@@ -1,6 +1,6 @@
 {
   "version": "0.3.2",
-  "schema_version": 1,
+  "schema_version": 2,
   "components": {
     "accordion": {
       "name": "accordion",
@@ -12,7 +12,7 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:ae538f63bb953645e3449302d4817816198c3510bc9ad216de0e4c30b0657344"
+      "checksum": "sha256:258b0ae3753977ef210912d81341f0f88f46aa754632ed1884e8af829b593132"
     },
     "alert": {
       "name": "alert",
@@ -24,7 +24,7 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:b4b55714c0ecae389df6d4298d11e3d8bcfc2c3cb816e1ddcca8ba90ee343641"
+      "checksum": "sha256:819147f259cdf08cca6efb3b306162677586356c8b6b32fcc2b19c48ff7f7dea"
     },
     "alert_dialog": {
       "name": "alert_dialog",
@@ -37,7 +37,7 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:f403efa380e230ed5dc1075c0e8f5b89fd6389eebd04a1371b2174357fbe26fc"
+      "checksum": "sha256:fbe1d8b22d2d09d0fbd236a19b5f2939741aa425719c1fa063e775eb661e2e75"
     },
     "aspect_ratio": {
       "name": "aspect_ratio",
@@ -61,7 +61,7 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:4bb312e8696ca34ec422c38add2395a26ababb77754e3bf92e3eb978fda00f73"
+      "checksum": "sha256:a128b8680ade86a57d0f489bf6416b61a14ffd5cbc75778cfbeda657b137b085"
     },
     "badge": {
       "name": "badge",
@@ -73,7 +73,7 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:784db78b4ab35fd854c90a7719fbffc87ccb18b1ec7c6df4f477d5d91bc4993b"
+      "checksum": "sha256:7600dcb3bed1e6e6f8eeed7ccef236124394a4d6867cb436af2c6f84b8568ec1"
     },
     "breadcrumb": {
       "name": "breadcrumb",
@@ -85,7 +85,7 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:c16228f730ae6f72c8f6634317c20d79960c79f77ecc0fb3bf02b0824c6406c4"
+      "checksum": "sha256:4053f6abb2333c7c0af21fedd15dd00a64183aded582e2a664c63fbeb592efe3"
     },
     "button": {
       "name": "button",
@@ -97,7 +97,7 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:081b7270b5f7ad77bbcf948b9f8386e76aae662a45ca698ab84f394145b23d0d"
+      "checksum": "sha256:14b67353f1372cf5096658279eb3b58cee31e142b2be4e494c3fd7ab35c6f659"
     },
     "calendar": {
       "name": "calendar",
@@ -110,7 +110,7 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:ce9ffe0a598ca0ff688ecc68fd5c045f5c7cdd5710070175163298c18203c36c"
+      "checksum": "sha256:ce1d7ccf82f3f6c25c0a7234b37b1bcf7aec7a82f1ec2aebd776a298b5371d68"
     },
     "card": {
       "name": "card",
@@ -122,7 +122,7 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:1563800f3f4901add2b6aef253f26bba6ed9b9e36dd6a8300386e77a8fc9ec0b"
+      "checksum": "sha256:9559841f0b69ccd5266c2d603422b28d7f068eb33cadff54242bd771d47a9668"
     },
     "checkbox": {
       "name": "checkbox",
@@ -134,7 +134,7 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:62c8d4fcf12f59ec0751858c7e604a69c7ce699e3d91ea931608787ddcf943fe"
+      "checksum": "sha256:0cfc1ca1fd17a7c5a1d91b9fc09e26aa2148543b854c253faf795f923d519547"
     },
     "code_block": {
       "name": "code_block",
@@ -148,7 +148,7 @@
       ],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:8f155bc4698df525213449a57abe4ba7a869dbe4f14bd28a599b4a83f63be724"
+      "checksum": "sha256:41936a5decc60cf8d773ffdc47a872c89651c095d3da35c1e9f0d1e06b563224"
     },
     "collapsible": {
       "name": "collapsible",
@@ -160,7 +160,21 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:ec6dc0818e9e8fb8c9885cb580c05383e41040908e4aaf0e98c64a07dbc5cecd"
+      "checksum": "sha256:5c6e48132093865af630755b010ba549b0cf4b3cad688a87ca1ccbaf9b61228e"
+    },
+    "combobox": {
+      "name": "combobox",
+      "description": "Searchable dropdown selection",
+      "file": "components/combobox.py",
+      "dependencies": [
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [
+        "position"
+      ],
+      "checksum": "sha256:42942859a2ea760ea6a0c6a2bbad4ffe099943173da0c6c64e0e22645be6edea"
     },
     "command": {
       "name": "command",
@@ -172,7 +186,7 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:e2e8fd266aa6c9088fbbf3ceda20fbaeeb419427876c08d59aaa8c66c1d51543"
+      "checksum": "sha256:43b07fbf9fa73d71be305a60ebad671ae5a3e607be820fd70e3dee6a784749aa"
     },
     "date_picker": {
       "name": "date_picker",
@@ -188,7 +202,7 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:f10844c42292a15ff012e17cb02b603d5191a174cdef064a47671b76cf9ed774"
+      "checksum": "sha256:743fedc05e528403a13a57251fe5d3fca77230d078a98a20128ae02a5315b984"
     },
     "dialog": {
       "name": "dialog",
@@ -201,7 +215,7 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:4abf8ff6e7850a8e0835186305c4303201408ac2421930f9d043fe13e60e2969"
+      "checksum": "sha256:036a88989f59af0036d70e2e9b4617aff02c4db30f7d2bc88d97a1b034d30715"
     },
     "drawer": {
       "name": "drawer",
@@ -214,7 +228,7 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:9ff02537f2474735b706cca0f03d578c38ed843e4191ca5aa6554dd845cd02d5"
+      "checksum": "sha256:283ea1586f591f6b6ad19374a36842ffbf9f9a4569dbdd2327e7d6e8448a5f5b"
     },
     "dropdown_menu": {
       "name": "dropdown_menu",
@@ -229,7 +243,7 @@
       "handlers": [
         "position"
       ],
-      "checksum": "sha256:2dbd45e71a147fc5dd66cb78eb9e2d0745d216335a04456ae224a0eac52d707c"
+      "checksum": "sha256:56ea9ac53fd10f7ee710796827e790d08446fd8d8ff2c11b631c64c9a87b2804"
     },
     "hover_card": {
       "name": "hover_card",
@@ -243,7 +257,7 @@
       "handlers": [
         "position"
       ],
-      "checksum": "sha256:8da61e8e329182ea46ace63d5205c55ea685d3dd1d135333b200b598f5bc77ec"
+      "checksum": "sha256:fdbd53f22396051158936bb551f792b1a6bde7670c580ee81f0488c5a6a1353e"
     },
     "input": {
       "name": "input",
@@ -255,7 +269,7 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:61ee626c7578773aaf7e0b154e5718112831115492fdbb9d02fd52013418824f"
+      "checksum": "sha256:61c035c111804b8654f72a8605cfc7677d1931b6d9cc96d95e8d880249397ff3"
     },
     "input_otp": {
       "name": "input_otp",
@@ -267,7 +281,7 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:6b02eb41660e6625d9526a1b52567cebc5d7977289cc2f4bb38b2c5efc61b321"
+      "checksum": "sha256:3b6c54279ee71962a9fff1bf68389b9c24b1b5e9a6176de4b974c7d667966b9f"
     },
     "label": {
       "name": "label",
@@ -293,7 +307,7 @@
       "handlers": [
         "position"
       ],
-      "checksum": "sha256:2979ab3ee9227321f6c139c625d1af2e64fbbfd23ab4a6d25b1539a5aaa3037a"
+      "checksum": "sha256:d62937fff5dda3cbf7f3cbbd6b32bb5ea9f7a6da471cec2cb779cbbadd4582f1"
     },
     "navigation_menu": {
       "name": "navigation_menu",
@@ -307,7 +321,7 @@
       "handlers": [
         "position"
       ],
-      "checksum": "sha256:e8936086dae3867535de64eca8fb801f21dca70afa1c8e7418e4f0c2d61fc0da"
+      "checksum": "sha256:9e45ca8f294875637d21cbdf440d9f8ac4dca1768688c7a6773e50bccfb236ab"
     },
     "pagination": {
       "name": "pagination",
@@ -319,7 +333,7 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:e3a3466eb1f3aa215b7635c7c566a9aef8bf4e35a3b54dfec8e2cffe9563f78c"
+      "checksum": "sha256:459c1a7dede2f1e701ceed3bc7ad3dc5a0392367171e4ab26101eebe3881c4a2"
     },
     "popover": {
       "name": "popover",
@@ -334,7 +348,7 @@
       "handlers": [
         "position"
       ],
-      "checksum": "sha256:ccae233098e79c4818cb3d59833fb2cc639aeddfae62ac56d0c873f20ec65622"
+      "checksum": "sha256:55ee19da400ceaa201a9cf422464b2456ac10ba5284d2649cdb5c519ed983e87"
     },
     "progress": {
       "name": "progress",
@@ -346,7 +360,7 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:61004583c8e6848278c11f0344e195638c3b4faaa1dbd0fb5c92794b616b032f"
+      "checksum": "sha256:2496c83d203f791ab2bb74d0fd1eefe3c9c19e2ee15b9e28bd64e8af67859017"
     },
     "radio_group": {
       "name": "radio_group",
@@ -358,7 +372,7 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:eaa4d808c9934b7e750b8f05aaba20c76793a74a0ef2798b7d61e8e25ef35d55"
+      "checksum": "sha256:b65728dbd083abb3d84f87f07b14f4f4fd27fc50d523d6fcfee7312486b2942d"
     },
     "scroll_area": {
       "name": "scroll_area",
@@ -370,7 +384,7 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:974f2b31a78e88ece82fea4d7e258245ea23b3ebaef58e615800252b864fe69d"
+      "checksum": "sha256:278fae1019300bce7695e1f45d98b4501c72746127fa4c9e2962d08ac32ee323"
     },
     "select": {
       "name": "select",
@@ -384,7 +398,7 @@
       "handlers": [
         "position"
       ],
-      "checksum": "sha256:6b2529a323a10e10bdafb8eaca23feb690c2890e0daa4bd006182788e5c5f63b"
+      "checksum": "sha256:37ab880d06605ca7eee4ba371179ff44ed07de28355f5b16a200e30eb46dae08"
     },
     "separator": {
       "name": "separator",
@@ -409,7 +423,7 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:66ae456f40cd785ab3128da1c487642c2e1f27c6b6bb72aac023ea7370183387"
+      "checksum": "sha256:fa6cec6a9193cf50358c0b71ea080050fbb7166dcaa4bd64d056f672baadfd2d"
     },
     "skeleton": {
       "name": "skeleton",
@@ -421,7 +435,7 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:1dd21a1de567d9195c802c20f6ae7f6e980b6bdbb38ef35191be0b9c9221d731"
+      "checksum": "sha256:11c5553b603aef0dbbcaa08314df90546b80360a1445826adec031fafc5e5809"
     },
     "slider": {
       "name": "slider",
@@ -433,7 +447,7 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:9528f4aea3405de756a4b52bf801350a75a293644f5f997177a20c710f04a9d3"
+      "checksum": "sha256:576edc62b302a144671f0d1e406c8a1e9349c30d05f5f78d69764afcfcd998e3"
     },
     "switch": {
       "name": "switch",
@@ -445,7 +459,7 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:9a0a2a6e1314fad50fb26802e6053255048ab29894dfbfe600dde2b24b593ee6"
+      "checksum": "sha256:9af3add1fa2d2b771073620296fe8bcdcef4b30bb5ca522a15fda7ac4c7cd19d"
     },
     "table": {
       "name": "table",
@@ -469,7 +483,7 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:b2b3504918b5944f4b631d63fd8d894184992cd0062ba7707ff77c2436e202b0"
+      "checksum": "sha256:7e1d417ea8fe7d69ea11f085fb1a0b211e7ee94186a929b5d07a6586da0b89af"
     },
     "textarea": {
       "name": "textarea",
@@ -481,7 +495,7 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:fbd1ae8bcb58e6e0ceee5b85c82569018fa284ce38f0514bdbdda034a1eb93d7"
+      "checksum": "sha256:4cdfdf9f894b2ec67f255f18bf3b0c59223957337a191a4c7a367a488cf5dc95"
     },
     "theme_toggle": {
       "name": "theme_toggle",
@@ -494,7 +508,7 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:80064f64cb55d32b2dce08f1aeb131c7b72bb54099750606a4c4ffde43139586"
+      "checksum": "sha256:1468e83073b04b9ec2cca9c3f753d04008f357d360d4e1b225db2d6af3314964"
     },
     "toast": {
       "name": "toast",
@@ -506,7 +520,7 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:be4e78ba17fe5c1bfab8cecd466475a3d65b461e337e92b5e344072f7727eb0d"
+      "checksum": "sha256:2c723d532bd8171ee3a6d23668bf5ee0f3dfdb2fede46ab703c8909f675b2d6e"
     },
     "toggle": {
       "name": "toggle",
@@ -518,7 +532,7 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:090589f3118670982e20fa525f15bceaca190cdd264a5ab06cedf24d632c4311"
+      "checksum": "sha256:61c49d9944f59f6604a3cd8d2468f8b8d9e707ce1af5fc02768b0db3562e1a5d"
     },
     "toggle_group": {
       "name": "toggle_group",
@@ -531,7 +545,7 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:10547c63338096b7ecf99c5b16a1fbecd430982378999701a5da06a5d05f956b"
+      "checksum": "sha256:1321bef498ed673b8da1b6d14430fd62c2667114140b40cbf973ee24faa1c796"
     },
     "tooltip": {
       "name": "tooltip",
@@ -545,7 +559,7 @@
       "handlers": [
         "position"
       ],
-      "checksum": "sha256:f39c72fd2ed14daa6e29c4bd2262acff1c00512b3f3befec9be032accf4af3f1"
+      "checksum": "sha256:cf001335a74c10c0e29e2f2b9ba822fe91d7a2b01a7f81a16fd6d3fd1d9e52d8"
     },
     "typography": {
       "name": "typography",
@@ -559,7 +573,7 @@
         "@plugin \"@tailwindcss/typography\";"
       ],
       "handlers": [],
-      "checksum": "sha256:8974fc3346afb8e0d7c59722ff60960fa088dfdcbef892fb93346886dc002a68"
+      "checksum": "sha256:e34c6b381f67d2656c1d0bb5e2b6077f36201894de59368f10a915f71e4ec8a3"
     },
     "utils": {
       "name": "utils",
@@ -569,7 +583,26 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:30b8a7d8b5403b67db2df9eb8f0e049d5ed3272c6ab49502f027d24f340d84ee"
+      "checksum": "sha256:c01d5de34baf08fb8ca4ab01ab9fe05d3246e88a3eb606ecb2eff8f98b17cd4e"
+    }
+  },
+  "blocks": {
+    "user_button_01": {
+      "name": "user_button_01",
+      "install_name": "user_button",
+      "description": "User avatar button with dropdown menu for auth actions",
+      "file": "blocks/user_button_01/user_button.py",
+      "dependencies": [
+        "avatar",
+        "dropdown_menu",
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [
+        "position"
+      ],
+      "checksum": "sha256:140619d16ec3674d68d20cf5a6623c35ed4c19d8b2a787e03063112c7c896beb"
     }
   }
 }

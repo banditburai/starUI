@@ -1,5 +1,5 @@
 from starhtml import Div, FT, Icon, Span, Signal
-from starhtml.datastar import js
+from starhtml.datastar import evt
 from components.utils import cn
 from components.code_block import CodeBlock as BaseCodeBlock
 from .copy_button import CopyButton
@@ -29,17 +29,17 @@ def CodePanel(
                 data_on_click=collapsed.toggle() if collapsible else None,
                 cls=cn(
                     "flex items-center justify-between px-3 py-2",
-                    collapsible and "cursor-pointer select-none hover:bg-muted/50 transition-colors",
+                    collapsible and "cursor-pointer transition-colors select-none hover:bg-muted/50",
                     not collapsible and "border-b border-border/50",
                 ),
                 data_attr_cls=collapsed.if_("", "border-b border-border/50") if collapsible else None
             ),
             Div(
-                BaseCodeBlock(code, language, id=code_id, cls="font-mono text-sm !border-0 !border-none overflow-x-auto"),
+                BaseCodeBlock(code, language, id=code_id, cls="overflow-x-auto !border-0 !border-none font-mono text-sm"),
                 cls=cn("transition-all duration-300 ease-in-out", not collapsible and "max-h-[2000px]"),
                 data_attr_cls=collapsed.if_("max-h-0 overflow-hidden", "max-h-[2000px]") if collapsible else None
             ),
-            cls="bg-muted/30 border border-border rounded-lg overflow-hidden group"
+            cls="overflow-hidden rounded-lg border border-border bg-muted/30 group"
         ),
         cls=cn("relative mb-6", cls),
         **attrs
@@ -66,9 +66,9 @@ def _chevron_button(collapsed: Signal) -> FT:
             cls="inline-block transition-transform duration-300",
             data_attr_cls=collapsed.if_("rotate-180", "rotate-0")
         ),
-        data_on_click=(js("evt.stopPropagation()"), collapsed.toggle()),
+        data_on_click=(evt.stopPropagation(), collapsed.toggle()),
         role="button",
         tabindex="0",
         aria_label="Toggle code block",
-        cls="inline-flex items-center justify-center h-6 w-6 text-muted-foreground hover:text-foreground cursor-pointer"
+        cls="inline-flex h-6 w-6 cursor-pointer items-center justify-center text-muted-foreground hover:text-foreground"
     )

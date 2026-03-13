@@ -16,30 +16,18 @@ __metadata__ = {"description": "Class name utilities"}
 
 
 def with_signals(component, **signals):
-    """
-    Attach signals as attributes to a component for IDE autocomplete and type hints.
-
-    Usage:
-        return with_signals(
-            Div(...),
-            selected=selected_sig,
-            month=month_sig,
-        )
-
-    This allows users to access component.selected, component.month, etc.
-    """
+    """Attach signals as attributes to a component."""
     for name, signal in signals.items():
         setattr(component, name, signal)
     return component
 
 
-# Theme configuration
 DEFAULT_THEME = "light"
 ALT_THEME = "dark"
 
 
 def cn(*classes: Any) -> str:
-    """Merge Tailwind classes intelligently, resolving conflicts."""
+    """Merge class names and truthy class mappings."""
     processed: list[str] = []
 
     for cls in classes:
@@ -99,7 +87,6 @@ def cva(base: str = "", config: dict[str, Any] | None = None) -> Callable[..., s
 
 
 def gen_id(prefix: str) -> str:
-    """Generate a short, unique id with a given prefix."""
     return f"{prefix}_{uuid4().hex[:8]}"
 
 
@@ -114,7 +101,6 @@ def _flatten(*items: Any) -> list:
 
 
 def merge_actions(*before: Any, kwargs: dict | None = None, after: Any = None) -> list:
-    # Flattens so callers can pass single actions or lists of actions freely
     result = _flatten(*before)
     if kwargs is not None:
         result.extend(_flatten(kwargs.pop("data_on_click", None)))
@@ -123,7 +109,7 @@ def merge_actions(*before: Any, kwargs: dict | None = None, after: Any = None) -
 
 
 def inject_context(element, **context):
-    """Recursively inject context into callable children, preserving structure."""
+    """Recursively inject context into callable children."""
     if callable(element) and not isinstance(element, FT):
         element = element(**context)
 

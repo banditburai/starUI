@@ -24,7 +24,7 @@ def BreadcrumbList(*children, cls: str = "", **kwargs) -> FT:
     return HTMLOl(
         *children,
         cls=cn(
-            "text-muted-foreground flex flex-wrap items-center gap-1.5 text-sm break-words sm:gap-2.5",
+            "flex flex-wrap items-center gap-1.5 text-sm break-words text-muted-foreground sm:gap-2.5",
             cls,
         ),
         data_slot="breadcrumb-list",
@@ -45,7 +45,7 @@ def BreadcrumbLink(*children, href: str = "#", cls: str = "", **kwargs) -> FT:
     return HTMLA(
         *children,
         href=href,
-        cls=cn("hover:text-foreground transition-colors", cls),
+        cls=cn("transition-colors hover:text-foreground", cls),
         data_slot="breadcrumb-link",
         **kwargs,
     )
@@ -55,7 +55,7 @@ def BreadcrumbPage(*children, cls: str = "", **kwargs) -> FT:
     return HTMLSpan(
         *children,
         aria_current="page",
-        cls=cn("text-foreground font-normal", cls),
+        cls=cn("font-normal text-foreground", cls),
         data_slot="breadcrumb-page",
         **kwargs,
     )

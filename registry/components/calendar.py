@@ -15,10 +15,10 @@ CaptionLayout = Literal["label", "dropdown"]
 
 
 class CalendarElement(Protocol):
-    selected: Signal  # str for single, list for range/multiple
-    month: Signal  # 1-12
+    selected: Signal
+    month: Signal
     year: Signal
-    month_display: Signal  # "January", "February", etc.
+    month_display: Signal
 
 
 MONTHS = (
@@ -106,7 +106,7 @@ def Calendar(
             role="application",
             aria_label="Calendar",
             aria_disabled="true" if disabled else None,
-            cls=cn("p-3 border rounded-lg w-fit", cls),
+            cls=cn("w-fit rounded-lg border p-3", cls),
             **kwargs,
         ),
         selected=selected_sig,
@@ -173,7 +173,7 @@ def _build_navigation(
         nav_button(False),
         center,
         nav_button(True),
-        cls="relative flex items-center justify-center h-8 mb-4",
+        cls="relative mb-4 flex h-8 items-center justify-center",
         role="group",
         aria_label="Calendar navigation",
     )
@@ -195,7 +195,7 @@ def _build_dropdown(
 
     trigger = HTMLButton(
         Span(data_text=display_sig, cls="pointer-events-none"),
-        Icon("lucide:chevron-down", cls="h-3 w-3 shrink-0 opacity-50 ml-1"),
+        Icon("lucide:chevron-down", cls="ml-1 h-3 w-3 shrink-0 opacity-50"),
         data_ref=trigger_ref,
         id=trigger_ref._id,
         popovertarget=content_ref._id,
@@ -208,7 +208,7 @@ def _build_dropdown(
     )
 
     item_cls = cn(
-        "px-2 py-1 text-sm rounded cursor-pointer hover:bg-accent hover:text-accent-foreground",
+        "cursor-pointer rounded px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground",
         "data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground",
     )
 
@@ -226,26 +226,20 @@ def _build_dropdown(
             attrs["data_year"] = value
         return Div(str(display), **attrs)
 
-    position_mods = {
-        "placement": "bottom",
-        "offset": 8,
-        "flip": True,
-        "shift": True,
-        "hide": True,
-        "container": "none",  # Key for calendar dropdowns to position correctly
-    }
-
     dropdown = Div(
         *[make_item(value, display) for value, display in items],
         data_on_click=js(_dropdown_handler(month, year, month_display, kind, content_ref)) if not disabled else None,
         data_ref=content_ref,
         data_style_min_width=trigger_ref.if_(trigger_ref.offsetWidth + "px", "8rem"),
-        data_position=(trigger_ref._id, position_mods),
+        data_position=(
+            trigger_ref._id,
+            {"placement": "bottom", "offset": 8, "flip": True, "shift": True, "hide": True, "container": "none"},
+        ),
         popover="auto",
         id=content_ref._id,
         role="listbox",
         aria_label=kind.capitalize() + " selection",
-        cls="z-50 max-h-[200px] overflow-y-auto scrollbar-hide rounded-md border bg-popover text-popover-foreground shadow-md outline-none dark:border",
+        cls="z-50 max-h-[200px] overflow-y-auto rounded-md border bg-popover text-popover-foreground shadow-md outline-none dark:border scrollbar-hide",
     )
 
     return Div(trigger, dropdown, cls="relative")
@@ -266,7 +260,7 @@ def _build_weekdays() -> Div:
         *[
             Div(
                 day,
-                cls="h-8 min-w-8 flex-1 text-[0.8rem] font-normal text-muted-foreground text-center flex items-center justify-center",
+                cls="flex h-8 min-w-8 flex-1 items-center justify-center text-center text-[0.8rem] font-normal text-muted-foreground",
                 role="columnheader",
                 aria_label=full_weekdays[i],
             )

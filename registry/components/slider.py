@@ -9,46 +9,53 @@ __metadata__ = {"description": "Slider component for selecting values"}
 SliderOrientation = Literal["horizontal", "vertical"]
 
 _THUMB_CLS = (
-    "absolute z-10 pointer-events-none size-4 shrink-0 rounded-full"
+    "pointer-events-none absolute z-10 size-4 shrink-0 rounded-full"
     " border border-primary bg-white shadow-sm ring-ring/50"
     " transition-[color,box-shadow] group-hover/slider:ring-4 group-has-[:focus]/slider:ring-4"
 )
 
 _INPUT_CLS = (
     "absolute inset-0 h-full w-full cursor-pointer appearance-none opacity-0 outline-none"
-    # Thumb sized to match visual for correct hit area
-    " [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:size-4"
+    " [&::-webkit-slider-thumb]:size-4 [&::-webkit-slider-thumb]:appearance-none"
     " [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:cursor-pointer"
     " [&::-webkit-slider-thumb]:mt-[-5px]"
-    " [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:size-4"
+    " [&::-moz-range-thumb]:size-4 [&::-moz-range-thumb]:appearance-none"
     " [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:cursor-pointer"
-    # Transparent track keeps custom track centered
-    " [&::-webkit-slider-runnable-track]:bg-transparent [&::-webkit-slider-runnable-track]:h-1.5 [&::-webkit-slider-runnable-track]:border-0"
-    " [&::-moz-range-track]:bg-transparent [&::-moz-range-track]:h-1.5 [&::-moz-range-track]:border-0"
+    " [&::-webkit-slider-runnable-track]:h-1.5 [&::-webkit-slider-runnable-track]:border-0 [&::-webkit-slider-runnable-track]:bg-transparent"
+    " [&::-moz-range-track]:h-1.5 [&::-moz-range-track]:border-0 [&::-moz-range-track]:bg-transparent"
     " disabled:cursor-not-allowed"
 )
 
 _ROOT_CLS = (
-    "group/slider relative flex grow touch-none items-center select-none"
+    "relative flex grow touch-none items-center select-none group/slider"
     " data-[orientation='horizontal']:h-5"
     " data-[orientation='vertical']:w-5 data-[orientation='vertical']:flex-col"
 )
 
 _OUTER_CLS = (
-    "flex w-full grow min-w-0 items-center gap-2"
+    "flex w-full min-w-0 grow items-center gap-2"
     " data-[orientation='vertical']:flex-col"
     " data-[orientation='vertical']:min-h-44 data-[orientation='vertical']:w-auto"
-    " data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed"
+    " data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50"
 )
 
-_VALUE_CLS = "text-sm font-medium tabular-nums text-foreground"
+_VALUE_CLS = "text-sm font-medium text-foreground tabular-nums"
 
 
 def _pct(val, lo, hi) -> Any:
-    # Guard SSR path against ZeroDivisionError; Signal path builds an expression tree
     if isinstance(val, int | float) and lo == hi:
         return 0.0
     return (val - lo) / (hi - lo) * 100
+
+
+def _value_output(value, fr: str, suffix: str | None = None, cls: str = _VALUE_CLS) -> FT:
+    return Output(
+        Span(data_text=value),
+        Span(f" {suffix}") if suffix else None,
+        fr=fr,
+        data_slot="slider-value",
+        cls=cls,
+    )
 
 
 def SliderTrack(
@@ -83,7 +90,7 @@ def SliderRange(
         cls=cn(
             "absolute bg-primary",
             "data-[orientation='horizontal']:h-full",
-            "data-[orientation='vertical']:w-full data-[orientation='vertical']:bottom-0",
+            "data-[orientation='vertical']:bottom-0 data-[orientation='vertical']:w-full",
             cls,
         ),
         data_orientation=orientation,
@@ -187,13 +194,7 @@ def Slider(
             cls=_ROOT_CLS,
             data_orientation=orientation,
         ),
-        Output(
-            Span(data_text=s),
-            Span(f" {suffix}") if suffix else None,
-            fr=slider_id,
-            data_slot="slider-value",
-            cls=cn(_VALUE_CLS, "pointer-events-none select-none min-w-8 text-right"),
-        )
+        _value_output(s, slider_id, suffix, cn(_VALUE_CLS, "pointer-events-none min-w-8 text-right select-none"))
         if show_value
         else None,
         data_orientation=orientation,
@@ -300,22 +301,10 @@ def RangeSlider(
             data_orientation=orientation,
         ),
         Div(
-            Output(
-                Span(data_text=s_min),
-                Span(f" {min_suffix}") if min_suffix else None,
-                fr=f"{slider_id}-min",
-                data_slot="slider-value",
-                cls=_VALUE_CLS,
-            ),
+            _value_output(s_min, f"{slider_id}-min", min_suffix),
             Span(" – ", cls="text-muted-foreground"),
-            Output(
-                Span(data_text=s_max),
-                Span(f" {max_suffix}") if max_suffix else None,
-                fr=f"{slider_id}-max",
-                data_slot="slider-value",
-                cls=_VALUE_CLS,
-            ),
-            cls="pointer-events-none select-none min-w-16 text-right",
+            _value_output(s_max, f"{slider_id}-max", max_suffix),
+            cls="pointer-events-none min-w-16 text-right select-none",
         )
         if show_value
         else None,

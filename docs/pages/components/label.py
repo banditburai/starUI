@@ -41,7 +41,7 @@ def composed_content_example():
             Label(
                 Icon("lucide:globe", cls="size-4"),
                 "Custom Domain",
-                Span("Optional", cls="text-xs bg-muted px-2 py-0.5 rounded-full font-normal"),
+                Span("Optional", cls="rounded-full bg-muted px-2 py-0.5 text-xs font-normal"),
                 fr="domain",
             ),
             Input(id="domain", placeholder="app.yourdomain.com"),

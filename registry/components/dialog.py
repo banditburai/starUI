@@ -32,7 +32,7 @@ dialog[data-dialog][open]::backdrop{transition-timing-function:cubic-bezier(0.16
 """
 
 dialog_variants = cva(
-    base="fixed inset-0 z-50 max-h-[85vh] max-w-[calc(100%-2rem)] w-full overflow-auto m-auto bg-background text-foreground border rounded-lg shadow-lg p-0 outline-none",
+    base="fixed inset-0 z-50 m-auto max-h-[85vh] w-full max-w-[calc(100%-2rem)] overflow-auto rounded-lg border bg-background p-0 text-foreground shadow-lg outline-none",
     config={
         "variants": {
             "size": {
@@ -60,14 +60,8 @@ def Dialog(
     open_state = Signal(f"{sig}_open", False)
     dialog_ref = Signal(sig, _ref_only=True)
 
-    trigger = next(
-        (c for c in children if callable(c) and getattr(c, "__name__", None) == "trigger"),
-        None,
-    )
-    content = next(
-        (c for c in children if callable(c) and getattr(c, "__name__", None) == "content"),
-        None,
-    )
+    trigger = next((c for c in children if getattr(c, "__name__", None) == "trigger"), None)
+    content = next((c for c in children if getattr(c, "__name__", None) == "content"), None)
 
     ctx = {
         "open_state": open_state,
@@ -111,12 +105,11 @@ def DialogTrigger(
     def trigger(*, open_state, dialog_ref, modal, **_):
         from .button import Button
 
-        show_method = dialog_ref.showModal() if modal else dialog_ref.show()
-        click_actions = merge_actions(show_method, open_state.set(True), kwargs=kwargs)
-
         return Button(
             *children,
-            data_on_click=click_actions,
+            data_on_click=merge_actions(
+                dialog_ref.showModal() if modal else dialog_ref.show(), open_state.set(True), kwargs=kwargs
+            ),
             type="button",
             aria_haspopup="dialog",
             variant=variant,
@@ -141,7 +134,7 @@ def DialogContent(
                 Icon("lucide:x", cls="size-4"),
                 Span("Close", cls="sr-only"),
                 data_on_click=[open_state.set(False), dialog_ref.close()],
-                cls="absolute top-4 right-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0",
+                cls="absolute top-4 right-4 rounded-sm opacity-70 transition-opacity outline-none hover:opacity-100 focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0",
                 type="button",
                 aria_label="Close",
             )
@@ -164,17 +157,12 @@ def DialogClose(
     def _(*, open_state, dialog_ref, **_):
         from .button import Button
 
-        close_actions = merge_actions(
-            kwargs=kwargs,
-            after=[
-                open_state.set(False),
-                dialog_ref.close(value) if value else dialog_ref.close(),
-            ],
-        )
-
         return Button(
             *children,
-            data_on_click=close_actions,
+            data_on_click=merge_actions(
+                kwargs=kwargs,
+                after=[open_state.set(False), dialog_ref.close(value) if value else dialog_ref.close()],
+            ),
             type="button",
             variant=variant,
             cls=cls,
@@ -239,7 +227,7 @@ def DialogDescription(
         return HTMLP(
             *children,
             id=f"{sig}-description",
-            cls=cn("text-muted-foreground text-sm", cls),
+            cls=cn("text-sm text-muted-foreground", cls),
             **kwargs,
         )
 

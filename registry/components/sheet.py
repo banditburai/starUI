@@ -55,8 +55,8 @@ def Sheet(
     sheet_open = Signal(f"{sig}_open", default_open)
     dialog_ref = Signal(sig, _ref_only=True)
 
-    trigger = next((c for c in children if callable(c) and getattr(c, "__name__", None) == "trigger"), None)
-    content = next((c for c in children if callable(c) and getattr(c, "__name__", None) == "content"), None)
+    trigger = next((c for c in children if getattr(c, "__name__", None) == "trigger"), None)
+    content = next((c for c in children if getattr(c, "__name__", None) == "content"), None)
 
     side = getattr(content, "_side", "right")
     size = getattr(content, "_size", "sm")
@@ -85,7 +85,7 @@ def Sheet(
             "md": "w-3/4 sm:max-w-md",
             "lg": "w-3/4 sm:max-w-lg",
             "xl": "w-3/4 sm:max-w-xl",
-            "full": "max-w-none w-full",
+            "full": "w-full max-w-none",
         }[size]
     )
 
@@ -107,7 +107,7 @@ def Sheet(
             aria_labelledby=f"{sig}_content-title",
             aria_describedby=f"{sig}_content-description",
             cls=cn(
-                "bg-background text-foreground bg-clip-padding shadow-lg",
+                "bg-background bg-clip-padding text-foreground shadow-lg",
                 "flex flex-col gap-4 p-0 outline-none",
                 side_cls,
                 size_cls,
@@ -144,15 +144,11 @@ def SheetTrigger(
     def trigger(*, sig, sheet_open, dialog_ref, modal, **_):
         from .button import Button
 
-        click_actions = merge_actions(
-            dialog_ref.showModal() if modal else dialog_ref.show(),
-            sheet_open.set(True),
-            kwargs=kwargs,
-        )
-
         return Button(
             *children,
-            data_on_click=click_actions,
+            data_on_click=merge_actions(
+                dialog_ref.showModal() if modal else dialog_ref.show(), sheet_open.set(True), kwargs=kwargs
+            ),
             id=f"{sig}_trigger",
             data_attr_aria_expanded=sheet_open.if_("true", "false"),
             aria_haspopup="dialog",
@@ -181,12 +177,12 @@ def SheetContent(
                 Icon("lucide:x", cls="size-4"),
                 Span("Close", cls="sr-only"),
                 size="icon",
-                cls="absolute top-4 right-4 opacity-70 hover:opacity-100 transition-opacity",
+                cls="absolute top-4 right-4 opacity-70 transition-opacity hover:opacity-100",
             )(**all_ctx)
             if show_close
             else None,
             *[inject_context(child, **all_ctx) for child in children],
-            cls="relative flex flex-col flex-1",
+            cls="relative flex flex-1 flex-col",
         )
 
     content._side = side
@@ -206,14 +202,9 @@ def SheetClose(
     def _(*, sheet_open, dialog_ref, **_):
         from .button import Button
 
-        click_actions = merge_actions(
-            kwargs=kwargs,
-            after=[sheet_open.set(False), dialog_ref.close()],
-        )
-
         return Button(
             *children,
-            data_on_click=click_actions,
+            data_on_click=merge_actions(kwargs=kwargs, after=[sheet_open.set(False), dialog_ref.close()]),
             data_slot="sheet-close",
             variant=variant,
             size=size,
@@ -254,7 +245,7 @@ def SheetTitle(*children, cls: str = "", **kwargs) -> FT:
             *children,
             id=f"{sig}_content-title",
             data_slot="sheet-title",
-            cls=cn("text-foreground font-semibold", cls),
+            cls=cn("font-semibold text-foreground", cls),
             **kwargs,
         )
 

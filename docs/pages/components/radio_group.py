@@ -15,7 +15,7 @@ from utils import auto_generate_page, with_code, Component, build_api_reference
 def default_example():
     return Div(
         (notify := Signal("notify", "all")),
-        P("Notify me about...", cls="text-sm font-medium mb-3"),
+        P("Notify me about...", cls="mb-3 text-sm font-medium"),
         RadioGroup(
             RadioGroupItem(value="all", label="All new messages"),
             RadioGroupItem(value="mentions", label="Direct messages and mentions"),
@@ -26,7 +26,7 @@ def default_example():
         P(
             "Current: ",
             Code(data_text=notify),
-            cls="text-sm text-muted-foreground mt-3"
+            cls="mt-3 text-sm text-muted-foreground"
         ),
         cls="max-w-sm"
     )
@@ -117,7 +117,7 @@ def form_integration_example():
                     type="submit",
                     data_attr_disabled=~contact,
                     data_on_click=(js("alert(`Preference: ${$contact}`)"), dict(prevent=True)),
-                    cls="w-full mt-4"
+                    cls="mt-4 w-full"
                 ),
             )
         ),
@@ -134,18 +134,18 @@ def custom_cards_example():
         return RadioGroupItem(
             value=value,
             label=Div(
-                Icon("lucide:server", cls="size-5 mb-1 text-muted-foreground"),
-                P(name, cls="font-semibold text-sm"),
+                Icon("lucide:server", cls="mb-1 size-5 text-muted-foreground"),
+                P(name, cls="text-sm font-semibold"),
                 P(location, cls="text-xs text-muted-foreground"),
                 data_selected="true" if is_initial else "false",
                 data_attr_data_selected=deploy.eq(value).if_("true", "false"),
-                cls="flex flex-col items-center p-4 border-2 rounded-lg text-center transition-all hover:bg-accent border-border data-[selected=true]:border-primary data-[selected=true]:ring-2 data-[selected=true]:ring-ring/20",
+                cls="flex flex-col items-center rounded-lg border-2 border-border p-4 text-center transition-all hover:bg-accent data-[selected=true]:border-primary data-[selected=true]:ring-2 data-[selected=true]:ring-ring/20",
             ),
         )
 
     return Div(
         deploy,
-        P("Deploy to", cls="text-sm font-medium mb-3"),
+        P("Deploy to", cls="mb-3 text-sm font-medium"),
         RadioGroup(
             RegionCard("us-east", "US East", "Virginia"),
             RegionCard("eu-west", "EU West", "Ireland"),
@@ -158,7 +158,7 @@ def custom_cards_example():
         P(
             "Region: ",
             Code(data_text=deploy),
-            cls="text-sm text-muted-foreground mt-3"
+            cls="mt-3 text-sm text-muted-foreground"
         ),
         cls="max-w-md"
     )
@@ -189,7 +189,7 @@ def plan_selector_example():
             Span(data_text=desc, cls="text-sm text-muted-foreground"),
             cls="mt-1",
         ),
-        cls="grid gap-2 w-full max-w-md",
+        cls="grid w-full max-w-md gap-2",
     )
 
 

@@ -41,14 +41,8 @@ def AlertDialog(
     open_state = Signal(f"{sig}_open", False)
     dialog_ref = Signal(sig, _ref_only=True)
 
-    trigger = next(
-        (c for c in children if callable(c) and getattr(c, "__name__", None) == "trigger"),
-        None,
-    )
-    content = next(
-        (c for c in children if callable(c) and getattr(c, "__name__", None) == "content"),
-        None,
-    )
+    trigger = next((c for c in children if getattr(c, "__name__", None) == "trigger"), None)
+    content = next((c for c in children if getattr(c, "__name__", None) == "content"), None)
 
     ctx = {"open_state": open_state, "dialog_ref": dialog_ref, "sig": sig}
 
@@ -65,7 +59,7 @@ def AlertDialog(
             aria_labelledby=f"{sig}-title",
             aria_describedby=f"{sig}-description",
             cls=cn(
-                "fixed inset-0 z-50 max-h-[85vh] max-w-[calc(100%-2rem)] sm:max-w-lg w-full overflow-auto m-auto bg-background text-foreground border rounded-lg shadow-lg p-0 outline-none",
+                "fixed inset-0 z-50 m-auto max-h-[85vh] w-full max-w-[calc(100%-2rem)] overflow-auto rounded-lg border bg-background p-0 text-foreground shadow-lg outline-none sm:max-w-lg",
                 cls,
             ),
             **kwargs,
@@ -86,11 +80,9 @@ def AlertDialogTrigger(
     def trigger(*, open_state, dialog_ref, **_):
         from .button import Button
 
-        click_actions = merge_actions(dialog_ref.showModal(), open_state.set(True), kwargs=kwargs)
-
         return Button(
             *children,
-            data_on_click=click_actions,
+            data_on_click=merge_actions(dialog_ref.showModal(), open_state.set(True), kwargs=kwargs),
             aria_haspopup="dialog",
             variant=variant,
             cls=cls,
@@ -138,7 +130,7 @@ def AlertDialogFooter(
     def _(**ctx):
         return Div(
             *[inject_context(child, **ctx) for child in children],
-            cls=cn("flex flex-col-reverse gap-2 sm:flex-row sm:justify-end mt-6", cls),
+            cls=cn("mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end", cls),
             **kwargs,
         )
 
@@ -170,7 +162,7 @@ def AlertDialogDescription(
         return HTMLP(
             *children,
             id=f"{sig}-description",
-            cls=cn("text-muted-foreground text-sm", cls),
+            cls=cn("text-sm text-muted-foreground", cls),
             **kwargs,
         )
 
@@ -187,11 +179,9 @@ def AlertDialogAction(
     def _(*, open_state, dialog_ref, **_):
         from .button import Button
 
-        click_actions = merge_actions(action, after=[open_state.set(False), dialog_ref.close()])
-
         return Button(
             *children,
-            data_on_click=click_actions,
+            data_on_click=merge_actions(action, after=[open_state.set(False), dialog_ref.close()]),
             variant=variant,
             cls=cls,
             **kwargs,
@@ -208,11 +198,9 @@ def AlertDialogCancel(
     def _(*, open_state, dialog_ref, **_):
         from .button import Button
 
-        click_actions = merge_actions(kwargs=kwargs, after=[open_state.set(False), dialog_ref.close()])
-
         return Button(
             *children,
-            data_on_click=click_actions,
+            data_on_click=merge_actions(kwargs=kwargs, after=[open_state.set(False), dialog_ref.close()]),
             variant="outline",
             cls=cls,
             **kwargs,

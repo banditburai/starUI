@@ -41,19 +41,16 @@ def TooltipTrigger(
 ):
     def _(*, sig, open_state, timer_state, **_):
         trigger_ref = Signal(f"{sig}_trigger", _ref_only=True)
-
-        open_expr = reset_timeout(timer_state, delay_duration, open_state.set(True))
         close_expr = clear_timeout(timer_state, open_state.set(False))
-        focus_open_expr = clear_timeout(timer_state, open_state.set(True))
 
         return Div(
             *children,
             data_ref=trigger_ref,
-            data_on_mouseenter=open_expr,
+            data_on_mouseenter=reset_timeout(timer_state, delay_duration, open_state.set(True)),
             data_on_mouseleave=reset_timeout(timer_state, hide_delay, open_state.set(False))
             if hide_delay > 0
             else close_expr,
-            data_on_focusin=focus_open_expr,
+            data_on_focusin=clear_timeout(timer_state, open_state.set(True)),
             data_on_focusout=close_expr,
             data_on_keydown=((evt.key == "Escape") | (evt.key == " ") | (evt.key == "Enter")).then(close_expr),
             aria_describedby=f"{sig}_content",
@@ -84,15 +81,15 @@ def TooltipContent(
         arrow_classes = {
             "top": "bottom-0 left-1/2 -translate-x-1/2 translate-y-[calc(50%-2px)]",
             "bottom": "top-0 left-1/2 -translate-x-1/2 -translate-y-[calc(50%-2px)]",
-            "left": "right-0 top-1/2 -translate-y-1/2 translate-x-[calc(50%-2px)]",
-            "right": "left-0 top-1/2 -translate-y-1/2 -translate-x-[calc(50%-2px)]",
+            "left": "top-1/2 right-0 translate-x-[calc(50%-2px)] -translate-y-1/2",
+            "right": "top-1/2 left-0 -translate-x-[calc(50%-2px)] -translate-y-1/2",
         }
 
         return Div(
             *children,
             Div(
                 cls=cn(
-                    "absolute size-2.5 rotate-45 rounded-[2px] z-50 bg-foreground",
+                    "absolute z-50 size-2.5 rotate-45 rounded-[2px] bg-foreground",
                     arrow_classes[side],
                 )
             ),
@@ -117,7 +114,7 @@ def TooltipContent(
             data_slot="tooltip-content",
             cls=cn(
                 "fixed z-50 w-fit max-w-xs rounded-md px-3 py-1.5",
-                "bg-foreground text-background text-xs text-pretty",
+                "bg-foreground text-xs text-pretty text-background",
                 "pointer-events-none",
                 "animate-in fade-in-0 zoom-in-95",
                 "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",

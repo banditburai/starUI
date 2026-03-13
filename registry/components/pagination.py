@@ -12,15 +12,15 @@ PaginationSize = Literal["default", "sm", "lg", "icon"]
 
 pagination_link_variants = cva(
     base=(
-        "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium "
+        "inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap "
         "transition-all disabled:pointer-events-none disabled:opacity-50 "
         "[&_[data-icon-sh]]:pointer-events-none [&_[data-icon-sh]:not([class*='size-'])]:size-4 "
-        "shrink-0 [&_[data-icon-sh]]:shrink-0 outline-none "
-        "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] "
+        "shrink-0 outline-none [&_[data-icon-sh]]:shrink-0 "
+        "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 "
         "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 "
         "data-[active=true]:border data-[active=true]:bg-background "
         "data-[active=true]:shadow-xs "
-        "data-[active=true]:dark:bg-input/30 data-[active=true]:dark:border-input "
+        "data-[active=true]:dark:border-input data-[active=true]:dark:bg-input/30 "
         "data-[active=true]:dark:hover:bg-input/50"
     ),
     config={
@@ -146,11 +146,11 @@ def _JumpEllipsis(page_sig, direction, total_pages):
     return HTMLButton(
         Span(
             Icon("lucide:ellipsis", cls="size-4"),
-            cls="flex items-center justify-center group-hover:hidden group-focus-within:hidden",
+            cls="flex items-center justify-center group-focus-within:hidden group-hover:hidden",
         ),
         Span(
             Icon(icon_name, cls="size-4"),
-            cls="hidden items-center justify-center group-hover:flex group-focus-within:flex",
+            cls="hidden items-center justify-center group-focus-within:flex group-hover:flex",
         ),
         Span(label, cls="sr-only"),
         data_on_click=page_sig.set(target),
@@ -196,7 +196,6 @@ def SimplePagination(
         middle_count = max(max_visible - 4, 1)
         half = middle_count // 2
 
-        # Snap thresholds avoid orphan pages (e.g. [1] [...] [3] — page 2 orphaned)
         left_snap = half + 3
         right_snap = total_pages - middle_count + half - 1
 

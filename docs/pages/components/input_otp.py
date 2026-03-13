@@ -94,7 +94,7 @@ def controlled_example():
         P(
             "Entered: ",
             Span(data_text=otp, cls="font-mono font-medium tracking-widest"),
-            cls="text-sm text-muted-foreground mt-3",
+            cls="mt-3 text-sm text-muted-foreground",
         ),
     )
 

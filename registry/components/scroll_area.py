@@ -23,7 +23,7 @@ _SCROLL_AREA_BASE_STYLES = """
 """
 
 _OVERFLOW_CLASSES = {
-    "vertical": "overflow-y-auto overflow-x-hidden",
+    "vertical": "overflow-x-hidden overflow-y-auto",
     "horizontal": "overflow-x-auto overflow-y-hidden",
     "both": "overflow-auto",
 }

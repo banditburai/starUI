@@ -29,11 +29,11 @@ def with_label_example():
         (pct := Signal("prog_label", 66)),
         Div(
             Span("Upload progress", cls="text-sm font-medium"),
-            Span(data_text=pct.round() + "%", cls="text-sm text-muted-foreground font-mono"),
+            Span(data_text=pct.round() + "%", cls="font-mono text-sm text-muted-foreground"),
             cls="flex justify-between"
         ),
         Progress(signal=pct, aria_label="Upload progress"),
-        cls="grid gap-2 w-full max-w-sm"
+        cls="grid w-full max-w-sm gap-2"
     )
 
 
@@ -43,13 +43,13 @@ def sizes_example():
     return Div(
         *[
             Div(
-                Span(h, cls="text-xs text-muted-foreground font-mono w-8 shrink-0"),
+                Span(h, cls="w-8 shrink-0 font-mono text-xs text-muted-foreground"),
                 Progress(value=v, cls=f"{h} flex-1" if h != "h-2" else "flex-1", aria_label=f"{h} size"),
                 cls="flex items-center gap-3"
             )
             for h, v in sizes
         ],
-        cls="grid gap-4 w-full max-w-sm"
+        cls="grid w-full max-w-sm gap-4"
     )
 
 
@@ -68,7 +68,7 @@ def reactive_example():
             ),
             Span(
                 data_text=volume.round() + "%",
-                cls="text-sm font-mono w-10 text-center",
+                cls="w-10 text-center font-mono text-sm",
             ),
             Button(
                 Icon("lucide:plus", cls="size-4"),
@@ -79,7 +79,7 @@ def reactive_example():
             ),
             cls="flex items-center justify-center gap-3"
         ),
-        cls="grid gap-3 w-full max-w-sm"
+        cls="grid w-full max-w-sm gap-3"
     )
 
 
@@ -119,7 +119,7 @@ def multi_step_example():
             Button("Reset", variant="outline", data_on_click=reset, data_attr_disabled=step.eq(0)),
             cls="flex gap-2",
         ),
-        cls="grid gap-3 w-full max-w-sm",
+        cls="grid w-full max-w-sm gap-3",
     )
 
 

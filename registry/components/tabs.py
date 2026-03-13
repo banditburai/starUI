@@ -13,7 +13,7 @@ TabsVariant = Literal["default", "line"]
 
 _TABS_LIST = {
     "default": "rounded-lg bg-muted",
-    "line": "rounded-none gap-1 bg-transparent",
+    "line": "gap-1 rounded-none bg-transparent",
 }
 
 _TABS_TRIGGER = {
@@ -68,7 +68,7 @@ def TabsList(*children, cls: str = "", **kwargs) -> FT:
             role="tablist",
             aria_orientation="horizontal",
             cls=cn(
-                "text-muted-foreground inline-flex h-9 w-fit items-center justify-center p-[3px]",
+                "inline-flex h-9 w-fit items-center justify-center p-[3px] text-muted-foreground",
                 _TABS_LIST[variant],
                 cls,
             ),
@@ -88,7 +88,6 @@ def TabsTrigger(
     def _(*, tabs_state, variant="default", _trigger_index, **_):
         tab_id = id if id is not None else next(_trigger_index)
         is_active = tabs_state == tab_id
-
         return HTMLButton(
             *children,
             data_on_click=merge_actions(tabs_state.set(tab_id), kwargs=kwargs),
@@ -107,11 +106,11 @@ def TabsTrigger(
                 "gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium "
                 "whitespace-nowrap transition-all "
                 "text-foreground/60 hover:text-foreground dark:text-muted-foreground dark:hover:text-foreground "
-                "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] "
-                "focus-visible:outline-ring focus-visible:outline-1 "
+                "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 "
+                "focus-visible:outline-1 focus-visible:outline-ring "
                 "disabled:pointer-events-none disabled:opacity-50 "
                 "[&_[data-icon-sh]]:pointer-events-none [&_[data-icon-sh]]:shrink-0 [&_[data-icon-sh]:not([class*='size-'])]:size-4 "
-                "after:bg-foreground after:absolute after:opacity-0 after:transition-opacity "
+                "after:absolute after:bg-foreground after:opacity-0 after:transition-opacity "
                 "after:inset-x-0 after:bottom-[-5px] after:h-0.5",
                 _TABS_TRIGGER[variant],
                 cls,
@@ -136,7 +135,7 @@ def TabsContent(*children, id: str | int | None = None, cls: str = "", **kwargs)
             id=f"panel-{tab_id}",
             aria_labelledby=str(tab_id),
             tabindex="0",
-            cls=cn("mt-2 outline-none overflow-x-auto", cls),
+            cls=cn("mt-2 overflow-x-auto outline-none", cls),
             **kwargs,
         )
 

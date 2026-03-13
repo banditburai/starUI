@@ -15,12 +15,12 @@ __metadata__ = {"description": "Date picker with popover calendar"}
 
 
 class DatePickerElement(Protocol):
-    selected: Signal  # str for single, list for range/multiple
+    selected: Signal
     calendar: CalendarElement
 
 
 class DateTimePickerElement(Protocol):
-    datetime: Signal  # combined datetime string
+    datetime: Signal
     date: Signal
     time: Signal
     calendar: CalendarElement
@@ -66,10 +66,9 @@ def DatePicker(
         selected=initial_selected,
         disabled=disabled,
         on_select=on_select if not disabled else None,
-        cls="border-0 rounded-none w-full",
+        cls="w-full rounded-none border-0",
     )
 
-    # Extract CSS value from trigger width class for popover min-width alignment
     _w = re.search(r"\[(.+?)\]", width or "")
     popover_min_style = f"min-width: {_w.group(1)};" if _w else ""
 
@@ -164,7 +163,7 @@ def DateTimePicker(
         mode="single",
         selected=initial_date,
         disabled=disabled,
-        cls="border-0 rounded-none w-full",
+        cls="w-full rounded-none border-0",
     )
 
     content = Div(
@@ -186,7 +185,7 @@ def DateTimePicker(
         ),
         PopoverContent(
             content,
-            cls="w-fit p-0 max-h-[600px] overflow-y-auto",
+            cls="max-h-[600px] w-fit overflow-y-auto p-0",
             align="start",
             offset=8,
             container="none",
@@ -271,7 +270,7 @@ def DatePickerWithInput(
             aria_haspopup="dialog",
             aria_describedby=content_ref._id,
             data_slot="popover-trigger",
-            cls="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 px-0 hover:bg-transparent",
+            cls="absolute top-1/2 right-1 h-7 w-7 -translate-y-1/2 px-0 hover:bg-transparent",
             disabled=disabled,
         ),
         _build_input_popover_content(content_ref._id, trigger_ref._id, cal, initial_selected, disabled),
@@ -296,30 +295,25 @@ def DatePickerWithInput(
 def _build_input_popover_content(
     content_id: str, trigger_id: str, cal: str, initial_selected: str, disabled: bool
 ) -> Div:
-    position_mods = {
-        "placement": "bottom-end",
-        "flip": True,
-        "shift": True,
-        "hide": True,
-        "container": "none",
-    }
-
     return Div(
         Calendar(
             signal=cal,
             mode="single",
             selected=initial_selected,
             disabled=disabled,
-            cls="border-0 rounded-none w-full",
+            cls="w-full rounded-none border-0",
         ),
         data_ref=content_id,
-        data_position=(trigger_id, position_mods),
+        data_position=(
+            trigger_id,
+            {"placement": "bottom-end", "flip": True, "shift": True, "hide": True, "container": "none"},
+        ),
         popover="auto",
         id=content_id,
         role="dialog",
         tabindex="-1",
         data_slot="popover-content",
-        cls="z-50 rounded-md border border-input bg-popover text-popover-foreground shadow-md outline-none w-fit p-0",
+        cls="z-50 w-fit rounded-md border border-input bg-popover p-0 text-popover-foreground shadow-md outline-none",
     )
 
 
@@ -340,7 +334,7 @@ def _build_trigger(
         Span(
             Icon(icon, cls="mr-2 h-4 w-4"),
             Span(data_text=js(display_text), cls="text-left"),
-            data_attr_class=is_empty.if_("text-muted-foreground flex items-center", "flex items-center"),
+            data_attr_class=is_empty.if_("flex items-center text-muted-foreground", "flex items-center"),
         ),
         variant="outline",
         cls=cn(width, "justify-start text-left font-normal"),
@@ -351,15 +345,15 @@ def _build_trigger(
 
 def _build_time_section(sig: str, hour_display, minute_display, pm, time, disabled: bool) -> Div:
     return Div(
-        Span("Time", cls="text-sm font-medium text-muted-foreground mb-2 block"),
+        Span("Time", cls="mb-2 block text-sm font-medium text-muted-foreground"),
         Div(
             _build_time_dropdown(sig, hour_display, minute_display, pm, time, "hour", disabled),
-            Span(":", cls="text-xl font-semibold text-muted-foreground mx-0.5"),
+            Span(":", cls="mx-0.5 text-xl font-semibold text-muted-foreground"),
             _build_time_dropdown(sig, hour_display, minute_display, pm, time, "minute", disabled),
             _build_ampm_toggle(hour_display, minute_display, pm, time, disabled),
             cls="flex items-center justify-center gap-1",
         ),
-        cls="p-4 pt-3 border-t",
+        cls="border-t p-4 pt-3",
     )
 
 
@@ -374,7 +368,7 @@ def _build_time_dropdown(sig: str, hour_display, minute_display, pm, time, field
 
     trigger = HTMLButton(
         Span(data_text=display, cls="pointer-events-none font-mono text-base"),
-        Icon("lucide:chevron-down", cls="h-3 w-3 shrink-0 opacity-50 ml-1"),
+        Icon("lucide:chevron-down", cls="ml-1 h-3 w-3 shrink-0 opacity-50"),
         data_ref=trigger_ref,
         id=trigger_ref._id,
         popovertarget=content_ref._id,
@@ -383,11 +377,11 @@ def _build_time_dropdown(sig: str, hour_display, minute_display, pm, time, field
         disabled=disabled,
         aria_label=f"Select {field}",
         aria_haspopup="listbox",
-        cls="flex h-8 w-16 items-center justify-center gap-1 rounded-md px-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground focus:outline-none disabled:opacity-50 border",
+        cls="flex h-8 w-16 items-center justify-center gap-1 rounded-md border px-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground focus:outline-none disabled:opacity-50",
     )
 
     item_cls = cn(
-        "px-3 py-1.5 text-sm font-mono rounded cursor-pointer hover:bg-accent hover:text-accent-foreground",
+        "cursor-pointer rounded px-3 py-1.5 font-mono text-sm hover:bg-accent hover:text-accent-foreground",
         "data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground",
     )
 
@@ -426,7 +420,7 @@ def _build_time_dropdown(sig: str, hour_display, minute_display, pm, time, field
         id=content_ref._id,
         role="listbox",
         aria_label=f"{field.capitalize()} selection",
-        cls="z-50 max-h-[180px] overflow-y-auto scrollbar-hide rounded-md border bg-popover text-popover-foreground shadow-md outline-none",
+        cls="z-50 max-h-[180px] overflow-y-auto rounded-md border bg-popover text-popover-foreground shadow-md outline-none scrollbar-hide",
     )
 
     return Div(trigger, dropdown, cls="relative")
@@ -443,7 +437,7 @@ def _build_ampm_toggle(hour_display, minute_display, pm, time, disabled: bool) -
             ]
             if not disabled
             else None,
-            data_attr_cls=is_selected.if_("bg-primary text-primary-foreground font-semibold", ""),
+            data_attr_cls=is_selected.if_("bg-primary font-semibold text-primary-foreground", ""),
             type="button",
             disabled=disabled,
             cls=f"h-8 w-10 text-xs {rounding} transition-colors border hover:bg-accent hover:text-accent-foreground",
@@ -452,7 +446,7 @@ def _build_ampm_toggle(hour_display, minute_display, pm, time, disabled: bool) -
     return Div(
         make_button("AM", False, "rounded-l-md"),
         make_button("PM", True, "rounded-r-md"),
-        cls="flex ml-2",
+        cls="ml-2 flex",
     )
 
 

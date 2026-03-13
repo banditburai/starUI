@@ -99,7 +99,7 @@ def RadioGroupItem(
             Div(
                 Div(cls="size-2 rounded-full bg-primary-foreground"),
                 cls=cn(
-                    "absolute inset-0 flex items-center justify-center pointer-events-none",
+                    "pointer-events-none absolute inset-0 flex items-center justify-center",
                     indicator_cls,
                 ),
                 style="opacity: 0; transition: opacity 0.15s",
@@ -109,9 +109,9 @@ def RadioGroupItem(
             cls=cn(
                 "relative flex aspect-square size-4 shrink-0 rounded-full border outline-none",
                 "border-input bg-background dark:bg-input/30",
-                "peer-focus-visible:border-ring peer-focus-visible:ring-ring/50 peer-focus-visible:ring-3",
+                "peer-focus-visible:border-ring peer-focus-visible:ring-3 peer-focus-visible:ring-ring/50",
                 "peer-aria-[invalid]:ring-destructive/20 dark:peer-aria-[invalid]:ring-destructive/40",
-                "dark:peer-aria-[invalid]:border-destructive/50 peer-aria-[invalid]:border-destructive peer-aria-[invalid]:ring-3",
+                "peer-aria-[invalid]:border-destructive peer-aria-[invalid]:ring-3 dark:peer-aria-[invalid]:border-destructive/50",
                 "peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
                 cls,
             ),
@@ -131,10 +131,10 @@ def RadioGroupItem(
             visual_radio,
             HTMLSpan(
                 label,
-                cls="text-sm font-medium leading-none select-none peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
+                cls="text-sm leading-none font-medium select-none peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
             ),
             fr=radio_id,
-            cls="flex items-center gap-3 cursor-pointer",
+            cls="flex cursor-pointer items-center gap-3",
             data_slot="radio-container",
         )
 
@@ -166,7 +166,7 @@ def RadioGroupWithLabel(
         HTMLLabel(
             label,
             HTMLSpan(" *", cls="text-destructive") if required else None,
-            cls="text-sm font-medium mb-3 block",
+            cls="mb-3 block text-sm font-medium",
             fr=group_id,
         ),
         RadioGroup(
@@ -192,8 +192,8 @@ def RadioGroupWithLabel(
             aria_invalid="true" if error_text else None,
             **kwargs,
         ),
-        HTMLP(error_text, cls="text-sm text-destructive mt-1.5") if error_text else None,
-        HTMLP(helper_text, cls="text-sm text-muted-foreground mt-1.5") if helper_text and not error_text else None,
+        HTMLP(error_text, cls="mt-1.5 text-sm text-destructive") if error_text else None,
+        HTMLP(helper_text, cls="mt-1.5 text-sm text-muted-foreground") if helper_text and not error_text else None,
         data_slot="radio-group-with-label",
         cls=cn("space-y-1.5", cls),
     )

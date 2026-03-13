@@ -23,7 +23,7 @@ def default_example():
             ratio=16 / 9,
             cls="rounded-md",
         ),
-        cls="max-w-xl w-full",
+        cls="w-full max-w-xl",
     )
 
 
@@ -48,11 +48,11 @@ def framing_example():
                     ratio=ratio,
                     cls="rounded-md",
                 ),
-                P(label, cls="text-sm text-muted-foreground text-center mt-2"),
+                P(label, cls="mt-2 text-center text-sm text-muted-foreground"),
             )
             for label, ratio in ratios
         ],
-        cls="grid grid-cols-2 gap-6 max-w-3xl w-full",
+        cls="grid w-full max-w-3xl grid-cols-2 gap-6",
     )
 
 
@@ -63,14 +63,14 @@ def video_embed_example():
             Div(
                 Div(
                     Icon("lucide:play", cls="size-8 fill-current"),
-                    cls="flex items-center justify-center size-16 rounded-full bg-white/90 text-black shadow-lg",
+                    cls="flex size-16 items-center justify-center rounded-full bg-white/90 text-black shadow-lg",
                 ),
                 cls="absolute inset-0 flex items-center justify-center rounded-md bg-gradient-to-br from-zinc-900 to-zinc-700",
             ),
             ratio=4 / 3,
             cls="rounded-md",
         ),
-        cls="max-w-md w-full",
+        cls="w-full max-w-md",
     )
 
 
@@ -96,7 +96,7 @@ def media_cards_example():
             )
             for src, title, desc in cards
         ],
-        cls="grid grid-cols-3 gap-4 w-full",
+        cls="grid w-full grid-cols-3 gap-4",
     )
 
 
@@ -108,7 +108,7 @@ def skeleton_example():
             ratio=16 / 9,
             cls="rounded-md",
         ),
-        cls="max-w-xl w-full",
+        cls="w-full max-w-xl",
     )
 
 

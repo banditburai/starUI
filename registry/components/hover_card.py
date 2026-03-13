@@ -69,7 +69,6 @@ def HoverCardContent(
 ):
     def _(*, sig, open_state, timer_state, **_):
         content_ref = Signal(f"{sig}_content", _ref_only=True)
-        placement = side if align == "center" else f"{side}-{align}"
 
         return Div(
             *children,
@@ -78,7 +77,7 @@ def HoverCardContent(
             data_position=(
                 f"{sig}_trigger",
                 {
-                    "placement": placement,
+                    "placement": side if align == "center" else f"{side}-{align}",
                     "offset": 4,
                     "flip": True,
                     "shift": True,
@@ -94,7 +93,7 @@ def HoverCardContent(
             tabindex="-1",
             data_slot="hover-card-content",
             cls=cn(
-                "fixed z-50 w-64 max-w-[90vw] pointer-events-auto",
+                "pointer-events-auto fixed z-50 w-64 max-w-[90vw]",
                 "rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none",
                 cls,
             ),

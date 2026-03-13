@@ -26,6 +26,9 @@ from pages.landing import (
     cta_section,
     footer_section,
 )
+from pages.cli import create_cli_docs
+from pages.configuration import create_configuration_docs
+from pages.deployment import create_deployment_docs
 
 DOCS_SIDEBAR_SECTIONS = []
 
@@ -81,13 +84,37 @@ async def initialize_docs_sidebar():
 
     print(f"[STARTUP] Loaded {component_count} components")
 
-    all_components = []
-    for name, component in registry.components.items():
-        all_components.append({
-            "href": f"/components/{name}",
-            "label": component["title"],
-        })
+    # Discover blocks
+    blocks_dir = Path(__file__).parent / "pages" / "blocks"
+    block_count = 0
+    if blocks_dir.exists():
+        for block_file in sorted(blocks_dir.glob("*.py")):
+            if block_file.stem in ["__init__", "__pycache__"]:
+                continue
+            try:
+                module_name = f"pages.blocks.{block_file.stem}"
+                module = __import__(module_name, fromlist=["*"])
+                if hasattr(module, "TITLE"):
+                    registry.register_block(
+                        name=block_file.stem,
+                        title=getattr(module, "TITLE", block_file.stem.title()),
+                        description=getattr(module, "DESCRIPTION", ""),
+                        order=getattr(module, "ORDER", 100),
+                        status=getattr(module, "STATUS", "stable"),
+                        create_docs=getattr(module, f"create_{block_file.stem}_docs", lambda: None),
+                        preview=getattr(module, "card_preview", None) or getattr(module, "preview", None),
+                    )
+                    block_count += 1
+            except Exception as e:
+                print(f"[STARTUP] Failed to load block {block_file.stem}: {e}")
 
+    if block_count:
+        print(f"[STARTUP] Loaded {block_count} blocks")
+
+    all_components = [
+        {"href": f"/components/{name}", "label": comp["title"]}
+        for name, comp in registry.components.items()
+    ]
     all_components.sort(key=lambda x: x["label"])
 
     DOCS_SIDEBAR_SECTIONS = [
@@ -95,13 +122,18 @@ async def initialize_docs_sidebar():
             "title": "Getting Started",
             "items": [
                 {"href": "/installation", "label": "Installation"},
+                {"href": "/cli", "label": "CLI Reference"},
+                {"href": "/configuration", "label": "Configuration"},
+                {"href": "/deployment", "label": "Deployment"},
             ]
         },
         {
             "title": "Components",
             "items": all_components
-        }
+        },
     ]
+
+    # Blocks are accessed via top-level header nav, not sidebar
 
 
 app, rt = star_app(
@@ -117,7 +149,7 @@ app.register(position, clipboard, motion, scroll)
 
 DOCS_NAV_ITEMS = [
     {"href": "/components", "label": "Components"},
-    # {"href": "/blocks", "label": "Blocks"},  # Coming soon
+    {"href": "/blocks", "label": "Blocks"},
     # {"href": "/themes", "label": "Themes"},  # Coming soon
 ]
 
@@ -162,6 +194,81 @@ def components_index():
     )
 
 
+@rt("/blocks")
+def blocks_index():
+    registry = get_registry()
+    blocks = sorted(
+        registry.blocks.items(),
+        key=lambda x: x[1].get("title", x[0]),
+    )
+
+    def block_card(name: str, block: dict) -> FT:
+        slug = name
+        preview_fn = block.get("preview")
+
+        if preview_fn:
+            preview_area = Div(
+                Div(preview_fn(), cls="pointer-events-none origin-center scale-90"),
+                cls="flex min-h-[160px] items-center justify-center overflow-hidden bg-muted/30 p-6",
+            )
+        else:
+            preview_area = Div(
+                Icon("lucide:layout-template", width="36", height="36", cls="text-muted-foreground/40"),
+                cls="flex min-h-[160px] items-center justify-center bg-muted/30 p-6",
+            )
+
+        return A(
+            Div(
+                preview_area,
+                Div(
+                    Span(block["title"], cls="truncate text-sm font-semibold text-foreground"),
+                    Code(
+                        f"star add {slug.replace('_', '-')}",
+                        cls="font-mono text-[11px] text-muted-foreground",
+                    ),
+                    cls="flex flex-col gap-0.5 border-t border-border px-4 py-2.5",
+                ),
+                cls="overflow-hidden rounded-lg border border-border bg-card",
+            ),
+            href=f"/blocks/{slug}",
+            cls="block",
+        )
+
+    return (
+        Title("Blocks \u2014 StarUI"),
+        Socials(
+            title="Blocks \u2014 StarUI",
+            site_name="StarUI",
+            description="Pre-built compositions of StarUI primitives \u2014 higher-level building blocks for common patterns.",
+            image="/static/images/og/starui.jpg",
+            url=f"{SITE_URL}/blocks",
+            card="summary_large_image",
+        ),
+        DocsLayout(
+            Div(
+                P(
+                    "Pre-built compositions of primitives for common UI patterns.",
+                    cls="mb-1 text-lg text-muted-foreground",
+                ),
+                P(
+                    "Copy, paste, customize.",
+                    cls="mb-8 text-sm text-muted-foreground",
+                ),
+                Div(
+                    *[block_card(name, comp) for name, comp in blocks],
+                    cls="grid auto-rows-fr gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5",
+                ) if blocks else P("No blocks available yet.", cls="text-muted-foreground"),
+                cls="mx-auto max-w-6xl",
+            ),
+            layout=LayoutConfig(
+                title="Blocks",
+                description="Explore all available StarUI blocks",
+            ),
+            sidebar=SidebarConfig(sections=DOCS_SIDEBAR_SECTIONS),
+        ),
+    )
+
+
 @rt("/components/{component_name}")
 def component_page(component_name: str):
     component_name = component_name.replace("-", "_")
@@ -171,7 +278,7 @@ def component_page(component_name: str):
     if not component:
         return DocsLayout(
             Div(
-                H1("Component Not Found", cls="text-3xl font-bold mb-4"),
+                H1("Component Not Found", cls="mb-4 text-3xl font-bold"),
                 P(f"The component '{component_name}' was not found.", cls="text-muted-foreground"),
                 A("View all components", href="/components", cls="text-primary hover:underline"),
             ),
@@ -196,6 +303,43 @@ def component_page(component_name: str):
             card="summary_large_image",
         ),
         component.get("create_docs", lambda: None)(),
+    )
+
+
+@rt("/blocks/{block_name}")
+def block_page(block_name: str):
+    block_name = block_name.replace("-", "_")
+    registry = get_registry()
+    block = registry.get_block(block_name)
+
+    if not block:
+        return DocsLayout(
+            Div(
+                H1("Block Not Found", cls="mb-4 text-3xl font-bold"),
+                P(f"The block '{block_name}' was not found.", cls="text-muted-foreground"),
+                A("View all components", href="/components", cls="text-primary hover:underline"),
+            ),
+            layout=LayoutConfig(
+                title="Block Not Found",
+                show_sidebar=True
+            ),
+            sidebar=SidebarConfig(sections=DOCS_SIDEBAR_SECTIONS),
+        )
+
+    block_title = block.get("title", block_name.replace("_", " ").title())
+    block_desc = block.get("description", f"{block_title} block for StarUI.")
+
+    return (
+        Title(f"{block_title} \u2014 StarUI"),
+        Socials(
+            title=f"{block_title} \u2014 StarUI",
+            site_name="StarUI",
+            description=block_desc,
+            image="/static/images/og/starui.jpg",
+            url=f"{SITE_URL}/blocks/{block_name}",
+            card="summary_large_image",
+        ),
+        block.get("create_docs", lambda: None)(),
     )
 
 
@@ -325,14 +469,14 @@ def installation():
             Div(
                 P(
                     "Get started with StarUI in minutes. Build beautiful, accessible components with Python and StarHTML.",
-                    cls="text-xl text-muted-foreground mb-8 max-w-3xl",
+                    cls="mb-8 max-w-3xl text-xl text-muted-foreground",
                 ),
                 
                 ComponentPreview(
                     Div(
                         Button("Get Started", variant="default", cls="mr-3"),
                         Button("View Components", variant="outline"),
-                        cls="flex gap-3 items-center justify-center"
+                        cls="flex items-center justify-center gap-3"
                     ),
                     '''from components.ui.button import Button
 
@@ -346,24 +490,24 @@ Button("View Components", variant="outline")''',
             ),
             
             Div(
-                H2("Installation", cls="text-3xl font-bold tracking-tight mb-8"),
+                H2("Installation", cls="mb-8 text-3xl font-bold tracking-tight"),
                 
                 Div(
                     Div(
                         Div(
                             Div(
-                                Span("1", cls="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold"),
+                                Span("1", cls="flex h-10 w-10 items-center justify-center rounded-full bg-primary font-semibold text-primary-foreground"),
                                 cls="flex-shrink-0"
                             ),
                             Div(
-                                H3("Install the StarUI CLI", cls="text-xl font-semibold mb-2"),
-                                P("Install StarUI globally using pip to access the CLI commands.", cls="text-muted-foreground mb-4"),
+                                H3("Install the StarUI CLI", cls="mb-2 text-xl font-semibold"),
+                                P("Install StarUI globally using pip to access the CLI commands.", cls="mb-4 text-muted-foreground"),
                                 CodeBlock("pip install starui", language="bash"),
-                                cls="flex-1 min-w-0 overflow-hidden"
+                                cls="min-w-0 flex-1 overflow-hidden"
                             ),
-                            cls="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start"
+                            cls="flex flex-col items-start gap-4 sm:flex-row sm:gap-6"
                         ),
-                        cls="p-4 sm:p-6 border rounded-lg bg-gradient-to-br from-background to-muted/20 overflow-hidden"
+                        cls="overflow-hidden rounded-lg border bg-gradient-to-br from-background to-muted/20 p-4 sm:p-6"
                     ),
                     cls="mb-8"
                 ),
@@ -372,37 +516,37 @@ Button("View Components", variant="outline")''',
                     Div(
                         Div(
                             Div(
-                                Span("2", cls="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold"),
+                                Span("2", cls="flex h-10 w-10 items-center justify-center rounded-full bg-primary font-semibold text-primary-foreground"),
                                 cls="flex-shrink-0"
                             ),
                             Div(
-                                H3("Initialize your project", cls="text-xl font-semibold mb-2"),
-                                P("Set up StarUI in your project directory. This creates the configuration and installs dependencies.", cls="text-muted-foreground mb-4"),
+                                H3("Initialize your project", cls="mb-2 text-xl font-semibold"),
+                                P("Set up StarUI in your project directory. This creates the configuration and installs dependencies.", cls="mb-4 text-muted-foreground"),
                                 CodeBlock("star init", language="bash"),
                                 Div(
                                     Div(
-                                        Icon("lucide:file-text", cls="h-5 w-5 text-primary mr-3 flex-shrink-0"),
+                                        Icon("lucide:file-text", cls="mr-3 h-5 w-5 flex-shrink-0 text-primary"),
                                         Div(
-                                            P("Creates starui.json configuration file", cls="font-medium text-sm"),
+                                            P("Creates starui.json configuration file", cls="text-sm font-medium"),
                                             P("Configures component paths and settings", cls="text-xs text-muted-foreground"),
                                         ),
                                         cls="flex items-start"
                                     ),
                                     Div(
-                                        Icon("lucide:package", cls="h-5 w-5 text-primary mr-3 flex-shrink-0"),
+                                        Icon("lucide:package", cls="mr-3 h-5 w-5 flex-shrink-0 text-primary"),
                                         Div(
-                                            P("Installs required dependencies", cls="font-medium text-sm"),
+                                            P("Installs required dependencies", cls="text-sm font-medium"),
                                             P("StarHTML, Tailwind CSS, and component utilities", cls="text-xs text-muted-foreground"),
                                         ),
                                         cls="flex items-start"
                                     ),
-                                    cls="space-y-3 mt-4 bg-muted/30 rounded-md p-4"
+                                    cls="mt-4 space-y-3 rounded-md bg-muted/30 p-4"
                                 ),
-                                cls="flex-1 min-w-0 overflow-hidden"
+                                cls="min-w-0 flex-1 overflow-hidden"
                             ),
-                            cls="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start"
+                            cls="flex flex-col items-start gap-4 sm:flex-row sm:gap-6"
                         ),
-                        cls="p-4 sm:p-6 border rounded-lg bg-gradient-to-br from-background to-muted/20 overflow-hidden"
+                        cls="overflow-hidden rounded-lg border bg-gradient-to-br from-background to-muted/20 p-4 sm:p-6"
                     ),
                     cls="mb-8"
                 ),
@@ -411,12 +555,12 @@ Button("View Components", variant="outline")''',
                     Div(
                         Div(
                             Div(
-                                Span("3", cls="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold"),
+                                Span("3", cls="flex h-10 w-10 items-center justify-center rounded-full bg-primary font-semibold text-primary-foreground"),
                                 cls="flex-shrink-0"
                             ),
                             Div(
-                                H3("Add components to your project", cls="text-xl font-semibold mb-2"),
-                                P("Install individual components with their dependencies automatically resolved.", cls="text-muted-foreground mb-4"),
+                                H3("Add components to your project", cls="mb-2 text-xl font-semibold"),
+                                P("Install individual components with their dependencies automatically resolved.", cls="mb-4 text-muted-foreground"),
                                 CodeBlock(
                                     '''# Add a single component
 star add button
@@ -428,24 +572,24 @@ star add button input card tabs
 star list''',
                                     language="bash"
                                 ),
-                                cls="flex-1 min-w-0 overflow-hidden"
+                                cls="min-w-0 flex-1 overflow-hidden"
                             ),
-                            cls="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start"
+                            cls="flex flex-col items-start gap-4 sm:flex-row sm:gap-6"
                         ),
-                        cls="p-4 sm:p-6 border rounded-lg bg-gradient-to-br from-background to-muted/20 overflow-hidden"
+                        cls="overflow-hidden rounded-lg border bg-gradient-to-br from-background to-muted/20 p-4 sm:p-6"
                     ),
                     cls="mb-12"
                 ),
             ),
             
             Div(
-                H2("Usage Examples", cls="text-3xl font-bold tracking-tight mb-8"),
+                H2("Usage Examples", cls="mb-8 text-3xl font-bold tracking-tight"),
                 
                 ComponentPreview(
                     Div(
                         Input(placeholder="Enter your email", cls="mb-3"),
                         Button("Subscribe", cls="w-full"),
-                        cls="max-w-sm mx-auto space-y-3"
+                        cls="mx-auto max-w-sm space-y-3"
                     ),
                     '''from components.ui.button import Button
 from components.ui.input import Input
@@ -465,7 +609,7 @@ Div(
                         (count := Signal("count", 0)),
                         Button("Click me!", data_on_click=count.add(1), cls="mb-3"),
                         P("Clicked: ", Span(data_text=count, cls="font-bold text-primary")),
-                        cls="text-center space-y-3"
+                        cls="space-y-3 text-center"
                     ),
                     '''from starhtml import Signal
 from components.ui.button import Button
@@ -484,7 +628,7 @@ Div(
             ),
             
             Div(
-                H2("Onwards", cls="text-2xl font-semibold tracking-tight mb-8 mt-16"),
+                H2("Onwards", cls="mt-16 mb-8 text-2xl font-semibold tracking-tight"),
                 Div(
                     _next_step_card(
                         "01",
@@ -507,7 +651,7 @@ Div(
                         "https://github.com/banditburai/starui",
                         "View on GitHub",
                     ),
-                    cls="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6"
+                    cls="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-3"
                 ),
             ),
         ),
@@ -521,17 +665,65 @@ Div(
     )
 
 
+@rt("/cli")
+def cli_reference():
+    return (
+        Title("CLI Reference \u2014 StarUI"),
+        Socials(
+            title="CLI Reference \u2014 StarUI",
+            site_name="StarUI",
+            description="Complete reference for the star command-line interface.",
+            image="/static/images/og/starui.jpg",
+            url=f"{SITE_URL}/cli",
+            card="summary_large_image",
+        ),
+        create_cli_docs(DOCS_SIDEBAR_SECTIONS),
+    )
+
+
+@rt("/configuration")
+def configuration():
+    return (
+        Title("Configuration \u2014 StarUI"),
+        Socials(
+            title="Configuration \u2014 StarUI",
+            site_name="StarUI",
+            description="How StarUI discovers and uses project configuration.",
+            image="/static/images/og/starui.jpg",
+            url=f"{SITE_URL}/configuration",
+            card="summary_large_image",
+        ),
+        create_configuration_docs(DOCS_SIDEBAR_SECTIONS),
+    )
+
+
+@rt("/deployment")
+def deployment():
+    return (
+        Title("Deployment \u2014 StarUI"),
+        Socials(
+            title="Deployment \u2014 StarUI",
+            site_name="StarUI",
+            description="Build for production and set up CI/CD pipelines.",
+            image="/static/images/og/starui.jpg",
+            url=f"{SITE_URL}/deployment",
+            card="summary_large_image",
+        ),
+        create_deployment_docs(DOCS_SIDEBAR_SECTIONS),
+    )
+
+
 def _next_step_card(num: str, title: str, description: str, href: str, button_text: str) -> FT:
     return A(
         Div(
-            Span(num, cls="text-xs font-mono text-muted-foreground tracking-widest"),
-            H3(title, cls="text-base font-medium mt-2 mb-2 group-hover:text-primary transition-colors"),
-            P(description, cls="text-sm text-muted-foreground leading-relaxed flex-1"),
-            Span(button_text, " \u2192", cls="text-sm font-medium text-primary mt-4 inline-block"),
-            cls="p-5 h-full flex flex-col",
+            Span(num, cls="font-mono text-xs tracking-widest text-muted-foreground"),
+            H3(title, cls="mt-2 mb-2 text-base font-medium transition-colors group-hover:text-primary"),
+            P(description, cls="flex-1 text-sm leading-relaxed text-muted-foreground"),
+            Span(button_text, " \u2192", cls="mt-4 inline-block text-sm font-medium text-primary"),
+            cls="flex h-full flex-col p-5",
         ),
         href=href,
-        cls="group border rounded-lg hover:border-primary/30 transition-colors h-full block",
+        cls="block h-full rounded-lg border transition-colors hover:border-primary/30 group",
     )
 
 
@@ -540,8 +732,9 @@ def sitemap():
     from starlette.responses import Response
 
     registry = get_registry()
-    paths = ["/", "/installation", "/components"]
+    paths = ["/", "/installation", "/cli", "/configuration", "/deployment", "/components"]
     paths += [f"/components/{name}" for name in registry.components]
+    paths += [f"/blocks/{name}" for name in registry.blocks]
 
     urls = "\n".join(
         f"  <url><loc>{SITE_URL}{p}</loc></url>"
@@ -610,7 +803,7 @@ def component_preview_iframe(preview_id: str):
     
     preview_data = IFRAME_PREVIEW_REGISTRY.get(preview_id)
     if not preview_data:
-        return Div("Preview not found", cls="text-center p-10 text-muted-foreground")
+        return Div("Preview not found", cls="p-10 text-center text-muted-foreground")
     
     return Div(
         preview_data['content'],

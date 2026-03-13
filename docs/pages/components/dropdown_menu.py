@@ -75,7 +75,7 @@ def hero_example():
                 ),
             ),
         ),
-        cls="flex items-center justify-center min-h-[200px]",
+        cls="flex min-h-[200px] items-center justify-center",
     )
 
 
@@ -129,7 +129,7 @@ def submenu_example():
                 ),
             ),
         ),
-        cls="flex items-center justify-center min-h-[200px]",
+        cls="flex min-h-[200px] items-center justify-center",
     )
 
 
@@ -142,13 +142,13 @@ def checkbox_example():
         Div(
             Span("Grid: ", cls="text-muted-foreground"),
             Span(data_text=show_grid.if_("On", "Off"), cls="font-medium"),
-            Span(" · ", cls="text-muted-foreground mx-1"),
+            Span(" · ", cls="mx-1 text-muted-foreground"),
             Span("Rulers: ", cls="text-muted-foreground"),
             Span(data_text=show_rulers.if_("On", "Off"), cls="font-medium"),
-            Span(" · ", cls="text-muted-foreground mx-1"),
+            Span(" · ", cls="mx-1 text-muted-foreground"),
             Span("Auto-save: ", cls="text-muted-foreground"),
             Span(data_text=auto_save.if_("On", "Off"), cls="font-medium"),
-            cls="flex items-center flex-wrap gap-1 p-3 bg-muted/50 rounded-lg border border-border text-sm mb-4"
+            cls="mb-4 flex flex-wrap items-center gap-1 rounded-lg border border-border bg-muted/50 p-3 text-sm"
         ),
         Div(
             DropdownMenu(
@@ -167,7 +167,7 @@ def checkbox_example():
             ),
             cls="flex justify-center"
         ),
-        cls="flex flex-col min-h-[200px] justify-center"
+        cls="flex min-h-[200px] flex-col justify-center"
     )
 
 
@@ -177,9 +177,9 @@ def radio_group_example():
         (theme := Signal("dm_theme", "system")),
         Div(
             Icon("lucide:palette", cls="size-4 text-muted-foreground"),
-            Span("Current theme: ", cls="text-muted-foreground ml-2"),
-            Strong(data_text=theme, cls="capitalize ml-1"),
-            cls="flex items-center p-3 bg-muted/50 rounded-lg border border-border text-sm mb-4"
+            Span("Current theme: ", cls="ml-2 text-muted-foreground"),
+            Strong(data_text=theme, cls="ml-1 capitalize"),
+            cls="mb-4 flex items-center rounded-lg border border-border bg-muted/50 p-3 text-sm"
         ),
         Div(
             DropdownMenu(
@@ -213,7 +213,7 @@ def radio_group_example():
             ),
             cls="flex justify-center"
         ),
-        cls="flex flex-col min-h-[200px] justify-center"
+        cls="flex min-h-[200px] flex-col justify-center"
     )
 
 
@@ -269,7 +269,7 @@ def shortcuts_example():
                 align="end",
             ),
         ),
-        cls="flex items-center justify-center min-h-[200px]",
+        cls="flex min-h-[200px] items-center justify-center",
     )
 
 

@@ -43,7 +43,7 @@ def hero_example():
                                         cls="text-sm leading-tight text-muted-foreground",
                                     ),
                                     href="#",
-                                    cls="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md",
+                                    cls="flex h-full w-full flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none select-none focus:shadow-md",
                                 ),
                                 cls="row-span-3",
                             ),
@@ -135,7 +135,7 @@ def hero_example():
                 ),
             ),
         ),
-        cls="flex items-center justify-center min-h-[300px]",
+        cls="flex min-h-[300px] items-center justify-center",
     )
 
 
@@ -221,7 +221,7 @@ def active_link_example():
                 ),
             ),
         ),
-        cls="flex items-center justify-center min-h-[300px]",
+        cls="flex min-h-[300px] items-center justify-center",
     )
 
 

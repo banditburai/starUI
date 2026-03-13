@@ -17,17 +17,17 @@ __metadata__ = {"description": "Code block with syntax highlighting", "packages"
 
 
 _CODE_BLOCK_CLS = (
-    "rounded-md overflow-x-auto m-0 min-w-0 px-5 py-4"
+    "m-0 min-w-0 overflow-x-auto rounded-md px-5 py-4"
     " bg-[var(--code-bg,_var(--muted))]"
     " text-[color:var(--code-color,_var(--foreground))]"
     " border border-[var(--code-border,_var(--border))]"
-    " font-mono text-sm leading-normal [tab-size:2] [font-variant-ligatures:none]"
-    " [scrollbar-width:thin] [scrollbar-color:var(--scrollbar-thumb,_var(--border))_var(--scrollbar-track,_transparent)]"
-    " focus-visible:outline-2 focus-visible:outline-ring/50 focus-visible:outline-offset-2"
+    " font-mono text-sm leading-normal [font-variant-ligatures:none] [tab-size:2]"
+    " [scrollbar-color:var(--scrollbar-thumb,_var(--border))_var(--scrollbar-track,_transparent)] [scrollbar-width:thin]"
+    " focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring/50"
     " [&_pre]:m-0 [&_pre]:font-[inherit] [&_pre]:text-[length:inherit] [&_pre]:leading-[inherit]"
-    " [&_pre]:whitespace-pre [&_pre]:overflow-x-visible [&_pre]:min-w-0"
-    " [&_code]:font-[inherit] [&_code]:bg-transparent [&_code]:p-0"
-    " [&_code]:block [&_code]:whitespace-pre [&_code]:overflow-x-visible"
+    " [&_pre]:min-w-0 [&_pre]:overflow-x-visible [&_pre]:whitespace-pre"
+    " [&_code]:bg-transparent [&_code]:p-0 [&_code]:font-[inherit]"
+    " [&_code]:block [&_code]:overflow-x-visible [&_code]:whitespace-pre"
 )
 
 

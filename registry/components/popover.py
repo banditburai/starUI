@@ -65,10 +65,8 @@ def PopoverContent(
 ):
     def _(*, sig, **ctx):
         content_ref = Signal(f"{sig}_content", _ref_only=True)
-        placement = side if align == "center" else f"{side}-{align}"
-
         position_mods = {
-            "placement": placement,
+            "placement": side if align == "center" else f"{side}-{align}",
             "flip": True,
             "shift": True,
             "hide": True,
@@ -115,7 +113,7 @@ def PopoverClose(
             variant=variant,
             size=size,
             data_slot="popover-close",
-            cls=cn("absolute right-2 top-2", cls),
+            cls=cn("absolute top-2 right-2", cls),
             aria_label="Close popover",
             **kwargs,
         )

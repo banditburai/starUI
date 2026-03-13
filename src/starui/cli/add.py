@@ -10,6 +10,7 @@ from .utils import (
     console,
     error,
     info,
+    install_block,
     install_component,
     status_context,
     success,
@@ -140,13 +141,13 @@ def _install_packages(packages: set[str]) -> None:
 
 
 def add_command(
-    components: list[str] = typer.Argument(..., help="Components to add"),
+    components: list[str] = typer.Argument(..., help="Components or blocks to add"),
     force: bool = typer.Option(False, "--force", help="Overwrite existing files"),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Show details"),
     theme: str = typer.Option(None, "--theme", help="Theme for code highlighting"),
     component_dir: str | None = typer.Option(None, "--component-dir", help="Component install directory"),
 ) -> None:
-    """Add components to your project."""
+    """Add components and blocks to your project."""
 
     if invalid := [c for c in components if not validate_component_name(c)]:
         error(f"Invalid component names: {', '.join(invalid)}")
@@ -162,18 +163,40 @@ def add_command(
 
     try:
         resolved = {}
-        for component in components:
-            normalized = component.replace("-", "_")
+        blocks_to_install: dict[str, tuple[str, str]] = {}
+
+        for name in components:
+            normalized = name.replace("-", "_")
             if verbose:
-                info(f"Resolving {component} -> {normalized}...")
-            resolved.update(client.get_component_with_dependencies(normalized))
+                info(f"Resolving {name} -> {normalized}...")
+
+            try:
+                kind, entry = client.lookup(normalized)
+            except FileNotFoundError:
+                error(f"'{name}' not found in registry")
+                raise typer.Exit(1) from None
+
+            if kind == "component":
+                resolved.update(client.get_component_with_dependencies(normalized))
+            else:
+                registry_name = entry["name"]
+                comp_deps, block_source = client.get_block_with_dependencies(registry_name)
+                resolved.update(comp_deps)
+                install_name = entry.get("install_name", registry_name)
+                blocks_to_install[registry_name] = (install_name, block_source)
 
         comp_dir = config.component_dir_absolute
         requested = {c.replace("-", "_") for c in components}
 
         conflicts = [n for n in resolved if n in requested and (comp_dir / f"{n}.py").exists()]
+        conflicts += [
+            inst
+            for rn, (inst, _) in blocks_to_install.items()
+            if (rn in requested or inst in requested) and (comp_dir / f"{inst}.py").exists()
+        ]
+
         if conflicts and not force:
-            warning("The following requested components already exist:")
+            warning("The following requested items already exist:")
             for name in conflicts:
                 console.print(f"  • {comp_dir / f'{name}.py'}")
             if not confirm("Overwrite?", default=False):
@@ -181,6 +204,12 @@ def add_command(
 
         if not force:
             resolved = {n: src for n, src in resolved.items() if n in requested or not (comp_dir / f"{n}.py").exists()}
+            blocks_to_install = {
+                rn: (inst, src)
+                for rn, (inst, src) in blocks_to_install.items()
+                if rn in requested or inst in requested or not (comp_dir / f"{inst}.py").exists()
+            }
+
         packages: set[str] = set()
         css_imports: list[str] = []
         for name in resolved:
@@ -188,6 +217,13 @@ def add_command(
                 meta = client.get_component_metadata(name)
                 packages.update(meta.get("packages", []))
                 css_imports.extend(meta.get("css_imports", []))
+            except FileNotFoundError:
+                pass
+        for reg_name in blocks_to_install:
+            try:
+                block_meta = client.get_block_metadata(reg_name)
+                packages.update(block_meta.get("packages", []))
+                css_imports.extend(block_meta.get("css_imports", []))
             except FileNotFoundError:
                 pass
 
@@ -199,19 +235,23 @@ def add_command(
         if css_imports:
             _setup_css_imports(config, list(dict.fromkeys(css_imports)))
 
-        with status_context("Installing components..."):
+        with status_context("Installing..."):
             comp_dir.mkdir(parents=True, exist_ok=True)
             (comp_dir / "__init__.py").touch()
 
             for name, source in resolved.items():
                 install_component(name, source, config=config, client=client, manifest=manifest)
 
+            for reg_name, (inst_name, source) in blocks_to_install.items():
+                install_block(reg_name, inst_name, source, config=config, client=client, manifest=manifest)
+
             manifest.save()
 
-        if resolved:
-            success(f"Installed components: {', '.join(resolved.keys())}")
+        installed_names = list(resolved.keys()) + [inst for inst, _ in blocks_to_install.values()]
+        if installed_names:
+            success(f"Installed: {', '.join(installed_names)}")
         else:
-            info("All components already installed (dependencies unchanged)")
+            info("All items already installed (dependencies unchanged)")
 
         if verbose:
             info(f"Location: {comp_dir}")

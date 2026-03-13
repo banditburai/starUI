@@ -11,7 +11,6 @@ __metadata__ = {"description": "Command palette interface"}
 
 
 CommandSize = Literal["sm", "md", "lg"]
-
 # Native dialog needs a frame to finish opening before input can receive focus
 _DIALOG_FOCUS_DELAY_MS = 50
 
@@ -106,7 +105,6 @@ def CommandDialog(
         cls="border-0 **:data-[slot=command-input-wrapper]:h-12",
     )
 
-    # Shares ID with Command's internal input_ref for focus management
     input_ref = Signal(f"{sig}_input", _ref_only=True)
 
     reset_signals = [
@@ -124,11 +122,11 @@ def CommandDialog(
         data_effect=(dialog_open & ~command.search).then(set_timeout(input_ref.focus(), _DIALOG_FOCUS_DELAY_MS)),
         id=dialog_ref._id,
         cls=cn(
-            "fixed max-h-[85vh] w-full max-w-2xl m-auto p-0",
+            "fixed m-auto max-h-[85vh] w-full max-w-2xl p-0",
             "backdrop:bg-black/50 backdrop:backdrop-blur-sm",
             "open:animate-in open:fade-in-0 open:zoom-in-95 open:duration-200",
             "open:backdrop:animate-in open:backdrop:fade-in-0 open:backdrop:duration-200",
-            "open:flex open:flex-col overflow-hidden rounded-lg",
+            "overflow-hidden rounded-lg open:flex open:flex-col",
             "bg-popover text-popover-foreground shadow-lg",
             "outline-none",
             cls,
@@ -179,7 +177,7 @@ def CommandInput(
                     data_on_keydown=js(_get_nav_handler(sig, search, selected, visible_items)),
                     placeholder=placeholder,
                     data_slot="command-input",
-                    cls="flex-1 min-w-0 bg-transparent px-2 text-sm text-ellipsis outline-hidden placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
+                    cls="min-w-0 flex-1 bg-transparent px-2 text-sm text-ellipsis outline-hidden placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
                     autocomplete="off",
                     autocorrect="off",
                     spellcheck="false",
@@ -212,10 +210,7 @@ def CommandList(
                 const items = [...document.querySelectorAll('[data-command-item="{sig}"]')];
                 const visible = items.filter(el => !el.style.display.includes('none') && el.dataset.disabled !== 'true');
                 {visible_count} = visible.length;
-                {visible_items} = visible.map(el => ({{
-                    index: parseInt(el.dataset.index || '0'),
-                    el: el
-                }}));
+                {visible_items} = visible.map(el => ({{ index: parseInt(el.dataset.index || '0') }}));
                 if (visible.length > 0) {selected} = parseInt(visible[0].dataset.index || '0');
             }});
         """)
@@ -281,7 +276,7 @@ def CommandGroup(
             Div(
                 heading,
                 data_slot="command-group-heading",
-                cls="text-muted-foreground px-2 py-1.5 text-xs font-medium select-none",
+                cls="px-2 py-1.5 text-xs font-medium text-muted-foreground select-none",
                 aria_hidden="true",
             )
             if heading
@@ -346,8 +341,8 @@ def CommandItem(
             data_keywords=keywords or "",
             data_index=str(index),
             cls=cn(
-                "group/command-item relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none",
-                "[&_[data-icon-sh]:not([class*='text-'])]:text-muted-foreground [&_[data-icon-sh]]:pointer-events-none [&_[data-icon-sh]]:shrink-0 [&_[data-icon-sh]:not([class*='size-'])]:size-4",
+                "relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none group/command-item",
+                "[&_[data-icon-sh]]:pointer-events-none [&_[data-icon-sh]]:shrink-0 [&_[data-icon-sh]:not([class*='size-'])]:size-4 [&_[data-icon-sh]:not([class*='text-'])]:text-muted-foreground",
                 "data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50",
                 "data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground" if not disabled else "",
                 cls,

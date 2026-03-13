@@ -27,18 +27,18 @@ def default_example():
     ]
     return ScrollArea(  #: hide
         Div(
-            P("Notifications", cls="text-sm font-semibold mb-1"),
+            P("Notifications", cls="mb-1 text-sm font-semibold"),
             Span("You have 3 unread messages", cls="text-xs text-muted-foreground"),
             Separator(cls="my-3"),
             *[
                 Div(
                     Div(
-                        Icon(icon, cls="h-4 w-4 text-muted-foreground mt-0.5 shrink-0"),
+                        Icon(icon, cls="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground"),
                         Div(
-                            P(title, cls="text-sm font-medium leading-tight"),
-                            P(desc, cls="text-xs text-muted-foreground mt-0.5 line-clamp-1"),
+                            P(title, cls="text-sm leading-tight font-medium"),
+                            P(desc, cls="mt-0.5 line-clamp-1 text-xs text-muted-foreground"),
                         ),
-                        Span(time, cls="text-[11px] text-muted-foreground shrink-0 ml-auto"),
+                        Span(time, cls="ml-auto shrink-0 text-[11px] text-muted-foreground"),
                         cls="flex gap-3",
                     ),
                     cls="py-2.5",
@@ -72,9 +72,9 @@ def horizontal_example():
                         Icon(icon, cls=f"h-5 w-5 {color_cls}"),
                         cls=f"flex items-center justify-center rounded-full h-12 w-12 {color_cls.split()[0]} dark:{color_cls.split()[2]}",
                     ),
-                    Span(name, cls="text-sm font-medium mt-2 text-center"),
+                    Span(name, cls="mt-2 text-center text-sm font-medium"),
                     Badge(role, variant="outline", cls="mt-1"),
-                    cls="flex flex-col items-center shrink-0 w-28",
+                    cls="flex w-28 shrink-0 flex-col items-center",
                 )
                 for icon, name, role, color_cls in members
             ],
@@ -113,10 +113,10 @@ def log_viewer_example():
     return ScrollArea(  #: hide
         Div(
             *[
-                Code(line, cls="block whitespace-pre text-[11px] leading-5 py-px")
+                Code(line, cls="block py-px text-[11px] leading-5 whitespace-pre")
                 for line in log_lines
             ],
-            cls="p-3 w-max",
+            cls="w-max p-3",
         ),
         orientation="both",
         cls="h-64 w-full max-w-2xl rounded-md border bg-muted/30 font-mono",
@@ -146,11 +146,11 @@ def auto_hide_example():
             *[
                 Div(
                     Div(
-                        Span(f"v{version}", cls="text-sm font-mono font-medium"),
+                        Span(f"v{version}", cls="font-mono text-sm font-medium"),
                         Badge(kind, variant=badge_variant[kind]),
                         cls="flex items-center gap-2",
                     ),
-                    P(desc, cls="text-xs text-muted-foreground mt-0.5"),
+                    P(desc, cls="mt-0.5 text-xs text-muted-foreground"),
                     cls="py-2.5",
                 )
                 for version, kind, desc in changelog

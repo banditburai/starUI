@@ -42,7 +42,6 @@ def InputOTP(
     slot_refs = [Signal(f"{sig}_{i}_ref", _ref_only=True) for i in range(max_length)]
     otp = Signal(sig, value, ifmissing=not value)
 
-    # These belong on the slot inputs, not the container
     aria_invalid = kwargs.pop("aria_invalid", None)
     aria_describedby = kwargs.pop("aria_describedby", None)
 
@@ -114,21 +113,16 @@ def InputOTPSlot(
         next_ref = f"${sig}_{index + 1}_ref" if index < max_length - 1 else None
         prev_ref = f"${sig}_{index - 1}_ref" if index > 0 else None
 
-        # data-on-input fires after data-bind has synced the value
         replace = f"{s}.replace(/[^{allow}]/g, '')" if allow else s
         advance = (
-            f"if ({s}.length > 0) {{ {next_ref}.focus(); {next_ref}.select() }}"
-            if next_ref
-            else "evt.target.select()"  # Re-select so next keystroke replaces
+            f"if ({s}.length > 0) {{ {next_ref}.focus(); {next_ref}.select() }}" if next_ref else "evt.target.select()"
         )
         input_handler = js(f"{s} = {replace}.slice(0, 1); {sync_composite}; {advance}")
 
         keydown_handler = js(
             "; ".join(
                 [
-                    # IME composition guard (mobile keyboards, CJK input)
                     "if (evt.isComposing || evt.keyCode === 229) return",
-                    # Block invalid chars before they reach data-bind
                     *(
                         [
                             f"if (evt.key.length === 1 && !evt.ctrlKey && !evt.metaKey && !/[{allow}]/.test(evt.key)) "
@@ -195,13 +189,13 @@ def InputOTPSlot(
                 aria_describedby=aria_describedby if index == 0 else None,
                 aria_label=f"{char_label} {index + 1} of {max_length}",
                 data_slot="input-otp-input",
-                cls="absolute inset-0 w-full h-full bg-transparent text-center "
-                "border-0 outline-none shadow-none text-sm "
+                cls="absolute inset-0 h-full w-full bg-transparent text-center "
+                "border-0 text-sm shadow-none outline-none "
                 "[caret-color:transparent] selection:bg-transparent "
                 "disabled:cursor-not-allowed",
             ),
             Div(
-                Div(cls="h-4 w-px animate-caret-blink bg-foreground"),
+                Div(cls="h-4 w-px bg-foreground animate-caret-blink"),
                 data_slot="input-otp-caret",
                 cls="pointer-events-none absolute inset-0 flex items-center justify-center",
                 data_show=slot_sig.length.eq(0),
@@ -211,10 +205,10 @@ def InputOTPSlot(
             cls=cn(
                 "relative flex size-9 items-center justify-center",
                 "border-y border-r border-input text-sm shadow-xs transition-all",
-                "first:border-l first:rounded-l-md last:rounded-r-md",
+                "first:rounded-l-md first:border-l last:rounded-r-md",
                 "dark:bg-input/30",
-                "has-[:focus]:z-10 has-[:focus]:border-ring has-[:focus]:ring-ring/50 has-[:focus]:ring-[3px]",
-                "aria-[invalid=true]:ring-destructive/20 aria-[invalid=true]:border-destructive "
+                "has-[:focus]:z-10 has-[:focus]:border-ring has-[:focus]:ring-[3px] has-[:focus]:ring-ring/50",
+                "aria-[invalid=true]:border-destructive aria-[invalid=true]:ring-destructive/20 "
                 "has-[:focus]:aria-[invalid=true]:border-destructive "
                 "has-[:focus]:aria-[invalid=true]:ring-destructive/20 "
                 "dark:has-[:focus]:aria-[invalid=true]:ring-destructive/40",

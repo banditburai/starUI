@@ -129,8 +129,8 @@ def AccordionTrigger(
             data_attr_data_state=is_open.if_("open", "closed"),
             cls=cn(
                 "flex w-full min-w-0 items-center justify-between py-4 text-sm font-medium "
-                "transition-colors hover:underline text-left outline-none "
-                "focus-visible:ring-ring/50 focus-visible:ring-[3px] focus-visible:rounded-sm "
+                "text-left transition-colors outline-none hover:underline "
+                "focus-visible:rounded-sm focus-visible:ring-[3px] focus-visible:ring-ring/50 "
                 "[&_[data-icon-sh]]:pointer-events-none [&_[data-icon-sh]]:shrink-0",
                 cls,
             ),
@@ -150,7 +150,7 @@ def AccordionContent(
         return Div(
             Div(
                 Div(*children, cls="pb-4"),
-                cls="overflow-hidden min-h-0",
+                cls="min-h-0 overflow-hidden",
             ),
             data_slot="accordion-content",
             role=role,
@@ -159,7 +159,7 @@ def AccordionContent(
             style="grid-template-rows: 1fr" if is_default_open else "grid-template-rows: 0fr",
             data_state="open" if is_default_open else "closed",
             cls=cn(
-                "text-sm grid transition-[grid-template-rows] duration-200 ease-out",
+                "grid text-sm transition-[grid-template-rows] duration-200 ease-out",
                 cls,
             ),
             data_attr_style=is_open.if_("grid-template-rows: 1fr", "grid-template-rows: 0fr"),

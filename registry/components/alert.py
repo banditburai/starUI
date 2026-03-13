@@ -12,16 +12,16 @@ AlertVariant = Literal["default", "destructive"]
 
 alert_variants = cva(
     base=(
-        "relative w-full overflow-hidden rounded-lg border px-4 py-3 text-sm grid "
-        "has-[[data-icon-sh]]:grid-cols-[calc(var(--spacing)*4)_1fr] grid-cols-[0_1fr] "
-        "has-[[data-icon-sh]]:gap-x-3 gap-y-0.5 items-start "
+        "relative grid w-full overflow-hidden rounded-lg border px-4 py-3 text-sm "
+        "grid-cols-[0_1fr] has-[[data-icon-sh]]:grid-cols-[calc(var(--spacing)*4)_1fr] "
+        "items-start gap-y-0.5 has-[[data-icon-sh]]:gap-x-3 "
         "[&_[data-icon-sh]]:size-4 [&_[data-icon-sh]]:translate-y-0.5"
     ),
     config={
         "variants": {
             "variant": {
                 "default": "bg-card text-card-foreground",
-                "destructive": "text-destructive bg-card [&_[data-icon-sh]]:text-destructive",
+                "destructive": "bg-card text-destructive [&_[data-icon-sh]]:text-destructive",
             }
         },
         "defaultVariants": {"variant": "default"},
@@ -53,7 +53,7 @@ def AlertTitle(
     return Div(
         *children,
         cls=cn(
-            "col-start-2 min-w-0 line-clamp-1 min-h-4 font-medium tracking-tight",
+            "col-start-2 line-clamp-1 min-h-4 min-w-0 font-medium tracking-tight",
             cls,
         ),
         data_slot="alert-title",
@@ -69,7 +69,7 @@ def AlertDescription(
     return Div(
         *children,
         cls=cn(
-            "col-start-2 min-w-0 break-words grid justify-items-start gap-1 text-sm [&_p]:leading-relaxed",
+            "col-start-2 grid min-w-0 justify-items-start gap-1 text-sm break-words [&_p]:leading-relaxed",
             cls,
         ),
         data_slot="alert-description",

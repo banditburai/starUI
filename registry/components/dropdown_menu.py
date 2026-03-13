@@ -1,8 +1,7 @@
 from typing import Literal
 
-from starhtml import FT, Div, Hr, Icon, Signal, Span
+from starhtml import FT, Div, Hr, Icon, Signal, Span, Style, js
 from starhtml import Button as HTMLButton
-from starhtml.datastar import evt
 
 from .utils import cn, cva, gen_id, inject_context, merge_actions
 
@@ -11,13 +10,38 @@ __metadata__ = {
     "handlers": ["position"],
 }
 
+_POPOVER_ANIMATE = """\
+[data-popover-animate]{--_dur-in:150ms;--_dur-out:100ms;transform-origin:var(--popover-origin,center);transition:opacity var(--_dur-out) ease,scale var(--_dur-out) ease,display var(--_dur-out) allow-discrete,overlay var(--_dur-out) allow-discrete}
+[data-popover-animate]:popover-open{transition-duration:var(--_dur-in);transition-timing-function:cubic-bezier(0.16,1,0.3,1)}
+[data-popover-animate]:not(:popover-open){opacity:0;scale:0.95}
+[data-popover-animate]:popover-open{@starting-style{opacity:0;scale:0.95}}
+@media(prefers-reduced-motion:reduce){[data-popover-animate]{transition-duration:0ms!important}}"""
+
+_MENU_ITEM_SEL = (
+    "[role=menuitem]:not([disabled]),[role=menuitemcheckbox]:not([disabled]),[role=menuitemradio]:not([disabled])"
+)
+_MENU_NAV = (
+    f"const items=[...evt.currentTarget.querySelectorAll('{_MENU_ITEM_SEL}')];"
+    "if(!items.length)return;const k=evt.key;let i=items.indexOf(document.activeElement);"
+    "if(k==='ArrowDown'){evt.preventDefault();i=(i+1)%items.length;items[i].focus()}"
+    "else if(k==='ArrowUp'){evt.preventDefault();i=(i-1+items.length)%items.length;items[i].focus()}"
+    "else if(k==='Home'){evt.preventDefault();items[0].focus()}"
+    "else if(k==='End'){evt.preventDefault();items[items.length-1].focus()}"
+    "else if(k.length===1&&!evt.ctrlKey&&!evt.metaKey&&!evt.altKey){"
+    "const m=evt.currentTarget;m._sb=(m._sb||'')+k.toLowerCase();"
+    "clearTimeout(m._st);m._st=setTimeout(()=>{m._sb=''},500);"
+    "const b=m._sb,s=b.length===1?i+1:0;"
+    "for(let j=0;j<items.length;j++){const x=(s+j)%items.length;"
+    "if(items[x].textContent.trim().toLowerCase().startsWith(b)){items[x].focus();break}}}"
+)
+
 
 dropdown_item_variants = cva(
     base=(
-        "relative flex w-full cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 "
+        "relative flex w-full cursor-default items-center gap-2 rounded-sm px-2 py-1.5 select-none "
         "text-sm outline-hidden "
         "[&_[data-icon-sh]:not([class*='text-'])]:text-muted-foreground "
-        "[&_[data-icon-sh]]:pointer-events-none [&_[data-icon-sh]]:shrink-0 [&_[data-icon-sh]]:size-4"
+        "[&_[data-icon-sh]]:pointer-events-none [&_[data-icon-sh]]:size-4 [&_[data-icon-sh]]:shrink-0"
     ),
     config={
         "variants": {
@@ -36,6 +60,12 @@ dropdown_item_variants = cva(
 )
 
 
+def _dropdown_item_cls(
+    *, variant: Literal["default", "destructive"] = "default", inset: str = "", disabled: bool = False, cls: str = ""
+) -> str:
+    return cn(dropdown_item_variants(variant=variant), inset, "pointer-events-none opacity-50" if disabled else "", cls)
+
+
 def DropdownMenu(*children, signal: str | Signal = "", cls: str = "", **kwargs) -> FT:
     sig = getattr(signal, "_id", signal) or gen_id("dropdown")
     open_state = Signal(f"{sig}_open", False)
@@ -47,6 +77,7 @@ def DropdownMenu(*children, signal: str | Signal = "", cls: str = "", **kwargs) 
     }
 
     return Div(
+        Style(_POPOVER_ANIMATE),
         open_state,
         *[inject_context(child, **ctx) for child in children],
         data_slot="dropdown-menu",
@@ -95,10 +126,17 @@ def DropdownMenuContent(
     def _(*, open_state, trigger_ref, content_ref, **ctx):
         ctx = dict(open_state=open_state, trigger_ref=trigger_ref, content_ref=content_ref, **ctx)
 
+        toggle_handler = js(
+            f"const o=evt.newState==='open';{open_state}=o;"
+            f"if(o)requestAnimationFrame(()=>"
+            f"evt.target.querySelector('{_MENU_ITEM_SEL}')?.focus())"
+        )
+
         return Div(
             *[inject_context(child, **ctx) for child in children],
             data_ref=content_ref,
-            data_on_toggle=open_state.set(evt.newState == "open"),
+            data_on_toggle=toggle_handler,
+            data_on_keydown=js(_MENU_NAV),
             data_style_min_width=trigger_ref.if_(trigger_ref.offsetWidth + "px", "8rem"),
             data_position=(
                 trigger_ref._id,
@@ -111,6 +149,7 @@ def DropdownMenuContent(
                 },
             ),
             popover="auto",
+            data_popover_animate="",
             id=content_ref._id,
             role="menu",
             aria_labelledby=trigger_ref._id,
@@ -119,7 +158,7 @@ def DropdownMenuContent(
             cls=cn(
                 "z-50 max-h-[min(var(--popover-available-height,80vh),80vh)] min-w-[8rem]",
                 "overflow-x-hidden overflow-y-auto rounded-md border",
-                "bg-popover text-popover-foreground shadow-md p-1",
+                "bg-popover p-1 text-popover-foreground shadow-md",
                 cls,
             ),
             **kwargs,
@@ -137,20 +176,14 @@ def DropdownMenuItem(
     **kwargs,
 ) -> FT:
     def _(*, content_ref, **_):
-        click_actions = merge_actions(kwargs=kwargs, after=content_ref.hidePopover())
-
         return HTMLButton(
             *children,
-            data_on_click=click_actions if not disabled else None,
-            cls=cn(
-                dropdown_item_variants(variant=variant),
-                "pl-8" if inset else "",
-                "pointer-events-none opacity-50" if disabled else "",
-                cls,
-            ),
+            data_on_click=merge_actions(kwargs=kwargs, after=content_ref.hidePopover()) if not disabled else None,
+            cls=_dropdown_item_cls(variant=variant, inset="pl-8" if inset else "", disabled=disabled, cls=cls),
             type="button",
             disabled=disabled,
             role="menuitem",
+            tabindex="-1",
             data_slot="dropdown-menu-item",
             **kwargs,
         )
@@ -178,14 +211,10 @@ def DropdownMenuCheckboxItem(
             ),
             *children,
             data_on_click=click_actions if not disabled else None,
-            cls=cn(
-                dropdown_item_variants(variant="default"),
-                "pl-8 pr-2",
-                "pointer-events-none opacity-50" if disabled else "",
-                cls,
-            ),
+            cls=_dropdown_item_cls(inset="pr-2 pl-8", disabled=disabled, cls=cls),
             type="button",
             role="menuitemcheckbox",
+            tabindex="-1",
             data_slot="dropdown-menu-checkbox-item",
             data_attr_aria_checked=checked.if_("true", "false"),
             disabled=disabled,
@@ -234,14 +263,10 @@ def DropdownMenuRadioItem(
             ),
             *children,
             data_on_click=click_actions if not disabled else None,
-            cls=cn(
-                dropdown_item_variants(variant="default"),
-                "pl-8 pr-2",
-                "pointer-events-none opacity-50" if disabled else "",
-                cls,
-            ),
+            cls=_dropdown_item_cls(inset="pr-2 pl-8", disabled=disabled, cls=cls),
             type="button",
             role="menuitemradio",
+            tabindex="-1",
             data_slot="dropdown-menu-radio-item",
             data_attr_aria_checked=is_checked.if_("true", "false"),
             disabled=disabled,
@@ -254,7 +279,7 @@ def DropdownMenuRadioItem(
 def DropdownMenuSeparator(cls: str = "", **kwargs) -> FT:
     return Hr(
         data_slot="dropdown-menu-separator",
-        cls=cn("-mx-1 my-1 border-border", cls),
+        cls=cn("-mx-1 my-1 h-px border-0 bg-border", cls),
         **kwargs,
     )
 
@@ -272,24 +297,17 @@ def DropdownMenuLabel(*children, inset: bool = False, cls: str = "", **kwargs) -
     )
 
 
-def DropdownMenuShortcut(
-    *children,
-    cls: str = "",
-    **kwargs,
-) -> FT:
+def DropdownMenuShortcut(*children, cls: str = "", **kwargs) -> FT:
     return Span(
         *children,
         data_slot="dropdown-menu-shortcut",
+        aria_hidden="true",
         cls=cn("ml-auto text-xs tracking-widest text-muted-foreground", cls),
         **kwargs,
     )
 
 
-def DropdownMenuGroup(
-    *children,
-    cls: str = "",
-    **kwargs,
-) -> FT:
+def DropdownMenuGroup(*children, cls: str = "", **kwargs) -> FT:
     def _(**ctx):
         return Div(
             *[inject_context(child, **ctx) for child in children],
@@ -336,8 +354,6 @@ def DropdownMenuSubTrigger(
     **kwargs,
 ) -> FT:
     def _(*, sub_open, sub_trigger_ref, sub_content_ref, **_):
-        click_actions = merge_actions(kwargs=kwargs) or None
-
         return HTMLButton(
             *children,
             Icon("lucide:chevron-right", cls="ml-auto size-4"),
@@ -345,16 +361,15 @@ def DropdownMenuSubTrigger(
             id=sub_trigger_ref._id,
             popovertarget=sub_content_ref._id,
             popoveraction="toggle",
-            data_on_click=click_actions,
+            data_on_click=merge_actions(kwargs=kwargs) or None,
             cls=cn(
-                dropdown_item_variants(variant="default"),
+                _dropdown_item_cls(inset="pl-8" if inset else "", cls=cls),
                 "data-[state=open]:bg-accent data-[state=open]:text-accent-foreground",
-                "pl-8" if inset else "",
-                cls,
             ),
             data_attr_data_state=sub_open.if_("open", "closed"),
             type="button",
             role="menuitem",
+            tabindex="-1",
             data_slot="dropdown-menu-sub-trigger",
             aria_haspopup="menu",
             data_attr_aria_expanded=sub_open.if_("true", "false"),
@@ -364,16 +379,19 @@ def DropdownMenuSubTrigger(
     return _
 
 
-def DropdownMenuSubContent(
-    *children,
-    cls: str = "",
-    **kwargs,
-) -> FT:
+def DropdownMenuSubContent(*children, cls: str = "", **kwargs) -> FT:
     def _(*, sub_open, sub_trigger_ref, sub_content_ref, **ctx):
+        toggle_handler = js(
+            f"const o=evt.newState==='open';{sub_open}=o;"
+            f"if(o)requestAnimationFrame(()=>"
+            f"evt.target.querySelector('{_MENU_ITEM_SEL}')?.focus())"
+        )
+
         return Div(
             *[inject_context(child, **ctx) for child in children],
             data_ref=sub_content_ref,
-            data_on_toggle=sub_open.set(evt.newState == "open"),
+            data_on_toggle=toggle_handler,
+            data_on_keydown=js(_MENU_NAV),
             data_position=(
                 sub_trigger_ref._id,
                 {
@@ -385,6 +403,7 @@ def DropdownMenuSubContent(
                 },
             ),
             popover="auto",
+            data_popover_animate="",
             id=sub_content_ref._id,
             role="menu",
             aria_labelledby=sub_trigger_ref._id,
@@ -393,7 +412,7 @@ def DropdownMenuSubContent(
             cls=cn(
                 "z-50 max-h-[min(var(--popover-available-height,80vh),80vh)] min-w-[8rem]",
                 "overflow-x-hidden overflow-y-auto rounded-md border",
-                "bg-popover text-popover-foreground shadow-lg p-1",
+                "bg-popover p-1 text-popover-foreground shadow-lg",
                 cls,
             ),
             **kwargs,

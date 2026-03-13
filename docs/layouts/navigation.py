@@ -42,7 +42,7 @@ def TopNavigation(current_component: str, cls: str = "") -> FT:
             Button("←", variant="ghost", size="sm", cls="h-8 w-8 p-0"),
             href=f"/components/{prev_comp[0]}",
             cls="no-underline"
-        ) if prev_comp else Div(cls="w-8 h-8")
+        ) if prev_comp else Div(cls="h-8 w-8")
     )
 
     next_button = (
@@ -50,7 +50,7 @@ def TopNavigation(current_component: str, cls: str = "") -> FT:
             Button("→", variant="ghost", size="sm", cls="h-8 w-8 p-0"),
             href=f"/components/{next_comp[0]}",
             cls="no-underline"
-        ) if next_comp else Div(cls="w-8 h-8")
+        ) if next_comp else Div(cls="h-8 w-8")
     )
 
     return Div(prev_button, next_button, cls=cn("flex items-center gap-2", cls))
@@ -77,6 +77,6 @@ def BottomNavigation(current_component: str, cls: str = "") -> FT:
 
     return Div(
         Div(prev_button, cls="flex-1"),
-        Div(next_button, cls="flex-1 flex justify-end"),
-        cls=cn("flex items-center justify-between pt-8 mt-8 border-t border-border/50", cls)
+        Div(next_button, cls="flex flex-1 justify-end"),
+        cls=cn("mt-8 flex items-center justify-between border-t border-border/50 pt-8", cls)
     )

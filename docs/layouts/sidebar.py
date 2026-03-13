@@ -31,7 +31,7 @@ def DocsSidebar(sections: list[dict[str, Any]] | None = None) -> FT:
                 cls="relative h-full py-2",
                 style="overflow-y: auto; scrollbar-width: thin; scrollbar-color: transparent transparent;",
             ),
-            cls="hidden xl:block xl:sticky xl:top-14 xl:w-64 xl:h-[calc(100vh-3.5rem)] xl:bg-background xl:border-r xl:border-border",
+            cls="hidden xl:sticky xl:top-14 xl:block xl:h-[calc(100vh-3.5rem)] xl:w-64 xl:border-r xl:border-border xl:bg-background",
         ),
         Div(cls="hidden xl:block xl:w-64 xl:shrink-0"),
     )
@@ -43,7 +43,7 @@ def MobileSidebar(sections: list[dict[str, Any]] | None = None) -> FT:
     
     return Div(
         nav_content,
-        cls="px-4 pt-6 bg-background h-full overflow-y-auto",
+        cls="h-full overflow-y-auto bg-background px-4 pt-6",
     )
 
 
@@ -64,7 +64,7 @@ def _sidebar_section(section: dict[str, Any]) -> FT:
         ) if section.get("title") else None,
         Div(
             *[_sidebar_item(item) for item in section.get("items", [])],
-            cls="flex flex-col items-start text-sm mb-6 space-y-1"
+            cls="mb-6 flex flex-col items-start space-y-1 text-sm"
         )
     )
 
@@ -78,7 +78,7 @@ def _sidebar_item(item: dict[str, Any]) -> FT:
     if item.get("disabled", False):
         return Span(
             item.get("label", ""),
-            cls="inline-flex items-center rounded-md px-2 py-1.5 text-sm text-muted-foreground cursor-not-allowed opacity-60"
+            cls="inline-flex cursor-not-allowed items-center rounded-md px-2 py-1.5 text-sm text-muted-foreground opacity-60"
         )
 
     sidebar_active = Signal("sidebar_active", _ref_only=True)
@@ -86,9 +86,9 @@ def _sidebar_item(item: dict[str, Any]) -> FT:
     return A(
         item.get("label", ""),
         href=href,
-        cls="inline-flex items-center rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        cls="inline-flex items-center rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
         data_attr_cls=sidebar_active.eq(href).if_(
-            "bg-accent text-accent-foreground font-medium",
+            "bg-accent font-medium text-accent-foreground",
             "text-muted-foreground"
         )
     )

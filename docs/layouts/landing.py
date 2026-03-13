@@ -55,13 +55,13 @@ def LandingLayout(
         Div(
             *_generate_starfield(),
             id="starfield-fixed",
-            cls="fixed inset-0 pointer-events-none z-[1]",
+            cls="pointer-events-none fixed inset-0 z-[1]",
             aria_hidden="true",
             data_style_transform="translateY(" + scroll.y * -0.05 + "px)",
             data_style_opacity="$aperture / 100",
         ),
         Div(cls="grain-overlay", aria_hidden="true"),
-        Div(DocsHeader(header), cls="landing-header relative z-50"),
+        Div(DocsHeader(header), cls="relative z-50 landing-header"),
         Main(*content, cls="relative z-10"),
-        cls="landing-page flex min-h-screen flex-col relative",
+        cls="relative flex min-h-screen flex-col landing-page",
     )

@@ -69,12 +69,12 @@ def header_example():
     return Div(
         Span("acme", cls="font-semibold tracking-tight"),
         Div(
-            A("Docs", href="#", cls="text-sm text-muted-foreground hover:text-foreground transition-colors"),
-            A("Blog", href="#", cls="text-sm text-muted-foreground hover:text-foreground transition-colors"),
+            A("Docs", href="#", cls="text-sm text-muted-foreground transition-colors hover:text-foreground"),
+            A("Blog", href="#", cls="text-sm text-muted-foreground transition-colors hover:text-foreground"),
             ThemeToggle(),
             cls="flex items-center gap-4",
         ),
-        cls="flex items-center justify-between w-full px-4 py-3 border-b",
+        cls="flex w-full items-center justify-between border-b px-4 py-3",
     )
 
 

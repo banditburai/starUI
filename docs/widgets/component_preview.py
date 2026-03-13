@@ -29,8 +29,8 @@ def ComponentPreview(
 
     header = (
         Div(
-            H3(title, cls="text-lg font-semibold mt-6") if title else None,
-            P(description, cls="text-sm text-muted-foreground mt-1") if description else None,
+            H3(title, cls="mt-6 text-lg font-semibold") if title else None,
+            P(description, cls="mt-1 text-sm text-muted-foreground") if description else None,
             cls="mb-3"
         ) if title or description else None
     )
@@ -41,7 +41,7 @@ def ComponentPreview(
             Iframe(
                 src=f"/component-preview-iframe/{preview_id}",
                 id=f"iframe_{preview_id}",
-                cls="w-full border-0 rounded-lg bg-background",
+                cls="w-full rounded-lg border-0 bg-background",
                 style=f"height: {iframe_height};",
                 sandbox="allow-scripts allow-same-origin",  # Datastar reactivity & localStorage
                 loading="lazy"
@@ -80,16 +80,16 @@ def ComponentPreview(
                             style="scrollbar-width: thin;"
                         ),
                         CopyButton(preview_id, copied, variant="group-hover") if copy_button else None,
-                        cls="relative group overflow-x-auto"
+                        cls="relative overflow-x-auto group"
                     ),
                     id="code",
-                    cls="mt-2 overflow-x-auto min-w-0 max-w-full"
+                    cls="mt-2 max-w-full min-w-0 overflow-x-auto"
                 ),
                 value=default_tab,
                 signal=f"{preview_id}_tab",
                 cls="w-full min-w-0"
             ),
-            cls="rounded-lg border p-6 min-w-0 overflow-hidden",
+            cls="min-w-0 overflow-hidden rounded-lg border p-6",
         ),
         cls=cn("relative mb-8 w-full", attrs.get("cls", "")),
         **{k: v for k, v in attrs.items() if k != "cls"},

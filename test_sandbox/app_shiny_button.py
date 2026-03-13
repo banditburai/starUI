@@ -22,7 +22,7 @@ app, rt = star_app(
     ),
     htmlkw=dict(lang="en", dir="ltr"),
     bodykw=dict(
-        cls="min-h-screen bg-background text-foreground flex items-center justify-center",
+        cls="flex min-h-screen items-center justify-center bg-background text-foreground",
     ),
 )
 
@@ -31,15 +31,15 @@ app, rt = star_app(
 def index():
     """Test page for button."""
     return Div(
-        H1("Button Test", cls="text-3xl font-bold mb-8"),        
+        H1("Button Test", cls="mb-8 text-3xl font-bold"),        
         NotStr("""
 <!-- From Uiverse.io by mRcOol7 -->
 <button
-  class="group cursor-pointer outline-none hover:rotate-90 duration-300"
+  class="cursor-pointer duration-300 outline-none hover:rotate-90 group"
   title="Add New"
 >
   <svg
-    class="stroke-teal-500 fill-none group-hover:fill-teal-800 group-active:stroke-teal-200 group-active:fill-teal-600 group-active:duration-0 duration-300"
+    class="fill-none stroke-teal-500 duration-300 group-hover:fill-teal-800 group-active:fill-teal-600 group-active:stroke-teal-200 group-active:duration-0"
     viewBox="0 0 24 24"
     height="50px"
     width="50px"
@@ -55,7 +55,7 @@ def index():
 </button>
 
 <div class="mt-8" data-signals-x="100" data-init="const duration = 3000; const pauseDuration = 1000; let animationStart = Date.now(); const animate = () => { const elapsed = Date.now() - animationStart; if (elapsed < duration) { const progress = elapsed / duration; $x = Math.round(100 - (progress * 200)); requestAnimationFrame(animate); } else { $x = -100; setTimeout(() => { animationStart = Date.now(); animate(); }, pauseDuration); } }; setTimeout(animate, pauseDuration);">
-  <h2 class="text-2xl font-bold mb-4">Shiny Button</h2>
+  <h2 class="mb-4 text-2xl font-bold">Shiny Button</h2>
 
   <button
     class="relative cursor-pointer rounded-lg border border-gray-300 px-6 py-2 font-medium transition-shadow duration-300 ease-in-out hover:shadow"
@@ -63,13 +63,13 @@ def index():
     data-style="{'--x': $x + '%'}"
   >
     <span
-      class="relative block size-full text-sm tracking-wide uppercase text-gray-700"
+      class="relative block size-full text-sm tracking-wide text-gray-700 uppercase"
       style="-webkit-mask-image: linear-gradient(-75deg, #000 calc(var(--x) + 20%), rgba(0,0,0,0.3) calc(var(--x) + 30%), #000 calc(var(--x) + 100%)); mask-image: linear-gradient(-75deg, #000 calc(var(--x) + 20%), rgba(0,0,0,0.3) calc(var(--x) + 30%), #000 calc(var(--x) + 100%));"
     >
       Shiny Button
     </span>
     <span
-      class="absolute inset-0 z-10 block rounded-[inherit] p-px pointer-events-none"
+      class="pointer-events-none absolute inset-0 z-10 block rounded-[inherit] p-px"
       style="mask: linear-gradient(#000, #000) content-box exclude, linear-gradient(#000, #000); -webkit-mask: linear-gradient(#000, #000) content-box exclude, linear-gradient(#000, #000); background-image: linear-gradient(-75deg, rgba(255,255,255,0.1) calc(var(--x) + 20%), rgba(255,255,255,0.5) calc(var(--x) + 25%), rgba(255,255,255,0.1) calc(var(--x) + 100%));"
     />
 </div>

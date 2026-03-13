@@ -17,21 +17,21 @@ def hero_calendar_example():
     return Div(
         Div(
             Div(
-                P("Single", cls="text-sm font-medium mb-2"),
+                P("Single", cls="mb-2 text-sm font-medium"),
                 cal_single,
                 cls="flex flex-col items-center"
             ),
             Div(
-                P("Range", cls="text-sm font-medium mb-2"),
+                P("Range", cls="mb-2 text-sm font-medium"),
                 cal_range,
                 cls="flex flex-col items-center"
             ),
             Div(
-                P("Multiple", cls="text-sm font-medium mb-2"),
+                P("Multiple", cls="mb-2 text-sm font-medium"),
                 cal_multiple,
                 cls="flex flex-col items-center"
             ),
-            cls="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto"
+            cls="mx-auto grid max-w-4xl grid-cols-1 gap-8 md:grid-cols-3"
         ),
         cls="w-full"
     )
@@ -83,7 +83,7 @@ def calendar_signals_example():
             P("Month: ", Span(data_text=cal.month, cls="font-mono text-xs")),
             P("Year: ", Span(data_text=cal.year, cls="font-mono text-xs")),
             P("Selected: ", Span(data_text=cal.selected.or_("none"), cls="font-mono text-xs")),
-            cls="mt-4 text-sm space-y-1"
+            cls="mt-4 space-y-1 text-sm"
         ),
         cls="flex flex-col items-center"
     )

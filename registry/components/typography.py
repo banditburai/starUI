@@ -30,11 +30,11 @@ heading_variants = cva(
     config={
         "variants": {
             "level": {
-                "display": "text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight",
-                "h1": "text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight",
-                "h2": "border-b pb-2 text-2xl sm:text-3xl font-semibold leading-tight",
-                "h3": "text-2xl font-semibold leading-tight",
-                "h4": "text-xl font-semibold leading-snug",
+                "display": "text-4xl leading-tight font-extrabold sm:text-5xl lg:text-6xl",
+                "h1": "text-3xl leading-tight font-extrabold sm:text-4xl lg:text-5xl",
+                "h2": "border-b pb-2 text-2xl leading-tight font-semibold sm:text-3xl",
+                "h3": "text-2xl leading-tight font-semibold",
+                "h4": "text-xl leading-snug font-semibold",
             },
         },
     },
@@ -48,7 +48,7 @@ text_variants = cva(
                 "body": "leading-7 [&:not(:first-child)]:mt-6",
                 "lead": "text-xl text-muted-foreground",
                 "large": "text-lg font-semibold",
-                "small": "text-sm font-medium leading-none",
+                "small": "text-sm leading-none font-medium",
                 "muted": "text-sm text-muted-foreground",
             }
         },
@@ -116,7 +116,7 @@ def Caption(*children, cls="", **kwargs) -> FT:
     return Div(
         *children,
         cls=cn(
-            "text-xs font-medium uppercase tracking-wider text-muted-foreground",
+            "text-xs font-medium tracking-wider text-muted-foreground uppercase",
             cls,
         ),
         **kwargs,
@@ -156,7 +156,7 @@ def Kbd(*children, cls="", **kwargs) -> FT:
     return HTMLKbd(
         *children,
         cls=cn(
-            "inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-xs font-medium text-foreground",
+            "inline-flex h-5 items-center gap-1 rounded border bg-muted px-1.5 font-mono text-xs font-medium text-foreground select-none",
             cls,
         ),
         **kwargs,
@@ -166,7 +166,7 @@ def Kbd(*children, cls="", **kwargs) -> FT:
 def Mark(*children, cls="", **kwargs) -> FT:
     return HTMLMark(
         *children,
-        cls=cn("bg-primary/20 dark:bg-primary/30 px-1 py-0.5 rounded-sm", cls),
+        cls=cn("rounded-sm bg-primary/20 px-1 py-0.5 dark:bg-primary/30", cls),
         **kwargs,
     )
 
@@ -182,6 +182,6 @@ def Figure(*children, cls="", **kwargs) -> FT:
 def Figcaption(*children, cls="", **kwargs) -> FT:
     return HTMLFigcaption(
         *children,
-        cls=cn("text-sm text-muted-foreground text-center italic", cls),
+        cls=cn("text-center text-sm text-muted-foreground italic", cls),
         **kwargs,
     )

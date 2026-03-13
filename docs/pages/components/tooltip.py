@@ -80,7 +80,7 @@ def toolbar_shortcuts_example():
                 Span("Insert link ", Code("⌘K", cls="ml-1.5 text-muted-foreground")),
             ),
         ),
-        cls="flex gap-1 justify-center",
+        cls="flex justify-center gap-1",
     )
 
 
@@ -131,7 +131,7 @@ def tooltip_positions_example():
             ),
             TooltipContent("Justify", side="left"),
         ),
-        cls="flex gap-2 justify-center",
+        cls="flex justify-center gap-2",
     )
 
 
@@ -152,7 +152,7 @@ def disabled_button_example():
             ),
             TooltipContent("Resolve 2 conflicts before merging"),
         ),
-        cls="flex gap-4 justify-center",
+        cls="flex justify-center gap-4",
     )
 
 
@@ -180,13 +180,13 @@ def form_field_tooltip_example():
                             "Starts with sk_live_ followed by 32 characters",
                         ),
                     ),
-                    cls="absolute right-3 inset-y-0 flex items-center pointer-events-auto",
+                    cls="pointer-events-auto absolute inset-y-0 right-3 flex items-center",
                 ),
                 cls="relative",
             ),
             cls="space-y-2",
         ),
-        cls="max-w-md mx-auto",
+        cls="mx-auto max-w-md",
     )
 
 
@@ -197,7 +197,7 @@ def truncated_text_example():
         TooltipTrigger(
             P(
                 commit_msg,
-                cls="max-w-xs truncate cursor-help text-sm font-mono",
+                cls="max-w-xs cursor-help truncate font-mono text-sm",
             ),
             delay_duration=300,
         ),
@@ -224,7 +224,7 @@ def status_indicators_example():
         status_dot("bg-green-500", "Production", "Deployed 4m ago by Sarah Chen"),
         status_dot("bg-yellow-500", "Staging", "Building from commit a3f2c91"),
         status_dot("bg-red-500", "Preview", "Build failed at 2:15 PM"),
-        cls="flex flex-col gap-3 items-start mx-auto w-fit",
+        cls="mx-auto flex w-fit flex-col items-start gap-3",
     )
 
 

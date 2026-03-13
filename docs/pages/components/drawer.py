@@ -73,7 +73,7 @@ def direction_example():
 
     return Div(
         *[make_drawer(*demo) for demo in demos],
-        cls="flex flex-wrap gap-2 justify-center",
+        cls="flex flex-wrap justify-center gap-2",
     )
 
 
@@ -117,14 +117,14 @@ def reactive_example():
                                 aria_label=f"Remove {name}",
                             ),
                             data_show=sig,
-                            cls="flex items-center justify-between p-2 rounded-md border",
+                            cls="flex items-center justify-between rounded-md border p-2",
                         )
                         for name, price, sig in items
                     ],
                     P(
                         "Your order is empty",
                         data_show=count.eq(0),
-                        cls="text-sm text-muted-foreground text-center py-4",
+                        cls="py-4 text-center text-sm text-muted-foreground",
                     ),
                     cls="space-y-2 px-4",
                 ),
@@ -186,7 +186,7 @@ def non_modal_example():
                 DrawerDescription("Chet Baker — Almost Blue"),
             ),
             Div(
-                Div(cls="aspect-square w-48 mx-auto rounded-md bg-muted"),
+                Div(cls="mx-auto aspect-square w-48 rounded-md bg-muted"),
                 Div(
                     Button(
                         Icon("lucide:skip-back", cls="size-4"),
