@@ -78,11 +78,6 @@ def install_item(
         warning(f"Failed to record {name} in manifest: {e}")
 
 
-def resolve_local_path(record: dict | None, name: str, *, manifest: "Manifest", component_dir: Path) -> Path:
-    recorded = record.get("file") if record else None
-    return manifest.project_root / recorded if recorded else component_dir / f"{name}.py"
-
-
 def find_block_by_install_name(name: str, installed_blocks: dict[str, dict]) -> str | None:
     return next(
         (bn for bn, rec in installed_blocks.items() if Path(rec.get("file", "")).stem == name),

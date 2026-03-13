@@ -67,11 +67,19 @@ class Manifest:
     def get_installed(self, kind: ItemKind = "component") -> dict[str, dict[str, str]]:
         return self._load()[SECTIONS[kind]]
 
+    def resolve_path(self, record: dict | None, name: str, component_dir: Path) -> Path:
+        # Recorded path may be stale after component_dir changes in pyproject.toml
+        recorded = record.get("file") if record else None
+        if recorded:
+            candidate = self.project_root / recorded
+            if candidate.exists():
+                return candidate
+        return component_dir / f"{name}.py"
+
     def _is_modified(self, record: dict[str, str] | None, name: str, component_dir: Path) -> bool:
         if not record:
             return False
-        recorded = record.get("file")
-        local_file = self.project_root / recorded if recorded else component_dir / f"{name}.py"
+        local_file = self.resolve_path(record, name, component_dir)
         return not local_file.exists() or compute_checksum(local_file) != record.get("checksum", "")
 
     def is_modified(self, name: str, component_dir: Path, kind: ItemKind = "component") -> bool:
