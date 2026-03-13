@@ -1,5 +1,6 @@
 from starhtml import *
 from widgets.code_block import CodeBlock
+from widgets.onwards import onwards_card, onwards_section
 from layouts.base import DocsLayout, LayoutConfig, SidebarConfig
 
 
@@ -138,6 +139,11 @@ jobs:
                 ),
             ),
 
+            onwards_section(
+                onwards_card("01", "Configuration", "Project settings, auto-detection, manifest, and cache.", "/configuration", "View Configuration"),
+                onwards_card("02", "CLI Reference", "Complete reference for every star command.", "/cli", "View CLI Reference"),
+                onwards_card("03", "Components", "Browse the full constellation of UI components.", "/components", "Browse Components"),
+            ),
         ),
         layout=LayoutConfig(
             title="Deployment",

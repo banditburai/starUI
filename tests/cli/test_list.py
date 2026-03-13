@@ -10,9 +10,18 @@ from starui.cli.list import list_command
 
 def _mock_client(components: list[dict]):
     client = MagicMock()
-    client.list_components.return_value = [c["name"] for c in components]
-    client.get_component_metadata.side_effect = lambda name: next(c for c in components if c["name"] == name)
-    client.list_blocks.return_value = []
+
+    def list_items(kind):
+        if kind == "component":
+            return [c["name"] for c in components]
+        return []
+
+    client.list_items.side_effect = list_items
+
+    def get_metadata(name, kind="component"):
+        return next(c for c in components if c["name"] == name)
+
+    client.get_metadata.side_effect = get_metadata
     return client
 
 
@@ -36,8 +45,13 @@ TWO_COMPONENTS = [
 
 def _mock_manifest(installed_names: set[str] | None = None):
     manifest = MagicMock()
-    manifest.get_installed.return_value = {n: {} for n in (installed_names or set())}
-    manifest.get_installed_blocks.return_value = {}
+
+    def get_installed(kind="component"):
+        if kind == "component":
+            return {n: {} for n in (installed_names or set())}
+        return {}
+
+    manifest.get_installed.side_effect = get_installed
     return manifest
 
 
@@ -59,8 +73,7 @@ class TestListCommand:
 
     def test_empty_registry_shows_info_message(self):
         client = MagicMock()
-        client.list_components.return_value = []
-        client.list_blocks.return_value = []
+        client.list_items.return_value = []
 
         with (
             patch("starui.cli.list.get_project_config"),
@@ -134,15 +147,14 @@ class TestListCommand:
 
     def test_metadata_error_skips_component_and_continues(self):
         client = MagicMock()
-        client.list_components.return_value = ["good", "bad"]
-        client.list_blocks.return_value = []
+        client.list_items.side_effect = lambda kind: ["good", "bad"] if kind == "component" else []
 
-        def get_meta(name):
+        def get_meta(name, kind="component"):
             if name == "bad":
                 raise RuntimeError("fail")
             return {"name": "good", "description": "Good one", "dependencies": []}
 
-        client.get_component_metadata.side_effect = get_meta
+        client.get_metadata.side_effect = get_meta
 
         with (
             patch("starui.cli.list.get_project_config"),

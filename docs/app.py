@@ -29,6 +29,7 @@ from pages.landing import (
 from pages.cli import create_cli_docs
 from pages.configuration import create_configuration_docs
 from pages.deployment import create_deployment_docs
+from widgets.onwards import onwards_card, onwards_section
 
 DOCS_SIDEBAR_SECTIONS = []
 
@@ -627,32 +628,10 @@ Div(
                 cls="space-y-8"
             ),
             
-            Div(
-                H2("Onwards", cls="mt-16 mb-8 text-2xl font-semibold tracking-tight"),
-                Div(
-                    _next_step_card(
-                        "01",
-                        "The Constellation",
-                        "34+ components. Every one interactive, every one yours to modify.",
-                        "/components",
-                        "Browse Components",
-                    ),
-                    _next_step_card(
-                        "02",
-                        "The Field Guide",
-                        "Signals, reactivity, the server-first model \u2014 learn the framework beneath the components.",
-                        "https://starhtml.com",
-                        "Visit StarHTML",
-                    ),
-                    _next_step_card(
-                        "03",
-                        "The Source",
-                        "Apache 2.0. Read the code, open an issue, send a patch.",
-                        "https://github.com/banditburai/starui",
-                        "View on GitHub",
-                    ),
-                    cls="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-3"
-                ),
+            onwards_section(
+                onwards_card("01", "The Constellation", "34+ components. Every one interactive, every one yours to modify.", "/components", "Browse Components"),
+                onwards_card("02", "The Field Guide", "Signals, reactivity, the server-first model \u2014 learn the framework beneath the components.", "https://starhtml.com", "Visit StarHTML"),
+                onwards_card("03", "The Source", "Apache 2.0. Read the code, open an issue, send a patch.", "https://github.com/banditburai/starui", "View on GitHub"),
             ),
         ),
         layout=LayoutConfig(
@@ -710,20 +689,6 @@ def deployment():
             card="summary_large_image",
         ),
         create_deployment_docs(DOCS_SIDEBAR_SECTIONS),
-    )
-
-
-def _next_step_card(num: str, title: str, description: str, href: str, button_text: str) -> FT:
-    return A(
-        Div(
-            Span(num, cls="font-mono text-xs tracking-widest text-muted-foreground"),
-            H3(title, cls="mt-2 mb-2 text-base font-medium transition-colors group-hover:text-primary"),
-            P(description, cls="flex-1 text-sm leading-relaxed text-muted-foreground"),
-            Span(button_text, " \u2192", cls="mt-4 inline-block text-sm font-medium text-primary"),
-            cls="flex h-full flex-col p-5",
-        ),
-        href=href,
-        cls="block h-full rounded-lg border transition-colors hover:border-primary/30 group",
     )
 
 

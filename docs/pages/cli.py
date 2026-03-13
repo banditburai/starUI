@@ -1,5 +1,6 @@
 from starhtml import *
 from widgets.code_block import CodeBlock
+from widgets.onwards import onwards_card, onwards_section
 from layouts.base import DocsLayout, LayoutConfig, SidebarConfig
 
 
@@ -52,20 +53,6 @@ def _callout(text: str, icon: str = "lucide:info") -> FT:
         Icon(icon, cls="mt-0.5 mr-3 h-5 w-5 flex-shrink-0 text-primary"),
         P(text, cls="text-sm text-muted-foreground"),
         cls="mt-4 flex items-start rounded-md bg-muted/30 p-4"
-    )
-
-
-def _onwards_card(num: str, title: str, description: str, href: str, button_text: str) -> FT:
-    return A(
-        Div(
-            Span(num, cls="font-mono text-xs tracking-widest text-muted-foreground"),
-            H3(title, cls="mt-2 mb-2 text-base font-medium transition-colors group-hover:text-primary"),
-            P(description, cls="flex-1 text-sm leading-relaxed text-muted-foreground"),
-            Span(button_text, " \u2192", cls="mt-4 inline-block text-sm font-medium text-primary"),
-            cls="flex h-full flex-col p-5",
-        ),
-        href=href,
-        cls="block h-full rounded-lg border transition-colors hover:border-primary/30 group",
     )
 
 
@@ -270,33 +257,10 @@ star sort --check""",
                 ),
             ),
 
-            # Onwards
-            Div(
-                H2("Onwards", cls="mt-16 mb-8 text-2xl font-semibold tracking-tight"),
-                Div(
-                    _onwards_card(
-                        "01",
-                        "Configuration",
-                        "Project settings, auto-detection, manifest, and cache.",
-                        "/configuration",
-                        "View Configuration",
-                    ),
-                    _onwards_card(
-                        "02",
-                        "Deployment",
-                        "Production builds, CI/CD pipelines, and GitHub Actions.",
-                        "/deployment",
-                        "View Deployment",
-                    ),
-                    _onwards_card(
-                        "03",
-                        "Components",
-                        "Browse the full constellation of UI components.",
-                        "/components",
-                        "Browse Components",
-                    ),
-                    cls="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-3"
-                ),
+            onwards_section(
+                onwards_card("01", "Configuration", "Project settings, auto-detection, manifest, and cache.", "/configuration", "View Configuration"),
+                onwards_card("02", "Deployment", "Production builds, CI/CD pipelines, and GitHub Actions.", "/deployment", "View Deployment"),
+                onwards_card("03", "Components", "Browse the full constellation of UI components.", "/components", "Browse Components"),
             ),
         ),
         layout=LayoutConfig(

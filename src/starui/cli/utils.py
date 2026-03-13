@@ -6,6 +6,9 @@ import typer
 from rich.console import Console
 from rich.status import Status
 
+from ..registry.checksum import compute_checksum
+from ..registry.manifest import ItemKind
+
 if TYPE_CHECKING:
     from ..config import ProjectConfig
     from ..registry.client import RegistryClient
@@ -42,53 +45,45 @@ def status_context(message: str) -> Status:
     return console.status(message)
 
 
-def install_component(
+def rewrite_block_imports(source: str) -> str:
+    """Convert absolute ``from components.`` imports to relative."""
+    return re.sub(r"^from components\.", "from .", source, flags=re.MULTILINE)
+
+
+def install_item(
     name: str,
     source: str,
     *,
+    kind: ItemKind = "component",
+    install_name: str | None = None,
     config: "ProjectConfig",
     client: "RegistryClient",
     manifest: "Manifest",
 ) -> None:
-    file_path = config.component_dir_absolute / f"{name}.py"
+    effective_name = install_name or name
+    if kind == "block":
+        source = rewrite_block_imports(source)
+    file_path = config.component_dir_absolute / f"{effective_name}.py"
     file_path.write_text(source)
+    checksum = compute_checksum(file_path)
     try:
-        meta = client.get_component_metadata(name)
         manifest.record_install(
             name,
             version=client.version,
-            checksum=meta.get("checksum", ""),
+            checksum=checksum,
             file_path=str(file_path.relative_to(config.project_root)),
+            kind=kind,
         )
-    except FileNotFoundError:
-        pass  # Manifest recording is best-effort; component is usable without it
+    except Exception as e:
+        warning(f"Failed to record {name} in manifest: {e}")
 
 
-def install_block(
-    name: str,
-    install_name: str,
-    source: str,
-    *,
-    config: "ProjectConfig",
-    client: "RegistryClient",
-    manifest: "Manifest",
-) -> None:
-    file_path = config.component_dir_absolute / f"{install_name}.py"
-    file_path.write_text(source)
-    try:
-        meta = client.get_block_metadata(name)
-        manifest.record_block_install(
-            name,
-            version=client.version,
-            checksum=meta.get("checksum", ""),
-            file_path=str(file_path.relative_to(config.project_root)),
-        )
-    except FileNotFoundError:
-        pass  # Best-effort; block is usable without manifest entry
+def resolve_local_path(record: dict | None, name: str, *, manifest: "Manifest", component_dir: Path) -> Path:
+    recorded = record.get("file") if record else None
+    return manifest.project_root / recorded if recorded else component_dir / f"{name}.py"
 
 
 def find_block_by_install_name(name: str, installed_blocks: dict[str, dict]) -> str | None:
-    """Match a block by its install_name (file stem), e.g. 'user_button' -> 'user_button_01'."""
     return next(
         (bn for bn, rec in installed_blocks.items() if Path(rec.get("file", "")).stem == name),
         None,

@@ -23,12 +23,15 @@ BLOCKS_DIR = REGISTRY_DIR / "blocks"
 
 
 def extract_dependencies(file_path: Path) -> list[str]:
-    """Derive component dependencies from relative imports."""
+    """Derive component dependencies from relative and absolute imports."""
     tree = ast.parse(file_path.read_text())
     deps = set()
     for node in ast.walk(tree):
-        if isinstance(node, ast.ImportFrom) and node.level == 1 and node.module:
-            deps.add(node.module)
+        if isinstance(node, ast.ImportFrom) and node.module:
+            if node.level == 1:
+                deps.add(node.module)
+            elif node.level == 0 and node.module.startswith("components."):
+                deps.add(node.module.removeprefix("components."))
     return sorted(deps)
 
 
@@ -71,7 +74,6 @@ def load_block(block_dir: Path) -> dict | None:
     if not py_files:
         return None
 
-    # Use the first .py file found (blocks have one main file)
     file_path = py_files[0]
     meta = extract_metadata(file_path)
     deps = extract_dependencies(file_path)
@@ -87,46 +89,6 @@ def load_block(block_dir: Path) -> dict | None:
         "handlers": meta.get("handlers", []),
         "checksum": compute_checksum(file_path),
     }
-
-
-BRIDGE_TEMPLATE = '''\
-"""Bridge relative imports to the components package for dev/docs contexts.
-
-When installed via `star add`, the block file lives alongside component files
-in `components/ui/`, so relative imports resolve naturally. In the registry
-layout (where blocks live in their own subdirectory), this __init__.py maps
-relative imports to the `components` package so the block can be imported
-directly during development and docs builds.
-"""
-
-import importlib
-import sys
-
-_COMPONENT_DEPS = {deps}
-
-for _name in _COMPONENT_DEPS:
-    _key = f"{{__name__}}.{{_name}}"
-    if _key not in sys.modules:
-        try:
-            sys.modules[_key] = importlib.import_module(f"components.{{_name}}")
-        except ModuleNotFoundError:
-            pass  # Not in a context where components package is on the path
-'''
-
-
-def _format_deps(deps: list[str]) -> str:
-    """Format deps list with double quotes to match ruff's preferred style."""
-    items = ", ".join(f'"{d}"' for d in deps)
-    return f"[{items}]"
-
-
-def generate_block_bridge(block_dir: Path, deps: list[str]) -> None:
-    """Auto-generate __init__.py bridge from AST-derived dependencies."""
-    init_path = block_dir / "__init__.py"
-    content = BRIDGE_TEMPLATE.format(deps=_format_deps(deps))
-    existing = init_path.read_text() if init_path.exists() else ""
-    if content != existing:
-        init_path.write_text(content)
 
 
 def generate_index() -> dict:
@@ -145,7 +107,6 @@ def generate_index() -> dict:
             entry = load_block(block_dir)
             if entry:
                 blocks[entry["name"]] = entry
-                generate_block_bridge(block_dir, entry["dependencies"])
 
     with open(PROJECT_ROOT / "pyproject.toml", "rb") as f:
         version = tomllib.load(f)["project"]["version"]
