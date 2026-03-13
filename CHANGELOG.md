@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.2] - 2026-03-13
+
 ### Fixed
 - `star status` and `star diff` now handle stale manifest paths when `component_dir` changes in `pyproject.toml`
 
@@ -377,3 +379,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [0.4.0]: https://github.com/banditburai/starUI/releases/tag/v0.4.0
 
 [0.4.1]: https://github.com/banditburai/starUI/releases/tag/v0.4.1
+
+[0.4.2]: https://github.com/banditburai/starUI/releases/tag/v0.4.2
