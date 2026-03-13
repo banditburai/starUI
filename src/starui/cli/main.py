@@ -9,6 +9,7 @@ from .dev import dev_command
 from .diff import diff_command
 from .init import init_command
 from .list import list_command
+from .sort import sort_command
 from .status import status_command
 from .update import update_command
 
@@ -45,6 +46,7 @@ app.command("build")(build_command)
 app.command("list")(list_command)
 app.command("status")(status_command)
 app.command("diff")(diff_command)
+app.command("sort")(sort_command)
 app.command("update")(update_command)
 
 
