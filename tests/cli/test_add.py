@@ -8,7 +8,11 @@ from click.exceptions import Exit
 
 from starui.cli.add import (
     _build_token_rules as _build_token_rules,
+)
+from starui.cli.add import (
     _setup_code_highlighting as _setup_code_highlighting,
+)
+from starui.cli.add import (
     _setup_css_imports,
     add_command,
 )
@@ -638,7 +642,10 @@ class TestMetadataFetchFailure:
 
         client = MagicMock()
         client.version = "main"
-        client.lookup.return_value = ("component", {"name": "button", "packages": [], "css_imports": [], "checksum": ""})
+        client.lookup.return_value = (
+            "component",
+            {"name": "button", "packages": [], "css_imports": [], "checksum": ""},
+        )
         client.get_component_with_dependencies.return_value = {"button": "# btn source"}
         # Metadata fetch fails during package collection phase
         client.get_component_metadata.side_effect = FileNotFoundError("no metadata")
@@ -764,7 +771,7 @@ class TestSetupCodeHighlighting:
     def test_skips_import_if_already_present(self, project):
         """If input.css already has the import, don't add it again."""
         input_css = project.css_dir_absolute / "input.css"
-        original = '@import "tailwindcss";\n@import \'./starlighter.css\';\n'
+        original = "@import \"tailwindcss\";\n@import './starlighter.css';\n"
         input_css.write_text(original)
 
         mock_starlighter = MagicMock()

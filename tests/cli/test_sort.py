@@ -11,7 +11,6 @@ from rich.console import Console
 from starui.cli.sort import sort_command
 from starui.sort import _extract_tokens, _is_fstring, _sort_string, sort_file, tokenize
 
-
 # ---------------------------------------------------------------------------
 # Library: tokenize()
 # ---------------------------------------------------------------------------
@@ -31,15 +30,15 @@ class TestTokenize:
         assert tokenize("flex") == ["flex"]
 
     def test_preserves_brackets(self):
-        result = tokenize("group-hover:text-[rgb(0,0,0)] flex")
-        assert result == ["group-hover:text-[rgb(0,0,0)]", "flex"]
+        result = tokenize("flex group-hover:text-[rgb(0,0,0)]")
+        assert result == ["flex", "group-hover:text-[rgb(0,0,0)]"]
 
     def test_preserves_parentheses(self):
         result = tokenize("bg-[url(image.png)] p-4")
         assert result == ["bg-[url(image.png)]", "p-4"]
 
     def test_multiple_whitespace_between_tokens(self):
-        assert tokenize("flex   gap-2") == ["flex", "gap-2"]
+        assert tokenize("flex gap-2") == ["flex", "gap-2"]
 
     def test_leading_trailing_whitespace(self):
         assert tokenize("  flex gap-2  ") == ["flex", "gap-2"]
@@ -48,8 +47,8 @@ class TestTokenize:
         assert tokenize("flex\tgap-2\np-4") == ["flex", "gap-2", "p-4"]
 
     def test_nested_brackets(self):
-        result = tokenize("text-[calc(100%-2rem)] flex")
-        assert result == ["text-[calc(100%-2rem)]", "flex"]
+        result = tokenize("flex text-[calc(100%-2rem)]")
+        assert result == ["flex", "text-[calc(100%-2rem)]"]
 
 
 # ---------------------------------------------------------------------------

@@ -102,7 +102,7 @@ directly during development and docs builds.
 import importlib
 import sys
 
-_COMPONENT_DEPS = {deps!r}
+_COMPONENT_DEPS = {deps}
 
 for _name in _COMPONENT_DEPS:
     _key = f"{{__name__}}.{{_name}}"
@@ -114,10 +114,16 @@ for _name in _COMPONENT_DEPS:
 '''
 
 
+def _format_deps(deps: list[str]) -> str:
+    """Format deps list with double quotes to match ruff's preferred style."""
+    items = ", ".join(f'"{d}"' for d in deps)
+    return f"[{items}]"
+
+
 def generate_block_bridge(block_dir: Path, deps: list[str]) -> None:
     """Auto-generate __init__.py bridge from AST-derived dependencies."""
     init_path = block_dir / "__init__.py"
-    content = BRIDGE_TEMPLATE.format(deps=deps)
+    content = BRIDGE_TEMPLATE.format(deps=_format_deps(deps))
     existing = init_path.read_text() if init_path.exists() else ""
     if content != existing:
         init_path.write_text(content)

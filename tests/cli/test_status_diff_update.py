@@ -495,9 +495,7 @@ class TestBlockUpdateCommand:
 
     @patch("starui.cli.update.RegistryClient")
     @patch("starui.cli.update.get_project_config")
-    def test_updates_block_when_registry_has_newer_version(
-        self, mock_config_fn, mock_client_cls, cli, project, config
-    ):
+    def test_updates_block_when_registry_has_newer_version(self, mock_config_fn, mock_client_cls, cli, project, config):
         runner, app = cli
         root, comp_dir = project
         mock_config_fn.return_value = config
@@ -525,9 +523,7 @@ class TestBlockUpdateCommand:
 
     @patch("starui.cli.update.RegistryClient")
     @patch("starui.cli.update.get_project_config")
-    def test_skips_block_when_checksums_match(
-        self, mock_config_fn, mock_client_cls, cli, project, config
-    ):
+    def test_skips_block_when_checksums_match(self, mock_config_fn, mock_client_cls, cli, project, config):
         runner, app = cli
         root, comp_dir = project
         mock_config_fn.return_value = config
@@ -546,9 +542,7 @@ class TestBlockUpdateCommand:
 
     @patch("starui.cli.update.RegistryClient")
     @patch("starui.cli.update.get_project_config")
-    def test_skips_modified_block_without_force(
-        self, mock_config_fn, mock_client_cls, cli, project, config
-    ):
+    def test_skips_modified_block_without_force(self, mock_config_fn, mock_client_cls, cli, project, config):
         runner, app = cli
         root, comp_dir = project
         mock_config_fn.return_value = config
@@ -572,9 +566,7 @@ class TestBlockUpdateCommand:
 
     @patch("starui.cli.update.RegistryClient")
     @patch("starui.cli.update.get_project_config")
-    def test_force_updates_modified_block(
-        self, mock_config_fn, mock_client_cls, cli, project, config
-    ):
+    def test_force_updates_modified_block(self, mock_config_fn, mock_client_cls, cli, project, config):
         runner, app = cli
         root, comp_dir = project
         mock_config_fn.return_value = config
@@ -599,9 +591,7 @@ class TestBlockUpdateCommand:
 
     @patch("starui.cli.update.RegistryClient")
     @patch("starui.cli.update.get_project_config")
-    def test_block_not_in_registry_skips_gracefully(
-        self, mock_config_fn, mock_client_cls, cli, project, config
-    ):
+    def test_block_not_in_registry_skips_gracefully(self, mock_config_fn, mock_client_cls, cli, project, config):
         runner, app = cli
         root, comp_dir = project
         mock_config_fn.return_value = config
@@ -620,9 +610,7 @@ class TestBlockUpdateCommand:
 
     @patch("starui.cli.update.RegistryClient")
     @patch("starui.cli.update.get_project_config")
-    def test_block_update_installs_missing_component_deps(
-        self, mock_config_fn, mock_client_cls, cli, project, config
-    ):
+    def test_block_update_installs_missing_component_deps(self, mock_config_fn, mock_client_cls, cli, project, config):
         runner, app = cli
         root, comp_dir = project
         mock_config_fn.return_value = config
@@ -655,9 +643,7 @@ class TestBlockUpdateCommand:
 
     @patch("starui.cli.update.RegistryClient")
     @patch("starui.cli.update.get_project_config")
-    def test_block_update_skips_existing_component_deps(
-        self, mock_config_fn, mock_client_cls, cli, project, config
-    ):
+    def test_block_update_skips_existing_component_deps(self, mock_config_fn, mock_client_cls, cli, project, config):
         runner, app = cli
         root, comp_dir = project
         mock_config_fn.return_value = config
@@ -751,9 +737,7 @@ class TestBlockUpdateCommand:
 
     @patch("starui.cli.update.RegistryClient")
     @patch("starui.cli.update.get_project_config")
-    def test_unknown_block_by_install_name_resolves(
-        self, mock_config_fn, mock_client_cls, cli, project, config
-    ):
+    def test_unknown_block_by_install_name_resolves(self, mock_config_fn, mock_client_cls, cli, project, config):
         """Typing 'star update user_button' finds the block installed as user_button_01."""
         runner, app = cli
         root, comp_dir = project
@@ -780,9 +764,7 @@ class TestBlockUpdateCommand:
 
     @patch("starui.cli.update.RegistryClient")
     @patch("starui.cli.update.get_project_config")
-    def test_verbose_shows_already_up_to_date_for_blocks(
-        self, mock_config_fn, mock_client_cls, cli, project, config
-    ):
+    def test_verbose_shows_already_up_to_date_for_blocks(self, mock_config_fn, mock_client_cls, cli, project, config):
         runner, app = cli
         root, comp_dir = project
         mock_config_fn.return_value = config
@@ -800,9 +782,7 @@ class TestBlockUpdateCommand:
 
     @patch("starui.cli.update.RegistryClient")
     @patch("starui.cli.update.get_project_config")
-    def test_general_exception_shows_error_message(
-        self, mock_config_fn, mock_client_cls, cli, project, config
-    ):
+    def test_general_exception_shows_error_message(self, mock_config_fn, mock_client_cls, cli, project, config):
         runner, app = cli
         root, comp_dir = project
         mock_config_fn.return_value = config
@@ -819,9 +799,7 @@ class TestBlockUpdateCommand:
 
     @patch("starui.cli.update.RegistryClient")
     @patch("starui.cli.update.get_project_config")
-    def test_empty_manifest_no_components_no_blocks(
-        self, mock_config_fn, mock_client_cls, cli, project, config
-    ):
+    def test_empty_manifest_no_components_no_blocks(self, mock_config_fn, mock_client_cls, cli, project, config):
         runner, app = cli
         root, _ = project
         mock_config_fn.return_value = config
