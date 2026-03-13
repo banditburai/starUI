@@ -1,19 +1,19 @@
+from collections.abc import Callable
 from typing import Any
 
 import typer
 from rich.table import Table
 from rich.text import Text
 
-from starui.config import get_project_config
-from starui.registry.client import RegistryClient
-from starui.registry.manifest import Manifest
-
+from ..config import get_project_config
+from ..registry.client import RegistryClient
+from ..registry.manifest import Manifest
 from .utils import console, error, info
 
 
 def _load_items(
     names: list[str],
-    get_meta,
+    get_meta: Callable[[str], dict[str, Any]],
     installed_names: set[str],
     *,
     search: str | None = None,
@@ -90,24 +90,24 @@ def list_command(
             config = get_project_config()
             manifest = Manifest(config.project_root)
             installed_names = set(manifest.get_installed())
-            installed_block_names = set(manifest.get_installed_blocks())
+            installed_block_names = set(manifest.get_installed(kind="block"))
         except Exception:
             pass
 
         client = RegistryClient()
-        comp_names = client.list_components()
-        block_names = client.list_blocks()
+        comp_names = client.list_items("component")
+        block_names = client.list_items("block")
 
         components = _load_items(
             comp_names,
-            client.get_component_metadata,
+            lambda name: client.get_metadata(name),
             installed_names,
             search=search,
             installed_only=installed,
         )
         blocks = _load_items(
             block_names,
-            client.get_block_metadata,
+            lambda name: client.get_metadata(name, kind="block"),
             installed_block_names,
             search=search,
             installed_only=installed,

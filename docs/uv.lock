@@ -874,8 +874,8 @@ wheels = [
 
 [[package]]
 name = "starui"
-version = "0.3.2"
-source = { directory = "../" }
+version = "0.4.0"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pydantic" },
     { name = "requests" },
@@ -885,28 +885,9 @@ dependencies = [
     { name = "typer" },
     { name = "websockets" },
 ]
-
-[package.metadata]
-requires-dist = [
-    { name = "pydantic", specifier = ">=2.5.0,<3.0.0" },
-    { name = "requests", specifier = ">=2.31.0,<3.0.0" },
-    { name = "rich", specifier = ">=13.7.0,<14.0.0" },
-    { name = "starhtml", specifier = ">=0.5.12" },
-    { name = "starmerge", specifier = ">=0.2.0" },
-    { name = "typer", specifier = ">=0.9.0,<1.0.0" },
-    { name = "websockets", specifier = ">=12.0.0,<16.0.0" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "build", specifier = ">=1.0.0" },
-    { name = "pyright", specifier = ">=1.1.403" },
-    { name = "pytest", specifier = ">=7.4.4" },
-    { name = "pytest-asyncio", specifier = ">=0.24.0" },
-    { name = "pytest-cov", specifier = ">=4.1.0" },
-    { name = "pytest-mock", specifier = ">=3.14.1" },
-    { name = "ruff", specifier = ">=0.12.8" },
-    { name = "twine", specifier = ">=4.0.0" },
+sdist = { url = "https://files.pythonhosted.org/packages/fa/a1/28b8fbf9e429e2db7b1edeedf300b7d866b0d849997fc5a721d8f2515bf9/starui-0.4.0.tar.gz", hash = "sha256:affdbb7fec6239ad96c2c1dc8f49e088a3181e9e611eeb24617e2baabce72ae3", size = 29191, upload-time = "2026-03-13T14:30:40.424Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/f6/81/7adee72141a0ceffa348f2b6d19121d00182b73fa229cd30d1ea6db5cc21/starui-0.4.0-py3-none-any.whl", hash = "sha256:d2271255537299f25e527dbb2083055afd9734c238bce46fe2c9db6d4affc42e", size = 39265, upload-time = "2026-03-13T14:30:39.144Z" },
 ]
 
 [[package]]
@@ -930,7 +911,7 @@ dev = [
 requires-dist = [
     { name = "starhtml" },
     { name = "starlighter", specifier = ">=0.2.0" },
-    { name = "starui", directory = "../" },
+    { name = "starui" },
     { name = "uvicorn", specifier = ">=0.30.0" },
 ]
 

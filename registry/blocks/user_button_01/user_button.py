@@ -1,14 +1,13 @@
-from starhtml import FT, Icon, P, Span
-
-from .avatar import Avatar, AvatarFallback, AvatarImage
-from .dropdown_menu import (
+from components.avatar import Avatar, AvatarFallback, AvatarImage
+from components.dropdown_menu import (
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 )
-from .utils import cn
+from components.utils import cn
+from starhtml import FT, Icon, P, Span
 
 __metadata__ = {
     "description": "User avatar button with dropdown menu for auth actions",

@@ -4,11 +4,10 @@ import typer
 from rich.table import Table
 from rich.text import Text
 
-from starui.config import get_project_config
-from starui.registry.client import RegistryClient
-from starui.registry.manifest import Manifest
-
-from .utils import MSG_NO_COMPONENTS, MSG_NO_MANIFEST, console, error, info
+from ..config import get_project_config
+from ..registry.client import RegistryClient
+from ..registry.manifest import ItemKind, Manifest
+from .utils import MSG_NO_COMPONENTS, MSG_NO_MANIFEST, console, error, info, resolve_local_path
 
 
 def _render_status_table(
@@ -17,33 +16,28 @@ def _render_status_table(
     manifest: "Manifest",
     client: "RegistryClient | None",
     component_dir: Path,
-    is_block: bool = False,
+    kind: ItemKind = "component",
 ) -> tuple[int, int]:
-    """Returns (modified_count, update_count)."""
     table = Table(title=title, show_header=True, header_style="bold blue")
-    table.add_column("Block" if is_block else "Name", style="cyan")
+    table.add_column("Block" if kind == "block" else "Name", style="cyan")
     table.add_column("Status", justify="center", min_width=10)
     table.add_column("Version", style="dim")
 
     modified_count = 0
     update_count = 0
 
-    is_modified = manifest.is_block_modified if is_block else manifest.is_modified
-    get_meta = (client.get_block_metadata if is_block else client.get_component_metadata) if client else None
-
     for name, record in sorted(items.items()):
-        recorded_file = record.get("file")
-        local_file = manifest.project_root / recorded_file if recorded_file else component_dir / f"{name}.py"
+        local_file = resolve_local_path(record, name, manifest=manifest, component_dir=component_dir)
         version = record.get("version", "unknown")
 
         if not local_file.exists():
             status = Text("Missing", style="red")
-        elif is_modified(name, component_dir):
+        elif manifest.is_modified(name, component_dir, kind=kind):
             status = Text("Modified", style="yellow")
             modified_count += 1
         elif client:
             try:
-                remote_meta = get_meta(name)
+                remote_meta = client.get_metadata(name, kind=kind)
                 remote_checksum = remote_meta.get("checksum", "")
             except FileNotFoundError:
                 remote_checksum = ""
@@ -72,7 +66,7 @@ def status_command() -> None:
             return
 
         installed = manifest.get_installed()
-        installed_blocks = manifest.get_installed_blocks()
+        installed_blocks = manifest.get_installed(kind="block")
 
         if not installed and not installed_blocks:
             info(MSG_NO_COMPONENTS)
@@ -80,7 +74,7 @@ def status_command() -> None:
 
         try:
             client = RegistryClient(version=manifest.registry_version)
-            client.list_components()
+            client.list_items("component")
         except Exception:
             client = None
             info("Could not fetch remote registry; showing local status only")
@@ -97,7 +91,7 @@ def status_command() -> None:
 
         if installed_blocks:
             m, u = _render_status_table(
-                installed_blocks, "Installed Blocks", manifest, client, component_dir, is_block=True
+                installed_blocks, "Installed Blocks", manifest, client, component_dir, kind="block"
             )
             total_modified += m
             total_updates += u

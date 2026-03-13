@@ -8,7 +8,7 @@ import requests
 from starui.registry.checksum import compute_checksum
 from starui.registry.client import INDEX_TTL_SECONDS, RegistryClient
 
-from .conftest import make_component_entry
+from .conftest import make_block_entry, make_component_entry
 
 BUTTON_SOURCE = "def Button(): pass\n"
 BUTTON_CHECKSUM = compute_checksum(BUTTON_SOURCE)
@@ -47,7 +47,7 @@ class TestFreshFetch:
         mock_get.return_value = _make_response(TEST_INDEX_TEXT)
 
         client = RegistryClient(version="main")
-        components = client.list_components()
+        components = client.list_items("component")
 
         assert "button" in components
         assert "utils" not in components
@@ -66,7 +66,7 @@ class TestFreshFetch:
         ]
 
         client = RegistryClient(version="main")
-        source = client.get_component_source("button")
+        source = client.get_source("button")
 
         assert source == BUTTON_SOURCE
         cached_file = home_dir / ".starui" / "cache" / "registry" / "main" / "components" / "button.py"
@@ -74,7 +74,7 @@ class TestFreshFetch:
         assert cached_file.read_bytes().decode("utf-8") == BUTTON_SOURCE
 
     @patch("requests.get")
-    def test_list_components_returns_sorted_without_utils(self, mock_get, home_dir):
+    def test_list_items_returns_sorted_without_utils(self, mock_get, home_dir):
         multi_index = {
             **TEST_INDEX,
             "components": {
@@ -86,7 +86,7 @@ class TestFreshFetch:
         mock_get.return_value = _make_response(json.dumps(multi_index))
 
         client = RegistryClient(version="main")
-        result = client.list_components()
+        result = client.list_items("component")
 
         assert result == ["alert", "button", "dialog"]
         assert "utils" not in result
@@ -96,7 +96,7 @@ class TestFreshFetch:
         mock_get.return_value = _make_response(TEST_INDEX_TEXT)
 
         client = RegistryClient(version="main")
-        meta = client.get_component_metadata("button")
+        meta = client.get_metadata("button")
 
         assert meta["name"] == "button"
         assert meta["dependencies"] == ["utils"]
@@ -108,7 +108,7 @@ class TestFreshFetch:
 
         client = RegistryClient(version="main")
         with pytest.raises(FileNotFoundError, match="not found in registry"):
-            client.get_component_source("nonexistent")
+            client.get_source("nonexistent")
 
     @patch("requests.get")
     def test_nonexistent_metadata_raises(self, mock_get, home_dir):
@@ -116,7 +116,7 @@ class TestFreshFetch:
 
         client = RegistryClient(version="main")
         with pytest.raises(FileNotFoundError, match="not found in registry"):
-            client.get_component_metadata("nonexistent")
+            client.get_metadata("nonexistent")
 
 
 class TestCacheTTL:
@@ -125,11 +125,11 @@ class TestCacheTTL:
         mock_get.return_value = _make_response(TEST_INDEX_TEXT)
 
         client1 = RegistryClient(version="main")
-        client1.list_components()
+        client1.list_items("component")
         assert mock_get.call_count == 1
 
         client2 = RegistryClient(version="main")
-        components = client2.list_components()
+        components = client2.list_items("component")
         assert "button" in components
         assert mock_get.call_count == 1
 
@@ -138,21 +138,21 @@ class TestCacheTTL:
         mock_get.return_value = _make_response(TEST_INDEX_TEXT)
 
         client1 = RegistryClient(version="main")
-        client1.list_components()
+        client1.list_items("component")
 
         meta_path = home_dir / ".starui" / "cache" / "registry" / "main" / "index.meta.json"
         expired_time = time.time() - INDEX_TTL_SECONDS - 100
         meta_path.write_text(json.dumps({"fetched_at": expired_time}))
 
         client2 = RegistryClient(version="main")
-        client2.list_components()
+        client2.list_items("component")
         assert mock_get.call_count == 2
 
     @patch("requests.get")
     def test_expired_cache_falls_back_on_network_error(self, mock_get, home_dir):
         mock_get.return_value = _make_response(TEST_INDEX_TEXT)
         client1 = RegistryClient(version="main")
-        client1.list_components()
+        client1.list_items("component")
 
         meta_path = home_dir / ".starui" / "cache" / "registry" / "main" / "index.meta.json"
         expired_time = time.time() - INDEX_TTL_SECONDS - 100
@@ -161,7 +161,7 @@ class TestCacheTTL:
         mock_get.side_effect = requests.ConnectionError("offline")
 
         client2 = RegistryClient(version="main")
-        components = client2.list_components()
+        components = client2.list_items("component")
         assert "button" in components
 
 
@@ -171,7 +171,7 @@ class TestImmutableVersions:
         mock_get.return_value = _make_response(TEST_INDEX_TEXT)
 
         client1 = RegistryClient(version="v0.3.0")
-        client1.list_components()
+        client1.list_items("component")
         assert mock_get.call_count == 1
 
         meta_path = home_dir / ".starui" / "cache" / "registry" / "v0.3.0" / "index.meta.json"
@@ -179,7 +179,7 @@ class TestImmutableVersions:
             meta_path.unlink()
 
         client2 = RegistryClient(version="v0.3.0")
-        components = client2.list_components()
+        components = client2.list_items("component")
         assert "button" in components
         assert mock_get.call_count == 1
 
@@ -188,13 +188,13 @@ class TestImmutableVersions:
         mock_get.return_value = _make_response(TEST_INDEX_TEXT)
 
         client1 = RegistryClient(version="main")
-        client1.list_components()
+        client1.list_items("component")
 
         meta_path = home_dir / ".starui" / "cache" / "registry" / "main" / "index.meta.json"
         meta_path.unlink()
 
         client2 = RegistryClient(version="main")
-        client2.list_components()
+        client2.list_items("component")
         assert mock_get.call_count == 2
 
 
@@ -209,7 +209,7 @@ class TestComponentSourceCaching:
         comp_dir.mkdir(parents=True)
         (comp_dir / "button.py").write_bytes(BUTTON_SOURCE.encode("utf-8"))
 
-        source = client.get_component_source("button")
+        source = client.get_source("button")
         assert source == BUTTON_SOURCE
         assert mock_get.call_count == 1
 
@@ -226,7 +226,7 @@ class TestComponentSourceCaching:
         comp_dir.mkdir(parents=True)
         (comp_dir / "button.py").write_text("# outdated content")
 
-        source = client.get_component_source("button")
+        source = client.get_source("button")
         assert source == BUTTON_SOURCE
         assert mock_get.call_count == 2
 
@@ -249,7 +249,7 @@ class TestComponentSourceCaching:
         comp_dir.mkdir(parents=True)
         (comp_dir / "button.py").write_text(stale_source)
 
-        source = client.get_component_source("button")
+        source = client.get_source("button")
         assert source == stale_source
 
     @patch("requests.get")
@@ -266,7 +266,7 @@ class TestComponentSourceCaching:
 
         client = RegistryClient(version="main")
         with pytest.raises(ConnectionError, match="Cannot fetch component"):
-            client.get_component_source("button")
+            client.get_source("button")
 
 
 class TestCorruptedCache:
@@ -280,7 +280,7 @@ class TestCorruptedCache:
         (cache_dir / "index.meta.json").write_text(json.dumps({"fetched_at": time.time()}))
 
         client = RegistryClient(version="main")
-        components = client.list_components()
+        components = client.list_items("component")
         assert "button" in components
         mock_get.assert_called_once()
 
@@ -294,8 +294,8 @@ class TestCorruptedCache:
         (cache_dir / "index.meta.json").write_text(json.dumps({"fetched_at": time.time()}))
 
         client = RegistryClient(version="main")
-        with pytest.raises(ConnectionError, match="Cannot fetch component registry"):
-            client.list_components()
+        with pytest.raises(ConnectionError, match="Cannot fetch registry index"):
+            client.list_items("component")
 
     @patch("requests.get")
     def test_corrupted_meta_invalidates_cache(self, mock_get, home_dir):
@@ -307,7 +307,7 @@ class TestCorruptedCache:
         (cache_dir / "index.meta.json").write_text("not json")
 
         client = RegistryClient(version="main")
-        client.list_components()
+        client.list_items("component")
         mock_get.assert_called_once()
 
     @patch("requests.get")
@@ -319,7 +319,7 @@ class TestCorruptedCache:
         (cache_dir / "index.json").write_text(TEST_INDEX_TEXT)
 
         client = RegistryClient(version="main")
-        client.list_components()
+        client.list_items("component")
         mock_get.assert_called_once()
 
     @patch("requests.get")
@@ -329,7 +329,7 @@ class TestCorruptedCache:
         (cache_dir / "index.json").write_text(TEST_INDEX_TEXT)
 
         client = RegistryClient(version="v1.0.0")
-        components = client.list_components()
+        components = client.list_items("component")
         assert "button" in components
         mock_get.assert_not_called()
 
@@ -341,10 +341,109 @@ class TestNoNetworkAvailable:
 
         client = RegistryClient(version="main")
         with pytest.raises(ConnectionError, match="Check your network connection"):
-            client.list_components()
+            client.list_items("component")
 
     @patch("requests.get")
     def test_constructor_creates_cache_directory(self, mock_get, home_dir):
         RegistryClient(version="v2.0.0")
         expected = home_dir / ".starui" / "cache" / "registry" / "v2.0.0"
         assert expected.is_dir()
+
+
+# ── Block caching tests ───────────────────────────────────────────────
+
+BLOCK_SOURCE = "from components.avatar import Avatar\n"
+
+BLOCK_INDEX = {
+    "version": "0.4.0",
+    "schema_version": 2,
+    "components": TEST_INDEX["components"],
+    "blocks": {
+        "user_button_01": make_block_entry(
+            "user_button_01",
+            BLOCK_SOURCE,
+            deps=["button"],
+            install_name="user_button",
+        ),
+    },
+}
+
+BLOCK_INDEX_TEXT = json.dumps(BLOCK_INDEX)
+
+
+class TestBlockSourceCaching:
+    @patch("requests.get")
+    def test_fetches_block_source_and_caches(self, mock_get, home_dir):
+        mock_get.side_effect = [
+            _make_response(BLOCK_INDEX_TEXT),
+            _make_response(BLOCK_SOURCE),
+        ]
+
+        client = RegistryClient(version="main")
+        source = client.get_source("user_button_01", kind="block")
+
+        assert source == BLOCK_SOURCE
+        cached = home_dir / ".starui" / "cache" / "registry" / "main" / "blocks" / "user_button.py"
+        assert cached.exists()
+        assert cached.read_text() == BLOCK_SOURCE
+
+    @patch("requests.get")
+    def test_cached_block_source_served_on_checksum_match(self, mock_get, home_dir):
+        mock_get.return_value = _make_response(BLOCK_INDEX_TEXT)
+
+        client = RegistryClient(version="main")
+
+        blocks_dir = home_dir / ".starui" / "cache" / "registry" / "main" / "blocks"
+        blocks_dir.mkdir(parents=True)
+        (blocks_dir / "user_button.py").write_text(BLOCK_SOURCE)
+
+        source = client.get_source("user_button_01", kind="block")
+        assert source == BLOCK_SOURCE
+        # Only one call: index fetch. No source fetch needed.
+        assert mock_get.call_count == 1
+
+    @patch("requests.get")
+    def test_list_blocks_returns_sorted_names(self, mock_get, home_dir):
+        mock_get.return_value = _make_response(BLOCK_INDEX_TEXT)
+
+        client = RegistryClient(version="main")
+        blocks = client.list_items("block")
+        assert blocks == ["user_button_01"]
+
+    @patch("requests.get")
+    def test_block_metadata_returns_entry(self, mock_get, home_dir):
+        mock_get.return_value = _make_response(BLOCK_INDEX_TEXT)
+
+        client = RegistryClient(version="main")
+        meta = client.get_metadata("user_button_01", kind="block")
+        assert meta["install_name"] == "user_button"
+        assert meta["dependencies"] == ["button"]
+
+
+class TestOldIndexWithoutBlocks:
+    """Indexes from older registry versions may lack a 'blocks' key."""
+
+    @patch("requests.get")
+    def test_old_index_blocks_default_to_empty(self, mock_get, home_dir):
+        # TEST_INDEX has no "blocks" key
+        mock_get.return_value = _make_response(TEST_INDEX_TEXT)
+
+        client = RegistryClient(version="main")
+        blocks = client.list_items("block")
+        assert blocks == []
+
+    @patch("requests.get")
+    def test_old_index_component_operations_still_work(self, mock_get, home_dir):
+        mock_get.return_value = _make_response(TEST_INDEX_TEXT)
+
+        client = RegistryClient(version="main")
+        components = client.list_items("component")
+        assert "button" in components
+
+    @patch("requests.get")
+    def test_old_index_block_lookup_raises_not_found(self, mock_get, home_dir):
+        mock_get.return_value = _make_response(TEST_INDEX_TEXT)
+
+        client = RegistryClient(version="main")
+        with pytest.raises(FileNotFoundError, match="not found in registry"):
+            client.lookup("some_block")

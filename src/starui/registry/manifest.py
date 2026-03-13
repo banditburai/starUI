@@ -3,9 +3,15 @@ import json
 import os
 import tempfile
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from .checksum import compute_checksum
+
+ItemKind = Literal["component", "block"]
+
+
+SECTIONS: dict[ItemKind, str] = {"component": "components", "block": "blocks"}
+
 
 MANIFEST_FILE = ".starui/manifest.json"
 
@@ -25,7 +31,6 @@ class Manifest:
                 self._data = json.loads(self.path.read_text())
             except (json.JSONDecodeError, OSError):
                 pass
-        # Normalize: ensure required keys exist after loading from disk
         for key in ("components", "blocks"):
             self._data.setdefault(key, {})
         return self._data
@@ -49,44 +54,28 @@ class Manifest:
     def registry_version(self) -> str:
         return self._load().get("registry_version", "main")
 
-    def record_install(self, name: str, version: str, checksum: str, file_path: str) -> None:
-        """Record a component installation in memory. Call save() to persist."""
-        self._load()["components"][name] = {
+    def record_install(
+        self, name: str, version: str, checksum: str, file_path: str, kind: ItemKind = "component"
+    ) -> None:
+        """In-memory only — call save() to persist."""
+        self._load()[SECTIONS[kind]][name] = {
             "version": version,
             "checksum": checksum,
             "file": file_path,
         }
 
-    def get_installed(self) -> dict[str, dict[str, str]]:
-        return self._load()["components"]
+    def get_installed(self, kind: ItemKind = "component") -> dict[str, dict[str, str]]:
+        return self._load()[SECTIONS[kind]]
 
     def _is_modified(self, record: dict[str, str] | None, name: str, component_dir: Path) -> bool:
         if not record:
             return False
-        recorded_file = record.get("file")
-        local_file = self.project_root / recorded_file if recorded_file else component_dir / f"{name}.py"
-        if not local_file.exists():
-            return True
-        return compute_checksum(local_file) != record.get("checksum", "")
+        recorded = record.get("file")
+        local_file = self.project_root / recorded if recorded else component_dir / f"{name}.py"
+        return not local_file.exists() or compute_checksum(local_file) != record.get("checksum", "")
 
-    def is_modified(self, name: str, component_dir: Path) -> bool:
-        return self._is_modified(self.get_installed().get(name), name, component_dir)
-
-    # ── Blocks ──────────────────────────────────────────────────────────
-
-    def record_block_install(self, name: str, version: str, checksum: str, file_path: str) -> None:
-        """Record a block installation in memory. Call save() to persist."""
-        self._load()["blocks"][name] = {
-            "version": version,
-            "checksum": checksum,
-            "file": file_path,
-        }
-
-    def get_installed_blocks(self) -> dict[str, dict[str, str]]:
-        return self._load()["blocks"]
-
-    def is_block_modified(self, name: str, component_dir: Path) -> bool:
-        return self._is_modified(self.get_installed_blocks().get(name), name, component_dir)
+    def is_modified(self, name: str, component_dir: Path, kind: ItemKind = "component") -> bool:
+        return self._is_modified(self.get_installed(kind).get(name), name, component_dir)
 
     def exists(self) -> bool:
         return self.path.exists()

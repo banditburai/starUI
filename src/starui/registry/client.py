@@ -7,6 +7,7 @@ from typing import Any
 import requests
 
 from .checksum import compute_checksum
+from .manifest import SECTIONS, ItemKind
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +35,12 @@ class RegistryClient:
         resp.raise_for_status()
         return resp.text
 
+    def _set_index(self, data: dict[str, Any]) -> dict[str, Any]:
+        for key in ("components", "blocks"):
+            data.setdefault(key, {})
+        self._index = data
+        return data
+
     def _get_index(self) -> dict[str, Any]:
         if self._index is not None:
             return self._index
@@ -52,28 +59,25 @@ class RegistryClient:
 
             if cache_valid:
                 try:
-                    self._index = json.loads(cached.read_text())
-                    return self._index
+                    return self._set_index(json.loads(cached.read_text()))
                 except (json.JSONDecodeError, OSError):
                     pass
 
         url = f"{self._base_url}/index.json"
         try:
             text = self._fetch_url(url)
-            self._index = json.loads(text)
             cached.write_text(text)
             meta.write_text(json.dumps({"fetched_at": time.time()}))
-            return self._index
+            return self._set_index(json.loads(text))
         except requests.RequestException as e:
             if cached.exists():
                 try:
-                    self._index = json.loads(cached.read_text())
                     logger.warning("Network error fetching index, using cached version: %s", e)
-                    return self._index
+                    return self._set_index(json.loads(cached.read_text()))
                 except (json.JSONDecodeError, OSError):
                     pass
             raise ConnectionError(
-                f"Cannot fetch component registry from {url}. Check your network connection or try again later."
+                f"Cannot fetch registry index from {url}. Check your network connection or try again later."
             ) from e
 
     def _fetch_source(self, entry: dict[str, Any], cache_subdir: str, cache_name: str, label: str) -> str:
@@ -98,93 +102,57 @@ class RegistryClient:
                 f"Cannot fetch {label} from {url}. Check your network connection or try again later."
             ) from e
 
-    # ── Components ──────────────────────────────────────────────────────
+    def _get_entry(self, name: str, kind: ItemKind) -> dict[str, Any]:
+        entry = self._get_index()[SECTIONS[kind]].get(name)
+        if not entry:
+            raise FileNotFoundError(f"{kind.title()} '{name}' not found in registry")
+        return entry
 
-    def _get_component_entry(self, name: str) -> dict[str, Any]:
-        comp = self._get_index()["components"].get(name)
-        if not comp:
-            raise FileNotFoundError(f"Component '{name}' not found in registry")
-        return comp
+    def list_items(self, kind: ItemKind) -> list[str]:
+        names = self._get_index()[SECTIONS[kind]]
+        return sorted(n for n in names if n != "utils") if kind == "component" else sorted(names)
 
-    def list_components(self) -> list[str]:
-        index = self._get_index()
-        return sorted(name for name in index["components"] if name != "utils")
+    def get_source(self, name: str, kind: ItemKind = "component") -> str:
+        entry = self._get_entry(name, kind)
+        cache_name = entry.get("install_name", name) if kind == "block" else name
+        return self._fetch_source(entry, SECTIONS[kind], cache_name, f"{kind} '{name}'")
 
-    def get_component_source(self, component_name: str) -> str:
-        return self._fetch_source(
-            self._get_component_entry(component_name),
-            "components",
-            component_name,
-            f"component '{component_name}'",
-        )
+    def get_metadata(self, name: str, kind: ItemKind = "component") -> dict[str, Any]:
+        return self._get_entry(name, kind)
 
-    def get_component_metadata(self, component_name: str) -> dict[str, Any]:
-        return self._get_component_entry(component_name)
-
-    def _visit_component(self, name: str, resolved: list[str], visiting: set[str], visited: set[str]) -> None:
+    def _visit_dep(self, name: str, resolved: list[str], visiting: set[str], visited: set[str]) -> None:
         if name in visiting:
             raise ValueError(f"Circular dependency: {name}")
         if name in visited:
             return
         visiting.add(name)
-        for dep in self.get_component_metadata(name).get("dependencies", []):
-            self._visit_component(dep, resolved, visiting, visited)
+        for dep in self.get_metadata(name).get("dependencies", []):
+            self._visit_dep(dep, resolved, visiting, visited)
         visiting.remove(name)
         visited.add(name)
         resolved.append(name)
 
-    def resolve_dependencies(self, component_name: str) -> list[str]:
-        resolved: list[str] = []
-        self._visit_component(component_name, resolved, set(), set())
-        return resolved
-
-    def get_component_with_dependencies(self, component_name: str) -> dict[str, str]:
-        return {n: self.get_component_source(n) for n in self.resolve_dependencies(component_name)}
-
-    # ── Blocks ──────────────────────────────────────────────────────────
-
-    def _get_block_entry(self, name: str) -> dict[str, Any]:
-        block = self._get_index()["blocks"].get(name)
-        if not block:
-            raise FileNotFoundError(f"Block '{name}' not found in registry")
-        return block
-
-    def list_blocks(self) -> list[str]:
-        return sorted(self._get_index()["blocks"])
-
-    def get_block_source(self, name: str) -> str:
-        block = self._get_block_entry(name)
-        install_name = block.get("install_name", name)
-        return self._fetch_source(block, "blocks", install_name, f"block '{name}'")
-
-    def get_block_metadata(self, name: str) -> dict[str, Any]:
-        return self._get_block_entry(name)
-
-    def resolve_block_dependencies(self, name: str) -> list[str]:
-        block = self._get_block_entry(name)
+    def resolve_dependencies(self, name: str, kind: ItemKind = "component") -> list[str]:
         resolved: list[str] = []
         visiting: set[str] = set()
         visited: set[str] = set()
-        for dep in block.get("dependencies", []):
-            self._visit_component(dep, resolved, visiting, visited)
+        roots = self._get_entry(name, kind).get("dependencies", []) if kind == "block" else [name]
+        for dep in roots:
+            self._visit_dep(dep, resolved, visiting, visited)
         return resolved
 
-    def get_block_with_dependencies(self, name: str) -> tuple[dict[str, str], str]:
-        comp_deps = {n: self.get_component_source(n) for n in self.resolve_block_dependencies(name)}
-        block_source = self.get_block_source(name)
-        return comp_deps, block_source
+    def get_with_dependencies(self, name: str, kind: ItemKind = "component") -> tuple[dict[str, str], str]:
+        """For components, deps excludes self. For blocks, deps are component dependencies."""
+        deps = {n: self.get_source(n) for n in self.resolve_dependencies(name, kind) if n != name}
+        return deps, self.get_source(name, kind)
 
-    # ── Unified lookup ──────────────────────────────────────────────────
-
-    def lookup(self, name: str) -> tuple[str, dict[str, Any]]:
+    def lookup(self, name: str) -> tuple[ItemKind, dict[str, Any]]:
         index = self._get_index()
-        if name in index["components"]:
-            return ("component", index["components"][name])
-        blocks = index["blocks"]
-        if name in blocks:
-            return ("block", blocks[name])
+        for kind, section in SECTIONS.items():
+            if name in index[section]:
+                return kind, index[section][name]
         # Fallback: match by install_name so `star add user-button` resolves
-        for entry in blocks.values():
+        for entry in index[SECTIONS["block"]].values():
             if entry.get("install_name") == name:
-                return ("block", entry)
+                return "block", entry
         raise FileNotFoundError(f"'{name}' not found in registry (checked components and blocks)")

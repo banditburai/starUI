@@ -1,6 +1,6 @@
 import pytest
 
-from .conftest import make_component_entry, make_test_client
+from .conftest import make_block_entry, make_component_entry, make_test_client
 
 TEST_SOURCES = {
     "utils": "def cn(*classes): pass\ndef cva(): pass\n",
@@ -45,40 +45,41 @@ class TestDependencyResolver:
 
 class TestComponentLoading:
     def test_load_single_component(self, registry_client):
-        source = registry_client.get_component_source("button")
+        source = registry_client.get_source("button")
         assert "def Button" in source
         assert "from .utils import" in source
 
     def test_load_component_with_dependencies(self, registry_client):
-        sources = registry_client.get_component_with_dependencies("theme_toggle")
-        assert set(sources.keys()) == {"utils", "button", "theme_toggle"}
-        assert "def Button" in sources["button"]
-        assert "def ThemeToggle" in sources["theme_toggle"]
+        deps, item_source = registry_client.get_with_dependencies("theme_toggle")
+        all_sources = {**deps, "theme_toggle": item_source}
+        assert set(all_sources.keys()) == {"utils", "button", "theme_toggle"}
+        assert "def Button" in all_sources["button"]
+        assert "def ThemeToggle" in all_sources["theme_toggle"]
 
     def test_load_nonexistent_component(self, registry_client):
         with pytest.raises(FileNotFoundError):
-            registry_client.get_component_source("nonexistent")
+            registry_client.get_source("nonexistent")
 
 
 class TestRegistryClient:
-    def test_list_components(self, registry_client):
-        components = registry_client.list_components()
+    def test_list_items(self, registry_client):
+        components = registry_client.list_items("component")
         assert "button" in components
         assert "theme_toggle" in components
         assert "alert" in components
         assert "utils" not in components
 
-    def test_get_component_metadata(self, registry_client):
-        meta = registry_client.get_component_metadata("theme_toggle")
+    def test_get_metadata(self, registry_client):
+        meta = registry_client.get_metadata("theme_toggle")
         assert meta["name"] == "theme_toggle"
         assert meta["dependencies"] == ["utils", "button"]
 
-        meta = registry_client.get_component_metadata("button")
+        meta = registry_client.get_metadata("button")
         assert meta["dependencies"] == ["utils"]
 
-    def test_get_component_source(self, registry_client):
-        assert "def Button" in registry_client.get_component_source("button")
-        utils_source = registry_client.get_component_source("utils")
+    def test_get_source(self, registry_client):
+        assert "def Button" in registry_client.get_source("button")
+        utils_source = registry_client.get_source("utils")
         assert "def cn" in utils_source
         assert "def cva" in utils_source
 
@@ -94,7 +95,9 @@ class TestDependencyChain:
                 assert result.index(dep) < result.index(comp)
 
     def test_dependency_order_preserved(self, registry_client):
-        order = list(registry_client.get_component_with_dependencies("theme_toggle").keys())
+        deps, item_source = registry_client.get_with_dependencies("theme_toggle")
+        all_sources = {**deps, "theme_toggle": item_source}
+        order = list(all_sources.keys())
         assert order.index("button") < order.index("theme_toggle")
 
 
@@ -154,8 +157,9 @@ class TestDiamondDependency:
         assert result.index("utils") < result.index("badge")
 
     def test_diamond_loads_all_sources(self, diamond_client):
-        sources = diamond_client.get_component_with_dependencies("dialog")
-        assert set(sources.keys()) == {"utils", "button", "badge", "dialog"}
+        deps, item_source = diamond_client.get_with_dependencies("dialog")
+        all_sources = {**deps, "dialog": item_source}
+        assert set(all_sources.keys()) == {"utils", "button", "badge", "dialog"}
 
 
 class TestMissingTransitiveDependency:
@@ -172,3 +176,109 @@ class TestMissingTransitiveDependency:
         client = make_test_client(tmp_path, "missing", index, sources)
         with pytest.raises(FileNotFoundError, match="'missing'"):
             client.resolve_dependencies("comp_a")
+
+
+# ── Block tests ────────────────────────────────────────────────────────
+
+BLOCK_SOURCES = {
+    "utils": "def cn(*classes): pass\n",
+    "avatar": "from .utils import cn\n\ndef Avatar(): pass\n",
+    "dropdown_menu": "from .utils import cn\n\ndef DropdownMenu(): pass\n",
+}
+
+BLOCK_SOURCE = "from components.avatar import Avatar\nfrom components.dropdown_menu import DropdownMenu\n"
+
+BLOCK_INDEX = {
+    "version": "0.3.0",
+    "schema_version": 2,
+    "components": {
+        "utils": make_component_entry("utils", BLOCK_SOURCES["utils"]),
+        "avatar": make_component_entry("avatar", BLOCK_SOURCES["avatar"], deps=["utils"]),
+        "dropdown_menu": make_component_entry("dropdown_menu", BLOCK_SOURCES["dropdown_menu"], deps=["utils"]),
+    },
+    "blocks": {
+        "user_button_01": make_block_entry(
+            "user_button_01",
+            BLOCK_SOURCE,
+            deps=["avatar", "dropdown_menu"],
+            install_name="user_button",
+        ),
+    },
+}
+
+
+@pytest.fixture
+def block_client(tmp_path):
+    return make_test_client(
+        tmp_path,
+        "blocks",
+        BLOCK_INDEX,
+        BLOCK_SOURCES,
+        block_sources={"user_button_01": ("user_button", BLOCK_SOURCE)},
+    )
+
+
+class TestBlockDependencyResolution:
+    def test_resolve_block_deps_returns_component_deps(self, block_client):
+        result = block_client.resolve_dependencies("user_button_01", kind="block")
+        assert "utils" in result
+        assert "avatar" in result
+        assert "dropdown_menu" in result
+        # Block itself is NOT in the resolved list (only component deps)
+        assert "user_button_01" not in result
+
+    def test_resolve_block_deps_topo_order(self, block_client):
+        result = block_client.resolve_dependencies("user_button_01", kind="block")
+        assert result.index("utils") < result.index("avatar")
+        assert result.index("utils") < result.index("dropdown_menu")
+
+    def test_get_with_dependencies_for_block(self, block_client):
+        deps, block_source = block_client.get_with_dependencies("user_button_01", kind="block")
+        assert "from components.avatar" in block_source
+        assert set(deps.keys()) == {"utils", "avatar", "dropdown_menu"}
+        assert "def Avatar" in deps["avatar"]
+
+    def test_nonexistent_block_raises(self, block_client):
+        with pytest.raises(FileNotFoundError, match="Block 'nonexistent' not found"):
+            block_client.resolve_dependencies("nonexistent", kind="block")
+
+
+class TestBlockListing:
+    def test_list_blocks(self, block_client):
+        blocks = block_client.list_items("block")
+        assert blocks == ["user_button_01"]
+
+    def test_list_components_excludes_blocks(self, block_client):
+        components = block_client.list_items("component")
+        assert "user_button_01" not in components
+        assert "avatar" in components
+
+
+class TestBlockLookup:
+    def test_lookup_block_by_registry_name(self, block_client):
+        kind, entry = block_client.lookup("user_button_01")
+        assert kind == "block"
+        assert entry["name"] == "user_button_01"
+        assert entry["install_name"] == "user_button"
+
+    def test_lookup_block_by_install_name(self, block_client):
+        kind, entry = block_client.lookup("user_button")
+        assert kind == "block"
+        assert entry["name"] == "user_button_01"
+
+    def test_lookup_component_not_confused_with_block(self, block_client):
+        kind, entry = block_client.lookup("avatar")
+        assert kind == "component"
+        assert entry["name"] == "avatar"
+
+
+class TestBlockSource:
+    def test_get_block_source(self, block_client):
+        source = block_client.get_source("user_button_01", kind="block")
+        assert "from components.avatar" in source
+
+    def test_get_block_metadata(self, block_client):
+        meta = block_client.get_metadata("user_button_01", kind="block")
+        assert meta["name"] == "user_button_01"
+        assert meta["install_name"] == "user_button"
+        assert meta["dependencies"] == ["avatar", "dropdown_menu"]

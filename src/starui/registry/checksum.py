@@ -1,5 +1,3 @@
-"""Canonical checksum computation for component files."""
-
 import hashlib
 from pathlib import Path
 

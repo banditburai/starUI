@@ -131,13 +131,12 @@ class TestCreateCssInput:
 class TestAddDefaultComponents:
     def test_writes_utils_and_deps_with_correct_content(self, project):
         mock_client = MagicMock()
-        mock_client.get_component_source.return_value = "# utils source"
+        mock_client.get_source.return_value = "# utils source"
         mock_client.version = "main"
-        mock_client.get_component_metadata.return_value = {"checksum": "", "packages": [], "css_imports": []}
-        mock_client.get_component_with_dependencies.return_value = {
-            "theme_toggle": "# toggle",
-            "button": "# button",
-        }
+        mock_client.get_with_dependencies.return_value = (
+            {"button": "# button"},
+            "# toggle",
+        )
 
         with (
             patch("starui.cli.init.RegistryClient", return_value=mock_client),
@@ -229,12 +228,12 @@ class TestInitCommand:
         (tmp_path / "static").mkdir()
 
         mock_client = MagicMock()
-        mock_client.get_component_source.return_value = "# utils"
+        mock_client.get_source.return_value = "# utils"
         mock_client.version = "main"
-        mock_client.get_component_metadata.return_value = {"checksum": "", "packages": [], "css_imports": []}
-        mock_client.get_component_with_dependencies.return_value = {
-            "theme_toggle": "# toggle",
-        }
+        mock_client.get_with_dependencies.return_value = (
+            {},
+            "# toggle",
+        )
 
         # Only mock the network boundary (RegistryClient) and console output
         with (
@@ -263,10 +262,9 @@ class TestInitCommand:
         (tmp_path / "pyproject.toml").write_text('[project]\nname = "test"\n')
 
         mock_client = MagicMock()
-        mock_client.get_component_source.return_value = "# utils"
+        mock_client.get_source.return_value = "# utils"
         mock_client.version = "main"
-        mock_client.get_component_metadata.return_value = {"checksum": "", "packages": [], "css_imports": []}
-        mock_client.get_component_with_dependencies.return_value = {}
+        mock_client.get_with_dependencies.return_value = ({}, "")
 
         with (
             patch("starui.cli.init.RegistryClient", return_value=mock_client),

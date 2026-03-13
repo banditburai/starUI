@@ -1,15 +1,15 @@
 import typer
 
-from starui.config import get_project_config
-from starui.registry.client import RegistryClient
-from starui.registry.manifest import Manifest
-
+from ..config import get_project_config
+from ..registry.client import RegistryClient
+from ..registry.manifest import ItemKind, Manifest
 from .utils import (
     MSG_NO_COMPONENTS,
     MSG_NO_MANIFEST,
     error,
     find_block_by_install_name,
     info,
+    install_item,
     success,
     warning,
 )
@@ -30,7 +30,7 @@ def update_command(
             return
 
         installed = manifest.get_installed()
-        installed_blocks = manifest.get_installed_blocks()
+        installed_blocks = manifest.get_installed(kind="block")
 
         if not installed and not installed_blocks:
             info(MSG_NO_COMPONENTS)
@@ -57,93 +57,50 @@ def update_command(
         client = RegistryClient(version=manifest.registry_version)
         component_dir = config.component_dir_absolute
 
-        updated = []
-        skipped = []
+        updated: list[str] = []
+        skipped: list[str] = []
 
-        for name in comp_targets:
+        all_targets: list[tuple[str, ItemKind]] = [
+            *((n, "component") for n in comp_targets),
+            *((n, "block") for n in block_targets),
+        ]
+
+        for name, kind in all_targets:
+            items = installed_blocks if kind == "block" else installed
+
             try:
-                remote_meta = client.get_component_metadata(name)
+                remote_meta = client.get_metadata(name, kind=kind)
             except FileNotFoundError:
                 if verbose:
                     info(f"{name}: not in registry, skipping")
                 continue
 
             remote_checksum = remote_meta.get("checksum", "")
-            local_checksum = installed[name].get("checksum", "")
+            local_checksum = items[name].get("checksum", "")
             if remote_checksum == local_checksum:
                 if verbose:
                     info(f"{name}: already up to date")
                 continue
 
-            if manifest.is_modified(name, component_dir) and not force:
+            if manifest.is_modified(name, component_dir, kind=kind) and not force:
                 warning(f"{name}: locally modified, skipping (use --force to overwrite)")
                 skipped.append(name)
                 continue
 
-            source = client.get_component_source(name)
-            file_path = component_dir / f"{name}.py"
-            file_path.write_text(source)
-
-            manifest.record_install(
-                name,
-                version=client.version,
-                checksum=remote_checksum,
-                file_path=str(file_path.relative_to(config.project_root)),
-            )
-
+            source = client.get_source(name, kind=kind)
+            iname = remote_meta.get("install_name") if kind == "block" else None
+            install_item(name, source, kind=kind, install_name=iname, config=config, client=client, manifest=manifest)
             updated.append(name)
 
-        for name in block_targets:
-            try:
-                remote_meta = client.get_block_metadata(name)
-            except FileNotFoundError:
-                if verbose:
-                    info(f"{name}: not in registry, skipping")
-                continue
-
-            remote_checksum = remote_meta.get("checksum", "")
-            local_checksum = installed_blocks[name].get("checksum", "")
-            if remote_checksum == local_checksum:
-                if verbose:
-                    info(f"{name}: already up to date")
-                continue
-
-            install_name = remote_meta.get("install_name", name)
-            if manifest.is_block_modified(name, component_dir) and not force:
-                warning(f"{name}: locally modified, skipping (use --force to overwrite)")
-                skipped.append(name)
-                continue
-
-            source = client.get_block_source(name)
-            file_path = component_dir / f"{install_name}.py"
-            file_path.write_text(source)
-
-            manifest.record_block_install(
-                name,
-                version=client.version,
-                checksum=remote_checksum,
-                file_path=str(file_path.relative_to(config.project_root)),
-            )
-
-            updated.append(name)
-
-            # Ensure block's component deps are installed
-            try:
-                for dep_name in client.resolve_block_dependencies(name):
-                    dep_file = component_dir / f"{dep_name}.py"
-                    if not dep_file.exists():
-                        dep_source = client.get_component_source(dep_name)
-                        dep_file.write_text(dep_source)
-                        dep_meta = client.get_component_metadata(dep_name)
-                        manifest.record_install(
-                            dep_name,
-                            version=client.version,
-                            checksum=dep_meta.get("checksum", ""),
-                            file_path=str(dep_file.relative_to(config.project_root)),
-                        )
-                        updated.append(dep_name)
-            except Exception:
-                pass
+            if kind == "block":
+                try:
+                    for dep_name in client.resolve_dependencies(name, kind="block"):
+                        if not (component_dir / f"{dep_name}.py").exists():
+                            dep_source = client.get_source(dep_name)
+                            install_item(dep_name, dep_source, config=config, client=client, manifest=manifest)
+                            updated.append(dep_name)
+                except Exception as e:
+                    warning(f"Could not install dependency for {name}: {e}")
 
         if updated:
             manifest.save()

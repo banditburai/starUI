@@ -7,7 +7,7 @@ from ..config import ProjectConfig, detect_component_dir, get_project_config, lo
 from ..registry.client import RegistryClient
 from ..registry.manifest import Manifest
 from ..templates import generate_app_starter, generate_css_input
-from .utils import confirm, console, error, info, install_component
+from .utils import confirm, console, error, info, install_item
 
 
 def validate_project(root: Path, component_dir: str = "components/ui", force: bool = False) -> None:
@@ -49,14 +49,15 @@ def add_default_components(config: ProjectConfig, verbose: bool = False) -> None
         client = RegistryClient()
         manifest = Manifest(config.project_root)
 
-        utils_source = client.get_component_source("utils")
-        install_component("utils", utils_source, config=config, client=client, manifest=manifest)
+        utils_source = client.get_source("utils")
+        install_item("utils", utils_source, config=config, client=client, manifest=manifest)
         if verbose:
             console.print("[green]Added:[/green] utils.py")
 
-        components = client.get_component_with_dependencies("theme_toggle")
-        for name, source in components.items():
-            install_component(name, source, config=config, client=client, manifest=manifest)
+        deps, item_source = client.get_with_dependencies("theme_toggle")
+        all_components = {**deps, "theme_toggle": item_source}
+        for name, source in all_components.items():
+            install_item(name, source, config=config, client=client, manifest=manifest)
             if verbose:
                 console.print(f"[green]Added component:[/green] {name}")
 

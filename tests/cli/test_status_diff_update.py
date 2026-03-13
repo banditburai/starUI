@@ -74,7 +74,7 @@ class TestStatusCommand:
         checksum = _install_component(root, comp_dir, "button", source)
 
         mock_client = MagicMock()
-        mock_client.get_component_metadata.return_value = {"checksum": checksum}
+        mock_client.get_metadata.return_value = {"checksum": checksum}
         mock_client_cls.return_value = mock_client
 
         result = runner.invoke(app, ["status"])
@@ -93,7 +93,7 @@ class TestStatusCommand:
         (comp_dir / "button.py").write_text("def Button(): return 'custom'\n")
 
         mock_client = MagicMock()
-        mock_client.get_component_metadata.side_effect = FileNotFoundError
+        mock_client.get_metadata.side_effect = FileNotFoundError
         mock_client_cls.return_value = mock_client
 
         result = runner.invoke(app, ["status"])
@@ -111,7 +111,7 @@ class TestStatusCommand:
         (comp_dir / "button.py").unlink()
 
         mock_client = MagicMock()
-        mock_client.get_component_metadata.side_effect = FileNotFoundError
+        mock_client.get_metadata.side_effect = FileNotFoundError
         mock_client_cls.return_value = mock_client
 
         result = runner.invoke(app, ["status"])
@@ -128,7 +128,7 @@ class TestStatusCommand:
         _install_component(root, comp_dir, "button", "def Button(): pass\n")
 
         mock_client = MagicMock()
-        mock_client.get_component_metadata.return_value = {"checksum": "sha256:newer_version"}
+        mock_client.get_metadata.return_value = {"checksum": "sha256:newer_version"}
         mock_client_cls.return_value = mock_client
 
         result = runner.invoke(app, ["status"])
@@ -178,14 +178,14 @@ class TestStatusCommand:
 
         mock_client = MagicMock()
 
-        def _mock_meta(name):
+        def _mock_meta(name, kind="component"):
             if name == "button":
                 return {"checksum": btn_checksum}
             if name == "select":
                 return {"checksum": "sha256:newer_version"}
             raise FileNotFoundError(name)
 
-        mock_client.get_component_metadata.side_effect = _mock_meta
+        mock_client.get_metadata.side_effect = _mock_meta
         mock_client_cls.return_value = mock_client
 
         result = runner.invoke(app, ["status"])
@@ -199,14 +199,14 @@ class TestDiffCommand:
     @patch("starui.cli.diff.get_project_config")
     def test_no_diff_when_identical(self, mock_config_fn, mock_client_cls, cli, project, config):
         runner, app = cli
-        _, comp_dir = project
+        root, comp_dir = project
         mock_config_fn.return_value = config
 
         source = "def Button(): pass\n"
-        (comp_dir / "button.py").write_text(source)
+        _install_component(root, comp_dir, "button", source)
 
         mock_client = MagicMock()
-        mock_client.get_component_source.return_value = source
+        mock_client.get_source.return_value = source
         mock_client_cls.return_value = mock_client
 
         result = runner.invoke(app, ["diff", "button"])
@@ -217,13 +217,14 @@ class TestDiffCommand:
     @patch("starui.cli.diff.get_project_config")
     def test_shows_diff_content(self, mock_config_fn, mock_client_cls, cli, project, config):
         runner, app = cli
-        _, comp_dir = project
+        root, comp_dir = project
         mock_config_fn.return_value = config
 
+        _install_component(root, comp_dir, "button", "def Button(): pass\n")
         (comp_dir / "button.py").write_text("def Button(): return 'custom'\n")
 
         mock_client = MagicMock()
-        mock_client.get_component_source.return_value = "def Button(): pass\n"
+        mock_client.get_source.return_value = "def Button(): pass\n"
         mock_client_cls.return_value = mock_client
 
         result = runner.invoke(app, ["diff", "button"])
@@ -251,7 +252,7 @@ class TestDiffCommand:
         (comp_dir / "custom.py").write_text("def Custom(): pass\n")
 
         mock_client = MagicMock()
-        mock_client.get_component_source.side_effect = FileNotFoundError("not in registry")
+        mock_client.get_source.side_effect = FileNotFoundError("not in registry")
         mock_client_cls.return_value = mock_client
 
         result = runner.invoke(app, ["diff", "custom"])
@@ -259,22 +260,67 @@ class TestDiffCommand:
 
     @patch("starui.cli.diff.RegistryClient")
     @patch("starui.cli.diff.get_project_config")
+    def test_block_diff_applies_import_rewrite(self, mock_config_fn, mock_client_cls, cli, project, config):
+        """Block diff rewrites registry source so absolute imports match the local relative ones."""
+        runner, app = cli
+        root, comp_dir = project
+        mock_config_fn.return_value = config
+
+        # Local file has rewritten (relative) imports, as installed by install_item
+        local_source = "from .avatar import Avatar\nfrom .utils import cn\n"
+        _install_block(root, comp_dir, "my_block_01", local_source, install_name="my_block")
+
+        # Registry returns absolute imports
+        registry_source = "from components.avatar import Avatar\nfrom components.utils import cn\n"
+
+        mock_client = MagicMock()
+        mock_client.get_source.return_value = registry_source
+        mock_client_cls.return_value = mock_client
+
+        result = runner.invoke(app, ["diff", "my_block_01"])
+        assert result.exit_code == 0
+        assert "no differences" in result.output
+
+    @patch("starui.cli.diff.RegistryClient")
+    @patch("starui.cli.diff.get_project_config")
+    def test_block_diff_shows_real_changes(self, mock_config_fn, mock_client_cls, cli, project, config):
+        """Block diff shows actual local edits after import rewriting is factored out."""
+        runner, app = cli
+        root, comp_dir = project
+        mock_config_fn.return_value = config
+
+        local_source = "from .avatar import Avatar\ndef MyBlock(): return 'custom'\n"
+        _install_block(root, comp_dir, "my_block_01", local_source, install_name="my_block")
+
+        registry_source = "from components.avatar import Avatar\ndef MyBlock(): pass\n"
+
+        mock_client = MagicMock()
+        mock_client.get_source.return_value = registry_source
+        mock_client_cls.return_value = mock_client
+
+        result = runner.invoke(app, ["diff", "my_block_01"])
+        assert result.exit_code == 0
+        assert "-def MyBlock(): pass" in result.output
+        assert "+def MyBlock(): return 'custom'" in result.output
+
+    @patch("starui.cli.diff.RegistryClient")
+    @patch("starui.cli.diff.get_project_config")
     def test_hyphenated_name_normalized(self, mock_config_fn, mock_client_cls, cli, project, config):
         runner, app = cli
-        _, comp_dir = project
+        root, comp_dir = project
         mock_config_fn.return_value = config
 
         source = "def DatePicker(): pass\n"
-        (comp_dir / "date_picker.py").write_text(source)
+        _install_component(root, comp_dir, "date_picker", source)
 
         mock_client = MagicMock()
-        mock_client.get_component_source.return_value = source
+        mock_client.get_source.return_value = source
         mock_client_cls.return_value = mock_client
 
         result = runner.invoke(app, ["diff", "date-picker"])
         assert result.exit_code == 0
         assert "no differences" in result.output
-        mock_client.get_component_source.assert_called_with("date_picker")
+        mock_client.get_source.assert_called_with("date_picker", kind="component")
 
 
 class TestUpdateCommand:
@@ -301,8 +347,8 @@ class TestUpdateCommand:
 
         mock_client = MagicMock()
         mock_client.version = "main"
-        mock_client.get_component_metadata.return_value = {"checksum": compute_checksum(new_source)}
-        mock_client.get_component_source.return_value = new_source
+        mock_client.get_metadata.return_value = {"checksum": compute_checksum(new_source)}
+        mock_client.get_source.return_value = new_source
         mock_client_cls.return_value = mock_client
 
         result = runner.invoke(app, ["update", "button"])
@@ -325,7 +371,7 @@ class TestUpdateCommand:
 
         mock_client = MagicMock()
         mock_client.version = "main"
-        mock_client.get_component_metadata.return_value = {"checksum": "sha256:newer"}
+        mock_client.get_metadata.return_value = {"checksum": "sha256:newer"}
         mock_client_cls.return_value = mock_client
 
         result = runner.invoke(app, ["update", "button"])
@@ -346,8 +392,8 @@ class TestUpdateCommand:
         new_source = "def Button(): pass  # v2\n"
         mock_client = MagicMock()
         mock_client.version = "main"
-        mock_client.get_component_metadata.return_value = {"checksum": compute_checksum(new_source)}
-        mock_client.get_component_source.return_value = new_source
+        mock_client.get_metadata.return_value = {"checksum": compute_checksum(new_source)}
+        mock_client.get_source.return_value = new_source
         mock_client_cls.return_value = mock_client
 
         result = runner.invoke(app, ["update", "button", "--force"])
@@ -365,7 +411,7 @@ class TestUpdateCommand:
         checksum = _install_component(root, comp_dir, "button", source)
 
         mock_client = MagicMock()
-        mock_client.get_component_metadata.return_value = {"checksum": checksum}
+        mock_client.get_metadata.return_value = {"checksum": checksum}
         mock_client_cls.return_value = mock_client
 
         result = runner.invoke(app, ["update"])
@@ -396,7 +442,7 @@ class TestUpdateCommand:
         _install_component(root, comp_dir, "custom", original_source)
 
         mock_client = MagicMock()
-        mock_client.get_component_metadata.side_effect = FileNotFoundError("not in registry")
+        mock_client.get_metadata.side_effect = FileNotFoundError("not in registry")
         mock_client_cls.return_value = mock_client
 
         result = runner.invoke(app, ["update"])
@@ -416,16 +462,16 @@ class TestUpdateCommand:
         new_button = "# v2 button\n"
         new_dialog = "# v2 dialog\n"
 
-        def mock_metadata(name):
+        def mock_metadata(name, kind="component"):
             return {"checksum": compute_checksum(new_button if name == "button" else new_dialog)}
 
-        def mock_source(name):
+        def mock_source(name, kind="component"):
             return new_button if name == "button" else new_dialog
 
         mock_client = MagicMock()
         mock_client.version = "main"
-        mock_client.get_component_metadata.side_effect = mock_metadata
-        mock_client.get_component_source.side_effect = mock_source
+        mock_client.get_metadata.side_effect = mock_metadata
+        mock_client.get_source.side_effect = mock_source
         mock_client_cls.return_value = mock_client
 
         result = runner.invoke(app, ["update", "button", "dialog"])
@@ -443,7 +489,7 @@ class TestUpdateCommand:
         _install_component(root, comp_dir, "custom", "# custom\n")
 
         mock_client = MagicMock()
-        mock_client.get_component_metadata.side_effect = FileNotFoundError("not found")
+        mock_client.get_metadata.side_effect = FileNotFoundError("not found")
         mock_client_cls.return_value = mock_client
 
         result = runner.invoke(app, ["update", "custom", "--verbose"])
@@ -461,7 +507,7 @@ class TestUpdateCommand:
         checksum = _install_component(root, comp_dir, "button", source)
 
         mock_client = MagicMock()
-        mock_client.get_component_metadata.return_value = {"checksum": checksum}
+        mock_client.get_metadata.return_value = {"checksum": checksum}
         mock_client_cls.return_value = mock_client
 
         result = runner.invoke(app, ["update", "button", "--verbose"])
@@ -473,18 +519,18 @@ class TestUpdateCommand:
 
 
 def _install_block(root, comp_dir, name, source, *, install_name=None, version="0.3.0"):
-    """Install a block on disk and record it in the manifest."""
     inst = install_name or name
     block_file = comp_dir / f"{inst}.py"
     block_file.write_text(source)
     checksum = compute_checksum(source)
 
     manifest = Manifest(root)
-    manifest.record_block_install(
+    manifest.record_install(
         name,
         version=version,
         checksum=checksum,
         file_path=str(block_file.relative_to(root)),
+        kind="block",
     )
     manifest.save()
     return checksum
@@ -506,12 +552,12 @@ class TestBlockUpdateCommand:
 
         mock_client = MagicMock()
         mock_client.version = "main"
-        mock_client.get_block_metadata.return_value = {
+        mock_client.get_metadata.return_value = {
             "checksum": compute_checksum(new_source),
             "install_name": "user_button",
         }
-        mock_client.get_block_source.return_value = new_source
-        mock_client.resolve_block_dependencies.return_value = []
+        mock_client.get_source.return_value = new_source
+        mock_client.resolve_dependencies.return_value = []
         mock_client_cls.return_value = mock_client
 
         result = runner.invoke(app, ["update", "user_button_01"])
@@ -519,7 +565,7 @@ class TestBlockUpdateCommand:
         assert (comp_dir / "user_button.py").read_text() == new_source
 
         manifest = Manifest(root)
-        assert manifest.get_installed_blocks()["user_button_01"]["checksum"] == compute_checksum(new_source)
+        assert manifest.get_installed(kind="block")["user_button_01"]["checksum"] == compute_checksum(new_source)
 
     @patch("starui.cli.update.RegistryClient")
     @patch("starui.cli.update.get_project_config")
@@ -532,7 +578,7 @@ class TestBlockUpdateCommand:
         checksum = _install_block(root, comp_dir, "my_block", source)
 
         mock_client = MagicMock()
-        mock_client.get_block_metadata.return_value = {"checksum": checksum}
+        mock_client.get_metadata.return_value = {"checksum": checksum}
         mock_client_cls.return_value = mock_client
 
         result = runner.invoke(app, ["update", "my_block"])
@@ -553,7 +599,7 @@ class TestBlockUpdateCommand:
 
         mock_client = MagicMock()
         mock_client.version = "main"
-        mock_client.get_block_metadata.return_value = {
+        mock_client.get_metadata.return_value = {
             "checksum": "sha256:newer",
             "install_name": "my_block",
         }
@@ -577,12 +623,12 @@ class TestBlockUpdateCommand:
         new_source = "# block v2\n"
         mock_client = MagicMock()
         mock_client.version = "main"
-        mock_client.get_block_metadata.return_value = {
+        mock_client.get_metadata.return_value = {
             "checksum": compute_checksum(new_source),
             "install_name": "my_block",
         }
-        mock_client.get_block_source.return_value = new_source
-        mock_client.resolve_block_dependencies.return_value = []
+        mock_client.get_source.return_value = new_source
+        mock_client.resolve_dependencies.return_value = []
         mock_client_cls.return_value = mock_client
 
         result = runner.invoke(app, ["update", "my_block", "--force"])
@@ -600,7 +646,7 @@ class TestBlockUpdateCommand:
         _install_block(root, comp_dir, "my_block", original)
 
         mock_client = MagicMock()
-        mock_client.get_block_metadata.side_effect = FileNotFoundError("not in registry")
+        mock_client.get_metadata.side_effect = FileNotFoundError("not in registry")
         mock_client_cls.return_value = mock_client
 
         result = runner.invoke(app, ["update", "my_block", "--verbose"])
@@ -624,14 +670,18 @@ class TestBlockUpdateCommand:
 
         mock_client = MagicMock()
         mock_client.version = "main"
-        mock_client.get_block_metadata.return_value = {
-            "checksum": compute_checksum(new_source),
-            "install_name": "my_block",
-        }
-        mock_client.get_block_source.return_value = new_source
-        mock_client.resolve_block_dependencies.return_value = ["avatar"]
-        mock_client.get_component_source.return_value = dep_source
-        mock_client.get_component_metadata.return_value = {"checksum": dep_checksum}
+
+        def mock_metadata(name, kind="component"):
+            if kind == "block":
+                return {"checksum": compute_checksum(new_source), "install_name": "my_block"}
+            return {"checksum": dep_checksum}
+
+        def mock_source(name, kind="component"):
+            return new_source if kind == "block" else dep_source
+
+        mock_client.get_metadata.side_effect = mock_metadata
+        mock_client.get_source.side_effect = mock_source
+        mock_client.resolve_dependencies.return_value = ["avatar"]
         mock_client_cls.return_value = mock_client
 
         result = runner.invoke(app, ["update", "my_block"])
@@ -658,12 +708,12 @@ class TestBlockUpdateCommand:
 
         mock_client = MagicMock()
         mock_client.version = "main"
-        mock_client.get_block_metadata.return_value = {
+        mock_client.get_metadata.return_value = {
             "checksum": compute_checksum(new_source),
             "install_name": "my_block",
         }
-        mock_client.get_block_source.return_value = new_source
-        mock_client.resolve_block_dependencies.return_value = ["avatar"]
+        mock_client.get_source.return_value = new_source
+        mock_client.resolve_dependencies.return_value = ["avatar"]
         mock_client_cls.return_value = mock_client
 
         result = runner.invoke(app, ["update", "my_block"])
@@ -685,12 +735,12 @@ class TestBlockUpdateCommand:
 
         mock_client = MagicMock()
         mock_client.version = "main"
-        mock_client.get_block_metadata.return_value = {
+        mock_client.get_metadata.return_value = {
             "checksum": compute_checksum(new_source),
             "install_name": "my_block",
         }
-        mock_client.get_block_source.return_value = new_source
-        mock_client.resolve_block_dependencies.side_effect = RuntimeError("network error")
+        mock_client.get_source.return_value = new_source
+        mock_client.resolve_dependencies.side_effect = RuntimeError("network error")
         mock_client_cls.return_value = mock_client
 
         result = runner.invoke(app, ["update", "my_block"])
@@ -718,14 +768,18 @@ class TestBlockUpdateCommand:
 
         mock_client = MagicMock()
         mock_client.version = "main"
-        mock_client.get_component_metadata.return_value = {"checksum": compute_checksum(new_comp)}
-        mock_client.get_component_source.return_value = new_comp
-        mock_client.get_block_metadata.return_value = {
-            "checksum": compute_checksum(new_block),
-            "install_name": "my_block",
-        }
-        mock_client.get_block_source.return_value = new_block
-        mock_client.resolve_block_dependencies.return_value = []
+
+        def mock_metadata(name, kind="component"):
+            if kind == "block":
+                return {"checksum": compute_checksum(new_block), "install_name": "my_block"}
+            return {"checksum": compute_checksum(new_comp)}
+
+        def mock_source(name, kind="component"):
+            return new_block if kind == "block" else new_comp
+
+        mock_client.get_metadata.side_effect = mock_metadata
+        mock_client.get_source.side_effect = mock_source
+        mock_client.resolve_dependencies.return_value = []
         mock_client_cls.return_value = mock_client
 
         result = runner.invoke(app, ["update"])
@@ -749,12 +803,12 @@ class TestBlockUpdateCommand:
 
         mock_client = MagicMock()
         mock_client.version = "main"
-        mock_client.get_block_metadata.return_value = {
+        mock_client.get_metadata.return_value = {
             "checksum": compute_checksum(new_source),
             "install_name": "user_button",
         }
-        mock_client.get_block_source.return_value = new_source
-        mock_client.resolve_block_dependencies.return_value = []
+        mock_client.get_source.return_value = new_source
+        mock_client.resolve_dependencies.return_value = []
         mock_client_cls.return_value = mock_client
 
         # user_button is the install_name, not the registry name
@@ -773,7 +827,7 @@ class TestBlockUpdateCommand:
         checksum = _install_block(root, comp_dir, "my_block", source)
 
         mock_client = MagicMock()
-        mock_client.get_block_metadata.return_value = {"checksum": checksum}
+        mock_client.get_metadata.return_value = {"checksum": checksum}
         mock_client_cls.return_value = mock_client
 
         result = runner.invoke(app, ["update", "my_block", "--verbose"])
@@ -790,7 +844,7 @@ class TestBlockUpdateCommand:
         _install_component(root, comp_dir, "button", "# v1\n")
 
         mock_client = MagicMock()
-        mock_client.get_component_metadata.side_effect = RuntimeError("network down")
+        mock_client.get_metadata.side_effect = RuntimeError("network down")
         mock_client_cls.return_value = mock_client
 
         result = runner.invoke(app, ["update"])

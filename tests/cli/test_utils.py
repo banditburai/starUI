@@ -8,7 +8,8 @@ from starui.cli.utils import (
     confirm,
     error,
     info,
-    install_component,
+    install_item,
+    rewrite_block_imports,
     success,
     validate_component_name,
     warning,
@@ -63,46 +64,90 @@ class TestConsoleUtilities:
             assert kwargs["default"] is False
 
 
-class TestInstallComponent:
+class TestInstallItem:
     def test_writes_file_and_records_manifest(self, project):
+        from starui.registry.checksum import compute_checksum
+
         client = MagicMock()
         client.version = "1.0.0"
-        client.get_component_metadata.return_value = {"checksum": "abc123"}
         manifest = MagicMock()
 
-        install_component("button", "# button source", config=project, client=client, manifest=manifest)
+        install_item("button", "# button source", config=project, client=client, manifest=manifest)
 
         written = (project.component_dir_absolute / "button.py").read_text()
         assert written == "# button source"
         manifest.record_install.assert_called_once_with(
             "button",
             version="1.0.0",
-            checksum="abc123",
+            checksum=compute_checksum("# button source"),
             file_path=str(project.component_dir_absolute.relative_to(project.project_root) / "button.py"),
+            kind="component",
         )
 
-    def test_writes_file_even_when_metadata_missing(self, project):
+    def test_writes_file_even_when_manifest_fails(self, project):
         client = MagicMock()
-        client.get_component_metadata.side_effect = FileNotFoundError("not in registry")
+        client.version = "1.0.0"
         manifest = MagicMock()
+        manifest.record_install.side_effect = RuntimeError("manifest broken")
 
-        install_component("custom", "# custom source", config=project, client=client, manifest=manifest)
+        install_item("custom", "# custom source", config=project, client=client, manifest=manifest)
 
         assert (project.component_dir_absolute / "custom.py").read_text() == "# custom source"
-        manifest.record_install.assert_not_called()
 
-    def test_non_file_not_found_errors_propagate(self, project):
+    def test_block_rewrites_imports(self, project):
         client = MagicMock()
-        client.get_component_metadata.side_effect = RuntimeError("unexpected")
+        client.version = "1.0.0"
+        manifest = MagicMock()
+        source = "from components.avatar import Avatar\nfrom components.utils import cn"
+
+        install_item(
+            "my_block",
+            source,
+            kind="block",
+            install_name="my_block_file",
+            config=project,
+            client=client,
+            manifest=manifest,
+        )
+
+        written = (project.component_dir_absolute / "my_block_file.py").read_text()
+        assert "from .avatar import Avatar" in written
+        assert "from .utils import cn" in written
+        assert "from components." not in written
+
+    def test_block_uses_install_name_for_file(self, project):
+        client = MagicMock()
+        client.version = "1.0.0"
         manifest = MagicMock()
 
-        try:
-            install_component("broken", "# src", config=project, client=client, manifest=manifest)
-            raise AssertionError("Should have raised")
-        except RuntimeError:
-            pass
+        install_item(
+            "user_button_01",
+            "# src",
+            kind="block",
+            install_name="user_button",
+            config=project,
+            client=client,
+            manifest=manifest,
+        )
 
-        assert (project.component_dir_absolute / "broken.py").exists()
+        assert (project.component_dir_absolute / "user_button.py").exists()
+        assert not (project.component_dir_absolute / "user_button_01.py").exists()
+
+
+class TestRewriteBlockImports:
+    def test_rewrites_components_prefix(self):
+        source = "from components.avatar import Avatar\nfrom components.utils import cn"
+        result = rewrite_block_imports(source)
+        assert result == "from .avatar import Avatar\nfrom .utils import cn"
+
+    def test_does_not_touch_other_imports(self):
+        source = "from starhtml import FT\nimport os"
+        assert rewrite_block_imports(source) == source
+
+    def test_handles_multiline(self):
+        source = "from components.dropdown_menu import (\n    DropdownMenu,\n)\n"
+        result = rewrite_block_imports(source)
+        assert result.startswith("from .dropdown_menu import (")
 
 
 class TestValidateComponentName:

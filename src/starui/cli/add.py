@@ -10,8 +10,7 @@ from .utils import (
     console,
     error,
     info,
-    install_block,
-    install_component,
+    install_item,
     status_context,
     success,
     validate_component_name,
@@ -162,7 +161,7 @@ def add_command(
         raise typer.Exit(1) from e
 
     try:
-        resolved = {}
+        comp_deps: dict[str, str] = {}
         blocks_to_install: dict[str, tuple[str, str]] = {}
 
         for name in components:
@@ -177,18 +176,20 @@ def add_command(
                 raise typer.Exit(1) from None
 
             if kind == "component":
-                resolved.update(client.get_component_with_dependencies(normalized))
+                deps, item_source = client.get_with_dependencies(normalized)
+                comp_deps.update(deps)
+                comp_deps[normalized] = item_source
             else:
                 registry_name = entry["name"]
-                comp_deps, block_source = client.get_block_with_dependencies(registry_name)
-                resolved.update(comp_deps)
+                deps, block_source = client.get_with_dependencies(registry_name, kind="block")
+                comp_deps.update(deps)
                 install_name = entry.get("install_name", registry_name)
                 blocks_to_install[registry_name] = (install_name, block_source)
 
         comp_dir = config.component_dir_absolute
         requested = {c.replace("-", "_") for c in components}
 
-        conflicts = [n for n in resolved if n in requested and (comp_dir / f"{n}.py").exists()]
+        conflicts = [n for n in comp_deps if n in requested and (comp_dir / f"{n}.py").exists()]
         conflicts += [
             inst
             for rn, (inst, _) in blocks_to_install.items()
@@ -203,7 +204,9 @@ def add_command(
                 raise typer.Exit(0)
 
         if not force:
-            resolved = {n: src for n, src in resolved.items() if n in requested or not (comp_dir / f"{n}.py").exists()}
+            comp_deps = {
+                n: src for n, src in comp_deps.items() if n in requested or not (comp_dir / f"{n}.py").exists()
+            }
             blocks_to_install = {
                 rn: (inst, src)
                 for rn, (inst, src) in blocks_to_install.items()
@@ -212,24 +215,17 @@ def add_command(
 
         packages: set[str] = set()
         css_imports: list[str] = []
-        for name in resolved:
+        for name, kind in [*((n, "component") for n in comp_deps), *((n, "block") for n in blocks_to_install)]:
             try:
-                meta = client.get_component_metadata(name)
+                meta = client.get_metadata(name, kind=kind)
                 packages.update(meta.get("packages", []))
                 css_imports.extend(meta.get("css_imports", []))
-            except FileNotFoundError:
-                pass
-        for reg_name in blocks_to_install:
-            try:
-                block_meta = client.get_block_metadata(reg_name)
-                packages.update(block_meta.get("packages", []))
-                css_imports.extend(block_meta.get("css_imports", []))
             except FileNotFoundError:
                 pass
 
         _install_packages(packages)
 
-        if "code_block" in resolved:
+        if "code_block" in comp_deps:
             _setup_code_highlighting(config, theme)
 
         if css_imports:
@@ -239,15 +235,23 @@ def add_command(
             comp_dir.mkdir(parents=True, exist_ok=True)
             (comp_dir / "__init__.py").touch()
 
-            for name, source in resolved.items():
-                install_component(name, source, config=config, client=client, manifest=manifest)
+            for name, source in comp_deps.items():
+                install_item(name, source, config=config, client=client, manifest=manifest)
 
             for reg_name, (inst_name, source) in blocks_to_install.items():
-                install_block(reg_name, inst_name, source, config=config, client=client, manifest=manifest)
+                install_item(
+                    reg_name,
+                    source,
+                    kind="block",
+                    install_name=inst_name,
+                    config=config,
+                    client=client,
+                    manifest=manifest,
+                )
 
             manifest.save()
 
-        installed_names = list(resolved.keys()) + [inst for inst, _ in blocks_to_install.values()]
+        installed_names = list(comp_deps.keys()) + [inst for inst, _ in blocks_to_install.values()]
         if installed_names:
             success(f"Installed: {', '.join(installed_names)}")
         else:
@@ -256,7 +260,7 @@ def add_command(
         if verbose:
             info(f"Location: {comp_dir}")
 
-        if first_name := next(iter(resolved or requested), None):
+        if first_name := next(iter(comp_deps or requested), None):
             class_name = first_name.title().replace("_", "")
             import_path = str(config.component_dir).replace("/", ".").replace("\\", ".")
             console.print(f"\n  Next steps:\n  • Import: from {import_path}.{first_name} import {class_name}")

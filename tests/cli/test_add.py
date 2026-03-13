@@ -20,7 +20,6 @@ from starui.cli.add import (
 
 def _mock_client(resolved: dict[str, str], *, metadata_fn=None):
     client = MagicMock()
-    client.get_component_with_dependencies.return_value = resolved
     default_meta = metadata_fn or (
         lambda name: {
             "name": name,
@@ -29,21 +28,29 @@ def _mock_client(resolved: dict[str, str], *, metadata_fn=None):
             "checksum": "",
         }
     )
-    client.get_component_metadata.side_effect = default_meta
+
+    def get_with_deps(name, kind="component"):
+        # For components: return (deps_without_self, self_source)
+        deps = {n: src for n, src in resolved.items() if n != name}
+        return deps, resolved.get(name, "")
+
+    client.get_with_dependencies.side_effect = get_with_deps
+
+    def get_metadata(name, kind="component"):
+        return default_meta(name)
+
+    client.get_metadata.side_effect = get_metadata
     client.lookup.side_effect = lambda name: ("component", default_meta(name))
     client.version = "main"
     return client
 
 
 def _messages(mock) -> list[str]:
-    """Extract the first positional string arg from each call to a mock."""
     return [call[0][0] for call in mock.call_args_list if call[0]]
 
 
 @dataclass
 class AddResult:
-    """Captures the observable outcomes of an add_command invocation."""
-
     successes: list[str] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
     infos: list[str] = field(default_factory=list)
@@ -229,16 +236,23 @@ class TestOverwriteConflicts:
 
 
 class TestAllComponentsAlreadyInstalled:
-    def test_no_new_files_written(self, project):
+    def test_existing_deps_preserved_and_requested_reinstalled(self, project):
+        """When deps exist and requested component exists, confirm overwrites it."""
         comp_dir = project.component_dir_absolute
-        (comp_dir / "utils.py").write_text("# u")
+        (comp_dir / "utils.py").write_text("# local utils")
+        (comp_dir / "dialog.py").write_text("# old dialog")
 
-        before = set(comp_dir.iterdir())
-        result = _run_add(project, ["dialog"], {"utils": "# u"})
-        after = set(comp_dir.iterdir())
+        _run_add(
+            project,
+            ["dialog"],
+            {"utils": "# u", "dialog": "# new dialog"},
+            confirm_response=True,
+        )
 
-        assert before == after
-        assert any("already installed" in msg for msg in result.infos)
+        # Dep is preserved (not overwritten)
+        assert (comp_dir / "utils.py").read_text() == "# local utils"
+        # Requested component is reinstalled
+        assert (comp_dir / "dialog.py").read_text() == "# new dialog"
 
 
 class TestImportPreservation:
@@ -353,7 +367,7 @@ class TestErrorPaths:
     def test_client_failure_raises_exit_with_message(self, project):
         client = MagicMock()
         client.lookup.return_value = ("component", {"name": "button"})
-        client.get_component_with_dependencies.side_effect = RuntimeError("boom")
+        client.get_with_dependencies.side_effect = RuntimeError("boom")
 
         with (
             patch("starui.cli.add.get_project_config", return_value=project),
@@ -417,7 +431,6 @@ def _mock_block_client(
     install_name: str = "user_button",
     block_meta: dict | None = None,
 ):
-    """Create a mock client that supports both component and block lookups."""
     block_entry = {
         "name": registry_name,
         "install_name": install_name,
@@ -433,9 +446,21 @@ def _mock_block_client(
 
     client = MagicMock()
     client.version = "main"
-    client.get_component_metadata.side_effect = comp_meta_fn
-    client.get_block_metadata.return_value = block_entry
-    client.get_block_with_dependencies.return_value = (comp_deps, block_source)
+
+    def get_metadata(name, kind="component"):
+        if kind == "block":
+            return block_entry
+        return comp_meta_fn(name)
+
+    client.get_metadata.side_effect = get_metadata
+
+    def get_with_deps(name, kind="component"):
+        if kind == "block":
+            return (comp_deps, block_source)
+        deps = {n: src for n, src in comp_deps.items() if n != name}
+        return deps, comp_deps.get(name, "")
+
+    client.get_with_dependencies.side_effect = get_with_deps
 
     def lookup(name):
         if name in comp_deps and name != "utils":
@@ -486,8 +511,8 @@ class TestBlockInstallByInstallName:
         _run_add(project, ["user-button"], {}, client=client)
 
         assert (comp_dir / "user_button.py").read_text() == "# block src"
-        # Verify get_block_with_dependencies was called with registry name, not install name
-        client.get_block_with_dependencies.assert_called_with("user_button_01")
+        # Verify get_with_dependencies was called with registry name, not install name
+        client.get_with_dependencies.assert_called_with("user_button_01", kind="block")
 
 
 class TestBlockConflictDetection:
@@ -636,7 +661,7 @@ class TestVerboseModeAndLookupFailure:
 
 class TestMetadataFetchFailure:
     def test_component_metadata_not_found_still_installs(self, project):
-        """If get_component_metadata raises FileNotFoundError during package collection,
+        """If get_metadata raises FileNotFoundError during package collection,
         the component should still be installed."""
         comp_dir = project.component_dir_absolute
 
@@ -646,22 +671,29 @@ class TestMetadataFetchFailure:
             "component",
             {"name": "button", "packages": [], "css_imports": [], "checksum": ""},
         )
-        client.get_component_with_dependencies.return_value = {"button": "# btn source"}
+        client.get_with_dependencies.return_value = ({}, "# btn source")
         # Metadata fetch fails during package collection phase
-        client.get_component_metadata.side_effect = FileNotFoundError("no metadata")
+        client.get_metadata.side_effect = FileNotFoundError("no metadata")
 
         _run_add(project, ["button"], {"button": "# btn source"}, client=client)
         assert (comp_dir / "button.py").exists()
 
     def test_block_metadata_not_found_still_installs(self, project):
-        """If get_block_metadata raises FileNotFoundError during package collection,
+        """If get_metadata raises FileNotFoundError during package collection,
         the block should still be installed."""
         comp_dir = project.component_dir_absolute
 
         client = _mock_block_client({"utils": "# u"}, "# block src")
-        # Override get_block_metadata to always fail — the package-collection loop
-        # on lines 222-228 catches FileNotFoundError and continues
-        client.get_block_metadata.side_effect = FileNotFoundError("metadata vanished")
+        # Override get_metadata to always fail for blocks — the package-collection loop
+        # catches FileNotFoundError and continues
+        original_get_metadata = client.get_metadata.side_effect
+
+        def failing_metadata(name, kind="component"):
+            if kind == "block":
+                raise FileNotFoundError("metadata vanished")
+            return original_get_metadata(name, kind=kind)
+
+        client.get_metadata.side_effect = failing_metadata
 
         _run_add(project, ["user-button-01"], {}, client=client)
         assert (comp_dir / "user_button.py").exists()

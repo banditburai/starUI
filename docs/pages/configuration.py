@@ -1,5 +1,6 @@
 from starhtml import *
 from widgets.code_block import CodeBlock
+from widgets.onwards import onwards_card, onwards_section
 from layouts.base import DocsLayout, LayoutConfig, SidebarConfig
 
 
@@ -267,6 +268,12 @@ css_dir = "static/css" """,
                     ),
                     _callout("Component source files are validated by checksum. If the cached file matches the registry checksum, it's served from cache regardless of age."),
                 ),
+            ),
+
+            onwards_section(
+                onwards_card("01", "Deployment", "Production builds, CI/CD pipelines, and GitHub Actions.", "/deployment", "View Deployment"),
+                onwards_card("02", "CLI Reference", "Complete reference for every star command.", "/cli", "View CLI Reference"),
+                onwards_card("03", "Components", "Browse the full constellation of UI components.", "/components", "Browse Components"),
             ),
         ),
         layout=LayoutConfig(

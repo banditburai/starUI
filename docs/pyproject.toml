@@ -11,9 +11,6 @@ dependencies = [
     "uvicorn>=0.30.0",
 ]
 
-[tool.uv.sources]
-starui = { path = ".." }
-
 [dependency-groups]
 dev = [
     "pytest>=8.0.0",
