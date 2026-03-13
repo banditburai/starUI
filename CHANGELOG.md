@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-03-13
+
 ### Added
 - `Combobox` component — searchable dropdown with keyboard navigation, custom rendering, and multi-select support
 - `star sort` command — sort Tailwind classes in Python files using Tailwind's canonical order; `--check` mode for CI
@@ -363,3 +365,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [0.3.1]: https://github.com/banditburai/starUI/releases/tag/v0.3.1
 
 [0.3.2]: https://github.com/banditburai/starUI/releases/tag/v0.3.2
+
+[0.4.0]: https://github.com/banditburai/starUI/releases/tag/v0.4.0
