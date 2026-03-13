@@ -432,3 +432,404 @@ class TestUpdateCommand:
         assert result.exit_code == 0
         assert (comp_dir / "button.py").read_text() == new_button
         assert (comp_dir / "dialog.py").read_text() == new_dialog
+
+    @patch("starui.cli.update.RegistryClient")
+    @patch("starui.cli.update.get_project_config")
+    def test_verbose_shows_not_in_registry_for_component(self, mock_config_fn, mock_client_cls, cli, project, config):
+        runner, app = cli
+        root, comp_dir = project
+        mock_config_fn.return_value = config
+
+        _install_component(root, comp_dir, "custom", "# custom\n")
+
+        mock_client = MagicMock()
+        mock_client.get_component_metadata.side_effect = FileNotFoundError("not found")
+        mock_client_cls.return_value = mock_client
+
+        result = runner.invoke(app, ["update", "custom", "--verbose"])
+        assert result.exit_code == 0
+        assert "not in registry" in result.output
+
+    @patch("starui.cli.update.RegistryClient")
+    @patch("starui.cli.update.get_project_config")
+    def test_verbose_shows_up_to_date_for_component(self, mock_config_fn, mock_client_cls, cli, project, config):
+        runner, app = cli
+        root, comp_dir = project
+        mock_config_fn.return_value = config
+
+        source = "# button\n"
+        checksum = _install_component(root, comp_dir, "button", source)
+
+        mock_client = MagicMock()
+        mock_client.get_component_metadata.return_value = {"checksum": checksum}
+        mock_client_cls.return_value = mock_client
+
+        result = runner.invoke(app, ["update", "button", "--verbose"])
+        assert result.exit_code == 0
+        assert "already up to date" in result.output
+
+
+# ── Block update tests ────────────────────────────────────────────────────
+
+
+def _install_block(root, comp_dir, name, source, *, install_name=None, version="0.3.0"):
+    """Install a block on disk and record it in the manifest."""
+    inst = install_name or name
+    block_file = comp_dir / f"{inst}.py"
+    block_file.write_text(source)
+    checksum = compute_checksum(source)
+
+    manifest = Manifest(root)
+    manifest.record_block_install(
+        name,
+        version=version,
+        checksum=checksum,
+        file_path=str(block_file.relative_to(root)),
+    )
+    manifest.save()
+    return checksum
+
+
+class TestBlockUpdateCommand:
+    """Tests for the block update loop in update_command (lines 96-146)."""
+
+    @patch("starui.cli.update.RegistryClient")
+    @patch("starui.cli.update.get_project_config")
+    def test_updates_block_when_registry_has_newer_version(
+        self, mock_config_fn, mock_client_cls, cli, project, config
+    ):
+        runner, app = cli
+        root, comp_dir = project
+        mock_config_fn.return_value = config
+
+        old_source = "# block v1\n"
+        new_source = "# block v2\n"
+        _install_block(root, comp_dir, "user_button_01", old_source, install_name="user_button")
+
+        mock_client = MagicMock()
+        mock_client.version = "main"
+        mock_client.get_block_metadata.return_value = {
+            "checksum": compute_checksum(new_source),
+            "install_name": "user_button",
+        }
+        mock_client.get_block_source.return_value = new_source
+        mock_client.resolve_block_dependencies.return_value = []
+        mock_client_cls.return_value = mock_client
+
+        result = runner.invoke(app, ["update", "user_button_01"])
+        assert result.exit_code == 0
+        assert (comp_dir / "user_button.py").read_text() == new_source
+
+        manifest = Manifest(root)
+        assert manifest.get_installed_blocks()["user_button_01"]["checksum"] == compute_checksum(new_source)
+
+    @patch("starui.cli.update.RegistryClient")
+    @patch("starui.cli.update.get_project_config")
+    def test_skips_block_when_checksums_match(
+        self, mock_config_fn, mock_client_cls, cli, project, config
+    ):
+        runner, app = cli
+        root, comp_dir = project
+        mock_config_fn.return_value = config
+
+        source = "# block current\n"
+        checksum = _install_block(root, comp_dir, "my_block", source)
+
+        mock_client = MagicMock()
+        mock_client.get_block_metadata.return_value = {"checksum": checksum}
+        mock_client_cls.return_value = mock_client
+
+        result = runner.invoke(app, ["update", "my_block"])
+        assert result.exit_code == 0
+        assert (comp_dir / "my_block.py").read_text() == source
+        assert "up to date" in result.output
+
+    @patch("starui.cli.update.RegistryClient")
+    @patch("starui.cli.update.get_project_config")
+    def test_skips_modified_block_without_force(
+        self, mock_config_fn, mock_client_cls, cli, project, config
+    ):
+        runner, app = cli
+        root, comp_dir = project
+        mock_config_fn.return_value = config
+
+        _install_block(root, comp_dir, "my_block", "# original\n")
+        modified = "# locally modified\n"
+        (comp_dir / "my_block.py").write_text(modified)
+
+        mock_client = MagicMock()
+        mock_client.version = "main"
+        mock_client.get_block_metadata.return_value = {
+            "checksum": "sha256:newer",
+            "install_name": "my_block",
+        }
+        mock_client_cls.return_value = mock_client
+
+        result = runner.invoke(app, ["update", "my_block"])
+        assert result.exit_code == 0
+        assert (comp_dir / "my_block.py").read_text() == modified
+        assert "modified" in result.output.lower() or "skipping" in result.output.lower()
+
+    @patch("starui.cli.update.RegistryClient")
+    @patch("starui.cli.update.get_project_config")
+    def test_force_updates_modified_block(
+        self, mock_config_fn, mock_client_cls, cli, project, config
+    ):
+        runner, app = cli
+        root, comp_dir = project
+        mock_config_fn.return_value = config
+
+        _install_block(root, comp_dir, "my_block", "# original\n")
+        (comp_dir / "my_block.py").write_text("# locally modified\n")
+
+        new_source = "# block v2\n"
+        mock_client = MagicMock()
+        mock_client.version = "main"
+        mock_client.get_block_metadata.return_value = {
+            "checksum": compute_checksum(new_source),
+            "install_name": "my_block",
+        }
+        mock_client.get_block_source.return_value = new_source
+        mock_client.resolve_block_dependencies.return_value = []
+        mock_client_cls.return_value = mock_client
+
+        result = runner.invoke(app, ["update", "my_block", "--force"])
+        assert result.exit_code == 0
+        assert (comp_dir / "my_block.py").read_text() == new_source
+
+    @patch("starui.cli.update.RegistryClient")
+    @patch("starui.cli.update.get_project_config")
+    def test_block_not_in_registry_skips_gracefully(
+        self, mock_config_fn, mock_client_cls, cli, project, config
+    ):
+        runner, app = cli
+        root, comp_dir = project
+        mock_config_fn.return_value = config
+
+        original = "# my block\n"
+        _install_block(root, comp_dir, "my_block", original)
+
+        mock_client = MagicMock()
+        mock_client.get_block_metadata.side_effect = FileNotFoundError("not in registry")
+        mock_client_cls.return_value = mock_client
+
+        result = runner.invoke(app, ["update", "my_block", "--verbose"])
+        assert result.exit_code == 0
+        assert (comp_dir / "my_block.py").read_text() == original
+        assert "not in registry" in result.output
+
+    @patch("starui.cli.update.RegistryClient")
+    @patch("starui.cli.update.get_project_config")
+    def test_block_update_installs_missing_component_deps(
+        self, mock_config_fn, mock_client_cls, cli, project, config
+    ):
+        runner, app = cli
+        root, comp_dir = project
+        mock_config_fn.return_value = config
+
+        old_source = "# block v1\n"
+        new_source = "# block v2\n"
+        _install_block(root, comp_dir, "my_block", old_source)
+
+        dep_source = "# avatar source\n"
+        dep_checksum = compute_checksum(dep_source)
+
+        mock_client = MagicMock()
+        mock_client.version = "main"
+        mock_client.get_block_metadata.return_value = {
+            "checksum": compute_checksum(new_source),
+            "install_name": "my_block",
+        }
+        mock_client.get_block_source.return_value = new_source
+        mock_client.resolve_block_dependencies.return_value = ["avatar"]
+        mock_client.get_component_source.return_value = dep_source
+        mock_client.get_component_metadata.return_value = {"checksum": dep_checksum}
+        mock_client_cls.return_value = mock_client
+
+        result = runner.invoke(app, ["update", "my_block"])
+        assert result.exit_code == 0
+        assert (comp_dir / "avatar.py").read_text() == dep_source
+
+        manifest = Manifest(root)
+        assert "avatar" in manifest.get_installed()
+
+    @patch("starui.cli.update.RegistryClient")
+    @patch("starui.cli.update.get_project_config")
+    def test_block_update_skips_existing_component_deps(
+        self, mock_config_fn, mock_client_cls, cli, project, config
+    ):
+        runner, app = cli
+        root, comp_dir = project
+        mock_config_fn.return_value = config
+
+        old_source = "# block v1\n"
+        new_source = "# block v2\n"
+        _install_block(root, comp_dir, "my_block", old_source)
+
+        # Pre-existing dep on disk
+        existing_dep = "# local avatar, should not change\n"
+        (comp_dir / "avatar.py").write_text(existing_dep)
+
+        mock_client = MagicMock()
+        mock_client.version = "main"
+        mock_client.get_block_metadata.return_value = {
+            "checksum": compute_checksum(new_source),
+            "install_name": "my_block",
+        }
+        mock_client.get_block_source.return_value = new_source
+        mock_client.resolve_block_dependencies.return_value = ["avatar"]
+        mock_client_cls.return_value = mock_client
+
+        result = runner.invoke(app, ["update", "my_block"])
+        assert result.exit_code == 0
+        assert (comp_dir / "avatar.py").read_text() == existing_dep
+
+    @patch("starui.cli.update.RegistryClient")
+    @patch("starui.cli.update.get_project_config")
+    def test_block_dep_resolution_failure_does_not_break_update(
+        self, mock_config_fn, mock_client_cls, cli, project, config
+    ):
+        runner, app = cli
+        root, comp_dir = project
+        mock_config_fn.return_value = config
+
+        old_source = "# block v1\n"
+        new_source = "# block v2\n"
+        _install_block(root, comp_dir, "my_block", old_source)
+
+        mock_client = MagicMock()
+        mock_client.version = "main"
+        mock_client.get_block_metadata.return_value = {
+            "checksum": compute_checksum(new_source),
+            "install_name": "my_block",
+        }
+        mock_client.get_block_source.return_value = new_source
+        mock_client.resolve_block_dependencies.side_effect = RuntimeError("network error")
+        mock_client_cls.return_value = mock_client
+
+        result = runner.invoke(app, ["update", "my_block"])
+        assert result.exit_code == 0
+        # Block itself was still updated despite dep resolution failure
+        assert (comp_dir / "my_block.py").read_text() == new_source
+        assert "Updated" in result.output
+
+    @patch("starui.cli.update.RegistryClient")
+    @patch("starui.cli.update.get_project_config")
+    def test_update_all_includes_both_components_and_blocks(
+        self, mock_config_fn, mock_client_cls, cli, project, config
+    ):
+        runner, app = cli
+        root, comp_dir = project
+        mock_config_fn.return_value = config
+
+        old_comp = "# button v1\n"
+        new_comp = "# button v2\n"
+        _install_component(root, comp_dir, "button", old_comp, version="0.2.0")
+
+        old_block = "# block v1\n"
+        new_block = "# block v2\n"
+        _install_block(root, comp_dir, "my_block", old_block)
+
+        mock_client = MagicMock()
+        mock_client.version = "main"
+        mock_client.get_component_metadata.return_value = {"checksum": compute_checksum(new_comp)}
+        mock_client.get_component_source.return_value = new_comp
+        mock_client.get_block_metadata.return_value = {
+            "checksum": compute_checksum(new_block),
+            "install_name": "my_block",
+        }
+        mock_client.get_block_source.return_value = new_block
+        mock_client.resolve_block_dependencies.return_value = []
+        mock_client_cls.return_value = mock_client
+
+        result = runner.invoke(app, ["update"])
+        assert result.exit_code == 0
+        assert (comp_dir / "button.py").read_text() == new_comp
+        assert (comp_dir / "my_block.py").read_text() == new_block
+        assert "button" in result.output
+        assert "my_block" in result.output
+
+    @patch("starui.cli.update.RegistryClient")
+    @patch("starui.cli.update.get_project_config")
+    def test_unknown_block_by_install_name_resolves(
+        self, mock_config_fn, mock_client_cls, cli, project, config
+    ):
+        """Typing 'star update user_button' finds the block installed as user_button_01."""
+        runner, app = cli
+        root, comp_dir = project
+        mock_config_fn.return_value = config
+
+        old_source = "# block v1\n"
+        new_source = "# block v2\n"
+        _install_block(root, comp_dir, "user_button_01", old_source, install_name="user_button")
+
+        mock_client = MagicMock()
+        mock_client.version = "main"
+        mock_client.get_block_metadata.return_value = {
+            "checksum": compute_checksum(new_source),
+            "install_name": "user_button",
+        }
+        mock_client.get_block_source.return_value = new_source
+        mock_client.resolve_block_dependencies.return_value = []
+        mock_client_cls.return_value = mock_client
+
+        # user_button is the install_name, not the registry name
+        result = runner.invoke(app, ["update", "user_button"])
+        assert result.exit_code == 0
+        assert (comp_dir / "user_button.py").read_text() == new_source
+
+    @patch("starui.cli.update.RegistryClient")
+    @patch("starui.cli.update.get_project_config")
+    def test_verbose_shows_already_up_to_date_for_blocks(
+        self, mock_config_fn, mock_client_cls, cli, project, config
+    ):
+        runner, app = cli
+        root, comp_dir = project
+        mock_config_fn.return_value = config
+
+        source = "# block current\n"
+        checksum = _install_block(root, comp_dir, "my_block", source)
+
+        mock_client = MagicMock()
+        mock_client.get_block_metadata.return_value = {"checksum": checksum}
+        mock_client_cls.return_value = mock_client
+
+        result = runner.invoke(app, ["update", "my_block", "--verbose"])
+        assert result.exit_code == 0
+        assert "already up to date" in result.output
+
+    @patch("starui.cli.update.RegistryClient")
+    @patch("starui.cli.update.get_project_config")
+    def test_general_exception_shows_error_message(
+        self, mock_config_fn, mock_client_cls, cli, project, config
+    ):
+        runner, app = cli
+        root, comp_dir = project
+        mock_config_fn.return_value = config
+
+        _install_component(root, comp_dir, "button", "# v1\n")
+
+        mock_client = MagicMock()
+        mock_client.get_component_metadata.side_effect = RuntimeError("network down")
+        mock_client_cls.return_value = mock_client
+
+        result = runner.invoke(app, ["update"])
+        assert result.exit_code != 0
+        assert "Update failed" in result.output
+
+    @patch("starui.cli.update.RegistryClient")
+    @patch("starui.cli.update.get_project_config")
+    def test_empty_manifest_no_components_no_blocks(
+        self, mock_config_fn, mock_client_cls, cli, project, config
+    ):
+        runner, app = cli
+        root, _ = project
+        mock_config_fn.return_value = config
+
+        # Create manifest with no components and no blocks
+        manifest = Manifest(root)
+        manifest.save()
+
+        result = runner.invoke(app, ["update"])
+        assert result.exit_code == 0
+        assert "No components" in result.output

@@ -6,7 +6,12 @@ from unittest.mock import MagicMock, patch
 import pytest
 from click.exceptions import Exit
 
-from starui.cli.add import _setup_css_imports, add_command
+from starui.cli.add import (
+    _build_token_rules as _build_token_rules,
+    _setup_code_highlighting as _setup_code_highlighting,
+    _setup_css_imports,
+    add_command,
+)
 
 
 def _mock_client(resolved: dict[str, str], *, metadata_fn=None):
@@ -418,7 +423,9 @@ def _mock_block_client(
         "checksum": "",
         **(block_meta or {}),
     }
-    comp_meta_fn = lambda name: {"name": name, "packages": [], "css_imports": [], "checksum": ""}
+
+    def comp_meta_fn(name):
+        return {"name": name, "packages": [], "css_imports": [], "checksum": ""}
 
     client = MagicMock()
     client.version = "main"
@@ -524,3 +531,251 @@ class TestBlockPackagesAndCssImports:
 
         _run_add(project, ["user-button-01"], {}, client=client)
         assert '@plugin "some-plugin";' in input_css.read_text()
+
+
+# ── _build_token_rules tests ─────────────────────────────────────────────
+
+
+class TestBuildTokenRules:
+    def test_generates_scrollbar_rules_when_theme_has_scrollbar_keys(self):
+        theme = {
+            "--scrollbar-track": "#111",
+            "--scrollbar-thumb": "#222",
+            "--scrollbar-thumb-hover": "#333",
+        }
+        result = _build_token_rules(theme)
+        assert "::-webkit-scrollbar-track" in result
+        assert "::-webkit-scrollbar-thumb {" in result
+        assert "border-radius: 4px;" in result
+        assert "::-webkit-scrollbar-thumb-hover" in result
+
+    def test_generates_token_rules_for_token_keys(self):
+        theme = {
+            "--token-keyword": "#ff0000",
+            "--token-string": "#00ff00",
+        }
+        result = _build_token_rules(theme)
+        assert ".token-keyword { color: var(--token-keyword); }" in result
+        assert ".token-string { color: var(--token-string); }" in result
+
+    def test_adds_font_style_italic_for_token_comment(self):
+        theme = {
+            "--token-comment": "#999",
+            "--token-keyword": "#f00",
+        }
+        result = _build_token_rules(theme)
+        assert "font-style: italic;" in result
+        # Only the comment line has italic
+        for line in result.split("\n"):
+            if "token-keyword" in line:
+                assert "italic" not in line
+            if "token-comment" in line:
+                assert "italic" in line
+
+    def test_skips_non_scrollbar_and_non_token_keys(self):
+        theme = {
+            "--background": "#fff",
+            "--foreground": "#000",
+            "--some-other": "blue",
+        }
+        result = _build_token_rules(theme)
+        # Should only have the default scrollbar size rule, nothing else
+        lines = result.strip().split("\n")
+        assert len(lines) == 1
+        assert "scrollbar" in lines[0]
+        assert "--background" not in result
+        assert "--foreground" not in result
+
+
+# ── Verbose mode and lookup failure tests ─────────────────────────────────
+
+
+class TestVerboseModeAndLookupFailure:
+    def test_verbose_shows_file_location(self, project):
+        result = _run_add(
+            project,
+            ["button"],
+            {"utils": "# u", "button": "# btn"},
+            verbose=True,
+        )
+        info_text = " ".join(result.infos)
+        assert "Location" in info_text or str(project.component_dir_absolute) in info_text
+
+    def test_component_not_found_in_registry_shows_error_and_exits(self, project):
+        client = MagicMock()
+        client.lookup.side_effect = FileNotFoundError("'nonexistent' not found")
+        client.version = "main"
+
+        with (
+            patch("starui.cli.add.get_project_config", return_value=project),
+            patch("starui.cli.add.RegistryClient", return_value=client),
+            patch("starui.cli.add.Manifest", return_value=MagicMock()),
+            patch("starui.cli.add.status_context", return_value=nullcontext()),
+            patch("starui.cli.add.console"),
+            patch("starui.cli.add.error") as mock_error,
+            pytest.raises(Exit),
+        ):
+            add_command(components=["nonexistent"], force=False, verbose=False, theme=None, component_dir=None)
+
+        assert any("not found" in msg for msg in _messages(mock_error))
+
+    def test_verbose_shows_resolving_message(self, project):
+        result = _run_add(
+            project,
+            ["button"],
+            {"utils": "# u", "button": "# btn"},
+            verbose=True,
+        )
+        info_text = " ".join(result.infos)
+        assert "Resolving" in info_text
+
+
+class TestMetadataFetchFailure:
+    def test_component_metadata_not_found_still_installs(self, project):
+        """If get_component_metadata raises FileNotFoundError during package collection,
+        the component should still be installed."""
+        comp_dir = project.component_dir_absolute
+
+        client = MagicMock()
+        client.version = "main"
+        client.lookup.return_value = ("component", {"name": "button", "packages": [], "css_imports": [], "checksum": ""})
+        client.get_component_with_dependencies.return_value = {"button": "# btn source"}
+        # Metadata fetch fails during package collection phase
+        client.get_component_metadata.side_effect = FileNotFoundError("no metadata")
+
+        _run_add(project, ["button"], {"button": "# btn source"}, client=client)
+        assert (comp_dir / "button.py").exists()
+
+    def test_block_metadata_not_found_still_installs(self, project):
+        """If get_block_metadata raises FileNotFoundError during package collection,
+        the block should still be installed."""
+        comp_dir = project.component_dir_absolute
+
+        client = _mock_block_client({"utils": "# u"}, "# block src")
+        # Override get_block_metadata to always fail — the package-collection loop
+        # on lines 222-228 catches FileNotFoundError and continues
+        client.get_block_metadata.side_effect = FileNotFoundError("metadata vanished")
+
+        _run_add(project, ["user-button-01"], {}, client=client)
+        assert (comp_dir / "user_button.py").exists()
+
+
+# ── _setup_code_highlighting tests ────────────────────────────────────────
+
+FAKE_THEMES = {
+    "github-light": {"--token-keyword": "#cf222e", "--token-string": "#0a3069"},
+    "github-dark": {"--token-keyword": "#ff7b72", "--token-string": "#a5d6ff", "--token-comment": "#8b949e"},
+    "monokai": {"--token-keyword": "#f92672", "--token-comment": "#75715e"},
+}
+
+
+class TestSetupCodeHighlighting:
+    def test_warns_when_starlighter_not_installed(self, project):
+        """If starlighter is not importable, shows a warning and returns early."""
+        with (
+            patch("starui.cli.add.warning") as mock_warning,
+            patch.dict("sys.modules", {"starlighter": None}),
+        ):
+            _setup_code_highlighting(project, theme="monokai")
+            assert any("Starlighter" in msg for msg in _messages(mock_warning))
+
+        # No starlighter.css should be generated
+        assert not (project.css_dir_absolute / "starlighter.css").exists()
+
+    def test_explicit_theme_generates_dark_only_css(self, project):
+        """Passing --theme monokai generates a dark-only starlighter.css."""
+        mock_starlighter = MagicMock()
+        mock_starlighter.THEMES = FAKE_THEMES
+
+        with (
+            patch.dict("sys.modules", {"starlighter": mock_starlighter}),
+            patch("starui.cli.add.console"),
+            patch("starui.cli.add.success"),
+            patch("starui.cli.add.info"),
+        ):
+            _setup_code_highlighting(project, theme="monokai")
+
+        css_file = project.css_dir_absolute / "starlighter.css"
+        assert css_file.exists()
+        content = css_file.read_text()
+        assert ":root" in content
+        # Dark-only mode: no .dark selector
+        assert ".dark" not in content
+
+    def test_interactive_theme_default_generates_light_dark_css(self, project):
+        """Interactive selection defaulting to choice 1 generates light/dark auto-switching."""
+        mock_starlighter = MagicMock()
+        mock_starlighter.THEMES = FAKE_THEMES
+
+        with (
+            patch.dict("sys.modules", {"starlighter": mock_starlighter}),
+            patch("starui.cli.add.typer.prompt", return_value="1"),
+            patch("starui.cli.add.console"),
+            patch("starui.cli.add.success"),
+            patch("starui.cli.add.info"),
+        ):
+            _setup_code_highlighting(project, theme=None)
+
+        css_file = project.css_dir_absolute / "starlighter.css"
+        assert css_file.exists()
+        content = css_file.read_text()
+        # Light/dark mode has both :root and .dark selectors
+        assert ":root" in content
+        assert ".dark" in content
+
+    def test_interactive_invalid_choice_defaults_to_first(self, project):
+        """Non-numeric input falls back to choice 0 (GitHub light/dark)."""
+        mock_starlighter = MagicMock()
+        mock_starlighter.THEMES = FAKE_THEMES
+
+        with (
+            patch.dict("sys.modules", {"starlighter": mock_starlighter}),
+            patch("starui.cli.add.typer.prompt", return_value="abc"),
+            patch("starui.cli.add.console"),
+            patch("starui.cli.add.success"),
+            patch("starui.cli.add.info"),
+        ):
+            _setup_code_highlighting(project, theme=None)
+
+        css_file = project.css_dir_absolute / "starlighter.css"
+        assert css_file.exists()
+        content = css_file.read_text()
+        assert ".dark" in content
+
+    def test_adds_import_to_input_css(self, project):
+        """starlighter.css import is added to input.css after the tailwindcss import."""
+        input_css = project.css_dir_absolute / "input.css"
+        input_css.write_text('@import "tailwindcss";\n')
+
+        mock_starlighter = MagicMock()
+        mock_starlighter.THEMES = FAKE_THEMES
+
+        with (
+            patch.dict("sys.modules", {"starlighter": mock_starlighter}),
+            patch("starui.cli.add.console"),
+            patch("starui.cli.add.success"),
+            patch("starui.cli.add.info"),
+        ):
+            _setup_code_highlighting(project, theme="monokai")
+
+        content = input_css.read_text()
+        assert "@import './starlighter.css';" in content
+
+    def test_skips_import_if_already_present(self, project):
+        """If input.css already has the import, don't add it again."""
+        input_css = project.css_dir_absolute / "input.css"
+        original = '@import "tailwindcss";\n@import \'./starlighter.css\';\n'
+        input_css.write_text(original)
+
+        mock_starlighter = MagicMock()
+        mock_starlighter.THEMES = FAKE_THEMES
+
+        with (
+            patch.dict("sys.modules", {"starlighter": mock_starlighter}),
+            patch("starui.cli.add.console"),
+            patch("starui.cli.add.success"),
+            patch("starui.cli.add.info"),
+        ):
+            _setup_code_highlighting(project, theme="monokai")
+
+        assert input_css.read_text() == original

@@ -90,10 +90,10 @@ def Page(*children, title="Component Test", show_back_link=True):
         A(
             Icon("lucide:arrow-left", width=20, height=20),
             href="/",
-            cls="absolute top-4 left-4 inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground h-10 w-10"
+            cls="absolute top-4 left-4 inline-flex h-10 w-10 items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground"
         ) if show_back_link else None,
         Div(ThemeToggle(), cls="absolute top-4 right-4"),
-        H1(title, cls="text-3xl font-bold mb-8 mt-16"),
+        H1(title, cls="mt-16 mb-8 text-3xl font-bold"),
         *children,
         cls="container mx-auto px-4 py-8"
     )
@@ -110,7 +110,7 @@ app, rt = star_app(
     ),
     htmlkw=dict(lang="en", dir="ltr"),
     bodykw=dict(
-        cls="min-h-screen bg-background text-foreground px-8 pt-8 pb-96",
+        cls="min-h-screen bg-background px-8 pt-8 pb-96 text-foreground",
     ),
 )
 app.register(position, clipboard)
@@ -123,45 +123,45 @@ def index():
         # Theme toggle in top-right
         Div(ThemeToggle(), cls="absolute top-4 right-4"),
 
-        H1("Component Migration Test Suite", cls="text-4xl font-bold mb-8"),
-        P("Click a component to test it individually:", cls="text-muted-foreground mb-4"),
+        H1("Component Migration Test Suite", cls="mb-8 text-4xl font-bold"),
+        P("Click a component to test it individually:", cls="mb-4 text-muted-foreground"),
 
         Div(
-            A("Accordion", href="/accordion", cls="text-primary hover:underline block"),
-            A("Alert", href="/alert", cls="text-primary hover:underline block"),
-            A("Alert Dialog", href="/alert-dialog", cls="text-primary hover:underline block"),
-            A("Avatar", href="/avatar", cls="text-primary hover:underline block"),
-            A("Badge", href="/badge", cls="text-primary hover:underline block"),
-            A("Button", href="/button", cls="text-primary hover:underline block"),
-            A("Calendar", href="/calendar", cls="text-primary hover:underline block"),
-            A("Card", href="/card", cls="text-primary hover:underline block"),
-            A("Checkbox", href="/checkbox", cls="text-primary hover:underline block"),
-            A("Code Block", href="/code-block", cls="text-primary hover:underline block"),
-            A("Command", href="/command", cls="text-primary hover:underline block"),
-            A("Date Picker", href="/date-picker", cls="text-primary hover:underline block"),
-            A("Dialog", href="/dialog", cls="text-primary hover:underline block"),
-            A("Dropdown Menu", href="/dropdown-menu", cls="text-primary hover:underline block"),
-            A("Hover Card", href="/hover-card", cls="text-primary hover:underline block"),
-            A("Input", href="/input", cls="text-primary hover:underline block"),
-            A("Label", href="/label", cls="text-primary hover:underline block"),
-            A("Popover", href="/popover", cls="text-primary hover:underline block"),
-            A("Progress", href="/progress", cls="text-primary hover:underline block"),
-            A("Radio Group", href="/radio-group", cls="text-primary hover:underline block"),
-            A("Select", href="/select", cls="text-primary hover:underline block"),
-            A("Separator", href="/separator", cls="text-primary hover:underline block"),
-            A("Sheet", href="/sheet", cls="text-primary hover:underline block"),
-            A("Skeleton", href="/skeleton", cls="text-primary hover:underline block"),
-            A("Switch", href="/switch", cls="text-primary hover:underline block"),
-            A("Table", href="/table", cls="text-primary hover:underline block"),
-            A("Textarea", href="/textarea", cls="text-primary hover:underline block"),
-            A("Tabs", href="/tabs", cls="text-primary hover:underline block"),
-            A("Toast", href="/toast", cls="text-primary hover:underline block"),
-            A("Toast - Server & Client Patterns", href="/toast-server", cls="text-primary hover:underline block ml-4 text-sm"),
-            A("Toggle", href="/toggle", cls="text-primary hover:underline block"),
-            A("Toggle Group", href="/toggle_group", cls="text-primary hover:underline block"),
-            A("Tooltip", href="/tooltip", cls="text-primary hover:underline block"),
-            A("Typography", href="/typography", cls="text-primary hover:underline block"),
-            A("Theme Toggle", href="/theme-toggle", cls="text-primary hover:underline block"),
+            A("Accordion", href="/accordion", cls="block text-primary hover:underline"),
+            A("Alert", href="/alert", cls="block text-primary hover:underline"),
+            A("Alert Dialog", href="/alert-dialog", cls="block text-primary hover:underline"),
+            A("Avatar", href="/avatar", cls="block text-primary hover:underline"),
+            A("Badge", href="/badge", cls="block text-primary hover:underline"),
+            A("Button", href="/button", cls="block text-primary hover:underline"),
+            A("Calendar", href="/calendar", cls="block text-primary hover:underline"),
+            A("Card", href="/card", cls="block text-primary hover:underline"),
+            A("Checkbox", href="/checkbox", cls="block text-primary hover:underline"),
+            A("Code Block", href="/code-block", cls="block text-primary hover:underline"),
+            A("Command", href="/command", cls="block text-primary hover:underline"),
+            A("Date Picker", href="/date-picker", cls="block text-primary hover:underline"),
+            A("Dialog", href="/dialog", cls="block text-primary hover:underline"),
+            A("Dropdown Menu", href="/dropdown-menu", cls="block text-primary hover:underline"),
+            A("Hover Card", href="/hover-card", cls="block text-primary hover:underline"),
+            A("Input", href="/input", cls="block text-primary hover:underline"),
+            A("Label", href="/label", cls="block text-primary hover:underline"),
+            A("Popover", href="/popover", cls="block text-primary hover:underline"),
+            A("Progress", href="/progress", cls="block text-primary hover:underline"),
+            A("Radio Group", href="/radio-group", cls="block text-primary hover:underline"),
+            A("Select", href="/select", cls="block text-primary hover:underline"),
+            A("Separator", href="/separator", cls="block text-primary hover:underline"),
+            A("Sheet", href="/sheet", cls="block text-primary hover:underline"),
+            A("Skeleton", href="/skeleton", cls="block text-primary hover:underline"),
+            A("Switch", href="/switch", cls="block text-primary hover:underline"),
+            A("Table", href="/table", cls="block text-primary hover:underline"),
+            A("Textarea", href="/textarea", cls="block text-primary hover:underline"),
+            A("Tabs", href="/tabs", cls="block text-primary hover:underline"),
+            A("Toast", href="/toast", cls="block text-primary hover:underline"),
+            A("Toast - Server & Client Patterns", href="/toast-server", cls="ml-4 block text-sm text-primary hover:underline"),
+            A("Toggle", href="/toggle", cls="block text-primary hover:underline"),
+            A("Toggle Group", href="/toggle_group", cls="block text-primary hover:underline"),
+            A("Tooltip", href="/tooltip", cls="block text-primary hover:underline"),
+            A("Typography", href="/typography", cls="block text-primary hover:underline"),
+            A("Theme Toggle", href="/theme-toggle", cls="block text-primary hover:underline"),
             cls="space-y-2"
         ),
         cls="container mx-auto"
@@ -173,7 +173,7 @@ def index():
 @rt("/accordion")
 def test_accordion():
     return Page(
-        H2("Single Mode (Collapsible)", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Single Mode (Collapsible)", cls="mt-8 mb-4 text-2xl font-semibold"),
         Accordion(
             AccordionItem(
                 AccordionTrigger("Is it accessible?"),
@@ -195,7 +195,7 @@ def test_accordion():
             cls="max-w-2xl"
         ),
 
-        H2("Multiple Mode", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Multiple Mode", cls="mt-8 mb-4 text-2xl font-semibold"),
         Accordion(
             AccordionItem(
                 AccordionTrigger("Can I open multiple items?"),
@@ -223,7 +223,7 @@ def test_accordion():
 @rt("/alert")
 def test_alert():
     return Page(
-        H2("Alert Variants", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Alert Variants", cls="mt-8 mb-4 text-2xl font-semibold"),
         Div(
             Alert(
                 AlertTitle("Default Alert"),
@@ -234,10 +234,10 @@ def test_alert():
                 AlertDescription("This is a destructive alert message."),
                 variant="destructive",
             ),
-            cls="space-y-4 max-w-2xl"
+            cls="max-w-2xl space-y-4"
         ),
 
-        H2("Alert with Icon", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Alert with Icon", cls="mt-8 mb-4 text-2xl font-semibold"),
         Div(
             Alert(
                 Icon("lucide:info"),
@@ -250,7 +250,7 @@ def test_alert():
                 AlertDescription("This alert includes an icon to draw attention to important information."),
                 variant="destructive",
             ),
-            cls="space-y-4 max-w-2xl"
+            cls="max-w-2xl space-y-4"
         ),
 
         title="Alert"
@@ -260,7 +260,7 @@ def test_alert():
 @rt("/avatar")
 def test_avatar():
     return Page(
-        H2("Basic Avatar", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Basic Avatar", cls="mt-8 mb-4 text-2xl font-semibold"),
         Div(
             Avatar(
                 AvatarImage(
@@ -277,11 +277,11 @@ def test_avatar():
                     alt="User"
                 )
             ),
-            cls="flex gap-4 items-center"
+            cls="flex items-center gap-4"
         ),
 
-        H2("Avatar Sizes", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Use size classes to customize:", cls="text-sm text-muted-foreground mb-2"),
+        H2("Avatar Sizes", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Use size classes to customize:", cls="mb-2 text-sm text-muted-foreground"),
         Div(
             Avatar(AvatarFallback("XS"), cls="size-6"),
             Avatar(AvatarFallback("SM"), cls="size-8"),
@@ -289,11 +289,11 @@ def test_avatar():
             Avatar(AvatarFallback("LG"), cls="size-12"),
             Avatar(AvatarFallback("XL"), cls="size-16"),
             Avatar(AvatarFallback("2X"), cls="size-20"),
-            cls="flex gap-4 items-center"
+            cls="flex items-center gap-4"
         ),
 
-        H2("Automatic Fallback", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("The second avatar will show fallback as the image URL is invalid:", cls="text-sm text-muted-foreground mb-2"),
+        H2("Automatic Fallback", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("The second avatar will show fallback as the image URL is invalid:", cls="mb-2 text-sm text-muted-foreground"),
         Div(
             AvatarWithFallback(
                 src="https://github.com/shadcn.png",
@@ -308,7 +308,7 @@ def test_avatar():
             AvatarWithFallback(
                 fallback="NI"
             ),
-            cls="flex gap-4 items-center"
+            cls="flex items-center gap-4"
         ),
 
         title="Avatar"
@@ -318,25 +318,25 @@ def test_avatar():
 @rt("/badge")
 def test_badge():
     return Page(
-        H2("Badge Variants", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Badge Variants", cls="mt-8 mb-4 text-2xl font-semibold"),
         Div(
             Badge("Default"),
             Badge("Secondary", variant="secondary"),
             Badge("Destructive", variant="destructive"),
             Badge("Outline", variant="outline"),
-            cls="flex flex-wrap gap-2 max-w-2xl"
+            cls="flex max-w-2xl flex-wrap gap-2"
         ),
 
-        H2("Badge with Icons", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Badge with Icons", cls="mt-8 mb-4 text-2xl font-semibold"),
         Div(
             Badge(Icon("lucide:check"), "Verified", variant="secondary"),
             Badge(Icon("lucide:star"), "Featured"),
             Badge(Icon("lucide:alert-triangle"), "Warning", variant="destructive"),
             Badge(Icon("lucide:info"), "Info", variant="outline"),
-            cls="flex flex-wrap gap-2 max-w-2xl"
+            cls="flex max-w-2xl flex-wrap gap-2"
         ),
 
-        H2("Clickable Badges", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Clickable Badges", cls="mt-8 mb-4 text-2xl font-semibold"),
         Div(
             (click_count := Signal("badge_clicks", 0)),
             Badge(
@@ -351,16 +351,16 @@ def test_badge():
                 clickable=True,
                 data_on_click=js("alert('Dismissed!')"),
             ),
-            P(data_text="Clicks: " + click_count, cls="text-sm text-muted-foreground mt-2"),
-            cls="flex flex-wrap gap-2 max-w-2xl"
+            P(data_text="Clicks: " + click_count, cls="mt-2 text-sm text-muted-foreground"),
+            cls="flex max-w-2xl flex-wrap gap-2"
         ),
 
-        H2("Badge as Link", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Badge as Link", cls="mt-8 mb-4 text-2xl font-semibold"),
         Div(
             Badge("Home", href="/", variant="secondary"),
             Badge("Documentation", href="#docs", variant="outline"),
             Badge("GitHub", href="https://github.com", variant="default"),
-            cls="flex flex-wrap gap-2 max-w-2xl"
+            cls="flex max-w-2xl flex-wrap gap-2"
         ),
 
         title="Badge"
@@ -375,10 +375,10 @@ async def api_data():
 
     return Fragment(
         Div(
-            P("✓ Data fetched successfully!", cls="text-green-600 font-medium"),
+            P("✓ Data fetched successfully!", cls="font-medium text-green-600"),
             P(f"Fetched at: {__import__('datetime').datetime.now().strftime('%H:%M:%S')}", cls="text-xs text-green-600"),
             id="api-response",
-            cls="mt-2 p-2 bg-green-50 rounded border border-green-200"
+            cls="mt-2 rounded border border-green-200 bg-green-50 p-2"
         )
     )
 
@@ -386,7 +386,7 @@ async def api_data():
 @rt("/button")
 def test_button():
     return Page(
-        H2("Button Variants", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Button Variants", cls="mt-8 mb-4 text-2xl font-semibold"),
         Div(
             Button("Default"),
             Button("Destructive", variant="destructive"),
@@ -394,29 +394,29 @@ def test_button():
             Button("Secondary", variant="secondary"),
             Button("Ghost", variant="ghost"),
             Button("Link", variant="link"),
-            cls="flex flex-wrap gap-2 max-w-2xl"
+            cls="flex max-w-2xl flex-wrap gap-2"
         ),
 
-        H2("Button Sizes", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Button Sizes", cls="mt-8 mb-4 text-2xl font-semibold"),
         Div(
             Button("Small", size="sm"),
             Button("Default", size="default"),
             Button("Large", size="lg"),
             Button(Icon("lucide:settings"), size="icon", variant="outline"),
             Button(Icon("lucide:trash"), size="icon", variant="destructive"),
-            cls="flex flex-wrap gap-2 items-center max-w-2xl"
+            cls="flex max-w-2xl flex-wrap items-center gap-2"
         ),
 
-        H2("Buttons with Icons", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Buttons with Icons", cls="mt-8 mb-4 text-2xl font-semibold"),
         Div(
             Button(Icon("lucide:mail"), "Email"),
             Button(Icon("lucide:download"), "Download", variant="secondary"),
             Button("Delete", Icon("lucide:trash"), variant="destructive"),
             Button(Icon("lucide:settings"), "Settings", variant="outline"),
-            cls="flex flex-wrap gap-2 max-w-2xl"
+            cls="flex max-w-2xl flex-wrap gap-2"
         ),
 
-        H2("Interactive Buttons", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Interactive Buttons", cls="mt-8 mb-4 text-2xl font-semibold"),
         Div(
             (count := Signal("button_count", 0)),
             Button(
@@ -437,19 +437,19 @@ def test_button():
                 data_on_click=count.set(0),
             ),
             P(data_text="Count: " + count, cls="text-lg font-semibold"),
-            cls="flex flex-wrap gap-2 items-center max-w-2xl"
+            cls="flex max-w-2xl flex-wrap items-center gap-2"
         ),
 
-        H2("Disabled State", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Disabled State", cls="mt-8 mb-4 text-2xl font-semibold"),
         Div(
             Button("Disabled Default", disabled=True),
             Button("Disabled Destructive", variant="destructive", disabled=True),
             Button("Disabled Outline", variant="outline", disabled=True),
-            cls="flex flex-wrap gap-2 max-w-2xl"
+            cls="flex max-w-2xl flex-wrap gap-2"
         ),
 
-        H2("Loading State Pattern 1: data-show Toggle (Best for 2 states)", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Both icons in DOM, toggled with data-show. Fast CSS-only switching.", cls="text-sm text-muted-foreground mb-2"),
+        H2("Loading State Pattern 1: data-show Toggle (Best for 2 states)", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Both icons in DOM, toggled with data-show. Fast CSS-only switching.", cls="mb-2 text-sm text-muted-foreground"),
         Div(
             (is_loading := Signal("is_loading", False)),
             Button(
@@ -467,12 +467,12 @@ def test_button():
                 data_on_click=is_loading.toggle(),
                 data_attr_disabled=is_loading,
             ),
-            P("✓ Fastest: Both icons preloaded, CSS toggle only", cls="text-xs text-muted-foreground mt-2"),
-            cls="flex flex-wrap gap-2 items-start max-w-2xl"
+            P("✓ Fastest: Both icons preloaded, CSS toggle only", cls="mt-2 text-xs text-muted-foreground"),
+            cls="flex max-w-2xl flex-wrap items-start gap-2"
         ),
 
-        H2("Loading State Pattern 2: Signal Value (Best for 3+ states)", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Icon name stored in signal. Useful for multiple states, but requires icon re-render.", cls="text-sm text-muted-foreground mb-2"),
+        H2("Loading State Pattern 2: Signal Value (Best for 3+ states)", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Icon name stored in signal. Useful for multiple states, but requires icon re-render.", cls="mb-2 text-sm text-muted-foreground"),
         Div(
             (status := Signal("status", "pending")),
             Button(
@@ -517,12 +517,12 @@ def test_button():
                 variant="outline",
                 data_on_click=status.set("pending"),
             ),
-            P("✓ Better for 3+ states: Only one icon element, state-driven", cls="text-xs text-muted-foreground mt-2"),
-            cls="flex flex-wrap gap-2 items-start max-w-2xl"
+            P("✓ Better for 3+ states: Only one icon element, state-driven", cls="mt-2 text-xs text-muted-foreground"),
+            cls="flex max-w-2xl flex-wrap items-start gap-2"
         ),
 
-        H2("Pattern 3: Real Backend Loading (data-indicator)", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Uses Datastar's built-in data-indicator for actual backend requests:", cls="text-sm text-muted-foreground mb-2"),
+        H2("Pattern 3: Real Backend Loading (data-indicator)", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Uses Datastar's built-in data-indicator for actual backend requests:", cls="mb-2 text-sm text-muted-foreground"),
         Div(
             (fetching := Signal("fetching", _ref_only=True)),
             Button(
@@ -535,13 +535,13 @@ def test_button():
                 variant="outline",
             ),
             Div(
-                P("Response will appear here...", cls="text-muted-foreground text-sm italic"),
+                P("Response will appear here...", cls="text-sm text-muted-foreground italic"),
                 id="api-response",
                 cls="mt-2"
             ),
-            P("✓ Automatic: 'fetching' signal created by Datastar during requests", cls="text-xs text-muted-foreground mt-2"),
+            P("✓ Automatic: 'fetching' signal created by Datastar during requests", cls="mt-2 text-xs text-muted-foreground"),
             P("Click button to see 2-second simulated network delay", cls="text-xs text-muted-foreground"),
-            cls="flex flex-col gap-2 max-w-2xl"
+            cls="flex max-w-2xl flex-col gap-2"
         ),
 
         title="Button"
@@ -551,7 +551,7 @@ def test_button():
 @rt("/alert-dialog")
 def test_alert_dialog():
     return Page(
-        H2("Alert Dialog Variants", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Alert Dialog Variants", cls="mt-8 mb-4 text-2xl font-semibold"),
         Div(
             # Basic alert dialog
             AlertDialog(
@@ -635,7 +635,7 @@ def test_calendar():
     )
 
     return Page(
-        H2("Single Mode", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Single Mode", cls="mt-8 mb-4 text-2xl font-semibold"),
         Div(
             cal_single,
             Div(
@@ -645,7 +645,7 @@ def test_calendar():
             cls="flex flex-col items-center"
         ),
 
-        H2("Range Mode", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Range Mode", cls="mt-8 mb-4 text-2xl font-semibold"),
         Div(
             cal_range,
             Div(
@@ -655,7 +655,7 @@ def test_calendar():
             cls="flex flex-col items-center"
         ),
 
-        H2("Multiple Mode", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Multiple Mode", cls="mt-8 mb-4 text-2xl font-semibold"),
         Div(
             cal_multiple,
             Div(
@@ -665,7 +665,7 @@ def test_calendar():
             cls="flex flex-col items-center"
         ),
 
-        H2("Disabled", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Disabled", cls="mt-8 mb-4 text-2xl font-semibold"),
         Div(
             Calendar(mode="single", disabled=True),
             cls="flex flex-col items-center"
@@ -677,7 +677,7 @@ def test_calendar():
 @rt("/card")
 def test_card():
     return Page(
-        H2("Basic Card", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Basic Card", cls="mt-8 mb-4 text-2xl font-semibold"),
         Card(
             CardHeader(
                 CardTitle("Card Title"),
@@ -696,7 +696,7 @@ def test_card():
             cls="max-w-md",
         ),
 
-        H2("Card with Input", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Card with Input", cls="mt-8 mb-4 text-2xl font-semibold"),
         Card(
             CardHeader(
                 CardTitle("Login to your account"),
@@ -720,7 +720,7 @@ def test_card():
             cls="max-w-md",
         ),
 
-        H2("Card with Action", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Card with Action", cls="mt-8 mb-4 text-2xl font-semibold"),
         Card(
             CardHeader(
                 CardTitle("Notifications", level="h4"),
@@ -750,7 +750,7 @@ def test_card():
             cls="max-w-md",
         ),
 
-        H2("Compact Card", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Compact Card", cls="mt-8 mb-4 text-2xl font-semibold"),
         Card(
             CardHeader(
                 CardTitle("Quick Stats", level="h5"),
@@ -777,7 +777,7 @@ def test_card():
 @rt("/checkbox")
 def test_checkbox():
     return Page(
-        H2("Checkbox Variants", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Checkbox Variants", cls="mt-8 mb-4 text-2xl font-semibold"),
         Div(
             CheckboxWithLabel(
                 label="Accept terms and conditions",                
@@ -803,15 +803,15 @@ def test_checkbox():
             cls="space-y-4"
         ),
 
-        H2("Custom Styled Checkbox", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Custom Styled Checkbox", cls="mt-8 mb-4 text-2xl font-semibold"),
         Div(
             CheckboxWithLabel(
                 label="Custom blue checkbox",                
                 helper_text="With custom blue styling when checked",
-                checkbox_cls="checked:!bg-blue-600 checked:!border-blue-600 dark:checked:!bg-blue-700 dark:checked:!border-blue-700",
+                checkbox_cls="checked:!border-blue-600 checked:!bg-blue-600 dark:checked:!border-blue-700 dark:checked:!bg-blue-700",
                 indicator_cls="!text-white",
             ),
-            cls="p-4 border rounded-lg max-w-md",
+            cls="max-w-md rounded-lg border p-4",
         ),
         title="Checkbox"
     )
@@ -820,14 +820,14 @@ def test_checkbox():
 @rt("/code-block")
 def test_code_block():
     return Page(
-        H2("Python Code", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Python Code", cls="mt-8 mb-4 text-2xl font-semibold"),
         CodeBlock('''def hello_world():
     """A simple greeting function"""
     message = "Hello, world!"
     print(message)
     return 42''', "python"),
 
-        H2("JavaScript Code", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("JavaScript Code", cls="mt-8 mb-4 text-2xl font-semibold"),
         CodeBlock('''function factorial(n) {
   if (n <= 1) return 1;
   return n * factorial(n - 1);
@@ -835,7 +835,7 @@ def test_code_block():
 
 console.log(factorial(5));''', "javascript"),
 
-        H2("Theme Switching", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Theme Switching", cls="mt-8 mb-4 text-2xl font-semibold"),
         P("Click the theme toggle (top-right) to test:", cls="mb-2"),
         Ul(
             Li("Code blocks should switch between light/dark themes"),
@@ -843,10 +843,10 @@ console.log(factorial(5));''', "javascript"),
             Li("Dark mode: dark background with light text"),
             Li("Syntax colors should adapt to the theme"),
             Li("No page reload needed - instant CSS switch"),
-            cls="list-disc list-inside space-y-1 text-muted-foreground mb-4"
+            cls="mb-4 list-inside list-disc space-y-1 text-muted-foreground"
         ),
 
-        H2("Expected Styling", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Expected Styling", cls="mt-8 mb-4 text-2xl font-semibold"),
         P("All code blocks should have:", cls="mb-2"),
         Ul(
             Li("Syntax highlighting with proper token colors"),
@@ -855,14 +855,14 @@ console.log(factorial(5));''', "javascript"),
             Li("Proper padding (20px)"),
             Li("Horizontal scrollbar if content overflows"),
             Li("Monospace font (Monaco, Menlo, etc.)"),
-            cls="list-disc list-inside space-y-1 text-muted-foreground"
+            cls="list-inside list-disc space-y-1 text-muted-foreground"
         ),
 
-        H2("Custom Styled Block", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Custom Styled Block", cls="mt-8 mb-4 text-2xl font-semibold"),
         P("This code block has custom border styling:", cls="mb-2"),
         CodeBlock('''print("Custom styling test")
 x = 1 + 2
-print(f"Result: {x}")''', "python", cls="!border-4 !border-primary !rounded-xl"),
+print(f"Result: {x}")''', "python", cls="!rounded-xl !border-4 !border-primary"),
         title="Code Block"
     )
 
@@ -870,12 +870,12 @@ print(f"Result: {x}")''', "python", cls="!border-4 !border-primary !rounded-xl")
 @rt("/date-picker")
 def test_date_picker():
     return Page(
-        H2("Date Picker Variants", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Date Picker Variants", cls="mt-8 mb-4 text-2xl font-semibold"),
 
         Div(
             # Single date picker
             Div(
-                H3("Single Date", cls="text-lg font-medium mb-2"),
+                H3("Single Date", cls="mb-2 text-lg font-medium"),
                 (single_picker := DatePicker(           
                     mode="single",
                     placeholder="Pick a date",
@@ -887,7 +887,7 @@ def test_date_picker():
             ),
             # Date range picker
             Div(
-                H3("Date Range", cls="text-lg font-medium mb-2"),
+                H3("Date Range", cls="mb-2 text-lg font-medium"),
                 (range_picker := DatePicker(                    
                     mode="range",
                     placeholder="Pick a date range",
@@ -899,7 +899,7 @@ def test_date_picker():
             ),
             # Date picker with presets
             Div(
-                H3("With Presets", cls="text-lg font-medium mb-2"),
+                H3("With Presets", cls="mb-2 text-lg font-medium"),
                 (presets_picker := DatePicker(                    
                     with_presets=True,
                     placeholder="Select a date",
@@ -911,7 +911,7 @@ def test_date_picker():
             ),
             # Multiple date selection
             Div(
-                H3("Multiple Dates", cls="text-lg font-medium mb-2"),
+                H3("Multiple Dates", cls="mb-2 text-lg font-medium"),
                 (multiple_picker := DatePicker(                    
                     mode="multiple",
                     placeholder="Select multiple dates",
@@ -923,7 +923,7 @@ def test_date_picker():
             ),
             # Date and time picker
             Div(
-                H3("Date & Time", cls="text-lg font-medium mb-2"),
+                H3("Date & Time", cls="mb-2 text-lg font-medium"),
                 (datetime_picker := DateTimePicker(
                     placeholder="Select date and time",
                 )),
@@ -934,7 +934,7 @@ def test_date_picker():
             ),
             # Date picker with input
             Div(
-                H3("With Input Field", cls="text-lg font-medium mb-2"),
+                H3("With Input Field", cls="mb-2 text-lg font-medium"),
                 (input_picker := DatePickerWithInput(
                     placeholder="YYYY-MM-DD",
                 )),
@@ -943,7 +943,7 @@ def test_date_picker():
                     cls="mt-2 text-sm text-muted-foreground"
                 ),
             ),
-            cls="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            cls="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
         ),
         title="Date Picker"
     )
@@ -952,7 +952,7 @@ def test_date_picker():
 @rt("/dialog")
 def test_dialog():
     return Page(
-        H2("Basic Dialog (Modal)", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Basic Dialog (Modal)", cls="mt-8 mb-4 text-2xl font-semibold"),
         Dialog(
             DialogTrigger("Edit Profile"),
             DialogContent(
@@ -992,7 +992,7 @@ def test_dialog():
             size="md",
         ),
 
-        H2("Dialog with Different Size", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Dialog with Different Size", cls="mt-8 mb-4 text-2xl font-semibold"),
         Dialog(
             DialogTrigger("Delete Account", variant="destructive"),
             DialogContent(
@@ -1011,8 +1011,8 @@ def test_dialog():
             size="sm",
         ),
 
-        H2("Non-Modal Dialog", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Non-modal dialogs allow interaction with the page behind them. Click outside won't close it.", cls="text-muted-foreground mb-4"),
+        H2("Non-Modal Dialog", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Non-modal dialogs allow interaction with the page behind them. Click outside won't close it.", cls="mb-4 text-muted-foreground"),
         Dialog(
             DialogTrigger("Open Non-Modal Dialog", variant="outline"),
             DialogContent(
@@ -1029,7 +1029,7 @@ def test_dialog():
                         Li("Persistent tool windows"),
                         Li("Floating panels"),
                         Li("Non-critical notifications"),
-                        cls="list-disc list-inside space-y-1 mt-2"
+                        cls="mt-2 list-inside list-disc space-y-1"
                     ),
                     cls="py-4",
                 ),
@@ -1048,14 +1048,14 @@ def test_dialog():
 @rt("/popover")
 def test_popover():
     return Page(
-        H2("Popover Examples", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Popover Examples", cls="mt-8 mb-4 text-2xl font-semibold"),
         Div(
             # Basic popover
             Popover(
                 PopoverTrigger("Open Popover"),
                 PopoverContent(
-                    H3("About this feature", cls="font-semibold mb-2"),
-                    P("This is a popover component that displays rich content in a floating panel.", cls="text-sm text-muted-foreground mb-3"),
+                    H3("About this feature", cls="mb-2 font-semibold"),
+                    P("This is a popover component that displays rich content in a floating panel.", cls="mb-3 text-sm text-muted-foreground"),
                     PopoverClose("✕"),
                     aria_label="Feature information",
                 ),
@@ -1064,7 +1064,7 @@ def test_popover():
             Popover(
                 PopoverTrigger("Top Popover", variant="outline"),
                 PopoverContent(
-                    H3("Top positioned", cls="font-semibold mb-2"),
+                    H3("Top positioned", cls="mb-2 font-semibold"),
                     P("This popover appears above the trigger.", cls="text-sm"),
                     side="top",
                     aria_label="Positioning information",
@@ -1074,16 +1074,16 @@ def test_popover():
             Popover(
                 PopoverTrigger("Settings", variant="secondary"),
                 PopoverContent(
-                    H3("Quick Settings", cls="font-semibold mb-3"),
+                    H3("Quick Settings", cls="mb-3 font-semibold"),
                     Div(
                         Label("Theme", cls="text-sm font-medium"),
                         Button("Toggle", variant="outline", size="sm"),
-                        cls="flex justify-between items-center mb-2",
+                        cls="mb-2 flex items-center justify-between",
                     ),
                     Div(
                         Label("Notifications", cls="text-sm font-medium"),
                         Checkbox(),
-                        cls="flex justify-between items-center mb-2",
+                        cls="mb-2 flex items-center justify-between",
                     ),
                     PopoverClose("Done", variant="ghost"),
                     aria_label="Quick settings menu",
@@ -1099,7 +1099,7 @@ def test_popover():
 @rt("/command")
 def test_command():
     return Page(
-        H2("Basic Command Palette", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Basic Command Palette", cls="mt-8 mb-4 text-2xl font-semibold"),
         Command(
             CommandInput(placeholder="Type a command or search..."),
             CommandList(
@@ -1169,10 +1169,10 @@ def test_command():
                 ),
             ),
             size="md",
-            cls="max-w-md mb-8",
+            cls="mb-8 max-w-md",
         ),
 
-        H2("Command Dialog", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Command Dialog", cls="mt-8 mb-4 text-2xl font-semibold"),
         CommandDialog(
             trigger=Button(
                 Div(
@@ -1270,7 +1270,7 @@ def test_command():
             ],
         ),
 
-        H2("Searchable Command Palette", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Searchable Command Palette", cls="mt-8 mb-4 text-2xl font-semibold"),
         Command(
             CommandInput(placeholder="Search frameworks..."),
             CommandList(
@@ -1342,10 +1342,10 @@ def test_command():
                 ),
             ),
             size="lg",
-            cls="max-w-md mb-8",
+            cls="mb-8 max-w-md",
         ),
 
-        H2("Command with Disabled Items", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Command with Disabled Items", cls="mt-8 mb-4 text-2xl font-semibold"),
         Command(
             CommandInput(placeholder="Search actions..."),
             CommandList(
@@ -1399,16 +1399,16 @@ def test_command():
 @rt("/theme-toggle")
 def test_theme_toggle():
     return Page(
-        H2("Instructions", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Click the theme toggle button in the top-right corner to switch between light and dark themes.", cls="text-muted-foreground mb-4"),
-        P("The theme preference is saved to localStorage and will persist across page reloads.", cls="text-muted-foreground mb-4"),
+        H2("Instructions", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Click the theme toggle button in the top-right corner to switch between light and dark themes.", cls="mb-4 text-muted-foreground"),
+        P("The theme preference is saved to localStorage and will persist across page reloads.", cls="mb-4 text-muted-foreground"),
 
-        H2("Theme-aware Content", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Theme-aware Content", cls="mt-8 mb-4 text-2xl font-semibold"),
         Div(
             P("This text should adapt to the current theme.", cls="mb-2"),
             P("Background and foreground colors are theme-aware.", cls="mb-2"),
-            Div("Bordered box", cls="border border-border p-4 rounded-md bg-card text-card-foreground"),
-            cls="space-y-4 max-w-2xl"
+            Div("Bordered box", cls="rounded-md border border-border bg-card p-4 text-card-foreground"),
+            cls="max-w-2xl space-y-4"
         ),
 
         title="Theme Toggle"
@@ -1418,66 +1418,66 @@ def test_theme_toggle():
 @rt("/input")
 def test_input():
     return Page(
-        H2("Basic Inputs", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Basic Inputs", cls="mt-8 mb-4 text-2xl font-semibold"),
         Div(
             Div(
                 (name := Signal("name", _ref_only=True)),
-                Label("Text Input", fr="text-input", cls="block text-sm font-medium mb-1.5"),
+                Label("Text Input", fr="text-input", cls="mb-1.5 block text-sm font-medium"),
                 Input(id="text-input", placeholder="Enter text...", signal=name),
-                P(data_text=name, cls="text-sm text-muted-foreground mt-1.5"),
+                P(data_text=name, cls="mt-1.5 text-sm text-muted-foreground"),
                 cls="space-y-1",
             ),
             Div(
                 (email := Signal("email", _ref_only=True)),
-                Label("Email Input", fr="email-input", cls="block text-sm font-medium mb-1.5"),
+                Label("Email Input", fr="email-input", cls="mb-1.5 block text-sm font-medium"),
                 Input(id="email-input", type="email", placeholder="email@example.com", signal=email),
-                P(data_text=email, cls="text-sm text-muted-foreground mt-1.5"),
+                P(data_text=email, cls="mt-1.5 text-sm text-muted-foreground"),
                 cls="space-y-1",
             ),
             Div(
-                Label("Password Input", fr="password-input", cls="block text-sm font-medium mb-1.5"),
+                Label("Password Input", fr="password-input", cls="mb-1.5 block text-sm font-medium"),
                 Input(id="password-input", type="password", placeholder="••••••••"),
                 cls="space-y-1",
             ),
             Div(
-                Label("Disabled Input", fr="disabled-input", cls="block text-sm font-medium mb-1.5"),
+                Label("Disabled Input", fr="disabled-input", cls="mb-1.5 block text-sm font-medium"),
                 Input(id="disabled-input", placeholder="Cannot edit", disabled=True),
                 cls="space-y-1",
             ),
-            cls="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8",
+            cls="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2",
         ),
 
-        H2("Width Override Test (StarMerge)", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("These inputs test that StarMerge correctly overrides the default w-full width:", cls="text-muted-foreground mb-4"),
+        H2("Width Override Test (StarMerge)", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("These inputs test that StarMerge correctly overrides the default w-full width:", cls="mb-4 text-muted-foreground"),
         Div(
             Div(
-                Label("Default width (w-full)", cls="block text-sm font-medium mb-1.5"),
+                Label("Default width (w-full)", cls="mb-1.5 block text-sm font-medium"),
                 Input(placeholder="Full width input"),
-                P("Should be full width", cls="text-xs text-muted-foreground mt-1"),
+                P("Should be full width", cls="mt-1 text-xs text-muted-foreground"),
                 cls="mb-4",
             ),
             Div(
-                Label("Override: w-1/2", cls="block text-sm font-medium mb-1.5"),
+                Label("Override: w-1/2", cls="mb-1.5 block text-sm font-medium"),
                 Input(placeholder="Half width", cls="w-1/2"),
-                P("Should be 50% width", cls="text-xs text-muted-foreground mt-1"),
+                P("Should be 50% width", cls="mt-1 text-xs text-muted-foreground"),
                 cls="mb-4",
             ),
             Div(
-                Label("Override: w-64", cls="block text-sm font-medium mb-1.5"),
+                Label("Override: w-64", cls="mb-1.5 block text-sm font-medium"),
                 Input(placeholder="Fixed width", cls="w-64"),
-                P("Should be w-64 (16rem)", cls="text-xs text-muted-foreground mt-1"),
+                P("Should be w-64 (16rem)", cls="mt-1 text-xs text-muted-foreground"),
                 cls="mb-4",
             ),
             Div(
-                Label("Override: max-w-sm", cls="block text-sm font-medium mb-1.5"),
+                Label("Override: max-w-sm", cls="mb-1.5 block text-sm font-medium"),
                 Input(placeholder="Max width", cls="max-w-sm"),
-                P("Should have max-w-sm constraint", cls="text-xs text-muted-foreground mt-1"),
+                P("Should have max-w-sm constraint", cls="mt-1 text-xs text-muted-foreground"),
                 cls="mb-4",
             ),
-            cls="max-w-2xl mb-8",
+            cls="mb-8 max-w-2xl",
         ),
 
-        H2("InputWithLabel Component", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("InputWithLabel Component", cls="mt-8 mb-4 text-2xl font-semibold"),
         Div(
             InputWithLabel(
                 label="Full Name",
@@ -1504,14 +1504,14 @@ def test_input():
                 placeholder="https://example.com",
                 error_text="Please enter a valid URL",
             ),
-            cls="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 max-w-4xl",
+            cls="mb-8 grid max-w-4xl grid-cols-1 gap-6 md:grid-cols-2",
         ),
 
-        H2("Validation Example", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Validation Example", cls="mt-8 mb-4 text-2xl font-semibold"),
         Div(
             (age := Signal("age", _ref_only=True)),
             (age_valid := Signal("age_valid", _ref_only=True)),
-            Label("Age (must be >= 18)", fr="age-input", cls="block text-sm font-medium mb-1.5"),
+            Label("Age (must be >= 18)", fr="age-input", cls="mb-1.5 block text-sm font-medium"),
             Input(
                 id="age-input",
                 type="text",
@@ -1523,9 +1523,9 @@ def test_input():
                 Span("✓ Valid", cls="text-green-600", style="display: none", data_show=age & age_valid),
                 Span("✗ Must be 18+", cls="text-destructive", style="display: none", data_show=age & ~age_valid),
                 Span("Enter your age to validate", cls="text-muted-foreground", data_show=~age | age.eq("")),
-                cls="text-sm mt-1.5",
+                cls="mt-1.5 text-sm",
             ),
-            cls="max-w-md mb-8",
+            cls="mb-8 max-w-md",
         ),
 
         title="Input"
@@ -1535,8 +1535,8 @@ def test_input():
 @rt("/label")
 def test_label():
     return Page(
-        H2("Basic Label Usage", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Labels are used with form inputs to provide accessible names:", cls="text-muted-foreground mb-4"),
+        H2("Basic Label Usage", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Labels are used with form inputs to provide accessible names:", cls="mb-4 text-muted-foreground"),
         Div(
             Div(
                 Label("Text Input", fr="text-input"),
@@ -1564,11 +1564,11 @@ def test_label():
                 ),
                 cls="space-y-2",
             ),
-            cls="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 max-w-4xl",
+            cls="mb-8 grid max-w-4xl grid-cols-1 gap-6 md:grid-cols-2",
         ),
 
-        H2("Label with Disabled Input", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Labels automatically style for disabled inputs using peer-disabled (input must come before label in DOM):", cls="text-muted-foreground mb-4"),
+        H2("Label with Disabled Input", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Labels automatically style for disabled inputs using peer-disabled (input must come before label in DOM):", cls="mb-4 text-muted-foreground"),
         Div(
             Input(
                 id="disabled-input",
@@ -1576,11 +1576,11 @@ def test_label():
                 disabled=True,
             ),
             Label("Disabled Input", fr="disabled-input"),
-            cls="flex flex-col-reverse gap-2 max-w-md",
+            cls="flex max-w-md flex-col-reverse gap-2",
         ),
 
-        H2("Label with Checkbox", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Labels work with checkboxes and other form elements:", cls="text-muted-foreground mb-4"),
+        H2("Label with Checkbox", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Labels work with checkboxes and other form elements:", cls="mb-4 text-muted-foreground"),
         Div(
             CheckboxWithLabel(
                 label="Accept terms and conditions",
@@ -1589,19 +1589,19 @@ def test_label():
                 label="Enable notifications",
                 checked=True,
             ),
-            cls="space-y-4 max-w-md",
+            cls="max-w-md space-y-4",
         ),
 
-        H2("Custom Styled Labels", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Labels can be customized with additional classes:", cls="text-muted-foreground mb-4"),
+        H2("Custom Styled Labels", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Labels can be customized with additional classes:", cls="mb-4 text-muted-foreground"),
         Div(
             Div(
-                Label("Bold Label", fr="bold-input", cls="!font-bold text-lg"),
+                Label("Bold Label", fr="bold-input", cls="text-lg !font-bold"),
                 Input(id="bold-input", placeholder="With bold label"),
                 cls="space-y-2",
             ),
             Div(
-                Label("Primary Colored Label", fr="primary-input", cls="!text-primary !text-base"),
+                Label("Primary Colored Label", fr="primary-input", cls="!text-base !text-primary"),
                 Input(id="primary-input", placeholder="With primary colored label"),
                 cls="space-y-2",
             ),
@@ -1610,7 +1610,7 @@ def test_label():
                 Input(id="destructive-input", placeholder="With destructive colored label"),
                 cls="space-y-2",
             ),
-            cls="space-y-6 max-w-md",
+            cls="max-w-md space-y-6",
         ),
 
         title="Label"
@@ -1620,8 +1620,8 @@ def test_label():
 @rt("/progress")
 def test_progress():
     return Page(
-        H2("Basic Progress", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Static progress bars showing different completion levels:", cls="text-muted-foreground mb-4"),
+        H2("Basic Progress", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Static progress bars showing different completion levels:", cls="mb-4 text-muted-foreground"),
         Div(
             P("25% Complete:", cls="mb-2 text-sm font-medium"),
             Progress(value=25),
@@ -1634,8 +1634,8 @@ def test_progress():
             cls="max-w-2xl"
         ),
 
-        H2("Interactive Progress", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Control progress with buttons:", cls="text-muted-foreground mb-4"),
+        H2("Interactive Progress", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Control progress with buttons:", cls="mb-4 text-muted-foreground"),
         Div(
             (demo_progress := Signal("demo_progress", _ref_only=True)),
             Progress(value=35, signal=demo_progress),
@@ -1657,18 +1657,18 @@ def test_progress():
                     variant="outline",
                     data_on_click=demo_progress.set(0),
                 ),
-                cls="flex gap-2 mt-4",
+                cls="mt-4 flex gap-2",
             ),
             P(
                 "Current: ",
                 Span(data_text=demo_progress.round() + " + '%'", cls="font-mono"),
-                cls="text-sm text-muted-foreground mt-4"
+                cls="mt-4 text-sm text-muted-foreground"
             ),
             cls="max-w-2xl"
         ),
 
-        H2("Auto-incrementing Progress", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Automatically increment progress over time:", cls="text-muted-foreground mb-4"),
+        H2("Auto-incrementing Progress", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Automatically increment progress over time:", cls="mb-4 text-muted-foreground"),
         Div(
             (auto_progress := Signal("auto_progress", _ref_only=True)),
             Progress(value=0, signal=auto_progress),
@@ -1707,13 +1707,13 @@ def test_progress():
                         {auto_progress.set(0)}
                     """),
                 ),
-                cls="flex gap-2 mt-4",
+                cls="mt-4 flex gap-2",
             ),
             cls="max-w-2xl"
         ),
 
-        H2("Custom Styling", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Progress bars with custom heights and colors:", cls="text-muted-foreground mb-4"),
+        H2("Custom Styling", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Progress bars with custom heights and colors:", cls="mb-4 text-muted-foreground"),
         Div(
             P("Large progress bar (h-4):", cls="mb-2 text-sm font-medium"),
             Progress(value=60, cls="h-4"),
@@ -1739,8 +1739,8 @@ def test_progress():
 @rt("/dropdown-menu")
 def test_dropdown_menu():
     return Page(
-        H2("Basic Dropdown", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("A dropdown menu with labels, separators, and keyboard shortcuts:", cls="text-muted-foreground mb-4"),
+        H2("Basic Dropdown", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("A dropdown menu with labels, separators, and keyboard shortcuts:", cls="mb-4 text-muted-foreground"),
         DropdownMenu(
             DropdownMenuTrigger("Open Menu"),
             DropdownMenuContent(
@@ -1771,8 +1771,8 @@ def test_dropdown_menu():
             ),
         ),
 
-        H2("Checkbox Items", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Dropdown with checkbox items for toggling options:", cls="text-muted-foreground mb-4"),
+        H2("Checkbox Items", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Dropdown with checkbox items for toggling options:", cls="mb-4 text-muted-foreground"),
         Div(
             (status_bar := Signal("status_bar", _ref_only=True)),
             (activity_bar := Signal("activity_bar", _ref_only=True)),
@@ -1794,12 +1794,12 @@ def test_dropdown_menu():
                 Span(data_text=activity_bar.if_("On", "Off"), cls="font-mono text-sm"),
                 " | Panel: ",
                 Span(data_text=panel.if_("On", "Off"), cls="font-mono text-sm"),
-                cls="text-sm text-muted-foreground mt-4"
+                cls="mt-4 text-sm text-muted-foreground"
             ),
         ),
 
-        H2("Radio Group", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Dropdown with radio items for single selection:", cls="text-muted-foreground mb-4"),
+        H2("Radio Group", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Dropdown with radio items for single selection:", cls="mb-4 text-muted-foreground"),
         Div(
             (position := Signal("position", _ref_only=True)),
             DropdownMenu(
@@ -1819,12 +1819,12 @@ def test_dropdown_menu():
             P(
                 "Selected position: ",
                 Span(data_text=position, cls="font-mono text-sm"),
-                cls="text-sm text-muted-foreground mt-4"
+                cls="mt-4 text-sm text-muted-foreground"
             ),
         ),
 
-        H2("Grouped Items", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Dropdown with grouped menu items:", cls="text-muted-foreground mb-4"),
+        H2("Grouped Items", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Dropdown with grouped menu items:", cls="mb-4 text-muted-foreground"),
         DropdownMenu(
             DropdownMenuTrigger("Actions", variant="outline"),
             DropdownMenuContent(
@@ -1858,8 +1858,8 @@ def test_dropdown_menu():
             ),
         ),
 
-        H2("Sub-menus", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Dropdown with nested sub-menus:", cls="text-muted-foreground mb-4"),
+        H2("Sub-menus", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Dropdown with nested sub-menus:", cls="mb-4 text-muted-foreground"),
         DropdownMenu(
             DropdownMenuTrigger("More Options", variant="secondary"),
             DropdownMenuContent(
@@ -1901,50 +1901,50 @@ def test_dropdown_menu():
 @rt("/hover-card")
 def test_hover_card():
     return Page(
-        H2("Basic", cls="text-2xl font-semibold mb-4"),
-        P("Hover over the username to see the user profile card:", cls="text-muted-foreground mb-4"),
+        H2("Basic", cls="mb-4 text-2xl font-semibold"),
+        P("Hover over the username to see the user profile card:", cls="mb-4 text-muted-foreground"),
         HoverCard(
             HoverCardTrigger(
-                Span("@username", cls="text-blue-600 underline cursor-pointer"),
+                Span("@username", cls="cursor-pointer text-blue-600 underline"),
             ),
             HoverCardContent(
                 Div(
-                    Div("👤", cls="w-12 h-12 bg-muted rounded-full flex items-center justify-center text-2xl mb-3"),
-                    H3("John Doe", cls="font-semibold mb-1"),
-                    P("@username", cls="text-sm text-muted-foreground mb-2"),
+                    Div("👤", cls="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-muted text-2xl"),
+                    H3("John Doe", cls="mb-1 font-semibold"),
+                    P("@username", cls="mb-2 text-sm text-muted-foreground"),
                     P("Full-stack developer passionate about building great user experiences.", cls="text-sm"),
                     cls="text-center",
                 ),
             ),
         ),
 
-        H2("Top Positioning", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("This hover card appears above the trigger:", cls="text-muted-foreground mb-4"),
+        H2("Top Positioning", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("This hover card appears above the trigger:", cls="mb-4 text-muted-foreground"),
         HoverCard(
             HoverCardTrigger(
                 Button("Hover for info", variant="outline"),
             ),
             HoverCardContent(
                 Div(
-                    H3("Quick Info", cls="font-semibold mb-2"),
-                    P("This hover card appears when you hover over the trigger element.", cls="text-sm text-muted-foreground mb-2"),
+                    H3("Quick Info", cls="mb-2 font-semibold"),
+                    P("This hover card appears when you hover over the trigger element.", cls="mb-2 text-sm text-muted-foreground"),
                     P("It stays open while you're hovering over either the trigger or the content.", cls="text-sm"),
                 ),
                 side="top",
             ),
         ),
 
-        H2("Left Positioning", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Hover over the badge to see product information:", cls="text-muted-foreground mb-4"),
+        H2("Left Positioning", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Hover over the badge to see product information:", cls="mb-4 text-muted-foreground"),
         HoverCard(
             HoverCardTrigger(
                 Badge("Product Info", variant="secondary"),
             ),
             HoverCardContent(
                 Div(
-                    H3("StarUI Components", cls="font-semibold mb-2"),
+                    H3("StarUI Components", cls="mb-2 font-semibold"),
                     Badge("v1.0.0", variant="outline", cls="mb-2"),
-                    P("A modern component library built with StarHTML and Datastar for reactive Python web apps.", cls="text-sm text-muted-foreground mb-3"),
+                    P("A modern component library built with StarHTML and Datastar for reactive Python web apps.", cls="mb-3 text-sm text-muted-foreground"),
                     Div(
                         Badge("Python"),
                         Badge("StarHTML", variant="secondary"),
@@ -1962,8 +1962,8 @@ def test_hover_card():
 @rt("/radio-group")
 def test_radio_group():
     return Page(
-        H2("With Label", cls="text-2xl font-semibold mb-4"),
-        P("Complete radio group with label, helper text, and validation:", cls="text-muted-foreground mb-4"),
+        H2("With Label", cls="mb-4 text-2xl font-semibold"),
+        P("Complete radio group with label, helper text, and validation:", cls="mb-4 text-muted-foreground"),
         Div(
             RadioGroupWithLabel(
                 label="Select your plan",
@@ -1978,8 +1978,8 @@ def test_radio_group():
             cls="mb-8",
         ),
 
-        H2("Horizontal Orientation", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Radio group with horizontal layout:", cls="text-muted-foreground mb-4"),
+        H2("Horizontal Orientation", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Radio group with horizontal layout:", cls="mb-4 text-muted-foreground"),
         RadioGroupWithLabel(
             label="Notification preferences",
             options=[
@@ -1991,8 +1991,8 @@ def test_radio_group():
             required=True,
         ),
 
-        H2("With Error State", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Radio group with validation error:", cls="text-muted-foreground mb-4"),
+        H2("With Error State", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Radio group with validation error:", cls="mb-4 text-muted-foreground"),
         RadioGroupWithLabel(
             label="Size",
             options=[
@@ -2005,8 +2005,8 @@ def test_radio_group():
             error_text="Please select a size",
         ),
 
-        H2("Simple Radio Group", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Basic radio group without wrapper label:", cls="text-muted-foreground mb-4"),
+        H2("Simple Radio Group", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Basic radio group without wrapper label:", cls="mb-4 text-muted-foreground"),
         Div(
             RadioGroup(
                 RadioGroupItem("small", "Small"),
@@ -2014,11 +2014,11 @@ def test_radio_group():
                 RadioGroupItem("large", "Large"),
                 value="medium",
             ),
-            cls="p-4 border rounded-lg",
+            cls="rounded-lg border p-4",
         ),
 
-        H2("Custom Styled Indicators", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Radio group with custom blue indicators:", cls="text-muted-foreground mb-4"),
+        H2("Custom Styled Indicators", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Radio group with custom blue indicators:", cls="mb-4 text-muted-foreground"),
         Div(
             RadioGroup(
                 RadioGroupItem(
@@ -2039,7 +2039,7 @@ def test_radio_group():
                 ),
                 value="option2",
             ),
-            cls="p-4 border rounded-lg",
+            cls="rounded-lg border p-4",
         ),
         title="Radio Group",
     )
@@ -2048,8 +2048,8 @@ def test_radio_group():
 @rt("/select")
 def test_select():
     return Page(
-        H2("Basic Select", cls="text-2xl font-semibold mb-4"),
-        P("Select component with string options:", cls="text-muted-foreground mb-4"),
+        H2("Basic Select", cls="mb-4 text-2xl font-semibold"),
+        P("Select component with string options:", cls="mb-4 text-muted-foreground"),
         Div(
             SelectWithLabel(
                 label="Country",
@@ -2060,8 +2060,8 @@ def test_select():
             cls="mb-8",
         ),
 
-        H2("Value/Label Tuples", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Select with separate values and labels:", cls="text-muted-foreground mb-4"),
+        H2("Value/Label Tuples", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Select with separate values and labels:", cls="mb-4 text-muted-foreground"),
         SelectWithLabel(
             label="Language",
             options=[
@@ -2075,8 +2075,8 @@ def test_select():
             helper_text="Choose your preferred language",
         ),
 
-        H2("Grouped Options", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Select with option groups:", cls="text-muted-foreground mb-4"),
+        H2("Grouped Options", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Select with option groups:", cls="mb-4 text-muted-foreground"),
         SelectWithLabel(
             label="Framework",
             options=[
@@ -2088,8 +2088,8 @@ def test_select():
             required=True,
         ),
 
-        H2("Error State", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Select with validation error:", cls="text-muted-foreground mb-4"),
+        H2("Error State", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Select with validation error:", cls="mb-4 text-muted-foreground"),
         SelectWithLabel(
             label="Department",
             options=["Engineering", "Design", "Marketing", "Sales", "Support"],
@@ -2097,8 +2097,8 @@ def test_select():
             required=True,
         ),
 
-        H2("Disabled State", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Disabled select with pre-selected value:", cls="text-muted-foreground mb-4"),
+        H2("Disabled State", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Disabled select with pre-selected value:", cls="mb-4 text-muted-foreground"),
         SelectWithLabel(
             label="Plan",
             options=["Free", "Pro", "Enterprise"],
@@ -2107,8 +2107,8 @@ def test_select():
             helper_text="Upgrade your account to change plans",
         ),
 
-        H2("Simple Select", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Basic select without label wrapper:", cls="text-muted-foreground mb-4"),
+        H2("Simple Select", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Basic select without label wrapper:", cls="mb-4 text-muted-foreground"),
         Div(
             Select(
                 SelectTrigger(
@@ -2121,11 +2121,11 @@ def test_select():
                     SelectItem("Disabled", value="disabled", disabled=True),
                 ),
             ),
-            cls="p-4 border rounded-lg mb-8",
+            cls="mb-8 rounded-lg border p-4",
         ),
 
-        H2("With Icons", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Select items with icons (using children):", cls="text-muted-foreground mb-4"),
+        H2("With Icons", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Select items with icons (using children):", cls="mb-4 text-muted-foreground"),
         Div(
             Select(
                 SelectTrigger(
@@ -2149,7 +2149,7 @@ def test_select():
                     ),
                 ),
             ),
-            cls="p-4 border rounded-lg",
+            cls="rounded-lg border p-4",
         ),
 
         title="Select",
@@ -2159,8 +2159,8 @@ def test_select():
 @rt("/separator")
 def test_separator():
     return Page(
-        H2("Basic Separator", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Horizontal separator dividing content:", cls="text-muted-foreground mb-4"),
+        H2("Basic Separator", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Horizontal separator dividing content:", cls="mb-4 text-muted-foreground"),
         Div(
             P("Content above separator", cls="mb-4"),
             Separator(),
@@ -2168,22 +2168,22 @@ def test_separator():
             cls="mb-8",
         ),
 
-        H2("Vertical Separators", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Vertical separator in flex layout:", cls="text-muted-foreground mb-4"),
+        H2("Vertical Separators", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Vertical separator in flex layout:", cls="mb-4 text-muted-foreground"),
         Div(
             Span("Left content"),
             Separator(orientation="vertical", cls="mx-4"),
             Span("Right content"),
-            cls="flex items-center h-8 mb-8",
+            cls="mb-8 flex h-8 items-center",
         ),
 
-        H2("Custom Styling", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Separators with custom colors and thickness:", cls="text-muted-foreground mb-4"),
+        H2("Custom Styling", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Separators with custom colors and thickness:", cls="mb-4 text-muted-foreground"),
         Div(
             P("Custom colored separator below:", cls="mb-2"),
-            Separator(cls="bg-red-500 h-0.5"),
+            Separator(cls="h-0.5 bg-red-500"),
             P("Thicker separator with different color:", cls="mt-4 mb-2"),
-            Separator(cls="bg-blue-500 h-1"),
+            Separator(cls="h-1 bg-blue-500"),
             cls="mb-8",
         ),
 
@@ -2194,8 +2194,8 @@ def test_separator():
 @rt("/sheet")
 def test_sheet():
     return Page(
-        H2("Right Side Sheet", cls="text-2xl font-semibold mb-4"),
-        P("Modal drawer that slides in from the right:", cls="text-muted-foreground mb-4"),
+        H2("Right Side Sheet", cls="mb-4 text-2xl font-semibold"),
+        P("Modal drawer that slides in from the right:", cls="mb-4 text-muted-foreground"),
         Div(
             Sheet(
                 SheetTrigger("Open Right Sheet"),
@@ -2210,7 +2210,7 @@ def test_sheet():
                         P("Sheet content goes here. Press ESC or click outside to close."),
                         Input(placeholder="Enter your name"),
                         Input(placeholder="Enter your email", type="email"),
-                        cls="p-6 space-y-4",
+                        cls="space-y-4 p-6",
                     ),
                     SheetFooter(
                         SheetClose("Cancel", variant="outline"),
@@ -2223,8 +2223,8 @@ def test_sheet():
             cls="mb-8",
         ),
 
-        H2("Left Side Sheet", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Sheet sliding from the left side:", cls="text-muted-foreground mb-4"),
+        H2("Left Side Sheet", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Sheet sliding from the left side:", cls="mb-4 text-muted-foreground"),
         Div(
             Sheet(
                 SheetTrigger("Open Left Sheet", variant="secondary"),
@@ -2234,11 +2234,11 @@ def test_sheet():
                         SheetDescription("Browse through the menu items."),
                     ),
                     Div(
-                        SheetClose("Menu Item 1", variant="ghost", cls="w-full justify-start p-2 hover:bg-accent rounded"),
-                        SheetClose("Menu Item 2", variant="ghost", cls="w-full justify-start p-2 hover:bg-accent rounded"),
-                        SheetClose("Menu Item 3", variant="ghost", cls="w-full justify-start p-2 hover:bg-accent rounded"),
-                        SheetClose("Menu Item 4", variant="ghost", cls="w-full justify-start p-2 hover:bg-accent rounded"),
-                        cls="p-6 space-y-2 flex flex-col",
+                        SheetClose("Menu Item 1", variant="ghost", cls="w-full justify-start rounded p-2 hover:bg-accent"),
+                        SheetClose("Menu Item 2", variant="ghost", cls="w-full justify-start rounded p-2 hover:bg-accent"),
+                        SheetClose("Menu Item 3", variant="ghost", cls="w-full justify-start rounded p-2 hover:bg-accent"),
+                        SheetClose("Menu Item 4", variant="ghost", cls="w-full justify-start rounded p-2 hover:bg-accent"),
+                        cls="flex flex-col space-y-2 p-6",
                     ),
                     side="left",
                     size="sm",
@@ -2247,8 +2247,8 @@ def test_sheet():
             cls="mb-8",
         ),
 
-        H2("Top Side Sheet", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Sheet sliding from the top:", cls="text-muted-foreground mb-4"),
+        H2("Top Side Sheet", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Sheet sliding from the top:", cls="mb-4 text-muted-foreground"),
         Div(
             Sheet(
                 SheetTrigger("Open Top Sheet", variant="outline"),
@@ -2267,8 +2267,8 @@ def test_sheet():
             cls="mb-8",
         ),
 
-        H2("Bottom Side Sheet", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Sheet sliding from the bottom:", cls="text-muted-foreground mb-4"),
+        H2("Bottom Side Sheet", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Sheet sliding from the bottom:", cls="mb-4 text-muted-foreground"),
         Div(
             Sheet(
                 SheetTrigger("Open Bottom Sheet", variant="destructive"),
@@ -2293,8 +2293,8 @@ def test_sheet():
             cls="mb-8",
         ),
 
-        H2("Large Sheet", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Sheet with large size:", cls="text-muted-foreground mb-4"),
+        H2("Large Sheet", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Sheet with large size:", cls="mb-4 text-muted-foreground"),
         Div(
             Sheet(
                 SheetTrigger("Open Large Sheet"),
@@ -2311,7 +2311,7 @@ def test_sheet():
                             Input(placeholder="Email", type="email", cls="mb-2"),
                             Input(placeholder="Phone", type="tel"),
                         ),
-                        cls="p-6 space-y-4",
+                        cls="space-y-4 p-6",
                     ),
                     SheetFooter(
                         SheetClose("Close", variant="outline"),
@@ -2331,17 +2331,17 @@ def test_sheet():
 @rt("/skeleton")
 def test_skeleton():
     return Page(
-        H2("Basic Shapes", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Simple skeleton placeholders for text content:", cls="text-muted-foreground mb-4"),
+        H2("Basic Shapes", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Simple skeleton placeholders for text content:", cls="mb-4 text-muted-foreground"),
         Div(
             Skeleton(cls="h-4 w-64"),  # Text line
             Skeleton(cls="h-4 w-48"),  # Shorter text line
             Skeleton(cls="h-4 w-56"),  # Another text line
-            cls="space-y-2 max-w-2xl"
+            cls="max-w-2xl space-y-2"
         ),
 
-        H2("Card Skeleton", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Skeleton for a card with avatar and content:", cls="text-muted-foreground mb-4"),
+        H2("Card Skeleton", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Skeleton for a card with avatar and content:", cls="mb-4 text-muted-foreground"),
         Div(
             Div(
                 Skeleton(cls="h-12 w-12 rounded-full"),  # Avatar
@@ -2352,28 +2352,28 @@ def test_skeleton():
                 ),
                 cls="flex items-center space-x-4",
             ),
-            Skeleton(cls="h-32 w-full mt-4"),  # Content area
-            Skeleton(cls="h-4 w-full mt-4"),  # Footer line
-            cls="p-4 border rounded-lg max-w-2xl"
+            Skeleton(cls="mt-4 h-32 w-full"),  # Content area
+            Skeleton(cls="mt-4 h-4 w-full"),  # Footer line
+            cls="max-w-2xl rounded-lg border p-4"
         ),
 
-        H2("Article Skeleton", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Skeleton for an article with title, date, text, and image:", cls="text-muted-foreground mb-4"),
+        H2("Article Skeleton", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Skeleton for an article with title, date, text, and image:", cls="mb-4 text-muted-foreground"),
         Div(
-            Skeleton(cls="h-8 w-3/4 mb-4"),  # Title
-            Skeleton(cls="h-3 w-32 mb-6"),  # Date
+            Skeleton(cls="mb-4 h-8 w-3/4"),  # Title
+            Skeleton(cls="mb-6 h-3 w-32"),  # Date
             Div(
                 Skeleton(cls="h-4 w-full"),
                 Skeleton(cls="h-4 w-full"),
                 Skeleton(cls="h-4 w-2/3"),
-                cls="space-y-2 mb-4",
+                cls="mb-4 space-y-2",
             ),
             Skeleton(cls="h-40 w-full"),  # Image placeholder
-            cls="p-4 border rounded-lg max-w-2xl"
+            cls="max-w-2xl rounded-lg border p-4"
         ),
 
-        H2("Loading State Toggle", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Toggle between skeleton loading state and actual content:", cls="text-muted-foreground mb-4"),
+        H2("Loading State Toggle", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Toggle between skeleton loading state and actual content:", cls="mb-4 text-muted-foreground"),
         Div(
             (loading := Signal("loading", True)),
             Button(
@@ -2384,24 +2384,24 @@ def test_skeleton():
             ),
             # Skeleton shown while loading
             Div(
-                Skeleton(cls="h-6 w-48 mb-2"),
-                Skeleton(cls="h-4 w-64 mb-4"),
+                Skeleton(cls="mb-2 h-6 w-48"),
+                Skeleton(cls="mb-4 h-4 w-64"),
                 Skeleton(cls="h-20 w-full"),
                 style="display: none",
                 data_show=loading,
             ),
             # Actual content shown when loaded
             Div(
-                H4("Content Loaded!", cls="text-lg font-semibold mb-2"),
+                H4("Content Loaded!", cls="mb-2 text-lg font-semibold"),
                 P("This content appears when loading is complete.", cls="mb-4"),
                 Div(
                     "This is the actual content that would load.",
-                    cls="p-4 bg-muted rounded-lg",
+                    cls="rounded-lg bg-muted p-4",
                 ),
                 style="display: none",
                 data_show=~loading,
             ),
-            cls="p-4 border rounded-lg max-w-2xl"
+            cls="max-w-2xl rounded-lg border p-4"
         ),
 
         title="Skeleton"
@@ -2411,8 +2411,8 @@ def test_skeleton():
 @rt("/switch")
 def test_switch():
     return Page(
-        H2("Switch Variants", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Switches with labels, helper text, and various states:", cls="text-muted-foreground mb-4"),
+        H2("Switch Variants", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Switches with labels, helper text, and various states:", cls="mb-4 text-muted-foreground"),
         Div(
             SwitchWithLabel(
                 label="Enable notifications",
@@ -2440,21 +2440,21 @@ def test_switch():
             cls="space-y-4"
         ),
 
-        H2("Simple Switches", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Basic switches without labels:", cls="text-muted-foreground mb-4"),
+        H2("Simple Switches", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Basic switches without labels:", cls="mb-4 text-muted-foreground"),
         Div(
-            P("Simple switches:", cls="text-sm font-medium mb-2"),
+            P("Simple switches:", cls="mb-2 text-sm font-medium"),
             Div(
                 Switch(checked=True),
                 Switch(),
                 Switch(disabled=True),
                 cls="flex gap-4",
             ),
-            cls="p-4 border rounded-lg max-w-md"
+            cls="max-w-md rounded-lg border p-4"
         ),
 
-        H2("Interactive Demo", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Toggle the switch to see state changes in real-time:", cls="text-muted-foreground mb-4"),
+        H2("Interactive Demo", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Toggle the switch to see state changes in real-time:", cls="mb-4 text-muted-foreground"),
         Div(
             (demo_switch := Signal("demo_switch", _ref_only=True)),
             SwitchWithLabel(
@@ -2468,15 +2468,15 @@ def test_switch():
                     Span(
                         data_text=demo_switch.if_("ON", "OFF"),
                         data_attr_class=demo_switch.if_(
-                            "text-green-600 dark:text-green-400 font-semibold",
-                            "text-red-600 dark:text-red-400 font-semibold"
+                            "font-semibold text-green-600 dark:text-green-400",
+                            "font-semibold text-red-600 dark:text-red-400"
                         ),
                     ),
                     cls="text-sm"
                 ),
-                cls="mt-4 p-4 bg-muted rounded-lg"
+                cls="mt-4 rounded-lg bg-muted p-4"
             ),
-            cls="p-4 border rounded-lg max-w-md"
+            cls="max-w-md rounded-lg border p-4"
         ),
 
         title="Switch"
@@ -2486,8 +2486,8 @@ def test_switch():
 @rt("/table")
 def test_table():
     return Page(
-        H2("Basic Table", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("A simple table with invoices and payment information:", cls="text-muted-foreground mb-4"),
+        H2("Basic Table", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("A simple table with invoices and payment information:", cls="mb-4 text-muted-foreground"),
         Table(
             TableHeader(
                 TableRow(
@@ -2531,8 +2531,8 @@ def test_table():
             ),
         ),
 
-        H2("Table with Selection", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Table with selectable rows and checkboxes:", cls="text-muted-foreground mb-4"),
+        H2("Table with Selection", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Table with selectable rows and checkboxes:", cls="mb-4 text-muted-foreground"),
         Table(
             TableCaption("A list of users with selection capabilities."),
             TableHeader(
@@ -2576,8 +2576,8 @@ def test_table():
             ),
         ),
 
-        H2("Compact Table", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("A compact table with custom sizing:", cls="text-muted-foreground mb-4"),
+        H2("Compact Table", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("A compact table with custom sizing:", cls="mb-4 text-muted-foreground"),
         Table(
             TableHeader(
                 TableRow(
@@ -2613,7 +2613,7 @@ def test_table():
                     TableCell("Electronics"),
                 ),
             ),
-            cls="text-xs [&_th]:h-8 [&_td]:p-1 [&_th]:p-1",
+            cls="text-xs [&_td]:p-1 [&_th]:h-8 [&_th]:p-1",
         ),
 
         title="Table"
@@ -2623,8 +2623,8 @@ def test_table():
 @rt("/textarea")
 def test_textarea():
     return Page(
-        H2("Textarea Variants", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Textareas with labels, helper text, and various states:", cls="text-muted-foreground mb-4"),
+        H2("Textarea Variants", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Textareas with labels, helper text, and various states:", cls="mb-4 text-muted-foreground"),
         Div(
             TextareaWithLabel(
                 label="Description",
@@ -2652,19 +2652,19 @@ def test_textarea():
             cls="space-y-4"
         ),
 
-        H2("Simple Textarea", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Basic textarea without label:", cls="text-muted-foreground mb-4"),
+        H2("Simple Textarea", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Basic textarea without label:", cls="mb-4 text-muted-foreground"),
         Div(
-            P("Simple textarea:", cls="text-sm font-medium mb-2"),
+            P("Simple textarea:", cls="mb-2 text-sm font-medium"),
             Textarea(
                 placeholder="Type something...",
                 resize="vertical",
             ),
-            cls="p-4 border rounded-lg max-w-2xl"
+            cls="max-w-2xl rounded-lg border p-4"
         ),
 
-        H2("Interactive Demo", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Type in the textarea to see live preview:", cls="text-muted-foreground mb-4"),
+        H2("Interactive Demo", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Type in the textarea to see live preview:", cls="mb-4 text-muted-foreground"),
         Div(
             (reactive_text := Signal("reactive_text", _ref_only=True)),
             Textarea(
@@ -2674,13 +2674,13 @@ def test_textarea():
                 cls="mb-4",
             ),
             Div(
-                P("Live Preview:", cls="font-medium mb-2"),
+                P("Live Preview:", cls="mb-2 font-medium"),
                 P(
                     data_text=reactive_text.if_(reactive_text, "(nothing typed yet)"),
-                    cls="p-3 border rounded bg-muted min-h-[3rem]"
+                    cls="min-h-[3rem] rounded border bg-muted p-3"
                 ),
             ),
-            cls="p-4 border rounded-lg max-w-2xl"
+            cls="max-w-2xl rounded-lg border p-4"
         ),
 
         title="Textarea"
@@ -2690,8 +2690,8 @@ def test_textarea():
 @rt("/tabs")
 def test_tabs():
     return Page(
-        H2("Default Variant (Boxed Style)", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Auto-indexed tabs - no need to specify id, defaults to first tab:", cls="text-muted-foreground mb-4"),
+        H2("Default Variant (Boxed Style)", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Auto-indexed tabs - no need to specify id, defaults to first tab:", cls="mb-4 text-muted-foreground"),
         Tabs(
             TabsList(
                 TabsTrigger("Preview"),
@@ -2700,36 +2700,36 @@ def test_tabs():
             ),
             TabsContent(
                 Div(
-                    H3("Preview Content", cls="text-lg font-semibold mb-2"),
+                    H3("Preview Content", cls="mb-2 text-lg font-semibold"),
                     P("This is the preview tab content with the default boxed style."),
                     Button("Action in Preview", variant="secondary", cls="mt-4"),
                 ),
             ),
             TabsContent(
                 Div(
-                    H3("Code Content", cls="text-lg font-semibold mb-2"),
+                    H3("Code Content", cls="mb-2 text-lg font-semibold"),
                     Pre(
                         Code("# Example code\ndef hello_world():\n    print('Hello, World!')", cls="text-sm"),
-                        cls="bg-muted p-4 rounded-md overflow-x-auto"
+                        cls="overflow-x-auto rounded-md bg-muted p-4"
                     ),
                 ),
             ),
             TabsContent(
                 Div(
-                    H3("Settings Content", cls="text-lg font-semibold mb-2"),
+                    H3("Settings Content", cls="mb-2 text-lg font-semibold"),
                     P("Configure your preferences here."),
                     Div(
                         Label("Enable notifications", fr="notifications_default"),
                         Checkbox(checked=True),
-                        cls="flex items-center gap-2 mt-4",
+                        cls="mt-4 flex items-center gap-2",
                     ),
                 ),
             ),
             variant="default",
         ),
 
-        H2("Plain Variant (Text Style)", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Plain variant with auto-indexed tabs:", cls="text-muted-foreground mb-4"),
+        H2("Plain Variant (Text Style)", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Plain variant with auto-indexed tabs:", cls="mb-4 text-muted-foreground"),
         Tabs(
             TabsList(
                 TabsTrigger("Account"),
@@ -2739,41 +2739,41 @@ def test_tabs():
             ),
             TabsContent(
                 Div(
-                    H3("Account Settings", cls="text-lg font-semibold mb-2"),
+                    H3("Account Settings", cls="mb-2 text-lg font-semibold"),
                     P("Manage your account settings and preferences."),
                     Div(
                         Label("Username", fr="username_plain"),
                         Input(id="username_plain", placeholder="Enter username"),
                         Label("Email", fr="email_plain", cls="mt-2"),
                         Input(id="email_plain", type="email", placeholder="Enter email"),
-                        cls="space-y-2 mt-4",
+                        cls="mt-4 space-y-2",
                     ),
                 ),
             ),
             TabsContent(
                 Div(
-                    H3("Password & Security", cls="text-lg font-semibold mb-2"),
+                    H3("Password & Security", cls="mb-2 text-lg font-semibold"),
                     P("Update your password and security settings."),
                     Button("Change Password", variant="outline", cls="mt-4"),
                 ),
             ),
             TabsContent(
                 Div(
-                    H3("Team Members", cls="text-lg font-semibold mb-2"),
+                    H3("Team Members", cls="mb-2 text-lg font-semibold"),
                     P("Manage your team and collaborate with others."),
                 ),
             ),
             TabsContent(
                 Div(
-                    H3("Billing Information", cls="text-lg font-semibold mb-2"),
+                    H3("Billing Information", cls="mb-2 text-lg font-semibold"),
                     P("View and manage your subscription and payment methods."),
                 ),
             ),
             variant="plain",
         ),
 
-        H2("With Semantic IDs", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Using semantic string IDs with custom default_id (starts on 'profile' tab):", cls="text-muted-foreground mb-4"),
+        H2("With Semantic IDs", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Using semantic string IDs with custom default_id (starts on 'profile' tab):", cls="mb-4 text-muted-foreground"),
         Tabs(
             TabsList(
                 TabsTrigger(
@@ -2794,21 +2794,21 @@ def test_tabs():
             ),
             TabsContent(
                 Div(
-                    H3("Home Tab", cls="text-lg font-semibold mb-2"),
+                    H3("Home Tab", cls="mb-2 text-lg font-semibold"),
                     P("Welcome to the home section."),
                 ),
                 id="home",
             ),
             TabsContent(
                 Div(
-                    H3("Profile Tab", cls="text-lg font-semibold mb-2"),
+                    H3("Profile Tab", cls="mb-2 text-lg font-semibold"),
                     P("View and edit your profile information."),
                 ),
                 id="profile",
             ),
             TabsContent(
                 Div(
-                    H3("Settings Tab", cls="text-lg font-semibold mb-2"),
+                    H3("Settings Tab", cls="mb-2 text-lg font-semibold"),
                     P("Manage your application settings."),
                 ),
                 id="settings_icon",
@@ -2824,11 +2824,11 @@ def test_tabs():
 @rt("/toggle")
 def test_toggle():
     return Page(
-        H2("Toggles", cls="text-2xl font-semibold mb-4"),
+        H2("Toggles", cls="mb-4 text-2xl font-semibold"),
 
         # Basic toggles
         Div(
-            P("Basic toggles:", cls="text-sm font-medium mb-2"),
+            P("Basic toggles:", cls="mb-2 text-sm font-medium"),
             Div(
                 Toggle(Icon("lucide:bold")),
                 Toggle(Icon("lucide:italic"), pressed=True),
@@ -2841,7 +2841,7 @@ def test_toggle():
 
         # Outline variant toggles
         Div(
-            P("Outline variant:", cls="text-sm font-medium mb-2"),
+            P("Outline variant:", cls="mb-2 text-sm font-medium"),
             Div(
                 Toggle(Icon("lucide:align-left"), variant="outline"),
                 Toggle(Icon("lucide:align-center"), variant="outline", pressed=True),
@@ -2854,19 +2854,19 @@ def test_toggle():
 
         # Different sizes
         Div(
-            P("Different sizes:", cls="text-sm font-medium mb-2"),
+            P("Different sizes:", cls="mb-2 text-sm font-medium"),
             Div(
                 Toggle("Small", size="sm", variant="outline"),
                 Toggle("Default", size="default", variant="outline"),
                 Toggle("Large", size="lg", variant="outline"),
-                cls="flex gap-2 items-center",
+                cls="flex items-center gap-2",
             ),
             cls="mb-4",
         ),
 
         # Toggle with text
         Div(
-            P("Toggle with text:", cls="text-sm font-medium mb-2"),
+            P("Toggle with text:", cls="mb-2 text-sm font-medium"),
             Div(
                 Toggle(
                     Icon("lucide:wifi"),
@@ -2896,11 +2896,11 @@ def test_toggle():
 @rt("/toggle_group")
 def test_toggle_group():
     return Page(
-        H2("Single Selection Toggle Groups", cls="text-2xl font-semibold mb-4"),
-        P("Click items to toggle selection. Only one item can be selected at a time.", cls="text-muted-foreground mb-4"),
+        H2("Single Selection Toggle Groups", cls="mb-4 text-2xl font-semibold"),
+        P("Click items to toggle selection. Only one item can be selected at a time.", cls="mb-4 text-muted-foreground"),
 
         Div(
-            P("Text formatting (bold pre-selected):", cls="text-sm font-medium mb-2"),
+            P("Text formatting (bold pre-selected):", cls="mb-2 text-sm font-medium"),
             ToggleGroup(
                 ("bold", Icon("lucide:bold")),
                 ("italic", Icon("lucide:italic")),
@@ -2913,7 +2913,7 @@ def test_toggle_group():
         ),
 
         Div(
-            P("Text alignment (center pre-selected):", cls="text-sm font-medium mb-2"),
+            P("Text alignment (center pre-selected):", cls="mb-2 text-sm font-medium"),
             ToggleGroup(
                 ("left", Icon("lucide:align-left")),
                 ("center", Icon("lucide:align-center")),
@@ -2927,7 +2927,7 @@ def test_toggle_group():
         ),
 
         Div(
-            P("Size selection (no pre-selection):", cls="text-sm font-medium mb-2"),
+            P("Size selection (no pre-selection):", cls="mb-2 text-sm font-medium"),
             ToggleGroup(
                 ("sm", "Small"),
                 ("md", "Medium"),
@@ -2941,7 +2941,7 @@ def test_toggle_group():
         ),
 
         Div(
-            P("View mode:", cls="text-sm font-medium mb-2"),
+            P("View mode:", cls="mb-2 text-sm font-medium"),
             ToggleGroup(
                 ("list", Div(Icon("lucide:list"), Span("List", cls="ml-1"), cls="flex items-center")),
                 ("grid", Div(Icon("lucide:layout-grid"), Span("Grid", cls="ml-1"), cls="flex items-center")),
@@ -2952,11 +2952,11 @@ def test_toggle_group():
             cls="mb-8",
         ),
 
-        H2("Multiple Selection Toggle Groups", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Click items to toggle selection. Multiple items can be selected.", cls="text-muted-foreground mb-4"),
+        H2("Multiple Selection Toggle Groups", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Click items to toggle selection. Multiple items can be selected.", cls="mb-4 text-muted-foreground"),
 
         Div(
-            P("Text options (multiple selection, bold and italic pre-selected):", cls="text-sm font-medium mb-2"),
+            P("Text options (multiple selection, bold and italic pre-selected):", cls="mb-2 text-sm font-medium"),
             ToggleGroup(
                 ("bold", Icon("lucide:bold")),
                 ("italic", Icon("lucide:italic")),
@@ -2969,11 +2969,11 @@ def test_toggle_group():
             cls="mb-8",
         ),
 
-        H2("States", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Toggle groups in different states:", cls="text-muted-foreground mb-4"),
+        H2("States", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Toggle groups in different states:", cls="mb-4 text-muted-foreground"),
 
         Div(
-            P("Disabled group:", cls="text-sm font-medium mb-2"),
+            P("Disabled group:", cls="mb-2 text-sm font-medium"),
             ToggleGroup(
                 ("option1", "Option 1"),
                 ("option2", "Option 2"),
@@ -2992,8 +2992,8 @@ def test_toggle_group():
 @rt("/toast")
 def test_toast():
     return Page(
-        H2("Basic Toast Types", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Click the buttons to trigger different toast variants:", cls="text-muted-foreground mb-4"),
+        H2("Basic Toast Types", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Click the buttons to trigger different toast variants:", cls="mb-4 text-muted-foreground"),
         Div(
             Button(
                 "Default Toast",
@@ -3023,8 +3023,8 @@ def test_toast():
             cls="flex flex-wrap gap-2"
         ),
 
-        H2("Custom Duration", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Control how long toasts stay visible:", cls="text-muted-foreground mb-4"),
+        H2("Custom Duration", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Control how long toasts stay visible:", cls="mb-4 text-muted-foreground"),
         Div(
             Button(
                 "Quick Toast (1s)",
@@ -3044,8 +3044,8 @@ def test_toast():
             cls="flex flex-wrap gap-2"
         ),
 
-        H2("Multiple Toasts", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Trigger multiple toasts in sequence:", cls="text-muted-foreground mb-4"),
+        H2("Multiple Toasts", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Trigger multiple toasts in sequence:", cls="mb-4 text-muted-foreground"),
         Div(
             Button(
                 "Spam Toasts",
@@ -3059,8 +3059,8 @@ def test_toast():
             cls="flex gap-2"
         ),
 
-        H2("Promise Pattern", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Simulate loading states with sequential toasts (loading toast is replaced by result):", cls="text-muted-foreground mb-4"),
+        H2("Promise Pattern", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Simulate loading states with sequential toasts (loading toast is replaced by result):", cls="mb-4 text-muted-foreground"),
         Div(
             Button(
                 "Promise Toast",
@@ -3115,31 +3115,31 @@ async def toast_sse_example():
 def test_toast_server():
     """Toast examples showing both client-side and server-side (SSE) patterns."""
     return Page(
-        H2("Server-Side Toasts (Hypermedia Pattern)", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("These toasts are triggered by server-sent events (SSE), demonstrating the hypermedia approach:", cls="text-muted-foreground mb-4"),
+        H2("Server-Side Toasts (Hypermedia Pattern)", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("These toasts are triggered by server-sent events (SSE), demonstrating the hypermedia approach:", cls="mb-4 text-muted-foreground"),
         Div(
             Button(
                 "Server-Side Toast",
                 data_on_click=get("/toast/sse-example"),
                 variant="default"
             ),
-            P("Click to trigger a server process that sends toast notifications via SSE.", cls="text-sm text-muted-foreground mt-2"),
+            P("Click to trigger a server process that sends toast notifications via SSE.", cls="mt-2 text-sm text-muted-foreground"),
             cls="space-y-2"
         ),
 
-        H2("Client-Side Toasts", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("These toasts are triggered directly in the browser:", cls="text-muted-foreground mb-4"),
+        H2("Client-Side Toasts", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("These toasts are triggered directly in the browser:", cls="mb-4 text-muted-foreground"),
         Div(
             Button(
                 "Client-Side Toast",
                 data_on_click=toast.success('Client-Side', 'This was triggered directly in the browser'),
                 variant="outline"
             ),
-            P("Click to trigger a toast using client-side JavaScript.", cls="text-sm text-muted-foreground mt-2"),
+            P("Click to trigger a toast using client-side JavaScript.", cls="mt-2 text-sm text-muted-foreground"),
             cls="space-y-2"
         ),
 
-        H2("Architecture Comparison", cls="text-2xl font-semibold mb-4 mt-8"),
+        H2("Architecture Comparison", cls="mt-8 mb-4 text-2xl font-semibold"),
         Card(
             CardHeader(
                 CardTitle("Client-Side Pattern"),
@@ -3150,7 +3150,7 @@ def test_toast_server():
     "Show Toast",
     data_on_click=toast('Message', 'Description')
 )''', language="python"),
-                P("Best for: Immediate UI feedback, form validation", cls="text-sm text-muted-foreground mt-4")
+                P("Best for: Immediate UI feedback, form validation", cls="mt-4 text-sm text-muted-foreground")
             ),
             cls="mb-4"
         ),
@@ -3171,7 +3171,7 @@ Button(
     "Process",
     data_on_click=get("/process")
 )''', language="python"),
-                P("Best for: Long-running operations, multi-step processes, server notifications", cls="text-sm text-muted-foreground mt-4")
+                P("Best for: Long-running operations, multi-step processes, server notifications", cls="mt-4 text-sm text-muted-foreground")
             )
         ),
 
@@ -3197,28 +3197,28 @@ def test_typography():
             Div(
                 Caption("DISPLAY"),
                 Display("The quick brown fox jumps", cls="!mt-0 !mb-4"),
-                cls="py-6 border-b border-border last:border-0"
+                cls="border-b border-border py-6 last:border-0"
             ),
 
             # H1 Example
             Div(
                 Caption("H1 - PRIMARY HEADING"),
                 H1("The quick brown fox jumps over the lazy dog", cls="!mt-0 !mb-4"),
-                cls="py-6 border-b border-border last:border-0"
+                cls="border-b border-border py-6 last:border-0"
             ),
 
             # H2 Example
             Div(
                 Caption("H2 - SECONDARY HEADING"),
                 H2("The quick brown fox jumps over the lazy dog", cls="!mt-0 !mb-4"),
-                cls="py-6 border-b border-border last:border-0"
+                cls="border-b border-border py-6 last:border-0"
             ),
 
             # H3 Example
             Div(
                 Caption("H3 - TERTIARY HEADING"),
                 H3("The quick brown fox jumps over the lazy dog", cls="!mt-0 !mb-4"),
-                cls="py-6 border-b border-border last:border-0"
+                cls="border-b border-border py-6 last:border-0"
             ),
 
             # H4-H6 Examples in grid
@@ -3235,7 +3235,7 @@ def test_typography():
                     Caption("H6 - SIXTH LEVEL"),
                     H6("The quick brown fox", cls="!mt-0 !mb-4"),
                 ),
-                cls="grid grid-cols-1 md:grid-cols-3 gap-6 py-6"
+                cls="grid grid-cols-1 gap-6 py-6 md:grid-cols-3"
             ),
         ),
 
@@ -3250,28 +3250,28 @@ def test_typography():
             Div(
                 Caption("LEAD - INTRODUCTORY TEXT"),
                 Lead("A modal dialog that interrupts the user with important content and expects a response.", cls="!mt-0 !mb-4"),
-                cls="py-6 border-b border-border last:border-0"
+                cls="border-b border-border py-6 last:border-0"
             ),
 
             # Subtitle
             Div(
                 Caption("SUBTITLE - SECONDARY DESCRIPTION"),
                 Subtitle("Perfect for supporting information that accompanies main headings.", cls="!mt-0 !mb-4"),
-                cls="py-6 border-b border-border last:border-0"
+                cls="border-b border-border py-6 last:border-0"
             ),
 
             # Paragraph
             Div(
                 Caption("PARAGRAPH - BODY TEXT"),
                 P("The king thought long and hard, and finally came up with a brilliant plan: he would tax the jokes in the kingdom. This is the standard body text with optimal line height for reading.", cls="!mt-0 !mb-4"),
-                cls="py-6 border-b border-border last:border-0"
+                cls="border-b border-border py-6 last:border-0"
             ),
 
             # Large
             Div(
                 Caption("LARGE - EMPHASIZED TEXT"),
                 Large("Are you absolutely sure you want to proceed with this action?", cls="!mt-0 !mb-4"),
-                cls="py-6 border-b border-border last:border-0"
+                cls="border-b border-border py-6 last:border-0"
             ),
 
             # Small, Muted, Caption grid
@@ -3288,7 +3288,7 @@ def test_typography():
                     Caption("CAPTION - METADATA"),
                     Caption("Last updated: March 2024"),
                 ),
-                cls="grid grid-cols-1 md:grid-cols-3 gap-6 py-6 border-b border-border last:border-0"
+                cls="grid grid-cols-1 gap-6 border-b border-border py-6 last:border-0 md:grid-cols-3"
             ),
 
             # Text component variants (removed invalid weight= and align= parameters)
@@ -3300,7 +3300,7 @@ def test_typography():
                     Text("Small variant for fine print", variant="small"),
                     cls="space-y-4"
                 ),
-                cls="py-6 border-b border-border last:border-0"
+                cls="border-b border-border py-6 last:border-0"
             ),
 
             # Inline Code
@@ -3325,7 +3325,7 @@ def test_typography():
                     "Design is not just what it looks like and feels like. Design is how it works. Great typography is the foundation of all great design.",
                     cls="!mt-0 !mb-4"
                 ),
-                cls="py-6 border-b border-border last:border-0"
+                cls="border-b border-border py-6 last:border-0"
             ),
 
             # Lists
@@ -3351,7 +3351,7 @@ def test_typography():
                         cls="!mt-0 !mb-4"
                     ),
                 ),
-                cls="grid grid-cols-1 lg:grid-cols-2 gap-8 py-6 border-b border-border last:border-0"
+                cls="grid grid-cols-1 gap-8 border-b border-border py-6 last:border-0 lg:grid-cols-2"
             ),
 
             # Figure and Figcaption
@@ -3360,7 +3360,7 @@ def test_typography():
                 Figure(
                     Div(
                         "📊",
-                        cls="w-full h-48 bg-muted rounded-lg flex items-center justify-center text-6xl"
+                        cls="flex h-48 w-full items-center justify-center rounded-lg bg-muted text-6xl"
                     ),
                     Figcaption("Fig 1. Typography usage statistics across modern web applications showing consistent hierarchy patterns."),
                     cls="!mt-0 !mb-4"
@@ -3393,7 +3393,7 @@ def test_typography():
                             ),
                             size="sm"
                         ),
-                        cls="bg-card rounded-lg border p-6"
+                        cls="rounded-lg border bg-card p-6"
                     ),
                     cls="mb-8"
                 ),
@@ -3427,7 +3427,7 @@ def test_typography():
 
                             size="base"
                         ),
-                        cls="bg-card rounded-lg border p-8"
+                        cls="rounded-lg border bg-card p-8"
                     ),
                     cls="mb-8"
                 ),
@@ -3445,11 +3445,11 @@ def test_typography():
 
                             size="lg"
                         ),
-                        cls="bg-card rounded-lg border p-8"
+                        cls="rounded-lg border bg-card p-8"
                     ),
                 ),
 
-                cls="space-y-8 mt-8"
+                cls="mt-8 space-y-8"
             ),
         ),
 
@@ -3476,7 +3476,7 @@ def test_typography():
                             Li("TypeScript ready")
                         ),
                         Muted("Get started today with our comprehensive documentation."),
-                        cls="bg-card rounded-lg border p-6"
+                        cls="rounded-lg border bg-card p-6"
                     ),
                 ),
 
@@ -3500,11 +3500,11 @@ def test_typography():
                             Li(InlineCode("Small"), " - Fine print and captions"),
                         ),
 
-                        cls="bg-card rounded-lg border p-6"
+                        cls="rounded-lg border bg-card p-6"
                     ),
                 ),
 
-                cls="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8"
+                cls="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2"
             ),
         ),
 
@@ -3515,8 +3515,8 @@ def test_typography():
 @rt("/tooltip")
 def test_tooltip():
     return Page(
-        H2("Keyboard Accessible Tooltips", cls="text-2xl font-semibold mb-4"),
-        P("Tooltips support both hover and keyboard focus. Tab through the buttons below.", cls="text-muted-foreground mb-4"),
+        H2("Keyboard Accessible Tooltips", cls="mb-4 text-2xl font-semibold"),
+        P("Tooltips support both hover and keyboard focus. Tab through the buttons below.", cls="mb-4 text-muted-foreground"),
 
         Div(
             Tooltip(
@@ -3540,8 +3540,8 @@ def test_tooltip():
             cls="flex gap-4"
         ),
 
-        H2("Position Variants", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Hover over the buttons to see tooltips with different positions.", cls="text-muted-foreground mb-4"),
+        H2("Position Variants", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Hover over the buttons to see tooltips with different positions.", cls="mb-4 text-muted-foreground"),
 
         Div(
             Tooltip(
@@ -3568,11 +3568,11 @@ def test_tooltip():
                 ),
                 TooltipContent("This is a tooltip on the left", side="left"),
             ),
-            cls="flex gap-4 flex-wrap"
+            cls="flex flex-wrap gap-4"
         ),
 
-        H2("Tooltip Alignment", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Tooltips can be aligned to start, center, or end relative to the trigger.", cls="text-muted-foreground mb-4"),
+        H2("Tooltip Alignment", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Tooltips can be aligned to start, center, or end relative to the trigger.", cls="mb-4 text-muted-foreground"),
 
         Div(
             Tooltip(
@@ -3593,11 +3593,11 @@ def test_tooltip():
                 ),
                 TooltipContent("End ➡", side="top", align="end", cls="w-28"),
             ),
-            cls="flex gap-4 flex-wrap"
+            cls="flex flex-wrap gap-4"
         ),
 
-        H2("Custom Delays", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Tooltips can have custom show and hide delays.", cls="text-muted-foreground mb-4"),
+        H2("Custom Delays", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Tooltips can have custom show and hide delays.", cls="mb-4 text-muted-foreground"),
 
         Div(
             Tooltip(
@@ -3628,11 +3628,11 @@ def test_tooltip():
                 ),
                 TooltipContent("Hides with 300ms delay"),
             ),
-            cls="flex gap-4 flex-wrap"
+            cls="flex flex-wrap gap-4"
         ),
 
-        H2("Tooltip on Icon Button", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Tooltips are commonly used on icon buttons to explain their purpose.", cls="text-muted-foreground mb-4"),
+        H2("Tooltip on Icon Button", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Tooltips are commonly used on icon buttons to explain their purpose.", cls="mb-4 text-muted-foreground"),
 
         Div(
             Tooltip(
@@ -3678,8 +3678,8 @@ def test_tooltip():
             cls="flex gap-4"
         ),
 
-        H2("Tooltip with Rich Content", cls="text-2xl font-semibold mb-4 mt-8"),
-        P("Tooltips can contain multiple elements.", cls="text-muted-foreground mb-4"),
+        H2("Tooltip with Rich Content", cls="mt-8 mb-4 text-2xl font-semibold"),
+        P("Tooltips can contain multiple elements.", cls="mb-4 text-muted-foreground"),
 
         Tooltip(
             TooltipTrigger(
@@ -3687,7 +3687,7 @@ def test_tooltip():
             ),
             TooltipContent(
                 Div(
-                    P("This tooltip has multiple lines", cls="font-semibold mb-1"),
+                    P("This tooltip has multiple lines", cls="mb-1 font-semibold"),
                     P("And can contain additional content", cls="text-xs"),
                 ),
                 side="top",

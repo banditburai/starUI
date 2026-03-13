@@ -39,10 +39,10 @@ def index():
         Div(ThemeToggle(), cls="absolute top-4 right-4"),
         # Main content container
         Div(
-            H1("StarUI Component Test", cls="text-4xl font-bold mb-8"),
+            H1("StarUI Component Test", cls="mb-8 text-4xl font-bold"),
             # Button variants
             Div(
-                H2("Buttons", cls="text-2xl font-semibold mb-4"),
+                H2("Buttons", cls="mb-4 text-2xl font-semibold"),
                 Div(
                     Button("Default"),
                     Button("Destructive", variant="destructive"),
@@ -52,24 +52,24 @@ def index():
                     Button("Link", variant="link"),
                     Button(Icon("lucide:settings"), variant="secondary", size="icon"),
                     Button("Disabled", disabled=True),
-                    cls="flex flex-wrap gap-2 mb-8",
+                    cls="mb-8 flex flex-wrap gap-2",
                 ),
             ),
             # Badge variants
             Div(
-                H2("Badges", cls="text-2xl font-semibold mb-4"),
+                H2("Badges", cls="mb-4 text-2xl font-semibold"),
                 Div(
                     Badge("Default"),
                     Badge("Secondary", variant="secondary"),
                     Badge("Destructive", variant="destructive"),
                     Badge("Outline", variant="outline"),
                     Badge("Clickable", ds_on_click("alert('Badge clicked!')")),
-                    cls="flex flex-wrap gap-2 mb-8",
+                    cls="mb-8 flex flex-wrap gap-2",
                 ),
             ),
             # Input types
             Div(
-                H2("Inputs", cls="text-2xl font-semibold mb-4"),
+                H2("Inputs", cls="mb-4 text-2xl font-semibold"),
                 Div(
                     Div(
                         Label("Text Input", for_="text-input"),
@@ -106,12 +106,12 @@ def index():
                         ),
                         cls="space-y-2",
                     ),
-                    cls="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8",
+                    cls="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2",
                 ),
             ),
             # Card example
             Div(
-                H2("Card", cls="text-2xl font-semibold mb-4"),
+                H2("Card", cls="mb-4 text-2xl font-semibold"),
                 Card(
                     CardHeader(
                         CardTitle("Card Title"),
@@ -128,12 +128,12 @@ def index():
                         Button("Save"),
                         cls="flex gap-2",
                     ),
-                    cls="max-w-md mb-8",
+                    cls="mb-8 max-w-md",
                 ),
             ),
             # Alert variants
             Div(
-                H2("Alerts", cls="text-2xl font-semibold mb-4"),
+                H2("Alerts", cls="mb-4 text-2xl font-semibold"),
                 Div(
                     Alert(
                         AlertTitle("Default Alert"),
@@ -144,12 +144,12 @@ def index():
                         AlertDescription("This is a destructive alert message."),
                         variant="destructive",
                     ),
-                    cls="space-y-4 mb-8",
+                    cls="mb-8 space-y-4",
                 ),
             ),
             # Breadcrumb
             Div(
-                H2("Breadcrumb", cls="text-2xl font-semibold mb-4"),
+                H2("Breadcrumb", cls="mb-4 text-2xl font-semibold"),
                 Breadcrumb(
                     BreadcrumbList(
                         BreadcrumbItem(BreadcrumbLink("Home", href="/")),
@@ -165,7 +165,7 @@ def index():
             ),
             # Tabs example - Default variant (boxed style)
             Div(
-                H2("Tabs - Default Variant", cls="text-2xl font-semibold mb-4"),
+                H2("Tabs - Default Variant", cls="mb-4 text-2xl font-semibold"),
                 Tabs(
                     TabsList(
                         TabsTrigger("Preview", id="preview"),
@@ -174,7 +174,7 @@ def index():
                     ),
                     TabsContent(
                         Div(
-                            H3("Preview Content", cls="text-lg font-semibold mb-2"),
+                            H3("Preview Content", cls="mb-2 text-lg font-semibold"),
                             P(
                                 "This is the preview tab content with the default boxed style."
                             ),
@@ -186,11 +186,11 @@ def index():
                     ),
                     TabsContent(
                         Div(
-                            H3("Code Content", cls="text-lg font-semibold mb-2"),
+                            H3("Code Content", cls="mb-2 text-lg font-semibold"),
                             Pre(
                                 Code(
                                     "# Example code\ndef hello_world():\n    print('Hello, World!')",
-                                    cls="block p-4 bg-muted rounded",
+                                    cls="block rounded bg-muted p-4",
                                 )
                             ),
                         ),
@@ -198,12 +198,12 @@ def index():
                     ),
                     TabsContent(
                         Div(
-                            H3("Settings Content", cls="text-lg font-semibold mb-2"),
+                            H3("Settings Content", cls="mb-2 text-lg font-semibold"),
                             P("Configure your preferences here."),
                             Div(
                                 Label("Enable notifications", for_="notifications"),
                                 Input(type="checkbox", id="notifications", cls="ml-2"),
-                                cls="flex items-center gap-2 mt-4",
+                                cls="mt-4 flex items-center gap-2",
                             ),
                         ),
                         id="settings",
@@ -215,7 +215,7 @@ def index():
             ),
             # Tabs example - Plain variant (text style)
             Div(
-                H2("Tabs - Plain Variant", cls="text-2xl font-semibold mb-4"),
+                H2("Tabs - Plain Variant", cls="mb-4 text-2xl font-semibold"),
                 Tabs(
                     TabsList(
                         TabsTrigger("Account", id="account"),
@@ -225,7 +225,7 @@ def index():
                     ),
                     TabsContent(
                         Div(
-                            H3("Account Settings", cls="text-lg font-semibold mb-2"),
+                            H3("Account Settings", cls="mb-2 text-lg font-semibold"),
                             P("Manage your account settings and preferences."),
                             Div(
                                 Label("Username", for_="username"),
@@ -234,14 +234,14 @@ def index():
                                     placeholder="Enter username",
                                     cls="max-w-sm",
                                 ),
-                                cls="space-y-2 mt-4",
+                                cls="mt-4 space-y-2",
                             ),
                         ),
                         id="account",
                     ),
                     TabsContent(
                         Div(
-                            H3("Password & Security", cls="text-lg font-semibold mb-2"),
+                            H3("Password & Security", cls="mb-2 text-lg font-semibold"),
                             P("Update your password and security settings."),
                             Button("Change Password", variant="outline", cls="mt-4"),
                         ),
@@ -249,14 +249,14 @@ def index():
                     ),
                     TabsContent(
                         Div(
-                            H3("Team Members", cls="text-lg font-semibold mb-2"),
+                            H3("Team Members", cls="mb-2 text-lg font-semibold"),
                             P("Manage your team and collaborate with others."),
                         ),
                         id="team",
                     ),
                     TabsContent(
                         Div(
-                            H3("Billing Information", cls="text-lg font-semibold mb-2"),
+                            H3("Billing Information", cls="mb-2 text-lg font-semibold"),
                             P("View and manage your subscription and payment methods."),
                         ),
                         id="billing",
@@ -268,7 +268,7 @@ def index():
             ),
             # Sheet example
             Div(
-                H2("Sheet (Modal Drawer)", cls="text-2xl font-semibold mb-4"),
+                H2("Sheet (Modal Drawer)", cls="mb-4 text-2xl font-semibold"),
                 Sheet(
                     SheetTrigger("Open Sheet", signal="demo_sheet"),
                     SheetContent(
@@ -283,7 +283,7 @@ def index():
                                 "Sheet content goes here. Press ESC or click outside to close."
                             ),
                             Input(placeholder="Type something..."),
-                            cls="p-6 space-y-4",
+                            cls="space-y-4 p-6",
                         ),
                         SheetFooter(
                             Button(
@@ -307,7 +307,7 @@ def index():
             ),
             # Dialog example
             Div(
-                H2("Dialog (Modal)", cls="text-2xl font-semibold mb-4"),
+                H2("Dialog (Modal)", cls="mb-4 text-2xl font-semibold"),
                 Dialog(
                     DialogTrigger("Edit Profile"),
                     DialogContent(
@@ -351,7 +351,7 @@ def index():
             ),
             # Dialog with different size and content
             Div(
-                H2("Dialog (Small Size)", cls="text-2xl font-semibold mb-4"),
+                H2("Dialog (Small Size)", cls="mb-4 text-2xl font-semibold"),
                 Dialog(
                     DialogTrigger("Delete Account", variant="destructive"),
                     DialogContent(
@@ -374,7 +374,7 @@ def index():
             ),
             # Alert Dialog examples
             Div(
-                H2("Alert Dialog", cls="text-2xl font-semibold mb-4"),
+                H2("Alert Dialog", cls="mb-4 text-2xl font-semibold"),
                 Div(
                     # Basic alert dialog
                     AlertDialog(
@@ -444,7 +444,7 @@ def index():
             ),
             # Radio Group examples
             Div(
-                H2("Radio Groups", cls="text-2xl font-semibold mb-4"),
+                H2("Radio Groups", cls="mb-4 text-2xl font-semibold"),
                 Div(
                     RadioGroupWithLabel(
                         "Select your plan",
@@ -483,7 +483,7 @@ def index():
                     Div(
                         P(
                             "Simple radio group (fully auto-managed):",
-                            cls="text-sm font-medium mb-2",
+                            cls="mb-2 text-sm font-medium",
                         ),
                         RadioGroup(
                             RadioGroupItem("small", "Small"),
@@ -491,12 +491,12 @@ def index():
                             RadioGroupItem("large", "Large"),
                             value="medium",
                         ),
-                        cls="p-4 border rounded-lg",
+                        cls="rounded-lg border p-4",
                     ),
                     Div(
                         P(
                             "Custom styled radio group (blue indicator):",
-                            cls="text-sm font-medium mb-2",
+                            cls="mb-2 text-sm font-medium",
                         ),
                         RadioGroup(
                             RadioGroupItem(
@@ -517,14 +517,14 @@ def index():
                             ),
                             value="option2",
                         ),
-                        cls="p-4 border rounded-lg",
+                        cls="rounded-lg border p-4",
                     ),
-                    cls="space-y-6 mb-8",
+                    cls="mb-8 space-y-6",
                 ),
             ),
             # Switch examples
             Div(
-                H2("Switches", cls="text-2xl font-semibold mb-4"),
+                H2("Switches", cls="mb-4 text-2xl font-semibold"),
                 Div(
                     SwitchWithLabel(
                         "Enable notifications",
@@ -555,21 +555,21 @@ def index():
                     ),
                     # Simple switches without labels
                     Div(
-                        P("Simple switches:", cls="text-sm font-medium mb-2"),
+                        P("Simple switches:", cls="mb-2 text-sm font-medium"),
                         Div(
                             Switch(signal="simple1", checked=True),
                             Switch(signal="simple2"),
                             Switch(disabled=True),
                             cls="flex gap-4",
                         ),
-                        cls="p-4 border rounded-lg",
+                        cls="rounded-lg border p-4",
                     ),
-                    cls="space-y-4 mb-8",
+                    cls="mb-8 space-y-4",
                 ),
             ),
             # Textarea examples
             Div(
-                H2("Textareas", cls="text-2xl font-semibold mb-4"),
+                H2("Textareas", cls="mb-4 text-2xl font-semibold"),
                 Div(
                     # Basic textarea
                     TextareaWithLabel(
@@ -603,19 +603,19 @@ def index():
                     ),
                     # Simple textarea without label
                     Div(
-                        P("Simple textarea:", cls="text-sm font-medium mb-2"),
+                        P("Simple textarea:", cls="mb-2 text-sm font-medium"),
                         Textarea(
                             placeholder="Type something...",
                             signal="simple_textarea",
                             resize="vertical",
                         ),
-                        cls="p-4 border rounded-lg",
+                        cls="rounded-lg border p-4",
                     ),
-                    cls="space-y-4 mb-8",
+                    cls="mb-8 space-y-4",
                 ),
                 # Reactive textarea test
                 Div(
-                    H3("Reactive Textarea Test", cls="text-lg font-semibold mb-4"),
+                    H3("Reactive Textarea Test", cls="mb-4 text-lg font-semibold"),
                     Div(
                         Textarea(
                             placeholder="Type here to test reactive binding...",
@@ -624,8 +624,8 @@ def index():
                             cls="mb-4"
                         ),
                         Div(
-                            P("Live Preview:", cls="font-medium mb-2"),
-                            P(ds_text("$reactiveTest || '(nothing typed yet)'"), cls="p-3 border rounded bg-gray-50 dark:bg-gray-900 min-h-[3rem]"),
+                            P("Live Preview:", cls="mb-2 font-medium"),
+                            P(ds_text("$reactiveTest || '(nothing typed yet)'"), cls="min-h-[3rem] rounded border bg-gray-50 p-3 dark:bg-gray-900"),
                             cls="mb-3"
                         ),
                         P(
@@ -634,14 +634,14 @@ def index():
                             cls="text-sm text-muted-foreground"
                         ),
                         ds_signals(reactiveTest=expr("")),
-                        cls="p-4 border rounded-lg bg-background"
+                        cls="rounded-lg border bg-background p-4"
                     ),
                     cls="mb-8"
                 ),
             ),
             # Select examples
             Div(
-                H2("Select", cls="text-2xl font-semibold mb-4"),
+                H2("Select", cls="mb-4 text-2xl font-semibold"),
                 Div(
                     # Basic select
                     SelectWithLabel(
@@ -695,7 +695,7 @@ def index():
                     ),
                     # Simple select without label
                     Div(
-                        P("Simple select:", cls="text-sm font-medium mb-2"),
+                        P("Simple select:", cls="mb-2 text-sm font-medium"),
                         Select(
                             SelectTrigger(
                                 SelectValue(placeholder="Pick an option", signal="simple_select"),
@@ -710,22 +710,22 @@ def index():
                             ),
                             signal="simple_select",
                         ),
-                        cls="p-4 border rounded-lg",
+                        cls="rounded-lg border p-4",
                     ),
-                    cls="space-y-4 mb-8",
+                    cls="mb-8 space-y-4",
                 ),
             ),
             # Popover examples
             Div(
-                H2("Popovers", cls="text-2xl font-semibold mb-4"),
+                H2("Popovers", cls="mb-4 text-2xl font-semibold"),
                 Div(
                     # Basic popover
                     Popover(
                         PopoverTrigger("Open Popover"),
                         PopoverContent(
                             Div(
-                                H3("About this feature", cls="font-semibold mb-2"),
-                                P("This is a popover component that displays rich content in a floating panel.", cls="text-sm text-muted-foreground mb-3"),
+                                H3("About this feature", cls="mb-2 font-semibold"),
+                                P("This is a popover component that displays rich content in a floating panel.", cls="mb-3 text-sm text-muted-foreground"),
                                 PopoverClose("✕"),
                             ),
                         ),
@@ -735,7 +735,7 @@ def index():
                         PopoverTrigger("Top Popover", variant="outline"),
                         PopoverContent(
                             Div(
-                                H3("Top positioned", cls="font-semibold mb-2"),
+                                H3("Top positioned", cls="mb-2 font-semibold"),
                                 P("This popover appears above the trigger.", cls="text-sm"),
                             ),
                             side="top",
@@ -746,27 +746,27 @@ def index():
                         PopoverTrigger("Settings", variant="secondary"),
                         PopoverContent(
                             Div(
-                                H3("Quick Settings", cls="font-semibold mb-3"),
+                                H3("Quick Settings", cls="mb-3 font-semibold"),
                                 Div(
                                     Label("Theme", cls="text-sm font-medium"),
                                     Button("Toggle", variant="outline", size="sm"),
-                                    cls="flex justify-between items-center mb-2",
+                                    cls="mb-2 flex items-center justify-between",
                                 ),
                                 Div(
                                     Label("Notifications", cls="text-sm font-medium"),
                                     Switch(signal="notif_setting"),
-                                    cls="flex justify-between items-center",
+                                    cls="flex items-center justify-between",
                                 ),
                                 PopoverClose("Done", variant="ghost"),
                             ),
                         ),
                     ),
-                    cls="flex flex-wrap gap-4 mb-8",
+                    cls="mb-8 flex flex-wrap gap-4",
                 ),
             ),
             # Dropdown Menu examples
             Div(
-                H2("Dropdown Menus", cls="text-2xl font-semibold mb-4"),
+                H2("Dropdown Menus", cls="mb-4 text-2xl font-semibold"),
                 Div(
                     # Basic dropdown
                     DropdownMenu(
@@ -814,25 +814,25 @@ def index():
                         "panel": False,
                         "position": expr("bottom"),
                     }),
-                    cls="flex flex-wrap gap-4 mb-8",
+                    cls="mb-8 flex flex-wrap gap-4",
                 ),
             ),
             # HoverCard examples
             Div(
-                H2("Hover Cards", cls="text-2xl font-semibold mb-4"),
+                H2("Hover Cards", cls="mb-4 text-2xl font-semibold"),
                 Div(
                     # Basic hover card
                     HoverCard(
                         HoverCardTrigger(
-                            Span("@username", cls="text-blue-600 underline cursor-pointer"),
+                            Span("@username", cls="cursor-pointer text-blue-600 underline"),
                             signal="user_hover",
                         ),
                         HoverCardContent(
                             Div(
                                 Div(
-                                    Div("👤", cls="w-12 h-12 bg-muted rounded-full flex items-center justify-center text-2xl mb-3"),
-                                    H3("John Doe", cls="font-semibold mb-1"),
-                                    P("@username", cls="text-sm text-muted-foreground mb-2"),
+                                    Div("👤", cls="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-muted text-2xl"),
+                                    H3("John Doe", cls="mb-1 font-semibold"),
+                                    P("@username", cls="mb-2 text-sm text-muted-foreground"),
                                     P("Full-stack developer passionate about building great user experiences.", cls="text-sm"),
                                     cls="text-center",
                                 ),
@@ -849,8 +849,8 @@ def index():
                         ),
                         HoverCardContent(
                             Div(
-                                H3("Quick Info", cls="font-semibold mb-2"),
-                                P("This hover card appears when you hover over the trigger element.", cls="text-sm text-muted-foreground mb-2"),
+                                H3("Quick Info", cls="mb-2 font-semibold"),
+                                P("This hover card appears when you hover over the trigger element.", cls="mb-2 text-sm text-muted-foreground"),
                                 P("It stays open while you're hovering over either the trigger or the content.", cls="text-sm"),
                             ),
                             signal="info_hover",
@@ -867,9 +867,9 @@ def index():
                         HoverCardContent(
                             Div(
                                 Div(
-                                    H3("StarUI Components", cls="font-semibold mb-2"),
+                                    H3("StarUI Components", cls="mb-2 font-semibold"),
                                     Badge("v1.0.0", variant="outline", cls="mb-2"),
-                                    P("A modern component library built with StarHTML and Datastar for reactive Python web apps.", cls="text-sm text-muted-foreground mb-3"),
+                                    P("A modern component library built with StarHTML and Datastar for reactive Python web apps.", cls="mb-3 text-sm text-muted-foreground"),
                                     Div(
                                         Badge("Python"),
                                         Badge("StarHTML", variant="secondary"),
@@ -883,16 +883,16 @@ def index():
                         ),
                         signal="product_hover",
                     ),
-                    cls="flex flex-wrap gap-4 mb-8",
+                    cls="mb-8 flex flex-wrap gap-4",
                 ),
             ),
             # Tooltip examples
             Div(
-                H2("Tooltips", cls="text-2xl font-semibold mb-4"),
+                H2("Tooltips", cls="mb-4 text-2xl font-semibold"),
                 TooltipProvider(
                     # Better spacing to prevent unwanted flipping
                     Div(
-                        P("Basic directional tooltips:", cls="text-sm text-muted-foreground mb-4"),
+                        P("Basic directional tooltips:", cls="mb-4 text-sm text-muted-foreground"),
                         # Top tooltip centered alone
                         Div(
                             Tooltip(
@@ -904,7 +904,7 @@ def index():
                                     side="top",
                                 ),
                             ),
-                            cls="flex justify-center mb-6"
+                            cls="mb-6 flex justify-center"
                         ),
                         # Left and Right with ample spacing
                         Div(
@@ -927,7 +927,7 @@ def index():
                                     side="right",
                                 ),
                             ),
-                            cls="flex justify-center items-center gap-16 mb-6"
+                            cls="mb-6 flex items-center justify-center gap-16"
                         ),
                         # Bottom tooltip centered alone
                         Div(
@@ -940,11 +940,11 @@ def index():
                                     side="bottom",
                                 ),
                             ),
-                            cls="flex justify-center mb-6"
+                            cls="mb-6 flex justify-center"
                         ),
                     ),
                 Div(
-                    P("Tooltip alignments:", cls="text-sm text-muted-foreground mb-2"),
+                    P("Tooltip alignments:", cls="mb-2 text-sm text-muted-foreground"),
                     Div(
                         Tooltip(
                             TooltipTrigger(
@@ -976,11 +976,11 @@ def index():
                                 align="end",
                             ),
                         ),
-                        cls="flex gap-2 mb-6",
+                        cls="mb-6 flex gap-2",
                     ),
                 ),
                 Div(
-                    P("Custom delay and focus support:", cls="text-sm text-muted-foreground mb-2"),
+                    P("Custom delay and focus support:", cls="mb-2 text-sm text-muted-foreground"),
                     Div(
                         Tooltip(
                             TooltipTrigger(
@@ -1002,14 +1002,14 @@ def index():
                                 side="bottom",
                             ),
                         ),
-                        cls="flex gap-4 mb-8",
+                        cls="mb-8 flex gap-4",
                     ),
                 ),
             ),
             ),
             # Checkbox examples
             Div(
-                H2("Checkboxes", cls="text-2xl font-semibold mb-4"),
+                H2("Checkboxes", cls="mb-4 text-2xl font-semibold"),
                 Div(
                     CheckboxWithLabel(
                         "Accept terms and conditions", signal="terms", required=True
@@ -1038,21 +1038,21 @@ def index():
                             "Custom blue checkbox",
                             signal="blue_checkbox",
                             helper_text="With custom blue styling when checked",
-                            checkbox_cls="checked:!bg-blue-600 checked:!border-blue-600 dark:checked:!bg-blue-700 dark:checked:!border-blue-700",
+                            checkbox_cls="checked:!border-blue-600 checked:!bg-blue-600 dark:checked:!border-blue-700 dark:checked:!bg-blue-700",
                             indicator_cls="!text-white",
                         ),
-                        cls="p-4 border rounded-lg",
+                        cls="rounded-lg border p-4",
                     ),
-                    cls="space-y-4 mb-8",
+                    cls="mb-8 space-y-4",
                 ),
             ),
             # Toggle examples
             Div(
-                H2("Toggles", cls="text-2xl font-semibold mb-4"),
+                H2("Toggles", cls="mb-4 text-2xl font-semibold"),
                 Div(
                     # Basic toggles
                     Div(
-                        P("Basic toggles:", cls="text-sm font-medium mb-2"),
+                        P("Basic toggles:", cls="mb-2 text-sm font-medium"),
                         Div(
                             Toggle(Icon("lucide:bold"), signal="toggle_bold"),
                             Toggle(Icon("lucide:italic"), signal="toggle_italic", pressed=True),
@@ -1064,7 +1064,7 @@ def index():
                     ),
                     # Outline variant toggles
                     Div(
-                        P("Outline variant:", cls="text-sm font-medium mb-2"),
+                        P("Outline variant:", cls="mb-2 text-sm font-medium"),
                         Div(
                             Toggle(Icon("lucide:align-left"), variant="outline", signal="align_left"),
                             Toggle(Icon("lucide:align-center"), variant="outline", signal="align_center", pressed=True),
@@ -1076,18 +1076,18 @@ def index():
                     ),
                     # Different sizes
                     Div(
-                        P("Different sizes:", cls="text-sm font-medium mb-2"),
+                        P("Different sizes:", cls="mb-2 text-sm font-medium"),
                         Div(
                             Toggle("Small", size="sm", variant="outline", signal="size_sm"),
                             Toggle("Default", size="default", variant="outline", signal="size_default"),
                             Toggle("Large", size="lg", variant="outline", signal="size_lg"),
-                            cls="flex gap-2 items-center",
+                            cls="flex items-center gap-2",
                         ),
                         cls="mb-4",
                     ),
                     # Toggle with text
                     Div(
-                        P("Toggle with text:", cls="text-sm font-medium mb-2"),
+                        P("Toggle with text:", cls="mb-2 text-sm font-medium"),
                         Div(
                             Toggle(
                                 Icon("lucide:wifi"),
@@ -1112,16 +1112,16 @@ def index():
                         ),
                         cls="mb-4",
                     ),
-                    cls="space-y-4 mb-8",
+                    cls="mb-8 space-y-4",
                 ),
             ),
             # Toggle Group examples
             Div(
-                H2("Toggle Groups", cls="text-2xl font-semibold mb-4"),
+                H2("Toggle Groups", cls="mb-4 text-2xl font-semibold"),
                 Div(
                     # Single selection toggle group
                     Div(
-                        P("Text formatting (single selection):", cls="text-sm font-medium mb-2"),
+                        P("Text formatting (single selection):", cls="mb-2 text-sm font-medium"),
                         SingleToggleGroup(
                             ("bold", Icon("lucide:bold")),
                             ("italic", Icon("lucide:italic")),
@@ -1133,7 +1133,7 @@ def index():
                     ),
                     # Multiple selection toggle group
                     Div(
-                        P("Text options (multiple selection):", cls="text-sm font-medium mb-2"),
+                        P("Text options (multiple selection):", cls="mb-2 text-sm font-medium"),
                         MultipleToggleGroup(
                             ("bold", Icon("lucide:bold")),
                             ("italic", Icon("lucide:italic")),
@@ -1146,7 +1146,7 @@ def index():
                     ),
                     # Alignment toggle group
                     Div(
-                        P("Text alignment:", cls="text-sm font-medium mb-2"),
+                        P("Text alignment:", cls="mb-2 text-sm font-medium"),
                         SingleToggleGroup(
                             ("left", Icon("lucide:align-left")),
                             ("center", Icon("lucide:align-center")),
@@ -1159,7 +1159,7 @@ def index():
                     ),
                     # Size toggle group
                     Div(
-                        P("Size selection:", cls="text-sm font-medium mb-2"),
+                        P("Size selection:", cls="mb-2 text-sm font-medium"),
                         SingleToggleGroup(
                             ("sm", "Small"),
                             ("md", "Medium"),
@@ -1173,7 +1173,7 @@ def index():
                     ),
                     # View mode toggle group
                     Div(
-                        P("View mode:", cls="text-sm font-medium mb-2"),
+                        P("View mode:", cls="mb-2 text-sm font-medium"),
                         SingleToggleGroup(
                             ("list", Div(Icon("lucide:list"), Span("List", cls="ml-1"))),
                             ("grid", Div(Icon("lucide:layout-grid"), Span("Grid", cls="ml-1"))),
@@ -1185,7 +1185,7 @@ def index():
                     ),
                     # Disabled toggle group
                     Div(
-                        P("Disabled group:", cls="text-sm font-medium mb-2"),
+                        P("Disabled group:", cls="mb-2 text-sm font-medium"),
                         SingleToggleGroup(
                             ("option1", "Option 1"),
                             ("option2", "Option 2"),
@@ -1196,18 +1196,18 @@ def index():
                         ),
                         cls="mb-4",
                     ),
-                    cls="space-y-4 mb-8",
+                    cls="mb-8 space-y-4",
                 ),
             ),
             # Accordion examples
             Div(
-                H2("Accordion", cls="text-2xl font-semibold mb-4"),
+                H2("Accordion", cls="mb-4 text-2xl font-semibold"),
                 Div(
                     # Single accordion with collapsible
                     Div(
                         P(
                             "Single selection (collapsible):",
-                            cls="text-sm font-medium mb-2",
+                            cls="mb-2 text-sm font-medium",
                         ),
                         Accordion(
                             AccordionItem(
@@ -1244,7 +1244,7 @@ def index():
                     ),
                     # Multiple selection accordion
                     Div(
-                        P("Multiple selection:", cls="text-sm font-medium mb-2"),
+                        P("Multiple selection:", cls="mb-2 text-sm font-medium"),
                         Accordion(
                             AccordionItem(
                                 AccordionTrigger(
@@ -1321,16 +1321,16 @@ def index():
                         ),
                         cls="mb-6",
                     ),
-                    cls="space-y-4 mb-8",
+                    cls="mb-8 space-y-4",
                 ),
             ),
             # Avatar examples
             Div(
-                H2("Avatars", cls="text-2xl font-semibold mb-4"),
+                H2("Avatars", cls="mb-4 text-2xl font-semibold"),
                 Div(
                     # Basic Avatar with image
                     Div(
-                        H3("Basic Avatar", cls="text-lg font-medium mb-2"),
+                        H3("Basic Avatar", cls="mb-2 text-lg font-medium"),
                         Div(
                             Avatar(
                                 AvatarImage(
@@ -1347,14 +1347,14 @@ def index():
                                     alt="User"
                                 )
                             ),
-                            cls="flex gap-4 items-center"
+                            cls="flex items-center gap-4"
                         ),
                         cls="mb-6",
                     ),
                     # Different sizes (composition example)
                     Div(
-                        H3("Avatar Sizes", cls="text-lg font-medium mb-2"),
-                        P("Use size classes to customize:", cls="text-sm text-muted-foreground mb-2"),
+                        H3("Avatar Sizes", cls="mb-2 text-lg font-medium"),
+                        P("Use size classes to customize:", cls="mb-2 text-sm text-muted-foreground"),
                         Div(
                             Avatar(AvatarFallback("XS"), cls="size-6"),
                             Avatar(AvatarFallback("SM"), cls="size-8"),
@@ -1362,14 +1362,14 @@ def index():
                             Avatar(AvatarFallback("LG"), cls="size-12"),
                             Avatar(AvatarFallback("XL"), cls="size-16"),
                             Avatar(AvatarFallback("2X"), cls="size-20"),
-                            cls="flex gap-4 items-center"
+                            cls="flex items-center gap-4"
                         ),
                         cls="mb-6",
                     ),
                     # Avatar with automatic fallback
                     Div(
-                        H3("Automatic Fallback", cls="text-lg font-medium mb-2"),
-                        P("The second avatar will show fallback as the image URL is invalid:", cls="text-sm text-muted-foreground mb-2"),
+                        H3("Automatic Fallback", cls="mb-2 text-lg font-medium"),
+                        P("The second avatar will show fallback as the image URL is invalid:", cls="mb-2 text-sm text-muted-foreground"),
                         Div(
                             AvatarWithFallback(
                                 src="https://github.com/shadcn.png",
@@ -1384,14 +1384,14 @@ def index():
                             AvatarWithFallback(
                                 fallback="NI"
                             ),
-                            cls="flex gap-4 items-center"
+                            cls="flex items-center gap-4"
                         ),
                         cls="mb-6",
                     ),
                     # Avatar Group (composition example)
                     Div(
-                        H3("Avatar Group", cls="text-lg font-medium mb-2"),
-                        P("Compose avatars with overlapping styles:", cls="text-sm text-muted-foreground mb-2"),
+                        H3("Avatar Group", cls="mb-2 text-lg font-medium"),
+                        P("Compose avatars with overlapping styles:", cls="mb-2 text-sm text-muted-foreground"),
                         Div(
                             Div(
                                 Avatar(AvatarFallback("JD")),
@@ -1406,51 +1406,51 @@ def index():
                     ),
                     # Avatar with Badge (composition example)
                     Div(
-                        H3("Avatar with Badge", cls="text-lg font-medium mb-2"),
-                        P("Compose with absolute positioning:", cls="text-sm text-muted-foreground mb-2"),
+                        H3("Avatar with Badge", cls="mb-2 text-lg font-medium"),
+                        P("Compose with absolute positioning:", cls="mb-2 text-sm text-muted-foreground"),
                         Div(
                             # Green status badge
                             Div(
                                 Avatar(AvatarFallback("JD")),
-                                Span(cls="absolute bottom-0 right-0 size-3 bg-green-500 rounded-full ring-2 ring-background"),
+                                Span(cls="absolute right-0 bottom-0 size-3 rounded-full bg-green-500 ring-2 ring-background"),
                                 cls="relative inline-block"
                             ),
                             # Red status badge
                             Div(
                                 Avatar(AvatarFallback("AS")),
-                                Span(cls="absolute bottom-0 right-0 size-3 bg-red-500 rounded-full ring-2 ring-background"),
+                                Span(cls="absolute right-0 bottom-0 size-3 rounded-full bg-red-500 ring-2 ring-background"),
                                 cls="relative inline-block"
                             ),
                             # Badge with count
                             Div(
                                 Avatar(AvatarFallback("MN")),
-                                Span("5", cls="absolute bottom-0 right-0 size-4 bg-red-500 rounded-full ring-2 ring-background flex items-center justify-center text-[8px] font-bold text-white"),
+                                Span("5", cls="absolute right-0 bottom-0 flex size-4 items-center justify-center rounded-full bg-red-500 text-[8px] font-bold text-white ring-2 ring-background"),
                                 cls="relative inline-block"
                             ),
-                            cls="flex gap-4 items-center"
+                            cls="flex items-center gap-4"
                         ),
                         cls="mb-6",
                     ),
                     # Avatar from Initials (composition example)
                     Div(
-                        H3("Avatar from Initials", cls="text-lg font-medium mb-2"),
-                        P("Use colored backgrounds for initials:", cls="text-sm text-muted-foreground mb-2"),
+                        H3("Avatar from Initials", cls="mb-2 text-lg font-medium"),
+                        P("Use colored backgrounds for initials:", cls="mb-2 text-sm text-muted-foreground"),
                         Div(
-                            Avatar(AvatarFallback("JD", cls="bg-red-600 dark:bg-red-500 text-white font-semibold")),
-                            Avatar(AvatarFallback("AS", cls="bg-blue-600 dark:bg-blue-500 text-white font-semibold")),
-                            Avatar(AvatarFallback("PQ", cls="bg-green-600 dark:bg-green-500 text-white font-semibold")),
-                            Avatar(AvatarFallback("MN", cls="bg-purple-600 dark:bg-purple-500 text-white font-semibold")),
-                            Avatar(AvatarFallback("XY", cls="bg-orange-600 dark:bg-orange-500 text-white font-semibold")),
-                            cls="flex gap-4 items-center"
+                            Avatar(AvatarFallback("JD", cls="bg-red-600 font-semibold text-white dark:bg-red-500")),
+                            Avatar(AvatarFallback("AS", cls="bg-blue-600 font-semibold text-white dark:bg-blue-500")),
+                            Avatar(AvatarFallback("PQ", cls="bg-green-600 font-semibold text-white dark:bg-green-500")),
+                            Avatar(AvatarFallback("MN", cls="bg-purple-600 font-semibold text-white dark:bg-purple-500")),
+                            Avatar(AvatarFallback("XY", cls="bg-orange-600 font-semibold text-white dark:bg-orange-500")),
+                            cls="flex items-center gap-4"
                         ),
                         cls="mb-6",
                     ),
-                    cls="space-y-4 mb-8",
+                    cls="mb-8 space-y-4",
                 ),
             ),
             # Separator examples
             Div(
-                H2("Separators", cls="text-2xl font-semibold mb-4"),
+                H2("Separators", cls="mb-4 text-2xl font-semibold"),
                 Div(
                     Div(
                         P("Content above separator", cls="mb-4"),
@@ -1459,45 +1459,45 @@ def index():
                         cls="mb-6",
                     ),
                     Div(
-                        H3("Vertical Separators", cls="text-lg font-medium mb-2"),
+                        H3("Vertical Separators", cls="mb-2 text-lg font-medium"),
                         Div(
                             Span("Left content"),
                             Separator(orientation="vertical", cls="mx-4"),
                             Span("Right content"),
-                            cls="flex items-center h-8",
+                            cls="flex h-8 items-center",
                         ),
                         cls="mb-6",
                     ),
                     Div(
-                        H3("Custom Styling", cls="text-lg font-medium mb-2"),
+                        H3("Custom Styling", cls="mb-2 text-lg font-medium"),
                         Div(
                             P("Custom colored separator below:", cls="mb-2"),
-                            Separator(cls="bg-red-500 h-0.5"),
+                            Separator(cls="h-0.5 bg-red-500"),
                             P("Thicker separator with different color:", cls="mt-4 mb-2"),
-                            Separator(cls="bg-blue-500 h-1"),
+                            Separator(cls="h-1 bg-blue-500"),
                         ),
                     ),
-                    cls="space-y-4 mb-8",
+                    cls="mb-8 space-y-4",
                 ),
             ),
             # Skeleton examples
             Div(
-                H2("Skeleton", cls="text-2xl font-semibold mb-4"),
+                H2("Skeleton", cls="mb-4 text-2xl font-semibold"),
                 Div(
                     # Basic skeleton shapes
                     Div(
-                        H3("Basic Shapes", cls="text-lg font-medium mb-2"),
+                        H3("Basic Shapes", cls="mb-2 text-lg font-medium"),
                         Div(
                             Skeleton(cls="h-4 w-64"),  # Text line
                             Skeleton(cls="h-4 w-48"),  # Shorter text line
                             Skeleton(cls="h-4 w-56"),  # Another text line
-                            cls="space-y-2 mb-4",
+                            cls="mb-4 space-y-2",
                         ),
                         cls="mb-6",
                     ),
                     # Card skeleton
                     Div(
-                        H3("Card Skeleton", cls="text-lg font-medium mb-2"),
+                        H3("Card Skeleton", cls="mb-2 text-lg font-medium"),
                         Div(
                             Div(
                                 Skeleton(cls="h-12 w-12 rounded-full"),  # Avatar
@@ -1508,32 +1508,32 @@ def index():
                                 ),
                                 cls="flex items-center space-x-4",
                             ),
-                            Skeleton(cls="h-32 w-full mt-4"),  # Content area
-                            Skeleton(cls="h-4 w-full mt-4"),  # Footer line
-                            cls="p-4 border rounded-lg",
+                            Skeleton(cls="mt-4 h-32 w-full"),  # Content area
+                            Skeleton(cls="mt-4 h-4 w-full"),  # Footer line
+                            cls="rounded-lg border p-4",
                         ),
                         cls="mb-6",
                     ),
                     # Article skeleton
                     Div(
-                        H3("Article Skeleton", cls="text-lg font-medium mb-2"),
+                        H3("Article Skeleton", cls="mb-2 text-lg font-medium"),
                         Div(
-                            Skeleton(cls="h-8 w-3/4 mb-4"),  # Title
-                            Skeleton(cls="h-3 w-32 mb-6"),  # Date
+                            Skeleton(cls="mb-4 h-8 w-3/4"),  # Title
+                            Skeleton(cls="mb-6 h-3 w-32"),  # Date
                             Div(
                                 Skeleton(cls="h-4 w-full"),
                                 Skeleton(cls="h-4 w-full"),
                                 Skeleton(cls="h-4 w-2/3"),
-                                cls="space-y-2 mb-4",
+                                cls="mb-4 space-y-2",
                             ),
                             Skeleton(cls="h-40 w-full"),  # Image placeholder
-                            cls="p-4 border rounded-lg",
+                            cls="rounded-lg border p-4",
                         ),
                         cls="mb-6",
                     ),
                     # Interactive skeleton toggle
                     Div(
-                        H3("Loading State Toggle", cls="text-lg font-medium mb-2"),
+                        H3("Loading State Toggle", cls="mb-2 text-lg font-medium"),
                         Div(
                             Button(
                                 ds_text("$loading ? 'Stop Loading' : 'Start Loading'"),
@@ -1543,35 +1543,35 @@ def index():
                             ),
                             # Content that toggles based on loading state
                             Div(
-                                Skeleton(cls="h-6 w-48 mb-2"),
-                                Skeleton(cls="h-4 w-64 mb-4"),
+                                Skeleton(cls="mb-2 h-6 w-48"),
+                                Skeleton(cls="mb-4 h-4 w-64"),
                                 Skeleton(cls="h-20 w-full"),
                                 ds_show("$loading"),
                             ),
                             Div(
-                                H4("Content Loaded!", cls="text-lg font-semibold mb-2"),
+                                H4("Content Loaded!", cls="mb-2 text-lg font-semibold"),
                                 P("This content appears when loading is complete.", cls="mb-4"),
                                 Div(
                                     "This is the actual content that would load.",
-                                    cls="p-4 bg-muted rounded-lg",
+                                    cls="rounded-lg bg-muted p-4",
                                 ),
                                 ds_show("!$loading"),
                             ),
                             ds_signals(loading=True),
-                            cls="p-4 border rounded-lg",
+                            cls="rounded-lg border p-4",
                         ),
                         cls="mb-6",
                     ),
-                    cls="space-y-4 mb-8",
+                    cls="mb-8 space-y-4",
                 ),
             ),
             # Progress examples
             Div(
-                H2("Progress", cls="text-2xl font-semibold mb-4"),
+                H2("Progress", cls="mb-4 text-2xl font-semibold"),
                 Div(
                     # Basic examples
                     Div(
-                        H3("Basic Examples", cls="text-lg font-medium mb-2"),
+                        H3("Basic Examples", cls="mb-2 text-lg font-medium"),
                         Div(
                             P("Default (25%):", cls="mb-2"),
                             Progress(progress_value=25),
@@ -1584,14 +1584,14 @@ def index():
                     ),
                     # Reactive progress with signals
                     Div(
-                        H3("Interactive Progress", cls="text-lg font-medium mb-2"),
+                        H3("Interactive Progress", cls="mb-2 text-lg font-medium"),
                         Div(
                             Progress(progress_value=35, signal="demo_progress"),
                             Div(
                                 Button("Increase", ds_on_click("$demo_progress = Math.min(100, $demo_progress + 10)")),
                                 Button("Decrease", ds_on_click("$demo_progress = Math.max(0, $demo_progress - 10)")),
                                 Button("Reset", ds_on_click("$demo_progress = 0")),
-                                cls="flex gap-2 mt-4",
+                                cls="mt-4 flex gap-2",
                             ),
                             P(
                                 Span("Current: "),
@@ -1604,7 +1604,7 @@ def index():
                     ),
                     # Auto-incrementing progress
                     Div(
-                        H3("Auto-incrementing Progress", cls="text-lg font-medium mb-2"),
+                        H3("Auto-incrementing Progress", cls="mb-2 text-lg font-medium"),
                         Div(
                             Progress(progress_value=0, signal="auto_progress"),
                             Div(
@@ -1646,7 +1646,7 @@ def index():
                                     """),
                                     variant="secondary"
                                 ),
-                                cls="flex gap-2 mt-4",
+                                cls="mt-4 flex gap-2",
                             ),
                             P(
                                 Span("Progress: "),
@@ -1659,7 +1659,7 @@ def index():
                     ),
                     # Custom styling
                     Div(
-                        H3("Custom Styling", cls="text-lg font-medium mb-2"),
+                        H3("Custom Styling", cls="mb-2 text-lg font-medium"),
                         Div(
                             P("Large progress bar:", cls="mb-2"),
                             Progress(progress_value=60, cls="h-4"),
@@ -1667,17 +1667,17 @@ def index():
                             Progress(progress_value=80, class_name="bg-green-200", cls="[&>div]:bg-green-500"),
                         ),
                     ),
-                    cls="space-y-4 mb-8",
+                    cls="mb-8 space-y-4",
                 ),
             ),
             # Interactive counter with Datastar
             Div(
-                H2("Interactive Counter (Datastar)", cls="text-2xl font-semibold mb-4"),
+                H2("Interactive Counter (Datastar)", cls="mb-4 text-2xl font-semibold"),
                 Div(
                     Div(
                         Span("Count: ", cls="font-semibold"),
                         Span(ds_text("$count")),
-                        cls="text-xl mb-4",
+                        cls="mb-4 text-xl",
                     ),
                     Div(
                         Button("-", ds_on_click("$count--"), variant="outline"),
@@ -1686,16 +1686,16 @@ def index():
                         cls="flex gap-2",
                     ),
                     ds_signals(count=0),
-                    cls="p-4 border rounded-lg mb-8",
+                    cls="mb-8 rounded-lg border p-4",
                 ),
             ),
             # Table examples
             Div(
-                H2("Tables", cls="text-2xl font-semibold mb-4"),
+                H2("Tables", cls="mb-4 text-2xl font-semibold"),
                 Div(
                     # Basic table
                     Div(
-                        H3("Basic Table", cls="text-lg font-medium mb-2"),
+                        H3("Basic Table", cls="mb-2 text-lg font-medium"),
                         Table(
                             TableHeader(
                                 TableRow(
@@ -1743,7 +1743,7 @@ def index():
                     ),
                     # Table with selection
                     Div(
-                        H3("Table with Selection", cls="text-lg font-medium mb-2"),
+                        H3("Table with Selection", cls="mb-2 text-lg font-medium"),
                         Table(
                             TableCaption("A list of users with selection capabilities."),
                             TableHeader(
@@ -1794,7 +1794,7 @@ def index():
                     ),
                     # Compact table
                     Div(
-                        H3("Compact Table", cls="text-lg font-medium mb-2"),
+                        H3("Compact Table", cls="mb-2 text-lg font-medium"),
                         Table(
                             TableHeader(
                                 TableRow(
@@ -1824,20 +1824,20 @@ def index():
                                     TableCell("Electronics"),
                                 ),
                             ),
-                            cls="text-xs [&_th]:h-8 [&_td]:p-1 [&_th]:p-1",
+                            cls="text-xs [&_td]:p-1 [&_th]:h-8 [&_th]:p-1",
                         ),
                         cls="mb-8",
                     ),
-                    cls="space-y-4 mb-8",
+                    cls="mb-8 space-y-4",
                 ),
             ),
             # Date Picker examples
             Div(
-                H2("Date Picker", cls="text-2xl font-semibold mb-4"),
+                H2("Date Picker", cls="mb-4 text-2xl font-semibold"),
                 Div(
                     # Single date picker
                     Div(
-                        H3("Single Date", cls="text-lg font-medium mb-2"),
+                        H3("Single Date", cls="mb-2 text-lg font-medium"),
                         DatePicker(
                             signal="single_date",
                             mode="single",
@@ -1847,7 +1847,7 @@ def index():
                     ),
                     # Date range picker
                     Div(
-                        H3("Date Range", cls="text-lg font-medium mb-2"),
+                        H3("Date Range", cls="mb-2 text-lg font-medium"),
                         DateRangePicker(
                             signal="date_range",
                             placeholder="Pick a date range",
@@ -1856,7 +1856,7 @@ def index():
                     ),
                     # Date picker with presets
                     Div(
-                        H3("With Presets", cls="text-lg font-medium mb-2"),
+                        H3("With Presets", cls="mb-2 text-lg font-medium"),
                         DatePickerWithPresets(
                             signal="date_presets",
                             placeholder="Select a date",
@@ -1865,7 +1865,7 @@ def index():
                     ),
                     # Multiple date selection
                     Div(
-                        H3("Multiple Dates", cls="text-lg font-medium mb-2"),
+                        H3("Multiple Dates", cls="mb-2 text-lg font-medium"),
                         DatePicker(
                             signal="multiple_dates",
                             mode="multiple",
@@ -1875,7 +1875,7 @@ def index():
                     ),
                     # Date and time picker
                     Div(
-                        H3("Date & Time", cls="text-lg font-medium mb-2"),
+                        H3("Date & Time", cls="mb-2 text-lg font-medium"),
                         DateTimePicker(
                             signal="datetime",
                             placeholder="Select date and time",
@@ -1884,23 +1884,23 @@ def index():
                     ),
                     # Date picker with input
                     Div(
-                        H3("With Input Field", cls="text-lg font-medium mb-2"),
+                        H3("With Input Field", cls="mb-2 text-lg font-medium"),
                         DatePickerWithInput(
                             signal="date_input",
                             placeholder="YYYY-MM-DD",
                         ),
                         cls="mb-4",
                     ),
-                    cls="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8",
+                    cls="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3",
                 ),
             ),
             # Command examples
             Div(
-                H2("Command", cls="text-2xl font-semibold mb-4"),
+                H2("Command", cls="mb-4 text-2xl font-semibold"),
                 Div(
                     # Basic Command palette
                     Div(
-                        H3("Basic Command Palette", cls="text-lg font-medium mb-2"),
+                        H3("Basic Command Palette", cls="mb-2 text-lg font-medium"),
                         Command(
                             CommandInput(placeholder="Type a command or search..."),
                             CommandList(
@@ -1965,7 +1965,7 @@ def index():
                     ),
                     # Command Dialog
                     Div(
-                        H3("Command Dialog", cls="text-lg font-medium mb-2"),
+                        H3("Command Dialog", cls="mb-2 text-lg font-medium"),
                         CommandDialog(
                             trigger=Button(
                                 Icon("lucide:terminal"),
@@ -2050,7 +2050,7 @@ def index():
                     ),
                     # Command with search example
                     Div(
-                        H3("Searchable Command Palette", cls="text-lg font-medium mb-2"),
+                        H3("Searchable Command Palette", cls="mb-2 text-lg font-medium"),
                         Command(
                             CommandInput(placeholder="Search frameworks..."),
                             CommandList(
@@ -2138,7 +2138,7 @@ def index():
                     ),
                     # Command with disabled items
                     Div(
-                        H3("Command with Disabled Items", cls="text-lg font-medium mb-2"),
+                        H3("Command with Disabled Items", cls="mb-2 text-lg font-medium"),
                         Command(
                             CommandInput(placeholder="Search actions..."),
                             CommandList(
@@ -2179,16 +2179,16 @@ def index():
                         ),
                         cls="mb-6",
                     ),
-                    cls="space-y-4 mb-8",
+                    cls="mb-8 space-y-4",
                 ),
             ),
             # Toast examples
             Div(
-                H2("Toast Notifications", cls="text-2xl font-semibold mb-4"),
+                H2("Toast Notifications", cls="mb-4 text-2xl font-semibold"),
                 Div(
                     # Basic toast triggers
                     Div(
-                        H3("Basic Toast Types", cls="text-lg font-medium mb-2"),
+                        H3("Basic Toast Types", cls="mb-2 text-lg font-medium"),
                         Div(
                             Button(
                                 "Default Toast",
@@ -2221,7 +2221,7 @@ def index():
                     ),
                     # Toast with different durations
                     Div(
-                        H3("Custom Duration", cls="text-lg font-medium mb-2"),
+                        H3("Custom Duration", cls="mb-2 text-lg font-medium"),
                         Div(
                             Button(
                                 "Quick Toast (1s)",
@@ -2244,7 +2244,7 @@ def index():
                     ),
                     # Multiple toasts
                     Div(
-                        H3("Multiple Toasts", cls="text-lg font-medium mb-2"),
+                        H3("Multiple Toasts", cls="mb-2 text-lg font-medium"),
                         Div(
                             Button(
                                 "Spam Toasts",
@@ -2262,8 +2262,8 @@ def index():
                     
                     # Position examples with different toasters
                     Div(
-                        H3("Different Positions", cls="text-lg font-medium mb-2"),
-                        P("Note: In a real app, you'd have separate toasters for different positions", cls="text-sm text-muted-foreground mb-4"),
+                        H3("Different Positions", cls="mb-2 text-lg font-medium"),
+                        P("Note: In a real app, you'd have separate toasters for different positions", cls="mb-4 text-sm text-muted-foreground"),
                         Div(
                             Button(
                                 "Promise Toast",
@@ -2282,13 +2282,13 @@ def index():
                         ),
                         cls="mb-6",
                     ),
-                    cls="space-y-4 mb-8",
+                    cls="mb-8 space-y-4",
                 ),
             ),
             # Form with validation example
             Div(
                 H2(
-                    "Form with Validation (Datastar)", cls="text-2xl font-semibold mb-4"
+                    "Form with Validation (Datastar)", cls="mb-4 text-2xl font-semibold"
                 ),
                 Form(
                     Div(
@@ -2332,12 +2332,12 @@ def index():
                     ds_on_submit(
                         "event.preventDefault(); if($name && $email.includes('@')) alert('Form submitted!')"
                     ),
-                    cls="space-y-4 max-w-md",
+                    cls="max-w-md space-y-4",
                 ),
             ),
             cls="container mx-auto p-8",
         ),
-        cls="min-h-screen relative",
+        cls="relative min-h-screen",
     )
 
 
@@ -2349,10 +2349,10 @@ def dropdown_width_debug():
         Div(ThemeToggle(), cls="absolute top-4 right-4"),
         # Main content
         Div(
-            H1("Dropdown Width Matching Debug", cls="text-3xl font-bold mb-8"),
+            H1("Dropdown Width Matching Debug", cls="mb-8 text-3xl font-bold"),
             
             Div(
-                H2("WORKING: Select Component", cls="text-xl font-semibold mb-4 text-green-600"),
+                H2("WORKING: Select Component", cls="mb-4 text-xl font-semibold text-green-600"),
                 Select(
                     SelectTrigger(
                         SelectValue(placeholder="Choose option")
@@ -2367,7 +2367,7 @@ def dropdown_width_debug():
             ),
             
             Div(
-                H2("FAILING: Hero Dropdown (Open Menu)", cls="text-xl font-semibold mb-4 text-red-600"),
+                H2("FAILING: Hero Dropdown (Open Menu)", cls="mb-4 text-xl font-semibold text-red-600"),
                 DropdownMenu(
                     DropdownMenuTrigger(
                         "Open Menu",
@@ -2394,7 +2394,7 @@ def dropdown_width_debug():
             ),
             
             Div(
-                H2("FAILING: Checkbox Dropdown (View Options)", cls="text-xl font-semibold mb-4 text-red-600"),
+                H2("FAILING: Checkbox Dropdown (View Options)", cls="mb-4 text-xl font-semibold text-red-600"),
                 DropdownMenu(
                     DropdownMenuTrigger(
                         Icon("lucide:eye", cls="mr-2 h-4 w-4"),
@@ -2421,7 +2421,7 @@ def dropdown_width_debug():
             ),
             
             Div(
-                H2("WORKING: Simple Dropdown (Settings)", cls="text-xl font-semibold mb-4 text-green-600"),
+                H2("WORKING: Simple Dropdown (Settings)", cls="mb-4 text-xl font-semibold text-green-600"),
                 DropdownMenu(
                     DropdownMenuTrigger("Settings"),
                     DropdownMenuContent(
@@ -2436,12 +2436,12 @@ def dropdown_width_debug():
             
             # CSS Debug Tools Section
             Div(
-                H1("🔧 CSS Debug Tools", cls="text-3xl font-bold mb-6 text-blue-600"),
+                H1("🔧 CSS Debug Tools", cls="mb-6 text-3xl font-bold text-blue-600"),
                 P(
                     "Advanced CSS debugging tools for analyzing dropdown width conflicts. "
                     "These tools help identify why some dropdowns are narrower than their triggers "
                     "despite having reactive min-width properties.",
-                    cls="text-gray-600 mb-8 text-lg"
+                    cls="mb-8 text-lg text-gray-600"
                 ),
                 
                 # CSS Debug Agent
@@ -2462,10 +2462,10 @@ def dropdown_width_debug():
                     cls="mb-8"
                 ),
                 
-                cls="container mx-auto p-8 max-w-7xl"
+                cls="container mx-auto max-w-7xl p-8"
             ),
             
-            cls="container mx-auto p-8 max-w-2xl"
+            cls="container mx-auto max-w-2xl p-8"
         ),
         ds_signals(show_grid=True, show_rulers=False, show_guides=True),
         Script("""
@@ -2561,7 +2561,7 @@ def dropdown_width_debug():
                 console.log('\\n=== END DEBUG ===');
             }, 1500); // Wait longer for datastar to fully initialize
         """),
-        cls="min-h-screen relative"
+        cls="relative min-h-screen"
     )
 
 
