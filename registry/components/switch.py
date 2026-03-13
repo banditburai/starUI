@@ -15,9 +15,9 @@ SwitchSize = Literal["default", "sm"]
 
 switch_variants = cva(
     base=(
-        "peer inline-flex shrink-0 items-center rounded-full "
+        "inline-flex shrink-0 items-center rounded-full peer "
         "border border-transparent shadow-xs transition-all outline-none "
-        "focus-visible:ring-[3px] focus-visible:border-ring focus-visible:ring-ring/50 "
+        "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 "
         "disabled:cursor-not-allowed disabled:opacity-50"
     ),
     config={
@@ -130,8 +130,8 @@ def SwitchWithLabel(
             ),
             cls="flex items-center gap-3",
         ),
-        HTMLP(error_text, cls="text-sm text-destructive mt-1.5") if error_text else None,
-        HTMLP(helper_text, cls="text-sm text-muted-foreground mt-1.5") if helper_text and not error_text else None,
+        HTMLP(error_text, cls="mt-1.5 text-sm text-destructive") if error_text else None,
+        HTMLP(helper_text, cls="mt-1.5 text-sm text-muted-foreground") if helper_text and not error_text else None,
         *attrs,
         cls=cn("space-y-1.5", cls),
         **kwargs,

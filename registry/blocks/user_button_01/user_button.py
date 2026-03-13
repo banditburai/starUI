@@ -1,4 +1,4 @@
-from starhtml import FT, Div, Icon, P, Span
+from starhtml import FT, Icon, P, Span
 
 from .avatar import Avatar, AvatarFallback, AvatarImage
 from .dropdown_menu import (
@@ -32,12 +32,12 @@ def UserButton(
 ) -> FT:
     """User avatar button with dropdown menu for account/auth actions."""
 
-    if not avatar_fallback and name:
+    if not avatar_fallback and name and name.strip():
         parts = name.split()
         avatar_fallback = (parts[0][0] + (parts[-1][0] if len(parts) > 1 else "")).upper()
 
     avatar = Avatar(
-        AvatarImage(src=avatar_src, alt=name) if avatar_src else None,
+        AvatarImage(src=avatar_src, alt="") if avatar_src else None,
         AvatarFallback(avatar_fallback) if avatar_fallback else None,
         cls="size-8",
     )
@@ -45,16 +45,22 @@ def UserButton(
     if show_name and name:
         trigger_content = Span(
             avatar,
-            Span(name, cls="truncate max-w-[150px]"),
-            Icon("lucide:chevron-down", cls="size-3.5 opacity-50 shrink-0"),
+            Span(name, cls="max-w-[150px] truncate"),
+            Icon("lucide:chevron-down", cls="size-3.5 shrink-0 opacity-50"),
             cls="flex items-center gap-2",
         )
-        trigger_cls = cn("relative h-auto rounded-full py-1 pl-1 pr-3 aria-expanded:bg-accent", cls)
+        trigger_cls = cn(
+            "relative h-auto cursor-pointer rounded-full py-1 pr-3 pl-1 ring-offset-background transition-colors",
+            "hover:bg-accent/50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+            "aria-expanded:bg-accent",
+            cls,
+        )
     else:
         trigger_content = avatar
         trigger_cls = cn(
-            "relative h-8 w-8 px-0 rounded-full",
-            "ring-offset-background transition-opacity hover:opacity-80",
+            "relative h-8 w-8 cursor-pointer rounded-full px-0",
+            "ring-offset-background transition-shadow",
+            "hover:ring-2 hover:ring-ring/50 hover:ring-offset-2",
             "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
             "aria-expanded:ring-2 aria-expanded:ring-ring aria-expanded:ring-offset-2",
             cls,
@@ -64,20 +70,11 @@ def UserButton(
 
     header_parts = []
     if name or email:
-        identity_avatar = Avatar(
-            AvatarImage(src=avatar_src, alt=name) if avatar_src else None,
-            AvatarFallback(avatar_fallback) if avatar_fallback else None,
-            cls="size-10",
-        )
-        identity_info = Div(
-            P(name, cls="text-sm font-semibold leading-none truncate") if name else None,
-            P(email, cls="text-xs text-muted-foreground leading-none truncate") if email else None,
-            cls="flex flex-col gap-1.5 min-w-0",
-        )
         header_parts.append(
             DropdownMenuLabel(
-                Div(identity_avatar, identity_info, cls="flex items-center gap-3"),
-                cls="font-normal py-2",
+                P(name, cls="truncate text-sm leading-none font-semibold") if name else None,
+                P(email, cls="truncate text-xs leading-none text-muted-foreground") if email else None,
+                cls="flex flex-col gap-1.5 font-normal",
             )
         )
         header_parts.append(DropdownMenuSeparator())
@@ -95,7 +92,7 @@ def UserButton(
             side=side,
             align=align,
             side_offset=side_offset,
-            cls="w-56",
+            cls="min-w-48",
         ),
         signal=signal,
         **kwargs,

@@ -20,16 +20,16 @@ ToastPosition = Literal[
 ]
 
 toast_variants = cva(
-    base="group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-lg border p-4 pr-8 shadow-lg",
+    base="pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-lg border p-4 pr-8 shadow-lg group",
     config={
         "variants": {
             "variant": {
                 "default": "border border-input bg-background text-foreground",
-                "success": "border border-input text-foreground bg-gradient-to-br from-green-100 to-background dark:from-green-950 dark:to-background",
-                "error": "border border-input text-foreground bg-gradient-to-br from-red-100 to-background dark:from-red-950 dark:to-background",
-                "warning": "border border-input text-foreground bg-gradient-to-br from-yellow-100 to-background dark:from-yellow-950 dark:to-background",
-                "info": "border border-input text-foreground bg-gradient-to-br from-blue-100 to-background dark:from-blue-950 dark:to-background",
-                "destructive": "border border-destructive/40 text-foreground bg-gradient-to-br from-red-200 to-background dark:from-red-950 dark:to-background",
+                "success": "border border-input bg-gradient-to-br from-green-100 to-background text-foreground dark:from-green-950 dark:to-background",
+                "error": "border border-input bg-gradient-to-br from-red-100 to-background text-foreground dark:from-red-950 dark:to-background",
+                "warning": "border border-input bg-gradient-to-br from-yellow-100 to-background text-foreground dark:from-yellow-950 dark:to-background",
+                "info": "border border-input bg-gradient-to-br from-blue-100 to-background text-foreground dark:from-blue-950 dark:to-background",
+                "destructive": "border border-destructive/40 bg-gradient-to-br from-red-200 to-background text-foreground dark:from-red-950 dark:to-background",
             }
         },
         "defaultVariants": {"variant": "default"},
@@ -51,7 +51,7 @@ def Toaster(
         "top-right": "top-0 right-0",
         "bottom-left": "bottom-0 left-0",
         "bottom-center": "bottom-0 left-1/2 -translate-x-1/2",
-        "bottom-right": "bottom-0 right-0",
+        "bottom-right": "right-0 bottom-0",
     }[position]
 
     return Div(
@@ -60,7 +60,7 @@ def Toaster(
             *[_toast_slot(i)(toasts=toasts) for i in range(max_visible)],
             data_toast_position=position,
             cls=cn(
-                "fixed z-[100] flex flex-col-reverse gap-2 p-4 w-[calc(100%-2rem)] sm:w-[420px] pointer-events-none",
+                "pointer-events-none fixed z-[100] flex w-[calc(100%-2rem)] flex-col-reverse gap-2 p-4 sm:w-[420px]",
                 position_cls,
                 cls,
             ),
@@ -87,7 +87,7 @@ def _toast_slot(index: int) -> FT:
                         "destructive",
                     ]
                 ],
-                cls="overflow-hidden min-h-0",
+                cls="min-h-0 overflow-hidden",
             ),
             cls="grid transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none",
             style=f"grid-template-rows: 0fr; opacity: 0; order: 99; view-transition-name: toast-slot-{index}",
@@ -143,7 +143,7 @@ def _toast_element(index: int, variant: str) -> FT:
                 data_on_click=js(f"{toasts} = {toasts}.map((t,i) => i==={index} ? null : t)"),
                 type="button",
                 aria_label="Dismiss toast",
-                cls="absolute right-2 top-2 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none",
+                cls="absolute top-2 right-2 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:opacity-100 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:pointer-events-none",
             ),
             data_toast_item="",
             data_show=show_condition,

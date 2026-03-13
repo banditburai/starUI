@@ -19,7 +19,9 @@ _POPOVER_ANIMATE = """\
 [data-popover-animate]:popover-open{@starting-style{opacity:0;scale:0.95}}
 @media(prefers-reduced-motion:reduce){[data-popover-animate]{transition-duration:0ms!important}}"""
 
-_MENU_ITEM_SEL = "[role=menuitem]:not([disabled]),[role=menuitemcheckbox]:not([disabled]),[role=menuitemradio]:not([disabled])"
+_MENU_ITEM_SEL = (
+    "[role=menuitem]:not([disabled]),[role=menuitemcheckbox]:not([disabled]),[role=menuitemradio]:not([disabled])"
+)
 _MENU_NAV = (
     f"const items=[...evt.currentTarget.querySelectorAll('{_MENU_ITEM_SEL}')];"
     "if(!items.length)return;const k=evt.key;let i=items.indexOf(document.activeElement);"
@@ -38,10 +40,10 @@ _MENU_NAV = (
 
 menubar_item_variants = cva(
     base=(
-        "relative flex cursor-default select-none items-center gap-1.5 rounded-sm px-1.5 py-1 "
+        "relative flex w-full cursor-default items-center gap-1.5 rounded-sm px-1.5 py-1 select-none "
         "text-sm outline-hidden "
         "[&_[data-icon-sh]:not([class*='text-'])]:text-muted-foreground "
-        "[&_[data-icon-sh]]:pointer-events-none [&_[data-icon-sh]]:shrink-0 [&_[data-icon-sh]]:size-4"
+        "[&_[data-icon-sh]]:pointer-events-none [&_[data-icon-sh]]:size-4 [&_[data-icon-sh]]:shrink-0"
     ),
     config={
         "variants": {
@@ -83,7 +85,7 @@ def Menubar(*children, signal: str | Signal = "", cls: str = "", **kwargs) -> FT
         role="menubar",
         data_slot="menubar",
         cls=cn(
-            "bg-background flex h-9 items-center gap-1 rounded-md border p-1 shadow-xs",
+            "flex h-9 items-center gap-1 rounded-md border bg-background p-1 shadow-xs",
             cls,
         ),
         **kwargs,
@@ -128,7 +130,7 @@ def MenubarTrigger(*children, cls: str = "", **kwargs) -> FT:
             data_attr_aria_expanded=is_active.if_("true", "false"),
             cls=cn(
                 "flex items-center rounded-sm px-1.5 py-0.5 text-sm font-medium "
-                "outline-hidden select-none cursor-default "
+                "cursor-default outline-hidden select-none "
                 "hover:bg-muted focus:bg-muted data-[state=open]:bg-muted",
                 cls,
             ),
@@ -236,7 +238,7 @@ def MenubarCheckboxItem(
             ),
             *children,
             data_on_click=click_actions if not disabled else None,
-            cls=_menubar_item_cls(inset="pl-7 pr-1.5", disabled=disabled, cls=cls),
+            cls=_menubar_item_cls(inset="pr-1.5 pl-7", disabled=disabled, cls=cls),
             type="button",
             role="menuitemcheckbox",
             tabindex="-1",
@@ -288,7 +290,7 @@ def MenubarRadioItem(
             ),
             *children,
             data_on_click=click_actions if not disabled else None,
-            cls=_menubar_item_cls(inset="pl-7 pr-1.5", disabled=disabled, cls=cls),
+            cls=_menubar_item_cls(inset="pr-1.5 pl-7", disabled=disabled, cls=cls),
             type="button",
             role="menuitemradio",
             tabindex="-1",

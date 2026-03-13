@@ -122,11 +122,11 @@ def CommandDialog(
         data_effect=(dialog_open & ~command.search).then(set_timeout(input_ref.focus(), _DIALOG_FOCUS_DELAY_MS)),
         id=dialog_ref._id,
         cls=cn(
-            "fixed max-h-[85vh] w-full max-w-2xl m-auto p-0",
+            "fixed m-auto max-h-[85vh] w-full max-w-2xl p-0",
             "backdrop:bg-black/50 backdrop:backdrop-blur-sm",
             "open:animate-in open:fade-in-0 open:zoom-in-95 open:duration-200",
             "open:backdrop:animate-in open:backdrop:fade-in-0 open:backdrop:duration-200",
-            "open:flex open:flex-col overflow-hidden rounded-lg",
+            "overflow-hidden rounded-lg open:flex open:flex-col",
             "bg-popover text-popover-foreground shadow-lg",
             "outline-none",
             cls,
@@ -177,7 +177,7 @@ def CommandInput(
                     data_on_keydown=js(_get_nav_handler(sig, search, selected, visible_items)),
                     placeholder=placeholder,
                     data_slot="command-input",
-                    cls="flex-1 min-w-0 bg-transparent px-2 text-sm text-ellipsis outline-hidden placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
+                    cls="min-w-0 flex-1 bg-transparent px-2 text-sm text-ellipsis outline-hidden placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
                     autocomplete="off",
                     autocorrect="off",
                     spellcheck="false",
@@ -276,7 +276,7 @@ def CommandGroup(
             Div(
                 heading,
                 data_slot="command-group-heading",
-                cls="text-muted-foreground px-2 py-1.5 text-xs font-medium select-none",
+                cls="px-2 py-1.5 text-xs font-medium text-muted-foreground select-none",
                 aria_hidden="true",
             )
             if heading
@@ -341,8 +341,8 @@ def CommandItem(
             data_keywords=keywords or "",
             data_index=str(index),
             cls=cn(
-                "group/command-item relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none",
-                "[&_[data-icon-sh]:not([class*='text-'])]:text-muted-foreground [&_[data-icon-sh]]:pointer-events-none [&_[data-icon-sh]]:shrink-0 [&_[data-icon-sh]:not([class*='size-'])]:size-4",
+                "relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none group/command-item",
+                "[&_[data-icon-sh]]:pointer-events-none [&_[data-icon-sh]]:shrink-0 [&_[data-icon-sh]:not([class*='size-'])]:size-4 [&_[data-icon-sh]:not([class*='text-'])]:text-muted-foreground",
                 "data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50",
                 "data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground" if not disabled else "",
                 cls,

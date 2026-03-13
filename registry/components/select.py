@@ -85,11 +85,11 @@ def SelectTrigger(
             aria_controls=f"{sig}_content",
             id=trigger_ref._id,
             cls=cn(
-                "flex w-full h-9 items-center justify-between gap-2 rounded-md border border-input",
+                "flex h-9 w-full items-center justify-between gap-2 rounded-md border border-input",
                 "bg-transparent px-3 py-2 text-sm shadow-xs",
-                "transition-[color,box-shadow] outline-hidden truncate",
+                "truncate outline-hidden transition-[color,box-shadow]",
                 "dark:bg-input/30 dark:hover:bg-input/50",
-                "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
+                "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
                 "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40",
                 "aria-invalid:border-destructive",
                 "disabled:cursor-not-allowed disabled:opacity-50",
@@ -112,7 +112,7 @@ def SelectValue(
         if children:
             return Span(
                 *children,
-                cls=cn("pointer-events-none truncate flex-1 text-left", cls),
+                cls=cn("pointer-events-none flex-1 truncate text-left", cls),
                 data_slot="select-value",
                 **kwargs,
             )
@@ -123,7 +123,7 @@ def SelectValue(
         return Span(
             ssr_text,
             data_text=text_expr,
-            cls=cn("pointer-events-none truncate flex-1 text-left", cls),
+            cls=cn("pointer-events-none flex-1 truncate text-left", cls),
             data_class_text_muted_foreground=~selected_label,
             data_slot="select-value",
             **kwargs,
@@ -222,7 +222,7 @@ def SelectItem(
             data_selected=is_selected,
             data_disabled="true" if disabled else None,
             cls=cn(
-                "relative flex w-full cursor-default select-none items-center gap-2 rounded-sm py-1.5 pl-2 pr-8 text-sm outline-hidden",
+                "relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none",
                 "hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
                 "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
                 cls,
@@ -259,7 +259,7 @@ def SelectLabel(
 ) -> FT:
     return Div(
         *children,
-        cls=cn("text-muted-foreground px-2 py-1.5 text-xs", cls),
+        cls=cn("px-2 py-1.5 text-xs text-muted-foreground", cls),
         data_slot="select-label",
         **kwargs,
     )
@@ -270,7 +270,7 @@ def SelectSeparator(
     **kwargs,
 ) -> FT:
     return Div(
-        cls=cn("bg-border pointer-events-none -mx-1 my-1 h-px", cls),
+        cls=cn("pointer-events-none -mx-1 my-1 h-px bg-border", cls),
         data_slot="select-separator",
         **kwargs,
     )
@@ -327,7 +327,7 @@ def SelectWithLabel(
             label,
             Span(" *", cls="text-destructive") if required else None,
             fr=trigger_id,
-            cls=cn("block text-sm font-medium mb-1.5", label_cls),
+            cls=cn("mb-1.5 block text-sm font-medium", label_cls),
         ),
         Select(
             SelectTrigger(
@@ -345,8 +345,8 @@ def SelectWithLabel(
             cls="w-full",
             **kwargs,
         ),
-        HTMLP(error_text, cls="text-sm text-destructive mt-1.5") if error_text else None,
-        HTMLP(helper_text, cls="text-sm text-muted-foreground mt-1.5") if helper_text and not error_text else None,
+        HTMLP(error_text, cls="mt-1.5 text-sm text-destructive") if error_text else None,
+        HTMLP(helper_text, cls="mt-1.5 text-sm text-muted-foreground") if helper_text and not error_text else None,
         data_slot="select-with-label",
         cls=cn("space-y-1.5", cls),
     )

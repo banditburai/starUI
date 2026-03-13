@@ -34,27 +34,27 @@ def Progress(
             Div(
                 style=f"transform: translateX(-{100 - ssr_pct}%)",
                 data_style_transform="translateX(-" + (100 - s) + "%)",
-                cls="bg-primary h-full w-full flex-1",
+                cls="h-full w-full flex-1 bg-primary",
             ),
             role="progressbar",
             aria_valuemin="0",
             aria_valuemax="100",
             data_attr_aria_valuenow=s,
             data_slot="progress",
-            cls=cn("bg-primary/20 relative h-2 w-full overflow-hidden rounded-full", cls),
+            cls=cn("relative h-2 w-full overflow-hidden rounded-full bg-primary/20", cls),
             **kwargs,
         )
 
     return Div(
         Div(
             style=f"transform: translateX(-{100 - ssr_pct}%)",
-            cls="bg-primary h-full w-full flex-1",
+            cls="h-full w-full flex-1 bg-primary",
         ),
         role="progressbar",
         aria_valuemin="0",
         aria_valuemax="100",
         aria_valuenow=str(ssr_pct),
         data_slot="progress",
-        cls=cn("bg-primary/20 relative h-2 w-full overflow-hidden rounded-full", cls),
+        cls=cn("relative h-2 w-full overflow-hidden rounded-full bg-primary/20", cls),
         **kwargs,
     )

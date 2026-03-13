@@ -10,7 +10,7 @@ directly during development and docs builds.
 import importlib
 import sys
 
-_COMPONENT_DEPS = ['avatar', 'dropdown_menu', 'utils']
+_COMPONENT_DEPS = ["avatar", "dropdown_menu", "utils"]
 
 for _name in _COMPONENT_DEPS:
     _key = f"{__name__}.{_name}"

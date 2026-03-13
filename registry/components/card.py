@@ -33,7 +33,7 @@ def Card(
     return Div(
         *children,
         cls=cn(
-            "bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm",
+            "flex flex-col gap-6 rounded-xl border bg-card py-6 text-card-foreground shadow-sm",
             cls,
         ),
         data_slot="card",
@@ -79,7 +79,7 @@ def CardDescription(
 ) -> FT:
     return P(
         *children,
-        cls=cn("min-w-0 break-words text-muted-foreground text-sm", cls),
+        cls=cn("min-w-0 text-sm break-words text-muted-foreground", cls),
         data_slot="card-description",
         **kwargs,
     )

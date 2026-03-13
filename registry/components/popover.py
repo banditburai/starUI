@@ -113,7 +113,7 @@ def PopoverClose(
             variant=variant,
             size=size,
             data_slot="popover-close",
-            cls=cn("absolute right-2 top-2", cls),
+            cls=cn("absolute top-2 right-2", cls),
             aria_label="Close popover",
             **kwargs,
         )

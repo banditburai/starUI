@@ -59,7 +59,7 @@ def AlertDialog(
             aria_labelledby=f"{sig}-title",
             aria_describedby=f"{sig}-description",
             cls=cn(
-                "fixed inset-0 z-50 max-h-[85vh] max-w-[calc(100%-2rem)] sm:max-w-lg w-full overflow-auto m-auto bg-background text-foreground border rounded-lg shadow-lg p-0 outline-none",
+                "fixed inset-0 z-50 m-auto max-h-[85vh] w-full max-w-[calc(100%-2rem)] overflow-auto rounded-lg border bg-background p-0 text-foreground shadow-lg outline-none sm:max-w-lg",
                 cls,
             ),
             **kwargs,
@@ -130,7 +130,7 @@ def AlertDialogFooter(
     def _(**ctx):
         return Div(
             *[inject_context(child, **ctx) for child in children],
-            cls=cn("flex flex-col-reverse gap-2 sm:flex-row sm:justify-end mt-6", cls),
+            cls=cn("mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end", cls),
             **kwargs,
         )
 
@@ -162,7 +162,7 @@ def AlertDialogDescription(
         return HTMLP(
             *children,
             id=f"{sig}-description",
-            cls=cn("text-muted-foreground text-sm", cls),
+            cls=cn("text-sm text-muted-foreground", cls),
             **kwargs,
         )
 

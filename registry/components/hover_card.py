@@ -93,7 +93,7 @@ def HoverCardContent(
             tabindex="-1",
             data_slot="hover-card-content",
             cls=cn(
-                "fixed z-50 w-64 max-w-[90vw] pointer-events-auto",
+                "pointer-events-auto fixed z-50 w-64 max-w-[90vw]",
                 "rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none",
                 cls,
             ),

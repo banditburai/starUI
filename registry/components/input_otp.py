@@ -189,13 +189,13 @@ def InputOTPSlot(
                 aria_describedby=aria_describedby if index == 0 else None,
                 aria_label=f"{char_label} {index + 1} of {max_length}",
                 data_slot="input-otp-input",
-                cls="absolute inset-0 w-full h-full bg-transparent text-center "
-                "border-0 outline-none shadow-none text-sm "
+                cls="absolute inset-0 h-full w-full bg-transparent text-center "
+                "border-0 text-sm shadow-none outline-none "
                 "[caret-color:transparent] selection:bg-transparent "
                 "disabled:cursor-not-allowed",
             ),
             Div(
-                Div(cls="h-4 w-px animate-caret-blink bg-foreground"),
+                Div(cls="h-4 w-px bg-foreground animate-caret-blink"),
                 data_slot="input-otp-caret",
                 cls="pointer-events-none absolute inset-0 flex items-center justify-center",
                 data_show=slot_sig.length.eq(0),
@@ -205,10 +205,10 @@ def InputOTPSlot(
             cls=cn(
                 "relative flex size-9 items-center justify-center",
                 "border-y border-r border-input text-sm shadow-xs transition-all",
-                "first:border-l first:rounded-l-md last:rounded-r-md",
+                "first:rounded-l-md first:border-l last:rounded-r-md",
                 "dark:bg-input/30",
-                "has-[:focus]:z-10 has-[:focus]:border-ring has-[:focus]:ring-ring/50 has-[:focus]:ring-[3px]",
-                "aria-[invalid=true]:ring-destructive/20 aria-[invalid=true]:border-destructive "
+                "has-[:focus]:z-10 has-[:focus]:border-ring has-[:focus]:ring-[3px] has-[:focus]:ring-ring/50",
+                "aria-[invalid=true]:border-destructive aria-[invalid=true]:ring-destructive/20 "
                 "has-[:focus]:aria-[invalid=true]:border-destructive "
                 "has-[:focus]:aria-[invalid=true]:ring-destructive/20 "
                 "dark:has-[:focus]:aria-[invalid=true]:ring-destructive/40",

@@ -35,11 +35,11 @@ def Checkbox(
             data_slot="checkbox",
             data_state="indeterminate" if indeterminate else checked_state.if_("checked", "unchecked"),
             cls=cn(
-                "peer appearance-none size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none",
+                "size-4 shrink-0 appearance-none rounded-[4px] border shadow-xs transition-shadow outline-none peer",
                 "border-input dark:bg-input/30",
-                "checked:bg-primary checked:border-primary dark:checked:bg-primary dark:checked:border-primary",
-                "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
-                "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive aria-invalid:checked:border-destructive",
+                "checked:border-primary checked:bg-primary dark:checked:border-primary dark:checked:bg-primary",
+                "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
+                "aria-invalid:border-destructive aria-invalid:ring-destructive/20 aria-invalid:checked:border-destructive dark:aria-invalid:ring-destructive/40",
                 "disabled:cursor-not-allowed disabled:opacity-50",
                 cls,
             ),
@@ -50,7 +50,7 @@ def Checkbox(
             data_attr_style="'opacity: 1'" if indeterminate else checked_state.if_("opacity: 1", "opacity: 0"),
             data_slot="checkbox-indicator",
             cls=cn(
-                "absolute inset-0 grid place-content-center text-primary-foreground transition-none pointer-events-none",
+                "pointer-events-none absolute inset-0 grid place-content-center text-primary-foreground transition-none",
                 indicator_cls,
             ),
         ),
@@ -108,7 +108,7 @@ def CheckboxWithLabel(
                 ),
                 HTMLP(
                     helper_text,
-                    cls=cn("text-muted-foreground text-sm", disabled and "opacity-70"),
+                    cls=cn("text-sm text-muted-foreground", disabled and "opacity-70"),
                 )
                 if helper_text
                 else None,
@@ -116,7 +116,7 @@ def CheckboxWithLabel(
             ),
             cls="flex items-start gap-3",
         ),
-        HTMLP(error_text, cls="text-sm text-destructive mt-1.5") if error_text else None,
+        HTMLP(error_text, cls="mt-1.5 text-sm text-destructive") if error_text else None,
         *attrs,
         cls=cls,
         **kwargs,

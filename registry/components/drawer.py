@@ -56,12 +56,12 @@ def _render_handle(sig, direction):
     clamp = "Math.max(0,raw)" if sign > 0 else "Math.min(0,raw)"
 
     if direction in ("top", "bottom"):
-        bar_cls = "w-12 h-1.5 rounded-full bg-muted-foreground/20"
-        container_cls = "flex justify-center py-3 cursor-grab active:cursor-grabbing touch-none select-none"
+        bar_cls = "h-1.5 w-12 rounded-full bg-muted-foreground/20"
+        container_cls = "flex cursor-grab touch-none justify-center py-3 select-none active:cursor-grabbing"
     else:
         bar_cls = "h-12 w-1.5 rounded-full bg-muted-foreground/20"
         container_cls = (
-            "flex items-center justify-center px-3 cursor-grab active:cursor-grabbing touch-none select-none"
+            "flex cursor-grab touch-none items-center justify-center px-3 select-none active:cursor-grabbing"
         )
 
     return Div(
@@ -111,10 +111,10 @@ def Drawer(
     }
 
     direction_cls = {
-        "right": "h-full border-l w-3/4 sm:max-w-sm",
-        "left": "h-full border-r w-3/4 sm:max-w-sm",
-        "top": "w-full border-b max-w-lg mx-auto rounded-b-xl",
-        "bottom": "w-full border-t max-w-lg mx-auto rounded-t-xl",
+        "right": "h-full w-3/4 border-l sm:max-w-sm",
+        "left": "h-full w-3/4 border-r sm:max-w-sm",
+        "top": "mx-auto w-full max-w-lg rounded-b-xl border-b",
+        "bottom": "mx-auto w-full max-w-lg rounded-t-xl border-t",
     }[direction]
 
     show_action = dialog_ref.showModal() if modal else dialog_ref.show()
@@ -142,7 +142,7 @@ def Drawer(
             aria_labelledby=f"{sig}_content-title",
             aria_describedby=f"{sig}_content-description",
             cls=cn(
-                "bg-background text-foreground bg-clip-padding shadow-lg",
+                "bg-background bg-clip-padding text-foreground shadow-lg",
                 "flex flex-col gap-0 p-0 outline-none",
                 direction_cls,
                 "overflow-y-auto",
@@ -214,12 +214,12 @@ def DrawerContent(
                 Icon("lucide:x", cls="size-4"),
                 Span("Close", cls="sr-only"),
                 size="icon",
-                cls="absolute top-4 right-4 opacity-70 hover:opacity-100 transition-opacity",
+                cls="absolute top-4 right-4 opacity-70 transition-opacity hover:opacity-100",
             )(**all_ctx)
             if show_close
             else None,
             *[inject_context(child, **all_ctx) for child in children],
-            cls="relative flex flex-col flex-1",
+            cls="relative flex flex-1 flex-col",
         )
 
     content._direction = direction
@@ -282,7 +282,7 @@ def DrawerTitle(*children, cls: str = "", **kwargs) -> FT:
             *children,
             id=f"{sig}_content-title",
             data_slot="drawer-title",
-            cls=cn("text-foreground font-semibold", cls),
+            cls=cn("font-semibold text-foreground", cls),
             **kwargs,
         )
 

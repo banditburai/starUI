@@ -54,7 +54,7 @@ def CollapsibleTrigger(
             disabled=disabled,
             cls=cn(
                 "cursor-pointer outline-none "
-                "focus-visible:ring-ring/50 focus-visible:ring-[3px] focus-visible:rounded-sm "
+                "focus-visible:rounded-sm focus-visible:ring-[3px] focus-visible:ring-ring/50 "
                 "disabled:pointer-events-none disabled:opacity-50",
                 cls,
             ),
@@ -74,7 +74,7 @@ def CollapsibleContent(
         return Div(
             Div(
                 Div(*children, cls=cls),
-                cls="overflow-hidden min-h-0 transition-[visibility] duration-200 [[data-state=closed]_&]:invisible",
+                cls="min-h-0 overflow-hidden transition-[visibility] duration-200 [[data-state=closed]_&]:invisible",
             ),
             data_slot="collapsible-content",
             role=role,

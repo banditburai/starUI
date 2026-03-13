@@ -81,15 +81,15 @@ def TooltipContent(
         arrow_classes = {
             "top": "bottom-0 left-1/2 -translate-x-1/2 translate-y-[calc(50%-2px)]",
             "bottom": "top-0 left-1/2 -translate-x-1/2 -translate-y-[calc(50%-2px)]",
-            "left": "right-0 top-1/2 -translate-y-1/2 translate-x-[calc(50%-2px)]",
-            "right": "left-0 top-1/2 -translate-y-1/2 -translate-x-[calc(50%-2px)]",
+            "left": "top-1/2 right-0 translate-x-[calc(50%-2px)] -translate-y-1/2",
+            "right": "top-1/2 left-0 -translate-x-[calc(50%-2px)] -translate-y-1/2",
         }
 
         return Div(
             *children,
             Div(
                 cls=cn(
-                    "absolute size-2.5 rotate-45 rounded-[2px] z-50 bg-foreground",
+                    "absolute z-50 size-2.5 rotate-45 rounded-[2px] bg-foreground",
                     arrow_classes[side],
                 )
             ),
@@ -114,7 +114,7 @@ def TooltipContent(
             data_slot="tooltip-content",
             cls=cn(
                 "fixed z-50 w-fit max-w-xs rounded-md px-3 py-1.5",
-                "bg-foreground text-background text-xs text-pretty",
+                "bg-foreground text-xs text-pretty text-background",
                 "pointer-events-none",
                 "animate-in fade-in-0 zoom-in-95",
                 "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",

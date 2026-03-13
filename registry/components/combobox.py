@@ -216,7 +216,7 @@ def ComboboxTrigger(
             disabled=is_disabled,
             cls=cn(
                 "bg-transparent text-sm outline-hidden placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
-                "flex-1 min-w-[50px] h-7" if multiple else "flex-1 min-w-0 text-ellipsis",
+                "h-7 min-w-[50px] flex-1" if multiple else "min-w-0 flex-1 text-ellipsis",
             ),
             **kwargs,
         )
@@ -261,14 +261,14 @@ def ComboboxTrigger(
             cls=cn(
                 "flex w-full rounded-lg border border-input",
                 "bg-transparent text-sm shadow-xs",
-                "transition-[color,box-shadow] outline-hidden",
+                "outline-hidden transition-[color,box-shadow]",
                 "dark:bg-input/30 dark:hover:bg-input/50",
-                "focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]",
-                "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
-                "data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed",
-                "min-h-9 max-h-[120px] overflow-y-auto flex-wrap gap-1 items-center pl-1.5 pr-2 py-1"
+                "focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50",
+                "aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40",
+                "data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50",
+                "max-h-[120px] min-h-9 flex-wrap items-center gap-1 overflow-y-auto py-1 pr-2 pl-1.5"
                 if multiple
-                else "h-9 items-center pl-3 py-2",
+                else "h-9 items-center py-2 pl-3",
                 cls,
             ),
         )
@@ -417,8 +417,8 @@ def ComboboxItem(
             data_index=str(index),
             id=f"{sig}_opt_{index}",
             cls=cn(
-                "relative flex w-full cursor-default select-none items-center gap-2 rounded-sm py-1.5 pl-2 pr-8 text-sm outline-hidden",
-                "[&_[data-icon-sh]:not([class*='text-'])]:text-muted-foreground [&_[data-icon-sh]]:pointer-events-none [&_[data-icon-sh]]:shrink-0 [&_[data-icon-sh]:not([class*='size-'])]:size-4",
+                "relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none",
+                "[&_[data-icon-sh]]:pointer-events-none [&_[data-icon-sh]]:shrink-0 [&_[data-icon-sh]:not([class*='size-'])]:size-4 [&_[data-icon-sh]:not([class*='text-'])]:text-muted-foreground",
                 "data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50",
                 "data-[highlighted=true]:bg-accent data-[highlighted=true]:text-accent-foreground"
                 if not disabled
@@ -458,7 +458,7 @@ def ComboboxGroup(
             Div(
                 heading,
                 data_slot="combobox-group-heading",
-                cls="text-muted-foreground px-2 py-1.5 text-xs font-medium select-none",
+                cls="px-2 py-1.5 text-xs font-medium text-muted-foreground select-none",
                 aria_hidden="true",
             )
             if heading
@@ -527,7 +527,7 @@ def ComboboxWithLabel(
             label,
             Span(" *", cls="text-destructive") if required else None,
             fr=f"{sig}_input",
-            cls=cn("block text-sm font-medium mb-1.5", label_cls),
+            cls=cn("mb-1.5 block text-sm font-medium", label_cls),
         ),
         Combobox(
             ComboboxTrigger(
@@ -549,8 +549,8 @@ def ComboboxWithLabel(
             cls="w-full",
             **kwargs,
         ),
-        HTMLP(error_text, cls="text-sm text-destructive mt-1.5") if error_text else None,
-        HTMLP(helper_text, cls="text-sm text-muted-foreground mt-1.5") if helper_text and not error_text else None,
+        HTMLP(error_text, cls="mt-1.5 text-sm text-destructive") if error_text else None,
+        HTMLP(helper_text, cls="mt-1.5 text-sm text-muted-foreground") if helper_text and not error_text else None,
         data_slot="combobox-with-label",
         cls=cn("space-y-1.5", cls),
     )

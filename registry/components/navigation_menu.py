@@ -83,7 +83,7 @@ def NavigationMenuList(*children, cls: str = "", **kwargs) -> FT:
             data_orientation="horizontal",
             data_slot="navigation-menu-list",
             cls=cn(
-                "group flex flex-1 list-none items-center justify-center space-x-1",
+                "flex flex-1 list-none items-center justify-center space-x-1 group",
                 cls,
             ),
             **kwargs,
@@ -129,10 +129,10 @@ def NavigationMenuTrigger(*children, cls: str = "", **kwargs) -> FT:
             data_attr_data_state=is_active.if_("open", "closed"),
             data_attr_aria_expanded=is_active.if_("true", "false"),
             cls=cn(
-                "group inline-flex h-9 w-max items-center justify-center rounded-md",
-                "bg-background px-4 py-2 text-sm font-medium outline-none transition-colors",
+                "inline-flex h-9 w-max items-center justify-center rounded-md group",
+                "bg-background px-4 py-2 text-sm font-medium transition-colors outline-none",
                 "hover:bg-accent hover:text-accent-foreground",
-                "focus-visible:ring-ring/50 focus-visible:ring-[3px]",
+                "focus-visible:ring-[3px] focus-visible:ring-ring/50",
                 "disabled:pointer-events-none disabled:opacity-50",
                 "data-[state=open]:bg-accent/50",
                 cls,
@@ -180,9 +180,9 @@ def NavigationMenuLink(
         data_slot="navigation-menu-link",
         cls=cn(
             "inline-flex h-9 w-max items-center justify-center rounded-md",
-            "bg-background px-4 py-2 text-sm font-medium no-underline outline-none transition-colors",
+            "bg-background px-4 py-2 text-sm font-medium no-underline transition-colors outline-none",
             "hover:bg-accent hover:text-accent-foreground",
-            "focus-visible:ring-ring/50 focus-visible:ring-[3px]",
+            "focus-visible:ring-[3px] focus-visible:ring-ring/50",
             "data-[active=true]:bg-accent/50 data-[active=true]:text-accent-foreground",
             cls,
         ),
@@ -211,14 +211,14 @@ def NavigationMenuListItem(
 ) -> FT:
     return Li(
         A(
-            Div(title, cls="text-sm font-medium leading-none"),
+            Div(title, cls="text-sm leading-none font-medium"),
             *children,
             href=href,
             cls=cn(
-                "block select-none space-y-1 rounded-md p-3 leading-none no-underline",
-                "outline-none transition-colors hover:bg-accent hover:text-accent-foreground",
+                "block space-y-1 rounded-md p-3 leading-none no-underline select-none",
+                "transition-colors outline-none hover:bg-accent hover:text-accent-foreground",
                 "focus-visible:bg-accent focus-visible:text-accent-foreground",
-                "focus-visible:ring-ring/50 focus-visible:ring-[3px]",
+                "focus-visible:ring-[3px] focus-visible:ring-ring/50",
             ),
             **kwargs,
         ),
