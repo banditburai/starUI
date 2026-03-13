@@ -37,7 +37,11 @@ def diff_command(
 
         if record:
             recorded_file = record.get("file")
-            local_file = (manifest.project_root / recorded_file) if recorded_file else (config.component_dir_absolute / f"{normalized}.py")
+            local_file = (
+                (manifest.project_root / recorded_file)
+                if recorded_file
+                else (config.component_dir_absolute / f"{normalized}.py")
+            )
         else:
             local_file = config.component_dir_absolute / f"{normalized}.py"
 

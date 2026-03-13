@@ -174,7 +174,7 @@ def add_command(
                 kind, entry = client.lookup(normalized)
             except FileNotFoundError:
                 error(f"'{name}' not found in registry")
-                raise typer.Exit(1)
+                raise typer.Exit(1) from None
 
             if kind == "component":
                 resolved.update(client.get_component_with_dependencies(normalized))
@@ -190,7 +190,8 @@ def add_command(
 
         conflicts = [n for n in resolved if n in requested and (comp_dir / f"{n}.py").exists()]
         conflicts += [
-            inst for rn, (inst, _) in blocks_to_install.items()
+            inst
+            for rn, (inst, _) in blocks_to_install.items()
             if (rn in requested or inst in requested) and (comp_dir / f"{inst}.py").exists()
         ]
 

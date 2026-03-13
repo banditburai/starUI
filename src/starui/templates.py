@@ -24,12 +24,12 @@ def get():
     return Div(
         Div(ThemeToggle(), cls="absolute top-4 right-4"),
         Div(
-            H1("Nothing to see here yet...", cls="text-2xl font-bold mb-2 text-foreground"),
+            H1("Nothing to see here yet...", cls="mb-2 text-2xl font-bold text-foreground"),
             P("But your StarHTML app is running!", cls="text-base text-muted-foreground"),
-            P("Theme toggle in top right →", cls="text-sm text-muted-foreground mt-4"),
+            P("Theme toggle in top right →", cls="mt-4 text-sm text-muted-foreground"),
             cls="text-center"
         ),
-        cls="min-h-screen flex items-center justify-center relative"
+        cls="relative flex min-h-screen items-center justify-center"
     )
 
 if __name__ == "__main__":

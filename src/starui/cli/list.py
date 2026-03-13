@@ -99,12 +99,18 @@ def list_command(
         block_names = client.list_blocks()
 
         components = _load_items(
-            comp_names, client.get_component_metadata, installed_names,
-            search=search, installed_only=installed,
+            comp_names,
+            client.get_component_metadata,
+            installed_names,
+            search=search,
+            installed_only=installed,
         )
         blocks = _load_items(
-            block_names, client.get_block_metadata, installed_block_names,
-            search=search, installed_only=installed,
+            block_names,
+            client.get_block_metadata,
+            installed_block_names,
+            search=search,
+            installed_only=installed,
         )
 
         if not components and not blocks:

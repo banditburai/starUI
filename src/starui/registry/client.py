@@ -113,7 +113,9 @@ class RegistryClient:
     def get_component_source(self, component_name: str) -> str:
         return self._fetch_source(
             self._get_component_entry(component_name),
-            "components", component_name, f"component '{component_name}'",
+            "components",
+            component_name,
+            f"component '{component_name}'",
         )
 
     def get_component_metadata(self, component_name: str) -> dict[str, Any]:
