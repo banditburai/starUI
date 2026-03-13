@@ -7,7 +7,7 @@ from rich.text import Text
 from ..config import get_project_config
 from ..registry.client import RegistryClient
 from ..registry.manifest import ItemKind, Manifest
-from .utils import MSG_NO_COMPONENTS, MSG_NO_MANIFEST, console, error, info, resolve_local_path
+from .utils import MSG_NO_COMPONENTS, MSG_NO_MANIFEST, console, error, info
 
 
 def _render_status_table(
@@ -27,7 +27,7 @@ def _render_status_table(
     update_count = 0
 
     for name, record in sorted(items.items()):
-        local_file = resolve_local_path(record, name, manifest=manifest, component_dir=component_dir)
+        local_file = manifest.resolve_path(record, name, component_dir)
         version = record.get("version", "unknown")
 
         if not local_file.exists():

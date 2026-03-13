@@ -7,7 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- `star status` and `star diff` now handle stale manifest paths when `component_dir` changes in `pyproject.toml`
+
 ## [0.4.1] - 2026-03-13
+
+### Changed
+- Unified component/block CLI and registry APIs into single parameterized functions
 
 ## [0.4.0] - 2026-03-13
 

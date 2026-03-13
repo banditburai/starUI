@@ -10,7 +10,6 @@ from .utils import (
     error,
     find_block_by_install_name,
     info,
-    resolve_local_path,
     rewrite_block_imports,
 )
 
@@ -43,9 +42,7 @@ def diff_command(
             error(f"'{normalized}' is not installed (use 'star add {component}' first)")
             raise typer.Exit(1)
 
-        local_file = resolve_local_path(
-            record, normalized, manifest=manifest, component_dir=config.component_dir_absolute
-        )
+        local_file = manifest.resolve_path(record, normalized, config.component_dir_absolute)
 
         if not local_file.exists():
             error(f"'{normalized}' is installed but the file is missing: {local_file}")
