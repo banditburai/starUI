@@ -52,12 +52,13 @@ def Dialog(
     *children: Any,
     signal: str | Signal = "",
     modal: bool = True,
+    default_open: bool = False,
     size: DialogSize = "md",
     cls: str = "",
     **kwargs: Any,
 ) -> FT:
     sig = getattr(signal, "_id", signal) or gen_id("dialog")
-    open_state = Signal(f"{sig}_open", False)
+    open_state = Signal(f"{sig}_open", default_open)
     dialog_ref = Signal(sig, _ref_only=True)
 
     trigger = next((c for c in children if getattr(c, "__name__", None) == "trigger"), None)
@@ -72,6 +73,7 @@ def Dialog(
 
     return Div(
         Style(_DIALOG_STYLES),
+        open_state,
         trigger(**ctx) if trigger else None,
         HTMLDialog(
             content(**ctx) if content else None,
@@ -86,6 +88,13 @@ def Dialog(
             aria_describedby=f"{sig}-description",
             cls=cn(dialog_variants(size=size), cls),
             **kwargs,
+        ),
+        Div(
+            data_effect=[
+                (open_state & ~dialog_ref.open).then(dialog_ref.showModal() if modal else dialog_ref.show()),
+                (~open_state & dialog_ref.open).then(dialog_ref.close()),
+            ],
+            style="display: none;",
         ),
         Div(
             data_effect=document.body.style.overflow.set(open_state.if_("hidden", "")),

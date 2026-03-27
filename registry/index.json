@@ -215,7 +215,7 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:036a88989f59af0036d70e2e9b4617aff02c4db30f7d2bc88d97a1b034d30715"
+      "checksum": "sha256:779dd1f3cf135ab496560a8a0b42b84c063395c47c273bf5cfeed2985446140e"
     },
     "drawer": {
       "name": "drawer",
@@ -245,6 +245,19 @@
       ],
       "checksum": "sha256:56ea9ac53fd10f7ee710796827e790d08446fd8d8ff2c11b631c64c9a87b2804"
     },
+    "field": {
+      "name": "field",
+      "description": "Accessible form field composition",
+      "file": "components/field.py",
+      "dependencies": [
+        "separator",
+        "utils"
+      ],
+      "packages": [],
+      "css_imports": [],
+      "handlers": [],
+      "checksum": "sha256:811875ee8658ad802558c2cb863847dd15b5ca41f345425b48c272e6de970f6c"
+    },
     "hover_card": {
       "name": "hover_card",
       "description": "Hover card with content",
@@ -269,7 +282,7 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:61c035c111804b8654f72a8605cfc7677d1931b6d9cc96d95e8d880249397ff3"
+      "checksum": "sha256:a481e67604068e4a69d58e72a343b439bffac3226a3c8fd0fb249b1d05df8950"
     },
     "input_otp": {
       "name": "input_otp",
@@ -471,7 +484,7 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:e683e0016cbc6051d0aef03f34bf346bdbe2dcac518e0591d210ddc38497f0fd"
+      "checksum": "sha256:b626219808df8202c67e0dd0854bc7567466eb8f150de7cda0ba878353a466c5"
     },
     "tabs": {
       "name": "tabs",
@@ -495,7 +508,7 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:4cdfdf9f894b2ec67f255f18bf3b0c59223957337a191a4c7a367a488cf5dc95"
+      "checksum": "sha256:4de66962946b804963852625139547697bf6af9375f6bbbddeaa2ae472784eb1"
     },
     "theme_toggle": {
       "name": "theme_toggle",
@@ -583,7 +596,7 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:c01d5de34baf08fb8ca4ab01ab9fe05d3246e88a3eb606ecb2eff8f98b17cd4e"
+      "checksum": "sha256:b4c4f1f55a2f6c7f1394b492c92b4be4740188983b452f42f4db4866fdcf2bae"
     }
   },
   "blocks": {
