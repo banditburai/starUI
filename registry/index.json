@@ -134,7 +134,7 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:0cfc1ca1fd17a7c5a1d91b9fc09e26aa2148543b854c253faf795f923d519547"
+      "checksum": "sha256:af203eadb7bc975eabdb2c73d098dacf3c4281dcfa060758c3a3f6313b589769"
     },
     "code_block": {
       "name": "code_block",
@@ -256,7 +256,7 @@
       "packages": [],
       "css_imports": [],
       "handlers": [],
-      "checksum": "sha256:811875ee8658ad802558c2cb863847dd15b5ca41f345425b48c272e6de970f6c"
+      "checksum": "sha256:cab1d6d1372c194dca5da83835a3ed308eabaea959b1459434ec3b098696c062"
     },
     "hover_card": {
       "name": "hover_card",

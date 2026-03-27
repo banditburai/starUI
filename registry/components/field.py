@@ -29,30 +29,55 @@ _FIELD_ORIENTATION = {
 _DISABLED_FIELD = "group-data-[disabled=true]/field:pointer-events-none group-data-[disabled=true]/field:opacity-50"
 
 
+def _is_autowire_control(node: FT) -> bool:
+    if node.get("data-field-control") == "true":
+        return True
+    return node.tag == "textarea" or (node.tag == "input" and node.get("type") not in {"checkbox", "hidden", "radio"})
+
+
+def _find_autowire_control(nodes) -> FT | None:
+    found: FT | bool | None = None
+
+    def walk(items) -> None:
+        nonlocal found
+        for node in items:
+            if found is False:
+                return
+            if isinstance(node, FT):
+                if node.get("data-slot") in {"field", "field-group", "field-set"}:
+                    continue
+                if _is_autowire_control(node):
+                    found = node if found is None else False
+                    continue
+                walk(node.children)
+            elif isinstance(node, tuple | list):
+                walk(node)
+
+    walk(nodes)
+    return found if isinstance(found, FT) else None
+
+
 def Field(
     *children,
     name: str | None = None,
     orientation: Literal["vertical", "horizontal", "responsive"] = "vertical",
     invalid: bool | Signal | None = None,
     validate=None,
+    validate_event: str = "input",
     signal: Signal | None = None,
     cls: str = "",
     **kwargs,
 ) -> FT:
-    field_signal = None
+    field_signal = signal
     if validate is not None and name:
-        field_signal = signal or Signal(name.replace("-", "_"), "")
+        field_signal = field_signal or Signal(name.replace("-", "_"), "")
         fn, *rest = validate if isinstance(validate, tuple) else (validate,)
         kw = rest.pop() if rest and isinstance(rest[-1], dict) else {}
-        field_signal.validate(fn, *rest, **kw)
+        field_signal.validate(fn, *rest, event=validate_event, **kw)
         invalid = field_signal.err
 
     children = tuple(inject_context(child, name=name, signal=field_signal) for child in children)
-    if name and (
-        inp := next(
-            (c for c in children if isinstance(c, FT) and c.tag in {"input", "textarea"} and not c.get("id")), None
-        )
-    ):
+    if name and (inp := _find_autowire_control(children)) and not inp.get("id"):
         inp.list[2] |= {"id": name, "aria-describedby": f"{name}-desc {name}-error"}
         if field_signal:
             for k, v in field_signal._validate_html.items():
