@@ -29,6 +29,7 @@ InputType = Literal[
 
 
 def Input(
+    *attrs,
     type: InputType = "text",
     placeholder: str | None = None,
     value: str | None = None,
@@ -48,6 +49,7 @@ def Input(
     **kwargs,
 ) -> FT:
     return HTMLInput(
+        *attrs,
         type=type,
         placeholder=placeholder,
         value=value,
@@ -71,7 +73,9 @@ def Input(
             "file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground",
             "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
             "aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40",
-            "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+            "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
+            "read-only:cursor-default read-only:bg-muted read-only:shadow-none read-only:focus-visible:ring-0",
+            "md:text-sm",
             cls,
         ),
         **kwargs,

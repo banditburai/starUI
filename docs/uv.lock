@@ -805,7 +805,7 @@ wheels = [
 
 [[package]]
 name = "starhtml"
-version = "0.5.19"
+version = "0.5.21"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "beautifulsoup4" },
@@ -821,9 +821,9 @@ dependencies = [
     { name = "starlette-compress" },
     { name = "uvicorn", extra = ["standard"] },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c2/90/f42f37ca8e01233b31aa3067b5aaf199f8162e25366434ee0efbd10114e7/starhtml-0.5.19.tar.gz", hash = "sha256:5e416245805fbe6b4152d688793cc9be82e69b923c2219889b63d66501c37264", size = 770981, upload-time = "2026-03-08T00:30:43.073Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/4c/ed/6394bb3d97e0f7d35513c5c95899e0de6c7884a50b68e63ac0907c8f2cb7/starhtml-0.5.21.tar.gz", hash = "sha256:ddad2bfea1fa53454b4dd9c2b3caa12c70d42b55e3c245a02949211e7dc1bf30", size = 777596, upload-time = "2026-03-27T04:57:56.789Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/5e/df/c4bef15b1038d59fda085de3e1a8f0ef91916f124f8487f0b1ccd43c9451/starhtml-0.5.19-py3-none-any.whl", hash = "sha256:d483d86cdc074dcdb8fda707194b85be24a7ec1ab3e2446786ea0feb297403b6", size = 149156, upload-time = "2026-03-08T00:30:41.315Z" },
+    { url = "https://files.pythonhosted.org/packages/84/11/29f9418856683895871761d4fb860f1374114309618670de6efdce6a40ab/starhtml-0.5.21-py3-none-any.whl", hash = "sha256:896ab0352057934fd7de63dde1589d92afb6aaad2a111174eb33ae57ec90e128", size = 151699, upload-time = "2026-03-27T04:57:55.431Z" },
 ]
 
 [[package]]
@@ -874,7 +874,7 @@ wheels = [
 
 [[package]]
 name = "starui"
-version = "0.4.0"
+version = "0.4.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pydantic" },
@@ -885,9 +885,9 @@ dependencies = [
     { name = "typer" },
     { name = "websockets" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/fa/a1/28b8fbf9e429e2db7b1edeedf300b7d866b0d849997fc5a721d8f2515bf9/starui-0.4.0.tar.gz", hash = "sha256:affdbb7fec6239ad96c2c1dc8f49e088a3181e9e611eeb24617e2baabce72ae3", size = 29191, upload-time = "2026-03-13T14:30:40.424Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/55/b6/e8c8dd4ffe814c72fe2e2f76ac6a97da2826e7b3bfa3fd34d9e7dfd2bda2/starui-0.4.1.tar.gz", hash = "sha256:bf00af8c4cf80abfc9e018f14976912943df14c303f00c17a89a84927fabc5bf", size = 29115, upload-time = "2026-03-13T17:14:51.53Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f6/81/7adee72141a0ceffa348f2b6d19121d00182b73fa229cd30d1ea6db5cc21/starui-0.4.0-py3-none-any.whl", hash = "sha256:d2271255537299f25e527dbb2083055afd9734c238bce46fe2c9db6d4affc42e", size = 39265, upload-time = "2026-03-13T14:30:39.144Z" },
+    { url = "https://files.pythonhosted.org/packages/33/aa/619db8ddf4fe54da8e5b1ef0bd581f601a808caebb1ff5af0a86f5fb8e11/starui-0.4.1-py3-none-any.whl", hash = "sha256:1dbb3973ccf45f4c3549faf78ee7b021e6b7eb685d5f137d931c69fb28e89b21", size = 39325, upload-time = "2026-03-13T17:14:50.396Z" },
 ]
 
 [[package]]
@@ -909,7 +909,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "starhtml" },
+    { name = "starhtml", specifier = ">=0.5.21" },
     { name = "starlighter", specifier = ">=0.2.0" },
     { name = "starui" },
     { name = "uvicorn", specifier = ">=0.30.0" },

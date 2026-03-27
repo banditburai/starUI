@@ -67,18 +67,7 @@ def cva(base: str = "", config: dict[str, Any] | None = None) -> Callable[..., s
 
         for compound in compound_variants:
             compound_class = compound.get("class", "")
-            if not compound_class:
-                continue
-
-            matches = True
-            for key, value in compound.items():
-                if key == "class":
-                    continue
-                if final_props.get(key) != value:
-                    matches = False
-                    break
-
-            if matches:
+            if compound_class and all(final_props.get(k) == v for k, v in compound.items() if k != "class"):
                 classes.append(compound_class)
 
         return cn(*classes)

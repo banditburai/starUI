@@ -47,6 +47,7 @@ COMPONENT_ICONS = {
     "aspect_ratio": "lucide:proportions",
     "collapsible": "lucide:chevrons-up-down",
     "drawer": "lucide:panel-bottom",
+    "field": "lucide:text-cursor-input",
     "input_otp": "lucide:rectangle-ellipsis",
     "scroll_area": "lucide:scroll-text",
     "slider": "lucide:sliders-horizontal",
@@ -71,6 +72,17 @@ def _preview_input() -> FT:
             Span("you@example.com", cls="text-[10px] text-muted-foreground"),
             cls="flex h-7 w-44 items-center rounded-md border border-border bg-background px-2",
         ),
+    )
+
+
+def _preview_field() -> FT:
+    return Div(
+        Span("Email", cls="mb-0.5 block text-[10px] font-medium text-foreground"),
+        Div(
+            Span("you@example.com", cls="text-[10px] text-muted-foreground"),
+            cls="flex h-7 w-44 items-center rounded-md border border-border bg-background px-2",
+        ),
+        Span("We'll never share your email.", cls="mt-0.5 block text-[9px] text-muted-foreground"),
     )
 
 
@@ -683,6 +695,7 @@ PREVIEW_MAP = {
     "aspect_ratio": _preview_aspect_ratio,
     "collapsible": _preview_collapsible,
     "drawer": _preview_drawer,
+    "field": _preview_field,
     "input_otp": _preview_input_otp,
     "scroll_area": _preview_scroll_area,
     "slider": _preview_slider,

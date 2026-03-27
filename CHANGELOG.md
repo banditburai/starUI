@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `Field` component — composable form field primitives with auto-wired IDs, client-side validation (`validate=`), responsive orientation, and error-state propagation. Includes `FieldSet`, `FieldLegend`, `FieldGroup`, `FieldContent`, `FieldLabel`, `FieldDescription`, `FieldSeparator`, and `FieldError`.
+- Requires starhtml >=0.5.21 for `Signal.validate()` and `form_submit` APIs
+
 ## [0.4.2] - 2026-03-13
 
 ### Fixed
