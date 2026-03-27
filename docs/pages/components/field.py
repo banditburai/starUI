@@ -8,7 +8,7 @@ CATEGORY = "form"
 ORDER = 5
 STATUS = "stable"
 
-from starhtml import A, Div, Form
+from starhtml import A, Button as HTMLButton, Div, Form, Icon, Signal, clipboard
 from starhtml.forms import email, form_submit, min_length, matches
 from components.button import Button
 from components.field import (
@@ -129,6 +129,39 @@ def form_example():
 
 
 @with_code
+def composite_control_example():
+    copied = Signal("token_copied", False)
+    token = "sk_live_x9Qm2pN7vL4c8rT1"
+    return Field(
+        copied,
+        FieldLabel("API token"),
+        Div(
+            Input(
+                type="password",
+                value=token,
+                readonly=True,
+                cls="pr-11 font-mono",
+            ),
+            HTMLButton(
+                Icon("lucide:check", cls="size-4", data_show=copied),
+                Icon("lucide:copy", cls="size-4", data_show=~copied),
+                type="button",
+                aria_label=copied.if_("Copied", "Copy API token"),
+                data_on_click=clipboard(text=token, signal=copied, timeout=1500),
+                cls=(
+                    "absolute top-1/2 right-2 -translate-y-1/2 rounded-md border border-transparent "
+                    "p-1.5 text-muted-foreground transition-colors hover:text-foreground"
+                ),
+            ),
+            cls="relative",
+        ),
+        FieldDescription("The input is wrapped with an inline action button, but Field still finds and wires the single text-like control automatically."),
+        name="comp-token",
+        cls="max-w-md",
+    )
+
+
+@with_code
 def fieldset_example():
     return FieldSet(
         FieldLegend("Billing contact"),
@@ -186,6 +219,7 @@ EXAMPLES_DATA = [
     {"fn": orientation_example, "title": "Orientation", "description": "Responsive orientation \u2014 stacks vertically in narrow containers, goes horizontal at wider breakpoints"},
     {"fn": states_example, "title": "States", "description": "Disabled, readonly, and error states with data_disabled, invalid, and server-side FieldError"},
     {"fn": form_example, "title": "Form Submission", "description": "Complete form with form_submit \u2014 auto-creates submitting/error signals, validates all fields, and disables submit while in flight"},
+    {"fn": composite_control_example, "title": "Composite Control", "description": "Single wrapped text-like control with an inline action button \u2014 still auto-wires description and error state"},
     {"fn": fieldset_example, "title": "FieldSet", "description": "Semantic fieldset with legend, inline-link description, and grid layout"},
     {"fn": separator_example, "title": "With Separator", "description": "Visual divider between alternative sign-in methods"},
 ]
@@ -193,7 +227,7 @@ EXAMPLES_DATA = [
 API_REFERENCE = build_api_reference(
     components=[
         Component("Field", "Accessible wrapper with orientation, validation, and error-state propagation via data-invalid", [
-            Prop("name", "str | None", "Auto-wires coordinated IDs across label, input, description, and error", "None"),
+            Prop("name", "str | None", "Auto-wires coordinated IDs across label, a single primary text-like control, description, and error. If multiple eligible controls are present, Field does not guess.", "None"),
             Prop("orientation", "Literal['vertical', 'horizontal', 'responsive']", "Layout direction", "'vertical'"),
             Prop("invalid", "bool | Signal | None", "Error state \u2014 True for static, Signal for reactive (auto-set when validate= is used)", "None"),
             Prop("validate", "callable | tuple | None", "Validation rule \u2014 email, (min_length, 8, 'Label'), or (matches, other_sig, 'msg'). Auto-creates signal, wires Input, FieldError, and invalid.", "None"),
