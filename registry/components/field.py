@@ -11,16 +11,15 @@ from .utils import cn, inject_context, with_signals
 __metadata__ = {"description": "Accessible form field composition", "dependencies": ["separator"]}
 
 _FIELD_ORIENTATION = {
-    "vertical": "flex-col [&>*]:w-full [&>.sr-only]:w-auto",
+    "vertical": "flex flex-col [&>*]:w-full [&>.sr-only]:w-auto @md/field-group:col-span-2",
     "horizontal": (
-        "flex-row items-center [&>[data-slot=field-label]]:flex-auto"
+        "grid grid-cols-[auto_1fr] items-center"
         " has-[>[data-slot=field-content]]:items-start"
         " has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px"
     ),
     "responsive": (
-        "flex-col @md/field-group:flex-row @md/field-group:items-center"
+        "flex flex-col @md/field-group:col-span-2 @md/field-group:grid @md/field-group:grid-cols-subgrid @md/field-group:items-center"
         " [&>*]:w-full @md/field-group:[&>*]:w-auto [&>.sr-only]:w-auto"
-        " @md/field-group:[&>[data-slot=field-label]]:flex-auto"
         " @md/field-group:has-[>[data-slot=field-content]]:items-start"
         " @md/field-group:has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px"
     ),
@@ -30,9 +29,11 @@ _DISABLED_FIELD = "group-data-[disabled=true]/field:pointer-events-none group-da
 
 
 def _is_autowire_control(node: FT) -> bool:
-    if node.get("data-field-control") == "true":
-        return True
-    return node.tag == "textarea" or (node.tag == "input" and node.get("type") not in {"checkbox", "hidden", "radio"})
+    return (
+        node.get("data-field-control") == "true"
+        or node.tag == "textarea"
+        or (node.tag == "input" and node.get("type") not in {"checkbox", "hidden", "radio"})
+    )
 
 
 def _find_autowire_control(nodes) -> FT | None:
@@ -69,7 +70,7 @@ def Field(
     **kwargs,
 ) -> FT:
     field_signal = signal
-    if validate is not None and name:
+    if validate and name:
         field_signal = field_signal or Signal(name.replace("-", "_"), "")
         fn, *rest = validate if isinstance(validate, tuple) else (validate,)
         kw = rest.pop() if rest and isinstance(rest[-1], dict) else {}
@@ -79,8 +80,9 @@ def Field(
     children = tuple(inject_context(child, name=name, signal=field_signal) for child in children)
     if name and (inp := _find_autowire_control(children)) and not inp.get("id"):
         inp.list[2] |= {"id": name, "aria-describedby": f"{name}-desc {name}-error"}
+        inp.list[2].setdefault("name", name.replace("-", "_"))
         if field_signal:
-            for k, v in field_signal._validate_html.items():
+            for k, v in field_signal._constraint_attrs.items():
                 inp.list[2].setdefault(k, v)
 
     result = Div(
@@ -92,7 +94,7 @@ def Field(
         data_invalid="true" if invalid is True else None,
         data_attr_data_invalid=invalid.if_("true") if isinstance(invalid, Signal) else None,
         cls=cn(
-            "flex w-full gap-2 group/field",
+            "w-full gap-2 group/field",
             "data-[invalid=true]:text-destructive",
             _FIELD_ORIENTATION[orientation],
             cls,
@@ -136,7 +138,8 @@ def FieldGroup(*children, cls: str = "", **kwargs) -> FT:
         *children,
         data_slot="field-group",
         cls=cn(
-            "@container/field-group flex w-full flex-col gap-5 group/field-group",
+            "@container/field-group grid w-full grid-cols-1 gap-5 group/field-group",
+            "@md/field-group:grid-cols-[auto_1fr]",
             "data-[slot=checkbox-group]:gap-3",
             "[&>[data-slot=field-group]]:gap-4",
             cls,
@@ -228,10 +231,8 @@ def FieldSeparator(*children, cls: str = "", **kwargs) -> FT:
 
 
 def FieldError(*children, signal: Signal | None = None, errors: list | None = None, cls: str = "", **kwargs):
-    _user_signal = signal
-
-    def _(*, name=None, signal=None, **_kw):
-        sig = _user_signal if _user_signal is not None else signal
+    def _(*, name=None, **_kw):
+        sig = signal or _kw.get("signal")
         if not children and errors == []:
             return None
         cs = children
