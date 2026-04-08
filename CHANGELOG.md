@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.3] - 2026-04-08
+
 ### Added
 - `Field` component — composable form field primitives with auto-wired IDs, client-side validation (`validate=`), responsive orientation, and error-state propagation. Includes `FieldSet`, `FieldLegend`, `FieldGroup`, `FieldContent`, `FieldLabel`, `FieldDescription`, `FieldSeparator`, and `FieldError`.
 
@@ -387,3 +389,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [0.4.1]: https://github.com/banditburai/starUI/releases/tag/v0.4.1
 
 [0.4.2]: https://github.com/banditburai/starUI/releases/tag/v0.4.2
+
+[0.4.3]: https://github.com/banditburai/starUI/releases/tag/v0.4.3
