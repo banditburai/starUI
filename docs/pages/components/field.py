@@ -46,13 +46,13 @@ def orientation_example():
     return FieldGroup(
         Field(
             FieldLabel("Display name"),
-            Input(placeholder="Jane Doe", cls="flex-1"),
+            Input(placeholder="Jane Doe"),
             orientation="responsive",
             name="ori-name",
         ),
         Field(
             FieldLabel("Username"),
-            Input(placeholder="janedoe", cls="flex-1"),
+            Input(placeholder="janedoe"),
             orientation="responsive",
             name="ori-user",
         ),
@@ -227,7 +227,7 @@ EXAMPLES_DATA = [
 API_REFERENCE = build_api_reference(
     components=[
         Component("Field", "Accessible wrapper with orientation, validation, and error-state propagation via data-invalid", [
-            Prop("name", "str | None", "Auto-wires coordinated IDs across label, a single primary text-like control, description, and error. If multiple eligible controls are present, Field does not guess.", "None"),
+            Prop("name", "str | None", "Auto-wires coordinated IDs across label, a single primary text-like control, description, and error. Also sets the HTML name attribute on the control for form submission (dashes converted to underscores). If multiple eligible controls are present, Field does not guess.", "None"),
             Prop("orientation", "Literal['vertical', 'horizontal', 'responsive']", "Layout direction", "'vertical'"),
             Prop("invalid", "bool | Signal | None", "Error state \u2014 True for static, Signal for reactive (auto-set when validate= is used)", "None"),
             Prop("validate", "callable | tuple | None", "Validation rule \u2014 email, (min_length, 8, 'Label'), or (matches, other_sig, 'msg'). Auto-creates signal, wires Input, FieldError, and invalid.", "None"),

@@ -9,7 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - `Field` component — composable form field primitives with auto-wired IDs, client-side validation (`validate=`), responsive orientation, and error-state propagation. Includes `FieldSet`, `FieldLegend`, `FieldGroup`, `FieldContent`, `FieldLabel`, `FieldDescription`, `FieldSeparator`, and `FieldError`.
-- Requires starhtml >=0.5.21 for `Signal.validate()` and `form_submit` APIs
+
+### Changed
+- Bump `starhtml` dependency from `>=0.5.21` to `>=0.6.0` (starlette 1.0 compatibility, built-in form handling)
 
 ## [0.4.2] - 2026-03-13
 
